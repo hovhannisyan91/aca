@@ -21,7 +21,8 @@ Here’s an overview of the project’s file structure:
 ├── sql                 # sql init files
 │   ├── 01_schema.sql   # building the schema
 │   ├── 02_et.sql       # inserting the csv file
-│   ├── 02_functions_and_procedures.sql # functions and procedures (optional)
+│   ├── 03_sps.sql # stored procedures (optional)
+│   ├── 03_udfs.sql # udfs (optional)
 └── docs                # Documentation assets
     ├── imgs            # Image assets for documentation
     └── index.html      # Presentation 
@@ -87,4 +88,4 @@ PGADMIN_EMAIL=admin@admin.com
 PGADMIN_PASSWORD=admin
 ```
 
-### **Good Luck**
+### **Good Luck!**
