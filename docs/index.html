@@ -123,7 +123,7 @@
                 <h3>Objective</h3>
                 <ul class="r-fit-text">
                     <li>What are Stored Procedures and User Defined Functions?</li>
-                    <li><b>When</b> and <b>Why</b> to use each Stored Procedures and UDFs</li>
+                    <li><b>When</b> and <b>Why</b> to use each Stored Procedures and UDFs?</li>
                     <li>Creating Stored Procedures in PostgreSQL</li>
                     <li>Creating User Defined Functions in PostgreSQL</li>
                     <li>Examples and Use Cases</li>
@@ -361,27 +361,49 @@ $$;
         </section>
         </section>
           
+        
         <!--! New Section UDF -->
         <section>
             <section>
                 <h3 class="new-section">User Defined Functions (UDFs)</h3>
             </section>
             <section id="udf-01">
-                <h3>Definition</h3>
-                <p><b>A user-defined function (UDF)</b> is a function that you create to encapsulate reusable logic. It can take parameters, perform operations, and return a value.</p>
+                <h3>Definition | Function</h3>
+                <p class="r-fit-text">A named block of code that performs a specific task, by taking an input parameters, processing them and return an output</p>
+                <pre><code class="python">
+function add(a, b):
+    return a + b
+
+x = add(2, 3)  --> returns 5
+
+                </code></pre>
+                
+            </section>
+            <section id="udf-01">
+                <h3>Definition | UDF</h3>
+                <p class="r-fit-text">A User-Defined Function (UDF) is a function that you (the user) create inside the DB.</p>
+                <p class="r-fit-text">Unlike built-in functions <i>(SUM(), AVG(), NOW())</i>, UDFs let you extend SQL with custom logic, liv inside the database, so they can be used in queries, <b>WHERE, JOINs, SELECTs</b> statements</p>
+                <pre><code class="python">
+function add(a, b):
+    return a + b
+
+x = add(2, 3)  --> returns 5
+
+                </code></pre>
+                
             </section>
             <section id="udf-02">
-                <h3>Benefits of Using UDFs</h3>
-                <ul>
-                    <li><b>Modularity:</b> Break down complex logic into smaller, manageable functions.</li>
-                    <li><b>Reusability:</b> Use the same function across different queries and applications.</li>
-                    <li><b>Maintainability:</b> Easier to update logic in one place.</li>
-                    <li><b>Performance:</b> Can improve performance by reducing code duplication.</li>
+                <h3>Why Do We Need UDFs?</h3>
+                <ul class="r-fit-text">
+                    <li><b>Encapsulation of Logic:</b> Instead of repeating formulas everywhere, define them once as a function.</li>
+                    <li><b>Consistency:</b> Ensures all queries use the same rule.</li>
+                    <li><b>Maintainability:</b> Makes SQL queries shorter and easier to understand.</li>
+                    <li><b>Performance:</b> SQL-language UDFs can be inlined and optimized by DB</li>
                 </ul>
             </section>
             <section id="udf-03">
                 <h3>UDF Types</h3>
-                <ul>
+                <ul class="r-fit-text">
                     <li><b>Scalar Functions:</b> Return a single value (e.g., integer, text).</li>
                     <li><b>Table-Valued Functions:</b> Return a table (set of rows).</li>
                     <li><b>Aggregate Functions:</b> Perform calculations on a set of values and return a single value (e.g., SUM, AVG).</li>
@@ -389,27 +411,146 @@ $$;
             </section>
             <section id="udf-04">
                 <h3>Pseudocode | Scalar</h3>
-                <pre><code class="language-sql">CREATE OR REPLACE FUNCTION function_name (parameters) RETURNS return_type AS $$ BEGIN -- function logic END; $$ LANGUAGE plpgsql;</code></pre>
+                <pre><code class="language-sql">
+FUNCTION double_value(x)
+RETURNS number
+BEGIN
+    RETURN x * 2
+END
+
+            </code></pre>
+                <pre><code class="language-sql">
+CALL double_value(5)  --> returns 10
+            </code></pre>
             </section>
             <section id="udf-05">
                 <h3>Pseudocode | Table Valued Functions</h3>
-                <pre><code class="language-sql">CREATE OR REPLACE FUNCTION function_name (parameters) RETURNS TABLE (column1 type1, column2 type2, ...) AS $$ BEGIN -- function logic END; $$ LANGUAGE plpgsql;</code></pre>
+                <pre><code class="language-sql">
+FUNCTION products_over_price(min_price)
+RETURNS TABLE(product_id, product_name, price)
+BEGIN
+    RETURN
+        SELECT id, name, price
+        FROM Products
+        WHERE price > min_price
+END
+
+</code></pre>
+                <pre><code class="language-sql">
+CALL products_over_price(100)
+--> returns a result set (multiple rows)
+
+</code></pre>
+            </section>
+            <section id="udf-05">
+                <h3 class="r-fit-text">Pseudocode | Aggregate Function</h3>
+                <pre><code class="language-sql">
+AGGREGATE_FUNCTION product_of_values(input_column)
+RETURNS number
+BEGIN
+    result = 1
+    FOR each value IN input_column
+        result = result * value
+    RETURN result
+END
+
+</code></pre>
+                <pre><code class="language-sql">
+CALL product_of_values(sales.quantity)
+--> returns product of all quantities
+
+</code></pre>
             </section>
             
             <section id="udf-06">
-                <h3>Creating User Defined Functions in PostgreSQL | Scalar</h3>
-                <pre><code class="language-sql">CREATE OR REPLACE FUNCTION function_name (parameters) RETURNS return_type AS $$ BEGIN -- function logic END; $$ LANGUAGE plpgsql;</code></pre>
+                <h3 class="r-fit-text" >Creating UDFs in PostgreSQL | Scalar</h3>
+                <pre><code class="language-sql">
+CREATE OR REPLACE FUNCTION calc_discounted_price(
+    p_price NUMERIC,
+    p_discount NUMERIC   -- e.g. 0.10 = 10%
+)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN p_price - (p_price * p_discount);
+END;
+$$;
+
+-- Usage:
+SELECT product_id, product_name,
+       calc_discounted_price(price, 0.15) AS discounted_price
+FROM products;
+                </code></pre>
             </section>
             <section id="udf-07">
-                <h3>Creating User Defined Functions in PostgreSQL | TVF</h3>
-                <pre><code class="language-sql">CREATE OR REPLACE FUNCTION function_name (parameters) RETURNS return_type AS $$ BEGIN -- function logic END; $$ LANGUAGE plpgsql;</code></pre>
+                <h3 class="r-fit-text">Creating User UDFs in PostgreSQL | TVF</h3>
+                <pre><code class="language-sql">
+CREATE OR REPLACE FUNCTION recent_orders(
+    p_customer_id INT,
+    p_limit INT
+)
+RETURNS TABLE(order_id INT, order_date TIMESTAMP, total NUMERIC)
+LANGUAGE sql
+AS $$
+    SELECT o.order_id,
+           o.order_date,
+           SUM(s.total_sales) AS total
+    FROM orders o
+    JOIN sales  s ON s.order_id = o.order_id
+    WHERE s.customer_id = p_customer_id
+    GROUP BY o.order_id, o.order_date
+    ORDER BY o.order_date DESC
+    LIMIT p_limit;
+$$;
+
+-- Usage:
+SELECT * FROM recent_orders(10001, 5);
+                    
+                </code></pre>
+            </section>
+        </section>
+            <section id="udf-07">
+                <h3 class="r-fit-text">Creating User UDFs in PostgreSQL | Aggregate</h3>
+<small>
+                    Step 1: Create the state transition function
+                <pre><code class="language-sql">
+CREATE OR REPLACE FUNCTION multiply_state(state NUMERIC, val NUMERIC)
+RETURNS NUMERIC
+LANGUAGE sql
+AS $$
+    SELECT state * val;
+$$;
+
+                    
+                </code></pre>
+Degine Aggregate using the state function                
+                <pre><code class="language-sql">
+CREATE AGGREGATE product_of_quantities(NUMERIC) (
+    SFUNC = multiply_state,
+    STYPE = NUMERIC,
+    INITCOND = '1'
+);
+
+                    
+                </code></pre>
+
+                <pre><code class="language-sql">
+SELECT product_id, product_of_quantities(quantity) AS qty_product
+FROM sales
+GROUP BY product_id;
+
+
+                    
+                </code></pre>
+</small>
             </section>
         </section>
 
-            <!-- UDF VS SP-->
+            <!--! UDF VS SP-->
             <section>
-                <section class="new-section"><h3>UDF vs SP</h3></section>
-                <section id="udf-vs-sp-01">
+                <section><h3  class="new-section">UDF vs SP</h3></section>
+                <section class="udf-vs-sp-01">
                     <h3>UDF vs SP</h3>
                     <table>
                         <tr>
@@ -420,7 +561,7 @@ $$;
                         <tr>
                             <td>Purpose</td>
                             <td>Encapsulate a series of SQL statements for execution.</td>
-                            <td>Encapsulate reusable logic that returns a value.</td>
+                            <td>Encapsulate reusable logic that <b>returns  a value.</b></td>
                         </tr>
                         <tr>
                             <td>Return Type</td>
@@ -448,7 +589,7 @@ $$;
 
             <!--Practice  -->
             <section>
-                <section class="new-section"><h3>Let's Practice</h3></section>
+                <section><h3 class="new-section">Let's Practice</h3></section>
                 <!-- TODO adding some proctival staf-->
                  <section>
                     <h3>Create DB using Docker</h3>
@@ -457,7 +598,7 @@ $$;
 
             <!-- Final Slide -->
             <section>
-                <h2>Thank You</h2>
+                <h3 class="new-section">Thank You</h3>
             </section>
             <!-- END OF THE PRESENTATION -->
         </div>
@@ -468,7 +609,7 @@ $$;
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.js"></script>
-
+    <script src="plugin/math/math.js"></script>
     <script>
         // Full list of configuration options available at:
         // https://revealjs.com/config/
@@ -511,4 +652,4 @@ $$;
 
 </body>
 
-</html>
+</html>f
