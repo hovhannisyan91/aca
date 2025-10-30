@@ -2,6 +2,8 @@
 
 ## Presentation
 
+<!-- quarto preview /Users/karen/Desktop/aca/index.qmd -->
+
 Visit [here](https://hovhannisyan91.github.io/aca/#/)
 
 
