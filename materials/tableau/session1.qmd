@@ -4,168 +4,144 @@ subtitle: "Workbooks, Data Types, Fields, Basic Charts, Filtering"
 categories: [tableau]
 ---
 
-## Overview
+# Introduction to Tableau
 
-This session introduces the **foundations of Tableau** — the leading tool for interactive data visualization and business intelligence.  
-Students learn how to connect to data, explore the Tableau interface, and create their first simple dashboard.  
+This chapter sets the foundation for working with **Tableau** — from connecting to data, through building your first visuals, to publishing a simple dashboard.  
+You’ll learn core concepts (dimensions, measures, discrete/continuous), get oriented in the interface, and apply best practices while creating your first views.
 
->By the end of the class, you should be able to connect to common data sources, understand Tableau’s data model, and build your first visualizations using key chart types..
+> By the end of the class, you should be able to connect to common data sources, explain Tableau’s core data concepts, and publish a simple, well-structured dashboard with basic interactivity.
 
 ---
 
 ## What Is Tableau?
 
-**Tableau** is a data visualization and analytics platform designed to help people see and understand their data.  
-It transforms raw datasets into meaningful visual stories that support data-driven decision-making.
+**Tableau** is a visual analytics platform that turns data into insight through interactive charts and dashboards.  
+In practice, Tableau bridges **raw tables** and **business understanding**, enabling you to explore, explain, and share findings quickly.
 
-Tableau connects easily to spreadsheets, databases, or live cloud data, enabling analysts to explore data visually without writing complex code.
+The typical Tableau workflow follows five stages:
+
+1. **Connect** – link to files (Excel/CSV), databases, or cloud sources.  
+2. **Prepare** – profile fields, set data types, create relationships/joins, and fix quality issues.  
+3. **Visualize** – build views on shelves with Marks (color/size/label/shape).  
+4. **Compose** – assemble sheets in dashboards; add filters, actions, and layout.  
+5. **Publish & Share** – deliver to Tableau Public, Cloud, or Server for feedback and decision-making.
+
+> This flow is iterative: each visualization raises new questions — adjust, test, and refine.
+
+---
+
+## Business Applications of Tableau
+
+Tableau supports decision-making across multiple industries:
+
+- **Telecommunications:** network KPIs, churn monitoring, device mix, and customer segmentation.  
+- **Retail & E-commerce:** category performance, retention cohorts, and funnel analysis.  
+- **Finance:** credit risk dashboards, revenue tracking, portfolio monitoring.  
+- **Marketing:** campaign attribution, A/B test results, and media mix performance.  
+- **Healthcare & Public Sector:** patient outcomes, resource management, and geographic analytics.
+
+**Unifying theme:** Tableau accelerates how analysts move from **questions → visuals → decisions**.
 
 ---
 
 ## Tableau Products
 
-Each Tableau product serves a distinct purpose within the analytics lifecycle.
-
 | Product | Description |
 |----------|--------------|
-| **Tableau Desktop** | Authoring tool for building visualizations and dashboards. |
-| **Tableau Server** | On-premise platform for sharing dashboards securely within an organization. |
-| **Tableau Cloud** | Cloud-hosted version of Tableau Server — no infrastructure required. |
-| **Tableau Public** | Free, cloud-based platform for publishing dashboards publicly. |
-| **Tableau Prep** | Tool for cleaning, combining, and reshaping data before analysis. |
-| **Tableau Next** | Experimental module for automated insight generation and trend detection. |
+| **Tableau Desktop** | The primary tool for creating visualizations and dashboards. |
+| **Tableau Prep** | A data preparation tool for cleaning and reshaping data before visualization. |
+| **Tableau Server** | On-premises platform for sharing dashboards securely within organizations. |
+| **Tableau Cloud** | Cloud-based alternative for publishing and managing dashboards without server setup. |
+| **Tableau Public** | Free, web-based platform for publishing dashboards publicly. |
+| **Tableau Next** | A new feature for automated insight generation and trend detection. |
 
-💡 **Tip:**  
-Tableau Public is ideal for practice and portfolio building. Use **Tableau Desktop Public Edition** to create and publish dashboards online.
+**Download:** [Tableau Public](https://www.tableau.com/products/public/download)  
+**Sample Datasets:** [Sample Data](https://public.tableau.com/app/learn/sample-data)
 
-[Download Tableau Public](https://www.tableau.com/products/public/download)  
-[Access Sample Datasets](https://public.tableau.com/app/learn/sample-data)
+Dataset used: **airbnb.xlsx**
 
-**Dataset used in class:** `airbnb.xlsx`
-
-![Connect to Excel](../../img/tableau/w1_connect_to_datasource.png)
+![Connect to Excel](../../../img/tableau/w1_connect_to_datasource.png)
 
 ---
 
 ## Tableau File Types
 
 | File Type | Extension | Description |
-|------------|------------|--------------|
-| **Workbook** | `.twb` | XML file storing visualizations and connections. |
-| **Packaged Workbook** | `.twbx` | Workbook + data files (used for sharing). |
-| **Data Source** | `.tds` | Metadata definition for a connection. |
-| **Packaged Data Source** | `.tdsx` | `.tds` plus data extract. |
-| **Extract File** | `.hyper` | Optimized local data extract. |
-| **Bookmark** | `.tbm` | Stores a single sheet. |
+|------------|------------|-------------|
+| Workbook | `.twb` | Contains worksheets, dashboards, and connections (without data). |
+| Packaged Workbook | `.twbx` | Workbook + embedded data and images (portable). |
+| Data Source | `.tds` | Contains metadata and field properties. |
+| Packaged Data Source | `.tdsx` | Data source + data extract (portable). |
+| Extract | `.hyper` | Optimized extract of data for faster performance. |
+| Bookmark | `.tbm` | Saves a single worksheet for reuse. |
 
 ---
 
-## Tableau Interface Overview
+## Data Types in Tableau
 
-The Tableau interface is divided into several main components that allow you to manage data, build visuals, and combine them into dashboards.
-
-| Section | Function |
-|----------|-----------|
-| **Data Pane (A)** | Contains all fields (dimensions, measures, parameters). |
-| **Shelves (B)** | Control how fields are displayed in a view (Rows, Columns, Filters). |
-| **Marks Card (C)** | Manages visual elements such as color, size, shape, and labels. |
-| **Filters Shelf (D)** | Restricts data displayed in a worksheet. |
-| **Dashboard Pane (E)** | Combines multiple sheets into one unified view. |
-| **Toolbar & Buttons (F)** | Provides shortcuts for key actions (undo, redo, sort, save). |
-
-![Tableau Interface](../../img/tableau/w1_worksheet.png)
+| Type | Example | Description |
+|------|----------|-------------|
+| **Number (Decimal)** | `Price` | Quantitative data with decimals. |
+| **Number (Whole)** | `Host ID` | Integer data without decimals. |
+| **Date / Date & Time** | `Host Since` | Temporal data. |
+| **String** | `Property Type` | Textual or categorical values. |
+| **Geographic Role** | `Zip Code` | Fields that can be mapped geographically. |
+| **Boolean** | `True/False` | Logical values used in filters or calculations. |
 
 ---
 
-## Core Tableau Concepts
+## Dimensions vs. Measures
 
-### Dimensions vs Measures
-
-- **Dimensions** are *qualitative* fields used to categorize data (e.g., Region, Category, Date).  
-- **Measures** are *quantitative* fields that can be aggregated (e.g., Sales, Profit, Quantity).  
-
-| Example | Type |
-|----------|------|
-| `Customer Name` | Dimension |
-| `SUM(Sales)` | Measure |
-| `AVG(Profit)` | Measure |
+- **Dimensions** contain qualitative fields (categories such as names, dates, or geographic data).  
+  → Used to *group*, *filter*, and *categorize* data.  
+- **Measures** contain quantitative, numeric fields.  
+  → Used to *aggregate* and *analyze* data (SUM, AVG, COUNT).
 
 ---
 
-### Discrete vs Continuous Fields
+## Discrete vs. Continuous Fields
 
-- **Discrete** fields create headers and categories (blue pills).  
-- **Continuous** fields create axes and ranges (green pills).
+| Concept | Description | Example |
+|----------|--------------|----------|
+| **Discrete** | Distinct categories, shown as separate labels or headers. | `Customer Name`, `Region` |
+| **Continuous** | Numeric or time fields forming an unbroken scale. | `SUM(Sales)`, `Order Date` |
 
-| Type | Example | Visualization Effect |
-|-------|----------|----------------------|
-| **Discrete** | `Region`, `Category` | Creates labels or categories |
-| **Continuous** | `SUM(Sales)`, `Date` | Creates an axis for measurement |
+**Tip:** You can convert measures or dimensions between discrete and continuous using the field dropdown.
 
 | ![Continuous](../../img/tableau/w1_continuous.png) | ![Discrete](../../img/tableau/w1_descrete.png) |
 |:--:|:--:|
 | **Continuous** | **Discrete** |
 
-*Tip:* You can convert between discrete and continuous by right-clicking a field and selecting **Convert to Continuous** or **Convert to Discrete**.
+---
+
+## Tableau Interface Overview
+
+| Section | Function |
+|----------|-----------|
+| **A. Data Pane** | Contains all fields (dimensions, measures, parameters). |
+| **B. Shelves** | Control how fields appear in the view (Rows, Columns, Filters). |
+| **C. Marks Card** | Controls visual elements (Color, Size, Label, Shape, Tooltip). |
+| **D. Filters Shelf** | Limits the data shown in the visualization. |
+| **E. Dashboard Pane** | Combines multiple sheets into a single interactive view. |
+| **F. Toolbar & Buttons** | Quick access to tools (undo, redo, sort, swap, etc.). |
+
+![Worksheet](../../img/tableau/w1_worksheet.png)
 
 ---
 
-## Creating Your First Visualization
-
-### Step 1: Connect to Data
-- Go to **Data → Connect to Data**  
-- Select `Excel` or `Text File`  
-- Choose `airbnb.xlsx` and drag the sheet into the workspace.
-
----
-
-### Step 2: Explore Data Types
-
-Observe the data pane to identify:
-- Number fields (decimal or whole)
-- Date fields
-- String (text) fields
-- Geographic fields (automatically assigned roles like City, Country)
-
----
-
-### Step 3: Build Basic Charts
-
-| Chart | Description | Example Fields |
-|--------|--------------|----------------|
-| **Bar Chart** | Compare values across categories | Region vs SUM(Sales) |
-| **Line Chart** | Show trends over time | Month vs SUM(Profit) |
-| **Pie Chart** | Show proportions | Category vs SUM(Sales) |
-| **Scatter Plot** | Display relationships between two measures | SUM(Sales) vs SUM(Profit) |
+## Creating Basic Charts
 
 | ![Bar chart](../../img/tableau/w1_bar_chart.png) | ![Line chart](../../img/tableau/w1_line_chart.png) | ![Pie chart](../../img/tableau/w1_pie_chart.png) | ![Scatter plot](../../img/tableau/w1_scatter_plot.png) |
 |:--:|:--:|:--:|:--:|
-| Bar Chart | Line Chart | Pie Chart | Scatter Plot |
+| **Bar Chart** | **Line Chart** | **Pie Chart** | **Scatter Plot** |
 
 ---
 
-### Step 4: Apply Filters, Groups, and Sets
-
-| Function | Purpose | Example |
-|-----------|----------|----------|
-| **Filters** | Focus analysis on specific data subsets | `[Region] = "East"` |
-| **Groups** | Combine similar categories | Group small cities into “Other” |
-| **Sets** | Create dynamic subsets based on conditions | Customers with Sales > 5000 |
-| **Sorting** | Arrange data by ascending/descending value | Sort by Profit descending |
+## Filters, Groups, Sets, and Sorting
 
 | ![Filters](../../img/tableau/w1_filter.png) | ![Groups](../../img/tableau/w1_group.png) | ![Sets](../../img/tableau/w1_set.png) | ![Sorting](../../img/tableau/w1_sort.png) |
 |:--:|:--:|:--:|:--:|
-| Filters | Groups | Sets | Sorting |
-
----
-
-## Reflection and Discussion
-
-1. How does Tableau differ from Excel or Power BI in the way it connects to and visualizes data?  
-2. Which chart types do you find most intuitive for understanding business patterns?  
-3. What data sources would you most likely use in your future Tableau projects?
-
-Write short notes or share in class for discussion.
+| **Filters** | **Groups** | **Sets** | **Sorting** |
 
 ---
 
@@ -191,10 +167,3 @@ Create a simple Tableau dashboard using the **Airbnb dataset**.
 1. [Introduction to Tableau for Beginners](https://www.youtube.com/watch?v=OmNeLFmyMJQ)
 
 ---
-
-## Preview of Next Class
-
-In the next session, we’ll explore **data connections and relationships in Tableau** — including **joins, blends, and unions** — and learn how to combine multiple data sources effectively.
-
----
-
