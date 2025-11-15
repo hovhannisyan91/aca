@@ -4,6 +4,40 @@ subtitle: "Data Types, Central Tendancy"
 categories: [statistics]
 ---
 
+
+
+# Agenda
+
+1. Types of Data
+2. Central Tendancy measurs
+3. Intro to visualization
+
+
+## What is Statistics?
+
+Statistics is the branch of mathematics that transforms numbers (data) into useful information
+fohr decision makers.
+
+**Why learn Statistics?**
+
+1. statistics helps you make better sense of the world.
+2. statistics helps you make better business decisions.
+
+The statistical methods you use for these tasks come from one of the two branches of statistics:
+*descriptive statistics* and *inferential statistics.*
+
+
+## Basic Vocabulary of Statistics
+
+- **Variable:** A variable is a characteristic of an item or individual.
+- **Data:** Data are the different values associated with a variable.
+- **Population:** A population consists of all the items or individuals about which you want to
+reach conclusions.
+- **Sample:** A sample is the portion of a population selected for analysis.
+- **Parameter:** A parameter is a measure that describes a characteristic of a population.
+- **Statistic:** A statistic is a measure that describes a characteristic of a sample.
+
+
 # Types of Data
 
 Understanding the **types of data** is the foundation of every analysis or visualization.  
@@ -11,7 +45,7 @@ Different data types require different summary statistics, charts, and interpret
 
 ---
 
-## Why Data Types Matter
+## Why Data Types Matter?
 
 Before calculating averages or plotting charts, it’s essential to recognize what kind of data you’re working with.  
 The classification of a variable determines:
@@ -46,6 +80,25 @@ Quantitative data represent **measurable quantities** that can be used in arithm
 | **Discrete** | Countable numbers, often integers | Number of customers, Complaints per day |
 | **Continuous** | Measured values within a range | Temperature, Age, Revenue, Weight |
 
+### Interval Data
+Interval values represent **ordered units that have the same difference**.  
+A variable is considered interval data when it contains numeric values that are ordered and where the exact differences between values are known.
+
+**Example (Temperature in Celsius):**  
+
+[-15, -10, -5, **0,** 5, 10, 15, 20, 25, 30]
+
+A key limitation of interval data is that it **does not have a true zero**.  
+In the Celsius example, there is no such thing as “no temperature.”
+
+### Ratio Data
+
+Ratio values are also **ordered units that have the same difference**, similar to interval values.  
+The key distinction is that ratio data **has an absolute zero**.
+
+**Examples:** Income, Weight, Length, etc.
+
+
 > **Tip:**  
 > *Discrete* → counting  
 > *Continuous* → measuring
@@ -67,6 +120,7 @@ Quantitative data represent **measurable quantities** that can be used in arithm
 graph TD
     A["Data Types"] --> B["Qualitative (Categorical)"]
     A --> C["Quantitative (Numerical)"]
+    A --> H["Other Types"]
 
     B --> D["Nominal"]
     B --> E["Ordinal"]
@@ -74,11 +128,11 @@ graph TD
     C --> F["Discrete"]
     C --> G["Continuous"]
 
-    A --> H["Other Types"]
+    
     H --> I["Binary"]
     H --> J["Time-Series"]
-    H --> K["Textual / Unstructured"]
-    H --> L["Spatial / Geographical"]
+    H --> K["Textual"]
+    H --> L["Spatial"]
 ```
 
 # Measures of Central Tendency
@@ -88,7 +142,7 @@ These are called **measures of central tendency**, and they tell us where the �
 
 The three most common measures are:
 
-- **Mean** — the average value  
+- **Mean or Average** — the average value  
 - **Median** — the middle value  
 - **Mode** — the most frequent value  
 
@@ -98,17 +152,82 @@ The three most common measures are:
 
 The **mean** is the sum of all values divided by the number of observations.
 
-\[
+
+$$
 \text{Mean} = \frac{\sum_{i=1}^{n} x_i}{n}
-\]
+$$
+
 
 | Example | Calculation |
 |----------|--------------|
 | Data: 5, 7, 8, 10 | Mean = (5 + 7 + 8 + 10) / 4 = **7.5** |
 
+
+#### Mean for Sample
+
+
+
+$$
+\bar{x} = \frac{\sum_{i=1}^{n} x_i}{n}
+$$
+
+
+#### Population Mean  
+(same, only notation is different)
+
+
+$$
+\mu = \frac{\sum_{i=1}^{N} x_i}{N}
+$$
+
+### Weighted Mean  
+
+| Type      | Score | Weight (%) |
+|-----------|-------|------------|
+| Exam      | 94    | 50         |
+| Project   | 92    | 35         |
+| Homework  | 100   | 15         |
+
+
+(*Weights do not need to add up to one!*)
+
+$$
+\bar{x} = 
+\frac{\displaystyle \sum_{i=1}^{n} (w_i x_i)}
+     {\displaystyle \sum_{i=1}^{n} w_i}
+$$
+
+
+### Sample Mean Example
+
+
+
 > **When to Use:**  
+> - Conveinent measurement clear to everybody
 > - Works well with **continuous or discrete numerical data**.  
 > - Sensitive to **outliers** (extreme values can distort the result).
+
+Given the 5 observations:
+
+
+$$
+\bar{x} 
+= \frac{\sum_{i=1}^{5} x_i}{5} 
+= \frac{14.2 + 19.6 + 22.7 + 13.1 + 20.9}{5} 
+= \frac{90.5}{5}
+= 18.1 \
+$$
+
+
+---
+
+$$
+\mu
+= \frac{\sum_{i=1}^{5} x_i}{5}
+= \frac{300 + 320 + 270 + 210 + 8{,}000}{5}
+= \frac{9{,}100}{5}
+= 1{,}820
+$$
 
 ---
 
@@ -161,6 +280,50 @@ The **mode** is the value that appears most often.
 > In a **perfectly symmetrical** distribution → Mean = Median = Mode  
 > In a **right-skewed** distribution → Mean > Median > Mode  
 > In a **left-skewed** distribution → Mean < Median < Mode
+
+
+## Frequency Distributions
+
+### Symmetric Distribution {.smaller}
+
+Mean ~ Median
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(1)
+
+# Normal (symmetric) distribution
+data_sym = np.random.normal(loc=50, scale=10, size=500)
+
+fig, ax = plt.subplots(figsize=(7,4))
+ax.hist(data_sym, bins=20, edgecolor="black", alpha=0.7)
+ax.set_title("Symmetric Distribution (Mean ≈ Median)")
+ax.set_xlabel("Value")
+ax.set_ylabel("Frequency")
+
+plt.show()
+```
+
+
+### Left Skewed Distributions
+
+```{python}
+#| echo: false
+# Left-skewed using a reversed gamma distribution
+data_left = 100 - np.random.gamma(shape=5, scale=4, size=500)
+
+fig, ax = plt.subplots(figsize=(7,4))
+ax.hist(data_left, bins=20, edgecolor="black", alpha=0.7)
+ax.set_title("Left-Skewed Distribution (Mean < Median)")
+ax.set_xlabel("Value")
+ax.set_ylabel("Frequency")
+
+plt.show()
+```
+
 
 ## Chart chooser
 
