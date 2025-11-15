@@ -236,6 +236,7 @@ $$
 The **median** is the value that separates the dataset into two equal halves.
 
 **Steps to calculate:**
+
 1. Order the data from smallest to largest.  
 2. If the number of observations is odd → middle value.  
 3. If even → average of the two middle values.
@@ -246,6 +247,7 @@ The **median** is the value that separates the dataset into two equal halves.
 | Data: 3, 5, 8, 10 | Median = (5 + 8)/2 = **6.5** |
 
 > **When to Use:**  
+> 
 > - Better than the mean for **skewed data** or when **outliers** are present.  
 > - Common for **income, property prices**, etc.
 
@@ -295,14 +297,23 @@ import matplotlib.pyplot as plt
 
 np.random.seed(1)
 
-# Normal (symmetric) distribution
+# Symmetric data
 data_sym = np.random.normal(loc=50, scale=10, size=500)
+
+mean_sym = np.mean(data_sym)
+median_sym = np.median(data_sym)
 
 fig, ax = plt.subplots(figsize=(7,4))
 ax.hist(data_sym, bins=20, edgecolor="black", alpha=0.7)
+
+# Add vertical lines
+ax.axvline(mean_sym, color="blue", linestyle="--", linewidth=2, label=f"Mean = {mean_sym:.2f}")
+ax.axvline(median_sym, color="red", linestyle="-", linewidth=2, label=f"Median = {median_sym:.2f}")
+
 ax.set_title("Symmetric Distribution (Mean ≈ Median)")
 ax.set_xlabel("Value")
 ax.set_ylabel("Frequency")
+ax.legend()
 
 plt.show()
 ```
@@ -312,19 +323,466 @@ plt.show()
 
 ```{python}
 #| echo: false
-# Left-skewed using a reversed gamma distribution
+# Left-skewed distribution (reversed gamma)
 data_left = 100 - np.random.gamma(shape=5, scale=4, size=500)
+
+mean_left = np.mean(data_left)
+median_left = np.median(data_left)
 
 fig, ax = plt.subplots(figsize=(7,4))
 ax.hist(data_left, bins=20, edgecolor="black", alpha=0.7)
+
+ax.axvline(mean_left, color="blue", linestyle="--", linewidth=2, label=f"Mean = {mean_left:.2f}")
+ax.axvline(median_left, color="red", linestyle="-", linewidth=2, label=f"Median = {median_left:.2f}")
+
 ax.set_title("Left-Skewed Distribution (Mean < Median)")
 ax.set_xlabel("Value")
 ax.set_ylabel("Frequency")
+ax.legend()
 
 plt.show()
 ```
 
 
-## Chart chooser
+### Right Skewed Distributions
 
-[Here](https://www.google.com/search?q=char&rlz=1C5CHFA_enAM1026AM1028&oq=char&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIMCAEQIxgnGIAEGIoFMgcIAhAAGIAEMgcIAxAAGIAEMgcIBBAAGIAEMgcIBRAAGIAEMgcIBhAAGIAEMgYIBxBFGEHSAQgxODA1ajBqNKgCALACAQ&sourceid=chrome&ie=UTF-8) may find charts for any occasion
+```{python}
+#| echo: false
+# Right-skewed distribution (gamma)
+data_right = np.random.gamma(shape=4, scale=4, size=500)
+
+mean_right = np.mean(data_right)
+median_right = np.median(data_right)
+
+fig, ax = plt.subplots(figsize=(7,4))
+ax.hist(data_right, bins=20, edgecolor="black", alpha=0.7)
+
+ax.axvline(mean_right, color="blue", linestyle="--", linewidth=2, label=f"Mean = {mean_right:.2f}")
+ax.axvline(median_right, color="red", linestyle="-", linewidth=2, label=f"Median = {median_right:.2f}")
+
+ax.set_title("Right-Skewed Distribution (Mean > Median)")
+ax.set_xlabel("Value")
+ax.set_ylabel("Frequency")
+ax.legend()
+
+plt.show()
+```
+
+
+
+## Symmetric, Left-Skewed, and Right-Skewed Distributions  
+
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(1)
+
+# ---- Generate data ----
+data_sym  = np.random.normal(loc=50, scale=10, size=500)
+data_left = 100 - np.random.gamma(shape=5, scale=4, size=500)
+data_right = np.random.gamma(shape=4, scale=4, size=500)
+
+datasets = [
+    ("Symmetric\nMean ≈ Median", data_sym),
+    ("Left-Skewed\nMean < Median", data_left),
+    ("Right-Skewed\nMean > Median", data_right)
+]
+
+# ---- Create subplots ----
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))  # <-- Reduced width + height
+bins = 18  # Slightly fewer bins to clean visuals
+
+for ax, (title, data) in zip(axes, datasets):
+
+    mean_val = np.mean(data)
+    median_val = np.median(data)
+
+    ax.hist(data, bins=bins, edgecolor="black", alpha=0.7)
+
+    # Mean line (blue dashed)
+    ax.axvline(mean_val, color="blue", linestyle="--", linewidth=1.8, label=f"Mean")
+
+    # Median line (red solid)
+    ax.axvline(median_val, color="red", linestyle="-", linewidth=1.8, label=f"Median")
+
+    ax.set_title(title, fontsize=11)
+    ax.set_xlabel("Value", fontsize=9)
+    ax.set_ylabel("Frequency", fontsize=9)
+
+    ax.tick_params(axis='both', which='major', labelsize=8)
+    ax.legend(fontsize=8, loc="upper right")
+
+plt.tight_layout(pad=1)
+plt.show()
+```
+
+
+## Enriched Plot
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+
+np.random.seed(1)
+
+# ---- Generate data ----
+data_sym  = np.random.normal(loc=50, scale=10, size=500)
+data_left = 100 - np.random.gamma(shape=5, scale=4, size=500)
+data_right = np.random.gamma(shape=4, scale=4, size=500)
+
+datasets = [
+    ("Symmetric\nMean ≈ Median", data_sym),
+    ("Left-Skewed\nMean < Median", data_left),
+    ("Right-Skewed\nMean > Median", data_right)
+]
+
+# ---- Create subplots ----
+fig, axes = plt.subplots(1, 3, figsize=(16, 4.5))  # slightly wider for annotations
+bins = 20
+
+for ax, (title, data) in zip(axes, datasets):
+
+    mean_val = np.mean(data)
+    median_val = np.median(data)
+
+    # Histogram
+    counts, bins_hist, patches = ax.hist(
+        data, bins=bins, alpha=0.6, edgecolor="black"
+    )
+
+    # KDE smooth density
+    kde = gaussian_kde(data)
+    xline = np.linspace(min(data), max(data), 400)
+    ax.plot(xline, kde(xline) * len(data) * (bins_hist[1] - bins_hist[0]),
+            color="black", linewidth=1.5, label="KDE")
+
+    # Mean line (blue dashed)
+    ax.axvline(mean_val, color="blue", linestyle="--", linewidth=2)
+    ax.annotate("Mean", xy=(mean_val, max(counts)*0.9),
+                xytext=(mean_val, max(counts)*1.1),
+                ha="center", color="blue", fontsize=8,
+                arrowprops=dict(arrowstyle="->", color="blue"))
+
+    # Median line (red solid)
+    ax.axvline(median_val, color="red", linestyle="-", linewidth=2)
+    ax.annotate("Median", xy=(median_val, max(counts)*0.9),
+                xytext=(median_val, max(counts)*1.1),
+                ha="center", color="red", fontsize=8,
+                arrowprops=dict(arrowstyle="->", color="red"))
+
+    # Shaded tails depending on skew
+    if "Left" in title:
+        ax.axvspan(min(data), mean_val, alpha=0.12, color="blue")
+    elif "Right" in title:
+        ax.axvspan(mean_val, max(data), alpha=0.12, color="blue")
+
+    # Titles & labels
+    ax.set_title(title, fontsize=12)
+    ax.set_xlabel("Value", fontsize=9)
+    ax.set_ylabel("Frequency", fontsize=9)
+    ax.tick_params(axis="both", labelsize=8)
+
+    # Summary table under plot
+    table_data = [
+        ["Mean", f"{mean_val:.2f}"],
+        ["Median", f"{median_val:.2f}"],
+        ["Std Dev", f"{np.std(data):.2f}"]
+    ]
+    table = ax.table(
+        cellText=table_data,
+        colLabels=["Statistic", "Value"],
+        cellLoc="center",
+        loc="bottom",
+        fontsize=8
+    )
+    table.scale(1, 1.1)
+
+plt.tight_layout(pad=2)
+plt.show()
+
+```
+
+
+
+# Measures of Variability
+
+## Measures of Variability
+
+- Range
+- Variance 
+- Standard Deviation (SD)
+
+
+## Range
+
+$$
+\text{Range = Highest Value - Lowest Value}
+$$
+
+> - Think about where is it applicable?
+> - Are there any limitations
+
+## Variance
+
+**Sample Variance:**
+
+$$
+s^{2} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})^{2}}{n - 1}
+$$
+
+**Population Variance**
+
+$$
+\sigma^{2}
+=
+\frac{
+\displaystyle \sum_{i=1}^{N} (x_i - \mu)^{2}
+}{
+N
+}
+$$
+
+## Standard Deviation
+
+**Sample Standard Deviation (Standard Error)**
+
+$$
+s \;=\; \sqrt{s^{2}}
+\;=\;
+\sqrt{
+\frac{
+\displaystyle \sum_{i=1}^{n} (x_i - \bar{x})^{2}
+}{
+n - 1
+}
+}
+$$
+
+**Population standard deviation**
+
+$$
+\sigma
+=
+\sqrt{
+\frac{
+\displaystyle \sum_{i=1}^{N} (x_i - \mu)^{2}
+}{
+N
+}
+}
+$$
+
+## How to compare variability?
+
+In which cases you can compare standard deviations?
+
+| Box     | Sample 1  | Sample 2  |
+|---------|---------------|----------------|
+| Box 1   | 14.2          | 18.2           |
+| Box 2   | 19.6          | 17.9           |
+| Box 3   | 22.7          | 18.1           |
+| Box 4   | 13.1          | 18.1           |
+| Box 5   | 20.9          | 18.2           |
+| **Mean** | **18.1**       | **18.1**        |
+| **Standard deviation** | **4.23** | **0.12** |
+
+
+### Visual Comparison of Variability
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Data from the table
+sample1 = np.array([14.2, 19.6, 22.7, 13.1, 20.9])
+sample2 = np.array([18.2, 17.9, 18.1, 18.1, 18.2])
+
+fig, ax = plt.subplots(figsize=(8,4))
+
+ax.scatter(np.ones_like(sample1), sample1, color="red", label="Sample 1 (High Variability)", s=70)
+ax.scatter(2*np.ones_like(sample2), sample2, color="blue", label="Sample 2 (Low Variability)", s=70)
+
+# Add jitter for aesthetics
+ax.scatter(1 + np.random.uniform(-0.03, 0.03, len(sample1)), sample1, color="red", s=70)
+ax.scatter(2 + np.random.uniform(-0.03, 0.03, len(sample2)), sample2, color="blue", s=70)
+
+ax.set_xticks([1,2])
+ax.set_xticklabels(["Sample 1", "Sample 2"])
+
+ax.set_ylabel("Weight (oz)")
+ax.set_title("Visual Comparison of Variability")
+
+ax.legend()
+plt.show()
+```
+
+### When variability is **bad**?
+
+- When consistency and quality control are important  
+- Product weights, drug dosages, machine precision  
+- Delivery times, service response times  
+- Financial risk (greater uncertainty)
+
+### When variability is **good**?
+
+- Biological diversity and adaptability  
+- Marketing segmentation & A/B testing  
+- Creativity and innovation  
+- Investments seeking higher upside  
+- Identifying top performers (sports, hiring)
+
+### When variability is **neutral**?
+
+- Natural randomness (weather, height, sampling variation)
+
+ 
+>**Variability is not inherently good or bad—its value depends on what you are trying to achieve.**
+
+
+## Why $N-1$?
+
+A **degree of freedom (df)** is an independent piece of information that can vary freely.  
+Whenever we estimate a parameter from the sample, we introduce a constraint.  
+Each constraint removes one degree of freedom.
+
+The universal rule is:
+
+$$
+df = n - \text{(number of estimated parameters)}.
+$$
+
+During the mean estimation, since we have one constraint we remove only 1 hence
+
+$$
+df = n - 1
+$$
+
+<!-- TODO -->
+
+
+## Coefficient of Variation (Normalization)
+
+The coefficient of variation (CV) is a measure of *relative variability*.  
+It allows us to compare the variability of two datasets **even when their units or scales differ**.
+
+---
+
+**Data**
+
+| Date               | Nike  | Google |
+|--------------------|----------|------------|
+| September 14, 2012 | 48.32    | 709.68     |
+| October 15, 2012   | 47.81    | 740.98     |
+| November 15, 2012  | 45.42    | 647.26     |
+| December 14, 2012  | 48.46    | 701.96     |
+| January 15, 2013   | 53.64    | 724.93     |
+| February 15, 2013  | 54.95    | 792.89     |
+| **Mean**           | **49.77** | **719.62** |
+| **Standard deviation** | **3.70** | **47.96** |
+
+---
+
+### Formula for the Coefficient of Variation
+
+$$
+\text{CV} = \frac{s}{\bar{x}} \times 100
+$$
+
+Where:
+
+- $s$ = standard deviation  
+- $\bar{x}$ = mean  
+- CV is expressed as a **percentage**
+
+---
+
+**Nike**
+
+$$
+\text{CV}_{\text{Nike}}
+= \frac{3.70}{49.77} \times 100
+\approx 7.4\%
+$$
+
+
+**Google**
+
+$$
+\text{CV}_{\text{Google}}
+= \frac{47.96}{719.62} \times 100
+\approx 6.7\%
+$$
+
+
+Although Google’s stock prices vary by a much larger **dollar amount**, its **relative variability** is smaller.
+
+- Nike CV = **7.4%**  
+- Google CV = **6.7%**
+
+This means that, compared to its average price, **Google's stock price is more stable** than Nike's.
+
+The CV helps us compare variability across different scales and units—something raw standard deviations alone cannot do.
+
+
+## Z-score
+
+Number of standard deviations that particular value is farther from the mean of its population or sample:
+
+**Population:**
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+**Sample:**
+
+$$
+z = \frac{x - \bar{x}}{s}
+$$
+
+```bash
+=STANDARDIZE(x, mean, standard_deviation)
+```
+
+Suppose we have:
+
+- x = 540
+- mean = 776.3
+- standard deviation = 385.1
+
+**Rule of Thumb for identifying outliers:** Data values that have z-scores above `+3` and below `-3` can be categorized as outliers.
+
+
+<!-- 
+## Empirical Rule
+
+- When data is close to bell-shaped and symmetrical:
+- 68-95-97.5 rule usually applies
+- Exam average 80, standard deviation 5:
+
+
+
+<!-- todo add plot -->
+
+<!-- ## Chebyshev’s Theorem
+
+Chebyshev’s Theorem applies to **any distribution**, not only symmetric or bell-shaped ones.  
+It states that for any value of \( z > 1 \), **at least** the following percentage of observations lie within  
+\( z \) standard deviations of the mean:
+
+$$
+\left( 1 - \frac{1}{z^2} \right) \times 100
+$$ --> 
+
+
+
+## Usefull materials
+
+- [Business Statistics 2](https://drive.google.com/file/d/1hpsygZCLHf0kV75Muy0Hn9xiS-AqPCZ9/view?usp=drive_link) Chapter 3 and Chapter 4
+- [Here](https://public.tableau.com/app/profile/glowbyte.consulting/viz/ChartChooser_15550897459460/ChartChooser)

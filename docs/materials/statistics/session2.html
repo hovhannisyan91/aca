@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -726,8 +761,31 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#symmetric-distribution" id="toc-symmetric-distribution" class="nav-link" data-scroll-target="#symmetric-distribution">Symmetric Distribution</a></li>
   <li><a href="#left-skewed-distributions" id="toc-left-skewed-distributions" class="nav-link" data-scroll-target="#left-skewed-distributions">Left Skewed Distributions</a></li>
+  <li><a href="#right-skewed-distributions" id="toc-right-skewed-distributions" class="nav-link" data-scroll-target="#right-skewed-distributions">Right Skewed Distributions</a></li>
   </ul></li>
-  <li><a href="#chart-chooser" id="toc-chart-chooser" class="nav-link" data-scroll-target="#chart-chooser">Chart chooser</a></li>
+  <li><a href="#symmetric-left-skewed-and-right-skewed-distributions" id="toc-symmetric-left-skewed-and-right-skewed-distributions" class="nav-link" data-scroll-target="#symmetric-left-skewed-and-right-skewed-distributions">Symmetric, Left-Skewed, and Right-Skewed Distributions</a></li>
+  <li><a href="#enriched-plot" id="toc-enriched-plot" class="nav-link" data-scroll-target="#enriched-plot">Enriched Plot</a></li>
+  </ul></li>
+  <li><a href="#measures-of-variability" id="toc-measures-of-variability" class="nav-link" data-scroll-target="#measures-of-variability">Measures of Variability</a>
+  <ul class="collapse">
+  <li><a href="#measures-of-variability-1" id="toc-measures-of-variability-1" class="nav-link" data-scroll-target="#measures-of-variability-1">Measures of Variability</a></li>
+  <li><a href="#range" id="toc-range" class="nav-link" data-scroll-target="#range">Range</a></li>
+  <li><a href="#variance" id="toc-variance" class="nav-link" data-scroll-target="#variance">Variance</a></li>
+  <li><a href="#standard-deviation" id="toc-standard-deviation" class="nav-link" data-scroll-target="#standard-deviation">Standard Deviation</a></li>
+  <li><a href="#how-to-compare-variability" id="toc-how-to-compare-variability" class="nav-link" data-scroll-target="#how-to-compare-variability">How to compare variability?</a>
+  <ul class="collapse">
+  <li><a href="#visual-comparison-of-variability" id="toc-visual-comparison-of-variability" class="nav-link" data-scroll-target="#visual-comparison-of-variability">Visual Comparison of Variability</a></li>
+  <li><a href="#when-variability-is-bad" id="toc-when-variability-is-bad" class="nav-link" data-scroll-target="#when-variability-is-bad">When variability is <strong>bad</strong>?</a></li>
+  <li><a href="#when-variability-is-good" id="toc-when-variability-is-good" class="nav-link" data-scroll-target="#when-variability-is-good">When variability is <strong>good</strong>?</a></li>
+  <li><a href="#when-variability-is-neutral" id="toc-when-variability-is-neutral" class="nav-link" data-scroll-target="#when-variability-is-neutral">When variability is <strong>neutral</strong>?</a></li>
+  </ul></li>
+  <li><a href="#why-n-1" id="toc-why-n-1" class="nav-link" data-scroll-target="#why-n-1">Why <span class="math inline">\(N-1\)</span>?</a></li>
+  <li><a href="#coefficient-of-variation-normalization" id="toc-coefficient-of-variation-normalization" class="nav-link" data-scroll-target="#coefficient-of-variation-normalization">Coefficient of Variation (Normalization)</a>
+  <ul class="collapse">
+  <li><a href="#formula-for-the-coefficient-of-variation" id="toc-formula-for-the-coefficient-of-variation" class="nav-link" data-scroll-target="#formula-for-the-coefficient-of-variation">Formula for the Coefficient of Variation</a></li>
+  </ul></li>
+  <li><a href="#z-score" id="toc-z-score" class="nav-link" data-scroll-target="#z-score">Z-score</a></li>
+  <li><a href="#usefull-materials" id="toc-usefull-materials" class="nav-link" data-scroll-target="#usefull-materials">Usefull materials</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1071,9 +1129,14 @@ These are called <strong>measures of central tendency</strong>, and they tell us
 <section id="median" class="level2">
 <h2 class="anchored" data-anchor-id="median">Median</h2>
 <p>The <strong>median</strong> is the value that separates the dataset into two equal halves.</p>
-<p><strong>Steps to calculate:</strong> 1. Order the data from smallest to largest.<br>
-2. If the number of observations is odd → middle value.<br>
-3. If even → average of the two middle values.</p>
+<p><strong>Steps to calculate:</strong></p>
+<ol type="1">
+<li>Order the data from smallest to largest.<br>
+</li>
+<li>If the number of observations is odd → middle value.<br>
+</li>
+<li>If even → average of the two middle values.</li>
+</ol>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -1093,9 +1156,12 @@ These are called <strong>measures of central tendency</strong>, and they tell us
 </tbody>
 </table>
 <blockquote class="blockquote">
-<p><strong>When to Use:</strong><br>
-- Better than the mean for <strong>skewed data</strong> or when <strong>outliers</strong> are present.<br>
-- Common for <strong>income, property prices</strong>, etc.</p>
+<p><strong>When to Use:</strong></p>
+<ul>
+<li>Better than the mean for <strong>skewed data</strong> or when <strong>outliers</strong> are present.<br>
+</li>
+<li>Common for <strong>income, property prices</strong>, etc.</li>
+</ul>
 </blockquote>
 <hr>
 </section>
@@ -1180,7 +1246,7 @@ In a <strong>left-skewed</strong> distribution → Mean &lt; Median &lt; Mode</p
 <section id="symmetric-distribution" class="level3 smaller">
 <h3 class="smaller anchored" data-anchor-id="symmetric-distribution">Symmetric Distribution</h3>
 <p>Mean ~ Median</p>
-<div id="8be5f852" class="cell" data-execution_count="1">
+<div id="83ace95f" class="cell" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -1192,7 +1258,7 @@ In a <strong>left-skewed</strong> distribution → Mean &lt; Median &lt; Mode</p
 </section>
 <section id="left-skewed-distributions" class="level3">
 <h3 class="anchored" data-anchor-id="left-skewed-distributions">Left Skewed Distributions</h3>
-<div id="8dd68bc5" class="cell" data-execution_count="2">
+<div id="58a70cee" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -1202,10 +1268,361 @@ In a <strong>left-skewed</strong> distribution → Mean &lt; Median &lt; Mode</p
 </div>
 </div>
 </section>
+<section id="right-skewed-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="right-skewed-distributions">Right Skewed Distributions</h3>
+<div id="9286a769" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="session2_files/figure-html/cell-4-output-1.png" width="585" height="376" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="chart-chooser" class="level2">
-<h2 class="anchored" data-anchor-id="chart-chooser">Chart chooser</h2>
-<p><a href="https://www.google.com/search?q=char&amp;rlz=1C5CHFA_enAM1026AM1028&amp;oq=char&amp;gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIMCAEQIxgnGIAEGIoFMgcIAhAAGIAEMgcIAxAAGIAEMgcIBBAAGIAEMgcIBRAAGIAEMgcIBhAAGIAEMgYIBxBFGEHSAQgxODA1ajBqNKgCALACAQ&amp;sourceid=chrome&amp;ie=UTF-8">Here</a> may find charts for any occasion</p>
+</section>
+<section id="symmetric-left-skewed-and-right-skewed-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="symmetric-left-skewed-and-right-skewed-distributions">Symmetric, Left-Skewed, and Right-Skewed Distributions</h2>
+<div id="bdf34757" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="session2_files/figure-html/cell-5-output-1.png" width="1431" height="373" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="enriched-plot" class="level2">
+<h2 class="anchored" data-anchor-id="enriched-plot">Enriched Plot</h2>
+<div id="a893ea6c" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="session2_files/figure-html/cell-6-output-1.png" width="1501" height="385" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="measures-of-variability" class="level1">
+<h1>Measures of Variability</h1>
+<section id="measures-of-variability-1" class="level2">
+<h2 class="anchored" data-anchor-id="measures-of-variability-1">Measures of Variability</h2>
+<ul>
+<li>Range</li>
+<li>Variance</li>
+<li>Standard Deviation (SD)</li>
+</ul>
+</section>
+<section id="range" class="level2">
+<h2 class="anchored" data-anchor-id="range">Range</h2>
+<p><span class="math display">\[
+\text{Range = Highest Value - Lowest Value}
+\]</span></p>
+<blockquote class="blockquote">
+<ul>
+<li>Think about where is it applicable?</li>
+<li>Are there any limitations</li>
+</ul>
+</blockquote>
+</section>
+<section id="variance" class="level2">
+<h2 class="anchored" data-anchor-id="variance">Variance</h2>
+<p><strong>Sample Variance:</strong></p>
+<p><span class="math display">\[
+s^{2} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})^{2}}{n - 1}
+\]</span></p>
+<p><strong>Population Variance</strong></p>
+<p><span class="math display">\[
+\sigma^{2}
+=
+\frac{
+\displaystyle \sum_{i=1}^{N} (x_i - \mu)^{2}
+}{
+N
+}
+\]</span></p>
+</section>
+<section id="standard-deviation" class="level2">
+<h2 class="anchored" data-anchor-id="standard-deviation">Standard Deviation</h2>
+<p><strong>Sample Standard Deviation (Standard Error)</strong></p>
+<p><span class="math display">\[
+s \;=\; \sqrt{s^{2}}
+\;=\;
+\sqrt{
+\frac{
+\displaystyle \sum_{i=1}^{n} (x_i - \bar{x})^{2}
+}{
+n - 1
+}
+}
+\]</span></p>
+<p><strong>Population standard deviation</strong></p>
+<p><span class="math display">\[
+\sigma
+=
+\sqrt{
+\frac{
+\displaystyle \sum_{i=1}^{N} (x_i - \mu)^{2}
+}{
+N
+}
+}
+\]</span></p>
+</section>
+<section id="how-to-compare-variability" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-compare-variability">How to compare variability?</h2>
+<p>In which cases you can compare standard deviations?</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Box</th>
+<th>Sample 1</th>
+<th>Sample 2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Box 1</td>
+<td>14.2</td>
+<td>18.2</td>
+</tr>
+<tr class="even">
+<td>Box 2</td>
+<td>19.6</td>
+<td>17.9</td>
+</tr>
+<tr class="odd">
+<td>Box 3</td>
+<td>22.7</td>
+<td>18.1</td>
+</tr>
+<tr class="even">
+<td>Box 4</td>
+<td>13.1</td>
+<td>18.1</td>
+</tr>
+<tr class="odd">
+<td>Box 5</td>
+<td>20.9</td>
+<td>18.2</td>
+</tr>
+<tr class="even">
+<td><strong>Mean</strong></td>
+<td><strong>18.1</strong></td>
+<td><strong>18.1</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Standard deviation</strong></td>
+<td><strong>4.23</strong></td>
+<td><strong>0.12</strong></td>
+</tr>
+</tbody>
+</table>
+<section id="visual-comparison-of-variability" class="level3">
+<h3 class="anchored" data-anchor-id="visual-comparison-of-variability">Visual Comparison of Variability</h3>
+<div id="8399a390" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="session2_files/figure-html/cell-7-output-1.png" width="659" height="357" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="when-variability-is-bad" class="level3">
+<h3 class="anchored" data-anchor-id="when-variability-is-bad">When variability is <strong>bad</strong>?</h3>
+<ul>
+<li>When consistency and quality control are important<br>
+</li>
+<li>Product weights, drug dosages, machine precision<br>
+</li>
+<li>Delivery times, service response times<br>
+</li>
+<li>Financial risk (greater uncertainty)</li>
+</ul>
+</section>
+<section id="when-variability-is-good" class="level3">
+<h3 class="anchored" data-anchor-id="when-variability-is-good">When variability is <strong>good</strong>?</h3>
+<ul>
+<li>Biological diversity and adaptability<br>
+</li>
+<li>Marketing segmentation &amp; A/B testing<br>
+</li>
+<li>Creativity and innovation<br>
+</li>
+<li>Investments seeking higher upside<br>
+</li>
+<li>Identifying top performers (sports, hiring)</li>
+</ul>
+</section>
+<section id="when-variability-is-neutral" class="level3">
+<h3 class="anchored" data-anchor-id="when-variability-is-neutral">When variability is <strong>neutral</strong>?</h3>
+<ul>
+<li>Natural randomness (weather, height, sampling variation)</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Variability is not inherently good or bad—its value depends on what you are trying to achieve.</strong></p>
+</blockquote>
+</section>
+</section>
+<section id="why-n-1" class="level2">
+<h2 class="anchored" data-anchor-id="why-n-1">Why <span class="math inline">\(N-1\)</span>?</h2>
+<p>A <strong>degree of freedom (df)</strong> is an independent piece of information that can vary freely.<br>
+Whenever we estimate a parameter from the sample, we introduce a constraint.<br>
+Each constraint removes one degree of freedom.</p>
+<p>The universal rule is:</p>
+<p><span class="math display">\[
+df = n - \text{(number of estimated parameters)}.
+\]</span></p>
+<p>During the mean estimation, since we have one constraint we remove only 1 hence</p>
+<p><span class="math display">\[
+df = n - 1
+\]</span></p>
+<!-- TODO -->
+</section>
+<section id="coefficient-of-variation-normalization" class="level2">
+<h2 class="anchored" data-anchor-id="coefficient-of-variation-normalization">Coefficient of Variation (Normalization)</h2>
+<p>The coefficient of variation (CV) is a measure of <em>relative variability</em>.<br>
+It allows us to compare the variability of two datasets <strong>even when their units or scales differ</strong>.</p>
+<hr>
+<p><strong>Data</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Nike</th>
+<th>Google</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>September 14, 2012</td>
+<td>48.32</td>
+<td>709.68</td>
+</tr>
+<tr class="even">
+<td>October 15, 2012</td>
+<td>47.81</td>
+<td>740.98</td>
+</tr>
+<tr class="odd">
+<td>November 15, 2012</td>
+<td>45.42</td>
+<td>647.26</td>
+</tr>
+<tr class="even">
+<td>December 14, 2012</td>
+<td>48.46</td>
+<td>701.96</td>
+</tr>
+<tr class="odd">
+<td>January 15, 2013</td>
+<td>53.64</td>
+<td>724.93</td>
+</tr>
+<tr class="even">
+<td>February 15, 2013</td>
+<td>54.95</td>
+<td>792.89</td>
+</tr>
+<tr class="odd">
+<td><strong>Mean</strong></td>
+<td><strong>49.77</strong></td>
+<td><strong>719.62</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Standard deviation</strong></td>
+<td><strong>3.70</strong></td>
+<td><strong>47.96</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<section id="formula-for-the-coefficient-of-variation" class="level3">
+<h3 class="anchored" data-anchor-id="formula-for-the-coefficient-of-variation">Formula for the Coefficient of Variation</h3>
+<p><span class="math display">\[
+\text{CV} = \frac{s}{\bar{x}} \times 100
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(s\)</span> = standard deviation<br>
+</li>
+<li><span class="math inline">\(\bar{x}\)</span> = mean<br>
+</li>
+<li>CV is expressed as a <strong>percentage</strong></li>
+</ul>
+<hr>
+<p><strong>Nike</strong></p>
+<p><span class="math display">\[
+\text{CV}_{\text{Nike}}
+= \frac{3.70}{49.77} \times 100
+\approx 7.4\%
+\]</span></p>
+<p><strong>Google</strong></p>
+<p><span class="math display">\[
+\text{CV}_{\text{Google}}
+= \frac{47.96}{719.62} \times 100
+\approx 6.7\%
+\]</span></p>
+<p>Although Google’s stock prices vary by a much larger <strong>dollar amount</strong>, its <strong>relative variability</strong> is smaller.</p>
+<ul>
+<li>Nike CV = <strong>7.4%</strong><br>
+</li>
+<li>Google CV = <strong>6.7%</strong></li>
+</ul>
+<p>This means that, compared to its average price, <strong>Google’s stock price is more stable</strong> than Nike’s.</p>
+<p>The CV helps us compare variability across different scales and units—something raw standard deviations alone cannot do.</p>
+</section>
+</section>
+<section id="z-score" class="level2">
+<h2 class="anchored" data-anchor-id="z-score">Z-score</h2>
+<p>Number of standard deviations that particular value is farther from the mean of its population or sample:</p>
+<p><strong>Population:</strong></p>
+<p><span class="math display">\[
+z = \frac{x - \mu}{\sigma}
+\]</span></p>
+<p><strong>Sample:</strong></p>
+<p><span class="math display">\[
+z = \frac{x - \bar{x}}{s}
+\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">=STANDARDIZE</span><span class="er">(</span><span class="ex">x,</span> mean, standard_deviation<span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Suppose we have:</p>
+<ul>
+<li>x = 540</li>
+<li>mean = 776.3</li>
+<li>standard deviation = 385.1</li>
+</ul>
+<p><strong>Rule of Thumb for identifying outliers:</strong> Data values that have z-scores above <code>+3</code> and below <code>-3</code> can be categorized as outliers.</p>
+<!-- 
+## Empirical Rule
+
+- When data is close to bell-shaped and symmetrical:
+- 68-95-97.5 rule usually applies
+- Exam average 80, standard deviation 5:
+
+
+
+<!-- todo add plot -->
+<!-- ## Chebyshev’s Theorem
+
+Chebyshev’s Theorem applies to **any distribution**, not only symmetric or bell-shaped ones.  
+It states that for any value of \( z > 1 \), **at least** the following percentage of observations lie within  
+\( z \) standard deviations of the mean:
+
+$$
+\left( 1 - \frac{1}{z^2} \right) \times 100
+$$ -->
+</section>
+<section id="usefull-materials" class="level2">
+<h2 class="anchored" data-anchor-id="usefull-materials">Usefull materials</h2>
+<ul>
+<li><a href="https://drive.google.com/file/d/1hpsygZCLHf0kV75Muy0Hn9xiS-AqPCZ9/view?usp=drive_link">Business Statistics 2</a> Chapter 3 and Chapter 4</li>
+<li><a href="https://public.tableau.com/app/profile/glowbyte.consulting/viz/ChartChooser_15550897459460/ChartChooser">Here</a></li>
+</ul>
 
 
 </section>
