@@ -752,35 +752,993 @@ $$
 
 Suppose we have:
 
-- x = 540
-- mean = 776.3
-- standard deviation = 385.1
+- `x = 540`
+- `mean = 776.3`
+- `standard deviation = 385.1`
+
+If a data point has a `z-score of 0`, that means it lies exactly at the mean. If a data point has a  positive score (`z-score > 0`), that means it lies above the mean. If a data point has negative score (`z-score<0`), that means it lies below the mean.
+
+---
 
 **Rule of Thumb for identifying outliers:** Data values that have z-scores above `+3` and below `-3` can be categorized as outliers.
 
 
-<!-- 
 ## Empirical Rule
 
-- When data is close to bell-shaped and symmetrical:
-- 68-95-97.5 rule usually applies
-- Exam average 80, standard deviation 5:
+For a normally distributed variable with mean $\mu$ and standard deviation $\sigma$, the empirical rule states:
 
 
+1. Within **1** standard deviation  $(\mu \pm 1\sigma)$: about $68\%$ of the data
+2. Within **2** standard deviations $(\mu \pm 2\sigma)$: about $95\%$ of the data
+3. Within **3** standard deviations $\mu \pm 3\sigma$: about $99.7\%$ of the data
 
-<!-- todo add plot -->
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
 
-<!-- ## Chebyshev’s Theorem
+import numpy as np
+import matplotlib.pyplot as plt
+
+mu = 100
+sigma = 15
+x = np.linspace(mu - 4*sigma, mu + 4*sigma, 400)
+y = 1/(sigma*np.sqrt(2*np.pi)) * np.exp(-(x-mu)**2/(2*sigma**2))
+
+fig, axes = plt.subplots(1, 3, figsize=(12,4))
+
+# 68%
+axes[0].plot(x, y)
+axes[0].fill_between(x, y, where=(x >= mu-sigma) & (x <= mu+sigma), alpha=0.3)
+axes[0].set_title("68% (μ ± 1σ)")
+axes[0].set_xlabel("Value"); axes[0].set_ylabel("Density")
+axes[0].grid(True)
+
+# 95%
+axes[1].plot(x, y)
+axes[1].fill_between(x, y, where=(x >= mu-2*sigma) & (x <= mu+2*sigma), alpha=0.3)
+axes[1].set_title("95% (μ ± 2σ)")
+axes[1].set_xlabel("Value"); axes[1].set_ylabel("Density")
+axes[1].grid(True)
+
+# 99.7%
+axes[2].plot(x, y)
+axes[2].fill_between(x, y, where=(x >= mu-3*sigma) & (x <= mu+3*sigma), alpha=0.3)
+axes[2].set_title("99.7% (μ ± 3σ)")
+axes[2].set_xlabel("Value"); axes[2].set_ylabel("Density")
+axes[2].grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+### Examples
+
+### Daily Steps on Fitness Trackers 
+
+Daily step counts for a person over several months often form a normal-like distribution.
+
+Assuming:
+
+- Average steps per day: $\mu = 8{,}000$  
+- Standard deviation: $\sigma = 1{,}500$
+
+Then:
+
+- **68%** of days fall within: $[6500,\ 9500]$
+- **95%** of days fall within: $[5000,\ 11000]$
+- **99.7%** of days fall within: $[3500,\ 12500]$
+
+Fitness coaches use this rule to identify `unusually inactive` or `exceptionally active` days.
+
+### SAT / GRE / University Exam Scores
+
+Large standardized tests tend to be approximately normal.
+
+Suppose:
+
+- Mean SAT Math score: $\mu = 520$  
+- Standard deviation: $\sigma = 100$
+
+Then:
+
+- **68%** score between: $520 \pm 100 = [420,\ 620]$
+- **95%** score between: $520 \pm 200 = [320,\ 720]$
+- **99.7%** score between: $520 \pm 300 = [220,\ 820]$
+
+
+Admissions departments use this distribution to benchmark `typical`, `strong`, or `exceptional` performance.
+
+---
+
+### Summarized Examples
+
+| Scenario                 | Mean ($\mu$)      | Std ($\sigma$) | 68% Range      | 95% Range               | 99.7% Range              |
+|-------------------------|--------------------|----------------|------------------------|--------------------------|---------------------------|
+| Body Temperature (°C)   | 37°C               | 0.3°C          | 36.7–37.3°C     | 36.4–37.6°C             | 36.1–37.9°C              |
+| SAT Math Score          | 520                | 100            | 420–620         | 320–720                 | 220–820                  |
+| Steps per Day           | 8000               | 1500           | 6500–9500             | 5000–11000              | 3500–12500               |
+| Rod Length (mm)         | 100                | 2              | 98–102                | 96–104                  | 94–106                   |
+| Reaction Time (sec)     | 0.25               | 0.04           | 0.21–0.29             | 0.17–0.33               | 0.13–0.37                |
+
+
+## Chebyshev’s Theorem
 
 Chebyshev’s Theorem applies to **any distribution**, not only symmetric or bell-shaped ones.  
-It states that for any value of \( z > 1 \), **at least** the following percentage of observations lie within  
+It states that for any value of  $(z > 1)$, **at least** the following percentage of observations lie within  
 \( z \) standard deviations of the mean:
 
 $$
 \left( 1 - \frac{1}{z^2} \right) \times 100
-$$ --> 
+$$ 
+
+| Z-Score Band      | Chebyshev Minimum                             | Interpretation                                                |
+|-------------------|-----------------------------------------------|----------------------------------------------------------------|
+| $|Z| < 1.5$       | $1 - \frac{1}{2.25} = 0.556 \rightarrow 55.6\%$    | At least $55.6\%$ of data have z-scores between –1.5 and +1.5 |
+| $|Z| < 2$         | $1 - \frac{1}{4} = 0.75 \rightarrow 75\%$           | At least $75\%$ fall within –2 ≤ Z ≤ +2                      |
+| $|Z| < 3$         | $1 - \frac{1}{9} = 0.889 \rightarrow 88.9\%$        | At least $88.9\%$ fall within –3 ≤ Z ≤ +3                    |
+| $|Z| < 4$         | $1 - \frac{1}{16} = 0.9375\rightarrow 93.75\%$     | At least $93.75\%$ fall within –4 ≤ Z ≤ +4                   |
 
 
+
+Suppose monthly customer spending is **highly skewed**, with a few customers making extremely large purchases.  
+Because the distribution is *not* normal, we cannot rely on the empirical rule — but Chebyshev’s theorem still applies when using **z-scores**.
+
+We measure:
+
+- Mean spending: $\mu = 120$ USD  
+- Standard deviation: $\sigma = 90$ USD  
+
+We want to know **what proportion of customers have z-scores between –2 and +2**, i.e., fall within two standard deviations of the mean.
+
+Using Chebyshev:
+
+$$
+P(|Z| < 2) \ge 1 - \frac{1}{4} = 0.75
+$$
+
+So **at least 75%** of customers must have z-scores:
+
+$$
+-2 \le Z \le 2
+$$
+
+This corresponds to spending between:
+
+$$
+x = \mu \pm 2\sigma = 120 \pm 180
+$$
+
+**Thus:**
+
+- **Lower bound:** 120 - 180 = -60 (interpreted as 0 in real life)  
+- **Upper bound:** 120 + 180 = 300
+
+**Meaning:**
+
+> **At least 75% of all customers must spend between 0 and 300 USD**,  
+> even though the distribution is highly skewed and unpredictable.
+
+This is the power of expressing Chebyshev in **z-score terms**:  
+
+## Chebyshev vs Empirical Rule
+
+| Goal | Normal Data | Any Data |
+|------|-------------|-----------|
+| Want precise percentages (68–95–99.7)? | Use z-scores + Empirical Rule | Not valid |
+| Want a minimum guarantee? | Optional | **Use z-scores + Chebyshev** |
+| Data is skewed or irregular? | Not valid | **Chebyshev works** |
+| Distribution unknown? | Not valid | **Chebyshev works** |
+
+
+## Grouped Data
+
+
+Below table represents a grouped frequency distribution of respondents by age category. Each row corresponds to an age interval, and the second column shows the frequency (fᵢ), meaning the number of people who fall within that interval. The total frequency is **100**, indicating the entire sample size.
+
+
+| Age Group         | Number of Respondents (fᵢ) |
+|-------------------|-----------------------------|
+| 20 to under 30    | 20                          |
+| 30 to under 40    | 41                          |
+| 40 to under 50    | 19                          |
+| 50 to under 60    | 9                           |
+| 60 to under 70    | 11                          |
+| **Total**         | **100**                     |
+
+
+### Mean of the Grouped Data
+
+$$
+\bar{x} \approx 
+\frac{
+\sum_{i=1}^{k} (f_i m_i)
+}{
+n
+}
+$$
+
+
+- $f_i$ = the frequency for class $i$  
+- $m_i$ = the midpoint for class $i$  
+- $n = \sum_{i=1}^{k} f_i$ (the total number of observations)  
+- $k$ = number of classes  
+
+#### Step 1: Midpoints
+
+>$\frac{20+30}{2}=25$
+
+| Age Group         | Class Midpoint (mᵢ) | Frequency (fᵢ) |
+|-------------------|----------------------|-----------------|
+| 20 to under 30    | 25                   | 20              |
+| 30 to under 40    | 35                   | 41              |
+| 40 to under 50    | 45                   | 19              |
+| 50 to under 60    | 55                   | 9               |
+| 60 to under 70    | 65                   | 11              |
+| **Total**         |                      | **100**         |
+
+
+
+### Step 2: Cumulative
+
+| Age Group         | Frequency (fᵢ) | Cumulative Frequency (Fᵢ) |
+|-------------------|----------------|----------------------------|
+| 20 to under 30    | 20             | 20                         |
+| 30 to under 40    | 41             | 61                         |
+| 40 to under 50    | 19             | 80                         |
+| 50 to under 60    | 9              | 89                         |
+| 60 to under 70    | 11             | 100                        |
+| **Total**         | **100**        | **100**                    |
+
+
+### Step 3: Relative Frequency Table
+
+| Age Group         | Frequency (fᵢ) | Relative Frequency (fᵢ / 100) |
+|-------------------|----------------|--------------------------------|
+| 20 to under 30    | 20             | 0.20                           |
+| 30 to under 40    | 41             | 0.41                           |
+| 40 to under 50    | 19             | 0.19                           |
+| 50 to under 60    | 9              | 0.09                           |
+| 60 to under 70    | 11             | 0.11                           |
+| **Total**         | **100**        | **1.00**                        |
+
+
+### Step 4: Percentage Frequencies Table
+
+
+| Age Group         | Frequency (fᵢ) | Percentage (%) |
+|-------------------|----------------|----------------|
+| 20 to under 30    | 20             | 20             |
+| 30 to under 40    | 41             | 41             |
+| 40 to under 50    | 19             | 19             |
+| 50 to under 60    | 9              | 9              |
+| 60 to under 70    | 11             | 11             |
+| **Total**         | **100**        | **100**        |
+
+
+
+### Step 5:  Visualization
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import matplotlib.pyplot as plt
+
+# Data
+midpoints = [25, 35, 45, 55, 65]
+freq      = [20, 41, 19, 9, 11]
+width     = 10
+
+# Create side-by-side plots
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+# Histogram
+axes[0].bar(midpoints, freq, width=width, align="center", edgecolor="black")
+axes[0].set_xlabel("Age (years)")
+axes[0].set_ylabel("Frequency")
+axes[0].set_title("Histogram of Age Distribution")
+
+# Frequency Polygon
+axes[1].plot(midpoints, freq, marker="o")
+axes[1].set_xlabel("Age (years)")
+axes[1].set_ylabel("Frequency")
+axes[1].set_title("Frequency Polygon")
+axes[1].grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+### Grouped SD
+
+$$
+s^2 \approx \frac{\sum_{i=1}^k f_i (m_i - \bar{x})^2}{n - 1}
+$$
+
+---
+
+| Age Group | Class Midpoint $m_i$ | Frequency $f_i$ | $\bar{x}$ | $m_i - \bar{x}$ | $(m_i - \bar{x})^2$ | $(m_i - \bar{x})^2 f_i$ |
+|-----------|----------------------|-----------------|-----------|-----------------|----------------------|-------------------------|
+| 20–30     | 25                   | 20              | 40        | -15             | 225                  | 4,500                   |
+| 30–40     | 35                   | 41              | 40        | -5              | 25                   | 1,025                   |
+| 40–50     | 45                   | 19              | 40        | 5               | 25                   | 475                     |
+| 50–60     | 55                   | 9               | 40        | 15              | 225                  | 2,025                   |
+| 60–70     | 65                   | 11              | 40        | 25              | 625                  | 6,875                   |
+| **Total** |                      | **100**         |           |                 |                      | **14,900**              |
+
+
+## Relative Positions | Percentile
+
+Percentiles help us describe where a particular value lies within the distribution of a dataset.
+
+- **Percentile**: an approximate measure of the percentage of values in the dataset that fall *below* a given value.
+- The **$p$-th percentile** is the value such that at least $p$ percent of the observations lie below it.
+- Do **not** confuse *percentages* and *percentiles* — they describe different concepts.
+- The **median** is the **50th percentile**, because half of the values lie below it.
+
+
+$$
+i = \frac{p}{100}(n)
+$$
+
+Where:
+
+- $p$ = the desired percentile  
+- $n$ = the total number of observations  
+- $i$ = the index (position) of the percentile in the ordered dataset  
+
+*Interpreting the Index $i$*
+
+- If $i$ is *not* a whole number, round $i$ **up** to the next whole number: The value at that position is the percentile.
+- If $i$ *is* a whole number, the percentile is the **midpoint** between the value at position $i$ and the value at position $i + 1$.
+
+In this example, we will calculate several percentiles using the index formula:
+
+$$
+i = \frac{p}{100}(n)
+$$
+
+### Percentile Rank
+
+| Name   | Score | Name   | Score |
+|--------|-------|--------|-------|
+| Lori   | 726   | Marc   | 690   |
+| Chris  | 643   | Kendra | 747   |
+|**John**   | **777**   | Peter  | 618   |
+| Sam    | 695   | Jordan | 701   |
+| Katie  | 796   | Teresa | 660   |
+| Carole | 743   | David  | 716   |
+| Irina  | 642   | Gia    | 742   |
+| Lisa   | 819   | Ryan   | 682   |
+
+---
+
+$$ \text{Percentile Rank} = \frac{\text{Number of values below x}+0.5}{\text{Total nuber of values}}100 $$
+
+
+There are **14** scores below John.
+
+$$\frac{14 + 0.5}{16} \times 100 = 90.625$$
+
+Thus, **John is in approximately the 91st percentile.** This means he scored better than about **91% of all individuals** in the dataset.
+
+-- 
+
+Suppose we have the following ordered dataset of $n = 12$ values:
+
+2, 4, 5, 7, 8, 9, 10, 12, 14, 15, 18, 21
+
+We will try find:
+
+- the 25th percentile ($P_{25}$)
+- the 50th percentile ($P_{50}$, the median)
+- the 75th percentile ($P_{75}$)
+
+---
+
+### Finding the 25th Percentile ($P_{25}$)
+
+**Step 1:** Compute the index  
+
+$$
+i = \frac{25}{100}(12) = 3
+$$
+
+**Step 2:** Since $i = 3$ is a whole number, we take the midpoint between the 3rd and 4th values.
+
+- *3rd* value = 5  
+- *4th* value = 7  
+
+Thus,
+$$
+P_{25} = \frac{5 + 7}{2} = 6
+$$
+
+---
+
+### Finding the 50th Percentile ($P_{50}$), the Median
+
+**Step 1:** Compute the index  
+$$
+i = \frac{50}{100}(12) = 6
+$$
+
+**Step 2:** Index is a whole number → midpoint between 6th and 7th values.
+
+- *6th* value = 9  
+- *7th* value = 11  
+
+Thus,
+$$
+P_{50} = \frac{9 + 11}{2} = 10
+$$
+
+---
+
+### Finding the 75th Percentile ($P_{75}$)
+
+**Step 1:** Compute the index  
+
+$$
+i = \frac{75}{100}(12) = 9
+$$
+
+**Step 2:** Whole number → midpoint between 9th and 10th values.
+
+- 9th value = 14  
+- 10th value = 18  
+
+Thus:
+
+$$
+P_{75} = \frac{14 + 18}{2} = 16
+$$
+
+---
+
+###  Summary
+
+- $P_{25} = 6$  
+- $P_{50} = 10$  
+- $P_{75} = 16$
+
+Percentiles locate values relative to the distribution and help us describe how data spreads.
+
+
+### Quartiles
+
+Quartiles divide the data into four equal parts. They are special percentiles:
+
+- **1st quartile ($Q_1$)** = 25th percentile  
+- **2nd quartile ($Q_2$)** = 50th percentile (median)  
+- **3rd quartile ($Q_3$)** = 75th percentile  
+
+---
+
+The **Interquartile Range (IQR)** measures the spread of the middle 50% of the data:
+
+$$
+\text{IQR} = Q_3 - Q_1
+$$
+
+---
+
+#### Boxplot Example 
+
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import matplotlib.pyplot as plt
+
+data = [2, 4, 5, 7, 8, 9, 10, 12, 14, 15, 18, 21]
+
+plt.figure(figsize=(6,4))
+plt.boxplot(data, vert=True)
+plt.title("Boxplot Example")
+plt.ylabel("Values")
+plt.grid(True)
+plt.show()
+```
+
+#### Example Dataset
+
+Consider the following ordered dataset with **12** data points:
+
+2, 4, 5, 7, 8, 9, 10, 12, 14, 15, 18, 21
+
+---
+
+#### Step 1: Find the Median ($Q_2$)
+
+Because $n = 12$ is even:
+
+- 6th value = 9  
+- 7th value = 10  
+
+$$
+Q_2 = \frac{9 + 10}{2} = 9.5
+$$
+
+---
+
+#### Step 2: Find $Q_1$ (25th percentile)
+
+$Q_1$ is the median of the **lower half**:
+
+**Lower half:** 2, 4, 5, 7, 8, 9
+
+Median of lower half:
+
+- 3rd value = 5  
+- 4th value = 7  
+
+$$
+Q_1 = \frac{5 + 7}{2} = 6
+$$
+
+---
+
+#### Step 3: Find $Q_3$ (75th percentile)
+
+$Q_3$ is the median of the **upper half**:
+
+**Upper half:** 10, 12, 14, 15, 18, 21
+
+**Median of upper half:**
+
+- 3rd value = 14  
+- 4th value = 15  
+
+$$
+Q_3 = \frac{14 + 15}{2} = 14.5
+$$
+
+---
+
+### Step 4: Compute the IQR
+
+$$
+\text{IQR} = Q_3 - Q_1 = 14.5 - 6 = 8.5
+$$
+
+---
+
+#### Summary of Quartiles
+
+| Quartile | Value |
+|----------|--------|
+| $Q_1$    | 6      |
+| $Q_2$    | 9.5    |
+| $Q_3$    | 14.5   |
+| IQR      | 8.5    |
+
+
+
+
+
+
+### Assingment in Percentiles
+
+We are given the populations (in millions) of 12 U.S. cities.  
+We will:
+
+- Calculate the **60th percentile** of the population data  
+- Find the **percentile rank** of the population of **Dallas (1.20 million)**  
+
+---
+
+#### Data Table
+
+| City             | Population (millions) |
+|------------------|------------------------|
+| New York, NY     | 8.18                   |
+| Los Angeles, CA  | 3.79                   |
+| Chicago, IL      | 2.70                   |
+| Houston, TX      | 2.10                   |
+| Philadelphia, PA | 1.53                   |
+| Phoenix, AZ      | 1.45                   |
+| San Antonio, TX  | 1.33                   |
+| San Diego, CA    | 1.31                   |
+| **Dallas, TX**       | **1.20**                   |
+| San Jose, CA     | 0.95                   |
+| Jacksonville, FL | 0.82                   |
+| Indianapolis, IN | 0.82                   |
+
+
+## Measures of Association
+
+### Measures of Association
+
+The table below shows the number of hours each student studied and their corresponding exam grade.
+
+#### Data Table
+
+| Student | Hours of Study | Exam Grade |
+|---------|----------------|------------|
+| 1       | 3              | 86         |
+| 2       | 7              | 98         |
+| 3       | 5              | 92         |
+| 4       | 4              | 83         |
+| 5       | 3              | 78         |
+| 6       | 2              | 79         |
+
+---
+
+### Scatter Plot (Hours of Study vs Exam Grade)
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import matplotlib.pyplot as plt
+
+# Data
+hours = [3, 7, 5, 4, 3, 2]
+grades = [86, 98, 92, 83, 78, 79]
+
+plt.figure(figsize=(6, 5))
+plt.scatter(hours, grades)
+
+plt.title("Hours of Study vs Exam Grade")
+plt.xlabel("Hours of Study")
+plt.ylabel("Exam Grade")
+plt.grid(True)
+
+plt.show()
+```
+
+### Covariance
+
+
+- Covariance describes the **direction** of the linear relationship between two variables.  
+- A **positive covariance** means the variables tend to increase together.  
+- A **negative covariance** means one variable increases as the other decreases.  
+- The **magnitude** of covariance does *not* indicate the strength of association.  
+- Therefore, covariance is useful for describing **direction**, but not **strength**.
+
+
+
+$$
+s_{xy} = 
+\frac{
+\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})
+}{
+n - 1
+}
+$$
+
+**Where:**
+
+- $x_i$, $y_i$ are paired observations  
+- $\bar{x}$ = mean of the $x$ values  
+- $\bar{y}$ = mean of the $y$ values  
+- $n$ = sample size  
+
+Covariance uses the product of deviations to identify whether  
+$x$ and $y$ move in the **same direction** (positive) or **opposite directions** (negative).
+
+
+### Correlation
+
+Correlation standardizes covariance so that it always falls between **–1.0** and **+1.0**. It tells us both the **direction** and **strength** of a linear relationship between two variables.
+
+$$
+r_{xy} = \frac{s_{xy}}{s_x s_y}
+$$
+
+Example:
+
+$$
+r_{xy}
+= \frac{12.8}{(1.79)(7.77)}
+= 0.920
+$$
+
+
+- The values of $r_{xy}$ range from **–1.0** to **+1.0**.  
+- When $r_{xy}$ is **positive**, the linear relationship between $x$ and $y$ is positive:  
+  as $x$ increases, $y$ tends to increase.  
+- When $r_{xy}$ is **negative**, the linear relationship between $x$ and $y$ is negative:  
+  as $x$ increases, $y$ tends to decrease.  
+- When $r_{xy} = 0$, there is **no linear relationship** between the variables.
+
+A value of **$r_{xy} = 0.920$** indicates a **strong positive linear relationship**.
+
+
+### Calculations
+
+
+#### Covariance and Correlation: Full Manual Calculations
+
+We use the dataset:
+
+| Student | Hours ($x_i$) | Grade ($y_i$) |
+|---------|----------------|----------------|
+| 1       | 3              | 86             |
+| 2       | 7              | 98             |
+| 3       | 5              | 92             |
+| 4       | 4              | 83             |
+| 5       | 3              | 78             |
+| 6       | 2              | 79             |
+
+Number of observations:  
+$$ n = 6 $$
+
+---
+
+#### Step 1: Compute the Means
+
+Hours:  
+$$ \bar{x} = \frac{3 + 7 + 5 + 4 + 3 + 2}{6} = \frac{24}{6} = 4 $$
+
+Grades:  
+$$ \bar{y} = \frac{86 + 98 + 92 + 83 + 78 + 79}{6} = \frac{516}{6} = 86 $$
+
+---
+
+#### Step 2: Covariance Table
+
+| $x_i$ | $y_i$ | $x_i - \bar{x}$ | $y_i - \bar{y}$ | $(x_i - \bar{x})(y_i - \bar{y})$ |
+|-------|-------|------------------|------------------|----------------------------------|
+| 3     | 86    | -1               | 0                | 0                                |
+| 7     | 98    | 3                | 12               | 36                               |
+| 5     | 92    | 1                | 6                | 6                                |
+| 4     | 83    | 0                | -3               | 0                                |
+| 3     | 78    | -1               | -8               | 8                                |
+| 2     | 79    | -2               | -7               | 14                               |
+| **Sum** |       |                  |                  | **64**                            |
+
+---
+
+#### Step 3: Sample Covariance
+
+Formula:
+
+$$
+s_{xy} = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{n - 1}
+$$
+
+Plug in values:
+
+$$
+s_{xy} = \frac{64}{6 - 1} = \frac{64}{5} = 12.8
+$$
+
+
+
+---
+
+#### Step 4: Compute Standard Deviations
+
+Hours ($x$):
+
+| $x_i$ | $x_i - \bar{x}$ | $(x_i - \bar{x})^2$ |
+|-------|------------------|----------------------|
+| 3     | -1               | 1                    |
+| 7     | 3                | 9                    |
+| 5     | 1                | 1                    |
+| 4     | 0                | 0                    |
+| 3     | -1               | 1                    |
+| 2     | -2               | 4                    |
+| **Sum** |                | **16**               |
+
+**Variance: **
+
+$$
+s_x^2 = \frac{16}{5} = 3.2
+$$
+
+**Std dev:**
+
+$$
+s_x = \sqrt{3.2} \approx 1.79
+$$
+
+---
+
+Grades ($y$):
+
+| $y_i$ | $y_i - \bar{y}$ | $(y_i - \bar{y})^2$ |
+|-------|------------------|----------------------|
+| 86    | 0                | 0                    |
+| 98    | 12               | 144                  |
+| 92    | 6                | 36                   |
+| 83    | -3               | 9                    |
+| 78    | -8               | 64                   |
+| 79    | -7               | 49                   |
+| **Sum** |                | **302**              |
+
+Variance:  
+$$
+s_y^2 = \frac{302}{5} = 60.4
+$$
+
+Std dev:  
+$$
+s_y = \sqrt{60.4} \approx 7.77
+$$
+
+---
+
+#### Step 5: Correlation
+
+$$
+r_{xy} = \frac{s_{xy}}{s_x s_y}
+$$
+
+Substitute:
+
+$$
+r_{xy} = \frac{12.8}{(1.79)(7.77)} = 0.9207
+$$
+
+This matches the Python result.
+
+---
+
+#### Final Values
+
+- **Covariance**:  
+  $$ s_{xy} = 12.8 $$
+
+- **Correlation**:  
+  $$ r_{xy} = 0.9207 $$
+
+---
+
+#### Scatter Plot With Values
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+hours = np.array([3,7,5,4,3,2])
+grades = np.array([86,98,92,83,78,79])
+
+cov = np.cov(hours, grades, ddof=1)[0,1]
+corr = np.corrcoef(hours, grades)[0,1]
+
+plt.figure(figsize=(8,6))
+plt.scatter(hours, grades, s=100, color="blue")
+
+for x, y in zip(hours, grades):
+    plt.text(x + 0.05, y + 0.3, f"({x}, {y})", fontsize=10)
+
+plt.xlabel("Hours of Study")
+plt.ylabel("Exam Grade")
+plt.title(f"Scatter Plot with Covariance = {cov:.2f} and Correlation = {corr:.3f}")
+plt.grid(True)
+plt.show()
+```
+
+
+
+### Correlation VS Causation
+
+High correlation does not imply causation:
+
+- Reverse Causality
+- Sample Selection
+  
+
+
+
+<!-- Total observations:  
+$$
+n = 12
+$$
+
+Sorted populations (ascending):
+
+0.82, 0.82, 0.95, 1.20, 1.31, 1.33,  
+1.45, 1.53, 2.10, 2.70, 3.79, 8.18 -->
+
+<!-- ---
+
+### Part 1: Calculate the 60th Percentile
+
+Use the index formula:
+
+$$
+i = \frac{p}{100}(n)
+$$
+
+Here $p = 60$ and $n = 12$:
+
+$$
+i = \frac{60}{100}(12) = 7.2
+$$
+
+Because 7.2 is **not** a whole number, round **up** to:
+
+$$
+i = 8
+$$
+
+The 60th percentile is the **8th value** in the sorted list.
+
+Sorted list with positions:
+
+1: 0.82  
+2: 0.82  
+3: 0.95  
+4: 1.20  
+5: 1.31  
+6: 1.33  
+7: 1.45  
+8: 1.53  
+9: 2.10  
+10: 2.70  
+11: 3.79  
+12: 8.18  
+
+Thus:
+
+$$
+P_{60} = 1.53
+$$
+
+---
+
+### Part 2: Percentile Rank of Dallas (1.20 million)
+
+Formula:
+
+$$
+\text{Percentile Rank} =
+\frac{(\text{# values below } x) + 0.5}{n} \times 100
+$$
+
+Dallas population = **1.20**
+
+Values below Dallas:
+
+0.82, 0.82, 0.95  
+→ **3 values below**
+
+Apply the formula:
+
+$$
+\frac{3 + 0.5}{12} \times 100
+= \frac{3.5}{12} \times 100
+= 29.17
+$$
+
+--- -->
+
+<!-- ### Conclusion -->
+
+<!-- - **60th percentile** of city populations: **1.53 million**   -->
+<!-- - **Dallas percentile rank**: **29th percentile**   -->
+
+<!-- Dallas has a larger population than about **29%** of the cities in the dataset. -->
 
 ## Usefull materials
 
