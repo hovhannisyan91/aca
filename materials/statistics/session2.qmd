@@ -5,6 +5,17 @@ categories: [statistics]
 ---
 
 
+```{python}
+
+#| echo: false
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+from matplotlib.gridspec import GridSpec
+
+```
 
 # Agenda
 
@@ -292,8 +303,7 @@ Mean ~ Median
 
 ```{python}
 #| echo: false
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 np.random.seed(1)
 
@@ -375,8 +385,6 @@ plt.show()
 
 ```{python}
 #| echo: false
-import numpy as np
-import matplotlib.pyplot as plt
 
 np.random.seed(1)
 
@@ -423,10 +431,6 @@ plt.show()
 ## Enriched Plot
 
 ```{python}
-#| echo: false
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
 
 np.random.seed(1)
 
@@ -596,8 +600,6 @@ In which cases you can compare standard deviations?
 
 ```{python}
 #| echo: false
-import numpy as np
-import matplotlib.pyplot as plt
 
 # Data from the table
 sample1 = np.array([14.2, 19.6, 22.7, 13.1, 20.9])
@@ -780,8 +782,7 @@ For a normally distributed variable with mean $\mu$ and standard deviation $\sig
 #| out-height: auto
 #| fig-align: center
 
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 mu = 100
 sigma = 15
@@ -1031,7 +1032,7 @@ $$
 #| out-height: auto
 #| fig-align: center
 
-import matplotlib.pyplot as plt
+
 
 # Data
 midpoints = [25, 35, 45, 55, 65]
@@ -1244,7 +1245,7 @@ $$
 #| out-height: auto
 #| fig-align: center
 
-import matplotlib.pyplot as plt
+
 
 data = [2, 4, 5, 7, 8, 9, 10, 12, 14, 15, 18, 21]
 
@@ -1390,7 +1391,7 @@ The table below shows the number of hours each student studied and their corresp
 #| out-height: auto
 #| fig-align: center
 
-import matplotlib.pyplot as plt
+
 
 # Data
 hours = [3, 7, 5, 4, 3, 2]
@@ -1616,8 +1617,6 @@ This matches the Python result.
 #| out-height: auto
 #| fig-align: center
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 hours = np.array([3,7,5,4,3,2])
 grades = np.array([86,98,92,83,78,79])
@@ -1640,6 +1639,94 @@ plt.show()
 
 
 
+
+
+### Correlation Graphically
+
+Below image shoes the correlation visually given different values
+
+`r = 1, -1, 0.6, -0.4, 0`
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+
+np.random.seed(7)
+
+def make_corr_data(r, n=18, noise=0.0):
+    """
+    Generate 2D points with approximate Pearson correlation r.
+    For |r|=1, we create a near-perfect line with tiny jitter.
+    """
+    if abs(r) == 1.0:
+        x = np.linspace(-2, 2, n)
+        y = r * x
+        if noise > 0:
+            y = y + np.random.normal(0, noise, size=n)
+        return x, y
+    
+    mean = [0, 0]
+    cov = [[1, r],
+           [r, 1]]
+    x, y = np.random.multivariate_normal(mean, cov, size=n).T
+    return x, y
+
+# target correlations
+targets = [
+    ("A",  1.0),
+    ("B", -1.0),
+    ("C",  0.6),
+    ("D", -0.4),
+    ("E",  0.0),
+]
+
+fig = plt.figure()
+gs = GridSpec(
+    2, 6, figure=fig,
+    wspace=0.7, hspace=0.8
+)
+
+axes = {
+    "A": fig.add_subplot(gs[0, 0:3]),
+    "B": fig.add_subplot(gs[0, 3:6]),
+    "C": fig.add_subplot(gs[1, 0:2]),
+    "D": fig.add_subplot(gs[1, 2:4]),
+    "E": fig.add_subplot(gs[1, 4:6]),
+}
+
+for label, r in targets:
+    ax = axes[label]
+    x, y = make_corr_data(r, n=16, noise=0.05 if abs(r)==1 else 0.0)
+    
+    ax.scatter(x, y, s=18)
+    ax.set_title("")  # no per-panel title
+    
+    # minimalist axes like the source image
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    
+    ax.set_xlabel("x", fontsize=9, labelpad=2)
+    ax.set_ylabel("y", fontsize=9, labelpad=2, rotation=0)
+    
+    # r annotation and panel letter
+    ax.text(0.60, 0.82, f"r = {r:+.1f}".replace("+",""),
+            transform=ax.transAxes, fontsize=9)
+    ax.text(0.50, -0.18, label,
+            transform=ax.transAxes, ha="center", va="top", fontsize=10)
+
+plt.show()
+```
+
+
+
+
 ### Correlation VS Causation
 
 High correlation does not imply causation:
@@ -1648,10 +1735,184 @@ High correlation does not imply causation:
 - Sample Selection
   
 
+#### The Ice Cream and Drowning Season
+
+- Every summer, ice cream sales **rise sharply.**
+- Every summer, drowning incidents also **rise sharply.** 
+
+
+The two curves look almost identical for many countries.
+
+>**Reality:**
+>Both are driven by a third factor — hot weather. People buy more ice cream, and people also go swimming more.Swimming increases exposure to drowning risk.
+
+
+`The common cause was hot weather`
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+ice_df = pd.read_csv('../../data/correlation/IceCream.csv')
+
+fig, ax1 = plt.subplots()
+ax1.plot(ice_df["Month"], ice_df["IceCream_Sales"], marker="o")
+ax1.set_xlabel("Month")
+ax1.set_ylabel("Ice Cream Sales")
+
+ax2 = ax1.twinx()
+ax2.plot(ice_df["Month"], ice_df["Drowning_Incidents"], color="tab:red", marker="o")
+ax2.set_ylabel("Drowning Incidents")
+
+plt.title("Ice Cream Sales vs Drowning Incidents")
+plt.show()
+```
+
+
+##### References
+
+`Tyler Vigen. Spurious Correlations. Hachette Books, 2015.`
+
+
+---
+
+#### The Firefighters and Fire Damage Pattern
+
+- Large fires attract **more firefighters**.  
+- Large fires also cause **more property damage**.
+
+The two lines rise together almost perfectly.
+
+> **Reality:**  
+> Fire size is the true driver. Bigger fires require more firefighters **and** naturally cause more damage.  
+> Deploying more firefighters does **not** increase damage — the causality is reversed.
+
+`The common cause was fire severity`
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fire_df = pd.read_csv('../../data/correlation/Firefighters.csv')
+
+fig, ax1 = plt.subplots()
+ax1.plot(fire_df["Event"], fire_df["Firefighters"], marker="o")
+ax1.set_xlabel("Event")
+ax1.set_ylabel("Firefighters")
+
+ax2 = ax1.twinx()
+ax2.plot(fire_df["Event"], fire_df["Damage_kUSD"], color="tab:red", marker="o")
+ax2.set_ylabel("Damage (k USD)")
+
+plt.title("Firefighters vs Fire Damage")
+plt.show()
+```
+
+##### References  
+`Gelman, Andrew & Jennifer Hill. Data Analysis Using Regression and Multilevel/Hierarchical Models. Cambridge University Press, 2006.`
+
+---
+
+#### The Salary and Coffee Consumption Illusion
+
+- Employees with higher salaries tend to drink **more coffee**.  
+- The relationship appears almost linear.
+
+This may tempt someone to conclude that drinking more coffee leads to higher pay.
+
+> **Reality:**  
+> Senior employees have both **higher salaries** and **stronger coffee habits** due to culture, workload, and meeting routines.  
+> Coffee does not *cause* higher salaries — job level does.
+
+`The common cause was job seniority`
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+salary_df = pd.read_csv('../../data/correlation/SalaryCoffee.csv')
+
+plt.plot(salary_df["Salary_kUSD"], salary_df["Coffee_Cups"], marker="o")
+plt.xlabel("Salary (k USD)")
+plt.ylabel("Coffee Cups per Day")
+plt.title("Salary vs Coffee Consumption")
+plt.show()
+```
+
+##### References  
+
+`Davenport, Thomas H., and Jeanne Harris. Competing on Analytics. Harvard Business Press, 2007.`
+
+---
+
+#### The Shoe Size and Reading Score Example
+
+- Children with larger shoe sizes show **higher reading scores**.  
+- The scatterplot forms a convincing positive trend.
+
+At first glance, it seems like bigger feet lead to better reading ability.
+
+> **Reality:**  
+> Older children have both **bigger shoes** and **higher reading ability**.  
+> Age is the confounding factor that explains the pattern.
+
+`The common cause was age`
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+shoe_df = pd.read_csv('../../data/correlation/ShoeSize.csv')
+
+plt.scatter(shoe_df["ShoeSize"], shoe_df["ReadingScore"])
+plt.xlabel("Shoe Size")
+plt.ylabel("Reading Score")
+plt.title("Shoe Size vs Reading Score")
+#TODO save as a png file late
+# plt.savefig("../../img/correlation/shoesize_reading.png", dpi=300, bbox_inches="tight")
+plt.show()
+```
+
+##### References  
+
+`Gravetter, Frederick & Larry Wallnau. Statistics for the Behavioral Sciences. Cengage Learning.`
+
+
+
+### Smoking and Lung Cancer Incidence
+
+- Smoking rates show a steep rise across mid-20th century.
+- Lung cancer incidence follows with a lag of several years.
+
+This trend appears across countries, genders, and time periods.
+
+> **Reality:**  
+> Smoking introduces carcinogenic compounds that mutate lung tissue.  
+> The causal mechanism is biological and supported by decades of medical research.
+
+`The mechanism was carcinogenic exposure`
+
+
 
 
 <!-- Total observations:  
-$$
+$$ 
 n = 12
 $$
 
