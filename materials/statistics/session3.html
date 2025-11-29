@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Statistics Session 03: Inference Essentials – Data Analytics Bootcamp</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-b6871152dc33c25e97e10f79624f84be.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo light-content">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data Analytics Bootcamp</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../materials/syllabus.html" aria-current="page"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/statistics/index.html"> 
+<span class="menu-text">Statistical Thinking</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/sql/index.html"> 
+<span class="menu-text">SQL</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/python/index.html"> 
+<span class="menu-text">Python</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/tableau/index.html"> 
+<span class="menu-text">Tableau</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/hovhannisyan91"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session3.html">Statistics Session 03: Inference Essentials</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Thinking</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 01: Descriptive Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 02: Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session3.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Statistics Session 03: Inference Essentials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 04: Inference Essentials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL Session 01: Coming Soon</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python Session 01: Coming Soon</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 01: Introduction To Tableau</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 02:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 03:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 04: Dashboard Design &amp; Performance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#probabilistic-distributions" id="toc-probabilistic-distributions" class="nav-link active" data-scroll-target="#probabilistic-distributions">Probabilistic Distributions</a>
+  <ul class="collapse">
+  <li><a href="#topics" id="toc-topics" class="nav-link" data-scroll-target="#topics">Topics</a></li>
+  <li><a href="#well-known-distributions" id="toc-well-known-distributions" class="nav-link" data-scroll-target="#well-known-distributions">Well-Known Distributions</a></li>
+  <li><a href="#what-is-a-probability-distribution" id="toc-what-is-a-probability-distribution" class="nav-link" data-scroll-target="#what-is-a-probability-distribution">What is a Probability Distribution?</a></li>
+  <li><a href="#normal-distribution" id="toc-normal-distribution" class="nav-link" data-scroll-target="#normal-distribution">Normal Distribution</a></li>
+  <li><a href="#uniform-distribution" id="toc-uniform-distribution" class="nav-link" data-scroll-target="#uniform-distribution">Uniform Distribution</a></li>
+  <li><a href="#exponential-distribution" id="toc-exponential-distribution" class="nav-link" data-scroll-target="#exponential-distribution">Exponential Distribution</a></li>
+  <li><a href="#poisson-distribution" id="toc-poisson-distribution" class="nav-link" data-scroll-target="#poisson-distribution">Poisson Distribution</a></li>
+  <li><a href="#bernoulli-distribution" id="toc-bernoulli-distribution" class="nav-link" data-scroll-target="#bernoulli-distribution">Bernoulli Distribution</a></li>
+  <li><a href="#final-comparison-of-the-four-distributions-retail-context" id="toc-final-comparison-of-the-four-distributions-retail-context" class="nav-link" data-scroll-target="#final-comparison-of-the-four-distributions-retail-context">Final Comparison of the Four Distributions (Retail Context)</a></li>
+  </ul></li>
+  <li><a href="#central-limit-theorem-clt" id="toc-central-limit-theorem-clt" class="nav-link" data-scroll-target="#central-limit-theorem-clt">Central Limit Theorem (CLT)</a></li>
+  <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link" data-scroll-target="#hypothesis-testing">Hypothesis Testing</a>
+  <ul class="collapse">
+  <li><a href="#examples-of-situations-which-require-hypothesis-testing" id="toc-examples-of-situations-which-require-hypothesis-testing" class="nav-link" data-scroll-target="#examples-of-situations-which-require-hypothesis-testing">Examples of situations which require hypothesis testing</a></li>
+  <li><a href="#null-and-alternative" id="toc-null-and-alternative" class="nav-link" data-scroll-target="#null-and-alternative">Null and Alternative</a></li>
+  <li><a href="#two-tail-hypothesis-test" id="toc-two-tail-hypothesis-test" class="nav-link" data-scroll-target="#two-tail-hypothesis-test">Two-Tail Hypothesis Test</a></li>
+  <li><a href="#procedure-of-hypothesis-test" id="toc-procedure-of-hypothesis-test" class="nav-link" data-scroll-target="#procedure-of-hypothesis-test">Procedure of Hypothesis Test</a></li>
+  <li><a href="#one-tail-test" id="toc-one-tail-test" class="nav-link" data-scroll-target="#one-tail-test">One-Tail Test</a></li>
+  <li><a href="#analogy-with-legal-system" id="toc-analogy-with-legal-system" class="nav-link" data-scroll-target="#analogy-with-legal-system">Analogy with Legal System</a></li>
+  <li><a href="#type-i-and-type-ii-errors" id="toc-type-i-and-type-ii-errors" class="nav-link" data-scroll-target="#type-i-and-type-ii-errors">Type I and Type II Errors</a></li>
+  <li><a href="#decision-rule" id="toc-decision-rule" class="nav-link" data-scroll-target="#decision-rule">Decision Rule</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session3.html">Statistics Session 03: Inference Essentials</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Statistics Session 03: Inference Essentials</h1>
+<p class="subtitle lead">Probabilistic Distributions, Sampling</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">statistics</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="probabilistic-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="probabilistic-distributions">Probabilistic Distributions</h2>
+<section id="topics" class="level3">
+<h3 class="anchored" data-anchor-id="topics">Topics</h3>
+<ul>
+<li>Probabilistic Distributions</li>
+<li>Sampling</li>
+<li>Confidence Intervals</li>
+<li>Hypothesis Testing</li>
+</ul>
+</section>
+<section id="well-known-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="well-known-distributions">Well-Known Distributions</h3>
+<p><img src="../../img/statistics/probabilistic_distributions.png" class="img-fluid"></p>
+</section>
+<section id="what-is-a-probability-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-a-probability-distribution">What is a Probability Distribution?</h3>
+<p>To understand a probability distribution, we start with a simple experiment: We go outside and measure people’s heights, one person at a time. Assume the true average height in the population is around <strong>175 cm</strong>.</p>
+<p>We begin with just a few measurements and gradually build the distribution.</p>
+</section>
+<section id="normal-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="normal-distribution">Normal Distribution</h3>
+<p>These first five people have heights around the high 144 to high 200.</p>
+<div id="9e0506b7" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>[174, 169, 175, 182, 168]</code></pre>
+</div>
+</div>
+<section id="histogram-with-5-people" class="level4">
+<h4 class="anchored" data-anchor-id="histogram-with-5-people">Histogram with 5 People</h4>
+<div id="5bacaf77" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-4-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="597" height="376"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="wider-bins" class="level4">
+<h4 class="anchored" data-anchor-id="wider-bins">Wider Bins</h4>
+<div id="41c1d57a" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-5-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="589" height="376"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="narrower-bins" class="level4">
+<h4 class="anchored" data-anchor-id="narrower-bins">Narrower Bins</h4>
+<div id="e20a1e75" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-6-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="597" height="376"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="increasing-sample-size-to-python-n" class="level4">
+<h4 class="anchored" data-anchor-id="increasing-sample-size-to-python-n">Increasing Sample Size to {python} N</h4>
+<div id="3e7cda08" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-7-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="585" height="376"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="generalization" class="level4">
+<h4 class="anchored" data-anchor-id="generalization">Generalization</h4>
+<p><span class="math display">\[
+f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\,\frac{(x - \mu)^2}{2\sigma^2} \right)
+\]</span></p>
+<div id="5aa326c2" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-8-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="597" height="376"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="probability-density-function" class="level4">
+<h4 class="anchored" data-anchor-id="probability-density-function">Probability Density Function</h4>
+<p><span class="math display">\[
+f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\!\left( -\,\frac{(x - \mu)^2}{2\sigma^2} \right)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(f(x)\)</span> gives the probability density at value <span class="math inline">\(x\)</span>. It describes how concentrated the distribution is around that point.</li>
+<li><span class="math inline">\(\mu\)</span> is the mean.<br>
+</li>
+<li><span class="math inline">\(\sigma\)</span> is the standard deviation.
+<ul>
+<li>small <span class="math inline">\(\sigma\)</span> makes the curve narrow and tall,<br>
+</li>
+<li>large <span class="math inline">\(\sigma\)</span> makes it wide and flat.</li>
+</ul></li>
+</ul>
+<p>The term <span class="math inline">\(\frac{1}{\sigma \sqrt{2\pi}}\)</span> ensures that the total area under the curve equals <strong>1</strong>, as required for any probability distribution.</p>
+</section>
+<section id="two-normal-distributions" class="level4">
+<h4 class="anchored" data-anchor-id="two-normal-distributions">Two Normal Distributions</h4>
+<div id="d9f38ee5" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-9-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1334" height="374"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="uniform-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="uniform-distribution">Uniform Distribution</h3>
+<section id="imagine" class="level4">
+<h4 class="anchored" data-anchor-id="imagine">Imagine</h4>
+<p>Imagine a telecom system that assigns a customer to one of several identical support bots <strong>randomly</strong>.<br>
+The system waits somewhere between <strong>0 and 10 seconds</strong> before routing the customer, and <strong>every value in that interval is equally likely</strong>.</p>
+<p>This kind of process has <strong>no preference</strong>:</p>
+<ul>
+<li>not more likely to assign earlier,</li>
+<li>not more likely to assign later.</li>
+</ul>
+</section>
+<section id="probability-density-function-pdf" class="level4">
+<h4 class="anchored" data-anchor-id="probability-density-function-pdf">Probability Density Function (PDF)</h4>
+<p>If <span class="math inline">\(X \sim U(a,b)\)</span>, then:</p>
+<p><span class="math display">\[
+f(x) = \frac{1}{b - a}, \quad a \le x \le b
+\]</span></p>
+<ul>
+<li><span class="math inline">\(f(x)=0\)</span> outside the interval</li>
+<li><span class="math inline">\([a,b]\)</span> is equally likely.</li>
+</ul>
+<p>Suppose we observe a sample <span class="math inline">\(x_1, x_2, \dots, x_n\)</span> from a uniform distribution <span class="math inline">\(U(a,b)\)</span>.<br>
+The likelihood of the parameters <span class="math inline">\((a,b)\)</span> given the data is:</p>
+<p><span class="math display">\[
+L(a,b \mid x_1,\dots,x_n)=\prod_{i=1}^n f(x_i)
+\]</span></p>
+<p>Because the PDF is constant inside the interval:</p>
+<ul>
+<li>If <strong>all</strong> observations lie in <span class="math inline">\([a,b]\)</span>:</li>
+</ul>
+<p><span class="math display">\[
+L(a,b \mid x_1,\dots,x_n)=\left(\frac{1}{b-a}\right)^n
+\]</span></p>
+<ul>
+<li>If <strong>any</strong> observation lies outside <span class="math inline">\([a,b]\)</span>:</li>
+</ul>
+<p><span class="math display">\[
+L(a,b \mid x_1,\dots,x_n)=0
+\]</span></p>
+<p>So uniform likelihood is simple:<br>
+<strong>constant if all points are inside, zero otherwise.</strong></p>
+</section>
+<section id="visualizing-uniform-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="visualizing-uniform-distribution">Visualizing Uniform Distribution</h4>
+<div id="060c2664" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-10-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1334" height="374"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="exponential-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="exponential-distribution">Exponential Distribution</h3>
+<p>Consider a supermarket or retail chain.<br>
+Customers arrive at the checkout lanes <strong>randomly</strong>, and the store wants to model:</p>
+<p><strong>How long until the next customer arrives at the counter?</strong></p>
+<blockquote class="blockquote">
+<p><strong>If arrivals are independent and have no memory, then the </strong>waiting time** between customer arrivals follows an <strong>Exponential distribution</strong>.**</p>
+</blockquote>
+<blockquote class="blockquote">
+<ul>
+<li>if you’ve been waiting 4 minutes already, the next customer is <strong>not</strong> <code>due</code></li>
+<li>every moment is a fresh start<br>
+</li>
+<li>the past does NOT influence the future (Markov Chain)</li>
+</ul>
+</blockquote>
+<p><strong>This is very common in retail analytics:</strong></p>
+<ul>
+<li><em>time until next customer walks into the store,</em></li>
+<li><em>time until next person reaches a self-checkout station,</em></li>
+<li><em>time until next event in an online store: purchase, add-to-cart, click, etc.</em></li>
+</ul>
+<p>All of these waiting times are modeled well by the <em>Exponential distribution.</em></p>
+<section id="probability-density-function-pdf-1" class="level4">
+<h4 class="anchored" data-anchor-id="probability-density-function-pdf-1">Probability Density Function (PDF)</h4>
+<p>If <span class="math inline">\(X \sim \text{Exp}(\lambda)\)</span>:</p>
+<p><span class="math display">\[
+f(x) = \lambda e^{-\lambda x}, \quad x \ge 0
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\lambda\)</span> = customer arrival <strong>rate</strong> (customers per minute)<br>
+</li>
+<li><span class="math inline">\(1/\lambda\)</span> = <strong>average waiting time</strong></li>
+</ul>
+<hr>
+</section>
+<section id="likelihood-for-observed-retail-data" class="level4">
+<h4 class="anchored" data-anchor-id="likelihood-for-observed-retail-data">Likelihood for Observed Retail Data</h4>
+<p>Suppose we measure actual waiting times between customer arrivals:</p>
+<p><span class="math display">\[
+x_1, x_2, \dots, x_n
+\]</span></p>
+<p>The likelihood of <span class="math inline">\(\lambda\)</span> given the data is:</p>
+<p><span class="math display">\[
+L(\lambda) = \prod_{i=1}^n \lambda e^{-\lambda x_i}
+\]</span></p>
+<p>This simplifies to:</p>
+<p><span class="math display">\[
+L(\lambda)
+= \lambda^n \exp\!\left(-\lambda \sum_{i=1}^n x_i\right)
+\]</span></p>
+<p>Log-likelihood:</p>
+<p><span class="math display">\[
+\ell(\lambda)
+= n \ln(\lambda) - \lambda \sum x_i
+\]</span></p>
+<p>Maximum Likelihood Estimate (MLE):</p>
+<p><span class="math display">\[
+\hat{\lambda} = \frac{n}{\sum x_i}
+\]</span></p>
+<p>Interpretation:</p>
+<ul>
+<li>fast arrivals → large <span class="math inline">\(\lambda\)</span><br>
+</li>
+<li>slow arrivals → small <span class="math inline">\(\lambda\)</span></li>
+</ul>
+<p>Just like checkout traffic in a retail store.</p>
+<hr>
+</section>
+<section id="visualization-pdf-likelihood-curve" class="level4">
+<h4 class="anchored" data-anchor-id="visualization-pdf-likelihood-curve">Visualization (PDF + Likelihood Curve)</h4>
+<p>We use example waiting times in minutes: <code>obs = [1.2, 0.5, 2.0, 0.8]</code></p>
+<p>These could be times between customers reaching a checkout lane.</p>
+<ul>
+<li>Left plot → PDF comparison for <span class="math inline">\(\lambda = 1\)</span> and <span class="math inline">\(\lambda = 0.3\)</span><br>
+</li>
+<li>Right plot → Likelihood curve for the observed retail dat</li>
+</ul>
+<div id="2884fce3" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-11-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1334" height="374"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpretation" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation">Interpretation</h4>
+<ul>
+<li>When customers arrive quickly and consistently, the waiting times shrink → the likelihood favors a <strong>large</strong> <span class="math inline">\(\lambda\)</span>.</li>
+<li>When customers arrive sporadically or slowly, the waiting times grow → the likelihood favors a <strong>small</strong> <span class="math inline">\(\lambda\)</span>.</li>
+</ul>
+<p>In our observed data:</p>
+<ul>
+<li>Average waiting time = <span class="math inline">\(4.5 / 4 = 1.125\)</span> minutes<br>
+</li>
+<li>MLE: <span class="math inline">\(\hat{\lambda} = 4/4.5 = 0.889\)</span> customers/minute</li>
+</ul>
+<p>Meaning:</p>
+<ul>
+<li>the best-fitting model suggests approximately <strong>0.89 customers per minute</strong>,<br>
+</li>
+<li>which corresponds to <strong>one customer roughly every 1.1 minutes</strong>.</li>
+</ul>
+<p>This type of analysis is central in retail analytics for understanding staffing requirements, managing checkout lanes, predicting peak hours, and optimizing store operations.</p>
+</section>
+</section>
+<section id="poisson-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="poisson-distribution">Poisson Distribution</h3>
+<section id="real-world-narrative-retail" class="level4">
+<h4 class="anchored" data-anchor-id="real-world-narrative-retail">Real-World Narrative (Retail)</h4>
+<p>In a retail store, the number of customers who walk through the entrance during a <strong>fixed time interval</strong> (e.g., 1 hour) is often random but follows a stable average rate.</p>
+<p>Examples: - number of customers per hour, - number of purchases per minute in an online shop, - number of returns processed during each 30-minute window, - number of carts abandoned every hour.</p>
+<p>If these events occur <strong>independently</strong> and with a <strong>constant average rate</strong>, then the number of events in a time window follows a <strong>Poisson distribution</strong>.</p>
+<hr>
+</section>
+<section id="probability-mass-function-pmf" class="level4">
+<h4 class="anchored" data-anchor-id="probability-mass-function-pmf">Probability Mass Function (PMF)</h4>
+<p>If <span class="math inline">\(X \sim \text{Poisson}(\lambda)\)</span>:</p>
+<p><span class="math display">\[
+P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}, \quad k = 0,1,2,\dots
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\lambda\)</span> is both the <strong>average number of events</strong> and the <strong>variance</strong>.</li>
+</ul>
+<hr>
+</section>
+<section id="likelihood-for-observed-retail-counts" class="level4">
+<h4 class="anchored" data-anchor-id="likelihood-for-observed-retail-counts">Likelihood for Observed Retail Counts</h4>
+<p>Suppose we observe event counts:</p>
+<p><span class="math display">\[
+x_1, x_2, \dots, x_n
+\]</span></p>
+<p>The likelihood for <span class="math inline">\(\lambda\)</span> is:</p>
+<p><span class="math display">\[
+L(\lambda)
+= \prod_{i=1}^n \frac{\lambda^{x_i} e^{-\lambda}}{x_i!}
+\]</span></p>
+<p>This simplifies to:</p>
+<p><span class="math display">\[
+L(\lambda)
+= \lambda^{\sum x_i} \, e^{-n\lambda} \Big/ \prod x_i!
+\]</span></p>
+<p>The log-likelihood:</p>
+<p><span class="math display">\[
+\ell(\lambda)
+= \left(\sum x_i\right)\ln(\lambda) - n\lambda + \text{constant}
+\]</span></p>
+<p>Maximum likelihood estimate:</p>
+<p><span class="math display">\[
+\hat{\lambda} = \frac{1}{n} \sum x_i
+\]</span></p>
+<p>which is simply the <strong>sample mean count</strong>.</p>
+</section>
+<section id="visualization" class="level4">
+<h4 class="anchored" data-anchor-id="visualization">Visualization</h4>
+<ul>
+<li>Left plot → PMF for <span class="math inline">\(\lambda = 3\)</span> and <span class="math inline">\(\lambda = 10\)</span><br>
+</li>
+<li>Right plot → likelihood as a function of <span class="math inline">\(\lambda\)</span></li>
+</ul>
+<div id="f3d9028f" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-12-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1334" height="374"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpretation-retail-context" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-retail-context">Interpretation (Retail Context)</h4>
+<ul>
+<li>Higher <span class="math inline">\(\lambda\)</span> means more customers entering per time interval.<br>
+</li>
+<li>Lower <span class="math inline">\(\lambda\)</span> means slower foot traffic.</li>
+</ul>
+<p><strong>In our observed retail data:</strong></p>
+<ul>
+<li>Total customers = <span class="math inline">\(S = 23\)</span><br>
+</li>
+<li>Number of intervals = <span class="math inline">\(n = 6\)</span><br>
+</li>
+<li>MLE: <span class="math inline">\(\hat{\lambda} = 23/6 = 3.83\)</span> customers per interval</li>
+</ul>
+<p><strong>Meaning:</strong></p>
+<ul>
+<li>on average, about <strong>3.8 customers</strong> arrive every 10 minutes,<br>
+</li>
+<li>which translates to roughly <strong>23 customers per hour</strong>.</li>
+</ul>
+<p><strong>This insight helps retailers in:</strong></p>
+<ul>
+<li>labor scheduling,<br>
+</li>
+<li>checkout allocation,<br>
+</li>
+<li>opening a new lane at high-traffic times,<br>
+</li>
+<li>supply-level decisions,<br>
+</li>
+<li>forecasting hourly demand.</li>
+</ul>
+</section>
+</section>
+<section id="bernoulli-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="bernoulli-distribution">Bernoulli Distribution</h3>
+<section id="real-world-narrative-retail-1" class="level4">
+<h4 class="anchored" data-anchor-id="real-world-narrative-retail-1">Real-World Narrative (Retail)</h4>
+<p>The Bernoulli distribution describes a <strong>single yes/no outcome</strong>.</p>
+<p>In retail, this is everywhere:</p>
+<ul>
+<li>A customer <strong>buys</strong> an item (1) or <strong>does not buy</strong> it (0)<br>
+</li>
+<li>A visitor <strong>clicks</strong> an online ad (1) or <strong>does not click</strong> (0)<br>
+</li>
+<li>A shopper <strong>redeems</strong> a coupon (1) or <strong>does not redeem</strong> (0)<br>
+</li>
+<li>A customer <strong>signs up</strong> for loyalty program (1) or <strong>does not</strong> (0)</li>
+</ul>
+<p>Every Bernoulli trial has just two outcomes: - success (1) with probability <span class="math inline">\(p\)</span> - failure (0) with probability <span class="math inline">\(1 - p\)</span></p>
+<hr>
+</section>
+<section id="probability-mass-function-pmf-1" class="level4">
+<h4 class="anchored" data-anchor-id="probability-mass-function-pmf-1">Probability Mass Function (PMF)</h4>
+<p>If <span class="math inline">\(X \sim \text{Bernoulli}(p)\)</span>:</p>
+<p><span class="math display">\[
+P(X = 1) = p, \qquad P(X = 0) = 1 - p
+\]</span></p>
+<p><span class="math inline">\(X\)</span> takes only two values: 0 or 1.</p>
+<hr>
+</section>
+<section id="likelihood-for-observed-retail-data-1" class="level4">
+<h4 class="anchored" data-anchor-id="likelihood-for-observed-retail-data-1">Likelihood for Observed Retail Data</h4>
+<p>Suppose we observe binary outcomes:</p>
+<p><span class="math display">\[
+x_1, x_2, \dots, x_n
+\]</span></p>
+<p>The likelihood for <span class="math inline">\(p\)</span> is:</p>
+<p><span class="math display">\[
+L(p) = p^{\sum x_i} (1-p)^{n - \sum x_i}
+\]</span></p>
+<p>Log-likelihood:</p>
+<p><span class="math display">\[
+\ell(p) = \left(\sum x_i\right)\ln(p) + \left(n - \sum x_i\right)\ln(1 - p)
+\]</span></p>
+<p>MLE:</p>
+<p><span class="math display">\[
+\hat{p} = \frac{\sum x_i}{n}
+\]</span></p>
+<p>which is simply the sample proportion<br>
+(e.g., the observed purchase rate).</p>
+<hr>
+</section>
+<section id="visualizations" class="level4">
+<h4 class="anchored" data-anchor-id="visualizations">Visualizations</h4>
+<p>We use sample retail purchase-decision data: <code>obs = [1, 0, 1, 1, 0, 0, 1, 1]</code></p>
+<p>This could represent whether a customer bought an item after viewing it online.</p>
+<ul>
+<li>Left plot → PMF for <span class="math inline">\(p = 0.2\)</span> and <span class="math inline">\(p = 0.8\)</span><br>
+</li>
+<li>Right plot → likelihood curve for <span class="math inline">\(p\)</span> based on the observed data.</li>
+</ul>
+<div id="9c0a57ca" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-13-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1334" height="374"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpretation-1" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-1">Interpretation</h4>
+<ul>
+<li>Higher <span class="math inline">\(p\)</span> means customers are much more likely to buy the product.<br>
+</li>
+<li>Lower <span class="math inline">\(p\)</span> means customers rarely make the purchase.</li>
+</ul>
+<p>In our observed data:</p>
+<ul>
+<li>Number of purchases = <span class="math inline">\(S = 5\)</span><br>
+</li>
+<li>Number of customers = <span class="math inline">\(n = 8\)</span><br>
+</li>
+<li>MLE: <span class="math inline">\(\hat{p} = 5/8 = 0.625\)</span></li>
+</ul>
+<p>Meaning:</p>
+<ul>
+<li>the best-fitting Bernoulli model suggests approximately <strong>62.5%</strong> purchase probability,<br>
+</li>
+<li>meaning a customer buys the product roughly <strong>3 out of every 5</strong> times they view it.</li>
+</ul>
+<p>Retail analysts use this to:</p>
+<ul>
+<li>measure conversion rate,<br>
+</li>
+<li>optimize product placement,<br>
+</li>
+<li>A/B test promotions,<br>
+</li>
+<li>forecast revenue based on customer behavior,<br>
+</li>
+<li>identify products with high vs.&nbsp;low purchase likelihood.</li>
+</ul>
+</section>
+</section>
+<section id="final-comparison-of-the-four-distributions-retail-context" class="level3">
+<h3 class="anchored" data-anchor-id="final-comparison-of-the-four-distributions-retail-context">Final Comparison of the Four Distributions (Retail Context)</h3>
+<p><strong>To summarize everything covered so far, this we will put the four core distributions side-by-side using their:</strong></p>
+<ul>
+<li>variable type,</li>
+<li>real-world retail interpretation,</li>
+<li>mathematical form,</li>
+<li>likelihood intuition,</li>
+<li>and when you should use each one.</li>
+</ul>
+<p>This serves as a compact review page for students.</p>
+<hr>
+<section id="comparison-table" class="level4">
+<h4 class="anchored" data-anchor-id="comparison-table">Comparison Table</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 14%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Distribution</th>
+<th>Variable Type</th>
+<th>What It Models</th>
+<th>Retail Example</th>
+<th>Key Parameter</th>
+<th>Likelihood Intuition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Uniform</strong></td>
+<td>Continuous (range)</td>
+<td>All values in an interval equally likely</td>
+<td>Random delay before assigning a customer to a cashier</td>
+<td><span class="math inline">\(a, b\)</span></td>
+<td>Likelihood is constant if all observations lie inside <span class="math inline">\([a,b]\)</span> and zero otherwise. Narrower intervals increase likelihood.</td>
+</tr>
+<tr class="even">
+<td><strong>Exponential</strong></td>
+<td>Continuous (positive)</td>
+<td>Time until next random event</td>
+<td>Time between customer arrivals at checkout</td>
+<td><span class="math inline">\(\lambda\)</span></td>
+<td>Likelihood favors large <span class="math inline">\(\lambda\)</span> when arrivals are frequent (short waits), small <span class="math inline">\(\lambda\)</span> when arrivals are sparse (long waits).</td>
+</tr>
+<tr class="odd">
+<td><strong>Poisson</strong></td>
+<td>Discrete count</td>
+<td>Number of events in a fixed time window</td>
+<td>Number of customers entering per hour</td>
+<td><span class="math inline">\(\lambda\)</span></td>
+<td>Likelihood peaks at <span class="math inline">\(\hat{\lambda} = \text{sample mean}\)</span>. Higher counts favor larger <span class="math inline">\(\lambda\)</span>.</td>
+</tr>
+<tr class="even">
+<td><strong>Bernoulli</strong></td>
+<td>Discrete binary</td>
+<td>One yes/no outcome</td>
+<td>Customer buys or does not buy a product</td>
+<td><span class="math inline">\(p\)</span></td>
+<td>Likelihood increases as <span class="math inline">\(p\)</span> approaches the observed proportion of purchases. Peaks at <span class="math inline">\(\hat{p}=S/n\)</span>.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="when-to-use-each-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="when-to-use-each-distribution">When to Use Each Distribution?</h4>
+<section id="uniform" class="level5">
+<h5 class="anchored" data-anchor-id="uniform">Uniform</h5>
+<p>Use when you only know the <em>range</em> of possible values but have no reason to believe any value is more likely.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>random delays,</li>
+<li>random arrival windows,</li>
+<li>simulation/bootstrapping where all outcomes are equally plausible.</li>
+</ul>
+<hr>
+</section>
+<section id="exponential" class="level5">
+<h5 class="anchored" data-anchor-id="exponential">Exponential</h5>
+<p>Use when you are modeling <strong>waiting times</strong> between independent events.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>time between customers at checkout,</li>
+<li>time between online purchases,</li>
+<li>time until next reward point redemption,</li>
+<li>time until next item is scanned at self-checkout.</li>
+</ul>
+<hr>
+</section>
+<section id="poisson" class="level5">
+<h5 class="anchored" data-anchor-id="poisson">Poisson</h5>
+<p>Use when you count <strong>how many events occur in a fixed interval</strong> of time.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>customers entering the store per hour,</li>
+<li>number of orders in each 5-minute window,</li>
+<li>number of carts abandoned per hour,</li>
+<li>number of returns processed every 30 minutes.</li>
+</ul>
+<hr>
+</section>
+<section id="bernoulli" class="level5">
+<h5 class="anchored" data-anchor-id="bernoulli">Bernoulli</h5>
+<p>Use when modeling a <strong>single yes/no trial</strong>:</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>customer buys <code>(1)</code> or does not buy <code>(0)</code>,</li>
+<li>customer clicks or does not click a promotion,</li>
+<li>customer redeems or does not redeem a coupon,</li>
+<li>customer signs up or does not sign up for loyalty program.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="final-intuition-summary" class="level4">
+<h4 class="anchored" data-anchor-id="final-intuition-summary">Final Intuition Summary</h4>
+<ul>
+<li>Use <strong>Uniform</strong> for “random within limits.”<br>
+</li>
+<li>Use <strong>Exponential</strong> for “time until next event.”<br>
+</li>
+<li>Use <strong>Poisson</strong> for “number of events per interval.”<br>
+</li>
+<li>Use <strong>Bernoulli</strong> for “one yes/no outcome.”</li>
+</ul>
+<p>Together, these four distributions cover the majority of basic retail/business modeling scenarios:</p>
+<ul>
+<li>foot traffic analysis,<br>
+</li>
+<li>checkout optimization,<br>
+</li>
+<li>conversion measurement,<br>
+</li>
+<li>forecasting purchase behavior,<br>
+</li>
+<li>and customer journey analytics.</li>
+</ul>
+<p><strong>They also form the foundation for more advanced models:</strong></p>
+<ul>
+<li>Binomial,</li>
+<li>Gamma,</li>
+<li>Negative Binomial,</li>
+<li>Many Bayesian updates</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="central-limit-theorem-clt" class="level2">
+<h2 class="anchored" data-anchor-id="central-limit-theorem-clt">Central Limit Theorem (CLT)</h2>
+<p>The normal distribution is kind of magical in that we see it a lot in nature. But there’s a reason for that, and that reason makes it super useful for statistics as well. The Central Limit Theorem is the basis for a lot of statistics and the good news is that it is a pretty simple concept. That magic is called <strong>The Central Limit Theorem (CLT)</strong>.</p>
+<p><img src="../../img/statistics/clt.png" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p><em>“Even if you’re not normal, the average is normal”</em></p>
+</blockquote>
+</section>
+<section id="hypothesis-testing" class="level2">
+<h2 class="anchored" data-anchor-id="hypothesis-testing">Hypothesis Testing</h2>
+<blockquote class="blockquote">
+<p>Keep calm and test the HYPOTHESIS!</p>
+</blockquote>
+<p>Hypothesis: Assumption about a population mean</p>
+<section id="examples-of-situations-which-require-hypothesis-testing" class="level3">
+<h3 class="anchored" data-anchor-id="examples-of-situations-which-require-hypothesis-testing">Examples of situations which require hypothesis testing</h3>
+<ul>
+<li>The industry that promotes compact fluorescent light (CFL) bulbs claims the bulbs use <strong>75% less energy</strong> and last <strong>10 times longer</strong> than incandescent bulbs. An independent lab would like to test this claim using hypothesis testing.</li>
+<li>A recent <em>Wall Street Journal</em> article titled <em>“Does the Internet Make You Smarter or Dumber?”</em> posed the possibility that online activities turn us into shallow thinkers. The article cited a statistic claiming that the average time an American spends looking at a Web page is <strong>56 seconds</strong>. A researcher at a local university would like to test this claim using a hypothesis test.</li>
+<li>The average car speed in Yerevan is <code>15 km/s</code>.</li>
+</ul>
+<p><em>what else?</em></p>
+</section>
+<section id="null-and-alternative" class="level3">
+<h3 class="anchored" data-anchor-id="null-and-alternative">Null and Alternative</h3>
+<ul>
+<li><strong>Null Hypothesis</strong> <span class="math inline">\(H_0\)</span> represents the status-quo or current situation. It assumes the population parameter equals (<span class="math inline">\(=\)</span>), is less than or equal (<span class="math inline">\(\le\)</span>), or greater than or equal (<span class="math inline">\(\ge\)</span>) a specific value.</li>
+<li><strong>Alternative Hypothesis</strong> <span class="math inline">\(H_1\)</span> opposes the null. It states that the population parameter is <span class="math inline">\(&lt;\)</span>, <span class="math inline">\(&gt;\)</span>, or <span class="math inline">\(\ne\)</span> a specific value.</li>
+<li>Wall Street Journal example (claim about average web page viewing time).</li>
+</ul>
+<p>The purpose of hypothesis statements is to draw a conclusion about population parameters for which we do not have complete knowledge.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 77%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Null Hypothesis (<span class="math inline">\(H_0\)</span>)</strong></td>
+<td>Represents status-quo; assumes no change or no effect.</td>
+</tr>
+<tr class="even">
+<td><strong>Alternative Hypothesis (<span class="math inline">\(H_1\)</span>)</strong></td>
+<td>Represents what we test for; assumes change, effect, or difference exists.</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="blockquote">
+<p>Alternative hypothesis is sometimes called the <strong>research hypothesis</strong>.</p>
+</blockquote>
+</section>
+<section id="two-tail-hypothesis-test" class="level3">
+<h3 class="anchored" data-anchor-id="two-tail-hypothesis-test">Two-Tail Hypothesis Test</h3>
+<p>A two-tail hypothesis test is used whenever the alternative hypothesis is expressed as:</p>
+<p><span class="math display">\[
+H_1 : \mu \ne 56
+\]</span></p>
+<p>Our Wall Street Journal example has the following hypotheses:</p>
+<p><span class="math display">\[
+H_0 : \mu = 56 \\
+H_1 : \mu \ne 56
+\]</span></p>
+<div id="737e183a" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-14-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="597" height="449"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="procedure-of-hypothesis-test" class="level3">
+<h3 class="anchored" data-anchor-id="procedure-of-hypothesis-test">Procedure of Hypothesis Test</h3>
+<ul>
+<li>Collect a sample of size <span class="math inline">\(n\)</span> and calculate the sample mean. In this example, the sample mean represents the mean viewing time per Web page.</li>
+<li>Plot the sample mean on the x-axis of the sampling distribution curve (Figure 9.1).</li>
+<li>If the sample mean falls within the white region, we do <strong>not reject</strong> <span class="math inline">\(H_0\)</span>. This means we do not have enough evidence to support <span class="math inline">\(H_1\)</span>, which states that the population mean is not equal to 56 seconds.</li>
+<li>If the sample mean falls in either shaded region (rejection regions), we <strong>reject</strong> <span class="math inline">\(H_0\)</span>. This means we have enough evidence to support <span class="math inline">\(H_1\)</span> — that the true mean is not 56 seconds.</li>
+</ul>
+</section>
+<section id="one-tail-test" class="level3">
+<h3 class="anchored" data-anchor-id="one-tail-test">One-Tail Test</h3>
+<ul>
+<li>CFL bulb example:</li>
+</ul>
+<p><span class="math display">\[
+H_0 : \mu \le 8000 \\
+H_1 : \mu &gt; 8000
+\]</span></p>
+<p>This is a right-tail hypothesis test where we only consider large values of <span class="math inline">\(\bar{x}\)</span> as evidence against <span class="math inline">\(H_0\)</span>.</p>
+<div id="be58bc0a" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session3_files/figure-html/cell-15-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="614" height="449"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="analogy-with-legal-system" class="level3">
+<h3 class="anchored" data-anchor-id="analogy-with-legal-system">Analogy with Legal System</h3>
+<p>We can never <code>accept</code> the null hypothesis. We can only <code>reject</code> it or <code>fail to reject</code> it.</p>
+<p>The legal system uses a similar structure.</p>
+<blockquote class="blockquote">
+<p>A defendant is assumed innocent until proven guilty.</p>
+</blockquote>
+<p><strong>Hypotheses formulated in legal analogy:</strong></p>
+<p><span class="math inline">\(H_0 : \text{The defendant is innocent (status quo)}\)</span> <span class="math inline">\(H_1 : \text{The defendant is guilty}\)</span></p>
+<p><strong>The two possible conclusions:</strong></p>
+<ol type="1">
+<li><strong>Reject</strong> <span class="math inline">\(H_0\)</span> → The defendant is guilty<br>
+</li>
+<li><strong>Fail to reject</strong> <span class="math inline">\(H_0\)</span> → The defendant is not guilty</li>
+</ol>
+</section>
+<section id="type-i-and-type-ii-errors" class="level3">
+<h3 class="anchored" data-anchor-id="type-i-and-type-ii-errors">Type I and Type II Errors</h3>
+<p>In quality control applications:</p>
+<ul>
+<li><strong>Type I error</strong> = producer’s risk<br>
+</li>
+<li><strong>Type II error</strong> = consumer’s risk</li>
+</ul>
+<p>The table below summarizes the decision outcomes.</p>
+<p><img src="../../img/statistics/type_I_and_type_II.png" class="img-fluid"></p>
+</section>
+<section id="decision-rule" class="level3">
+<h3 class="anchored" data-anchor-id="decision-rule">Decision Rule</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 31%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Condition (Reality)</th>
+<th>Decision: Reject <span class="math inline">\(H_0\)</span></th>
+<th>Decision: Do Not Reject <span class="math inline">\(H_0\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><span class="math inline">\(H_0\)</span> is actually true</strong></td>
+<td>Type I Error (<span class="math inline">\(\alpha\)</span>)</td>
+<td>Correct Outcome</td>
+</tr>
+<tr class="even">
+<td><strong><span class="math inline">\(H_0\)</span> is actually false</strong></td>
+<td>Correct Outcome</td>
+<td>Type II Error (<span class="math inline">\(\beta\)</span>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>For quality control applications:</strong></p>
+<ul>
+<li>Type I error = producer’s risk: <span class="math inline">\(H_0 : \mu = 4.0 \text{ mm}\)</span> (process is satisfactory)</li>
+<li>Type II error = consumer’s risk: <span class="math inline">\(H_1 : \mu \ne 4.0 \text{ mm}\)</span> (process is not satisfactory)</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/hovhannisyan91\.github\.io\/aca");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,3090 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Statistics Session 04: Inference Essentials – Data Analytics Bootcamp</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-b6871152dc33c25e97e10f79624f84be.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo light-content">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data Analytics Bootcamp</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../materials/syllabus.html" aria-current="page"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/statistics/index.html"> 
+<span class="menu-text">Statistical Thinking</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/sql/index.html"> 
+<span class="menu-text">SQL</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/python/index.html"> 
+<span class="menu-text">Python</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/tableau/index.html"> 
+<span class="menu-text">Tableau</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/hovhannisyan91"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session4.html">Statistics Session 04: Inference Essentials</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Thinking</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 01: Descriptive Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 02: Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 03: Inference Essentials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session4.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Statistics Session 04: Inference Essentials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL Session 01: Coming Soon</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/week6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python Session 01: Coming Soon</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/week7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 01: Introduction To Tableau</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 02:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 03:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 04: Dashboard Design &amp; Performance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/week4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#agenda" id="toc-agenda" class="nav-link active" data-scroll-target="#agenda">Agenda</a></li>
+  <li><a href="#sampling" id="toc-sampling" class="nav-link" data-scroll-target="#sampling">Sampling</a>
+  <ul class="collapse">
+  <li><a href="#population-vs.-sample" id="toc-population-vs.-sample" class="nav-link" data-scroll-target="#population-vs.-sample">Population vs.&nbsp;Sample</a></li>
+  <li><a href="#why-not-measure-everyone" id="toc-why-not-measure-everyone" class="nav-link" data-scroll-target="#why-not-measure-everyone">Why Not Measure Everyone?</a></li>
+  <li><a href="#why-businesses-prefer-sampling" id="toc-why-businesses-prefer-sampling" class="nav-link" data-scroll-target="#why-businesses-prefer-sampling">Why Businesses Prefer Sampling?</a></li>
+  <li><a href="#the-risks-of-sampling" id="toc-the-risks-of-sampling" class="nav-link" data-scroll-target="#the-risks-of-sampling">The Risks of Sampling</a></li>
+  </ul></li>
+  <li><a href="#types-of-sampling" id="toc-types-of-sampling" class="nav-link" data-scroll-target="#types-of-sampling">Types of Sampling</a>
+  <ul class="collapse">
+  <li><a href="#probability-sampling" id="toc-probability-sampling" class="nav-link" data-scroll-target="#probability-sampling">Probability Sampling</a></li>
+  <li><a href="#nonprobability-sampling" id="toc-nonprobability-sampling" class="nav-link" data-scroll-target="#nonprobability-sampling">Nonprobability Sampling</a></li>
+  </ul></li>
+  <li><a href="#sampling-and-nonsampling-errors" id="toc-sampling-and-nonsampling-errors" class="nav-link" data-scroll-target="#sampling-and-nonsampling-errors">Sampling and Nonsampling Errors</a></li>
+  <li><a href="#sampling-distribution" id="toc-sampling-distribution" class="nav-link" data-scroll-target="#sampling-distribution">Sampling Distribution</a>
+  <ul class="collapse">
+  <li><a href="#distirbution-of-the-mean-with-finite-population" id="toc-distirbution-of-the-mean-with-finite-population" class="nav-link" data-scroll-target="#distirbution-of-the-mean-with-finite-population">Distirbution of the Mean with Finite Population</a></li>
+  <li><a href="#distribution-of-the-proportion" id="toc-distribution-of-the-proportion" class="nav-link" data-scroll-target="#distribution-of-the-proportion">Distribution of the Proportion</a></li>
+  <li><a href="#sample-proportion" id="toc-sample-proportion" class="nav-link" data-scroll-target="#sample-proportion">Sample Proportion</a></li>
+  </ul></li>
+  <li><a href="#confidence-intervals" id="toc-confidence-intervals" class="nav-link" data-scroll-target="#confidence-intervals">Confidence Intervals</a>
+  <ul class="collapse">
+  <li><a href="#point-estimates" id="toc-point-estimates" class="nav-link" data-scroll-target="#point-estimates">Point Estimates</a></li>
+  <li><a href="#confidence-intervals-for-the-mean-known-sd" id="toc-confidence-intervals-for-the-mean-known-sd" class="nav-link" data-scroll-target="#confidence-intervals-for-the-mean-known-sd">Confidence Intervals for the Mean | known SD</a></li>
+  <li><a href="#confidence-intervals-for-the-mean-unknown-sd" id="toc-confidence-intervals-for-the-mean-unknown-sd" class="nav-link" data-scroll-target="#confidence-intervals-for-the-mean-unknown-sd">Confidence Intervals for the Mean | Unknown SD</a></li>
+  <li><a href="#confidence-intervals-for-proportions" id="toc-confidence-intervals-for-proportions" class="nav-link" data-scroll-target="#confidence-intervals-for-proportions">Confidence Intervals for Proportions</a></li>
+  <li><a href="#determining-the-required-sample-size" id="toc-determining-the-required-sample-size" class="nav-link" data-scroll-target="#determining-the-required-sample-size">Determining the Required Sample Size</a></li>
+  </ul></li>
+  <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link" data-scroll-target="#hypothesis-testing">Hypothesis Testing</a>
+  <ul class="collapse">
+  <li><a href="#stating-the-hypothesis" id="toc-stating-the-hypothesis" class="nav-link" data-scroll-target="#stating-the-hypothesis">Stating The Hypothesis</a></li>
+  <li><a href="#steps-in-hypothesis-testing" id="toc-steps-in-hypothesis-testing" class="nav-link" data-scroll-target="#steps-in-hypothesis-testing">Steps In hypothesis testing</a></li>
+  <li><a href="#graphical-representation" id="toc-graphical-representation" class="nav-link" data-scroll-target="#graphical-representation">Graphical Representation</a></li>
+  <li><a href="#type-ii-error" id="toc-type-ii-error" class="nav-link" data-scroll-target="#type-ii-error">Type II Error</a></li>
+  <li><a href="#case-study" id="toc-case-study" class="nav-link" data-scroll-target="#case-study">Case Study</a></li>
+  </ul></li>
+  <li><a href="#comparing-two-population-means" id="toc-comparing-two-population-means" class="nav-link" data-scroll-target="#comparing-two-population-means">Comparing Two Population Means</a>
+  <ul class="collapse">
+  <li><a href="#two-sample-t-test-ab-test" id="toc-two-sample-t-test-ab-test" class="nav-link" data-scroll-target="#two-sample-t-test-ab-test">Two-Sample t-Test (A/B Test)</a></li>
+  <li><a href="#two-sample-t-test-right-tailed-test" id="toc-two-sample-t-test-right-tailed-test" class="nav-link" data-scroll-target="#two-sample-t-test-right-tailed-test">Two Sample t-Test | Right-Tailed Test</a></li>
+  <li><a href="#two-sample-t-test-left-tailed-test" id="toc-two-sample-t-test-left-tailed-test" class="nav-link" data-scroll-target="#two-sample-t-test-left-tailed-test">Two Sample t-Test | Left-Tailed Test</a></li>
+  <li><a href="#combined-summary-table" id="toc-combined-summary-table" class="nav-link" data-scroll-target="#combined-summary-table">Combined Summary Table</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session4.html">Statistics Session 04: Inference Essentials</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Statistics Session 04: Inference Essentials</h1>
+<p class="subtitle lead">Sorytelling with Data</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">statistics</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="agenda" class="level2">
+<h2 class="anchored" data-anchor-id="agenda">Agenda</h2>
+<ul>
+<li>Sampling</li>
+<li>Confidence Intervals</li>
+<li>Hypothesis Testing</li>
+<li>Storytelling With Data</li>
+</ul>
+</section>
+<section id="sampling" class="level2">
+<h2 class="anchored" data-anchor-id="sampling">Sampling</h2>
+<section id="population-vs.-sample" class="level3">
+<h3 class="anchored" data-anchor-id="population-vs.-sample">Population vs.&nbsp;Sample</h3>
+<p>In statistics:</p>
+<ul>
+<li>a <strong>population</strong> is the full group we care about (all customers, all transactions, all students, all calls).<br>
+</li>
+<li>a <strong>sample</strong> is a <strong>smaller, representative portion</strong> of that population.</li>
+</ul>
+<p>For example, when a market research company measures TV viewership, the <em>population</em> is every viewer, but the <em>sample</em> is only the households that have a Nielsen people-meter installed.</p>
+<blockquote class="blockquote">
+<p>The goal is to learn something about everyone by studying just the selected few.</p>
+</blockquote>
+<hr>
+</section>
+<section id="why-not-measure-everyone" class="level3">
+<h3 class="anchored" data-anchor-id="why-not-measure-everyone">Why Not Measure Everyone?</h3>
+<p>At first glance, it may seem logical to <em>“measure everything”</em> But in reality, studying an entire population is often:</p>
+<ul>
+<li><strong>Too expensive</strong><br>
+</li>
+<li><strong>Too time-consuming</strong><br>
+</li>
+<li><strong>Physically impossible</strong><br>
+</li>
+<li><strong>Damaging to the items being measured</strong> (quality control settings)</li>
+</ul>
+<hr>
+<p>Imagine you want to understand <strong>student attitudes toward academic integrity</strong> at ACA.</p>
+<p>You <code>could</code> send a survey to all students, but:</p>
+<ul>
+<li>Not everyone will respond.<br>
+</li>
+<li>Collecting, cleaning, and processing thousands of responses would take weeks.<br>
+</li>
+<li>In many cases, a <strong>properly selected sample</strong> (e.g.,<code>15–25%</code> of students) is enough to accurately represent the entire student body.</li>
+</ul>
+<p>A similar real-world example from the textbook shows how a college committee surveyed only a subset of students yet confidently inferred the attitudes of the whole institution.</p>
+<hr>
+</section>
+<section id="why-businesses-prefer-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="why-businesses-prefer-sampling">Why Businesses Prefer Sampling?</h3>
+<p>Sampling allows organizations to:</p>
+<ol type="1">
+<li><strong>Save money and time</strong><br>
+</li>
+<li><strong>Check quality without damaging products</strong><br>
+</li>
+<li><strong>Launch decisions faster</strong><br>
+</li>
+<li><strong>Work with continuous data streams</strong> when populations grow too fast<br>
+</li>
+<li><strong>Avoid unnecessary measurements</strong> when additional data adds little value</li>
+</ol>
+<p>In telecom, banking, or marketing environments—like you often cannot measure every interaction or manually label every event. Sampling helps you make reliable conclusions with controlled effort.</p>
+<hr>
+</section>
+<section id="the-risks-of-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="the-risks-of-sampling">The Risks of Sampling</h3>
+<p>Sampling introduces <strong>uncertainty</strong>. Estimates may deviate from the true population values.</p>
+<p><strong>However:</strong></p>
+<ul>
+<li>Statistics gives us tools to <strong>quantify</strong> this risk<br>
+</li>
+<li>Many sampling errors are <strong>small and predictable</strong><br>
+</li>
+<li>Well-designed sampling keeps accuracy high while effort stays low</li>
+</ul>
+<blockquote class="blockquote">
+<p><em>Sampling is not a shortcut.</em> It is a <strong>scientifically grounded method</strong> for making reliable decisions when full measurement is unnecessary, impractical, or impossible.<br>
+In both academic settings and real business operations, <strong>sampling enables accurate, fast, and cost-effective insights</strong>.</p>
+</blockquote>
+</section>
+</section>
+<section id="types-of-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="types-of-sampling">Types of Sampling</h2>
+<p>There are many options available for gathering samples from a population. The two basic types that we will discuss are:</p>
+<ul>
+<li>probability sampling</li>
+<li>nonprobability sampling</li>
+</ul>
+<section id="probability-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="probability-sampling">Probability Sampling</h3>
+<p>A <strong>probability sample</strong> is a sample in which each member of the population has a <em>known, nonzero, chance</em> of being selected for the sample.</p>
+<p>There are <strong>five</strong> main types of probability sampling techniques statisticians use:</p>
+<ul>
+<li>simple random</li>
+<li>systematic</li>
+<li>stratified</li>
+<li>cluster</li>
+<li>resampling</li>
+</ul>
+<section id="simple-random-sampling" class="level4">
+<h4 class="anchored" data-anchor-id="simple-random-sampling">Simple Random Sampling</h4>
+<p>A <strong>simple random sample</strong> is a sample in which every member of the population has an <strong>equal chance</strong> of being chosen.</p>
+<p><img src="../../img/statistics/simple_random_sampling.png" class="img-fluid"></p>
+</section>
+<section id="systematic-sampling" class="level4">
+<h4 class="anchored" data-anchor-id="systematic-sampling">Systematic Sampling</h4>
+<p>In <strong>systematic sampling</strong>, every <code>k-th</code> member of the population is chosen for the sample. The value of <code>k</code> is determined by dividing the size of the population <code>(N)</code> by the size of the sample <code>(n)</code>.</p>
+<p>But how do you know whcih value of <code>k</code> to choose? The value of k is the systematic sampling constant:</p>
+<p><span class="math display">\[k = \frac{N}{n}\]</span></p>
+<p>where:</p>
+<ul>
+<li><strong>N:</strong> Size of the population</li>
+<li><strong>n:</strong> Size of the sample</li>
+</ul>
+<p>Using my academic integrity survey, with a population of <code>1,800</code> students and a sample of <code>10</code>:</p>
+<p><span class="math display">\[k = \frac{N}{n} = \frac{1,800}{10}=180\]</span></p>
+<p>From a listing of the entire population, I would choose every <strong>180th</strong> student to be included in the sample.</p>
+<p><img src="../../img/statistics/systematic_sampling.png" class="img-fluid"></p>
+<p>Systematic sampling is often easier to implement than a simple random sample.</p>
+<!-- TODO try to put in a box -->
+<p><strong>Problem</strong></p>
+<p>A problem can arise if the population contains a repeating pattern that aligns with the interval (k). This <strong>periodicity</strong> can produce a biased sample.<br>
+<strong>Example:</strong> selecting data every 4th week in an 8-week term may always fall on midterms or finals, leading to inflated study-hour data.</p>
+<p><strong>Solution</strong></p>
+<p>The first selected unit does not have to be the first entry.We can randomly choose a starting position and then pick every (k)-th observation after that.</p>
+</section>
+<section id="stratified-sampling" class="level4">
+<h4 class="anchored" data-anchor-id="stratified-sampling">Stratified Sampling</h4>
+<p>Stratified sampling is used when <em>specific subgroups within a population differ in ways that are important to the analysis</em>. If these subgroups are not represented proportionally in the sample, the results may become biased—even when random sampling procedures are used.</p>
+<p>Consider a cybersecurity compliance study within a large technology company. Previous internal audits show that <strong>senior engineers</strong> tend to follow security protocols far more consistently than <strong>junior engineers</strong>. If we rely on simple random or systematic sampling, it is possible—simply by chance—that 45% of the selected employees will be senior engineers, even though they represent only 15% of the workforce. Such a sample would lead us to overestimate overall compliance levels.</p>
+<p><strong>Stratified sampling prevents this type of distortion. </strong>The population is divided into meaningful groups (such as junior, mid-level, senior, and management), and each group is sampled in proportion to its actual size. This ensures that the final sample mirrors the true composition of the population and that no subgroup with unusually high or low compliance influences the results disproportionately.</p>
+<p>In contexts such as academic integrity studies, organizational culture assessments, customer-segmentation research, or ACA-style analytics projects, stratified sampling provides a more <strong>balanced, representative, and trustworthy</strong> basis for drawing conclusions.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 18%">
+<col style="width: 15%">
+<col style="width: 26%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stratum (Role Level)</th>
+<th>Population Size</th>
+<th>Population %</th>
+<th>Sample Size (n = 200)</th>
+<th>Calculation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Junior Engineers</td>
+<td>1,200</td>
+<td>40%</td>
+<td>80</td>
+<td><span class="math inline">\(0.40 \times 200\)</span></td>
+</tr>
+<tr class="even">
+<td>Mid-Level Engineers</td>
+<td>900</td>
+<td>30%</td>
+<td>60</td>
+<td><span class="math inline">\(0.30 \times 200\)</span></td>
+</tr>
+<tr class="odd">
+<td>Senior Engineers</td>
+<td>450</td>
+<td>15%</td>
+<td>30</td>
+<td><span class="math inline">\(0.15 \times 200\)</span></td>
+</tr>
+<tr class="even">
+<td>Management</td>
+<td>450</td>
+<td>15%</td>
+<td>30</td>
+<td><span class="math inline">\(0.15 \times 200\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td><strong>3,000</strong></td>
+<td><strong>100%</strong></td>
+<td><strong>200</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><img src="../../img/statistics/stratified_sampling.png" class="img-fluid"></p>
+</section>
+<section id="cluster-sampling" class="level4">
+<h4 class="anchored" data-anchor-id="cluster-sampling">Cluster Sampling</h4>
+<p>Cluster sampling divides the population into <strong>mutually exclusive groups</strong>—called clusters— where each cluster is intended to be a small-scale representation of the entire population. Instead of sampling individuals directly, we randomly select entire clusters and then either survey every member of those clusters or take a simple random sample within them.</p>
+<p>Clusters are often based on <strong>geography or natural groupings</strong> to simplify data collection. For example, in an academic integrity study, classrooms at specific times of day could serve as clusters. Once a set of classrooms is randomly selected, all students in those rooms (or a sample of them) can be surveyed.</p>
+<p>A common source of confusion is the difference between <strong>strata</strong> and <strong>clusters</strong>:</p>
+<ul>
+<li><p><strong>Strata</strong> are groups whose members share a common characteristic (e.g., all freshmen). Strata are typically <strong>homogeneous</strong> within each group and are used to ensure proper representation in the sample.</p></li>
+<li><p><strong>Clusters</strong>, by contrast, are “mini-populations”—often <strong>heterogeneous</strong> mixtures of different types of individuals (e.g., a classroom containing freshmen, sophomores, juniors, and seniors). The goal is convenience and efficiency, not homogeneity.</p></li>
+</ul>
+<p>Cluster sampling is widely used in business settings, especially when <strong>test-marketing new products</strong>. Companies select cities or regions as clusters and gather feedback from customers within those areas. When designed carefully, cluster sampling provides a cost-effective way to collect a probability sample while maintaining representativeness.</p>
+<p><img src="../../img/statistics/cluster_sampling.png" class="img-fluid"></p>
+</section>
+<section id="resampling-bootstrap" class="level4">
+<h4 class="anchored" data-anchor-id="resampling-bootstrap">Resampling (Bootstrap)</h4>
+<p>Resampling is a statistical approach in which multiple samples are repeatedly drawn from an observed dataset to <strong>better understand the variability of a statistic.</strong> One of the most widely used resampling techniques is the <strong>bootstrap method</strong>, introduced by Bradley Efron at Stanford University.</p>
+<p>Bootstrapping offers a practical, assumption-light method for estimating the uncertainty around statistical measures.</p>
+<p>Bootstrapping works by drawing many samples <strong>with replacement</strong> from the original dataset. <em>For each resample, we compute a statistic of interest—such as a mean, median, proportion, or variance.</em> By repeating this process thousands of times, we obtain a distribution of the statistic, which helps us understand how much it varies and where the true population value is likely to fall.</p>
+<p>Bootstrapping is flexible and powerful. Unlike many traditional statistical methods, it does <strong>not</strong> require strong assumptions about the underlying population distribution. It can be applied to estimate population parameters, standard errors, and measures of uncertainty for a wide variety of statistics.</p>
+<section id="website-conversion-rates-digital-marketing" class="level5">
+<h5 class="anchored" data-anchor-id="website-conversion-rates-digital-marketing">Website Conversion Rates (Digital Marketing)</h5>
+<p>A marketing team measures the conversion rate of a landing page based on 600 user sessions. They use bootstrapping to repeatedly resample these outcomes and estimate the distribution of the conversion rate. This helps them compare campaign performance confidently without relying on theoretical formulas.</p>
+</section>
+<section id="model-performance-metrics-machine-learning" class="level5">
+<h5 class="anchored" data-anchor-id="model-performance-metrics-machine-learning">Model Performance Metrics (Machine Learning)</h5>
+<p>A data science team evaluates a predictive model using a dataset of 10,000 labeled observations. They apply bootstrapping to estimate the variability of accuracy, recall, or AUC scores. This produces more reliable estimates of model performance under different resampling conditions.</p>
+<hr>
+<p><img src="../../img/statistics/resampling_sampling.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="simple-random-vs-systematic-vs-stratified-vs-cluster" class="level4">
+<h4 class="anchored" data-anchor-id="simple-random-vs-systematic-vs-stratified-vs-cluster">Simple Random vs Systematic vs Stratified vs Cluster</h4>
+<p><img src="../../img/statistics/comparison_sampling.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="nonprobability-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="nonprobability-sampling">Nonprobability Sampling</h3>
+<p><strong>A nonprobability sample</strong> is a sample in which the probability of a population member being selected for the sample <strong>is not known.</strong></p>
+<p>A common type of nonprobability sample is a <strong>convenience sample.</strong> This type of sampling is useful when you are simply trying to gather some general information about the population.</p>
+<ul>
+<li><strong>Convenience sample:</strong> A convenience sample is used when members of the population are chosen to become part of the sample simply because they are easily accessible.</li>
+<li><strong>Internet Poll:</strong> Most individuals who participate in Internet polls have very little statistical training. They are impressed when they see thousands of responses recorded in real time and tend to believe the results.</li>
+</ul>
+</section>
+</section>
+<section id="sampling-and-nonsampling-errors" class="level2">
+<h2 class="anchored" data-anchor-id="sampling-and-nonsampling-errors">Sampling and Nonsampling Errors</h2>
+<p>When we rely on a sample instead of measuring an entire population, some level of error is unavoidable. Population values—known as <strong>parameters</strong>—are typically unknown, so we use <strong>statistics</strong> from our sample to estimate them. Because a sample represents only part of the population, the statistic will almost never match the parameter exactly. This difference is called <strong>sampling error</strong>, and it reflects the natural variability that occurs in any sampling process.</p>
+<p><span class="math display">\[\text{Sampling Error}=\bar{x}-\mu\]</span></p>
+<p>where</p>
+<ul>
+<li><span class="math inline">\(\bar{x}:\)</span> sample mean</li>
+<li><span class="math inline">\(\mu:\)</span> population mean</li>
+</ul>
+<p>Sampling error is expected and tends to decrease when the sample size increases. However, data collection can also be affected by <strong>nonsampling errors</strong>, which arise from factors unrelated to the sampling procedure. These include biased survey questions, measurement mistakes, data entry errors, or low response rates. Unlike sampling errors, nonsampling errors cannot be reduced simply by collecting more data.</p>
+<blockquote class="blockquote">
+<p>Recognizing the difference between sampling and nonsampling errors is essential for evaluating how accurate and reliable a study’s conclusions are.</p>
+</blockquote>
+</section>
+<section id="sampling-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="sampling-distribution">Sampling Distribution</h2>
+<section id="distirbution-of-the-mean-with-finite-population" class="level3">
+<h3 class="anchored" data-anchor-id="distirbution-of-the-mean-with-finite-population">Distirbution of the Mean with Finite Population</h3>
+<p>Up to this point, we have assumed that samples are drawn from a very large—or effectively infinite—population. In such cases, the sample represents only a tiny fraction of the population, so the usual standard error formula is appropriate.</p>
+<p>However, when the population is <strong>finite</strong> and the sample makes up a noticeable portion of that population, the standard error of the mean must be adjusted. This situation arises when the ratio of sample size to population size: <span class="math inline">\(n/N \gt 5\)</span>.</p>
+<p>In these cases, we use the <strong>finite population correction factor (FPC)</strong> to account for the fact that sampling without replacement reduces variability. The corrected standard error becomes smaller because the sample is capturing a larger portion of the population.</p>
+<p>For example, if a population contains 100 individuals, and we sample more than 5 of them (i.e., <span class="math inline">\(n &gt; 5\)</span>), the finite population correction factor should be applied to compute an accurate standard error. Ignoring the correction would <strong>overestimate</strong> the sampling error and lead to incorrect probability calculations.</p>
+<p><span class="math display">\[
+\sigma_{\bar{x}} = \frac{\sigma}{\sqrt{n}} \sqrt{\frac{N - n}{N - 1}}
+\]</span></p>
+<p><strong>where:</strong></p>
+<ul>
+<li><span class="math inline">\(\sigma:\)</span> Population standard deviation</li>
+<li><span class="math inline">\(N:\)</span> Population size</li>
+<li><span class="math inline">\(n:\)</span> Sample size</li>
+<li><span class="math inline">\(\frac{N-n}{N-1}:\)</span> finite population correction factor.</li>
+</ul>
+<p>This adjustment ensures that probability calculations and confidence intervals accurately reflect the reduced sampling variability when the sample is a sizable proportion of the population.</p>
+<p><strong>Example</strong></p>
+<p>Consider a consulting firm serving <strong>120 clients</strong>. Historically, the average satisfaction rating is <strong>7.3</strong>. A recent survey of <strong>50 clients</strong> shows an average of <strong>7.8</strong>.</p>
+<p>Because the sample is more than 5% of the population, the finite population correction must be applied:</p>
+<ul>
+<li>The sample represents a large share of all clients.</li>
+<li>Sampling without replacement reduces variability.</li>
+<li>Using the FPC provides a more accurate standard error.</li>
+<li>A low resulting probability suggests the true population mean has improved.</li>
+</ul>
+<p>This type of adjustment is essential in practical business settings—small customer lists, internal employee populations, specialized cohorts, or any ACA-based system where the population size is limited and known.</p>
+<p><strong>Effect of the Correction Factor</strong></p>
+<p>The following table illustrates how the standard error changes when the population size is 100 and the sample size increases. As <span class="math inline">\(n\)</span> grows, the correction factor becomes smaller, reducing the standard error significantly.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 18%">
+<col style="width: 31%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Sample Size (n)</th>
+<th>Standard Error</th>
+<th>Finite Correction Factor</th>
+<th>Standard Error with FPC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>40</td>
+<td>0.111</td>
+<td>0.778</td>
+<td>0.086</td>
+</tr>
+<tr class="even">
+<td>60</td>
+<td>0.090</td>
+<td>0.636</td>
+<td>0.057</td>
+</tr>
+<tr class="odd">
+<td>80</td>
+<td>0.078</td>
+<td>0.449</td>
+<td>0.035</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>0.070</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>As shown, when the sample covers the entire population (<span class="math inline">\(n = 100\)</span>), the corrected standard error becomes zero, as no sampling error exists in a census.</p>
+</section>
+<section id="distribution-of-the-proportion" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-of-the-proportion">Distribution of the Proportion</h3>
+<p>In many real-world applications, we analyze proportions rather than means—for example, the % of customers who churn, voters who support a candidate, or households that watch a specific media event. In these situations, the statistic of interest is the <strong>sample proportion</strong>, and its behavior across repeated samples is described by the <strong>sampling distribution of the proportion</strong>.</p>
+<p>uppose a national streaming analytics firm claims that <strong>52% of U.S. households</strong> watched a large live sports event in 2024. A media agency wants to verify the claim and surveys <strong>300 randomly selected households</strong>. In the sample, <strong>147 households</strong> watched the event.</p>
+<p>To evaluate whether this sample supports the firm’s claim, we check whether the sample size is large enough to use the normal approximation to the binomial distribution. The following conditions must hold:</p>
+<p><span class="math display">\[
+np \ge 5
+\]</span></p>
+<p><span class="math display">\[
+n(1 - p) \ge 5
+\]</span></p>
+<p>Using the claimed proportion <span class="math inline">\(p = 0.52\)</span> and sample size <span class="math inline">\(n = 300\)</span>:</p>
+<p><span class="math display">\[
+np = 300(0.52) = 156 \ge 5
+\]</span></p>
+<p><span class="math display">\[
+n(1 - p) = 300(0.48) = 144 \ge 5
+\]</span></p>
+<p>Thus, the normal approximation is appropriate.</p>
+</section>
+<section id="sample-proportion" class="level3">
+<h3 class="anchored" data-anchor-id="sample-proportion">Sample Proportion</h3>
+<p>The sample proportion is:</p>
+<p><span class="math display">\[
+\hat{p} = \frac{x}{n}
+\]</span></p>
+<p>For this survey:</p>
+<p><span class="math display">\[
+\hat{p} = \frac{147}{300} = 0.49
+\]</span></p>
+<section id="standard-error-of-the-proportion" class="level4">
+<h4 class="anchored" data-anchor-id="standard-error-of-the-proportion">Standard Error of the Proportion</h4>
+<p>The standard error reflects how much sample proportions vary across repeated samples:</p>
+<p><span class="math display">\[
+\sigma_{\hat{p}} = \sqrt{ \frac{p(1 - p)}{n} }
+\]</span></p>
+</section>
+<section id="z-score-for-the-sample-proportion" class="level4">
+<h4 class="anchored" data-anchor-id="z-score-for-the-sample-proportion">z-Score for the Sample Proportion</h4>
+<p>To evaluate how far the sample proportion is from the claimed population proportion:</p>
+<p><span class="math display">\[
+z_{\hat{p}} = \frac{\hat{p} - p}{\sigma_{\hat{p}}}
+\]</span></p>
+<p>A large positive or negative value indicates that the observed sample proportion would be unlikely if the claimed population proportion were correct.</p>
+<p>The sampling distribution of the proportion allows us to determine how probable it is to observe a sample proportion like the one in our study. If the probability is small, the sample provides evidence against the population claim. If the probability is reasonable, the sample is consistent with the claim.</p>
+<p>In this example, the observed sample proportion (0.49) is close to the claimed population proportion (0.52), and with a moderate sample size, the difference is well within the range of expected sampling variability.</p>
+</section>
+<section id="section" class="level4">
+<h4 class="anchored" data-anchor-id="section"></h4>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart TD
+A["Population with true proportion p"] --&gt; B["Select a random sample"]
+B --&gt; C["Count successes in the sample"]
+C --&gt; D["Compute the sample proportion"]
+D --&gt; E["Repeat the sampling process"]
+E --&gt; F["Distribution of sample proportions"]
+F --&gt; G["Shape: approximately normal"]
+F --&gt; H["Center equals p"]
+F --&gt; I["Spread depends on p and n"]
+
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="confidence-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="confidence-intervals">Confidence Intervals</h2>
+<p>One of the most important roles statistics plays in today’s world is to:</p>
+<ul>
+<li>gather information from a sample,</li>
+<li>use that information to make a statement about the population from which the sample was chosen.</li>
+</ul>
+<blockquote class="blockquote">
+<p>Understanding <em>confidence intervals</em> helps quantify how certain we are about the population parameter based on sample data.lets</p>
+</blockquote>
+<section id="point-estimates" class="level3">
+<h3 class="anchored" data-anchor-id="point-estimates">Point Estimates</h3>
+<p>A <strong>point estimate</strong> is a single value that best describes the population parameter of interest.</p>
+<p>The most common point estimates are:</p>
+<ul>
+<li>the <strong>sample mean</strong> (<span class="math inline">\(\bar{x}\)</span>)</li>
+<li>the <strong>sample proportion</strong> (<span class="math inline">\(\hat{p}\)</span>)</li>
+</ul>
+<blockquote class="blockquote">
+<p>Point estimates are easy to calculate, but they provide <strong>no information</strong> about the accuracy or uncertainty of the estimate. They simply give one number — a <code>“best guess”</code> of the true population value.</p>
+</blockquote>
+<div class="callout callout-style-simple callout-note callout-titled" title="Confidence Interval">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Confidence Interval
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A <strong>confidence interval for the mean</strong> is an interval estimate around a sample mean that provides a range within which the true population mean is expected to lie.</p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled" title="Confidence Level">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Confidence Level
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A <strong>confidence level</strong> is the probability that the interval constructed from sample data will contain the population parameter of interest.</p>
+</div>
+</div>
+<p>The purpose of generating a <code>confidence interval</code> is to provide an estimate for the true population mean by combining:</p>
+<ul>
+<li>the sample mean <span class="math inline">\(\bar{x}\)</span><br>
+</li>
+<li>the critical <span class="math inline">\(z\)</span>-value<br>
+</li>
+<li>the standard error <span class="math inline">\(\sigma_{\bar{x}}\)</span></li>
+</ul>
+<p>A <code>90%</code> CI means that <strong>90% of such intervals—constructed from repeated samples—would contain the true population mean.</strong></p>
+<p>Typically, confidence levels are set by the statistician at <code>90%</code> or <code>95%</code> and will occasionally go as high as <code>99%</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 22%">
+<col style="width: 16%">
+<col style="width: 22%">
+<col style="width: 22%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Confidence Level</th>
+<th>α (Significance Level)</th>
+<th>α/2 (Each Tail)</th>
+<th>Lower z<sub>α/2</sub></th>
+<th>Upper z<sub>α/2</sub></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>90%</td>
+<td>0.10</td>
+<td>0.05</td>
+<td>-1.645</td>
+<td>1.645</td>
+</tr>
+<tr class="even">
+<td>95%</td>
+<td>0.05</td>
+<td>0.025</td>
+<td>-1.960</td>
+<td>1.960</td>
+</tr>
+<tr class="odd">
+<td>99%</td>
+<td>0.01</td>
+<td>0.005</td>
+<td>-2.576</td>
+<td>2.576</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="confidence-intervals-for-the-mean-known-sd" class="level3">
+<h3 class="anchored" data-anchor-id="confidence-intervals-for-the-mean-known-sd">Confidence Intervals for the Mean | known SD</h3>
+<!-- TODO name normal name instead of QVC -->
+<p>Let’s say we want to construct a <code>confidence interval</code> <strong>for the average order</strong> size of the QVC customer based on my sample mean of <code>$129.20</code> with a <code>90% confidence level</code>. To determine this interval, we need two more pieces of information:</p>
+<ol type="1">
+<li>the sample size: <span class="math inline">\(\bar{x}\)</span><br>
+</li>
+<li>the population standard deviation <span class="math inline">\(\sigma\)</span></li>
+</ol>
+<p>Suppose the sample mean was based on the 32 orders (<span class="math inline">\(n=32\)</span>). Also, we’ll assume the population standard deviation is equal to <span class="math inline">\(\sigma=40.602\)</span></p>
+<div class="callout callout-style-simple callout-note callout-titled" title="About known Standard Deviation">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>About known Standard Deviation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Usually domain experts are familiar with the value of SD</p>
+</div>
+</div>
+<p><strong>Standard Error (SE):</strong></p>
+<p><span class="math display">\[
+\sigma_{\bar{x}} = \frac{\sigma}{\sqrt{n}} = \frac{\$ 40.602}{\sqrt{32}} = \$7.173
+\]</span></p>
+<p><strong>Margin of Error (MoE):</strong></p>
+<p>A <strong>margin of error</strong> represents the width of the confidence interval <code>between a sample mean and its upper limit or between a sample mean and its lower limit</code>. Notice that the confidence interval is <strong>symmetrical</strong> around the sample mean.</p>
+<p><span class="math display">\[MoE_{\bar{x}} = z_{\frac{\alpha}{2}}\sigma_{\bar{x}}\]</span></p>
+<p><strong>Confidence Levels:</strong></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="math display">\[UCL = \bar{x} + MoE\]</span></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">\[LCL = \bar{x} - MoE\]</span></p>
+</div>
+</div>
+<p><span class="math display">\[ \Downarrow \]</span></p>
+<p><span class="math display">\[MoE_{90} = 1.645 \cdot 7.176 = 11.80\]</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="math display">\[UCL = 129.2 + 11.8 = 141\]</span></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">\[LCL = 129.2 - 11.8 = 117\]</span></p>
+</div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 21%">
+<col style="width: 15%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>CL</th>
+<th><span class="math inline">\(z_{α/2}\)</span></th>
+<th>SE</th>
+<th>MoE</th>
+<th>LCL</th>
+<th>UCL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>90%</td>
+<td>1.645</td>
+<td>7.173</td>
+<td>11.80</td>
+<td>117</td>
+<td>141</td>
+</tr>
+<tr class="even">
+<td>95%</td>
+<td>1.960</td>
+<td>7.173</td>
+<td>14.06</td>
+<td>115</td>
+<td>143</td>
+</tr>
+<tr class="odd">
+<td>99%</td>
+<td>2.576</td>
+<td>7.174</td>
+<td>18.47</td>
+<td>110</td>
+<td>147</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="blockquote">
+<p>A <code>99%</code> confidence interval is even <strong>wider</strong> than the <code>95%</code> and <code>90%</code> intervals because a greater level of confidence requires covering a larger portion of the sampling distribution.</p>
+</blockquote>
+<section id="sample-means-and-90-confidence-intervals" class="level4">
+<h4 class="anchored" data-anchor-id="sample-means-and-90-confidence-intervals">Sample Means and 90% Confidence Intervals</h4>
+<p>A confidence interval does not guarantee that the true population mean will fall inside the interval calculated from a single sample. In the example, <code>Sample 1</code> produced a 90% confidence interval that correctly captured the true population mean of <code>125</code>. However, <code>Sample 5</code> produced an interval that entirely missed the true mean.</p>
+<p>This outcome is expected. A 90% confidence interval means that <strong>the method</strong>, when applied repeatedly across many random samples of the same size, will produce intervals that contain the population mean about 90% of the time. It does <strong>not</strong> mean that any individual interval has a 90% chance of containing the true value, nor does it guarantee that 9 out of 10 intervals from a small set of samples will succeed.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 21%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Sample</th>
+<th>Sample Mean</th>
+<th>Margin of Error</th>
+<th>Lower Limit</th>
+<th>Upper Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>129.20</td>
+<td>11.80</td>
+<td>117.40</td>
+<td>141.00</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>132.00</td>
+<td>11.80</td>
+<td>120.20</td>
+<td>143.80</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>117.50</td>
+<td>11.80</td>
+<td>105.70</td>
+<td>129.30</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>128.20</td>
+<td>11.80</td>
+<td>116.40</td>
+<td>140.00</td>
+</tr>
+<tr class="odd">
+<td><strong>5</strong></td>
+<td><strong>108.80</strong></td>
+<td><strong>11.80</strong></td>
+<td><strong>97.00</strong></td>
+<td><strong>120.60</strong></td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>130.10</td>
+<td>11.80</td>
+<td>118.30</td>
+<td>141.90</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>117.90</td>
+<td>11.80</td>
+<td>106.10</td>
+<td>129.70</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>120.10</td>
+<td>11.80</td>
+<td>108.30</td>
+<td>131.90</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>133.80</td>
+<td>11.80</td>
+<td>122.00</td>
+<td>145.60</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>119.00</td>
+<td>11.80</td>
+<td>107.20</td>
+<td>130.80</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The key idea:</strong> confidence intervals describe the <strong>long-run performance</strong> of the estimation procedure, not certainty about the result of a single sample.</p>
+<div id="b28ad173" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-2-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="758" height="566"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="confidence-intervals-for-the-mean-unknown-sd" class="level3">
+<h3 class="anchored" data-anchor-id="confidence-intervals-for-the-mean-unknown-sd">Confidence Intervals for the Mean | Unknown SD</h3>
+<p>So far our confidence-interval examples have assumed that the population standard deviation (<span class="math inline">\(\sigma\)</span>), is known. In practice, this is rarely the case. Most of the time, we only have access to the sample itself, and we must estimate the population standard deviation using the <strong>sample standard deviation</strong>, <span class="math inline">\(s\)</span>.</p>
+<p><strong>The sample standard deviation can always be computed directly from the data:</strong></p>
+<p><span class="math display">\[
+s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n - 1}}
+\]</span></p>
+<p>Since <span class="math inline">\(s\)</span> is based on the sample, it is only an estimate of the true population standard deviation. As a result, when <span class="math inline">\(\sigma\)</span> is unknown, we cannot rely on the normal distribution to calculate a confidence interval for the mean.</p>
+<p>Instead, we use the <strong>Student’s t-distribution</strong>, which adjusts for the uncertainty created by estimating <span class="math inline">\(\sigma\)</span> with <span class="math inline">\(s\)</span>.</p>
+<p>The <code>t-distribution</code> behaves like the normal distribution when sample sizes are large, but it has heavier tails for smaller sample sizes. This accounts for the additional variability that comes from estimating the standard deviation. As the sample size increases, the t-distribution approaches the standard normal distribution.</p>
+<p>The overall structure of the confidence-interval formula remains the same:</p>
+<ul>
+<li><span class="math inline">\(\sigma \Rightarrow s\)</span><br>
+</li>
+<li><code>normal distribution</code> <span class="math inline">\(\Rightarrow\)</span> <code>t-distribution</code></li>
+<li><code>z-table</code> <span class="math inline">\(\Rightarrow\)</span> <code>t-tabe</code></li>
+</ul>
+<p>This adjustment allows us to construct valid confidence intervals in the realistic case where the population standard deviation is not available.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Interesting fact about T-distribution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Interesting fact about T-distribution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Please watch <a href="https://www.youtube.com/watch?v=32CuxWdOlow">this video.</a></p>
+</div>
+</div>
+<section id="students-t-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="students-t-distribution">Student’s t-distribution</h4>
+<ul>
+<li>A bell-shaped and symmetric, similar to the normal distribution.</li>
+<li>Its exact shape depends on the <strong>degrees of freedom</strong>, defined as <span class="math inline">\(n - 1\)</span> for a sample of size <span class="math inline">\(n\)</span>.</li>
+<li>The total area under the curve is <code>1.0</code>, just like any valid probability distribution.</li>
+<li>Because it is wider and flatter than the normal distribution, the critical values from the t-distribution are <strong>larger</strong> than z-critical values for the same confidence level. This leads to wider confidence intervals, reflecting the extra uncertainty created by estimating the population standard deviation with the sample standard deviation.</li>
+<li>The t-distribution is actually a <strong>family</strong> of distributions—one for each degree of freedom. As the degrees of freedom increase, the t-distribution becomes more similar to the normal distribution. With more than 100 degrees of freedom, the two are practically identical.</li>
+</ul>
+<div id="605443ee" class="cell" data-fig-height="5" data-fig-width="18" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-3-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1430" height="374"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="calculating-the-confidence-intervals" class="level4">
+<h4 class="anchored" data-anchor-id="calculating-the-confidence-intervals">Calculating the Confidence Intervals</h4>
+<p>Is it is mentioned above, the calculation methodology is the same:</p>
+<ol type="1">
+<li>Calculate Sample Mean</li>
+<li>Calcualate the Standard Error</li>
+<li>Calculate the Margin of Error</li>
+<li>Caluclate the Confidence Inervals</li>
+</ol>
+<blockquote class="blockquote">
+<p>Note the Confidence Level/Significance Level (<span class="math inline">\(\alpha\)</span>) must be given. Let’s assume that the <span class="math inline">\(\alpha = 0.05\)</span></p>
+</blockquote>
+<section id="weekly-visitors" class="level5">
+<h5 class="anchored" data-anchor-id="weekly-visitors">Weekly Visitors</h5>
+<p>The shop owner expects to have more than <strong>90</strong> visiters per week for the sustainable develepment.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Week</th>
+<th>Visitors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>116</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>83</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>89</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>87</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>81</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>109</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>114</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>123</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>102</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>131</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>96</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>74</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>109</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>106</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>118</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>78</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>91</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>98</td>
+</tr>
+</tbody>
+</table>
+<p>In order to calculate the <code>sample mean</code> and the <code>sample standard deviation</code> we can use excel:</p>
+<ul>
+<li><strong>DF:</strong> <code>COUNT(B2:B19)-1 = 17</code></li>
+<li><strong>Mean:</strong> <code>AVERAGE(B2:B19) = 100.3</code></li>
+<li><strong>Standard Deviation | Sample:</strong> <code>STDEV.S(B2:B19) = 16.6</code></li>
+<li><strong>Critical t-score:</strong> <code>T.INV.2T(alpha, df) = T.INV.2T(0.05,17) = 2.11</code></li>
+<li><strong>Margin of Error:</strong> <code>CONFIDENCE.T(alpha, sd,n) = CONFIDENCE.T(0.05, 16.6,18) = 8.25</code></li>
+</ul>
+<p>Margine Of Error</p>
+<p><span class="math display">\[
+\hat{\sigma}_{\bar{x}} = \frac{s}{\sqrt{n}} = 3.92
+\]</span></p>
+<p><strong>Confidence Levels:</strong></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="math display">\[UCL = \bar{x} + MoE\]</span></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">\[LCL = \bar{x} - MoE\]</span></p>
+</div>
+</div>
+<p><span class="math display">\[ \Downarrow \]</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="math display">\[UCL = 100.3 + 8.25 = 108.55\]</span></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">\[LCL = 100.3 - 8.25 = 92.05\]</span></p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled" title="Conclusion">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Conclusion
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Based on the result we are <code>95% confident</code> that the true population mean for the number of visits per week is between <code>92</code> and <code>108</code>. Because the entire interval exceeds 90 patients per week, it apears that the financial goals are being met.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Remember">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Remember
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The properties of the confidence intervals using the t-distribution are the same for those constructed using the normal distribtuion:</p>
+<ul>
+<li>Increasing the confidence level will result in a wider (less precise) confidence interval.</li>
+<li>Increasing the sample size will result in a narrower (more precise) confidence interval.</li>
+<li>The margin of error is given by: <span class="math inline">\(\text{Margin of Error} = t_{\alpha/2} \, \hat{\sigma}_{\bar{x}}\)</span></li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="confidence-intervals-for-proportions" class="level3">
+<h3 class="anchored" data-anchor-id="confidence-intervals-for-proportions">Confidence Intervals for Proportions</h3>
+<p>The confidence interval for the proportion is an interval estimate around a sample proportion that provides us with a range of where the true population proportion lies.</p>
+<p>Recall that the proportion data follow the binomial distribution, which can be approximated by the normal distribution under the following condition:</p>
+<p><span class="math display">\[np \ge 5 \text{ and } n(1-n) \ge 5\]</span></p>
+<p>where:</p>
+<ul>
+<li><strong>p:</strong> probability of a success in the population</li>
+<li><strong>n:</strong> sample size</li>
+</ul>
+<div class="callout callout-style-simple callout-note callout-titled" title="Mini Case Study">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Mini Case Study
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Suppose the online channel would like to estimate the proportion of customers who are female in order to improve the channel’s advertising effectiveness.</p>
+<p>Let’s say from a random sample of <code>175</code> customers, <code>116</code> were female.</p>
+</div>
+</div>
+<p><strong>Sample Proportion</strong></p>
+<p><span class="math display">\[\bar{p} = \frac{x}{n} = \frac{116}{175}=0.663\]</span></p>
+<p>where:</p>
+<ul>
+<li><strong>x:</strong> the number of observations of interest in the sample (successes)</li>
+<li><strong>n:</strong> the sample size</li>
+</ul>
+<p>To construct a confidence interval, we need the <strong>standard error of the proportion</strong>.</p>
+<p>The true standard error (using the unknown population proportion <span class="math inline">\(p\)</span>) is:</p>
+<p><span class="math display">\[
+\sigma_{\bar{p}} = \sqrt{\frac{p(1 - p)}{n}}
+\]</span></p>
+<p>We do not know <span class="math inline">\(p\)</span>, yet the formula for standard error requires <span class="math inline">\(p\)</span>.</p>
+<p>We can use the sample proportion <span class="math inline">\(\bar{p}\)</span> to approximate <span class="math inline">\(p\)</span>. This gives the <strong>approximate standard error</strong>:</p>
+<p><span class="math display">\[
+\hat{\sigma}_{\bar{p}} = \sqrt{\frac{\bar{p}(1 - \bar{p})}{n}}
+\]</span></p>
+<p>After calculated the standard error, can calculate the <code>99%</code> confidence interval for the proportion of female shopping customers using <code>MoE</code> and calculating <code>UCL</code> and <code>LCL</code>.</p>
+<p><span class="math display">\[
+\hat{\sigma}_{\bar{p}}
+= \sqrt{\frac{\bar{p}(1 - \bar{p})}{n}}
+= \sqrt{\frac{0.663(1 - 0.663)}{175}}
+= \sqrt{\frac{0.223}{175}}
+= \sqrt{0.001274}
+= 0.0357
+\]</span></p>
+<p><span class="math display">\[ \Downarrow \]</span></p>
+<p><span class="math display">\[
+UCL_{\bar{p}} = \bar{p} + z_{\alpha/2}\hat{\sigma}_{\bar{p}} = 0.663 + (2.575)(0.0357) =  0.755
+\]</span></p>
+<p><span class="math display">\[
+LCL_{\bar{p}} = \bar{p} - z_{\alpha/2}\hat{\sigma}_{\bar{p}} = 0.663 - (2.575)(0.0357) =0.571
+\]</span></p>
+<p>Based on our sample proportion of <code>0.663</code>, we are <code>99%</code> confident that the proportion of female shoppers is between <code>0.572  and 0.755</code>,</p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Why is it wider?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Why is it wider?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The confidence interval seems wider as we want to be 99% confident of capturing the population proportion we need a wide interval</p>
+</div>
+</div>
+</section>
+<section id="determining-the-required-sample-size" class="level3">
+<h3 class="anchored" data-anchor-id="determining-the-required-sample-size">Determining the Required Sample Size</h3>
+<p>So far, we have focused on calculating a confidence interval and margin of error for a population when we know:</p>
+<ul>
+<li>The confidence level<br>
+</li>
+<li>The sample size<br>
+</li>
+<li>The standard deviation</li>
+</ul>
+<p><strong>Now we will try to reverse the process.</strong> Instead of computing the margin of error from the sample size, we determine <strong>the sample size needed</strong> to achieve a desired margin of error, given:</p>
+<ul>
+<li>The confidence level<br>
+</li>
+<li>The population standard deviation</li>
+</ul>
+<p>This procedure is extremely useful because one of the first practical questions in statisticalwork is: <em>How large should the sample be?</em></p>
+<ul>
+<li><strong>too large:</strong> wastes resources.<br>
+</li>
+<li><strong>too small:</strong> produces estimates that are not precise enough.</li>
+</ul>
+<p>We will begin by determining the required sample size for estimating a population <strong>mean</strong> and <strong>proportion</strong>.</p>
+<section id="sample-size-estimating-population-mean" class="level4">
+<h4 class="anchored" data-anchor-id="sample-size-estimating-population-mean">Sample Size | Estimating Population Mean</h4>
+<div class="callout callout-style-default callout-tip callout-titled" title="At&amp;T Case Study">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>At&amp;T Case Study
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A major telecom operator in 2024 needed an accurate estimate of average monthly mobile data usage. With heavy-streaming customers generating most of the traffic, the operator aimed to set plans that balance cost and capacity.</p>
+<p>To achieve this at a <strong>95% confidence level</strong> with a <strong><span class="math inline">\(\pm2\)</span> GB margin of error</strong>, the operator calculated the sample size required to estimate the population mean efficiently and reliably.</p>
+<p>Based on internal analytics, the population standard deviation is believed to be <span class="math inline">\(\sigma = 8\)</span> GB.</p>
+</div>
+</div>
+<p>In order to identify the Sample Size we need to do minor algebra for MoE Equation:</p>
+<p><span class="math display">\[MoE_\bar{x} = z_{\frac{\alpha}{2}} \sigma_{\bar{x}} = z_{\frac{\alpha}{2}} \frac{\sigma}{\sqrt{n}} \Rightarrow  \sqrt{n} = \frac{z_{\frac{\alpha}{2}}\sigma}{MoE}\]</span></p>
+<p><span class="math display">\[
+n = \left( \frac{z_{\alpha/2}\, 2\sigma}{\text{MoE}} \right)^2
+\]</span></p>
+<p>Remember for a 95% confidence level critical z-value would be <span class="math inline">\(z_{\alpha/2} = 1.96\)</span></p>
+<p><strong>Calculate and round up:</strong></p>
+<p><span class="math display">\[
+n = \left( \frac{1.96 \cdot 8}{2} \right)^2 = 61.46 = 62
+\]</span></p>
+<p>Thus, a sample of <strong>62 customers</strong> is required to estimate the average monthly mobile data usage with a <strong>95% confidence interval</strong> and a <strong><span class="math inline">\(\pm2\)</span> GB margin of error</strong>.</p>
+</section>
+<section id="sample-size-estimating-proportion" class="level4">
+<h4 class="anchored" data-anchor-id="sample-size-estimating-proportion">Sample Size | Estimating Proportion</h4>
+<div class="callout callout-style-default callout-tip callout-titled" title="FinTech Case Study: Biometric Login Adoption">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>FinTech Case Study: Biometric Login Adoption
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A leading FinTech app in 2025 wants to estimate the proportion of users who <strong>enable biometric login</strong><br>
+(FaceID/TouchID). This metric is crucial for security-feature adoption and for planning future upgrades.</p>
+<p>To achieve a <strong>95% confidence level</strong> with a <strong><span class="math inline">\(\pm2\)</span>% margin of error</strong>, the company needs to determine the minimum sample size required to estimate this proportion accurately.</p>
+<p>A quick pilot test of 200 users revealed that <strong>24%</strong> had biometric login enabled, giving<br>
+<span class="math display">\[\bar{p} = 0.24\]</span></p>
+</div>
+</div>
+<p><span class="math display">\[
+n = \frac{z_{\alpha/2}^2 \, \bar{p}(1 - \bar{p})}{(MoE_{\bar{p}})^2}
+\]</span></p>
+<p>For a <strong>95% confidence level</strong>, we use:</p>
+<ul>
+<li><span class="math inline">\(z_{\alpha/2} = 1.96\)</span></li>
+<li><span class="math inline">\(\bar{p} = 0.24\)</span></li>
+<li><span class="math inline">\(MoE_{\bar{p}} = 0.02\)</span></li>
+</ul>
+<p><strong>Thus</strong></p>
+<p><span class="math display">\[
+n \approx \frac{(1.96)^2 (0.24)(0.76)}{(0.02)^2} \approx 1402.6 \Rightarrow 1403
+\]</span></p>
+<p>A sample of <strong>1,403 users</strong> is required to estimate the true proportion of biometric-enabled users within<br>
+a <strong>95% confidence interval</strong> and <strong><span class="math inline">\(\pm2\)</span> percentage points of precision</strong>.</p>
+<!-- TODO Calculate for finit population -->
+</section>
+</section>
+</section>
+<section id="hypothesis-testing" class="level2">
+<h2 class="anchored" data-anchor-id="hypothesis-testing">Hypothesis Testing</h2>
+<p>In the <strong>statistical world</strong>, a <strong>hypothesis</strong> is an assumption about a specific population parameter, such as a mean, a proportion, or a standard deviation.</p>
+<p>We data Analyists/Statistitians like to make an assumptions about the value of a population parameter, and then:</p>
+<ul>
+<li>collect a sample from that population,</li>
+<li>measure the sample,</li>
+<li>declare in ascholarly manner, whether the sample supports the original assumption.</li>
+</ul>
+<p><strong>This, in a nutshell, is what hypothesis testing is all about.</strong></p>
+<!-- TODO -->
+<section id="stating-the-hypothesis" class="level3">
+<h3 class="anchored" data-anchor-id="stating-the-hypothesis">Stating The Hypothesis</h3>
+<p>A recent Wall Street Journal article titled <strong>“Does the Internet Make You Smarter or Dumber?”</strong> posed the possibility that online activities turn us into shallow thinkers. The article cited a statistic claiming that the average time an American spends looking at a Web page is <code>56 seconds</code>. A researcher at a local university would like to test this claim using a hypothesis test.</p>
+<section id="null-hypothesis" class="level4">
+<h4 class="anchored" data-anchor-id="null-hypothesis">Null Hypothesis</h4>
+<p>The null hypothesis denoted by <span class="math inline">\(H_0\)</span>, <em>represents the status</em> quo and involves stating the belief that the population parameter is <strong><span class="math inline">\(\le,=, \ge\)</span></strong> a specific value. The null hypothesis is believed to be true unless there is overwhelming evidence to the contrary.</p>
+</section>
+<section id="alternative-hypothesis" class="level4">
+<h4 class="anchored" data-anchor-id="alternative-hypothesis">Alternative hypothesis</h4>
+<p>The alternative hypothesis, denoted by <span class="math inline">\(H_1\)</span>, represents the opposite of the null hypothesis and is believed to be true if the null hypothesis is found to be false. The alternative hypothesis always states that the population parameter is <strong><span class="math inline">\(\gt,\ne, \lt\)</span></strong> a specific value.</p>
+<p>You need to be careful how you state the null and alternative hypotheses. Your decision will depend on the nature of the test and the motivation of the person conducting it. Suppose the purpose of the test is to determine if the population mean is equal to a specific value, which is what we would want to test based on our previous Wall Street Journal article</p>
+<div class="callout callout-style-default callout-important callout-titled" title="Analogy with the Legan System">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Analogy with the Legan System
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>We can never accept the Null Hypothesis!</strong></p>
+<p>In order to completely understand the process consider the analogy with the legal system.</p>
+<p><em>We can either reject it or not reject it (fail to reject it)</em></p>
+<p>The court system assumes a persion is innocent until proben guily, the hypothesis test is formulated as follows</p>
+<ul>
+<li><span class="math inline">\(H_0:\)</span> the defendant is innocent (sttus quo)</li>
+<li><span class="math inline">\(H_1:\)</span> the defendant is guilty</li>
+</ul>
+<p>TH court system might have two conclusions:</p>
+<ol type="1">
+<li><strong>Reject the Null Hypothesis</strong> <span class="math inline">\(\rightarrow\)</span> the defendant is guilty</li>
+<li><strong>Fail to reject the Null Hypothesis</strong> <span class="math inline">\(\rightarrow\)</span> the defendant is guilty</li>
+</ol>
+</div>
+</div>
+</section>
+</section>
+<section id="steps-in-hypothesis-testing" class="level3">
+<h3 class="anchored" data-anchor-id="steps-in-hypothesis-testing">Steps In hypothesis testing</h3>
+<ol type="1">
+<li>Identify <strong>the null</strong> and <strong>alternative hypotheses</strong></li>
+<li>Set a value for the <strong>significance level</strong> <span class="math inline">\(\alpha\)</span></li>
+<li>Determine the appropriate <strong>critical value</strong></li>
+<li>Calculate the appropriate <strong>test statistic</strong></li>
+<li>Compare the <strong>test statistics</strong> with the <strong>critical score</strong></li>
+<li>State your conclusion</li>
+</ol>
+<section id="identifying-the-null-hypothesis" class="level4">
+<h4 class="anchored" data-anchor-id="identifying-the-null-hypothesis">Identifying the Null Hypothesis</h4>
+<p>You need to be careful how you state the null and alternative hypotheses. Your decision will depend on the nature of the test and the motivation of the person conducting it. Suppose the purpose of the test is to determine if the population mean is equal to a specific value, which is what we would want to test based on our previous Wall Street Journal article. We would then assign this statement as the null hypothesis, which results in the following equation:</p>
+<p>In this example the Internet users spend an average timeof <code>56 seconds</code> on a Web page. Thhus the status qua would be</p>
+<p><span class="math display">\[
+H_0: \mu = 56 \text{ seconds (status quo)}
+\]</span></p>
+<p><span class="math display">\[
+H_1: \mu \ne  56 \text{ seconds}
+\]</span></p>
+<section id="all-combinations" class="level5">
+<h5 class="anchored" data-anchor-id="all-combinations">All combinations</h5>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 30%">
+<col style="width: 28%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Two-Tailed Test</th>
+<th>Left-Tailed Test</th>
+<th>Right-Tailed Test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Null</strong></td>
+<td><span class="math display">\[H_0: \mu = 56\]</span></td>
+<td><span class="math display">\[H_0: \mu \ge 56\]</span></td>
+<td><span class="math display">\[H_0: \mu \le 56\]</span></td>
+</tr>
+<tr class="even">
+<td><strong>Alternative</strong></td>
+<td><span class="math display">\[H_1: \mu \ne 56\]</span></td>
+<td><span class="math display">\[H_1: \mu &lt; 56\]</span></td>
+<td><span class="math display">\[H_1: \mu &gt; 56\]</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="set-significance-level" class="level4">
+<h4 class="anchored" data-anchor-id="set-significance-level">Set Significance Level</h4>
+<p>The level of significance represents the <em>probability of making a Type I error.</em> A Type I error occurs when we reject the null hypothesis but it is actually true. I the scope of the program we will set <span class="math inline">\(\alpha = 0.05\)</span> which is a common value used in hypothesis testing.</p>
+<blockquote class="blockquote">
+<p>In the scope the above exampl <code>Type I Error</code> we conclude that the true average time spent on a webpage is not 56 seconds, even though in reality it is 56 seconds.</p>
+</blockquote>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Alpha (α)</th>
+<th>Tail</th>
+<th>Critical z-Score</th>
+<th>Critical t-Score <strong>(df = 20)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.01</td>
+<td>One</td>
+<td>2.33</td>
+<td>2.528</td>
+</tr>
+<tr class="even">
+<td>0.01</td>
+<td>Two</td>
+<td>2.575</td>
+<td>2.845</td>
+</tr>
+<tr class="odd">
+<td>0.02</td>
+<td>One</td>
+<td>2.05</td>
+<td>2.312</td>
+</tr>
+<tr class="even">
+<td>0.02</td>
+<td>Two</td>
+<td>2.33</td>
+<td>2.528</td>
+</tr>
+<tr class="odd">
+<td>0.05</td>
+<td>One</td>
+<td>1.645</td>
+<td>1.725</td>
+</tr>
+<tr class="even">
+<td>0.05</td>
+<td>Two</td>
+<td>1.96</td>
+<td>2.086</td>
+</tr>
+<tr class="odd">
+<td>0.10</td>
+<td>One</td>
+<td>1.28</td>
+<td>1.325</td>
+</tr>
+<tr class="even">
+<td>0.10</td>
+<td>Two</td>
+<td>1.645</td>
+<td>1.725</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In practical terms:</strong></p>
+<ul>
+<li>The researcher conducts a sample study.</li>
+<li>The sample mean differs enough from 56 seconds to fall outside the acceptance region.</li>
+<li>The test rejects the null hypothesis at the <code>5%</code>level.</li>
+<li>But in truth, Americans do spend exactly <code>56</code> seconds on average.</li>
+</ul>
+<p><img src="../../img/statistics/type_I_and_type_II.png" class="img-fluid"></p>
+</section>
+<section id="determining-critical-values-and-the-test-statistics" class="level4">
+<h4 class="anchored" data-anchor-id="determining-critical-values-and-the-test-statistics">Determining Critical Values and the Test Statistics</h4>
+<div class="callout callout-style-simple callout-note callout-titled" title="In case of z-test">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>In case of z-test
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>When Variance is known</strong></p>
+<ul>
+<li>test statistic would be <span class="math inline">\(z_{\bar{x}}\)</span><br>
+</li>
+<li>critical value would be <span class="math inline">\(z_{\alpha}\)</span></li>
+</ul>
+<p><span class="math display">\[
+z_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{\sigma / \sqrt{n}}
+\]</span></p>
+<p><strong>Given</strong></p>
+<ul>
+<li>Claimed mean: <span class="math inline">\(\mu_{H_0} = 56\)</span> seconds<br>
+</li>
+<li>Sample mean: <span class="math inline">\(\bar{x} = 62\)</span> seconds<br>
+</li>
+<li><strong>Population standard deviation (historical estimate):</strong> <span class="math inline">\(\sigma = 18\)</span> seconds<br>
+</li>
+<li>Sample size: <span class="math inline">\(n = 45\)</span></li>
+</ul>
+<p><span class="math display">\[
+z_{\bar{x}}
+= \frac{\bar{x} - \mu_{H_0}}{\sigma / \sqrt{n}}
+= \frac{62 - 56}{18 / \sqrt{45}}
+= \frac{6}{2.683}
+= 2.24
+\]</span></p>
+<p>A test statistic of <strong>2.24</strong> lies well into the rejection region (far from 0).</p>
+<ul>
+<li>For a <strong>two-tailed test</strong> at <span class="math inline">\(\alpha = 0.05\)</span>, the critical values are <span class="math inline">\(\pm 1.96\)</span>.<br>
+</li>
+<li>Since <strong>2.24 &gt; 1.96</strong>, we <strong>reject <span class="math inline">\(H_0\)</span></strong>.</li>
+</ul>
+<p><strong>Interpretation:</strong><br>
+There is statistically significant evidence that the true average time spent on a webpage is <strong>different</strong> from 56 seconds.</p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled" title="In case of t-test">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>In case of t-test
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>When Variance is Unknown</strong></p>
+<ul>
+<li>test statistic would be <span class="math inline">\(t_{\bar{x}}\)</span><br>
+</li>
+<li>critical value would be <span class="math inline">\(t_{\alpha}\)</span> (from the t-table)</li>
+</ul>
+<p><span class="math display">\[
+t_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{s / \sqrt{n}}
+\]</span></p>
+<p><strong>Given</strong></p>
+<ul>
+<li>Claimed mean: <span class="math inline">\(\mu_{H_0} = 56\)</span> seconds<br>
+</li>
+<li>Sample mean: <span class="math inline">\(\bar{x} = 62\)</span> seconds<br>
+</li>
+<li><strong>Sample standard deviation:</strong> <span class="math inline">\(s = 20\)</span> seconds<br>
+</li>
+<li>Sample size: <span class="math inline">\(n = 30\)</span><br>
+</li>
+<li>Degrees of freedom: <span class="math inline">\(df = n - 1 = 29\)</span></li>
+</ul>
+<p><strong>Test Statistic</strong></p>
+<p><span class="math display">\[
+t_{\bar{x}}
+= \frac{62 - 56}{20 / \sqrt{30}}
+= \frac{6}{3.651}
+= 1.64
+\]</span></p>
+<p><strong>Critical Value</strong></p>
+<p>For a <strong>two-tailed test</strong> at <span class="math inline">\(\alpha = 0.05\)</span> with <span class="math inline">\(df = 29\)</span>:</p>
+<p><span class="math display">\[f
+t_{\alpha/2, \, df} = t_{0.025,29} = 2.045
+\]</span></p>
+<p><strong>Decision</strong></p>
+<p>Since <strong>1.64 &lt; 2.045</strong>, we <strong>fail to reject <span class="math inline">\(H_0\)</span></strong>. There is <strong>not enough statistical evidence</strong> to conclude that the true average time spent on a webpage is different from <strong>56 seconds</strong>. The sample mean is slightly higher, <strong>but not far enough from 56</strong> to be statistically significant given the sample size and sample variability.</p>
+</div>
+</div>
+<p>In the scope of this program we are going to conduct two hypothesis testing</p>
+<ol type="1">
+<li>Hypothesis Testing for a Single Population</li>
+<li>Hypothesis Testing for two Samples (A/b testing) <!-- TODO --></li>
+</ol>
+</section>
+</section>
+<section id="graphical-representation" class="level3">
+<h3 class="anchored" data-anchor-id="graphical-representation">Graphical Representation</h3>
+<div id="436e2976" class="cell" data-fig-height="3" data-fig-width="5" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-4-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1910" height="470"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="decision-rules" class="level4">
+<h4 class="anchored" data-anchor-id="decision-rules">Decision Rules</h4>
+<section id="z-value" class="level5">
+<h5 class="anchored" data-anchor-id="z-value">Z Value</h5>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 39%">
+<col style="width: 30%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test Type</th>
+<th>Hypotheses</th>
+<th>Condition</th>
+<th>Conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Two-tail</strong></td>
+<td><span class="math inline">\(H_0: \mu = \mu_0\)</span></td>
+<td><span class="math inline">\(\lvert z_x \rvert &gt; z_{\alpha/2}\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(H_1: \mu \ne \mu_0\)</span></td>
+<td><span class="math inline">\(\lvert z_x \rvert \le z_{\alpha/2}\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>One-tail</strong></td>
+<td><span class="math inline">\(H_0: \mu \le \mu_0\)</span></td>
+<td><span class="math inline">\(z_x &gt; z_\alpha\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(H_1: \mu &gt; \mu_0\)</span></td>
+<td><span class="math inline">\(z_x \le z_\alpha\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>One-tail</strong></td>
+<td><span class="math inline">\(H_0: \mu \ge \mu_0\)</span></td>
+<td><span class="math inline">\(z_x &lt; -z_\alpha\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(H_1: \mu &lt; \mu_0\)</span></td>
+<td><span class="math inline">\(z_x \ge -z_\alpha\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p-value" class="level5">
+<h5 class="anchored" data-anchor-id="p-value">P Value</h5>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 35%">
+<col style="width: 35%">
+<col style="width: 17%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test Type</th>
+<th>Hypotheses</th>
+<th>Condition</th>
+<th>Conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Two-tail</strong></td>
+<td><span class="math inline">\(H_0: \mu = \mu_0\)</span></td>
+<td><span class="math inline">\(\lvert t_{\bar{x}} \rvert &gt; t_{\alpha/2,\;df}\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(H_1: \mu \ne \mu_0\)</span></td>
+<td><span class="math inline">\(\lvert t_{\bar{x}} \rvert \le t_{\alpha/2,\;df}\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Right-tail</strong></td>
+<td><span class="math inline">\(H_0: \mu \le \mu_0\)</span></td>
+<td><span class="math inline">\(t_{\bar{x}} &gt; t_{\alpha,\;df}\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(H_1: \mu &gt; \mu_0\)</span></td>
+<td><span class="math inline">\(t_{\bar{x}} \le t_{\alpha,\;df}\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Left-tail</strong></td>
+<td><span class="math inline">\(H_0: \mu \ge \mu_0\)</span></td>
+<td><span class="math inline">\(t_{\bar{x}} &lt; -t_{\alpha,\;df}\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(H_1: \mu &lt; \mu_0\)</span></td>
+<td><span class="math inline">\(t_{\bar{x}} \ge -t_{\alpha,\;df}\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p-value-1" class="level5">
+<h5 class="anchored" data-anchor-id="p-value-1">P Value</h5>
+<p>It is mor convenient the use <code>p-value</code> apporach, as it helps us to rememeber the decission rule easily.</p>
+<p>If the <code>p-value</code> is less than <span class="math inline">\(\alpha\)</span>, there is little chance of observing the sample mean from the population on which it is based if the null hypothesis were actually true. We therefore reject the null hypothesis under this condition.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Condition</strong></th>
+<th><strong>Conclusion</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p\text{-Value} \ge \alpha\)</span></td>
+<td>Do not reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p\text{-Value} &lt; \alpha\)</span></td>
+<td>Reject <span class="math inline">\(H_0\)</span></td>
+</tr>
+</tbody>
+</table>
+<section id="visuall-representation" class="level6">
+<h6 class="anchored" data-anchor-id="visuall-representation">Visuall Representation</h6>
+<div id="23bcbeb0" class="cell" data-fig-height="3" data-fig-width="5" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-5-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1910" height="470"></p>
+</figure>
+</div>
+</div>
+</div>
+<!-- HERE -->
+</section>
+</section>
+</section>
+</section>
+<section id="type-ii-error" class="level3">
+<h3 class="anchored" data-anchor-id="type-ii-error">Type II Error</h3>
+<p>We can also be guilty of <strong>Type II error</strong>, which occurs when the <code>null hypothesis is really false and we fail to reject it</code>. The probability of a Type II error is known as <span class="math inline">\(\beta\)</span>.</p>
+<p><img src="../../../img/statistics/type_I_and_type_II.png" class="img-fluid"></p>
+<p>When we decide to <strong>reject the null hypothesis, there is always the chance, with</strong> probability equal to <span class="math inline">\(\alpha\)</span>, that we are wrong! In the Nissan Leaf example, a is the probability of concluding that the average driving distance does exceed 100 miles when, in fact, it does not exceed 100 miles.</p>
+</section>
+<section id="case-study" class="level3">
+<h3 class="anchored" data-anchor-id="case-study">Case Study</h3>
+<div class="callout callout-style-default callout-tip callout-titled" title="Urban Traffic Analytics: Average Speed in Yerevan">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Urban Traffic Analytics: Average Speed in Yerevan
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Urban mobility reports often claim that the average weekday driving speed in Yerevan is <code>15 km/h</code>. A transportation analyst wants to test this claim using recent GPS data from ride-sharing vehicles.</p>
+<p>This example is ideal for explaining all <strong>three hypothesis-test formulations:</strong></p>
+<ul>
+<li><strong>Two-Tailed:</strong> Is the true average speed different from <code>15 km/h</code>?</li>
+<li><strong>Right-Tailed:</strong> Are drivers going faster than <code>15 km/h</code>?</li>
+<li><strong>Left-Tailed:</strong> Are drivers going slower than <code>15 km/h</code>?</li>
+</ul>
+</div>
+</div>
+<section id="two-tailed-test-is-the-true-average-speed-different-from-15-kmh" class="level4">
+<h4 class="anchored" data-anchor-id="two-tailed-test-is-the-true-average-speed-different-from-15-kmh">Two-Tailed Test: Is the true average speed different from 15 km/h?</h4>
+<p>We want to test whether the true average weekday driving speed in Yerevan differs from the commonly stated value of <strong>15 km/h</strong>.</p>
+<section id="hypotheses" class="level5">
+<h5 class="anchored" data-anchor-id="hypotheses">Hypotheses</h5>
+<p><span class="math display">\[H_0: \mu = 15\]</span><br>
+<span class="math display">\[H_1: \mu \ne 15\]</span></p>
+<p>Since the population standard deviation is unknown, a <strong>one-sample t-test</strong> is appropriate.</p>
+<p><strong>Given</strong></p>
+<ul>
+<li><strong>Sample size:</strong> <span class="math inline">\(n = 1000\)</span></li>
+<li><strong>Sample mean:</strong> <span class="math inline">\(\bar{x} = 16.2 \text{ km/h}\)</span></li>
+<li><strong>Sample standard deviation:</strong> <span class="math inline">\(s = 5.1 \text{ km/h}\)</span></li>
+<li><strong>Null hypothesis mean:</strong> <span class="math inline">\(\mu_{H_0} = 15\)</span></li>
+<li><strong>Significance level:</strong> <span class="math inline">\(\alpha = 0.05\)</span></li>
+<li><strong>Degrees of freedom:</strong> <span class="math inline">\(df = 999\)</span></li>
+</ul>
+<p><strong>The test statistic is:</strong></p>
+<p><span class="math display">\[
+t_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{s/\sqrt{n}}
+\]</span></p>
+<div id="a724588c" class="cell" data-fig-height="3.5" data-fig-width="6" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-6-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Interpretation of the Two-Tailed Test</strong></p>
+<ul>
+<li>The computed test statistic is: <span class="math inline">\(t_{\bar{x}} = 7.44\)</span></li>
+<li>For a two-tailed test with <span class="math inline">\(\alpha = 0.05\)</span> and <span class="math inline">\(df = 999\)</span> <span class="math inline">\(\rightarrow\)</span> <span class="math inline">\(t_{\alpha/2, df} = \pm 1.96\)</span> :</li>
+<li><strong>p-value:</strong> <span class="math inline">\(p = 2 \cdot P(T &gt; 7.44)\approx 1 \times 10^{-10}\)</span></li>
+</ul>
+<p><strong>Decision</strong></p>
+<p><span class="math inline">\(|7.44| &gt; 1.96 \rightarrow\)</span> <span class="math inline">\(p &lt; 0.05\)</span></p>
+<p>We <strong>reject the null hypothesis</strong>. There is very strong evidence that the true average weekday driving speed in Yerevan is <strong>not equal</strong> to 15 km/h.</p>
+<!-- Right Tailed -->
+</section>
+</section>
+<section id="right-tailed-test-are-drivers-going-faster-than-15-kmh" class="level4">
+<h4 class="anchored" data-anchor-id="right-tailed-test-are-drivers-going-faster-than-15-kmh"><strong>Right-Tailed Test: Are drivers going faster than 15 km/h?</strong></h4>
+<p>We want to test whether the true average weekday driving speed in Yerevan is <strong>greater</strong> than<br>
+the stated value of <strong>15 km/h</strong>.</p>
+<section id="hypotheses-1" class="level5">
+<h5 class="anchored" data-anchor-id="hypotheses-1">Hypotheses</h5>
+<p><span class="math display">\[H_0: \mu \le 15\]</span><br>
+<span class="math display">\[H_1: \mu &gt; 15\]</span></p>
+<p><strong>Given</strong></p>
+<ul>
+<li><strong>Sample size:</strong> <span class="math inline">\(n = 1000\)</span></li>
+<li><strong>Sample mean:</strong> <span class="math inline">\(\bar{x} = 16.2\)</span> km/h</li>
+<li><strong>Sample standard deviation:</strong> <span class="math inline">\(s = 5.1\)</span> km/h</li>
+<li><strong>Null hypothesis mean:</strong> <span class="math inline">\(\mu_{H_0}=15\)</span></li>
+<li><strong>Significance level:</strong> <span class="math inline">\(\alpha=0.05\)</span></li>
+<li><strong>Degrees of freedom:</strong> <span class="math inline">\(df = 999\)</span></li>
+</ul>
+<p><strong>The test statistic is:</strong></p>
+<p><span class="math display">\[
+t_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{s/\sqrt{n}}
+\]</span></p>
+<div id="a52274da" class="cell" data-fig-height="3.5" data-fig-width="6" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-7-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="interpretation-of-the-right-tailed-test" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-of-the-right-tailed-test"><strong>Interpretation of the Right-Tailed Test</strong></h4>
+<ul>
+<li><strong>Test statistic:</strong> <span class="math inline">\(t_{\bar{x}} = 7.44\)</span></li>
+<li><strong>Critical value:</strong> <span class="math inline">\(t_{\alpha, 999} = 1.645\)</span></li>
+<li><strong>p-value:</strong> <span class="math inline">\(p \approx 5\times 10^{-11}\)</span></li>
+</ul>
+<p><strong>Decision</strong></p>
+<p>Since <span class="math inline">\(7.44 &gt; 1.645\)</span> and <span class="math inline">\(p &lt; 0.05\)</span>, we <strong>reject <span class="math inline">\(H_0\)</span></strong>.</p>
+<p><strong>Conclusion:</strong><br>
+There is extremely strong evidence that <strong>drivers in Yerevan drive faster than 15 km/h</strong> on average.</p>
+</section>
+<section id="left-tailed-test-are-drivers-slower-than-15-kmh" class="level4">
+<h4 class="anchored" data-anchor-id="left-tailed-test-are-drivers-slower-than-15-kmh">Left-Tailed Test: Are drivers slower than 15 km/h?</h4>
+<p>We want to test whether the true average weekday driving speed in Yerevan is <strong>less</strong> than<br>
+the stated value of <strong>15 km/h</strong>.</p>
+<section id="hypotheses-2" class="level5">
+<h5 class="anchored" data-anchor-id="hypotheses-2">Hypotheses</h5>
+<p><span class="math display">\[H_0: \mu \ge 15\]</span><br>
+<span class="math display">\[H_1: \mu &lt; 15\]</span></p>
+<p><strong>Given</strong></p>
+<ul>
+<li><strong>Sample size:</strong> <span class="math inline">\(n = 1000\)</span></li>
+<li><strong>Sample mean:</strong> <span class="math inline">\(\bar{x} = 16.2\)</span> km/h</li>
+<li><strong>Sample standard deviation:</strong> <span class="math inline">\(s = 5.1\)</span> km/h</li>
+<li><strong>Null hypothesis mean:</strong> <span class="math inline">\(\mu_{H_0} = 15\)</span></li>
+<li><strong>Significance level:</strong> <span class="math inline">\(\alpha = 0.05\)</span></li>
+<li><strong>Degrees of freedom:</strong> <span class="math inline">\(df = 999\)</span></li>
+</ul>
+<p><strong>The test statistic is:</strong></p>
+<p><span class="math display">\[
+t_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{s/\sqrt{n}}
+\]</span></p>
+<div id="2a55c693" class="cell" data-fig-height="3.5" data-fig-width="6" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-8-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="interpretation-of-the-left-tailed-test" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-of-the-left-tailed-test">Interpretation of the Left-Tailed Test</h4>
+<ul>
+<li><strong>Test statistic:</strong> <span class="math inline">\(t_{\bar{x}} = 7.44\)</span><br>
+</li>
+<li><strong>Critical value:</strong> <span class="math inline">\(t_{\alpha, 999} = -1.645\)</span><br>
+</li>
+<li><strong>p-value:</strong> <span class="math inline">\(p = P(T &lt; 7.44) \approx 1.00\)</span></li>
+</ul>
+<p><strong>Decision:</strong></p>
+<p>Since <span class="math inline">\(7.44\)</span> is <strong>not less</strong> than <span class="math inline">\(-1.645\)</span> and <span class="math inline">\(p &gt; 0.05\)</span>, we <strong>do NOT reject <span class="math inline">\(H_0\)</span></strong>.</p>
+<p><strong>Conclusion:</strong></p>
+<p>There is <strong>no evidence</strong> that drivers in Yerevan are slower than 15 km/h. In fact, the sample strongly indicates the opposite.</p>
+</section>
+</section>
+</section>
+<section id="comparing-two-population-means" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-two-population-means">Comparing Two Population Means</h2>
+<p>The <strong>sampling distribution for the difference in means</strong> is the result of subtracting the sampling distribution for the mean of one population from the sampling distribution for the mean of a second population.</p>
+<p><img src="../../img/statistics/two_sample.png" class="img-fluid"></p>
+<section id="two-sample-t-test-ab-test" class="level3">
+<h3 class="anchored" data-anchor-id="two-sample-t-test-ab-test">Two-Sample t-Test (A/B Test)</h3>
+<p>Does Variant B change average daily engagement?</p>
+<p>A telecom company is testing <strong>two versions of its mobile self-care app</strong>:</p>
+<ul>
+<li><strong>Version A (control)</strong> — current user interface<br>
+</li>
+<li><strong>Version B (treatment)</strong> — redesigned dashboard</li>
+</ul>
+<p>The team wants to know whether <strong>average daily user engagement (minutes/day)</strong> differs between the two versions.</p>
+<section id="hypotheses-3" class="level4">
+<h4 class="anchored" data-anchor-id="hypotheses-3">Hypotheses</h4>
+<p><span class="math display">\[H_0: \mu_A = \mu_B\]</span><br>
+<span class="math display">\[H_1: \mu_A \ne \mu_B\]</span></p>
+<p>Since population SD is unknown for both groups, we use a <strong>two-sample Welch t-test</strong>.</p>
+</section>
+<section id="given" class="level4">
+<h4 class="anchored" data-anchor-id="given">Given</h4>
+<ul>
+<li>Version A: <span class="math inline">\(n_A = 800\)</span>, <span class="math inline">\(\bar{x}_A = 12.5\)</span>, <span class="math inline">\(s_A = 6.2\)</span></li>
+<li>Version B: <span class="math inline">\(n_B = 850\)</span>, <span class="math inline">\(\bar{x}_B = 13.4\)</span>, <span class="math inline">\(s_B = 6.8\)</span></li>
+</ul>
+</section>
+<section id="test-statistic" class="level4">
+<h4 class="anchored" data-anchor-id="test-statistic">Test Statistic</h4>
+<p><span class="math display">\[
+t = \frac{\bar{x}_A - \bar{x}_B}{\sqrt{\frac{s_A^2}{n_A} + \frac{s_B^2}{n_B}}}
+\]</span></p>
+<p>Degrees of freedom use the <strong>Welch approximation</strong>.</p>
+<div id="155b7db1" class="cell" data-fig-height="3.5" data-fig-width="6" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-9-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpretation" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation">Interpretation</h4>
+<ul>
+<li>Test statistic: <span class="math inline">\(t = -2.93\)</span></li>
+<li>Critical values: <span class="math inline">\(t_{\alpha/2, df} \approx \pm 1.96\)</span></li>
+<li>p-value: <span class="math inline">\(p = 0.0034\)</span></li>
+</ul>
+</section>
+<section id="decision" class="level4">
+<h4 class="anchored" data-anchor-id="decision">Decision</h4>
+<p>Because <span class="math inline">\(|t| &gt; 1.96\)</span> and <span class="math inline">\(p &lt; 0.05\)</span>, we <strong>reject <span class="math inline">\(H_0\)</span></strong>.</p>
+</section>
+<section id="conclusion" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion">Conclusion</h4>
+<p><strong>Version B</strong> produces a <strong>statistically significant difference</strong> in average daily engagement compared to <strong>Version A.</strong></p>
+</section>
+</section>
+<section id="two-sample-t-test-right-tailed-test" class="level3">
+<h3 class="anchored" data-anchor-id="two-sample-t-test-right-tailed-test">Two Sample t-Test | Right-Tailed Test</h3>
+<p><em>Does Variant B increase engagement?</em></p>
+<p>Now the team wants a directional test:</p>
+<p><strong>Does Version B strictly increase user engagement?</strong></p>
+<section id="hypotheses-4" class="level4">
+<h4 class="anchored" data-anchor-id="hypotheses-4">Hypotheses</h4>
+<p><span class="math display">\[H_0: \mu_B \le \mu_A\]</span><br>
+<span class="math display">\[H_1: \mu_B &gt; \mu_A\]</span></p>
+</section>
+<section id="given-1" class="level4">
+<h4 class="anchored" data-anchor-id="given-1">Given</h4>
+<p>Same data as Example 1:</p>
+<ul>
+<li><span class="math inline">\(n_A = 800\)</span>, <span class="math inline">\(\bar{x}_A = 12.5\)</span>, <span class="math inline">\(s_A = 6.2\)</span><br>
+</li>
+<li><span class="math inline">\(n_B = 850\)</span>, <span class="math inline">\(\bar{x}_B = 13.4\)</span>, <span class="math inline">\(s_B = 6.8\)</span></li>
+</ul>
+</section>
+<section id="test-statistic-1" class="level4">
+<h4 class="anchored" data-anchor-id="test-statistic-1">Test Statistic</h4>
+<p><span class="math display">\[
+t = \frac{\bar{x}_A - \bar{x}_B}{\sqrt{\frac{s_A^2}{n_A} + \frac{s_B^2}{n_B}}}
+\]</span></p>
+<div id="16a6b162" class="cell" data-fig-height="3.5" data-fig-width="6" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-10-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpretation-right-tailed-test" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-right-tailed-test">Interpretation (Right-Tailed Test)</h4>
+<ul>
+<li>Test statistic: <span class="math inline">\(t = -2.93\)</span></li>
+<li>Critical value: <span class="math inline">\(t_{0.95, df} = 1.645\)</span></li>
+<li>p-value: <span class="math inline">\(p = 0.998\)</span></li>
+</ul>
+</section>
+<section id="decision-1" class="level4">
+<h4 class="anchored" data-anchor-id="decision-1">Decision</h4>
+<p>We <strong>fail to reject <span class="math inline">\(H_0\)</span></strong>.</p>
+</section>
+<section id="conclusion-1" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-1">Conclusion</h4>
+<p>There is <strong>no evidence</strong> that <em>Version B increases user engagement</em>.</p>
+</section>
+</section>
+<section id="two-sample-t-test-left-tailed-test" class="level3">
+<h3 class="anchored" data-anchor-id="two-sample-t-test-left-tailed-test">Two Sample t-Test | Left-Tailed Test</h3>
+<p><code>Does Variant B reduce app load time?</code></p>
+<p>Load time is a <strong>negative metric</strong>: smaller = better.</p>
+<section id="hypotheses-5" class="level4">
+<h4 class="anchored" data-anchor-id="hypotheses-5">Hypotheses</h4>
+<p><span class="math display">\[H_0: \mu_B \ge \mu_A\]</span><br>
+<span class="math display">\[H_1: \mu_B &lt; \mu_A\]</span></p>
+</section>
+<section id="given-2" class="level4">
+<h4 class="anchored" data-anchor-id="given-2">Given</h4>
+<ul>
+<li>Version A: <span class="math inline">\(\bar{x}_A = 3.2\)</span> sec, <span class="math inline">\(s_A = 1.4\)</span>, <span class="math inline">\(n_A = 600\)</span><br>
+</li>
+<li>Version B: <span class="math inline">\(\bar{x}_B = 2.9\)</span> sec, <span class="math inline">\(s_B = 1.3\)</span>, <span class="math inline">\(n_B = 620\)</span></li>
+</ul>
+</section>
+<section id="test-statistic-2" class="level4">
+<h4 class="anchored" data-anchor-id="test-statistic-2">Test Statistic</h4>
+<p><span class="math display">\[
+t = \frac{\bar{x}_A - \bar{x}_B}{\sqrt{s_A^2/n_A + sB^2/n_B}}
+\]</span></p>
+<div id="b2de9b18" class="cell" data-fig-height="3.5" data-fig-width="6" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="session4_files/figure-html/cell-11-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpretation-left-tailed-test" class="level4">
+<h4 class="anchored" data-anchor-id="interpretation-left-tailed-test">Interpretation (Left-Tailed Test)</h4>
+<ul>
+<li>Test statistic: <span class="math inline">\(t = 4.37\)</span></li>
+<li>Critical value: <span class="math inline">\(t_{0.05, df} = -1.645\)</span></li>
+<li>p-value: <span class="math inline">\(p = 1.00\)</span></li>
+</ul>
+</section>
+<section id="decision-2" class="level4">
+<h4 class="anchored" data-anchor-id="decision-2">Decision</h4>
+<p>We <strong>fail to reject <span class="math inline">\(H_0\)</span></strong>.</p>
+</section>
+<section id="conclusion-2" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-2">Conclusion</h4>
+<p>There is no evidence that Version B reduces app load time.</p>
+</section>
+</section>
+<section id="combined-summary-table" class="level3">
+<h3 class="anchored" data-anchor-id="combined-summary-table">Combined Summary Table</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 15%">
+<col style="width: 24%">
+<col style="width: 5%">
+<col style="width: 10%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test Type</th>
+<th>Scenario</th>
+<th>Hypotheses</th>
+<th>Test Statistic</th>
+<th>Critical Value(s)</th>
+<th>p-Value</th>
+<th>Decision</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Two-Tailed</strong></td>
+<td>&nbsp;Difference between App A and App B</td>
+<td><span class="math inline">\(H_0:\mu_A=\mu_B\)</span> <br> <span class="math inline">\(H_1:\mu_A\ne\mu_B\)</span></td>
+<td><span class="math inline">\(t=-2.93\)</span></td>
+<td><span class="math inline">\(\pm 1.96\)</span></td>
+<td><span class="math inline">\(p=0.003\)</span></td>
+<td>Reject</td>
+<td>Engagement is <strong>significantly different</strong> between A and B.</td>
+</tr>
+<tr class="even">
+<td><strong>Right-Tailed</strong></td>
+<td>Does B <em>increase</em> engagement vs A?</td>
+<td><span class="math inline">\(H_0:\mu_B\le\mu_A\)</span> <br> <span class="math inline">\(H_1:\mu_B&gt;\mu_A\)</span></td>
+<td><span class="math inline">\(t=-2.93\)</span></td>
+<td><span class="math inline">\(t_{0.95}=1.645\)</span></td>
+<td><span class="math inline">\(p=0.99\)</span></td>
+<td>Fail to reject</td>
+<td>No evidence that Version B <strong>increases</strong> engagement.</td>
+</tr>
+<tr class="odd">
+<td><strong>Left-Tailed</strong></td>
+<td>Does B <em>reduce</em> app load time vs A?</td>
+<td><span class="math inline">\(H_0:\mu_B\ge\mu_A\)</span> <br> <span class="math inline">\(H_1:\mu_B&lt;\mu_A\)</span></td>
+<td><span class="math inline">\(t=4.37\)</span></td>
+<td><span class="math inline">\(t_{0.05}=-1.645\)</span></td>
+<td><span class="math inline">\(p=1.00\)</span></td>
+<td>Fail to rejectS</td>
+<td>No evidence that Version B <strong>reduces</strong> load time.</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/hovhannisyan91\.github\.io\/aca");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
