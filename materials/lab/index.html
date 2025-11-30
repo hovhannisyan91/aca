@@ -20,41 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -66,6 +31,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
 <link href="../../img/favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-listing/list.min.js"></script>
+<script src="../../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -108,7 +75,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-title','listing-author','listing-subtitle','listing-image','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-title","listing-author","listing-subtitle","listing-image","listing-description"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -698,134 +723,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#vs-code" id="toc-vs-code" class="nav-link active" data-scroll-target="#vs-code">VS Code</a>
-  <ul class="collapse">
-  <li><a href="#download" id="toc-download" class="nav-link" data-scroll-target="#download">Download</a></li>
-  <li><a href="#windows-installation" id="toc-windows-installation" class="nav-link" data-scroll-target="#windows-installation">Windows Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps" id="toc-installation-steps" class="nav-link" data-scroll-target="#installation-steps">Installation Steps</a></li>
-  <li><a href="#verify-path" id="toc-verify-path" class="nav-link" data-scroll-target="#verify-path">Verify PATH</a></li>
-  <li><a href="#fix-path-manually-if-needed" id="toc-fix-path-manually-if-needed" class="nav-link" data-scroll-target="#fix-path-manually-if-needed">Fix PATH Manually (if needed)</a></li>
-  </ul></li>
-  <li><a href="#macos-installation" id="toc-macos-installation" class="nav-link" data-scroll-target="#macos-installation">macOS Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-1" id="toc-installation-steps-1" class="nav-link" data-scroll-target="#installation-steps-1">Installation Steps</a></li>
-  <li><a href="#add-vs-code-to-path" id="toc-add-vs-code-to-path" class="nav-link" data-scroll-target="#add-vs-code-to-path">Add VS Code to PATH</a></li>
-  <li><a href="#verify-path-1" id="toc-verify-path-1" class="nav-link" data-scroll-target="#verify-path-1">Verify PATH</a></li>
-  </ul></li>
-  <li><a href="#recommended-extensions" id="toc-recommended-extensions" class="nav-link" data-scroll-target="#recommended-extensions">Recommended Extensions</a>
-  <ul class="collapse">
-  <li><a href="#python-development" id="toc-python-development" class="nav-link" data-scroll-target="#python-development">Python Development</a></li>
-  <li><a href="#git-and-github" id="toc-git-and-github" class="nav-link" data-scroll-target="#git-and-github">Git and GitHub</a></li>
-  <li><a href="#containers-and-development-environments" id="toc-containers-and-development-environments" class="nav-link" data-scroll-target="#containers-and-development-environments">Containers and Development Environments</a></li>
-  <li><a href="#markdown-and-documentation" id="toc-markdown-and-documentation" class="nav-link" data-scroll-target="#markdown-and-documentation">Markdown and Documentation</a></li>
-  <li><a href="#productivity" id="toc-productivity" class="nav-link" data-scroll-target="#productivity">Productivity</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#docker" id="toc-docker" class="nav-link" data-scroll-target="#docker">Docker</a>
-  <ul class="collapse">
-  <li><a href="#download-1" id="toc-download-1" class="nav-link" data-scroll-target="#download-1">Download</a></li>
-  <li><a href="#windows-installation-1" id="toc-windows-installation-1" class="nav-link" data-scroll-target="#windows-installation-1">Windows Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-2" id="toc-installation-steps-2" class="nav-link" data-scroll-target="#installation-steps-2">Installation Steps</a></li>
-  <li><a href="#verify-installation" id="toc-verify-installation" class="nav-link" data-scroll-target="#verify-installation">Verify Installation</a></li>
-  <li><a href="#common-windows-issues" id="toc-common-windows-issues" class="nav-link" data-scroll-target="#common-windows-issues">Common Windows Issues</a></li>
-  </ul></li>
-  <li><a href="#macos-installation-1" id="toc-macos-installation-1" class="nav-link" data-scroll-target="#macos-installation-1">macOS Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-3" id="toc-installation-steps-3" class="nav-link" data-scroll-target="#installation-steps-3">Installation Steps</a></li>
-  <li><a href="#verify-installation-1" id="toc-verify-installation-1" class="nav-link" data-scroll-target="#verify-installation-1">Verify Installation</a></li>
-  </ul></li>
-  <li><a href="#post-installation-setup" id="toc-post-installation-setup" class="nav-link" data-scroll-target="#post-installation-setup">Post-Installation Setup</a>
-  <ul class="collapse">
-  <li><a href="#increase-resource-limits-optional-but-recommended" id="toc-increase-resource-limits-optional-but-recommended" class="nav-link" data-scroll-target="#increase-resource-limits-optional-but-recommended">Increase Resource Limits (Optional but Recommended)</a></li>
-  <li><a href="#enable-kubernetes-optional" id="toc-enable-kubernetes-optional" class="nav-link" data-scroll-target="#enable-kubernetes-optional">Enable Kubernetes (Optional)</a></li>
-  </ul></li>
-  <li><a href="#recommended-docker-tools" id="toc-recommended-docker-tools" class="nav-link" data-scroll-target="#recommended-docker-tools">Recommended Docker Tools</a>
-  <ul class="collapse">
-  <li><a href="#for-development" id="toc-for-development" class="nav-link" data-scroll-target="#for-development">For Development</a></li>
-  <li><a href="#for-container-management" id="toc-for-container-management" class="nav-link" data-scroll-target="#for-container-management">For Container Management</a></li>
-  <li><a href="#useful-images-for-the-course" id="toc-useful-images-for-the-course" class="nav-link" data-scroll-target="#useful-images-for-the-course">Useful Images for the Course</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#git-and-github-1" id="toc-git-and-github-1" class="nav-link" data-scroll-target="#git-and-github-1">Git and Github</a>
-  <ul class="collapse">
-  <li><a href="#installation-and-configuration" id="toc-installation-and-configuration" class="nav-link" data-scroll-target="#installation-and-configuration">Installation and Configuration</a>
-  <ul class="collapse">
-  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
-  </ul></li>
-  <li><a href="#sign-up-for-github" id="toc-sign-up-for-github" class="nav-link" data-scroll-target="#sign-up-for-github">Sign Up for GitHub</a></li>
-  <li><a href="#git-configuration" id="toc-git-configuration" class="nav-link" data-scroll-target="#git-configuration">Git Configuration</a>
-  <ul class="collapse">
-  <li><a href="#check-current-git-config" id="toc-check-current-git-config" class="nav-link" data-scroll-target="#check-current-git-config">Check Current Git Config</a></li>
-  <li><a href="#set-username" id="toc-set-username" class="nav-link" data-scroll-target="#set-username">Set Username</a></li>
-  <li><a href="#set-email" id="toc-set-email" class="nav-link" data-scroll-target="#set-email">Set Email</a></li>
-  <li><a href="#verify-updated-config" id="toc-verify-updated-config" class="nav-link" data-scroll-target="#verify-updated-config">Verify Updated Config</a></li>
-  </ul></li>
-  <li><a href="#generate-personal-access-token-pat" id="toc-generate-personal-access-token-pat" class="nav-link" data-scroll-target="#generate-personal-access-token-pat">Generate Personal Access Token (PAT)</a>
-  <ul class="collapse">
-  <li><a href="#steps" id="toc-steps" class="nav-link" data-scroll-target="#steps">Steps</a></li>
-  </ul></li>
-  <li><a href="#generate-ssh-key-optional-but-recommended" id="toc-generate-ssh-key-optional-but-recommended" class="nav-link" data-scroll-target="#generate-ssh-key-optional-but-recommended">Generate SSH Key (Optional but Recommended)</a>
-  <ul class="collapse">
-  <li><a href="#steps-1" id="toc-steps-1" class="nav-link" data-scroll-target="#steps-1">Steps</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#python-miniconda" id="toc-python-miniconda" class="nav-link" data-scroll-target="#python-miniconda">Python (Miniconda)</a>
-  <ul class="collapse">
-  <li><a href="#download-2" id="toc-download-2" class="nav-link" data-scroll-target="#download-2">Download</a></li>
-  <li><a href="#windows-installation-2" id="toc-windows-installation-2" class="nav-link" data-scroll-target="#windows-installation-2">Windows Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-4" id="toc-installation-steps-4" class="nav-link" data-scroll-target="#installation-steps-4">Installation Steps</a></li>
-  <li><a href="#verify-installation-2" id="toc-verify-installation-2" class="nav-link" data-scroll-target="#verify-installation-2">Verify Installation</a></li>
-  </ul></li>
-  <li><a href="#macos-installation-2" id="toc-macos-installation-2" class="nav-link" data-scroll-target="#macos-installation-2">macOS Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-5" id="toc-installation-steps-5" class="nav-link" data-scroll-target="#installation-steps-5">Installation Steps</a></li>
-  <li><a href="#verify-installation-3" id="toc-verify-installation-3" class="nav-link" data-scroll-target="#verify-installation-3">Verify Installation</a></li>
-  </ul></li>
-  <li><a href="#creating-and-managing-environments" id="toc-creating-and-managing-environments" class="nav-link" data-scroll-target="#creating-and-managing-environments">Creating and Managing Environments</a>
-  <ul class="collapse">
-  <li><a href="#create-a-new-environment" id="toc-create-a-new-environment" class="nav-link" data-scroll-target="#create-a-new-environment">Create a New Environment</a></li>
-  <li><a href="#activate-environment" id="toc-activate-environment" class="nav-link" data-scroll-target="#activate-environment">Activate Environment</a></li>
-  <li><a href="#deactivate-environment" id="toc-deactivate-environment" class="nav-link" data-scroll-target="#deactivate-environment">Deactivate Environment</a></li>
-  <li><a href="#list-environments" id="toc-list-environments" class="nav-link" data-scroll-target="#list-environments">List Environments</a></li>
-  </ul></li>
-  <li><a href="#installing-packages" id="toc-installing-packages" class="nav-link" data-scroll-target="#installing-packages">Installing Packages</a>
-  <ul class="collapse">
-  <li><a href="#install-a-package" id="toc-install-a-package" class="nav-link" data-scroll-target="#install-a-package">Install a Package</a></li>
-  <li><a href="#install-multiple-packages" id="toc-install-multiple-packages" class="nav-link" data-scroll-target="#install-multiple-packages">Install Multiple Packages</a></li>
-  <li><a href="#installing-via-pip-inside-conda" id="toc-installing-via-pip-inside-conda" class="nav-link" data-scroll-target="#installing-via-pip-inside-conda">Installing via <code>pip</code> inside Conda</a></li>
-  </ul></li>
-  <li><a href="#updating-conda" id="toc-updating-conda" class="nav-link" data-scroll-target="#updating-conda">Updating Conda</a></li>
-  <li><a href="#recommended-packages-for-the-course" id="toc-recommended-packages-for-the-course" class="nav-link" data-scroll-target="#recommended-packages-for-the-course">Recommended Packages for the Course</a></li>
-  <li><a href="#adding-environment-to-vs-code" id="toc-adding-environment-to-vs-code" class="nav-link" data-scroll-target="#adding-environment-to-vs-code">Adding Environment to VS Code</a></li>
-  </ul></li>
-  <li><a href="#tableau" id="toc-tableau" class="nav-link" data-scroll-target="#tableau">Tableau</a>
-  <ul class="collapse">
-  <li><a href="#sign-up-for-tableau-public" id="toc-sign-up-for-tableau-public" class="nav-link" data-scroll-target="#sign-up-for-tableau-public">Sign Up for Tableau Public</a>
-  <ul class="collapse">
-  <li><a href="#steps-2" id="toc-steps-2" class="nav-link" data-scroll-target="#steps-2">Steps</a></li>
-  </ul></li>
-  <li><a href="#download-3" id="toc-download-3" class="nav-link" data-scroll-target="#download-3">Download</a></li>
-  <li><a href="#windows-installation-3" id="toc-windows-installation-3" class="nav-link" data-scroll-target="#windows-installation-3">Windows Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-6" id="toc-installation-steps-6" class="nav-link" data-scroll-target="#installation-steps-6">Installation Steps</a></li>
-  <li><a href="#verify-installation-4" id="toc-verify-installation-4" class="nav-link" data-scroll-target="#verify-installation-4">Verify Installation</a></li>
-  </ul></li>
-  <li><a href="#macos-installation-3" id="toc-macos-installation-3" class="nav-link" data-scroll-target="#macos-installation-3">macOS Installation</a>
-  <ul class="collapse">
-  <li><a href="#installation-steps-7" id="toc-installation-steps-7" class="nav-link" data-scroll-target="#installation-steps-7">Installation Steps</a></li>
-  <li><a href="#verify-installation-5" id="toc-verify-installation-5" class="nav-link" data-scroll-target="#verify-installation-5">Verify Installation</a></li>
-  </ul></li>
-  </ul></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -834,13 +733,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Lab Sessions</h1>
-<p class="subtitle lead">Guide</p>
   <div class="quarto-categories">
-    <div class="quarto-category">docker</div>
-    <div class="quarto-category">git</div>
-    <div class="quarto-category">sql</div>
-    <div class="quarto-category">python</div>
-    <div class="quarto-category">tableau</div>
+    <div class="quarto-category">Python</div>
   </div>
   </div>
 
@@ -858,589 +752,128 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="vs-code" class="level1">
-<h1>VS Code</h1>
-<section id="download" class="level2">
-<h2 class="anchored" data-anchor-id="download">Download</h2>
-<p>Download Visual Studio Code from the official website: <a href="https://code.visualstudio.com/Download">download link</a></p>
-<p>Choose the installer for your operating system:</p>
-<ul>
-<li>Windows (System Installer)</li>
-<li>macOS (Universal)</li>
-</ul>
-</section>
-<section id="windows-installation" class="level2">
-<h2 class="anchored" data-anchor-id="windows-installation">Windows Installation</h2>
-<section id="installation-steps" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps">Installation Steps</h3>
-<ol type="1">
-<li>Run the installer.</li>
-<li>Enable the following options during setup:
-<ul>
-<li>Add to <code>PATH</code> (Environment Variables)</li>
-<li>Add <code>Open with Code</code> to File Explorer context menu</li>
-<li>Register VS Code as the default editor for supported file types</li>
-</ul></li>
-</ol>
-</section>
-<section id="verify-path" class="level3">
-<h3 class="anchored" data-anchor-id="verify-path">Verify PATH</h3>
-<p>Open <code>PowerShell</code> or <code>Command Prompt</code> and run (press enter):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">code</span> .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="fix-path-manually-if-needed" class="level3">
-<h3 class="anchored" data-anchor-id="fix-path-manually-if-needed">Fix PATH Manually (if needed)</h3>
-<p>If the terminal reports that <code>code is not recognized</code>:</p>
-<ol type="1">
-<li>Open <code>Edit the system environment variables.</code></li>
-<li>Select <code>Environment Variables.</code></li>
-<li>Under the <strong>Path</strong> variable, add the directory where <code>Code.exe</code> is located, for example:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">C:\Users\&lt;username</span><span class="op">&gt;</span><span class="dt">\A</span>ppData\Local\Programs\Microsoft VS Code<span class="dt">\</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Restart the terminal after updating.</strong></p>
-</section>
-</section>
-<section id="macos-installation" class="level2">
-<h2 class="anchored" data-anchor-id="macos-installation">macOS Installation</h2>
-<section id="installation-steps-1" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-1">Installation Steps</h3>
-<ol type="1">
-<li>Download the <code>.dmg</code> file from <a href="https://code.visualstudio.com/Download">here</a></li>
-<li>Drag <strong>Visual Studio Code.app</strong> into the Applications folder.</li>
-</ol>
-</section>
-<section id="add-vs-code-to-path" class="level3">
-<h3 class="anchored" data-anchor-id="add-vs-code-to-path">Add VS Code to PATH</h3>
-<ol type="1">
-<li>Open VS Code.</li>
-<li>Press <strong>Command+Shift+P</strong> to open the Command Palette.</li>
-<li><strong>Run:</strong></li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Shell</span> Command: Install <span class="st">'code'</span> command in PATH</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="verify-path-1" class="level3">
-<h3 class="anchored" data-anchor-id="verify-path-1">Verify PATH</h3>
-<p><strong>Open Terminal and run:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">code</span> .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-</section>
-<section id="recommended-extensions" class="level2">
-<h2 class="anchored" data-anchor-id="recommended-extensions">Recommended Extensions</h2>
-<section id="python-development" class="level3">
-<h3 class="anchored" data-anchor-id="python-development">Python Development</h3>
-<ul>
-<li>Python</li>
-<li>Pylance</li>
-<li>Jupyter</li>
-</ul>
-</section>
-<section id="git-and-github" class="level3">
-<h3 class="anchored" data-anchor-id="git-and-github">Git and GitHub</h3>
-<ul>
-<li>GitLens</li>
-<li>GitHub Pull Requests and Issues</li>
-</ul>
-</section>
-<section id="containers-and-development-environments" class="level3">
-<h3 class="anchored" data-anchor-id="containers-and-development-environments">Containers and Development Environments</h3>
-<ul>
-<li>Docker</li>
-<li>Dev Containers (Remote Containers)</li>
-</ul>
-</section>
-<section id="markdown-and-documentation" class="level3">
-<h3 class="anchored" data-anchor-id="markdown-and-documentation">Markdown and Documentation</h3>
-<ul>
-<li>Markdown All in One</li>
-<li>Markdown Preview Enhanced</li>
-<li>YAML</li>
-</ul>
-</section>
-<section id="productivity" class="level3">
-<h3 class="anchored" data-anchor-id="productivity">Productivity</h3>
-<ul>
-<li>Project Manager</li>
-<li>Better Comments</li>
-<li>Code Spell Checker</li>
-</ul>
-</section>
-</section>
-</section>
-<section id="docker" class="level1">
-<h1>Docker</h1>
-<section id="download-1" class="level2">
-<h2 class="anchored" data-anchor-id="download-1">Download</h2>
-<p>Download Docker Desktop from the official website:<br>
-<a href="https://www.docker.com/products/docker-desktop/">download link</a></p>
-<p>Choose the installer for your operating system:</p>
-<ul>
-<li>Windows (Docker Desktop for Windows)</li>
-<li>macOS (Docker Desktop for Mac – Intel or Apple Silicon (M chip serries))</li>
-</ul>
-</section>
-<section id="windows-installation-1" class="level2">
-<h2 class="anchored" data-anchor-id="windows-installation-1">Windows Installation</h2>
-<section id="installation-steps-2" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-2">Installation Steps</h3>
-<ol type="1">
-<li>Download Docker Desktop for Windows.</li>
-<li>Run the installer.</li>
-<li>During installation, ensure the following:
-<ul>
-<li>Enable “Use WSL 2 instead of Hyper-V” (recommended)</li>
-<li>Allow required components to install (<code>WSL 2, Linux kernel updates</code>)</li>
-</ul></li>
-<li>Restart the system if prompted.</li>
-</ol>
-</section>
-<section id="verify-installation" class="level3">
-<h3 class="anchored" data-anchor-id="verify-installation">Verify Installation</h3>
-<p>Open <code>PowerShell</code> or <code>Command Prompt</code> and run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Then verify Docker is running:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run hello-world</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>If you see a “Hello from Docker!” message, the installation is successful.</p>
-</section>
-<section id="common-windows-issues" class="level3">
-<h3 class="anchored" data-anchor-id="common-windows-issues">Common Windows Issues</h3>
-<p>If Docker reports that <code>WSL 2 is not installed</code>:</p>
-<p>Install WSL 2 manually:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wsl</span> <span class="at">--install</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Restart your machine and try again.</p>
-<p>If Docker fails to start, <strong>ensure:</strong></p>
-<ul>
-<li>Virtualization is enabled in BIOS.</li>
-<li>WSL is enabled in Windows Features.</li>
-</ul>
-</section>
-</section>
-<section id="macos-installation-1" class="level2">
-<h2 class="anchored" data-anchor-id="macos-installation-1">macOS Installation</h2>
-<section id="installation-steps-3" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-3">Installation Steps</h3>
-<ol type="1">
-<li>Download Docker Desktop for macOS.</li>
-<li>Open the <code>.dmg</code> file.</li>
-<li>Drag <strong>Docker.app</strong> into the Applications folder.</li>
-<li>Start Docker Desktop from Applications.</li>
-</ol>
-</section>
-<section id="verify-installation-1" class="level3">
-<h3 class="anchored" data-anchor-id="verify-installation-1">Verify Installation</h3>
-<p>Open Terminal and run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Then run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run hello-world</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>If the container runs successfully, Docker is installed correctly.</p>
-</section>
-</section>
-<section id="post-installation-setup" class="level2">
-<h2 class="anchored" data-anchor-id="post-installation-setup">Post-Installation Setup</h2>
-<section id="increase-resource-limits-optional-but-recommended" class="level3">
-<h3 class="anchored" data-anchor-id="increase-resource-limits-optional-but-recommended">Increase Resource Limits (Optional but Recommended)</h3>
-<p><code>Open Docker Desktop → Settings → Resources, and adjust:</code></p>
-<ul>
-<li>CPU</li>
-<li>Memory</li>
-<li>Disk image size</li>
-</ul>
-<p><strong>For database-heavy workloads, set at least:</strong></p>
-<ul>
-<li>2 CPUs<br>
-</li>
-<li>4 GB RAM</li>
-</ul>
-</section>
-<section id="enable-kubernetes-optional" class="level3">
-<h3 class="anchored" data-anchor-id="enable-kubernetes-optional">Enable Kubernetes (Optional)</h3>
-<p>Open Docker Desktop → Settings → Kubernetes → Enable Kubernetes.</p>
-<p>Useful for advanced container orchestration practice.</p>
-<blockquote class="blockquote">
-<p>We are not going to go over it</p>
-</blockquote>
-</section>
-</section>
-<section id="recommended-docker-tools" class="level2">
-<h2 class="anchored" data-anchor-id="recommended-docker-tools">Recommended Docker Tools</h2>
-<section id="for-development" class="level3">
-<h3 class="anchored" data-anchor-id="for-development">For Development</h3>
-<ul>
-<li>Docker Compose (included in Docker Desktop)</li>
-<li>Dev Containers (VS Code extension)</li>
-<li>Docker CLI</li>
-</ul>
-</section>
-<section id="for-container-management" class="level3">
-<h3 class="anchored" data-anchor-id="for-container-management">For Container Management</h3>
-<ul>
-<li><code>docker stats</code></li>
-<li><code>docker ps -a</code></li>
-<li><code>docker logs &lt;container&gt;</code></li>
-<li><code>docker exec -it &lt;container&gt; /bin/bash</code></li>
-</ul>
-<blockquote class="blockquote">
-<p>We will go over it during the class session</p>
-</blockquote>
-</section>
-<section id="useful-images-for-the-course" class="level3">
-<h3 class="anchored" data-anchor-id="useful-images-for-the-course">Useful Images for the Course</h3>
-<ul>
-<li><code>postgres:latest</code></li>
-<li><code>pgadmin:latest</code></li>
-<li><code>python:3.12-slim</code></li>
-<li><code>jupyter/base-notebook</code></li>
-</ul>
-</section>
-</section>
-</section>
-<section id="git-and-github-1" class="level1">
-<h1>Git and Github</h1>
-<section id="installation-and-configuration" class="level2">
-<h2 class="anchored" data-anchor-id="installation-and-configuration">Installation and Configuration</h2>
-<section id="installation" class="level3">
-<h3 class="anchored" data-anchor-id="installation">Installation</h3>
-<ul>
-<li><strong>macOS:</strong> Install Xcode Command Line Tools. Open Terminal and run:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xcode-select</span> <span class="at">--install</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><strong>Linux:</strong> Git may already be installed. If not, install it using:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install git</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><strong>Windows:</strong> Download Git for Windows from <a href="https://git-scm.com/download/win">here</a> and install it with default settings.</li>
-</ul>
-<p>To verify that Git is installed, run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-</section>
-<section id="sign-up-for-github" class="level2">
-<h2 class="anchored" data-anchor-id="sign-up-for-github">Sign Up for GitHub</h2>
-<p>Follow these steps to create a GitHub account:</p>
-<ol type="1">
-<li>Open the GitHub website: <a href="https://github.com/">github</a></li>
-<li>Click <strong>Sign up</strong> in the top-right corner.</li>
-<li><strong>Enter your:</strong>
-<ul>
-<li>Email address<br>
-</li>
-<li>Password<br>
-</li>
-<li>Username</li>
-</ul></li>
-<li>Choose your email verification preferences.</li>
-<li>Complete the verification challenge.</li>
-<li>Click <strong>Create account</strong>.</li>
-<li>GitHub will send a verification code to your email. Enter the code to activate your account.</li>
-<li>Choose the <strong>Free</strong> plan (sufficient for all coursework and projects).</li>
-</ol>
-<p>After this, your GitHub account is ready.</p>
-</section>
-<section id="git-configuration" class="level2">
-<h2 class="anchored" data-anchor-id="git-configuration">Git Configuration</h2>
-<section id="check-current-git-config" class="level3">
-<h3 class="anchored" data-anchor-id="check-current-git-config">Check Current Git Config</h3>
-<p>After running this you should see empty parts under the email and username.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> <span class="at">--list</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="set-username" class="level3">
-<h3 class="anchored" data-anchor-id="set-username">Set Username</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.name <span class="st">"your_name"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="set-email" class="level3">
-<h3 class="anchored" data-anchor-id="set-email">Set Email</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">"your_email"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="verify-updated-config" class="level3">
-<h3 class="anchored" data-anchor-id="verify-updated-config">Verify Updated Config</h3>
-<p>Check again to see the updates</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> <span class="at">--list</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-</section>
-<section id="generate-personal-access-token-pat" class="level2">
-<h2 class="anchored" data-anchor-id="generate-personal-access-token-pat">Generate Personal Access Token (PAT)</h2>
-<p>GitHub no longer accepts account passwords for Git operations. You must use a <strong>Personal Access Token (PAT)</strong> instead.</p>
-<section id="steps" class="level3">
-<h3 class="anchored" data-anchor-id="steps">Steps</h3>
-<ol type="1">
-<li><p>Sign in to your GitHub account.</p></li>
-<li><p><strong>Go to:Profile → Settings → Developer settings → Personal access tokens → Tokens (classic)</strong></p></li>
-<li><p>Click <strong>Generate new token</strong>.</p></li>
-<li><p>Select scopes (minimum recommended):</p>
-<ul>
-<li><code>repo</code></li>
-<li><code>read:org</code></li>
-<li><code>workflow</code></li>
-<li><code>or select all</code></li>
-</ul></li>
-<li><p>Set <code>no expiration</code> day</p></li>
-<li><p>Click <strong>Generate token</strong>.</p></li>
-<li><p>Copy the token and <code>store it securely</code>.</p></li>
-</ol>
-<p><strong>You will provide this token when running:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-</section>
-<section id="generate-ssh-key-optional-but-recommended" class="level2">
-<h2 class="anchored" data-anchor-id="generate-ssh-key-optional-but-recommended">Generate SSH Key (Optional but Recommended)</h2>
-<p>SSH keys allow password-less authentication with GitHub.</p>
-<section id="steps-1" class="level3">
-<h3 class="anchored" data-anchor-id="steps-1">Steps</h3>
-<ol type="1">
-<li>Open Terminal or PowerShell.</li>
-<li>Generate a new SSH key:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> rsa <span class="at">-b</span> 4096 <span class="at">-C</span> <span class="st">"your_email@example.com"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ol start="3" type="1">
-<li>When asked for a file location, press ENTER to use the default:</li>
-</ol>
-<pre><code>~/.ssh/id_rsa</code></pre>
-<ol start="4" type="1">
-<li>When asked for a passphrase:
-<ul>
-<li><strong>Leave empty for no passphrase</strong></li>
-<li>Or enter a secure passphrase</li>
-</ul></li>
-<li>Display your public key:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.ssh/id_rsa.pub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><em>macOS users can copfy it to clipboard:</em></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pbcopy</span> <span class="op">&lt;</span> ~/.ssh/id_rsa.pub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><em>Windows PowerShell:</em></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Get-Content</span> ~/.ssh/id_rsa.pub <span class="kw">|</span> <span class="ex">Set-Clipboard</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ol start="6" type="1">
-<li>Add the SSH key to GitHub:
-<ul>
-<li>Go to <strong>GitHub → Settings → SSH and GPG keys</strong></li>
-<li>Click <strong>New SSH key</strong></li>
-<li>Paste the key</li>
-<li>Save</li>
-</ul></li>
-</ol>
-</section>
-</section>
-</section>
-<section id="python-miniconda" class="level1">
-<h1>Python (Miniconda)</h1>
-<section id="download-2" class="level2">
-<h2 class="anchored" data-anchor-id="download-2">Download</h2>
-<p>Download <strong>Miniconda</strong> from the official website: <a href="https://docs.conda.io/en/latest/miniconda.html">download link</a></p>
-<p>Choose the installer for your operating system:</p>
-<ul>
-<li>Windows (Miniconda3 Windows 64-bit)</li>
-<li>macOS (Miniconda3 macOS Intel or macOS Apple Silicon)</li>
-</ul>
-<p>Select the either <code>Python 3.13</code>.</p>
-</section>
-<section id="windows-installation-2" class="level2">
-<h2 class="anchored" data-anchor-id="windows-installation-2">Windows Installation</h2>
-<section id="installation-steps-4" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-4">Installation Steps</h3>
-<ol type="1">
-<li>Download the Miniconda installer (<code>.exe</code> file).</li>
-<li>Run the installer.</li>
-<li>During setup, enable:
-<ul>
-<li><strong>Add Miniconda to my PATH environment variable</strong><br>
-(or leave it disabled if you prefer using the Miniconda Prompt)</li>
-<li><strong>Register Miniconda as the system Python</strong></li>
-</ul></li>
-<li>Finish the installation and restart the terminal.</li>
-</ol>
-</section>
-<section id="verify-installation-2" class="level3">
-<h3 class="anchored" data-anchor-id="verify-installation-2">Verify Installation</h3>
-<p>Open PowerShell or Command Prompt and run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> <span class="at">--version</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span><span class="cf">if</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Then</span> test the base environment:</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span>bash</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Check whether the pip is working:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<!-- ! -->
-</section>
-</section>
-<section id="macos-installation-2" class="level2">
-<h2 class="anchored" data-anchor-id="macos-installation-2">macOS Installation</h2>
-<section id="installation-steps-5" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-5">Installation Steps</h3>
-<ol type="1">
-<li>Download the macOS installer (<code>.pkg</code> for Intel, <code>.sh</code> for Apple Silicon).</li>
-<li>If using the <code>.pkg</code> file, run the installer normally.</li>
-<li>If using the <code>.sh</code> installer:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> Miniconda3-py313_<span class="pp">*</span>-MacOSX-arm64.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ol type="1">
-<li>Accept the license terms.</li>
-<li>Allow setup to initialize Conda by adding it to your shell configuration.</li>
-<li>Restart your terminal.</li>
-</ol>
-</section>
-<section id="verify-installation-3" class="level3">
-<h3 class="anchored" data-anchor-id="verify-installation-3">Verify Installation</h3>
-<p>Run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Then verify Python:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">--version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-</section>
-<section id="creating-and-managing-environments" class="level2">
-<h2 class="anchored" data-anchor-id="creating-and-managing-environments">Creating and Managing Environments</h2>
-<section id="create-a-new-environment" class="level3">
-<h3 class="anchored" data-anchor-id="create-a-new-environment">Create a New Environment</h3>
-<p>Example environment with Python 3.12:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-n</span> myenv python=3.11</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="activate-environment" class="level3">
-<h3 class="anchored" data-anchor-id="activate-environment">Activate Environment</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate myenv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="deactivate-environment" class="level3">
-<h3 class="anchored" data-anchor-id="deactivate-environment">Deactivate Environment</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> deactivate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="list-environments" class="level3">
-<h3 class="anchored" data-anchor-id="list-environments">List Environments</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-</section>
-<section id="installing-packages" class="level2">
-<h2 class="anchored" data-anchor-id="installing-packages">Installing Packages</h2>
-<section id="install-a-package" class="level3">
-<h3 class="anchored" data-anchor-id="install-a-package">Install a Package</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install numpy</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="install-multiple-packages" class="level3">
-<h3 class="anchored" data-anchor-id="install-multiple-packages">Install Multiple Packages</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pandas matplotlib seaborn</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="installing-via-pip-inside-conda" class="level3">
-<h3 class="anchored" data-anchor-id="installing-via-pip-inside-conda">Installing via <code>pip</code> inside Conda</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install requests</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-</section>
-<section id="updating-conda" class="level2">
-<h2 class="anchored" data-anchor-id="updating-conda">Updating Conda</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> update conda</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="recommended-packages-for-the-course" class="level2">
-<h2 class="anchored" data-anchor-id="recommended-packages-for-the-course">Recommended Packages for the Course</h2>
-<ul>
-<li>pandas<br>
-</li>
-<li>numpy<br>
-</li>
-<li>matplotlib<br>
-</li>
-<li>seaborn<br>
-</li>
-<li>scikit-learn<br>
-</li>
-<li>jupyter</li>
-<li>plotly</li>
-<li>folium<br>
-</li>
-<li>ipykernel (for VSCode integration)</li>
-</ul>
-<p><strong>Example install:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pandas numpy matplotlib seaborn scikit-learn jupyter ipykernel</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<blockquote class="blockquote">
-<p>We are going to go over it</p>
-</blockquote>
-<hr>
-</section>
-<section id="adding-environment-to-vs-code" class="level2">
-<h2 class="anchored" data-anchor-id="adding-environment-to-vs-code">Adding Environment to VS Code</h2>
-<p>After activating the environment, install the kernel:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span> myenv <span class="at">--display-name</span> <span class="st">"Python (myenv)"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Then in VS Code:</p>
-<ol type="1">
-<li>Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)</li>
-<li>Select <strong>Python: Select Interpreter</strong></li>
-<li>Choose <strong>Python (myenv)</strong></li>
-</ol>
-</section>
-</section>
-<section id="tableau" class="level1">
-<h1>Tableau</h1>
-<section id="sign-up-for-tableau-public" class="level2">
-<h2 class="anchored" data-anchor-id="sign-up-for-tableau-public">Sign Up for Tableau Public</h2>
-<p>You must create a <strong>Tableau Public account</strong> before working with Tableau.</p>
-<section id="steps-2" class="level3">
-<h3 class="anchored" data-anchor-id="steps-2">Steps</h3>
-<ol type="1">
-<li>Visit the Tableau Public website: <a href="https://public.tableau.com/">here</a></li>
-<li>Click <strong>Sign In</strong> (top right).</li>
-<li>Click <strong>Create one now</strong>.</li>
-<li>Enter your:
-<ul>
-<li>Email</li>
-<li>Name</li>
-<li>Password</li>
-</ul></li>
-<li>Accept the terms and click <strong>Create account</strong>.</li>
-<li>Check your email and verify your Tableau account: Verification is required to publish dashboards.</li>
-</ol>
-</section>
-</section>
-<section id="download-3" class="level2">
-<h2 class="anchored" data-anchor-id="download-3">Download</h2>
-<p>Download <strong>Tableau Public</strong> from the official website: <a href="https://public.tableau.com/app/discover">https://public.tableau.com/app/discover</a></p>
-<p>Choose the installer for your operating system:</p>
-<ul>
-<li>Windows (Tableau Public for Windows)</li>
-<li>macOS (Tableau Public for Mac)</li>
-</ul>
-<hr>
-</section>
-<section id="windows-installation-3" class="level2">
-<h2 class="anchored" data-anchor-id="windows-installation-3">Windows Installation</h2>
-<section id="installation-steps-6" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-6">Installation Steps</h3>
-<ol type="1">
-<li>Download the installer (<code>.exe</code>).</li>
-<li>Run the installer.</li>
-<li>Accept the license agreement.</li>
-<li>Keep the default installation options.</li>
-<li>Launch Tableau Public after installation.</li>
-</ol>
-</section>
-<section id="verify-installation-4" class="level3">
-<h3 class="anchored" data-anchor-id="verify-installation-4">Verify Installation</h3>
-<blockquote class="blockquote">
-<p>Open Tableau Public from the Start Menu. If the application launches without errors, the setup is complete.</p>
-</blockquote>
-<hr>
-</section>
-</section>
-<section id="macos-installation-3" class="level2">
-<h2 class="anchored" data-anchor-id="macos-installation-3">macOS Installation</h2>
-<section id="installation-steps-7" class="level3">
-<h3 class="anchored" data-anchor-id="installation-steps-7">Installation Steps</h3>
-<ol type="1">
-<li>Download the installer (<code>.dmg</code>).</li>
-<li>Open it and drag <strong>Tableau Public.app</strong> into the Applications folder.</li>
-<li>Launch the application from Applications or Launchpad.</li>
-<li>Allow macOS permissions if prompted.</li>
-</ol>
-</section>
-<section id="verify-installation-5" class="level3">
-<h3 class="anchored" data-anchor-id="verify-installation-5">Verify Installation</h3>
-<p>Once Tableau Public opens successfully, installation is complete.</p>
 
 
-</section>
-</section>
-</section>
 
-</main> <!-- /main -->
+
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="VlNjb2RlJTJDSURF" data-listing-file-modified-sort="1764482168047" data-listing-reading-time-sort="2" data-listing-word-count-sort="345">
+<div class="thumbnail"><a href="../../materials/lab/vscode.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../../materials/lab/vscode.html" class="no-external">Vs Code</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../../materials/lab/vscode.html" class="no-external">Lab Session</a>
+</div>
+<div class="delink listing-description"><a href="../../materials/lab/vscode.html" class="no-external">
+Download Visual Studio Code from the official website:<br>
+download link
+</a></div>
+</div>
+<div class="metadata">
+<a href="../../materials/lab/vscode.html" class="no-external">
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="RG9ja2Vy" data-listing-file-modified-sort="1764482168047" data-listing-reading-time-sort="3" data-listing-word-count-sort="444">
+<div class="thumbnail"><a href="../../materials/lab/docker.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../../materials/lab/docker.html" class="no-external">Docker</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../../materials/lab/docker.html" class="no-external">Lab Sessions</a>
+</div>
+<div class="delink listing-description"><a href="../../materials/lab/docker.html" class="no-external">
+Download Docker Desktop from the official website:<br>
+download link
+</a></div>
+</div>
+<div class="metadata">
+<a href="../../materials/lab/docker.html" class="no-external">
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="R2l0" data-listing-file-modified-sort="1764482168047" data-listing-reading-time-sort="1" data-listing-word-count-sort="148">
+<div class="thumbnail"><a href="../../materials/lab/git.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../../materials/lab/git.html" class="no-external">Git &amp; Github</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../../materials/lab/git.html" class="no-external">Lab Sessions</a>
+</div>
+<div class="delink listing-description"><a href="../../materials/lab/git.html" class="no-external">
+To verify that Git is installed, run:
+</a></div>
+</div>
+<div class="metadata">
+<a href="../../materials/lab/git.html" class="no-external">
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="UHl0aG9u" data-listing-file-modified-sort="1764482168047" data-listing-reading-time-sort="3" data-listing-word-count-sort="451">
+<div class="thumbnail"><a href="../../materials/lab/python.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../../materials/lab/python.html" class="no-external">Python</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../../materials/lab/python.html" class="no-external">Lab Sessions</a>
+</div>
+<div class="delink listing-description"><a href="../../materials/lab/python.html" class="no-external">
+Download <strong>Miniconda</strong> from the official website:<br>
+download link
+</a></div>
+</div>
+<div class="metadata">
+<a href="../../materials/lab/python.html" class="no-external">
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="VGFibGVhdQ==" data-listing-file-modified-sort="1764482168047" data-listing-reading-time-sort="2" data-listing-word-count-sort="242">
+<div class="thumbnail"><a href="../../materials/lab/tableau.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../../materials/lab/tableau.html" class="no-external">Tableau</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../../materials/lab/tableau.html" class="no-external">Lab Sessions</a>
+</div>
+<div class="delink listing-description"><a href="../../materials/lab/tableau.html" class="no-external">
+You must create a <strong>Tableau Public account</strong> before working with the tool.
+</a></div>
+</div>
+<div class="metadata">
+<a href="../../materials/lab/tableau.html" class="no-external">
+</a>
+</div>
+</div>
+</div>
+<div class="listing-no-matching d-none">No matching items</div>
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
