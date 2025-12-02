@@ -1,9 +1,3 @@
----
-title: "Git & Github"
-subtitle: "Lab Sessions"
-categories: [Git]
----
-
 # Git and GitHub
 
 ## Installation and Configuration
@@ -55,4 +49,326 @@ Follow these steps to create a GitHub account:
 
 3. Enter your:
    - Email address  
-   -
+   - Password  
+   - Username  
+
+<!-- TODO: screenshot - GitHub registration form -->
+
+4. Choose your email verification preferences.
+
+5. Complete the verification challenge.
+   <!-- TODO: screenshot - GitHub puzzle/captcha -->
+
+6. Click **Create account**.
+
+7. GitHub will send a verification code to your email. Enter the code to activate your account.
+   <!-- TODO: screenshot - email verification field -->
+
+8. Choose the **Free** plan (sufficient for this course).
+
+After this, your GitHub account is fully ready.
+
+---
+
+## Git Configuration
+
+### Check Current Git Config
+
+Run the following command to see your current configuration (should be mostly empty on new installations):
+
+```bash
+git config --global --list
+```
+
+<!-- TODO: screenshot - empty git config list -->
+
+### Set Username
+
+```bash
+git config --global user.name "your_name"
+```
+
+<!-- TODO: screenshot - setting git username -->
+
+### Set Email
+
+```bash
+git config --global user.email "your_email"
+```
+
+<!-- TODO: screenshot - setting git email -->
+
+### Verify Updated Config
+
+Check again:
+
+```bash
+git config --global --list
+```
+
+<!-- TODO: screenshot - username and email now appear -->
+
+---
+
+## Generate Personal Access Token (PAT)
+
+GitHub no longer accepts passwords for Git operations.  
+You must generate a **Personal Access Token (PAT)**.
+
+### Steps
+
+1. Sign in to your GitHub account.
+
+2. Navigate to:  
+   **Profile → Settings → Developer settings → Personal access tokens → Tokens (classic)**
+
+<!-- TODO: screenshot - GitHub settings navigation -->
+
+3. Click **Generate new token**.
+   <!-- TODO: screenshot - generate new token button -->
+
+4. Select scopes (minimum recommended):
+   - `repo`
+   - `read:org`
+   - `workflow`
+   - or simply select **all**
+
+<!-- TODO: screenshot - PAT scopes selection -->
+
+5. Set **No expiration**.
+
+<!-- TODO: screenshot - PAT expiration options -->
+
+6. Click **Generate token**.
+
+7. Copy the token and store it securely.
+
+<!-- TODO: screenshot - generated PAT -->
+
+You will paste this token when executing:
+
+```bash
+git push
+```
+
+---
+
+## Generate SSH Key (Optional but Recommended)
+
+SSH keys allow secure password-less authentication with GitHub.
+
+### Steps
+
+1. Open Terminal or PowerShell.
+
+2. Generate a new SSH key:
+
+```bash
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+```
+
+<!-- TODO: screenshot - ssh-keygen running -->
+
+3. When prompted for a location, press ENTER to use the default:
+
+```
+~/.ssh/id_rsa
+```
+
+<!-- TODO: screenshot - ssh key default path -->
+
+4. When asked for a passphrase:
+   - leave empty for no passphrase  
+   - or enter a secure passphrase  
+
+5. Display your public key:
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+
+<!-- TODO: screenshot - public key output -->
+
+### Copy SSH Key
+
+macOS:
+
+```bash
+pbcopy < ~/.ssh/id_rsa.pub
+```
+
+Windows PowerShell:
+
+```bash
+Get-Content ~/.ssh/id_rsa.pub | Set-Clipboard
+```
+
+<!-- TODO: screenshot - copying key to clipboard -->
+
+### Add SSH Key to GitHub
+
+1. Go to **GitHub → Settings → SSH and GPG keys**
+2. Click **New SSH key**
+3. Paste your key
+4. Save
+
+<!-- TODO: screenshot - GitHub SSH key page -->
+
+---
+
+
+
+### Create a Remote Repository on GitHub
+
+1. Log in to your GitHub account.
+2. Click the **New** repository button.
+   <!-- TODO: screenshot - GitHub "New repository" button -->
+3. Fill in:
+   - Repository name  
+   - Description (optional)  
+   - Set it to **Public**
+4. Do **NOT** initialize with README (we will create files locally).
+   <!-- TODO: screenshot - repository creation form -->
+5. Click **Create repository**.
+
+GitHub will show you the **remote URL**, e.g.:
+
+```bash
+https://github.com/username/myrepo.git
+```
+
+<!-- TODO: screenshot - newly created empty repo page with remote URL -->
+
+1. Choose a folder on your computer.
+2. Initialize Git in that folder:
+
+```bash
+git init
+```
+
+<!-- TODO: screenshot - git init output -->
+
+3. Connect your local repo to the remote repo:
+
+```bash
+git remote add origin https://github.com/username/myrepo.git
+```
+
+<!-- TODO: screenshot - successful git remote add -->
+
+4. Verify remote:
+
+```bash
+git remote -v
+```
+
+<!-- TODO: screenshot - list of remotes -->
+
+---
+
+# Adding a Dummy File
+
+Inside your local project folder, create a simple file:
+
+```bash
+echo "This is a test file" > test.txt
+```
+
+<!-- TODO: screenshot - test.txt created in file explorer -->
+
+Then stage it:
+
+```bash
+git add test.txt
+```
+
+Commit it:
+
+```bash
+git commit -m "Add test file"
+```
+
+<!-- TODO: screenshot - git add and git commit output -->
+
+---
+
+# Pushing to GitHub
+
+Push your commit to GitHub:
+
+```bash
+git push -u origin main
+```
+
+If your default branch is **master**, use:
+
+```bash
+git push -u origin master
+```
+
+<!-- TODO: screenshot - first push showing authentication -->
+
+You will be asked for:
+
+- username  
+- **Personal Access Token** (instead of password)
+
+After authentication, your file will appear on GitHub.
+
+<!-- TODO: screenshot - repo page showing test.txt -->
+
+---
+
+# Pulling Changes from GitHub
+
+If changes have been made remotely, you can update your local repo:
+
+```bash
+git pull origin main
+```
+
+or:
+
+```bash
+git pull
+```
+
+<!-- TODO: screenshot - git pull showing new changes -->
+
+Use pull whenever you want your local files to match GitHub.
+
+---
+
+# Cloning a Repository (Alternative Workflow)
+
+Instead of creating a folder manually, you can clone an existing remote repo:
+
+```bash
+git clone https://github.com/username/myrepo.git
+```
+
+This will:
+
+- Create the folder  
+- Download all existing files  
+- Set the remote origin automatically  
+
+<!-- TODO: screenshot - git clone output -->
+
+---
+
+# Summary Workflow
+
+1. Create repo on GitHub (empty, no README)  
+2. `git init` locally  
+3. Create files  
+4. `git add`  
+5. `git commit`  
+6. `git remote add origin <url>`  
+7. `git push`  
+
+or use:
+
+- `git clone` → edit → `git add` → `git commit` → `git push`
+
+<!-- TODO: screenshot - full workflow diagram (optional) -->
