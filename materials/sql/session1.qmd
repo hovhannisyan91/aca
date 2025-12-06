@@ -1,6 +1,1172 @@
 ---
-title: "SQL Session 01: Coming Soon"
+title: "SQL Session 01: Intro to Relational Databases"
 categories: [SQL]
 ---
 
-Coming soon.
+## Learning Goals
+
+- Explain the difference between relational databases and non-relational databases
+- Explain the importance of online analytical processing databases (OLAP) and relational database management systems (RDBMS)
+- Datawarhous vs Data Mart vs Datalake vs DataLahouse
+- Set up a database environment using docker
+
+## Introduction
+
+Now, you’ve reached the stage in the Program where you need to learn how to manage your data institutional way. 
+
+To do so, you’ll need to know **structured query language (SQL)**, the first language of:
+
+- Data analysts
+- Analytics Engineers
+- Data engineers
+- Data scientists. 
+
+::: {.callout-tip title='About the importance of SQL'}
+
+**You can’t call yourself a data analyst until you know the basics of SQL**
+
+---
+
+**SQL is the language of Tables!**
+:::
+
+Besides SQL, you’ll explore various types of databases and what makes them different from Excel. 
+During the rest of the session, you will get in-depth look at *current, everyday practices* in the field. 
+
+**Since the best way to learn SQL is to use it,** you’ll get hands-on tasks at the end of every Exercise. 
+<!-- By the time you finish this Achievement, you’ll have used SQL to query data, answered complex business questions, and presented your findings with visualizations. Excited? We sure are! -->
+
+
+## What is a Database
+
+
+**A database** is a collection of stored data, usually organized in tables of rows and columns and managed by a database management system (DBMS). Analysts collectively refer to the *data, the DBMS, and other related tools* as the **database.**
+
+While there are several ways to store data in a database, the most common approach is to store the data in **columns and rows.** The intersection of each column and row is called a **cell**, and each cell represents a **data element.**
+
+A **Data element** could be:
+
+- **numeric:** 
+- **text**
+- you name it...
+<!-- TODO add other formats -->
+
+
+*Table: Example of rows, columns, and a highlighted cell*
+
+|       | Col A | Col B        | Col C |
+|:------|:------|:-------------|:------|
+| Row 1 | A1    | B1           | C1    |
+| Row 2 | A2    | **B2 (Cell)**| C2    |
+| Row 3 | A3    | B3           | C3    |
+
+*Cell = intersection of Row 2 and Column B → B2.*
+
+
+
+### Spreadsheets vs. Databases
+
+
+
+Databases differ from spreadsheets (*excel-like tools*) in several important ways, particularly in scalability, performance, and the ability to support multiple users. The key distinctions include:
+
+- **User Access**
+  - Spreadsheets are typically designed for single-user access.
+  - Databases allow multiple users to access and manipulate the data simultaneously.
+
+- **Data Capacity**
+  - Spreadsheets handle relatively small datasets (usually up to a few hundred thousand rows).
+  - Databases can efficiently store and process millions or even billions of records.
+
+- **Performance**
+  - Spreadsheets load the *entire dataset* into memory when opened.
+  - Databases retrieve *only the necessary records*, improving speed and scalability.
+
+- **Query Capability**
+  - Spreadsheets require manual filtering, sorting, and counting.
+  - Databases allow precise and fast queries using SQL.
+
+To illustrate the difference, consider the following dataset of actors stored in a database table:
+
+**Table: Example of Actor Records in a Database**
+
+| actor_id | first_name | last_name   | last_update              |
+|---------:|------------|-------------|---------------------------|
+| 1        | Penelope   | Guiness     | 2013-05-26 14:47:57.62    |
+| 2        | Nick       | Wahlberg    | 2013-05-26 14:47:57.62    |
+| 3        | Ed         | Chase       | 2013-05-26 14:47:57.62    |
+| 4        | Jennifer   | Davis       | 2013-05-26 14:47:57.62    |
+| 5        | Johnny     | Lollobrigida| 2013-05-26 14:47:57.62    |
+
+
+#### Spreadsheet vs. Database Workflow
+
+When performing tasks such as counting how many actors have the first name **"Ed"**, the difference between spreadsheets and databases becomes clear:
+
+- **Using a Spreadsheet:**
+  - You must manually **filter the `first_name` column** to show only rows containing “Ed.”
+  - After filtering, you manually **count the matching rows** or read the count displayed by the spreadsheet application.
+  - With large datasets, loading, filtering, and recalculating can be **slow and resource-intensive**, causing delays and potential crashes.
+  - Spreadsheets can process **only one query at a time**, limiting efficiency.
+
+- **Using a Database**
+  - Instead of loading the entire dataset, you can execute a **single SQL query** such as:
+    ```sql
+    SELECT COUNT(*) 
+    FROM actor
+    WHERE first_name = 'Ed';
+    ```
+  - The result is returned **almost instantly**, even with very large datasets.
+  - Databases support **multiple users** running queries simultaneously without performance degradation.
+  - They are optimized for **complex, concurrent data manipulation and retrieval**, making them more suitable for scalable and shared environments.
+
+::: {.callout-note}
+Overall, spreadsheets may be adequate for small, single-user datasets, but databases provide far superior performance, scalability, and efficiency when working with larger datasets or multiple users.
+:::
+
+#### Spreadsheets vs. Databases
+
+| **SPREADSHEET**                                                                 | **DATABASE**                                                                     |
+|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| Designed for single-user access                                                  | Designed for multiple-user access                                                |
+| Only one user can manipulate the data at one point in time                       | Multiple users can manipulate the data at one point in time                      |
+| Handles a limited amount of data                                                 | Handles small to massive amounts of data                                         |
+| Basic to moderate data operations                                                | Basic to complex data operations                                                 |
+| Slow or unable to manipulate, extract, transform, and aggregate large amounts of data | Faster to manipulate, extract, transform, and aggregate large amounts of data |
+
+
+
+### Structured vs Unstructured Data
+
+Before we learn about different types of databases, we should understand the distinction between them. Broadly speaking, these below terms refer to how data is organized:
+
+- structured
+- unstructured
+- semi-structured data. 
+
+
+#### Structured Data
+
+Each **row** in the table represents a distinct *entity* (in this case, an actor), while each **column** corresponds to a specific *attribute* such as the actor’s first name. The intersection of a row and a column forms a **cell**, and each cell contains a single data value.
+
+Importantly, every column is assigned a **predefined data type**, which determines the kind of information it can store. For example, the `first_name` column uses a **text** data type, meaning all values in this column must consist of alphabetical characters only.
+
+##### Sample Data
+
+| actor_id | first_name | last_name     | last_update              |
+|---------:|------------|---------------|---------------------------|
+| 1        | Penelope   | Guiness       | 2013-05-26 14:47:57.62    |
+| 2        | Nick       | Wahlberg      | 2013-05-26 14:47:57.62    |
+| 3        | Ed         | Chase         | 2013-05-26 14:47:57.62    |
+| 4        | Jennifer   | Davis         | 2013-05-26 14:47:57.62    |
+| 5        | Johnny     | Lollobrigida  | 2013-05-26 14:47:57.62    |
+| 6        | Bette      | Nicholson     | 2013-05-26 14:47:57.62    |
+| 7        | Grace      | Mostel        | 2013-05-26 14:47:57.62    |
+| 8        | Matthew    | Johansson     | 2013-05-26 14:47:57.62    |
+| 9        | Joe        | Swank         | 2013-05-26 14:47:57.62    |
+| 10       | Christian  | Gable         | 2013-05-26 14:47:57.62    |
+
+
+
+#### Unstructured Data
+
+Unstructured data refers to information that **does not follow a predefined model or tabular format**. Unlike structured data, it has no fixed rows, columns, or consistent organization. Common examples include:
+
+- Emails  
+- Text messages  
+- Images and graphics  
+- Audio and video files  
+
+Because it lacks a clear structure, unstructured data is **more difficult to search, process, and analyze**. Extracting useful information often requires significant manual effort or specialized tools. It can be compared to searching for every instance of a specific word in a book—possible, but time-consuming and inefficient without the right indexing or processing methods.
+
+<!-- todod add unstructured_data.png image -->
+
+#### Semi-Structured Data
+
+Semi-structured data lies **between structured and unstructured data**. While it does not follow a rigid tabular format, it still maintains a **discernible organizational framework**, making it more flexible than strictly structured data.
+
+This type of data can be analyzed effectively **only when you understand the organizational rules** embedded within it. A common example is **HTML**: although it is not stored in rows and columns, it contains predictable **tags** and **nested elements** that define the structure of the information. To locate specific content within an HTML file, you must first understand what each tag represents.
+
+Semi-structured data therefore offers:
+
+- **More flexibility** than structured tables  
+- **More organization** than raw unstructured content  
+- **Better adaptability** for evolving or complex data formats  
+
+
+<!-- todod add semi-structured_data.png image -->
+
+##### Examples of Each Data Type
+
+| **Type**              | **Examples**                                                                                      |
+|-----------------------|----------------------------------------------------------------------------------------------------|
+| **Structured Data**   | Customer tables, sales transactions, employee records, relational database tables (SQL).           |
+| **Unstructured Data** | Emails, PDFs, text documents, social media posts, images, videos, audio recordings.                |
+| **Semi-Structured Data** | HTML documents, JSON files, XML files, log files, key–value store outputs.                    |
+
+
+### Intro to SQL
+
+**SQL (Structured Query Language)** was first developed by **IBM** in the early 1970s and released publicly in 1979. It was later standardized by the American National Standards Institute (ANSI), establishing it as the primary language for interacting with relational databases.
+
+SQL is used for three core tasks:
+
+- **Manipulating Data:** inserting, updating, or deleting records within a database.
+- **Searching Data:** retrieving all films that feature a specific actor (e.g., *Ed Chase*).
+- **Defining Database Structures:** For instance, creating new tables or adding columns to existing ones.
+
+Like any language, SQL follows specific **syntax rules**.
+
+- An English sentence ends with a period.  
+- A SQL statement ends with a **semicolon (;)**.  
+
+::: {.callout-warning}
+While the foundational syntax is consistent, slight variations may occur depending on the database system (e.g., PostgreSQL vs. SQL Server). Understanding these conventions is essential before writing your own SQL queries.
+:::
+
+---
+
+::: {.callout-note title = "Is SQL a Programing Language?"}
+
+SQL generally counts as **code** even though it’s not technically a programming language. You’ll encounter a common phenomenon when you start working with it—you’ll find yourself in situations where you can’t solve a coding problem using only your existing knowledge. Don’t worry—this happens to all beginners, and it’s something you’ll have to learn to deal with.
+
+Most coders spend a fair amount of time researching answers to their problems online. There’s no need to get frustrated if you run into a brick wall—simply Google what you’re trying to achieve in SQL (or any other language), and you may be surprised how quickly you’ll find an answer to your problem!
+:::
+
+
+### Types of Databases
+
+As you learn about SQL, you’ll be working with a relational database, a common type of database that all analysts need to be familiar with. That said, relational databases aren’t the only type of database out there. Let’s look at the most important ones and their defining features:
+
+
+1. Relational Databases
+2. NoSQL Databaes
+3. Graph Databases
+
+::: {.callout}
+- Databases could also be **centralized or distributed.**
+- Databases could also be **online analytical processing (OLAP)** or **online transaction processing (OLTP) system.**
+:::
+
+#### Relational Databases
+
+
+A **relational database** is a collection of data stored in one or more tables of rows and columns. 
+
+Between the different tables, there are links, known as **relationships**. As you’ve already learned, data analysts use SQL to query and manipulate the data in relational databases.
+
+![](../../img/sql/rdbms.png)
+
+
+Popular relational database management systems (RDBMS) include **Microsoft SQL Server**,**MySQL**, **Oracle DB** and **PostgreSQL**. Each of these **RDBMS** is owned by different companies:
+
+- **PostgreSQL:** PostreSQL Comunity
+- **MySQL:** Oracle
+- **Oracle:** Oracle
+- **MSSQ:** Microsoft
+
+<!-- ![](../../img/sql/postgresql_icon.png)
+![](../../img/sql/mysql_icon.png)
+![](../../img/sql/mssql_icon.png) -->
+
+
+| Feature | PostgreSQL | SQL Server | Oracle | MySQL |
+|---------|------------|------------|--------|--------|
+| License | Open-source | Commercial + Express | Commercial | Open-source (Oracle-owned) |
+| OS Support | Linux, macOS, Windows | Windows, Linux | Linux, Unix, Windows | Linux, Windows |
+| Strengths | Standards compliant, JSONB, extensible | Enterprise BI, T-SQL, Microsoft ecosystem | Scalability, security, enterprise features | Fast reads, simple web workloads |
+| Best Use Cases | Analytics, complex apps, data science | BI, ERP, corporate apps | Finance, telecom, large enterprises | Web apps, lightweight services |
+
+
+#### NoSQL Databases
+
+> NoSQL means **Not Only SQL**  can be both relational and non-relational. 
+
+Unlike relational databases, NoSQL databases have a **flexible data model**, and they’re used to store unstructured, semi-structured, and even structured data.
+In general, you wouldn’t use SQL to access a NoSQL database, though some have SQL-like languages.
+
+As web applications have become more complex, NoSQL databases have become popular thanks to their flexibility. NoSQL databases are used for applications that change frequently as new functions and features are added; for instance, the social networking site LinkedIn uses a NoSQL database.
+
+Thus, NoSQL databases are non-relational systems designed for **scalability, flexibility, and high-volume data.** They fall into several major categories depending on their data model.
+
+##### **Key–Value Databases**
+
+
+
+- **Concept:** Simple key → value storage.
+- **Popular systems:** Redis, Amazon DynamoDB, Riak KV
+- **Example (Redis):**
+
+```python
+{
+  'course':'Data Analtyics',
+  'company':'ACA'
+}
+```
+
+![](../../img/sql/key_value_db.png)
+
+---
+
+##### **Document Databases**
+
+
+- **Concept:** JSON-like documents with flexible schema.
+- **Popular systems:** MongoDB, CouchDB, Firestore
+- **Example (MongoDB):**
+```json
+{
+  "user_id": 1001,
+  "name": "Maria",
+  "roles": ["admin", "manager"]
+}
+```
+![](../../img/sql/document.png)
+
+---
+
+##### **Column-Family (Wide-Column) Databases**
+
+
+
+- **Concept:** Data stored in column families across distributed nodes.
+- **Popular systems:** Apache Cassandra, HBase, ScyllaDB
+- **Example (Cassandra CQL):**
+```sql
+INSERT INTO users (user_id, name, age)
+VALUES (1001, 'Maria', 33);
+```
+![](../../img/sql/wide_column_db.png)
+
+---
+
+##### **Graph Databases**
+
+
+
+- **Concept:** Nodes and relationships.
+- **Popular systems:** Neo4j, ArangoDB, Amazon Neptune
+- **Example (Neo4j Cypher):**
+```cypher
+CREATE (u:User {name: "Maria"})
+CREATE (p:Project {title: "Analytics App"})
+CREATE (u)-[:LEADS]->(p);
+```
+
+![](../../img/sql/graphdb.png)
+
+---
+
+##### **Time-Series Databases**
+
+
+
+- **Concept:** Optimized for timestamped metrics.
+- **Popular systems:** InfluxDB, TimescaleDB, Prometheus
+- **Example (InfluxDB Line Protocol):**
+
+![](../../img/sql/time-seriesdb.png)
+
+
+
+*Mostly used among DevOps for monitoring
+*
+---
+
+##### **Search Engine Databases**
+
+
+- **Concept:** Full-text indexing and search.
+- **Popular systems:** Elasticsearch, OpenSearch, Apache Solr
+- **Example (Elasticsearch Query):**
+```json
+{
+  "query": {
+    "match": {
+      "message": "database error"
+    }
+  }
+}
+```
+
+![](../../img/sql/search-engine.png)
+
+
+>Mostly used for querying logs
+
+---
+
+##### Summary Table
+
+| NoSQL Type       | Key Concept                | Popular Databases                             |
+|------------------|----------------------------|-----------------------------------------------|
+| Key–Value        | Key → Value lookups        | Redis, DynamoDB, Riak                         |
+| Document         | JSON-like documents        | MongoDB, CouchDB, Firestore                   |
+| Column-Family    | Wide-column storage        | Cassandra, HBase, ScyllaDB                    |
+| Graph            | Nodes + edges              | Neo4j, ArangoDB, Amazon Neptune               |
+| Time-Series      | Time-stamped metrics       | InfluxDB, TimescaleDB, Prometheus             |
+| Search Engine    | Text search and indexing   | Elasticsearch, OpenSearch, Solr               |
+
+
+
+::: {.callout title = "Reading"}
+[SQL vs NoSQL]([link](https://www.ibm.com/think/topics/sql-vs-nosql))
+:::
+
+### Centralized vs Distributed Databases
+
+
+The three kinds of databases discussed above can be **centralized** or **distributed**. Put simply, these concepts refer to where the database is stored. 
+
+::: {.figure fig-align="center"}
+![Illustration of centralized vs distributed databases](../../img/sql/centralized_vs_distributed.png){width="92%"}
+:::
+
+#### **Centralized Databases**
+
+ 
+A centralized database runs on a **single machine** (single-node). All users, analysts, and administrators connect to this one server.
+
+**Key Features:**
+
+- All data lives in one powerful machine.
+- Easy to manage and maintain.
+- Can handle **billions of records** and **terabytes of data**.
+- Scaling requires buying larger, more expensive hardware (vertical scaling).
+- Once the system reaches hardware limits, performance and management become challenging.
+
+**Common in:** Traditional enterprises, internal IT systems, on-premise setups.
+
+**Analogy:** A workstation or laptop, but with **high-end server specifications**.
+
+---
+
+
+#### **Distributed Databases**
+
+ 
+A distributed database stores data across **multiple machines** (nodes). These nodes work together to form one logical database.
+
+##### **Key Features:**
+
+- Designed for **massive-scale data**.
+- Scales horizontally by adding more machines.
+- Faster data access and search due to parallel processing.
+- More cost-effective storage.
+- Higher availability and fault tolerance.
+
+##### **Common in:**
+
+- Banking systems  
+- Telecommunications  
+- Large tech companies (Google, Facebook, Amazon, Netflix)  
+
+#####  **Why it's used?**  
+
+To handle constantly growing data, high query loads, global users, and real-time applications.
+
+---
+
+##### **Centralized vs Distributed Databases: Summary**
+
+| Feature | Centralized Database | Distributed Database |
+|--------|----------------------|----------------------|
+| Storage location | One machine | Many machines |
+| Scalability | Vertical (add more power) | Horizontal (add more nodes) |
+| Typical capacity | High but limited by hardware | Extremely high, virtually unlimited |
+| Cost | Expensive to scale | More cost-efficient |
+
+
+##### **OLAP Systems (Online Analytical Processing)**
+![](../../img/sql/OLAP.png){width="80%"}
+
+
+OLAP systems are optimized for **READ-heavy analytical workloads**. They store large volumes of historical data and support complex queries, aggregations, and trend analysis.
+
+**Key Features:**
+
+- Designed primarily for **reading and analyzing** data.
+- Not optimized for frequent inserts/updates/deletes.
+- Stores historical and summarized information.
+- Supports advanced analytics: dashboards, reports, trends, forecasting.
+- Typically powered by data warehouses or data marts.
+
+**Example:** An e-commerce analyst retrieves **last year’s order data** from a data warehouse and analyzes trends across months, categories, or customer segments.
+
+**Common Technologies:**  `Amazon Redshift`, `Snowflake`,` BigQuery`, `Apache Hive`, `Microsoft SQL Server Analysis Services`.
+
+---
+
+#### **OLTP Systems (Online Transaction Processing)**
+
+![](../../img/sql/OLTP.png){width="80%"}
+
+
+OLTP systems are optimized for **fast inserts, updates, and deletes**.  They handle high-volume transactional operations in real time.
+
+**Key Features:**
+
+- Processes large numbers of small, atomic transactions.
+- Ensures consistency using ACID properties.
+- Optimized for real-time operations.
+- Used by operational systems rather than analytics.
+
+**Example:** A bank’s ATM network continuously **inserts, updates, or deletes** records as customers make withdrawals, deposits, or transfers.
+
+**Common Technologies:** `PostgreSQL`, `MySQL`, `Oracle`, `SQL Server`, `MongoDB` (as transactional store).
+
+
+::: {.callout-important title = "About ACID, BASE and CAP Theorem"}
+
+In computer science, **ACID** (**a**tomicity, **c**onsistency, **i**solation, **d**urability)** is a set of properties of database transactions intended to guarantee data validity despite errors, power failures, and other mishaps. For example, a transfer of funds from one bank account to another, even involving multiple changes such as debiting one account and crediting another, is a single transaction.
+
+---
+
+The oposite of ACID is **BASE** (**b**asically **a**vailable, **s**oft state, and **e**ventually consistent: 
+
+In ACID  whole transaction fails if an error occurs in any step within the transaction; in contrast, BASE databases prioritize availability over consistency: instead of failing the transaction, users can access inconsistent data temporarily: data consistency is achieved, but not immediately. 
+
+A database either leans towards ACID or BASE, but it cannot be both according to [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). 
+
+For example, SQL databases (like MySQL, PostgreSQL, AWS RedShift) are structured over the ACID model, while NoSQL databases (like DynamoDB[4] or MongoDB) use the BASE architecture. However, some NoSQL databases might exhibit certain ACID traits
+
+
+
+:::
+
+---
+
+
+#### **OLAP vs OLTP: Summary**
+
+| Feature | OLAP | OLTP |
+|--------|------|------|
+| Primary purpose | Analytics, reporting | Real-time transactions |
+| Query type | Read-heavy, complex | Write-heavy, simple |
+| Data volume | Historical, large datasets | Current transactional data |
+| Performance optimized for | Aggregations, scans | Fast inserts/updates/deletes |
+| Common use cases | Dashboards, BI, trend analysis | Banking, retail transactions, booking systems |
+| Users | Analysts, data scientists | End-users, applications, machines |
+
+
+![](../../img/sql/OLAPvsOLTP.png)
+
+
+::: {.callout-note title="Reading"}
+[OLTPvsOLAP]([link](https://medium.com/@HalderNilimesh/comprehensive-comparison-of-oltp-and-olap-key-differences-use-cases-and-choosing-the-right-565e74be4670))
+:::
+
+## Data Management Architectures
+
+Okay, we got high level understanding about the databases and their types, however in real life applications we need to master the so called Data Management Architecture (DMA).
+Let's go over them chronologically:
+
+1. Data Warehouse (DW)
+2. Data Mart (DM)
+3. Data Lake (DL)
+4. Data Lakehous (DLH)
+
+### Data Warehouse (DW)
+
+The earliest large-scale analytics storage (1980-90s).
+
+A Data Warehouse is a `centralized`, `structured`, and governed analytical storage designed for reporting, business intelligence, and decision-making. Everything inside is modeled, cleaned, validated, and optimized for SQL analytics.
+
+![](../../img/sql/dw.png)
+
+#### Purpose 
+
+- Provide a single version of truth for the organization.
+- Serve business reporting, dashboards, KPIs.
+- Allow analysts to run consistent, repeatable metrics.
+
+#### Architecture
+
+- **Core storage:** relational tables in Star or Snowflake schema.
+- ETL/ELT pipelines transform raw data into structured models.
+- **Strong governance:** data quality rules, validation layers, semantic models.
+
+#### Schema Approach
+
+- **Schema-on-write:** data must be modeled before it enters.
+- **Facts** (large numerical tables).
+- **Dimensions** (lookup tables with business attributes).
+- **Conformed dimensions** for uniform interpretation (e.g., Customer, Product).
+
+#### Query Model
+
+- Aggregations, joins, slicing/dicing, reporting.
+- Optimized for read-heavy workloads.
+
+#### Advantages
+
+- High data quality
+- Strong governance
+- Fast SQL analytics
+- Business-friendly, predictable models
+
+#### Limitations
+
+- **Rigid:** changes require redesign
+- Poor for raw, unstructured data
+- **Expensive** for large-scale storage
+- Not ideal for ML pipelines that need raw historical data
+
+#### Typical Tools/Platforms
+
+- Snowflake (warehouse mode)
+- Amazon Redshift
+- Google BigQuery (classic DW usage)
+- Teradata
+- Oracle Exadata
+
+
+#### Relationship to others
+
+- **DW** is the parent of **DM**.
+- **DW** predates **DL** and **DLH**.
+  
+### Data Mart (DM)
+
+Introduced after Data Warehouses (late 1990s).
+
+A Data Mart is a `subject-specific`, `department-focused` subset of a Data Warehouse.  It is optimized for a particular business domain such as Marketing, Finance, Sales, HR, or Operations.
+
+![](../../img/sql/dm.png)
+
+#### Purpose 
+
+- Reduce load on the central Data Warehouse.
+- Deliver faster, domain-specific analytics.
+- Allow departments to have tailored KPIs and models.
+- Improve performance by minimizing unnecessary joins and tables.
+
+
+#### Architecture
+
+- Usually built as **dependent data marts**, sourced from the DW.
+- Sometimes built as **independent data marts** (less common today).
+- Domain-specific schemas (e.g., Marketing Mart, Finance Mart).
+- Can use star/snowflake schemas but simplified for a business unit.
+
+#### Schema Approach
+
+- **Schema-on-write** (same as DW).
+- Contains facts/dimensions **relevant only to one business domain**.
+- May extend or customize dimensions (e.g., Marketing_Customer).
+
+#### Query Model
+
+- Faster analytical queries for a single domain.
+- Reduced table complexity.
+- Supports dashboards, KPI reporting, and departmental insights.
+
+#### Advantages
+
+- High performance for domain-specific workloads
+- Reduces contention on the central DW
+- Simpler models for end users
+- Enables data ownership by individual departments
+
+#### Limitations
+
+- Can create data silos if unmanaged
+- Requires synchronization with DW
+- Potential duplication of logic if marts diverge
+
+> [Data Silo](https://www.ibm.com/think/topics/data-silos)
+
+#### Typical Tools/Platforms
+
+- Snowflake Data Marts
+- Redshift Data Marts
+- BigQuery departmental datasets
+- Microsoft SQL Server departmental warehouses
+
+#### Relationship to others
+
+- **DM** is the child of **DW**.
+- Relies on **DW** for consistency.
+- Not directly related to Data Lakes or Lakehouses except in *hybrid architectures.*
+
+---
+
+### Data Lake (DL)
+
+Introduced during the Big Data era (2010s).
+
+A Data Lake is a `large-scale`, `low-cost`, `raw-data` storage system that can ingest structured, semi-structured, and unstructured data without modeling.
+
+![](../../img/sql/dm.png)
+
+#### Purpose 
+
+- Store massive amounts of raw data cheaply.
+- Support machine learning and exploratory analytics.
+- Capture `logs`, `JSON` files, `clickstreams`, `IoT` data, `images`, `audio`.
+- Preserve granular, historical data with no loss.
+
+#### Architecture
+
+- Built on object storage (S3, GCS, ADLS, or HDFS).
+- **Organized into zones:** **raw**, **curated**, **prepared**.
+- Ingestion via **ELT** pipelines.
+- Often uses frameworks like `Spark`, `Hive`, `Presto`, or `Dremio`.
+
+#### Schema Approach
+
+- **Schema-on-read:** structure is applied only at query time.
+- **Supports open formats:** Parquet, ORC, Avro, CSV, JSON.
+- Can handle unstructured formats (text, logs, images).
+
+#### Query Model
+
+- Flexible but slower than DW for SQL analytics.
+- Best for ML workloads requiring raw historical data.
+- Handles batch and streaming ingestion.
+
+#### Advantages
+
+- Extremely flexible storage model
+- Very low cost for large-scale data
+- Excellent for ML, experimentation, and data science
+- Decouples storage from compute
+
+#### Limitations
+
+- No ACID guarantees in traditional lakes
+- Poor governance (risk of “data swamp”)
+- Hard for business teams to use directly
+- Not optimized for BI dashboards
+
+#### Typical Tools/Platforms
+
+- AWS S3 + Athena / EMR
+- Azure Data Lake Storage
+- Google Cloud Storage + BigQuery external tables
+- Hadoop HDFS
+- Databricks in lake mode
+
+#### Relationship to others
+
+- **DL** evolved after **DW** and **DM**.
+- Predecessor of the DLH.
+- **DW** and **DL** often *coexist in two-tier architectures*.
+
+
+
+### Data Lakehouse (DLH)
+
+The most modern architecture (2020s).
+
+A Data Lakehouse is a `unified`, `ACID-compliant`, `analytics + ML` architecture built on top of Data Lake storage.  
+It merges the strengths of Data Warehouses and Data Lakes into a single system.
+
+![](../../img/sql/dl.png)
+
+
+#### Purpose 
+
+- Provide a single platform for SQL analytics, BI, ML, and streaming.
+- Avoid duplication between DW and DL.
+- Guarantee ACID transactions and strong governance on cheap lake storage.
+- Support both structured and unstructured data.
+
+#### Architecture
+
+- Storage on cloud object stores (S3, ADLS, GCS).
+- ACID table formats: **Delta Lake**, **Apache Iceberg**, **Apache Hudi**.
+- Metadata layers for schema enforcement, governance, versioning.
+- Compute engines: Spark, Databricks, Presto/Trino, Snowflake, BigQuery.
+
+### Schema Approach
+
+- Supports both **schema-on-write** and **schema-on-read**.
+- Allows schema evolution, time travel, and versioning.
+- Enforces constraints even on raw lake storage.
+
+#### Query Model
+
+- High-performance SQL (warehouse-like).
+- ML workloads (lake-like).
+- Supports batch, streaming, and real-time analytics.
+- Works for both BI dashboards and ML pipelines.
+
+#### Advantages
+
+- Unifies DW + DL into one architecture
+- ACID guarantees on object storage
+- Suitable for both BI and ML
+- Simplifies pipelines and governance
+- Scalable and cost-effective
+
+#### Limitations
+
+- Requires organizational adoption and re-skilling
+- Governance maturity varies by platform
+- Classic DW teams may struggle to transition
+
+#### Typical Tools/Platforms
+
+- Databricks Lakehouse (Delta)
+- Snowflake (Unistore + Iceberg)
+- BigQuery (Lakehouse-friendly design)
+- Apache Iceberg + Trino/Presto
+- Apache Hudi platforms
+
+#### Relationship to others
+
+- DLH is the evolution of the Data Lake.
+- DLH aims to unify and simplify analytics workloads.
+- DLH may replace DW in modern architectures.
+
+
+<!-- #### **Database Layers**
+
+- **Operational Database (OLTP):** Primary system of record for real-time transactions; normalized schema, ACID guarantees.
+- **Data Warehouse:** Curated, structured, and historical store optimized for analytics; fed via ETL/ELT pipelines and supports dimensional models (star/snowflake).
+- **Data Lake:** Low-cost storage for raw, semi-structured, and unstructured data at scale; schema-on-read enables flexible exploration.
+- **Data Lakehouse:** Combines lake storage with warehouse-like governance and performance (ACID tables, time travel, unified catalog).
+- **Data Mart:** Focused slice of the warehouse or lakehouse tailored for a specific team/domain to simplify access and controls.
+- **Staging/Raw Layer:** Landing zone for ingested data before cleansing and modeling; keeps reproducible snapshots of source data. -->
+
+
+
+<!--  -->
+
+## Building our first Database
+
+Now that we have high level understanding about the databases, their types and architectures, it is high time to build our first database and continue.
+
+In order to be able to build and run the databse you need to have keep  `docker desktop`  active. If you haven't isntalled Docker yet, checkout the the isntallation and testing steps [here](https://hovhannisyan91.github.io/aca/materials/lab/docker.html)
+
+PS you will see how easy it is.
+
+### What are we going to achieve?
+
+We are going to build a relational database which will consist from the following tables.
+
+1. Sales
+2. Time Dimenion
+3. Product Dimansion
+4. Employee Dimension
+5. Customer Dimension
+
+
+
+![](../../img/sql/star_schema.png)
+
+
+::: {.callout-important}
+This is going to be part of your portfolio, make sure the make it as structured as possible.
+:::
+
+
+### Step 1: Create New GitHub Repository
+
+1. Log in to GitHub.  
+2. Click **New Repository**.  
+3. Repository name: `sql-analytics-portfolio`  
+4. Check **Add a README file**.  
+5. Check **Add .gitignore** and choose **None**.  
+6. Click **Create Repository**.
+
+### Step 2: Clone the Repository
+
+1. Create a folder name `aca` in your Desktop or wherever you want
+2. Open your terminal there. You should see there `~/aca`
+3. Type in your termina:
+```bash
+git clone <your-repository-url>
+```
+4. Navigate to that folder by typing:
+```bash
+cd  <your-repository-url>
+```
+5. type `code .` to open the project with the VsCode
+6. RECOMMENDED save the project in the VsCode using the Project Manager extention
+
+### Step 3: Downlaod the data
+
+1. Create a new folder inside  of the project named `data`
+2. Downlaod the following `csv` files and put in the `data` folder
+   1. <a href="https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/sql_module/data/customers.csv" target="_blank">customers.csv</a>  
+   2. <a href="https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/sql_module/data/employees.csv" target="_blank">employees.csv</a>  
+   3. <a href="https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/sql_module/data/orders.csv" target="_blank">orders.csv</a>  
+   4. <a href="https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/sql_module/data/products.csv" target="_blank">products.csv</a>  
+   5. <a href="https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/sql_module/data/sales.csv" target="_blank">sales.csv</a>
+3. Add  and commit the changes done so far 
+```bash
+git add .
+git commit -m "Added data folder with CSV datasets"
+```
+
+### Step 4: Update `.gitignore`
+
+1. Open the `.gitignore` file in your repository and add the following two lines at the bottom: 
+```bash
+pgadmin_data/
+postgres_data/
+```
+2. Again add and commit
+```bash
+git add .gitignore
+git commit -m "Updated .gitignore to exclude database volumes"
+```
+
+### Step 5: Creating Init folder and SQL files
+
+We are going to create init files which will be executed only during the first db initialization.
+
+1. Create a file named `init`
+2. Inside of the Init folder create a file named `01_schema.sql` for database schema code. Copy the respective chunk there
+3. Inside of the Init folder create a file named `02_etl.sql` for data loading to SQL
+4. Add and Commit the changes 
+```bash
+  git add init/
+  git commit -m "Added initial schema and ETL SQL files"
+```
+
+
+#### 01_schema.sql
+
+```sql
+-- 01_schema.sql
+
+-- Safety: drop if you are iterating (comment these in production)
+-- DROP TABLE IF EXISTS sales CASCADE;
+-- DROP TABLE IF EXISTS orders CASCADE;
+-- DROP TABLE IF EXISTS products CASCADE;
+-- DROP TABLE IF EXISTS customers CASCADE;
+-- DROP TABLE IF EXISTS employees CASCADE;
+
+CREATE TABLE IF NOT EXISTS employees (
+  employee_id   SERIAL PRIMARY KEY,
+  first_name    TEXT,
+  last_name     TEXT,
+  email         TEXT,
+  salary        NUMERIC
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+  customer_id   INTEGER PRIMARY KEY,
+  customer_name TEXT,
+  address       TEXT,
+  city          TEXT,
+  zip_code      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  product_id    INTEGER PRIMARY KEY,
+  product_name  TEXT,
+  price         NUMERIC,
+  description   TEXT,
+  category      TEXT
+);
+
+-- orders: include year/quarter/month as stored columns (loaded from CSV)
+CREATE TABLE IF NOT EXISTS orders (
+  order_id    INTEGER PRIMARY KEY,
+  order_date  TIMESTAMP,
+  year        INT,
+  quarter     INT,
+  month       TEXT
+);
+
+CREATE TABLE IF NOT EXISTS sales (
+  transaction_id INTEGER PRIMARY KEY,
+  order_id       INTEGER REFERENCES orders(order_id)     ON DELETE RESTRICT,
+  product_id     INTEGER REFERENCES products(product_id) ON DELETE RESTRICT,
+  customer_id    INTEGER REFERENCES customers(customer_id) ON DELETE RESTRICT,
+  employee_id    INTEGER REFERENCES employees(employee_id) ON DELETE SET NULL,
+  total_sales    NUMERIC,
+  quantity       INTEGER,
+  discount       NUMERIC
+);
+
+-- Helpful indexes
+CREATE INDEX IF NOT EXISTS idx_sales_order_id   ON sales(order_id);
+CREATE INDEX IF NOT EXISTS idx_sales_product_id ON sales(product_id);
+CREATE INDEX IF NOT EXISTS idx_sales_customer_id ON sales(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_date      ON orders(order_date);
+```
+
+
+#### 02_schema.sql
+
+```sql
+-- 03_seed_from_csv.sql
+-- COPY must read files inside the container; we mounted ./data to /docker-entrypoint-initdb.d/data
+
+\echo 'Loading employees...'
+COPY employees(employee_id,first_name,last_name,email,salary)
+FROM '/docker-entrypoint-initdb.d/data/employees.csv'
+WITH (FORMAT csv, HEADER true);
+
+\echo 'Loading customers...'
+COPY customers(customer_id,customer_name,address,city,zip_code)
+FROM '/docker-entrypoint-initdb.d/data/customers.csv'
+WITH (FORMAT csv, HEADER true);
+
+\echo 'Loading products...'
+COPY products(product_id,product_name,price,description,category)
+FROM '/docker-entrypoint-initdb.d/data/products.csv'
+WITH (FORMAT csv, HEADER true);
+
+\echo 'Loading orders...'
+\echo 'Loading orders...'
+COPY orders(order_id,order_date,year,quarter,month)
+FROM '/docker-entrypoint-initdb.d/data/orders.csv'
+WITH (FORMAT csv, HEADER true);
+
+\echo 'Loading sales...'
+COPY sales(transaction_id,order_id,product_id,customer_id,employee_id,total_sales,quantity,discount)
+FROM '/docker-entrypoint-initdb.d/data/sales.csv'
+WITH (FORMAT csv, HEADER true);
+```
+
+::: {.callout-caution}
+Pay attention to the orders  and think about it.
+:::
+
+
+### Step 6: Create `.env` file
+
+This file is going to setup the database parameters
+
+1. Create `.env` file in the `root`
+2. Copy and paste the following there
+```bash
+PORT = 5432
+DB_USER=admin
+DB_PASSWORD=password
+DB_NAME=aca
+PGADMIN_EMAIL=admin@admin.com
+PGADMIN_PASSWORD=admin
+```
+3. Add and commit `.env` file
+```bash
+
+git add .env
+git commit -m "Added environment variables for PostgreSQL"
+
+```
+
+### Step 7: Create the docker-compose.yaml File
+
+1. Create `docker-compose.yaml` file
+2. copy and paste the following code there
+   
+```yaml
+
+services:
+db:
+  container_name: postgresql_db_aca
+  image: postgres:17
+  restart: always
+  env_file: .env
+  environment:
+    POSTGRES_USER: ${DB_USER}
+    POSTGRES_PASSWORD: ${DB_PASSWORD}
+    POSTGRES_DB: ${DB_NAME}
+  ports:
+    - "5432:5432"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+  volumes:
+    - ./postgres_data:/var/lib/postgresql/data
+    - ./init:/docker-entrypoint-initdb.d
+
+pgadmin:
+  container_name: pgadmin_aca
+  image: dpage/pgadmin4
+  restart: always
+  environment:
+    PGADMIN_DEFAULT_EMAIL: admin@example.com
+    PGADMIN_DEFAULT_PASSWORD: admin
+  ports:
+    - "5050:80"
+  volumes:
+    - ./pgadmin_data:/var/lib/pgadmin
+
+```
+
+1. Add and commit
+
+```bash
+
+git add docker-compose.yaml
+git commit -m "Added Docker Compose configuration for PostgreSQL and pgAdmin"
+
+```
+
+4. Now your repository must have the following structure
+```bash
+.
+├── README.md
+├── .gitignore                     # Ignoring
+├── .env                     # Environment variables for PostgreSQL
+├── docker-compose.yaml      # Docker Compose configuration
+├── data/                    # CSV datasets
+│   ├── customers.csv
+│   ├── employees.csv
+│   ├── orders.csv
+│   ├── products.csv
+│   ├── sales.csv
+├── init/                    # SQL initialization scripts
+│   ├── 01_schema.sql        # Database schema creation
+│   ├── 02_etl.sql           # Data loading and ETL process
+
+```
+
+
+
+### Step 8: Run the Docker Environment
+
+
+1. Open the integrated terminal in VS Code.
+2. Ensure `Docker Desktop` is running on your machine.
+3. Then start the database services:
+   
+```bash
+docker compose up
+```
+
+
+
+### Step 9:  View the Tabless
+
+
+1. Once running, access pgAdmin in your browser by [http://localhost:5050](http://localhost:5050)
+1. username: `admin@admin.com` 
+2. password: `admin`
+3. hostname must be the same as the postgres service name in `docker-compose.yaml`, which is `db`
+4. When running for the first time, you must create a server. Configure it as shown in the below image (Password is blurred it should be `password`.)
+  
+
+![](../../img/lab/sql/pgadmin.png)
+
+
+### Step 10: Our First Queries | Preview
+
+Use the following SQL statements to preview the first 10 rows from each table after loading your CSV data.
+
+A **schema** is a logical container inside a PostgreSQL database.  You can think of it as a folder that holds database objects.
+
+The default schema is `public`.
+
+```sql
+SELECT * FROM public.customers LIMIT 10;
+
+SELECT * FROM public.employees LIMIT 10;
+
+SELECT * FROM public.orders LIMIT 10;
+
+SELECT * FROM public.products LIMIT 10;
+
+SELECT * FROM public.sales LIMIT 10;
+```
+
