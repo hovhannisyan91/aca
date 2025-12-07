@@ -918,9 +918,9 @@ git commit -m "Updated .gitignore to exclude database volumes"
 
 We are going to create init files which will be executed only during the first db initialization.
 
-1. Create a file named `init`
-2. Inside of the Init folder create a file named `01_schema.sql` for database schema code. Copy the respective chunk there
-3. Inside of the Init folder create a file named `02_etl.sql` for data loading to SQL
+1. Create a folder named `init`
+2. Inside of the `init folder` create a file named `01_schema.sql` for database schema code. Copy the respective chunk there
+3. Inside of the `init folder` create a file named `02_etl.sql` for data loading to SQL
 4. Add and Commit the changes 
 ```bash
   git add init/
@@ -992,7 +992,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_date      ON orders(order_date);
 ```
 
 
-#### 02_schema.sql
+#### 02_etl.sql
 
 ```sql
 -- 03_seed_from_csv.sql
@@ -1058,40 +1058,45 @@ git commit -m "Added environment variables for PostgreSQL"
 2. copy and paste the following code there
    
 ```yaml
-
 services:
-db:
-  container_name: postgresql_db_aca
-  image: postgres:17
-  restart: always
-  env_file: .env
-  environment:
-    POSTGRES_USER: ${DB_USER}
-    POSTGRES_PASSWORD: ${DB_PASSWORD}
-    POSTGRES_DB: ${DB_NAME}
-  ports:
-    - "5432:5432"
-  healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-    interval: 10s
-    timeout: 5s
-    retries: 10
-  volumes:
-    - ./postgres_data:/var/lib/postgresql/data
-    - ./init:/docker-entrypoint-initdb.d
+  db:
+    container_name: postgresql_db_aca
+    image: postgres:17
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      # Persist database data (keep your bind mount; a named volume also works)
+      - ./postgres_data:/var/lib/postgresql/data
+      # Run these once on first initialization
+      - ./init:/docker-entrypoint-initdb.d
+      # Make CSVs available to COPY during init (read-only)
+      - ./data:/docker-entrypoint-initdb.d/data:ro
 
-pgadmin:
-  container_name: pgadmin_aca
-  image: dpage/pgadmin4
-  restart: always
-  environment:
-    PGADMIN_DEFAULT_EMAIL: admin@example.com
-    PGADMIN_DEFAULT_PASSWORD: admin
-  ports:
-    - "5050:80"
-  volumes:
-    - ./pgadmin_data:/var/lib/pgadmin
-
+  pgadmin:
+    container_name: pgadmin_aca
+    image: dpage/pgadmin4
+    restart: always
+    env_file: .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - ./pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
 ```
 
 1. Add and commit
@@ -1141,13 +1146,33 @@ docker compose up
 
 
 1. Once running, access pgAdmin in your browser by [http://localhost:5050](http://localhost:5050)
-1. username: `admin@admin.com` 
-2. password: `admin`
-3. hostname must be the same as the postgres service name in `docker-compose.yaml`, which is `db`
-4. When running for the first time, you must create a server. Configure it as shown in the below image (Password is blurred it should be `password`.)
-  
+3. username: `admin@admin.com` 
+3. password: `admin`
 
-![](../../img/lab/sql/pgadmin.png)
+![](../../img/sql/pgadmin_1.png)
+
+4. Open Object$\rightarrow$Register$\rightarrow$Server 
+   ![](../../img/sql/pgadmin_2.png)
+
+5. In the general under the name column
+   ![](../../img/sql/pgadmin_3.png)
+
+6. Click on the connection and fill in: 
+   1. hostname must be the same as the postgres service name in `docker-compose.yaml`, which is `db`,
+   2.  port `5432`
+   3.  maintanance database: `aca`
+   4.  username: `admin`
+   5.  password: `password`
+   ![](../../img/sql/pgadmin_4.png)
+7. Navigate to in my case: $any_name \rightarrow aca \rgitharrow Schemas \rightarrow public \rightarrow Tables$
+   
+   ![](../../img/sql/pgadmin_5.png)
+8. Click on the `query tool`  copy and paste the queries provided in the [Step 10](###Step 10: Our First Queries | Preview)
+   
+   ![](../../img/sql/pgadmin_6.png)
+
+
+
 
 
 ### Step 10: Our First Queries | Preview
@@ -1180,3 +1205,20 @@ As soon as you finish the job related to the DB, remove the contaieners by typin
 ```bash
 docker-compose down
 ```
+
+### Step 12: Everytime when re-runing 
+
+We are going to  deactivate and activate constantly, thus you will get use to it. Dont worry :)
+
+```bash
+docker-compose up
+```
+
+
+::: {.callout-important}
+In case of `ANY CHANGE` in the `docker-compose.yaml` file:
+
+1. `docker compose down -v`
+2. delete `postgres_data` folder
+3. `docker compose up --build`
+:::
