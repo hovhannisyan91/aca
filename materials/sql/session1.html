@@ -109,6 +109,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -719,7 +748,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data-mart-dm" id="toc-data-mart-dm" class="nav-link" data-scroll-target="#data-mart-dm">Data Mart (DM)</a></li>
   <li><a href="#data-lake-dl" id="toc-data-lake-dl" class="nav-link" data-scroll-target="#data-lake-dl">Data Lake (DL)</a></li>
   <li><a href="#data-lakehouse-dlh" id="toc-data-lakehouse-dlh" class="nav-link" data-scroll-target="#data-lakehouse-dlh">Data Lakehouse (DLH)</a></li>
-  <li><a href="#schema-approach-3" id="toc-schema-approach-3" class="nav-link" data-scroll-target="#schema-approach-3">Schema Approach</a></li>
   </ul></li>
   <li><a href="#building-our-first-database" id="toc-building-our-first-database" class="nav-link" data-scroll-target="#building-our-first-database">Building our first Database</a>
   <ul class="collapse">
@@ -734,6 +762,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#step-8-run-the-docker-environment" id="toc-step-8-run-the-docker-environment" class="nav-link" data-scroll-target="#step-8-run-the-docker-environment">Step 8: Run the Docker Environment</a></li>
   <li><a href="#step-9-view-the-tabless" id="toc-step-9-view-the-tabless" class="nav-link" data-scroll-target="#step-9-view-the-tabless">Step 9: View the Tabless</a></li>
   <li><a href="#step-10-our-first-queries-preview" id="toc-step-10-our-first-queries-preview" class="nav-link" data-scroll-target="#step-10-our-first-queries-preview">Step 10: Our First Queries | Preview</a></li>
+  <li><a href="#step-11-close-and-delete-containers" id="toc-step-11-close-and-delete-containers" class="nav-link" data-scroll-target="#step-11-close-and-delete-containers">Step 11: Close and Delete Containers</a></li>
+  <li><a href="#step-12-everytime-when-re-runing" id="toc-step-12-everytime-when-re-runing" class="nav-link" data-scroll-target="#step-12-everytime-when-re-runing">Step 12: Everytime when re-runing</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1886,14 +1916,14 @@ It merges the strengths of Data Warehouses and Data Lakes into a single system.<
 <li>Compute engines: Spark, Databricks, Presto/Trino, Snowflake, BigQuery.</li>
 </ul>
 </section>
-</section>
-<section id="schema-approach-3" class="level3">
-<h3 class="anchored" data-anchor-id="schema-approach-3">Schema Approach</h3>
+<section id="schema-approach-3" class="level4">
+<h4 class="anchored" data-anchor-id="schema-approach-3">Schema Approach</h4>
 <ul>
 <li>Supports both <strong>schema-on-write</strong> and <strong>schema-on-read</strong>.</li>
 <li>Allows schema evolution, time travel, and versioning.</li>
 <li>Enforces constraints even on raw lake storage.</li>
 </ul>
+</section>
 <section id="query-model-3" class="level4">
 <h4 class="anchored" data-anchor-id="query-model-3">Query Model</h4>
 <ul>
@@ -2051,9 +2081,9 @@ Important
 <h3 class="anchored" data-anchor-id="step-5-creating-init-folder-and-sql-files">Step 5: Creating Init folder and SQL files</h3>
 <p>We are going to create init files which will be executed only during the first db initialization.</p>
 <ol type="1">
-<li>Create a file named <code>init</code></li>
-<li>Inside of the Init folder create a file named <code>01_schema.sql</code> for database schema code. Copy the respective chunk there</li>
-<li>Inside of the Init folder create a file named <code>02_etl.sql</code> for data loading to SQL</li>
+<li>Create a folder named <code>init</code></li>
+<li>Inside of the <code>init folder</code> create a file named <code>01_schema.sql</code> for database schema code. Copy the respective chunk there</li>
+<li>Inside of the <code>init folder</code> create a file named <code>02_etl.sql</code> for data loading to SQL</li>
 <li>Add and Commit the changes</li>
 </ol>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> add init/</span>
@@ -2119,8 +2149,8 @@ Important
 <span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> idx_sales_customer_id <span class="kw">ON</span> sales(customer_id);</span>
 <span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> idx_orders_date      <span class="kw">ON</span> orders(order_date);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="schema.sql-1" class="level4">
-<h4 class="anchored" data-anchor-id="schema.sql-1">02_schema.sql</h4>
+<section id="etl.sql" class="level4">
+<h4 class="anchored" data-anchor-id="etl.sql">02_etl.sql</h4>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 03_seed_from_csv.sql</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- COPY must read files inside the container; we mounted ./data to /docker-entrypoint-initdb.d/data</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2190,39 +2220,45 @@ Caution
 <li>Create <code>docker-compose.yaml</code> file</li>
 <li>copy and paste the following code there</li>
 </ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">db</span><span class="kw">:</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> postgresql_db_aca</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:17</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> always</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">env_file</span><span class="kw">:</span><span class="at"> .env</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">environment</span><span class="kw">:</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span><span class="at"> ${DB_USER}</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span><span class="at"> ${DB_PASSWORD}</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">POSTGRES_DB</span><span class="kw">:</span><span class="at"> ${DB_NAME}</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ports</span><span class="kw">:</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="st">"5432:5432"</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"CMD-SHELL"</span><span class="kw">,</span><span class="at"> </span><span class="st">"pg_isready -U ${DB_USER} -d ${DB_NAME}"</span><span class="kw">]</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 10s</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 5s</span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">volumes</span><span class="kw">:</span></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ./postgres_data:/var/lib/postgresql/data</span></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ./init:/docker-entrypoint-initdb.d</span></span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="fu">pgadmin</span><span class="kw">:</span></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> pgadmin_aca</span></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">image</span><span class="kw">:</span><span class="at"> dpage/pgadmin4</span></span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> always</span></span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">environment</span><span class="kw">:</span></span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">PGADMIN_DEFAULT_EMAIL</span><span class="kw">:</span><span class="at"> admin@example.com</span></span>
-<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">PGADMIN_DEFAULT_PASSWORD</span><span class="kw">:</span><span class="at"> admin</span></span>
-<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ports</span><span class="kw">:</span></span>
-<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="st">"5050:80"</span></span>
-<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">volumes</span><span class="kw">:</span></span>
-<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ./pgadmin_data:/var/lib/pgadmin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">db</span><span class="kw">:</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> postgresql_db_aca</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:17</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> always</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">env_file</span><span class="kw">:</span><span class="at"> .env</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span><span class="at"> ${DB_USER}</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span><span class="at"> ${DB_PASSWORD}</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_DB</span><span class="kw">:</span><span class="at"> ${DB_NAME}</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"5432:5432"</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"CMD-SHELL"</span><span class="kw">,</span><span class="at"> </span><span class="st">"pg_isready -U ${DB_USER} -d ${DB_NAME}"</span><span class="kw">]</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co">      # Persist database data (keep your bind mount; a named volume also works)</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./postgres_data:/var/lib/postgresql/data</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co">      # Run these once on first initialization</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./init:/docker-entrypoint-initdb.d</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="co">      # Make CSVs available to COPY during init (read-only)</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./data:/docker-entrypoint-initdb.d/data:ro</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pgadmin</span><span class="kw">:</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> pgadmin_aca</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> dpage/pgadmin4</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> always</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">env_file</span><span class="kw">:</span><span class="at"> .env</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">PGADMIN_DEFAULT_EMAIL</span><span class="kw">:</span><span class="at"> ${PGADMIN_EMAIL}</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">PGADMIN_DEFAULT_PASSWORD</span><span class="kw">:</span><span class="at"> ${PGADMIN_PASSWORD}</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"5050:80"</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./pgadmin_data:/var/lib/pgadmin</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> db</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ol type="1">
 <li>Add and commit</li>
 </ol>
@@ -2262,10 +2298,24 @@ Caution
 <li>Once running, access pgAdmin in your browser by <a href="http://localhost:5050">http://localhost:5050</a></li>
 <li>username: <code>admin@admin.com</code></li>
 <li>password: <code>admin</code></li>
-<li>hostname must be the same as the postgres service name in <code>docker-compose.yaml</code>, which is <code>db</code></li>
-<li>When running for the first time, you must create a server. Configure it as shown in the below image (Password is blurred it should be <code>password</code>.)</li>
 </ol>
-<p><img src="../../img/lab/sql/pgadmin.png" class="img-fluid"></p>
+<p><img src="../../img/sql/pgadmin_1.png" class="img-fluid"></p>
+<ol start="4" type="1">
+<li><p>Open Object<span class="math inline">\(\rightarrow\)</span>Register<span class="math inline">\(\rightarrow\)</span>Server <img src="../../img/sql/pgadmin_2.png" class="img-fluid"></p></li>
+<li><p>In the general under the name column <img src="../../img/sql/pgadmin_3.png" class="img-fluid"></p></li>
+<li><p>Click on the connection and fill in:</p>
+<ol type="1">
+<li>hostname must be the same as the postgres service name in <code>docker-compose.yaml</code>, which is <code>db</code>,</li>
+<li>port <code>5432</code></li>
+<li>maintanance database: <code>aca</code></li>
+<li>username: <code>admin</code></li>
+<li>password: <code>password</code> <img src="../../img/sql/pgadmin_4.png" class="img-fluid"></li>
+</ol></li>
+<li><p>Navigate to in my case: <span class="math inline">\(any_name \rightarrow aca \rgitharrow Schemas \rightarrow public \rightarrow Tables\)</span></p>
+<p><img src="../../img/sql/pgadmin_5.png" class="img-fluid"></p></li>
+<li><p>Click on the <code>query tool</code> copy and paste the queries provided in the <a href="###Step%2010:%20Our%20First%20Queries%20%7C%20Preview">Step 10</a></p>
+<p><img src="../../img/sql/pgadmin_6.png" class="img-fluid"></p></li>
+</ol>
 </section>
 <section id="step-10-our-first-queries-preview" class="level3">
 <h3 class="anchored" data-anchor-id="step-10-our-first-queries-preview">Step 10: Our First Queries | Preview</h3>
@@ -2281,6 +2331,34 @@ Caution
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="kw">public</span>.products <span class="kw">LIMIT</span> <span class="dv">10</span>;</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="kw">public</span>.sales <span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="step-11-close-and-delete-containers" class="level3">
+<h3 class="anchored" data-anchor-id="step-11-close-and-delete-containers">Step 11: Close and Delete Containers</h3>
+<p>As soon as you finish the job related to the DB, remove the contaieners by typing</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> down</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="step-12-everytime-when-re-runing" class="level3">
+<h3 class="anchored" data-anchor-id="step-12-everytime-when-re-runing">Step 12: Everytime when re-runing</h3>
+<p>We are going to deactivate and activate constantly, thus you will get use to it. Dont worry :)</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> up</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In case of <code>ANY CHANGE</code> in the <code>docker-compose.yaml</code> file:</p>
+<ol type="1">
+<li><code>docker compose down -v</code></li>
+<li>delete <code>postgres_data</code> folder</li>
+<li><code>docker compose up --build</code></li>
+</ol>
+</div>
+</div>
 
 
 </section>
