@@ -1,6 +1,6 @@
 ---
-title: "Data Analyst"
-subtitle: "SQL"
+title: "Data Analyst "
+subtitle: "SQL | Week 1"
 author: "Karen Hovhannisyan"
 date: last-modified
 format:
@@ -27,4 +27,248 @@ format:
           </style>
 ---
 
-## Comming. Soon
+
+
+## What is a Database
+
+A **database** is a collection of stored data, organized in tables of *rows* and *columns*, and managed by a **database management system (DBMS)**.
+
+Analysts use “database” to refer collectively to:
+
+- The stored data  
+- The DBMS  
+- The related tools used to access and manipulate that data
+
+---
+
+## Tables, Rows, Columns
+
+**A table consists of:**
+
+- **Rows**: represent entities  
+- **Columns**: represent attributes  
+- **Cells**: intersection of row × column containing a single data element  
+
+**A data element may be:**
+
+- Numeric  
+- Text  
+- Or any other data type supported by the DBMS  
+
+---
+
+## Example Table
+
+<!-- ```{.smaller .scrollable} -->
+|       | Col A | Col B        | Col C |
+|-------|-------|--------------|-------|
+| Row 1 | A1    | B1           | C1    |
+| Row 2 | A2    | **B2 (Cell) **   | C2    |
+| Row 3 | A3    | B3           | C3    |
+<!-- ``` -->
+
+
+## Why This Structure Matters
+
+- Predictable row–column structure  
+- Each column has a **predefined data type**  
+- Ensures data quality and consistency  
+- Enables efficient search, filtering, and querying  
+- Forms the foundation of SQL  
+
+
+
+## Spreadsheets vs Databases {.smaller}
+
+| Feature                          | Spreadsheet                           | Database                                         |
+|----------------------------------|----------------------------------------|--------------------------------------------------|
+| User Access                     | Single-user                            | Multi-user, concurrent access                    |
+| Data Capacity                   | Limited (thousands to ~1M rows)        | Massive (millions to billions of records)        |
+| Performance                     | Loads entire file into memory          | Retrieves only required data                     |
+| Data Operations                 | Basic to moderate                      | Basic to highly complex (joins, aggregations)    |
+| Querying                        | Manual filtering/sorting               | SQL queries, fast and optimized                  |
+| Scalability                     | Low                                    | High (vertical & horizontal scaling)             |
+| Reliability                     | Prone to errors and file corruption    | ACID-compliant, transaction-safe                 |
+| Collaboration                   | Difficult; conflicts possible          | Seamless concurrent usage                        |
+| Automation                      | Limited                                | High; integrates with scripts and applications   |
+| Data Integrity                  | Minimal enforcement                    | Strong data types, constraints, relationships    |
+
+
+---
+
+## Example Actor Table {.smaller}
+
+| actor_id | first_name | last_name    | last_update            |
+|----------|------------|--------------|------------------------|
+| 1        | Penelope   | Guiness      | 2013-05-26 14:47:57.62 |
+| 2        | Nick       | Wahlberg     | 2013-05-26 14:47:57.62 |
+| 3        | Ed         | Chase        | 2013-05-26 14:47:57.62 |
+| 4        | Jennifer   | Davis        | 2013-05-26 14:47:57.62 |
+| 5        | Johnny     | Lollobrigida | 2013-05-26 14:47:57.62 |
+
+- Filter `first_name = 'Ed'` manually  
+- Count filtered rows manually  
+- Slow and memory-heavy with large data  
+- Only one query at a time  
+
+$$\downarrow$$
+
+```sql
+SELECT COUNT(*)
+FROM actor
+WHERE first_name = 'Ed';
+```
+
+
+## Structured vs Unstructured vs Semi-Structured Data
+
+To understand database types, we must first distinguish how data can be organized.
+There are three major categories:
+
+- Structured data  
+- Unstructured data  
+- Semi-structured data  
+
+---
+
+## Structured Data {.smaller}
+
+Highly organized and stored in a tabular format.
+
+Characteristics:
+
+- Rows represent entities  
+- Columns represent attributes  
+- Every cell contains a **single value**  
+- Each column has a **predefined data type** (TEXT, INTEGER, NUMERIC, etc.)
+
+Example:
+
+::: {.smaller .scrollable}
+| actor_id | first_name | last_name    | last_update              |
+|----------|------------|--------------|---------------------------|
+| 1        | Penelope   | Guiness      | 2013-05-26 14:47:57.62   |
+| 2        | Nick       | Wahlberg     | 2013-05-26 14:47:57.62   |
+| 3        | Ed         | Chase        | 2013-05-26 14:47:57.62   |
+| 4        | Jennifer   | Davis        | 2013-05-26 14:47:57.62   |
+| 5        | Johnny     | Lollobrigida | 2013-05-26 14:47:57.62   |
+:::
+
+---
+
+## Unstructured Data {.smaller}
+
+Data with **no fixed model**, no rows, no columns.
+
+Examples:
+
+- Emails  
+- PDFs  
+- Text documents  
+- Images, graphics  
+- Videos, audio  
+- Social media posts  
+
+Properties:
+
+- Harder to search and process  
+- Requires specialized tools  
+- Often free-form and unpredictable  
+
+---
+
+## Semi-Structured Data {.smaller}
+
+Data that is *not tabular*, yet still contains **organizational markers**.
+
+Examples:
+
+- HTML  
+- JSON  
+- XML  
+- Log files  
+- Key–value records  
+
+Properties:
+
+- More flexible than structured  
+- More organized than unstructured  
+- Structure is embedded through tags, nesting, or key–value rules  
+
+Example (JSON):
+
+```json
+{
+  "user_id": 1001,
+  "name": "Maria",
+  "roles": ["admin", "manager"]
+}
+```
+
+---
+
+::: {.columns}
+::: {.column width="33%"}
+**Structured**
+
+<svg viewBox="0 0 220 140" width="100%" aria-label="Structured data grid">
+  <rect x="10" y="10" width="200" height="120" rx="8" fill="#f7f9fc" stroke="#1f4b99" stroke-width="3"/>
+  <line x1="10" y1="50" x2="210" y2="50" stroke="#1f4b99" stroke-width="3"/>
+  <line x1="10" y1="85" x2="210" y2="85" stroke="#b7c6e2" stroke-width="2"/>
+  <line x1="10" y1="110" x2="210" y2="110" stroke="#b7c6e2" stroke-width="2"/>
+  <line x1="70" y1="10" x2="70" y2="130" stroke="#b7c6e2" stroke-width="2"/>
+  <line x1="135" y1="10" x2="135" y2="130" stroke="#b7c6e2" stroke-width="2"/>
+  <text x="20" y="38" font-family="Arial" font-size="14" fill="#1f4b99">ID</text>
+  <text x="80" y="38" font-family="Arial" font-size="14" fill="#1f4b99">Name</text>
+  <text x="145" y="38" font-family="Arial" font-size="14" fill="#1f4b99">City</text>
+  <text x="20" y="74" font-family="Arial" font-size="13" fill="#345375">1</text>
+  <text x="80" y="74" font-family="Arial" font-size="13" fill="#345375">Maria</text>
+  <text x="145" y="74" font-family="Arial" font-size="13" fill="#345375">Oslo</text>
+  <text x="20" y="100" font-family="Arial" font-size="13" fill="#345375">2</text>
+  <text x="80" y="100" font-family="Arial" font-size="13" fill="#345375">Nick</text>
+  <text x="145" y="100" font-family="Arial" font-size="13" fill="#345375">Berlin</text>
+</svg>
+:::
+::: {.column width="33%"}
+**Unstructured**
+
+<svg viewBox="0 0 220 140" width="100%" aria-label="Unstructured data notes">
+  <rect x="15" y="10" width="190" height="120" rx="10" fill="#fff7ed" stroke="#c05c2d" stroke-width="3"/>
+  <path d="M30 40 Q70 25 110 44 T190 46" fill="none" stroke="#c05c2d" stroke-width="3"/>
+  <path d="M30 68 Q65 80 100 64 T190 68" fill="none" stroke="#e38a54" stroke-width="2"/>
+  <path d="M30 90 Q75 105 120 86 T190 92" fill="none" stroke="#e38a54" stroke-width="2"/>
+  <path d="M30 112 Q55 95 95 118 T190 118" fill="none" stroke="#c05c2d" stroke-width="3"/>
+  <text x="28" y="30" font-family="Arial" font-size="12" fill="#c05c2d">photos, chats, mp3...</text>
+</svg>
+:::
+::: {.column width="34%"}
+**Semi-Structured**
+
+<svg viewBox="0 0 220 140" width="100%" aria-label="Semi-structured data tags">
+  <rect x="10" y="12" width="200" height="116" rx="10" fill="#eef8f2" stroke="#2d814d" stroke-width="3"/>
+  <rect x="22" y="26" width="176" height="30" rx="6" fill="#d6f1df" stroke="#2d814d" stroke-width="2"/>
+  <text x="34" y="46" font-family="Arial" font-size="13" fill="#2d814d">&lt;user id="1001"&gt;</text>
+  <rect x="22" y="66" width="176" height="26" rx="6" fill="#d6f1df" stroke="#2d814d" stroke-width="2"/>
+  <text x="34" y="83" font-family="Arial" font-size="13" fill="#2d814d">"name": "Maria"</text>
+  <rect x="22" y="100" width="176" height="22" rx="6" fill="#d6f1df" stroke="#2d814d" stroke-width="2"/>
+  <text x="34" y="115" font-family="Arial" font-size="13" fill="#2d814d">"roles": ["admin"]</text>
+</svg>
+:::
+:::
+
+
+## Centralized VS Distributed
+
+::: {.figure fig-align="center"}
+![Centralized vs distributed database diagram](../../../img/sql/centralized_vs_distributed.png){width="90%"}
+:::
+
+
+## Data Management Architectures
+
+<!-- TODO Provide only the images SLIDE BY SLIDE /Users/karen/Desktop/aca/materials/sql/session1.qmd-->
+
+
+# Building our firs datavabse 
+
+<!--TODO add each step as one slide, in case of codes make it scroollable. /Users/karen/Desktop/aca/materials/sql/session1.qmd  --> 
