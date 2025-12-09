@@ -1,0 +1,167 @@
+---
+title: "SQL Session 02: Intro to Relational Databases A"
+categories: [SQL]
+---
+
+[how to use pgadmin4](https://www.youtube.com/watch?v=E9vx7CwN2Wc)
+
+<!-- Imagine you’ve been hired as a data analyst at Rockbuster Stealth, a fictional company that provides online video rentals. Your job is to look at the data to answer various business questions. As you work through this Achievement and learn more about SQL, the questions you answer and data queries you perform will gradually become more complex.
+
+On your first day of work, your supervisor sends you the data dump for Rockbuster Stealth and asks you to work on the following tasks. -->
+
+
+In the previous session you learned about different types of databases and the database management systems used to define, query, and manage them. 
+
+Without databases, you wouldn’t be able to `retrieve`, `update`, or `delete` data. But first, you need to actually **store the data** in the database. And before you store the data in the database, you have to decide on the most effective way to organize the data.
+
+In this Session, we will learn about the various elements of a relational database, specifically **keys**, **data types**, and **schemas**. Then, you’ll walk through how to extract the entity relationship diagram for a relational database. 
+
+## Data Storage Structures
+
+Recall, **Relational database** consists of **one or more tables** made up of **rows** and **columns**, and these tables are linked by **relationships.**
+
+
+
+The list on the left represents all the columns in the table. Notice how each column represents a specific attribute of a film, for example, `title`, `description`, and `release_year` An expanded version of this table is shown in Figure 2. As you can see, each row, or record, holds data about a new film.
+
+
+<!-- TODO add an image for an expanded version of the table -->
+
+
+::: {.callout-tip}
+another fancy name for a record is TUPLE
+:::
+
+
+Tables are such a common structure for databases that you’ve likely interacted with one without realizing it. Whenever you place an order on an ecommerce website like Amazon, for example, your order details are stored in a table. Each row in the table represents a different order, and the columns represent attributes such as customer name, address, product ordered, price, order date, and so on. To illustrate, here’s an order report from Amazon.
+
+
+### Key
+
+
+If you refer back to the film table in Figure 1, you’ll notice a key icon next to the `film_id` column. This tells us that `film_id` is a key in the film table. So, what is a key exactly?
+
+A key is a column (or set of columns) that acts as a **unique identifier for a row**, which is helpful for finding records. In Figure 2, you can see each film’s unique ID in the `film_id` column. There are several types of keys found in databases. Knowing the differences between them will help you understand the relationships between the various tables in the database.
+
+
+#### Primary Key
+
+The primary key is a column or set of columns that acts as a **unique identifier** for each record in a table. There can only be **one primary key within a table**, and it has to meet the following criteria:
+
+1. It has to be unique for each row
+2. It cannot be null for any record
+3. The values of the primary key can’t be modified if it’s linked to another table
+
+The promary key is the `film_id` column. Notice how every value is unique and there are no empty cells.
+
+
+#### Candidate Key
+
+
+A **candidate key** is any column that can **uniquely identify a row in a table**, which means there can be more than one candidate key in a table. Since the primary key is chosen from the pool of available candidate keys in a table, candidate keys must meet the same criteria as primary keys, listed above.
+
+<!-- TODO Provide an examples -->
+
+
+#### Composite Key
+
+When no single column can uniquely identify the rows in a table, a combination of columns is used instead. This combination, or set, of columns is called a **composite key.**
+
+<!-- TODO Provide an examples -->
+
+#### Surrogate Key
+
+If a table has **no candidate keys,** you can add a system-generated column, known as a surrogate key, to act as an identifier for each row. Usually this surrogate key is called “key” or “id,” and it’s a number that has no meaning in relation to the record or data in the table.
+
+The “film_id” in Figure 2 is an example of a surrogate key; it’s only purpose is to identify each record in the table.
+
+<!-- TODO Provide an examples -->
+
+#### Foreign Key
+
+A **foreign key** is a column, or set of columns, that refers to the primary key in another table. **Foreign keys are used to establish relationships between tables** and are helpful in navigating from one table to another. Let’s look at the example in Figure 3. See how the primary key from the language table, `language_id` has been copied into the film table; however, here it’s a **foreign key.** The arrow between the two tables illustrates this connection.
+
+**Foreign keys play an important role in relational databases, so you can expect to learn a lot more about them later.**
+
+::: {.callout-tip}
+The concept of keys
+If you remember, you have learned the concept of keys back in Achievement 1 when you were integrating data sets in Excel. The logic here is very much the same, even if it’s expanded—a key serves as an identifier so that you can link two or more data sets.
+:::
+
+
+<!-- TODO Provide relationship with example  -->
+
+
+### Index
+
+
+Imagine you have a book and someone asks you to note down the number of every page that starts with the letter **A**. Doing this manually would take a long time, and the longer the book is, the more time the task requires.
+
+Now imagine the book is a **dictionary**. Instead of checking pages one by one, you jump directly to the section marked **A**, immediately reaching the pages you need.
+
+This is exactly how **indexes** work in databases.
+
+Indexes do **not** add new data to a table. Instead, they are **special lookup structures** that arrange existing records in a way that makes retrieval much faster.
+
+<!-- Todo example of a book -->
+
+::: {.callout-note title="the title"}
+When a query searches through **every** record in a table instead of using an index, this is called a **full scan**.
+:::
+
+
+While indexes improve query performance, they come with trade-offs.  
+They consume storage space and require maintenance whenever data changes.
+
+
+**Before Creating an Index:**
+
+- Avoid indexing **small tables** — scanning them is usually faster.
+- Avoid indexing **frequently updated tables** — indexes must be updated after every insert/update.
+- Avoid indexing columns with many **NULL** values.
+- Avoid indexing columns that are **frequently manipulated** (e.g., columns in constant arithmetic operations).
+:::
+
+Below are the main types of indexes relevant for data analysts.
+
+
+#### Single-Column Index
+
+A single-column index is based on **one** column in a table. Consider the example below: the table contains employee details such as `name`, `contact number`, `age`, and a `primary key`.  
+If you frequently search employees by name, you may create a **single-column index** on the `name` column so that records are sorted alphabetically.
+
+| Employee ID | Name    | Contact Number | Age |
+|-------------|---------|----------------|-----|
+| 1           | Max     | 800692692      | 24  |
+| 2           | Jessica | 800123456      | 35  |
+| 3           | Mikeal  | 800745547      | 49  |
+| …           |         |                |     |
+| 7393        | John    | 800900900      | 48  |
+
+A single-column index improves the speed of queries filtering on one field, but it does not help when filtering across multiple fields. 
+
+---
+
+#### Multiple Column / Composite Index
+
+A **multiple-column**, or **composite**, index is applied to **two or more** columns.  
+This is useful when queries frequently filter based on several fields at the same time.
+
+For example, using the same employee table, you might create an index on **(name, age)** if your queries often filter or sort using both columns.
+
+
+Composite indexes are most effective when query filters follow the **same left-to-right order** of the index definition.
+
+
+
+---
+
+#### Unique Index
+
+Indexes can also be categorized as **unique** or **non-unique**.  
+A **unique index** ensures that no two rows contain the same value in the indexed column(s). This enforces data integrity and prevents duplication.
+
+- **Unique index:** prohibits duplicate values  
+- **Non-unique index:** allows duplicates  
+- Both single-column and composite indexes can be **unique or non-unique**  
+
