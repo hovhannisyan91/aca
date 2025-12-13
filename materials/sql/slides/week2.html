@@ -12,7 +12,7 @@
 
   <meta name="author" content="Karen Hovhannisyan">
   <meta name="dcterms.date" content="2025-12-13">
-  <title>Data Analytics Bootcamp – Data Analyst</title>
+  <title>Data Analytics Bootcamp – Data Analyst | Week 2</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -140,8 +140,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Data Analyst</h1>
-  <p class="subtitle">SQL</p>
+  <h1 class="title">Data Analyst | Week 2</h1>
+  <p class="subtitle">Data Types, Schemas, Keys, Indexes</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -153,16 +153,876 @@ Karen Hovhannisyan
 
   <p class="date">2025-12-13</p>
 </section>
-<section id="comming.-soon" class="slide level2">
-<h2>Comming. Soon</h2>
-
+<section>
+<section id="for-today" class="title-slide slide level1 center">
+<h1>For Today…</h1>
 
 </section>
+<section id="learning-goals" class="slide level2">
+<h2>Learning Goals</h2>
+<p>By the end of this session, you will be able to:</p>
+<ul>
+<li>understand how data is structured in PostgreSQL</li>
+<li>identify tables, rows, and columns</li>
+<li>explain different types of keys and relationships</li>
+<li>understand how indexes affect performance</li>
+<li>recognize common PostgreSQL data types</li>
+<li>get familiarized with basic SQL syntax</li>
+</ul>
+</section>
+<section id="erd-simple" class="slide level2">
+<h2>ERD Simple</h2>
+
+<img data-src="../../../img/sql/erd_simple.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section>
+<section id="sales-analytics-database" class="slide level2">
+<h2>Sales Analytics Database</h2>
+<p><strong>The database captures information about:</strong></p>
+<ul>
+<li>customers who place orders</li>
+<li>products that are sold</li>
+<li>employees involved in the sales process</li>
+<li>orders placed over time</li>
+<li>individual sales transactions</li>
+</ul>
+</section>
+<section id="questions-to-data-analyst" class="slide level2">
+<h2>Questions to Data Analyst</h2>
+<p>Your role as an analyst is to <strong>query this data</strong> to answer business questions related to:</p>
+<ul>
+<li>revenue and sales performance</li>
+<li>product popularity</li>
+<li>customer behavior</li>
+<li>employee contribution</li>
+<li>time-based trends</li>
+</ul>
+</section>
+<section id="erd-complete" class="slide level2">
+<h2>ERD Complete</h2>
+
+<img data-src="../../../img/sql/erd_extanded.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section></section>
+<section>
+<section id="keys-and-indexes" class="title-slide slide level1 center">
+<h1>Keys and Indexes</h1>
+<p>To store data efficiently and enable relationships between tables, relational databases rely on <strong>keys</strong> and <strong>indexes</strong>.</p>
+</section>
+<section id="keys" class="slide level2">
+<h2>Keys</h2>
+<div class="columns">
+<div class="column">
+<ul>
+<li>Primary Key</li>
+<li>Candidate Key</li>
+<li>Composite Key</li>
+<li>Surrogate Key</li>
+<li>Foreign key</li>
+</ul>
+</div><div class="column">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../../../img/sql/pk_sales.png"></p>
+<figcaption>!</figcaption>
+</figure>
+</div>
+</div></div>
+<!-- end columns -->
+</section>
+<section id="primary-key" class="slide level2">
+<h2>Primary Key</h2>
+<p>A <strong>primary key</strong> uniquely identifies each record in a table.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>transaction_id</strong></th>
+<th>order_id</th>
+<th>product_id</th>
+<th>customer_id</th>
+<th>total_sales</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1001</strong></td>
+<td>501</td>
+<td>12</td>
+<td>3001</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1002</strong></td>
+<td>501</td>
+<td>18</td>
+<td>3001</td>
+<td>19.99</td>
+</tr>
+<tr class="odd">
+<td><strong>1003</strong></td>
+<td>502</td>
+<td>12</td>
+<td>3005</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1004</strong></td>
+<td>503</td>
+<td>25</td>
+<td>3008</td>
+<td>89.99</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="candidate-key" class="slide level2">
+<h2>Candidate Key</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 30%">
+<col style="width: 37%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>customer_id</strong></th>
+<th>customer_name</th>
+<th><strong>email</strong></th>
+<th>city</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>3001</strong></td>
+<td>Alice Johnson</td>
+<td><strong>alice.johnson@email.com</strong></td>
+<td>Berlin</td>
+</tr>
+<tr class="even">
+<td><strong>3002</strong></td>
+<td>Mark Thompson</td>
+<td><strong>mark.thompson@email.com </strong></td>
+<td>Paris</td>
+</tr>
+<tr class="odd">
+<td><strong>3003</strong></td>
+<td>Elena Petrova</td>
+<td><strong>elena.p@email.com </strong></td>
+<td>Madrid</td>
+</tr>
+<tr class="even">
+<td><strong>3004</strong></td>
+<td>David Chen</td>
+<td><strong>david.chen@email.com </strong></td>
+<td>London</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="composite-key" class="slide level2">
+<h2>Composite Key</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th><strong>order_id</strong></th>
+<th><strong>product_id</strong></th>
+<th>product_name</th>
+<th>quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>501</strong></td>
+<td><strong>12</strong></td>
+<td>Wireless Mouse</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>501</strong></td>
+<td><strong>18</strong></td>
+<td>USB-C Cable</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><strong>502</strong></td>
+<td><strong>12</strong></td>
+<td>Wireless Mouse</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>503</strong></td>
+<td><strong>25</strong></td>
+<td>Mechanical Keyboard</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<div title="Composite Key">
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Composite Key</strong></p>
+</div>
+<div class="callout-content">
+<p><code>(order_id, product_id)</code> could uniquely identify rows in some transactional systems.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="surrogate-key" class="slide level2">
+<h2>Surrogate Key</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th><strong>transaction_id</strong></th>
+<th>order_id</th>
+<th>product_id</th>
+<th>quantity</th>
+<th>total_sales</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1001</strong></td>
+<td>501</td>
+<td>12</td>
+<td>1</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1002</strong></td>
+<td>501</td>
+<td>18</td>
+<td>2</td>
+<td>19.99</td>
+</tr>
+<tr class="odd">
+<td><strong>1003</strong></td>
+<td>502</td>
+<td>12</td>
+<td>1</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1004</strong></td>
+<td>503</td>
+<td>25</td>
+<td>1</td>
+<td>89.99</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Surrogate Key helps:</strong></p>
+<ul>
+<li>simplify joins</li>
+<li>reduce index size</li>
+<li>improve query readability</li>
+</ul>
+</section>
+<section id="foreign-key" class="slide level2">
+<h2>Foreign Key</h2>
+
+<img data-src="../../../img/sql/fk_sales_vs_products.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section>
+<section id="indexes" class="slide level2">
+<h2>Indexes</h2>
+
+<img data-src="../../../img/sql/index.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section>
+<section id="trade-off" class="slide level2">
+<h2>Trade-Off</h2>
+<div title="Full Table Scan">
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Full Table Scan</strong></p>
+</div>
+<div class="callout-content">
+<p>When a query checks <strong>every row</strong> instead of using an index, this is called a <strong>full scan</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<p>Indexes improve read performance but come with trade-offs:</p>
+<ul>
+<li>extra storage</li>
+<li>slower inserts and updates</li>
+<li>maintenance overhead</li>
+</ul>
+</section>
+<section id="when-not-to-create" class="slide level2">
+<h2>When not to Create!</h2>
+<ul>
+<li>Very small tables</li>
+<li>Frequently updated columns</li>
+<li>Columns with many NULL values</li>
+<li>Columns with very low cardinality</li>
+</ul>
+</section>
+<section id="single-column-index" class="slide level2">
+<h2>Single-Column Index</h2>
+<p>A <strong>single-column index</strong> is built on one column.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Employee ID</th>
+<th>Name</th>
+<th>Contact Number</th>
+<th>Age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Max</td>
+<td><strong>800692692</strong></td>
+<td>24</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Jessica</td>
+<td><strong>800123456</strong></td>
+<td>35</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Mikeal</td>
+<td><strong>800745547</strong></td>
+<td>49</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="composite-index" class="slide level2 smaller">
+<h2>Composite Index</h2>
+<p>Consider <code>employees table</code>, but now imagine that queries often filter by both <code>name</code> and <code>age</code> at the same time.</p>
+<div class="columns">
+<div class="column">
+<p><span class="math display">\[\rightarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>employee_id</th>
+<th>name</th>
+<th>age</th>
+<th>department</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><strong>Max</strong></td>
+<td><strong>24</strong></td>
+<td>Sales</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>Jessica</strong></td>
+<td><strong>35</strong></td>
+<td>Marketing</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>Max</strong></td>
+<td><strong>35</strong></td>
+<td>Finance</td>
+</tr>
+</tbody>
+</table>
+</div><div class="column">
+<p><strong>When to use:</strong></p>
+<ul>
+<li>Efficient for queries filtering on <code>name</code></li>
+<li>Efficient for queries filtering on <code>name</code> <strong>and</strong> <code>age</code></li>
+<li><strong>Not efficient</strong> for queries filtering on <code>age</code> only</li>
+</ul>
+</div></div>
+<!-- end columns -->
+</section>
+<section id="unique-index" class="slide level2 smaller">
+<h2>Unique Index</h2>
+<p>Basically all the candidate keys :)</p>
+<div class="columns">
+<div class="column">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>customer_name</th>
+<th>email</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3001</td>
+<td>Alice Johnson</td>
+<td><strong>alice@email.com</strong></td>
+</tr>
+<tr class="even">
+<td>3002</td>
+<td>Mark Thompson</td>
+<td><strong>mark@email.com</strong></td>
+</tr>
+<tr class="odd">
+<td>3003</td>
+<td>Elena Petrova</td>
+<td><strong>elena@email.com</strong></td>
+</tr>
+</tbody>
+</table>
+</div><div class="column">
+<p><strong>Use a unique index when:</strong></p>
+<ul>
+<li>values must be unique across rows</li>
+<li>the column is frequently used for lookup</li>
+<li><strong>uniqueness is part of business logic</strong></li>
+</ul>
+</div></div>
+<p><!-- end columns --></p>
+</section></section>
+<section>
+<section id="question" class="title-slide slide level1 center">
+<h1>Question</h1>
+<p><strong>Are Keys Also Indexes?</strong></p>
+</section>
+<section id="answer" class="slide level2">
+<h2>Answer</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 31%">
+<col style="width: 32%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Enforces Uniqueness</th>
+<th>Improves Query Speed</th>
+<th>Stored as Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Primary Key</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes (unique index)</td>
+</tr>
+<tr class="even">
+<td>Unique Constraint</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes (unique index)</td>
+</tr>
+<tr class="odd">
+<td>Foreign Key</td>
+<td>No</td>
+<td>Sometimes</td>
+<td>No (by default)</td>
+</tr>
+<tr class="even">
+<td>Regular Index</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+</section></section>
+<section>
+<section id="data-types" class="title-slide slide level1 center">
+<h1>Data Types</h1>
+<p><strong>PostgreSQL data types are commonly grouped into:</strong></p>
+<ul>
+<li>Numeric</li>
+<li>Character (Text)</li>
+<li>Date &amp; Time</li>
+<li>Boolean &amp; Categorical</li>
+<li>Special &amp; Advanced</li>
+</ul>
+</section>
+<section id="data-types-in-postgresql" class="slide level2">
+<h2>Data Types in PostgreSQL</h2>
+<p>Data types define:</p>
+<ul>
+<li>what kind of data a column can store</li>
+<li>how data is validated</li>
+<li>how much storage is used</li>
+<li>how fast queries can run</li>
+</ul>
+</section>
+<section id="why-data-types-matter" class="slide level2">
+<h2>Why Data Types Matter?</h2>
+<p>Choosing the wrong data type can:</p>
+<ul>
+<li>break calculations</li>
+<li>reduce performance</li>
+<li>waste storage</li>
+<li>introduce subtle errors</li>
+</ul>
+</section>
+<section id="numeric-data-types" class="slide level2 smaller">
+<h2>Numeric Data Types</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>INTEGER</code></td>
+<td>Whole numbers</td>
+<td><code>2500</code></td>
+<td>Counts</td>
+</tr>
+<tr class="even">
+<td><code>BIGINT</code></td>
+<td>Large integers</td>
+<td><code>9876543210</code></td>
+<td>IDs</td>
+</tr>
+<tr class="odd">
+<td><code>NUMERIC(p,s)</code></td>
+<td>Exact decimals</td>
+<td><code>15432.75</code></td>
+<td>Revenue</td>
+</tr>
+<tr class="even">
+<td><code>DOUBLE PRECISION</code></td>
+<td>Approximate</td>
+<td><code>0.123456</code></td>
+<td>KPIs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The Rule of Thumb:</strong></p>
+<ul>
+<li>Use INTEGER for counts</li>
+<li>Use NUMERIC for money</li>
+<li>Use DOUBLE PRECISION for ratios</li>
+</ul>
+<p><strong>Index performance depends on data type size:</strong></p>
+<ul>
+<li>smaller types <span class="math inline">\(\rightarrow\)</span> faster indexes</li>
+<li>larger types <span class="math inline">\(\rightarrow\)</span> more storage</li>
+</ul>
+</section>
+<section id="main-character-data-types" class="slide level2 smaller">
+<h2>Main Character Data Types</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CHAR(n)</td>
+<td>Fixed-length character string</td>
+<td>CHAR(5) → ‘US’</td>
+<td>Country codes, fixed formats</td>
+</tr>
+<tr class="even">
+<td>VARCHAR(n)</td>
+<td>Variable-length string with limit</td>
+<td>VARCHAR(50) → ‘Karen Hovhannisyan’</td>
+<td>Names, emails</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>Variable-length string, no limit</td>
+<td>‘This product has been discontinued.’</td>
+<td>Descriptions, comments</td>
+</tr>
+<tr class="even">
+<td>CHARACTER VARYING(n)</td>
+<td>SQL-standard name for VARCHAR</td>
+<td>CHARACTER VARYING(20) → ‘A123XZ’</td>
+<td>Codes, identifiers</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="main-date-and-time-data-types" class="slide level2 smaller">
+<h2>Main Date and Time Data Types</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DATE</td>
+<td>Calendar date (no time)</td>
+<td>2025-03-15</td>
+<td>Birth dates, order dates</td>
+</tr>
+<tr class="even">
+<td>TIME</td>
+<td>Time of day (no date)</td>
+<td>14:30:00</td>
+<td>Opening hours</td>
+</tr>
+<tr class="odd">
+<td>TIME WITH TIME ZONE</td>
+<td>Time with time zone info</td>
+<td>14:30:00+04</td>
+<td>Cross-region schedules</td>
+</tr>
+<tr class="even">
+<td>TIMESTAMP</td>
+<td>Date and time (no timezone)</td>
+<td>2025-03-15 14:30:00</td>
+<td>Local event logs</td>
+</tr>
+<tr class="odd">
+<td>TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ)</td>
+<td>Date and time with timezone handling</td>
+<td>2025-03-15 10:30:00+00</td>
+<td>Auditing, analytics</td>
+</tr>
+<tr class="even">
+<td>INTERVAL</td>
+<td>Time duration</td>
+<td>3 days 4 hours</td>
+<td>Session length, SLA</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="boolean-categorical-data-types" class="slide level2 smaller">
+<h2>Boolean &amp; Categorical Data Types</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BOOLEAN</td>
+<td>Logical true / false value</td>
+<td>TRUE, FALSE</td>
+<td>Active flags, eligibility</td>
+</tr>
+<tr class="even">
+<td>CHAR(n)</td>
+<td>Fixed-length category code</td>
+<td>CHAR(1) → ‘Y’</td>
+<td>Yes/No indicators</td>
+</tr>
+<tr class="odd">
+<td>VARCHAR(n)</td>
+<td>Short categorical label</td>
+<td>‘premium’</td>
+<td>Customer segments</td>
+</tr>
+<tr class="even">
+<td>TEXT</td>
+<td>Free-form category label</td>
+<td>‘high_value_customer’</td>
+<td>Tags, labels</td>
+</tr>
+<tr class="odd">
+<td>ENUM</td>
+<td>Predefined set of values</td>
+<td>(‘low’,‘medium’,‘high’)</td>
+<td>Controlled categories</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="special-data-types-optional" class="slide level2 smaller">
+<h2>Special Data Types | OPTIONAL</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type / Extension</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>JSON / JSONB</td>
+<td>Semi-structured JSON data</td>
+<td>{“plan”:“premium”,“usage”:120}</td>
+<td>Logs, APIs, configs</td>
+</tr>
+<tr class="even">
+<td>ARRAY</td>
+<td>Array of values</td>
+<td>{1,2,3}</td>
+<td>Tags, multi-valued attributes</td>
+</tr>
+<tr class="odd">
+<td>UUID</td>
+<td>Universally unique identifier</td>
+<td>550e8400-e29b-41d4-a716-446655440000</td>
+<td>Distributed IDs</td>
+</tr>
+<tr class="even">
+<td>INET</td>
+<td>IP address</td>
+<td>192.168.1.1</td>
+<td>Network traffic</td>
+</tr>
+<tr class="odd">
+<td>CIDR</td>
+<td>Network block</td>
+<td>192.168.0.0/24</td>
+<td>Subnet modeling</td>
+</tr>
+<tr class="even">
+<td><strong>GEOMETRY (PostGIS)</strong></td>
+<td><strong>Geometric objects</strong></td>
+<td><strong>POINT(40.18 44.51)</strong></td>
+<td><strong>Maps, locations</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>GEOGRAPHY (PostGIS)</strong></td>
+<td><strong>Earth-based coordinates</strong></td>
+<td><strong>POINT(44.51 40.18)</strong></td>
+<td><strong>Distance calculations</strong></td>
+</tr>
+<tr class="even">
+<td>ltree</td>
+<td>Hierarchical tree paths</td>
+<td>region.city.store</td>
+<td>Organizational trees</td>
+</tr>
+<tr class="odd">
+<td>pgRouting</td>
+<td>Graph/network extension</td>
+<td>N/A</td>
+<td>Network routing, telecom</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="postgis-geospatial-extension" class="slide level2">
+<h2>PostGIS (Geospatial Extension)</h2>
+<p>PostGIS adds <strong>geospatial intelligence</strong> to PostgreSQL.</p>
+<p>Common capabilities:</p>
+<ul>
+<li>Distance calculations</li>
+<li>Spatial joins</li>
+<li>Radius searches</li>
+<li>Area coverage</li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>As a data analyst you are <strong>not expected</strong> to design <strong>PostGIS</strong> schemas or routing graphs — but you <em>will</em> query them.</p>
+<p>Documentation you can find <a href="https://postgis.net/workshops/postgis-intro/">here</a></p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="relational-database-schema" class="title-slide slide level1 center">
+<h1>Relational Database Schema</h1>
+
+</section>
+<section id="what-is-a-schema" class="slide level2">
+<h2>What Is a Schema?</h2>
+<p>A <strong>schema</strong> describes the structure of a database: tables, columns, keys, and relationships.</p>
+</section>
+<section id="star-schema" class="slide level2">
+<h2>Star Schema</h2>
+<p>A <strong>star schema</strong> consists of:</p>
+<ul>
+<li>one central <strong>fact table</strong></li>
+<li>multiple surrounding <strong>dimension tables</strong></li>
+</ul>
+
+<img data-src="../../../img/sql/star_schema.png" class="r-stretch"><div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>Although our database is transactional, its structure closely resembles a star schema, making it well-suited for analytics.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="snowflake-schema" class="slide level2">
+<h2>Snowflake Schema</h2>
+<p>A <strong>snowflake schema</strong> extends the star schema by normalizing dimension tables into sub-dimensions.</p>
+
+<img data-src="../../../img/sql/snowflake_schema.png" class="r-stretch"></section>
+<section id="entity-relationship-diagram-erd" class="slide level2">
+<h2>Entity Relationship Diagram (ERD)</h2>
+<p>Try to generate the ERD for the sales database using your SQL client.<br>
+Identify primary keys, foreign keys, and relationships.</p>
+
+
+
+<img data-src="../../../img/sql/generate_erd.png" class="r-stretch"></section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="../../../img/favicon.png" class="slide-logo"></p>
 <div class="footer footer-default">
-
+<p><a href="../../../materials/sql/session2.html" target="_blank">Back to chapter target</a></p>
 </div>
 </div></div>
 

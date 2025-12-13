@@ -74,6 +74,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -469,7 +498,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/sql/slides/week2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Data Analyst</span></a>
+ <span class="menu-text">Data Analyst | Week 2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -695,14 +724,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#character-data-types" id="toc-character-data-types" class="nav-link" data-scroll-target="#character-data-types">Character Data Types</a></li>
   <li><a href="#date-time-data-types" id="toc-date-time-data-types" class="nav-link" data-scroll-target="#date-time-data-types">Date &amp; Time Data Types</a></li>
   <li><a href="#boolean-categorical-data-types" id="toc-boolean-categorical-data-types" class="nav-link" data-scroll-target="#boolean-categorical-data-types">Boolean &amp; Categorical Data Types</a></li>
-  <li><a href="#special-advanced-data-types" id="toc-special-advanced-data-types" class="nav-link" data-scroll-target="#special-advanced-data-types">Special &amp; Advanced Data Types</a></li>
-  </ul></li>
-  <li><a href="#relational-database-schema" id="toc-relational-database-schema" class="nav-link" data-scroll-target="#relational-database-schema">Relational Database Schema</a>
-  <ul class="collapse">
-  <li><a href="#what-is-a-schema" id="toc-what-is-a-schema" class="nav-link" data-scroll-target="#what-is-a-schema">What Is a Schema?</a></li>
-  <li><a href="#star-schema" id="toc-star-schema" class="nav-link" data-scroll-target="#star-schema">Star Schema</a></li>
-  <li><a href="#snowflake-schema" id="toc-snowflake-schema" class="nav-link" data-scroll-target="#snowflake-schema">Snowflake Schema</a></li>
-  <li><a href="#entity-relationship-diagram-erd" id="toc-entity-relationship-diagram-erd" class="nav-link" data-scroll-target="#entity-relationship-diagram-erd">Entity Relationship Diagram (ERD)</a></li>
+  <li><a href="#special-advanced-data-types-optional" id="toc-special-advanced-data-types-optional" class="nav-link" data-scroll-target="#special-advanced-data-types-optional">Special &amp; Advanced Data Types | OPTIONAL</a></li>
   </ul></li>
   <li><a href="#data-dictionary" id="toc-data-dictionary" class="nav-link" data-scroll-target="#data-dictionary">Data Dictionary</a></li>
   </ul>
@@ -1247,8 +1269,8 @@ They are special lookup structures that improve <strong>query performance</stron
 <span class="screen-reader-only">Important</span>Are Keys Also Indexes?
 </div>
 </div>
-<section id="keys-vs-indexes-storage-perspective" class="level3 callout-body-container callout-body">
-<h3 class="anchored" data-anchor-id="keys-vs-indexes-storage-perspective">Keys vs Indexes — Storage Perspective</h3>
+<section id="keys-vs-indexes" class="level3 callout-body-container callout-body">
+<h3 class="anchored" data-anchor-id="keys-vs-indexes">Keys vs Indexes</h3>
 <p>From a <strong>database engine and storage point of view</strong>, keys and indexes are closely related, but they are <strong>not the same thing</strong>.</p>
 <ul>
 <li>A <strong>key</strong> defines a <strong>logical rule</strong> (uniqueness, relationships)</li>
@@ -1370,216 +1392,833 @@ Caution
 <hr>
 <section id="numeric-data-types" class="level3">
 <h3 class="anchored" data-anchor-id="numeric-data-types">Numeric Data Types</h3>
-<p><strong>Used for:</strong> counts, quantities, prices, measurements</p>
+<p><strong>In PostgreSQL, numeric data types fall into three main groups:</strong></p>
+<ol type="1">
+<li><strong>Integers</strong>: whole numbers</li>
+<li><strong>Exact numerics:</strong> precise decimal numbers</li>
+<li><strong>Floating-point numbers:</strong> approximate decimals</li>
+</ol>
+<p><strong>Numeric data types are used for:</strong></p>
+<ul>
+<li>counts</li>
+<li>quantities</li>
+<li>prices</li>
+<li>measurements</li>
+</ul>
+<section id="main-numeric-data-types-with-example-values" class="level4">
+<h4 class="anchored" data-anchor-id="main-numeric-data-types-with-example-values">Main Numeric Data Types (with Example Values)</h4>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 30%">
+<col style="width: 27%">
+<col style="width: 23%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Data Type</th>
 <th>Description</th>
-<th>Example</th>
-<th>Use Case</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>INTEGER</code></td>
-<td>Whole numbers</td>
-<td><code>2500</code></td>
-<td>Counts</td>
+<td>SMALLINT</td>
+<td>Small-range whole numbers</td>
+<td>12</td>
+<td>Status codes, flags</td>
 </tr>
 <tr class="even">
-<td><code>BIGINT</code></td>
-<td>Large integers</td>
-<td><code>9876543210</code></td>
-<td>IDs</td>
+<td>INTEGER / INT</td>
+<td>Standard whole numbers</td>
+<td>2500</td>
+<td>Quantities, counts</td>
 </tr>
 <tr class="odd">
-<td><code>NUMERIC(p,s)</code></td>
-<td>Exact decimals</td>
-<td><code>15432.75</code></td>
-<td>Revenue</td>
+<td>BIGINT</td>
+<td>Very large whole numbers</td>
+<td>9876543210</td>
+<td>IDs, large counters</td>
 </tr>
 <tr class="even">
-<td><code>DOUBLE PRECISION</code></td>
-<td>Approximate</td>
-<td><code>0.123456</code></td>
-<td>KPIs</td>
+<td>NUMERIC(p, s)</td>
+<td>Exact precision decimal</td>
+<td>NUMERIC(10,2) → 15432.75</td>
+<td>Salary, revenue</td>
+</tr>
+<tr class="odd">
+<td>DECIMAL(p, s)</td>
+<td>Same as NUMERIC (SQL standard)</td>
+<td>DECIMAL(8,3) → 123.456</td>
+<td>Financial data</td>
+</tr>
+<tr class="even">
+<td>REAL</td>
+<td>Approximate floating-point</td>
+<td>3.14159</td>
+<td>Scientific values</td>
+</tr>
+<tr class="odd">
+<td>DOUBLE PRECISION</td>
+<td>Higher-precision floating-point</td>
+<td>0.0000123456789</td>
+<td>Statistical calculations</td>
 </tr>
 </tbody>
 </table>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Important
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Use <code>NUMERIC</code> for money, floating-point for ratios.</p>
+<p>Notice how <strong>exact numerics</strong> (NUMERIC, DECIMAL) preserve precision, while <strong>floating-point types</strong> (REAL, DOUBLE PRECISION) may introduce rounding differences.</p>
 </div>
 </div>
+</section>
+<section id="performance-vs-precision-trade-off" class="level4">
+<h4 class="anchored" data-anchor-id="performance-vs-precision-trade-off">Performance vs Precision Trade-off</h4>
+<p>When choosing a numeric data type, you must balance <strong>precision</strong>, <strong>performance</strong>, and <strong>storage efficiency</strong>.<br>
+The table below summarizes the most common analytical requirements and the recommended PostgreSQL data types.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 24%">
+<col style="width: 29%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Requirement</th>
+<th>Precision Needed</th>
+<th>Performance Priority</th>
+<th>Recommended Data Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Row counts, simple counters</td>
+<td>Exact</td>
+<td>Very high</td>
+<td>INTEGER</td>
+</tr>
+<tr class="even">
+<td>Large identifiers (IDs)</td>
+<td>Exact</td>
+<td>High</td>
+<td>BIGINT</td>
+</tr>
+<tr class="odd">
+<td>Financial values (salary, revenue)</td>
+<td>Exact</td>
+<td>Medium</td>
+<td>NUMERIC(p,s)</td>
+</tr>
+<tr class="even">
+<td>Prices with decimals</td>
+<td>Exact</td>
+<td>Medium</td>
+<td>DECIMAL(p,s)</td>
+</tr>
+<tr class="odd">
+<td>Ratios, averages, KPIs</td>
+<td>Approximate acceptable</td>
+<td>High</td>
+<td>DOUBLE PRECISION</td>
+</tr>
+<tr class="even">
+<td>Scientific measurements</td>
+<td>Approximate acceptable</td>
+<td>Very high</td>
+<td>REAL / DOUBLE PRECISION</td>
+</tr>
+</tbody>
+</table>
 <hr>
+</section>
+<section id="index-size-considerations" class="level4">
+<h4 class="anchored" data-anchor-id="index-size-considerations">Index Size Considerations</h4>
+<p>Indexes <strong>inherit</strong> the storage and performance characteristics of the column type they are built on:</p>
+<ul>
+<li>Index on INTEGER <span class="math inline">\(\rightarrow\)</span> <strong>small</strong> <span class="math inline">\(\rightarrow\)</span> <strong>cache-friendly</strong></li>
+<li>Index on NUMERIC <span class="math inline">\(\rightarrow\)</span> <strong>larger</strong> <span class="math inline">\(\rightarrow\)</span> <strong>slower to scan</strong></li>
+<li>Composite indexes <strong>amplify</strong> the effect of column size</li>
+</ul>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled" title="Best Practice">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Best Practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Use the smallest numeric type that safely fits your data.</strong></p>
+<ul>
+<li>Prefer INTEGER over BIGINT if values fit</li>
+<li>Use NUMERIC only when precision matters</li>
+<li>Avoid premature use of NUMERIC for IDs or counters</li>
+</ul>
+</div>
+</div>
+</section>
 </section>
 <section id="character-data-types" class="level3">
 <h3 class="anchored" data-anchor-id="character-data-types">Character Data Types</h3>
+<p>Character data types are used to store <strong>textual information</strong> such as names, descriptions, identifiers, and free-form text.</p>
+<p><strong>In PostgreSQL, character data types fall into three main groups:</strong></p>
+<ol type="1">
+<li><strong>Fixed-length characters</strong> — text with a fixed size<br>
+</li>
+<li><strong>Variable-length characters</strong> — text with flexible size limits<br>
+</li>
+<li><strong>Unbounded text</strong> — long or unpredictable text</li>
+</ol>
+<p><strong>Character data types are used for:</strong></p>
+<ul>
+<li>names</li>
+<li>descriptions</li>
+<li>emails</li>
+<li>codes</li>
+<li>comments</li>
+</ul>
+<section id="main-character-data-types" class="level4">
+<h4 class="anchored" data-anchor-id="main-character-data-types">Main Character Data Types</h4>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Type</th>
+<th>Data Type</th>
 <th>Description</th>
-<th>Example</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>CHAR(n)</code></td>
-<td>Fixed length</td>
-<td><code>'US   '</code></td>
+<td>CHAR(n)</td>
+<td>Fixed-length character string</td>
+<td>CHAR(5) → ‘US’</td>
+<td>Country codes, fixed formats</td>
 </tr>
 <tr class="even">
-<td><code>VARCHAR(n)</code></td>
-<td>Variable length</td>
-<td><code>'Karen'</code></td>
+<td>VARCHAR(n)</td>
+<td>Variable-length string with limit</td>
+<td>VARCHAR(50) → ‘Karen Hovhannisyan’</td>
+<td>Names, emails</td>
 </tr>
 <tr class="odd">
-<td><code>TEXT</code></td>
-<td>Unlimited</td>
-<td>Product descriptions</td>
+<td>TEXT</td>
+<td>Variable-length string, no limit</td>
+<td>‘This product has been discontinued.’</td>
+<td>Descriptions, comments</td>
+</tr>
+<tr class="even">
+<td>CHARACTER VARYING(n)</td>
+<td>SQL-standard name for VARCHAR</td>
+<td>CHARACTER VARYING(20) → ‘A123XZ’</td>
+<td>Codes, identifiers</td>
 </tr>
 </tbody>
 </table>
-<hr>
-</section>
-<section id="date-time-data-types" class="level3">
-<h3 class="anchored" data-anchor-id="date-time-data-types">Date &amp; Time Data Types</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>DATE</code></td>
-<td>Date only</td>
-<td><code>2025-03-15</code></td>
-</tr>
-<tr class="even">
-<td><code>TIMESTAMP</code></td>
-<td>Date + time</td>
-<td><code>2025-03-15 14:30</code></td>
-</tr>
-<tr class="odd">
-<td><code>TIMESTAMPTZ</code></td>
-<td>Time zone aware</td>
-<td><code>2025-03-15 10:30+00</code></td>
-</tr>
-<tr class="even">
-<td><code>INTERVAL</code></td>
-<td>Duration</td>
-<td><code>3 days</code></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="boolean-categorical-data-types" class="level3">
-<h3 class="anchored" data-anchor-id="boolean-categorical-data-types">Boolean &amp; Categorical Data Types</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Example</th>
-<th>Use</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>BOOLEAN</code></td>
-<td><code>TRUE</code></td>
-<td>Flags</td>
-</tr>
-<tr class="even">
-<td><code>ENUM</code></td>
-<td><code>'low','medium','high'</code></td>
-<td>Categories</td>
-</tr>
-<tr class="odd">
-<td><code>VARCHAR</code></td>
-<td><code>'premium'</code></td>
-<td>Segments</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="special-advanced-data-types" class="level3">
-<h3 class="anchored" data-anchor-id="special-advanced-data-types">Special &amp; Advanced Data Types</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Use</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>JSONB</code></td>
-<td>Logs, APIs</td>
-</tr>
-<tr class="even">
-<td><code>UUID</code></td>
-<td>Distributed IDs</td>
-</tr>
-<tr class="odd">
-<td><code>INET</code></td>
-<td>IP addresses</td>
-</tr>
-<tr class="even">
-<td><code>GEOMETRY</code></td>
-<td>Geospatial</td>
-</tr>
-<tr class="odd">
-<td><code>pgRouting</code></td>
-<td>Networks</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Warning
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Advanced data types require specialized indexes.</p>
+<p>VARCHAR(n) and TEXT behave <strong>almost identically</strong> in PostgreSQL.<br>
+The main difference is whether you want to <strong>enforce a maximum length</strong>.</p>
 </div>
 </div>
+</section>
+<section id="performance-vs-flexibility-trade-off" class="level4">
+<h4 class="anchored" data-anchor-id="performance-vs-flexibility-trade-off">Performance vs Flexibility Trade-off</h4>
+<p>When choosing a character data type, the trade-off is usually between <strong>data validation</strong> and <strong>flexibility</strong>, not raw performance.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 28%">
+<col style="width: 27%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Requirement</th>
+<th>Length Control Needed</th>
+<th>Flexibility Priority</th>
+<th>Recommended Data Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fixed-format values</td>
+<td>Yes (fixed)</td>
+<td>Low</td>
+<td>CHAR(n)</td>
+</tr>
+<tr class="even">
+<td>Names, emails</td>
+<td>Yes (reasonable limit)</td>
+<td>Medium</td>
+<td>VARCHAR(n)</td>
+</tr>
+<tr class="odd">
+<td>Free-form text</td>
+<td>No</td>
+<td>High</td>
+<td>TEXT</td>
+</tr>
+<tr class="even">
+<td>User comments, notes</td>
+<td>No</td>
+<td>Very high</td>
+<td>TEXT</td>
+</tr>
+</tbody>
+</table>
 <hr>
 </section>
-</section>
-<section id="relational-database-schema" class="level2">
-<h2 class="anchored" data-anchor-id="relational-database-schema">Relational Database Schema</h2>
-<section id="what-is-a-schema" class="level3">
-<h3 class="anchored" data-anchor-id="what-is-a-schema">What Is a Schema?</h3>
-<p>A <strong>schema</strong> describes the structure of a database: tables, columns, keys, and relationships.</p>
-<hr>
-</section>
-<section id="star-schema" class="level3">
-<h3 class="anchored" data-anchor-id="star-schema">Star Schema</h3>
-<p>A <strong>star schema</strong> consists of:</p>
+<section id="index-size-considerations-1" class="level4">
+<h4 class="anchored" data-anchor-id="index-size-considerations-1">Index Size Considerations</h4>
+<p>Indexes on character columns depend on <strong>string length</strong> and <strong>value distribution</strong>:</p>
 <ul>
-<li>one central <strong>fact table</strong></li>
-<li>multiple surrounding <strong>dimension tables</strong></li>
+<li>Index on CHAR(n) <span class="math inline">\(\rightarrow\)</span> predictable size <span class="math inline">\(\rightarrow\)</span> stable performance</li>
+<li>Index on VARCHAR(n) <span class="math inline">\(\rightarrow\)</span> variable size <span class="math inline">\(\rightarrow\)</span> generally efficient</li>
+<li>Index on TEXT <span class="math inline">\(\rightarrow\)</span> potentially large <span class="math inline">\(\rightarrow\)</span> slower scans for long values</li>
+<li>Long strings in composite indexes <strong>increase index size significantly</strong></li>
 </ul>
-<p><img src="../../img/sql/star_schema.png" class="img-fluid"></p>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled" title="Best Practice">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Best Practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Use constraints, not oversized text types, to control data quality.</strong></p>
+<ul>
+<li>Prefer VARCHAR(n) when a reasonable maximum length exists</li>
+<li>Use TEXT for descriptions and comments</li>
+<li>Avoid CHAR(n) unless values are truly fixed-length</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="date-time-data-types" class="level3">
+<h3 class="anchored" data-anchor-id="date-time-data-types">Date &amp; Time Data Types</h3>
+<p>Date and time data types are used to store <strong>temporal information</strong>, such as when an event occurred, started, or ended.</p>
+<p>They are critical for analytics involving <strong>time series</strong>, <strong>trends</strong>, <strong>seasonality</strong>, and <strong>durations</strong>.</p>
+<p><strong>In PostgreSQL, date and time data types fall into four main groups:</strong></p>
+<ol type="1">
+<li><strong>Date-only values</strong></li>
+<li><strong>Time-only values</strong></li>
+<li><strong>Timestamps (date + time)</strong></li>
+<li><strong>Time intervals / durations</strong></li>
+</ol>
+<p><strong>Date &amp; time data types are used for:</strong></p>
+<ul>
+<li>event dates</li>
+<li>timestamps</li>
+<li>log records</li>
+<li>durations</li>
+<li>time-based analysis</li>
+</ul>
+<section id="main-date-time-data-types" class="level4">
+<h4 class="anchored" data-anchor-id="main-date-time-data-types">Main Date &amp; Time Data Types</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DATE</td>
+<td>Calendar date (no time)</td>
+<td>2025-03-15</td>
+<td>Birth dates, order dates</td>
+</tr>
+<tr class="even">
+<td>TIME</td>
+<td>Time of day (no date)</td>
+<td>14:30:00</td>
+<td>Opening hours</td>
+</tr>
+<tr class="odd">
+<td>TIME WITH TIME ZONE</td>
+<td>Time with time zone info</td>
+<td>14:30:00+04</td>
+<td>Cross-region schedules</td>
+</tr>
+<tr class="even">
+<td>TIMESTAMP</td>
+<td>Date and time (no timezone)</td>
+<td>2025-03-15 14:30:00</td>
+<td>Local event logs</td>
+</tr>
+<tr class="odd">
+<td>TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ)</td>
+<td>Date and time with timezone handling</td>
+<td>2025-03-15 10:30:00+00</td>
+<td>Auditing, analytics</td>
+</tr>
+<tr class="even">
+<td>INTERVAL</td>
+<td>Time duration</td>
+<td>3 days 4 hours</td>
+<td>Session length, SLA</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>TIMESTAMPTZ does <strong>not</strong> store the time zone itself.<br>
+PostgreSQL converts values to UTC internally and displays them using the session time zone.</p>
+</div>
+</div>
+</section>
+<section id="accuracy-vs-interpretability-trade-off" class="level4">
+<h4 class="anchored" data-anchor-id="accuracy-vs-interpretability-trade-off">Accuracy vs Interpretability Trade-off</h4>
+<p>When working with time data, the trade-off is often between <strong>absolute correctness</strong> and <strong>human interpretation</strong>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Requirement</th>
+<th>Time Zone Awareness</th>
+<th>Recommended Data Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Simple dates</td>
+<td>Not needed</td>
+<td>DATE</td>
+</tr>
+<tr class="even">
+<td>Local business timestamps</td>
+<td>Not required</td>
+<td>TIMESTAMP</td>
+</tr>
+<tr class="odd">
+<td>Multi-region systems</td>
+<td>Required</td>
+<td>TIMESTAMPTZ</td>
+</tr>
+<tr class="even">
+<td>Durations and differences</td>
+<td>Not applicable</td>
+<td>INTERVAL</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="index-size-considerations-2" class="level4">
+<h4 class="anchored" data-anchor-id="index-size-considerations-2">Index Size Considerations</h4>
+<p>Date and time types are <strong>fixed-size</strong>, making them efficient for indexing:</p>
+<ul>
+<li>Index on DATE <span class="math inline">\(\rightarrow\)</span> <strong>small</strong> <span class="math inline">\(\rightarrow\)</span> very fast range scans</li>
+<li>Index on TIMESTAMP <span class="math inline">\(\rightarrow\)</span> <strong>small</strong> <span class="math inline">\(\rightarrow\)</span> efficient sorting</li>
+<li>Index on TIMESTAMPTZ <span class="math inline">\(\rightarrow\)</span> <strong>small</strong> <span class="math inline">\(\rightarrow\)</span> timezone-safe</li>
+<li>Index on INTERVAL <span class="math inline">\(\rightarrow\)</span> rarely indexed (use carefully)</li>
+</ul>
+<p><strong>Date-based indexes are commonly used with:</strong></p>
+<ul>
+<li>WHERE date BETWEEN …</li>
+<li>GROUP BY date</li>
+<li>time-window queries</li>
+</ul>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled" title="Best Practice">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Best Practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Always use TIMESTAMPTZ for analytics and logging systems.</strong></p>
+<ul>
+<li>Avoid ambiguity in multi-region environments</li>
+<li>Use DATE only when time is irrelevant</li>
+<li>Store durations as INTERVAL, not numeric hacks</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="boolean-categorical-data-types" class="level3">
+<h3 class="anchored" data-anchor-id="boolean-categorical-data-types">Boolean &amp; Categorical Data Types</h3>
+<p>Boolean and categorical data types are used to store <strong>logical values</strong> and <strong>finite categories</strong>.<br>
+They are especially important for <strong>filtering</strong>, <strong>segmentation</strong>, and <strong>business rules</strong>.</p>
+<p><strong>In PostgreSQL, boolean and categorical data types fall into two main groups:</strong></p>
+<ol type="1">
+<li><strong>Boolean values</strong> — true / false logic<br>
+</li>
+<li><strong>Categorical values</strong> — limited sets of labels</li>
+</ol>
+<p><strong>These data types are used for:</strong></p>
+<ul>
+<li>flags</li>
+<li>status indicators</li>
+<li>binary decisions</li>
+<li>categorical segmentation</li>
+</ul>
+<section id="main-boolean-categorical-data-types" class="level4">
+<h4 class="anchored" data-anchor-id="main-boolean-categorical-data-types">Main Boolean &amp; Categorical Data Types</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BOOLEAN</td>
+<td>Logical true / false value</td>
+<td>TRUE, FALSE</td>
+<td>Active flags, eligibility</td>
+</tr>
+<tr class="even">
+<td>CHAR(n)</td>
+<td>Fixed-length category code</td>
+<td>CHAR(1) → ‘Y’</td>
+<td>Yes/No indicators</td>
+</tr>
+<tr class="odd">
+<td>VARCHAR(n)</td>
+<td>Short categorical label</td>
+<td>‘premium’</td>
+<td>Customer segments</td>
+</tr>
+<tr class="even">
+<td>TEXT</td>
+<td>Free-form category label</td>
+<td>‘high_value_customer’</td>
+<td>Tags, labels</td>
+</tr>
+<tr class="odd">
+<td>ENUM</td>
+<td>Predefined set of values</td>
+<td>(‘low’,‘medium’,‘high’)</td>
+<td>Controlled categories</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>PostgreSQL accepts multiple boolean literals:</strong></p>
+<p>TRUE / FALSE, true / false, 1 / 0, yes / no.</p>
+</div>
+</div>
+</section>
+<section id="control-vs-flexibility-trade-off" class="level4">
+<h4 class="anchored" data-anchor-id="control-vs-flexibility-trade-off">Control vs Flexibility Trade-off</h4>
+<p>The main trade-off for categorical data is between <strong>data integrity</strong> and <strong>flexibility</strong>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Requirement</th>
+<th>Validation Strictness</th>
+<th>Recommended Data Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Binary logic</td>
+<td>Very strict</td>
+<td>BOOLEAN</td>
+</tr>
+<tr class="even">
+<td>Small fixed category set</td>
+<td>Very strict</td>
+<td>ENUM</td>
+</tr>
+<tr class="odd">
+<td>Evolving categories</td>
+<td>Medium</td>
+<td>VARCHAR(n)</td>
+</tr>
+<tr class="even">
+<td>User-defined labels</td>
+<td>Low</td>
+<td>TEXT</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="index-size-considerations-3" class="level4">
+<h4 class="anchored" data-anchor-id="index-size-considerations-3">Index Size Considerations</h4>
+<ul>
+<li>Index on BOOLEAN <span class="math inline">\(\rightarrow\)</span> very small <span class="math inline">\(\rightarrow\)</span> fast but often low selectivity</li>
+<li>Index on short categorical strings <span class="math inline">\(\rightarrow\)</span> efficient</li>
+<li>Index on high-cardinality categories <span class="math inline">\(\rightarrow\)</span> more useful than boolean indexes</li>
+<li>Avoid indexing columns with <strong>very few distinct values</strong></li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled" title="Best Practice">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Best Practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Use BOOLEAN only for true binary logic.</strong></p>
+<ul>
+<li>Do not encode booleans as ‘Y’/‘N’ unless required</li>
+<li>Use ENUM only when categories are stable</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="special-advanced-data-types-optional" class="level3">
+<h3 class="anchored" data-anchor-id="special-advanced-data-types-optional">Special &amp; Advanced Data Types | OPTIONAL</h3>
+<p>Beyond standard numeric, text, and date types, PostgreSQL supports <strong>specialized data types</strong> designed for <strong>specific domains</strong> such as</p>
+<ul>
+<li>geospatial analysis</li>
+<li>networks</li>
+<li>graphsand</li>
+<li>semi-structured data.</li>
+</ul>
+<p>These data types are typically used in <strong>advanced analytics</strong>, <strong>telecom</strong>, <strong>log analysis</strong>, and <strong>platform-scale systems</strong>.</p>
+<p><strong>Special data types are used for:</strong></p>
+<ul>
+<li>geospatial analytics</li>
+<li>network analysis</li>
+<li>semi-structured data</li>
+<li>system-level identifiers</li>
+<li>advanced domain modeling</li>
+</ul>
+<section id="main-special-data-types-with-example-values" class="level4">
+<h4 class="anchored" data-anchor-id="main-special-data-types-with-example-values">Main Special Data Types (with Example Values)</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type / Extension</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>JSON / JSONB</td>
+<td>Semi-structured JSON data</td>
+<td>{“plan”:“premium”,“usage”:120}</td>
+<td>Logs, APIs, configs</td>
+</tr>
+<tr class="even">
+<td>ARRAY</td>
+<td>Array of values</td>
+<td>{1,2,3}</td>
+<td>Tags, multi-valued attributes</td>
+</tr>
+<tr class="odd">
+<td>UUID</td>
+<td>Universally unique identifier</td>
+<td>550e8400-e29b-41d4-a716-446655440000</td>
+<td>Distributed IDs</td>
+</tr>
+<tr class="even">
+<td>INET</td>
+<td>IP address</td>
+<td>192.168.1.1</td>
+<td>Network traffic</td>
+</tr>
+<tr class="odd">
+<td>CIDR</td>
+<td>Network block</td>
+<td>192.168.0.0/24</td>
+<td>Subnet modeling</td>
+</tr>
+<tr class="even">
+<td>GEOMETRY (PostGIS)</td>
+<td>Geometric objects</td>
+<td>POINT(40.18 44.51)</td>
+<td>Maps, locations</td>
+</tr>
+<tr class="odd">
+<td>GEOGRAPHY (PostGIS)</td>
+<td>Earth-based coordinates</td>
+<td>POINT(44.51 40.18)</td>
+<td>Distance calculations</td>
+</tr>
+<tr class="even">
+<td>ltree</td>
+<td>Hierarchical tree paths</td>
+<td>region.city.store</td>
+<td>Organizational trees</td>
+</tr>
+<tr class="odd">
+<td>pgRouting</td>
+<td>Graph/network extension</td>
+<td>N/A</td>
+<td>Network routing, telecom</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Most advanced data types are provided via <strong>PostgreSQL extensions</strong>, not core SQL.</p>
+</div>
+</div>
+</section>
+<section id="domain-specific-trade-offs" class="level4">
+<h4 class="anchored" data-anchor-id="domain-specific-trade-offs">Domain-Specific Trade-offs</h4>
+<p>Special data types trade <strong>generality</strong> for <strong>domain power</strong>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Requirement</th>
+<th>Domain</th>
+<th>Recommended Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Flexible event payloads</td>
+<td>Logging / APIs</td>
+<td>JSONB</td>
+</tr>
+<tr class="even">
+<td>Multi-valued attributes</td>
+<td>Analytics</td>
+<td>ARRAY</td>
+</tr>
+<tr class="odd">
+<td>Globally unique IDs</td>
+<td>Distributed systems</td>
+<td>UUID</td>
+</tr>
+<tr class="even">
+<td>IP &amp; network data</td>
+<td>Telecom / IT</td>
+<td>INET, CIDR</td>
+</tr>
+<tr class="odd">
+<td>Location-based analytics</td>
+<td>GIS</td>
+<td>PostGIS (GEOMETRY / GEOGRAPHY)</td>
+</tr>
+<tr class="even">
+<td>Graph traversal</td>
+<td>Networks</td>
+<td>pgRouting, graph models</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="indexing-performance-considerations" class="level4">
+<h4 class="anchored" data-anchor-id="indexing-performance-considerations">Indexing &amp; Performance Considerations</h4>
+<p>Special data types usually require <strong>specialized indexes</strong>:</p>
+<ul>
+<li>JSONB <span class="math inline">\(\rightarrow\)</span> GIN index</li>
+<li>GEOMETRY / GEOGRAPHY <span class="math inline">\(\rightarrow\)</span> GiST / SP-GiST</li>
+<li>ARRAY <span class="math inline">\(\rightarrow\)</span> GIN</li>
+<li>INET / CIDR <span class="math inline">\(\rightarrow\)</span> GiST</li>
+</ul>
+<p>Improper indexing can make these types <strong>very slow</strong> on large datasets.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Performance Warning">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Performance Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Advanced data types without proper indexes often lead to <strong>full scans</strong>, even on indexed tables.</p>
+</div>
+</div>
+</section>
+<section id="postgis-geospatial-extension" class="level4">
+<h4 class="anchored" data-anchor-id="postgis-geospatial-extension">PostGIS (Geospatial Extension)</h4>
+<p>PostGIS adds <strong>geospatial intelligence</strong> to PostgreSQL.</p>
+<p>Common capabilities:</p>
+<ul>
+<li>Distance calculations</li>
+<li>Spatial joins</li>
+<li>Radius searches</li>
+<li>Area coverage</li>
+</ul>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1590,23 +2229,10 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Although our database is transactional, its structure closely resembles a star schema, making it well-suited for analytics.</p>
+<p>As a data analyst you are <strong>not expected</strong> to design <strong>PostGIS</strong> schemas or routing graphs — but you <em>will</em> query them.</p>
 </div>
 </div>
-<hr>
 </section>
-<section id="snowflake-schema" class="level3">
-<h3 class="anchored" data-anchor-id="snowflake-schema">Snowflake Schema</h3>
-<p>A <strong>snowflake schema</strong> extends the star schema by normalizing dimension tables into sub-dimensions.</p>
-<p><img src="../../img/sql/snowflake_schema.png" class="img-fluid"></p>
-<hr>
-</section>
-<section id="entity-relationship-diagram-erd" class="level3">
-<h3 class="anchored" data-anchor-id="entity-relationship-diagram-erd">Entity Relationship Diagram (ERD)</h3>
-<p>Try to generate the ERD for the sales database using your SQL client.<br>
-Identify primary keys, foreign keys, and relationships.</p>
-<p><img src="../../img/sql/generate_erd.png" class="img-fluid"></p>
-<hr>
 </section>
 </section>
 <section id="data-dictionary" class="level2">
@@ -1941,52 +2567,6 @@ Central fact table storing individual sales transaction lines.</p>
 <td><code>employees</code></td>
 <td><code>employee_id</code></td>
 <td>Many-to-one</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="indexes-1" class="level4">
-<h4 class="anchored" data-anchor-id="indexes-1">Indexes</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 30%">
-<col style="width: 16%">
-<col style="width: 30%">
-<col style="width: 22%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Index Name</th>
-<th>Table</th>
-<th>Column(s)</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>idx_sales_order_id</code></td>
-<td><code>sales</code></td>
-<td><code>order_id</code></td>
-<td>Speed up joins with orders</td>
-</tr>
-<tr class="even">
-<td><code>idx_sales_product_id</code></td>
-<td><code>sales</code></td>
-<td><code>product_id</code></td>
-<td>Speed up product analysis</td>
-</tr>
-<tr class="odd">
-<td><code>idx_sales_customer_id</code></td>
-<td><code>sales</code></td>
-<td><code>customer_id</code></td>
-<td>Speed up customer analysis</td>
-</tr>
-<tr class="even">
-<td><code>idx_orders_date</code></td>
-<td><code>orders</code></td>
-<td><code>order_date</code></td>
-<td>Speed up time-based queries</td>
 </tr>
 </tbody>
 </table>
