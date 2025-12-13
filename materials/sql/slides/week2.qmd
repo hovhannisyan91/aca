@@ -1,6 +1,6 @@
 ---
-title: "Data Analyst"
-subtitle: "SQL"
+title: "Data Analyst | Week 2"
+subtitle: "Data Types, Schemas, Keys, Indexes"
 author: "Karen Hovhannisyan"
 date: last-modified
 format:
@@ -13,6 +13,7 @@ format:
     width: 1500
     transition: slide
     logo: ../../../img/favicon.png
+    footer: "<a href=\"../session2.qmd\" target= _blank>Back to chapter target</a>"
     # css: ../../../reveal_styles.css
     include-in-header:
       - text: |
@@ -27,4 +28,388 @@ format:
           </style>
 ---
 
-## Comming. Soon
+# For Today...
+
+## Learning Goals
+
+By the end of this session, you will be able to:
+
+- understand how data is structured in PostgreSQL
+- identify tables, rows, and columns
+- explain different types of keys and relationships
+- understand how indexes affect performance
+- recognize common PostgreSQL data types
+- get familiarized with basic SQL syntax
+
+
+## ERD Simple
+
+![!](../../../img/sql/erd_simple.png)
+
+## Sales Analytics Database
+
+**The database captures information about:**
+
+- customers who place orders
+- products that are sold
+- employees involved in the sales process
+- orders placed over time
+- individual sales transactions
+
+## Questions to Data Analyst
+
+Your role as an analyst is to **query this data** to answer business questions related to:
+
+- revenue and sales performance
+- product popularity
+- customer behavior
+- employee contribution
+- time-based trends
+
+## ERD Complete
+
+![!](../../../img/sql/erd_extanded.png)
+
+
+# Keys and Indexes
+
+To store data efficiently and enable relationships between tables, relational databases rely on **keys** and **indexes**.
+
+
+## Keys
+
+::: {.columns}
+::: {.column}
+- Primary Key
+- Candidate Key
+- Composite Key
+- Surrogate Key
+- Foreign key
+:::
+
+::: {.column}
+![!](../../../img/sql/pk_sales.png)
+:::
+::: 
+<!-- end columns -->
+
+## Primary Key
+
+A **primary key** uniquely identifies each record in a table.  
+
+
+| **transaction_id** | order_id | product_id | customer_id | total_sales |
+|----------------|----------|------------|-------------|-------------|
+| **1001**           | 501      | 12         | 3001        | 49.99       |
+| **1002**           | 501      | 18         | 3001        | 19.99       |
+| **1003**           | 502      | 12         | 3005        | 49.99       |
+| **1004**           | 503      | 25         | 3008        | 89.99       |
+
+
+## Candidate Key
+
+| **customer_id** | customer_name       | **email**                    | city     |
+|-------------|---------------------|--------------------------|----------|
+| **3001**        | Alice Johnson       | **alice.johnson@email.com**  | Berlin   |
+| **3002**        | Mark Thompson       | **mark.thompson@email.com ** | Paris    |
+| **3003**        | Elena Petrova       | **elena.p@email.com  **      | Madrid  |
+| **3004**        | David Chen          | **david.chen@email.com **    | London  |
+
+
+## Composite Key
+
+
+| **order_id** | **product_id** | product_name        | quantity |
+|----------|------------|---------------------|----------|
+| **501**      | **12**         | Wireless Mouse      | 1        |
+| **501**      | **18**         | USB-C Cable         | 2        |
+| **502**      | **12**         | Wireless Mouse      | 1        |
+| **503**      | **25**         | Mechanical Keyboard | 1        |
+
+
+::: {.callout-important title = "Composite Key"}
+`(order_id, product_id)` could uniquely identify rows in some transactional systems.
+:::
+
+
+## Surrogate Key
+
+
+| **transaction_id** | order_id | product_id | quantity | total_sales |
+|----------------|----------|------------|----------|-------------|
+| **1001**           | 501      | 12         | 1        | 49.99       |
+| **1002**           | 501      | 18         | 2        | 19.99       |
+| **1003**           | 502      | 12         | 1        | 49.99       |
+| **1004**           | 503      | 25         | 1        | 89.99       |
+
+
+**Surrogate Key helps:**
+
+- simplify joins
+- reduce index size
+- improve query readability
+
+## Foreign Key
+
+![!](../../../img/sql/fk_sales_vs_products.png)
+
+
+## Indexes
+
+![!](../../../img/sql/index.png)
+
+
+## Trade-Off
+
+::: {.callout-note title="Full Table Scan"}
+When a query checks **every row** instead of using an index, this is called a **full scan**.
+:::
+
+Indexes improve read performance but come with trade-offs:
+
+- extra storage
+- slower inserts and updates
+- maintenance overhead
+
+## When not to Create!
+
+- Very small tables
+- Frequently updated columns
+- Columns with many NULL values
+- Columns with very low cardinality
+
+## Single-Column Index
+
+A **single-column index** is built on one column.
+
+| Employee ID | Name    | Contact Number | Age |
+|-------------|---------|----------------|-----|
+| 1           | Max     | **800692692**      | 24  |
+| 2           | Jessica | **800123456**      | 35  |
+| 3           | Mikeal  | **800745547**      | 49  |
+
+
+
+## Composite Index {.smaller}
+
+Consider `employees table`, but now imagine that queries often filter by both `name` and `age` at the same time.
+
+
+::: {.columns}
+::: {.column}
+$$\rightarrow$$
+
+| employee_id | name    | age | department |
+|-------------|---------|-----|------------|
+| 1           | **Max**     | **24**  | Sales      |
+| 2           | **Jessica** | **35**  | Marketing  |
+| 3           | **Max**     | **35**  | Finance    |
+
+:::
+::: {.column}
+**When to use:**
+
+- Efficient for queries filtering on `name`
+- Efficient for queries filtering on `name` **and** `age`
+- **Not efficient** for queries filtering on `age` only
+
+:::
+::: 
+<!-- end columns -->
+
+
+## Unique Index {.smaller}
+
+Basically all the candidate keys :) 
+
+::: {.columns}
+::: {.column}
+| customer_id | customer_name | email                    |
+|-------------|---------------|--------------------------|
+| 3001        | Alice Johnson | **alice@email.com**          |
+| 3002        | Mark Thompson | **mark@email.com**           |
+| 3003        | Elena Petrova | **elena@email.com**          |
+:::
+::: {.column}
+**Use a unique index when:**
+
+- values must be unique across rows
+- the column is frequently used for lookup
+- **uniqueness is part of business logic**
+:::
+:::
+ <!-- end columns -->
+
+
+# Question
+
+**Are Keys Also Indexes?**
+
+##  Answer
+
+| Concept | Enforces Uniqueness | Improves Query Speed | Stored as Index |
+|-------|---------------------|----------------------|-----------------|
+| Primary Key | Yes | Yes | Yes (unique index) |
+| Unique Constraint | Yes | Yes | Yes (unique index) |
+| Foreign Key | No | Sometimes | No (by default) |
+| Regular Index | No | Yes | Yes |
+
+# Data Types 
+
+**PostgreSQL data types are commonly grouped into:**
+
+- Numeric
+- Character (Text)
+- Date & Time
+- Boolean & Categorical
+- Special & Advanced
+
+
+
+## Data Types in PostgreSQL
+
+Data types define:
+
+- what kind of data a column can store
+- how data is validated
+- how much storage is used
+- how fast queries can run
+
+## Why Data Types Matter?
+
+Choosing the wrong data type can:
+
+- break calculations
+- reduce performance
+- waste storage
+- introduce subtle errors
+
+
+## Numeric Data Types {.smaller}
+
+
+| Data Type | Description | Example | Use Case |
+|----------|------------|---------|---------|
+| `INTEGER` | Whole numbers | `2500` | Counts |
+| `BIGINT` | Large integers | `9876543210` | IDs |
+| `NUMERIC(p,s)` | Exact decimals | `15432.75` | Revenue |
+| `DOUBLE PRECISION` | Approximate | `0.123456` | KPIs |
+
+
+**The Rule of Thumb:**
+
+- Use INTEGER for counts
+- Use NUMERIC for money
+- Use DOUBLE PRECISION for ratios
+
+**Index performance depends on data type size:**
+
+- smaller types $\rightarrow$ faster indexes
+- larger types $\rightarrow$ more storage
+
+
+## Main Character Data Types {.smaller}
+
+| Data Type | Description | Example Value | Typical Use Case |
+|----------|-------------|---------------|------------------|
+| CHAR(n) | Fixed-length character string | CHAR(5) → 'US   ' | Country codes, fixed formats |
+| VARCHAR(n) | Variable-length string with limit | VARCHAR(50) → 'Karen Hovhannisyan' | Names, emails |
+| TEXT | Variable-length string, no limit | 'This product has been discontinued.' | Descriptions, comments |
+| CHARACTER VARYING(n) | SQL-standard name for VARCHAR | CHARACTER VARYING(20) → 'A123XZ' | Codes, identifiers |
+
+
+## Main Date and Time Data Types {.smaller}
+
+
+| Data Type | Description | Example Value | Typical Use Case |
+|----------|-------------|---------------|------------------|
+| DATE | Calendar date (no time) | 2025-03-15 | Birth dates, order dates |
+| TIME | Time of day (no date) | 14:30:00 | Opening hours |
+| TIME WITH TIME ZONE | Time with time zone info | 14:30:00+04 | Cross-region schedules |
+| TIMESTAMP | Date and time (no timezone) | 2025-03-15 14:30:00 | Local event logs |
+| TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ) | Date and time with timezone handling | 2025-03-15 10:30:00+00 | Auditing, analytics |
+| INTERVAL | Time duration | 3 days 4 hours | Session length, SLA |
+
+
+
+## Boolean & Categorical Data Types {.smaller}
+
+| Data Type | Description | Example Value | Typical Use Case |
+|----------|-------------|---------------|------------------|
+| BOOLEAN | Logical true / false value | TRUE, FALSE | Active flags, eligibility |
+| CHAR(n) | Fixed-length category code | CHAR(1) → 'Y' | Yes/No indicators |
+| VARCHAR(n) | Short categorical label | 'premium' | Customer segments |
+| TEXT | Free-form category label | 'high_value_customer' | Tags, labels |
+| ENUM | Predefined set of values | ('low','medium','high') | Controlled categories |
+
+
+## Special Data Types | OPTIONAL {.smaller}
+
+| Data Type / Extension | Description | Example Value | Typical Use Case |
+|----------------------|-------------|---------------|------------------|
+| JSON / JSONB | Semi-structured JSON data | {"plan":"premium","usage":120} | Logs, APIs, configs |
+| ARRAY | Array of values | {1,2,3} | Tags, multi-valued attributes |
+| UUID | Universally unique identifier | 550e8400-e29b-41d4-a716-446655440000 | Distributed IDs |
+| INET | IP address | 192.168.1.1 | Network traffic |
+| CIDR | Network block | 192.168.0.0/24 | Subnet modeling |
+| **GEOMETRY (PostGIS)** | **Geometric objects** | **POINT(40.18 44.51)** | **Maps, locations** |
+| **GEOGRAPHY (PostGIS)** | **Earth-based coordinates** | **POINT(44.51 40.18)** | **Distance calculations** |
+| ltree | Hierarchical tree paths | region.city.store | Organizational trees |
+| pgRouting | Graph/network extension | N/A | Network routing, telecom |
+
+
+## PostGIS (Geospatial Extension)
+
+PostGIS adds **geospatial intelligence** to PostgreSQL.
+
+Common capabilities:
+
+- Distance calculations
+- Spatial joins
+- Radius searches
+- Area coverage
+
+::: {.callout-important}
+As a data analyst you are **not expected** to design **PostGIS** schemas or routing graphs — but you *will* query them.
+
+Documentation you can find [here](https://postgis.net/workshops/postgis-intro/)
+:::
+
+
+# Relational Database Schema
+
+## What Is a Schema?
+
+A **schema** describes the structure of a database: tables, columns, keys, and relationships.
+
+---
+
+## Star Schema
+
+A **star schema** consists of:
+
+- one central **fact table**
+- multiple surrounding **dimension tables**
+
+![](../../../img/sql/star_schema.png)
+
+::: {.callout-important}
+Although our database is transactional, its structure closely resembles a star schema, making it well-suited for analytics.
+:::
+
+---
+
+## Snowflake Schema
+
+A **snowflake schema** extends the star schema by normalizing dimension tables into sub-dimensions.
+
+![](../../../img/sql/snowflake_schema.png)
+
+---
+
+## Entity Relationship Diagram (ERD)
+
+Try to generate the ERD for the sales database using your SQL client.  
+Identify primary keys, foreign keys, and relationships.
+
+![](../../../img/sql/generate_erd.png)

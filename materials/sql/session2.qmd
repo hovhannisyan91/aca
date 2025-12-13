@@ -314,7 +314,7 @@ Creating a unique index on `email`:
 
 ::: {.callout-important title="Are Keys Also Indexes?"}
 
-### Keys vs Indexes — Storage Perspective
+### Keys vs Indexes
 
 From a **database engine and storage point of view**, keys and indexes are closely related, but they are **not the same thing**.
 
@@ -341,7 +341,6 @@ From a **database engine and storage point of view**, keys and indexes are close
 :::
 
 
-
 ## Data Types
 
 Data types define **what kind of data** a column can store.  
@@ -365,9 +364,6 @@ To calculate averages or totals, the column must enforce a numeric type.
 
 ---
 
-
-
-
 ## Data Types in PostgreSQL
 
 1. Numeric
@@ -381,109 +377,358 @@ To calculate averages or totals, the column must enforce a numeric type.
 
 ---
 
+
 ### Numeric Data Types
 
-**Used for:** counts, quantities, prices, measurements
+**In PostgreSQL, numeric data types fall into three main groups:**
 
-| Data Type | Description | Example | Use Case |
-|----------|------------|---------|---------|
-| `INTEGER` | Whole numbers | `2500` | Counts |
-| `BIGINT` | Large integers | `9876543210` | IDs |
-| `NUMERIC(p,s)` | Exact decimals | `15432.75` | Revenue |
-| `DOUBLE PRECISION` | Approximate | `0.123456` | KPIs |
+1. **Integers**: whole numbers
+2. **Exact numerics:** precise decimal numbers
+3. **Floating-point numbers:** approximate decimals
 
-::: {.callout-important}
-Use `NUMERIC` for money, floating-point for ratios.
+**Numeric data types are used for:**
+
+- counts
+- quantities
+- prices
+- measurements
+
+#### Main Numeric Data Types (with Example Values)
+
+| Data Type          | Description                     | Example Value                | Typical Use Case         |
+| ------------------ | ------------------------------- | ---------------------------- | ------------------------ |
+| SMALLINT         | Small-range whole numbers       | 12                         | Status codes, flags      |
+| INTEGER / INT  | Standard whole numbers          | 2500                       | Quantities, counts       |
+| BIGINT           | Very large whole numbers        | 9876543210                 | IDs, large counters      |
+| NUMERIC(p, s)    | Exact precision decimal         | NUMERIC(10,2) → 15432.75 | Salary, revenue          |
+| DECIMAL(p, s)    | Same as NUMERIC (SQL standard)  | DECIMAL(8,3) → 123.456   | Financial data           |
+| REAL             | Approximate floating-point      | 3.14159                    | Scientific values        |
+| DOUBLE PRECISION | Higher-precision floating-point | 0.0000123456789            | Statistical calculations |
+
+::: {.callout-note}
+Notice how **exact numerics** (NUMERIC, DECIMAL) preserve precision, while **floating-point types** (REAL, DOUBLE PRECISION) may introduce rounding differences.
 :::
 
+#### Performance vs Precision Trade-off
+
+When choosing a numeric data type, you must balance **precision**, **performance**, and **storage efficiency**.  
+The table below summarizes the most common analytical requirements and the recommended PostgreSQL data types.
+
+| Requirement | Precision Needed | Performance Priority | Recommended Data Type |
+|------------|------------------|----------------------|-----------------------|
+| Row counts, simple counters | Exact | Very high | INTEGER |
+| Large identifiers (IDs) | Exact | High | BIGINT |
+| Financial values (salary, revenue) | Exact | Medium | NUMERIC(p,s) |
+| Prices with decimals | Exact | Medium | DECIMAL(p,s) |
+| Ratios, averages, KPIs | Approximate acceptable | High | DOUBLE PRECISION |
+| Scientific measurements | Approximate acceptable | Very high | REAL / DOUBLE PRECISION |
+
 ---
+
+#### Index Size Considerations
+
+Indexes **inherit** the storage and performance characteristics of the column type they are built on:
+
+- Index on INTEGER $\rightarrow$ **small** $\rightarrow$ **cache-friendly**
+- Index on NUMERIC $\rightarrow$ **larger** $\rightarrow$ **slower to scan**
+- Composite indexes **amplify** the effect of column size
+
+---
+
+::: {.callout-important title="Best Practice"}
+**Use the smallest numeric type that safely fits your data.**
+
+- Prefer INTEGER over BIGINT if values fit
+- Use NUMERIC only when precision matters
+- Avoid premature use of NUMERIC for IDs or counters
+:::
 
 ### Character Data Types
 
-| Type | Description | Example |
-|-----|------------|--------|
-| `CHAR(n)` | Fixed length | `'US   '` |
-| `VARCHAR(n)` | Variable length | `'Karen'` |
-| `TEXT` | Unlimited | Product descriptions |
+Character data types are used to store **textual information** such as names, descriptions, identifiers, and free-form text.
+
+**In PostgreSQL, character data types fall into three main groups:**
+
+1. **Fixed-length characters** — text with a fixed size  
+2. **Variable-length characters** — text with flexible size limits  
+3. **Unbounded text** — long or unpredictable text  
+
+**Character data types are used for:**
+
+- names
+- descriptions
+- emails
+- codes
+- comments
+
+#### Main Character Data Types
+
+| Data Type | Description | Example Value | Typical Use Case |
+|----------|-------------|---------------|------------------|
+| CHAR(n) | Fixed-length character string | CHAR(5) → 'US   ' | Country codes, fixed formats |
+| VARCHAR(n) | Variable-length string with limit | VARCHAR(50) → 'Karen Hovhannisyan' | Names, emails |
+| TEXT | Variable-length string, no limit | 'This product has been discontinued.' | Descriptions, comments |
+| CHARACTER VARYING(n) | SQL-standard name for VARCHAR | CHARACTER VARYING(20) → 'A123XZ' | Codes, identifiers |
+
+::: {.callout-note}
+VARCHAR(n) and TEXT behave **almost identically** in PostgreSQL.  
+The main difference is whether you want to **enforce a maximum length**.
+:::
+
+#### Performance vs Flexibility Trade-off
+
+When choosing a character data type, the trade-off is usually between **data validation** and **flexibility**, not raw performance.
+
+| Requirement | Length Control Needed | Flexibility Priority | Recommended Data Type |
+|------------|-----------------------|----------------------|-----------------------|
+| Fixed-format values | Yes (fixed) | Low | CHAR(n) |
+| Names, emails | Yes (reasonable limit) | Medium | VARCHAR(n) |
+| Free-form text | No | High | TEXT |
+| User comments, notes | No | Very high | TEXT |
 
 ---
+
+#### Index Size Considerations
+
+Indexes on character columns depend on **string length** and **value distribution**:
+
+- Index on CHAR(n) $\rightarrow$ predictable size $\rightarrow$ stable performance
+- Index on VARCHAR(n) $\rightarrow$ variable size $\rightarrow$ generally efficient
+- Index on TEXT $\rightarrow$ potentially large $\rightarrow$ slower scans for long values
+- Long strings in composite indexes **increase index size significantly**
+
+---
+
+::: {.callout-important title="Best Practice"}
+**Use constraints, not oversized text types, to control data quality.**
+
+- Prefer VARCHAR(n) when a reasonable maximum length exists
+- Use TEXT for descriptions and comments
+- Avoid CHAR(n) unless values are truly fixed-length
+:::
 
 ### Date & Time Data Types
 
-| Type | Description | Example |
-|-----|------------|--------|
-| `DATE` | Date only | `2025-03-15` |
-| `TIMESTAMP` | Date + time | `2025-03-15 14:30` |
-| `TIMESTAMPTZ` | Time zone aware | `2025-03-15 10:30+00` |
-| `INTERVAL` | Duration | `3 days` |
+Date and time data types are used to store **temporal information**, such as when an event occurred, started, or ended.
+
+They are critical for analytics involving **time series**, **trends**, **seasonality**, and **durations**.
+
+**In PostgreSQL, date and time data types fall into four main groups:**
+
+1. **Date-only values**
+2. **Time-only values**
+3. **Timestamps (date + time)**
+4. **Time intervals / durations**
+
+**Date & time data types are used for:**
+
+- event dates
+- timestamps
+- log records
+- durations
+- time-based analysis
+
+#### Main Date & Time Data Types 
+
+| Data Type | Description | Example Value | Typical Use Case |
+|----------|-------------|---------------|------------------|
+| DATE | Calendar date (no time) | 2025-03-15 | Birth dates, order dates |
+| TIME | Time of day (no date) | 14:30:00 | Opening hours |
+| TIME WITH TIME ZONE | Time with time zone info | 14:30:00+04 | Cross-region schedules |
+| TIMESTAMP | Date and time (no timezone) | 2025-03-15 14:30:00 | Local event logs |
+| TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ) | Date and time with timezone handling | 2025-03-15 10:30:00+00 | Auditing, analytics |
+| INTERVAL | Time duration | 3 days 4 hours | Session length, SLA |
+
+::: {.callout-note}
+TIMESTAMPTZ does **not** store the time zone itself.  
+PostgreSQL converts values to UTC internally and displays them using the session time zone.
+:::
+
+#### Accuracy vs Interpretability Trade-off
+
+When working with time data, the trade-off is often between **absolute correctness** and **human interpretation**.
+
+| Requirement | Time Zone Awareness | Recommended Data Type |
+|------------|---------------------|-----------------------|
+| Simple dates | Not needed | DATE |
+| Local business timestamps | Not required | TIMESTAMP |
+| Multi-region systems | Required | TIMESTAMPTZ |
+| Durations and differences | Not applicable | INTERVAL |
 
 ---
+
+#### Index Size Considerations
+
+Date and time types are **fixed-size**, making them efficient for indexing:
+
+- Index on DATE $\rightarrow$ **small** $\rightarrow$ very fast range scans
+- Index on TIMESTAMP $\rightarrow$ **small** $\rightarrow$ efficient sorting
+- Index on TIMESTAMPTZ $\rightarrow$ **small** $\rightarrow$ timezone-safe
+- Index on INTERVAL $\rightarrow$ rarely indexed (use carefully)
+
+**Date-based indexes are commonly used with:**
+
+- WHERE date BETWEEN ...
+- GROUP BY date
+- time-window queries
+
+---
+
+::: {.callout-important title="Best Practice"}
+**Always use TIMESTAMPTZ for analytics and logging systems.**
+
+- Avoid ambiguity in multi-region environments
+- Use DATE only when time is irrelevant
+- Store durations as INTERVAL, not numeric hacks
+:::
 
 ### Boolean & Categorical Data Types
 
-| Type | Example | Use |
-|-----|--------|----|
-| `BOOLEAN` | `TRUE` | Flags |
-| `ENUM` | `'low','medium','high'` | Categories |
-| `VARCHAR` | `'premium'` | Segments |
+Boolean and categorical data types are used to store **logical values** and **finite categories**.  
+They are especially important for **filtering**, **segmentation**, and **business rules**.
+
+**In PostgreSQL, boolean and categorical data types fall into two main groups:**
+
+1. **Boolean values** — true / false logic  
+2. **Categorical values** — limited sets of labels  
+
+**These data types are used for:**
+
+- flags
+- status indicators
+- binary decisions
+- categorical segmentation
+
+#### Main Boolean & Categorical Data Types
+
+| Data Type | Description | Example Value | Typical Use Case |
+|----------|-------------|---------------|------------------|
+| BOOLEAN | Logical true / false value | TRUE, FALSE | Active flags, eligibility |
+| CHAR(n) | Fixed-length category code | CHAR(1) → 'Y' | Yes/No indicators |
+| VARCHAR(n) | Short categorical label | 'premium' | Customer segments |
+| TEXT | Free-form category label | 'high_value_customer' | Tags, labels |
+| ENUM | Predefined set of values | ('low','medium','high') | Controlled categories |
+
+::: {.callout-caution}
+**PostgreSQL accepts multiple boolean literals:**
+
+TRUE / FALSE, true / false, 1 / 0, yes / no.
+:::
+
+#### Control vs Flexibility Trade-off
+
+The main trade-off for categorical data is between **data integrity** and **flexibility**.
+
+| Requirement | Validation Strictness | Recommended Data Type |
+|------------|----------------------|-----------------------|
+| Binary logic | Very strict | BOOLEAN |
+| Small fixed category set | Very strict | ENUM |
+| Evolving categories | Medium | VARCHAR(n) |
+| User-defined labels | Low | TEXT |
 
 ---
 
-### Special & Advanced Data Types
+#### Index Size Considerations
 
-| Type | Use |
-|-----|----|
-| `JSONB` | Logs, APIs |
-| `UUID` | Distributed IDs |
-| `INET` | IP addresses |
-| `GEOMETRY` | Geospatial |
-| `pgRouting` | Networks |
+- Index on BOOLEAN $\rightarrow$ very small $\rightarrow$ fast but often low selectivity
+- Index on short categorical strings $\rightarrow$ efficient
+- Index on high-cardinality categories $\rightarrow$ more useful than boolean indexes
+- Avoid indexing columns with **very few distinct values**
 
-::: {.callout-warning}
-Advanced data types require specialized indexes.
+::: {.callout-important title="Best Practice"}
+**Use BOOLEAN only for true binary logic.**
+
+- Do not encode booleans as 'Y'/'N' unless required
+- Use ENUM only when categories are stable
 :::
 
 ---
 
-## Relational Database Schema
+### Special & Advanced Data Types | OPTIONAL
 
-### What Is a Schema?
+Beyond standard numeric, text, and date types, PostgreSQL supports **specialized data types** designed for **specific domains** such as 
 
-A **schema** describes the structure of a database: tables, columns, keys, and relationships.
+- geospatial analysis 
+- networks
+- graphsand 
+- semi-structured data.
+
+These data types are typically used in **advanced analytics**, **telecom**, **log analysis**, and **platform-scale systems**.
+
+**Special data types are used for:**
+
+- geospatial analytics
+- network analysis
+- semi-structured data
+- system-level identifiers
+- advanced domain modeling
+
+#### Main Special Data Types (with Example Values)
+
+| Data Type / Extension | Description | Example Value | Typical Use Case |
+|----------------------|-------------|---------------|------------------|
+| JSON / JSONB | Semi-structured JSON data | {"plan":"premium","usage":120} | Logs, APIs, configs |
+| ARRAY | Array of values | {1,2,3} | Tags, multi-valued attributes |
+| UUID | Universally unique identifier | 550e8400-e29b-41d4-a716-446655440000 | Distributed IDs |
+| INET | IP address | 192.168.1.1 | Network traffic |
+| CIDR | Network block | 192.168.0.0/24 | Subnet modeling |
+| GEOMETRY (PostGIS) | Geometric objects | POINT(40.18 44.51) | Maps, locations |
+| GEOGRAPHY (PostGIS) | Earth-based coordinates | POINT(44.51 40.18) | Distance calculations |
+| ltree | Hierarchical tree paths | region.city.store | Organizational trees |
+| pgRouting | Graph/network extension | N/A | Network routing, telecom |
+
+::: {.callout-note}
+Most advanced data types are provided via **PostgreSQL extensions**, not core SQL.
+:::
+
+#### Domain-Specific Trade-offs
+
+Special data types trade **generality** for **domain power**.
+
+| Requirement | Domain | Recommended Type |
+|------------|--------|------------------|
+| Flexible event payloads | Logging / APIs | JSONB |
+| Multi-valued attributes | Analytics | ARRAY |
+| Globally unique IDs | Distributed systems | UUID |
+| IP & network data | Telecom / IT | INET, CIDR |
+| Location-based analytics | GIS | PostGIS (GEOMETRY / GEOGRAPHY) |
+| Graph traversal | Networks | pgRouting, graph models |
 
 ---
 
-### Star Schema
+#### Indexing & Performance Considerations
 
-A **star schema** consists of:
+Special data types usually require **specialized indexes**:
 
-- one central **fact table**
-- multiple surrounding **dimension tables**
+- JSONB $\rightarrow$ GIN index
+- GEOMETRY / GEOGRAPHY $\rightarrow$ GiST / SP-GiST
+- ARRAY $\rightarrow$ GIN
+- INET / CIDR $\rightarrow$ GiST
 
-![](../../img/sql/star_schema.png)
+Improper indexing can make these types **very slow** on large datasets.
+
+::: {.callout-warning title="Performance Warning"}
+Advanced data types without proper indexes often lead to **full scans**, even on indexed tables.
+:::
+
+
+
+#### PostGIS (Geospatial Extension)
+
+PostGIS adds **geospatial intelligence** to PostgreSQL.
+
+Common capabilities:
+
+- Distance calculations
+- Spatial joins
+- Radius searches
+- Area coverage
 
 ::: {.callout-important}
-Although our database is transactional, its structure closely resembles a star schema, making it well-suited for analytics.
+As a data analyst you are **not expected** to design **PostGIS** schemas or routing graphs — but you *will* query them.
 :::
 
----
 
-### Snowflake Schema
-
-A **snowflake schema** extends the star schema by normalizing dimension tables into sub-dimensions.
-
-![](../../img/sql/snowflake_schema.png)
-
----
-
-### Entity Relationship Diagram (ERD)
-
-Try to generate the ERD for the sales database using your SQL client.  
-Identify primary keys, foreign keys, and relationships.
-
-![](../../img/sql/generate_erd.png)
-
----
 
 ## Data Dictionary
 
@@ -598,16 +843,7 @@ Central fact table storing individual sales transaction lines.
 
 ---
 
-#### Indexes
 
-| Index Name | Table | Column(s) | Purpose |
-|-----------|------|-----------|--------|
-| `idx_sales_order_id` | `sales` | `order_id` | Speed up joins with orders |
-| `idx_sales_product_id` | `sales` | `product_id` | Speed up product analysis |
-| `idx_sales_customer_id` | `sales` | `customer_id` | Speed up customer analysis |
-| `idx_orders_date` | `orders` | `order_date` | Speed up time-based queries |
-
----
 
 #### Analyst Notes
 
