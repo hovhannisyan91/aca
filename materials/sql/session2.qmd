@@ -745,7 +745,6 @@ As an analyst, the data dictionary helps you understand where data lives and how
 
 This data dictionary describes the structure and meaning of the tables used in the **sales analytics database**.
 
-It documents:
 
 - table purpose
 - column definitions
@@ -852,3 +851,281 @@ Central fact table storing individual sales transaction lines.
 - `transaction_id` is a **surrogate key**
 - Time attributes are intentionally **denormalized**
 - Foreign keys may be **logically enforced** in analytical systems
+
+
+## Syntax
+
+## Convention
+
+<!-- TODO Write about that the SQL statements neeeds to be all capps , column names aetss -->
+
+
+## CRUD
+
+This section will introduce the most common SQL commands, known as CRUD operations. The acronym CRUD stands for create, read, update, and delete, and it describes the four operations that can be performed with a database.
+
+**CRUD** stands:
+
+- CREATE
+- SELECT
+- UPDATE
+- DELETE
+  
+
+::: {.callout-tip}
+[SQL cheet sheet](https://images.careerfoundry.com/public/courses/data-immersion/A3/E3.3/SQL-Commands-Cheat-Sheet.pdf) 
+:::
+
+
+### CREATE
+
+`CREATE` commands are used to create new entities in a database, such as tables or indexes.  
+Compared to other CRUD operations, `CREATE` is more complex because it requires you to define the **rules and properties** (constraints) of the database objects.
+
+Before learning about constraints, let’s walk through the `CREATE` command to understand:
+
+- when you might encounter it on the job
+- why it’s important
+- how it’s commonly used
+
+Imagine you are a data analyst and your manager asks you to create new tables in the database and insert the correct data. This is an important task because raw data must be organized into related tables—an essential feature of relational databases.
+
+Let’s walk through the main steps involved.
+
+
+
+#### CREATE TABLE
+
+When creating a table, you must define:
+
+- the table name
+- its columns
+- the data types
+- the primary key
+
+For example, a table might include columns such as:
+
+- `film_id` (primary key)
+- `title`
+- `description`
+- `release_year`
+
+Use the `CREATE TABLE` command to define this structure in PostgreSQL.
+
+---
+
+#### CREATE INDEX
+
+Indexes help organize data so it can be retrieved faster.
+
+If a table contains many rows, creating an index can significantly improve query performance.  
+You can create an index on one or more columns using the `CREATE INDEX` command.
+
+
+
+#### INSERT
+
+After creating a table, you need to add data to it.
+
+The `INSERT` command is used to add a new row to a table.  
+If the statement is correct, PostgreSQL will confirm that the record was inserted successfully.
+
+If there is an error, PostgreSQL will return a message explaining why the insertion failed.
+
+You can also use the `DEFAULT` keyword to insert default values when some fields are omitted.
+
+---
+
+#### ALTER
+
+After creating a table, you may realize that changes are needed.
+
+The `ALTER` statement allows you to:
+
+- add columns
+- remove columns
+- rename columns
+- rename tables
+
+This makes it possible to evolve database structures over time.
+
+---
+
+::: {.callout-note title="To Quote or Not to Quote?"}
+
+When writing SQL statements, make sure to place quotes around **non-numeric values** such as text and dates.
+
+For example, in an `INSERT` command:
+
+- text values like `title` and `description` **must be enclosed in quotes**
+- numeric values like `language_id` and `release_year` **should not**
+
+Different database systems handle quotes differently.
+
+PostgreSQL accepts **single quotes only** for string literals, while some other systems allow both single and double quotes.
+
+:::
+
+
+### SELECT
+
+The second CRUD operation is **READ**, which is implemented using the `SELECT` command.
+
+`SELECT` is used to specify which data you want to retrieve, and it is one of the most frequently used SQL commands among data analysts.
+
+You have already used `SELECT` statements to retrieve data from tables.  
+Next, you will practice writing more `SELECT` queries in PostgreSQL.
+
+
+
+### FROM
+
+The `FROM` clause specifies **where the data comes from**, usually a table.
+
+Example: retrieve product identifiers and names from the `products` table.
+
+```sql
+SELECT product_id, product_name
+FROM products;
+```
+
+### WHERE
+
+The `WHERE` clause is used to **filter rows** returned by a query based on one or more conditions.
+
+Without `WHERE`, a query returns **all rows** from a table.
+
+
+Example: return all sales transactions where the total sales value is less than 50.
+
+```sql
+SELECT *
+FROM sales
+WHERE total_sales < 50;
+```
+
+
+## UPDATE
+
+
+The `UPDATE` statement is used to **modify existing records** in a table.
+
+Updates should almost always be applied to **specific rows**, not entire tables.
+
+
+**Example:** update the price of a specific product.
+
+```sql
+UPDATE products
+SET price = 49.99
+WHERE product_id = 12;
+
+```
+
+
+### DELETE
+
+The `DELETE` statement is used to **remove records** from a table.
+
+Because deletions are irreversible, this command must be used **with extreme caution**.
+
+
+**Example:** delete a single sales transaction.
+
+```sql
+DELETE FROM sales
+WHERE transaction_id = 1004;
+```
+
+## SQL Rules and Best Practices
+
+Now that you’ve seen the most common SQL statements, let’s get to grips with some basic rules and best practices for using SQL. Before starting, however, you should know that this list is by no means exhaustive, rather, a starting point, as you’re bound to pick up more tricks and tips once on the job.
+
+### Numbers and Underscores
+
+In a relational database, table and column names can’t start with a number, and they can’t contain spaces. Use an underscore instead. For example:
+
+
+**Recommended**
+
+```sql
+CREATE TABLE customer_lifecycle
+CREATE TABLE customer
+```
+
+**Not Recommended**
+
+```sql
+CREATE TABLE customer lifecycle
+CREATE TABLE 3customer
+```
+
+
+### Capitalization
+
+SQL commands are written in capitals, but table names and column names are written in lowercase. This is to improve readability. For example:
+
+
+**Recommended**
+
+```sql
+SELECT column_a, column_b FROM tablename
+SELECT film_id, category_id FROM film_category
+```
+
+
+**Not Recommended**
+
+```sql
+Select COLUMN_A, COLUMN_B from TABLENAME
+SELECT FILM_ID, CATGEORY_ID FROM FILM_CATEGORY
+```
+
+
+### Commenting
+
+It is good practice to **comment your SQL code** so that other analysts and developers can easily read and understand your queries.
+
+Comments do **not** affect query execution — they exist purely for **documentation and readability**.
+
+
+Use `--` to add a single-line comment.
+
+```sql
+-- select and display all columns from the sales table
+SELECT *
+FROM sales
+LIMIT 10;
+```
+
+
+Multi-line comments can also be used to **temporarily disable blocks of SQL code** during testing or debugging.
+
+```sql
+/*
+SELECT
+  s.transaction_id,
+  p.product_name,
+  s.total_sales
+FROM sales s
+JOIN products p
+  ON s.product_id = p.product_id
+WHERE s.total_sales > 100;
+*/
+```
+
+### Aliasing
+
+Aliases assign **temporary names** to columns or tables within a query and its result set.
+
+Aliases improve **readability**, reduce verbosity, and are often required in more complex queries.
+
+
+Column aliases rename columns in the **query output**.
+
+```sql
+SELECT
+  product_name AS item_name,
+  price AS unit_price
+FROM products;
+```
