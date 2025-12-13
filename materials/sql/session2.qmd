@@ -1,167 +1,621 @@
 ---
-title: "SQL Session 02: Intro to Relational Databases A"
-categories: [SQL]
+title: "SQL Session 02: Intro to PostgreSQL"
+categories: [SQL, Data Types, Schemas, Keys, Indexes, Syntax]
 ---
 
-[how to use pgadmin4](https://www.youtube.com/watch?v=E9vx7CwN2Wc)
+## Context: Sales Analytics Database
 
-<!-- Imagine you’ve been hired as a data analyst at Rockbuster Stealth, a fictional company that provides online video rentals. Your job is to look at the data to answer various business questions. As you work through this Achievement and learn more about SQL, the questions you answer and data queries you perform will gradually become more complex.
+Imagine you’ve just joined a company as a **data analyst**.  
+The company sells products through an online channel and stores its operational data in a **PostgreSQL relational database**.
 
-On your first day of work, your supervisor sends you the data dump for Rockbuster Stealth and asks you to work on the following tasks. -->
+The database captures information about:
 
+- customers who place orders
+- products that are sold
+- employees involved in the sales process
+- orders placed over time
+- individual sales transactions
 
-In the previous session you learned about different types of databases and the database management systems used to define, query, and manage them. 
+Your role as an analyst is to **query this data** to answer business questions related to:
 
-Without databases, you wouldn’t be able to `retrieve`, `update`, or `delete` data. But first, you need to actually **store the data** in the database. And before you store the data in the database, you have to decide on the most effective way to organize the data.
+- revenue and sales performance
+- product popularity
+- customer behavior
+- employee contribution
+- time-based trends
 
-In this Session, we will learn about the various elements of a relational database, specifically **keys**, **data types**, and **schemas**. Then, you’ll walk through how to extract the entity relationship diagram for a relational database. 
+---
+
+## Learning Goals
+
+In the previous session, you learned about different types of databases and the database management systems used to define, query, and manage them.
+
+Without databases, you wouldn’t be able to **retrieve**, **update**, or **delete** data.  
+Before analysis can begin, however, data must first be **stored**, **structured**, and **related** correctly.
+
+In this session, we will learn about the core building blocks of a relational database:
+
+- tables, rows, and columns
+- keys and relationships
+- indexes and performance trade-offs
+- data types in PostgreSQL
+- database schemas and analytical modeling concepts
+
+By the end of this session, you should be able to **read and understand a relational schema** and write more efficient SQL queries.
+
+::: {.callout-tip}
+Check out [how to use pgAdmin 4](https://www.youtube.com/watch?v=E9vx7CwN2Wc) for better navigation.
+:::
+
+---
 
 ## Data Storage Structures
 
-Recall, **Relational database** consists of **one or more tables** made up of **rows** and **columns**, and these tables are linked by **relationships.**
+A **relational database** consists of **one or more tables** made up of **rows** and **columns**, and these tables are linked by **relationships**.
 
+In this course, we will work with a **sales analytics database** that includes tables such as:
 
+- `sales`
+- `orders`
+- `products`
+- `customers`
+- `employees`
 
-The list on the left represents all the columns in the table. Notice how each column represents a specific attribute of a film, for example, `title`, `description`, and `release_year` An expanded version of this table is shown in Figure 2. As you can see, each row, or record, holds data about a new film.
+Each table stores information about a specific business entity, and relationships between tables allow us to combine this information during analysis.
 
+The list on the left represents all the columns in a table. Each column represents a specific attribute of a transaction, such as `total_sales`, `quantity`, or `product_id`. Each row (record) represents a **single transaction**.
 
-<!-- TODO add an image for an expanded version of the table -->
-
+![](../../img/sql/erd_extanded.png)
 
 ::: {.callout-tip}
-another fancy name for a record is TUPLE
+Another name for a record is a **tuple**.
+
+We will revisit tuples when working with Python and relational data.
 :::
 
+Tables are such a common structure that you’ve likely interacted with them without realizing it.  
+For example, when you place an order on an e-commerce website like Amazon:
 
-Tables are such a common structure for databases that you’ve likely interacted with one without realizing it. Whenever you place an order on an ecommerce website like Amazon, for example, your order details are stored in a table. Each row in the table represents a different order, and the columns represent attributes such as customer name, address, product ordered, price, order date, and so on. To illustrate, here’s an order report from Amazon.
+- **Each row** represents a different order or transaction
+- **Columns** represent attributes such as:
+  - customer name
+  - address
+  - product ordered
+  - price
+  - order date
+
+To illustrate, [here’s](https://docs.google.com/spreadsheets/d/1iMX96kbFhcLIeW5TlSCEF99NMTecfx5HLW_QC5gbiqc/edit?usp=drive_link) an example order report.
+
+---
+
+## Keys and Indexes
+
+To store data efficiently and enable relationships between tables, relational databases rely on **keys** and **indexes**.
+
+### Keys
+
+A **key** is a column (or set of columns) that uniquely identifies a row in a table.  
+Keys are essential for locating records and defining relationships between tables.
 
 
-### Key
+If you refer back to the `sales` table, you’ll notice a key icon next to the `transaction_id` column.  
+This indicates that `transaction_id` is a **key**.
 
+In our database, each row in the `sales` table represents a **single transaction line**, uniquely identified by `transaction_id`.
 
-If you refer back to the film table in Figure 1, you’ll notice a key icon next to the `film_id` column. This tells us that `film_id` is a key in the film table. So, what is a key exactly?
-
-A key is a column (or set of columns) that acts as a **unique identifier for a row**, which is helpful for finding records. In Figure 2, you can see each film’s unique ID in the `film_id` column. There are several types of keys found in databases. Knowing the differences between them will help you understand the relationships between the various tables in the database.
-
+![](../../img/sql/pk_sales.png)
 
 #### Primary Key
 
-The primary key is a column or set of columns that acts as a **unique identifier** for each record in a table. There can only be **one primary key within a table**, and it has to meet the following criteria:
+A **primary key** uniquely identifies each record in a table.  
+Each table can have **only one primary key**, and it must:
 
-1. It has to be unique for each row
-2. It cannot be null for any record
-3. The values of the primary key can’t be modified if it’s linked to another table
+1. Be unique
+2. Never be NULL
+3. Remain stable when referenced by other tables
 
-The promary key is the `film_id` column. Notice how every value is unique and there are no empty cells.
+In the `sales` table, `transaction_id` is the primary key.
 
+| transaction_id | order_id | product_id | customer_id | total_sales |
+|----------------|----------|------------|-------------|-------------|
+| 1001           | 501      | 12         | 3001        | 49.99       |
+| 1002           | 501      | 18         | 3001        | 19.99       |
+| 1003           | 502      | 12         | 3005        | 49.99       |
+| 1004           | 503      | 25         | 3008        | 89.99       |
+
+---
 
 #### Candidate Key
 
+A **candidate key** is any column (or set of columns) that can uniquely identify a row.
 
-A **candidate key** is any column that can **uniquely identify a row in a table**, which means there can be more than one candidate key in a table. Since the primary key is chosen from the pool of available candidate keys in a table, candidate keys must meet the same criteria as primary keys, listed above.
+For example, in the `customers` table, `customer_id`  and `email` columns are candidate keys.
 
-<!-- TODO Provide an examples -->
+This means **both columns are candidate keys**.
 
+From the set of candidate keys, one is chosen as the **primary key**.
+
+In this schema, `customer_id` is selected as the primary key, while `email` remains an alternative identifier.
+
+| **customer_id** | customer_name       | **email**                    | city     |
+|-------------|---------------------|--------------------------|----------|
+| 3001        | Alice Johnson       | alice.johnson@email.com  | Berlin   |
+| 3002        | Mark Thompson       | mark.thompson@email.com  | Paris    |
+| 3003        | Elena Petrova       | elena.p@email.com        | Madrid  |
+| 3004        | David Chen          | david.chen@email.com     | London  |
+
+---
 
 #### Composite Key
 
-When no single column can uniquely identify the rows in a table, a combination of columns is used instead. This combination, or set, of columns is called a **composite key.**
+A **composite key** is formed by combining two or more columns when no single column is sufficient to uniquely identify a row.
 
-<!-- TODO Provide an examples -->
+For example, `(order_id, product_id)` could uniquely identify rows in some transactional systems.
+
+| order_id | product_id | product_name        | quantity |
+|----------|------------|---------------------|----------|
+| 501      | 12         | Wireless Mouse      | 1        |
+| 501      | 18         | USB-C Cable         | 2        |
+| 502      | 12         | Wireless Mouse      | 1        |
+| 503      | 25         | Mechanical Keyboard | 1        |
+
+In this table:
+
+- `order_id` alone is **not unique**
+- `product_id` alone is **not unique**
+- The combination `(order_id, product_id)` uniquely identifies each row
+
+This combination forms a **composite key**.
 
 #### Surrogate Key
 
-If a table has **no candidate keys,** you can add a system-generated column, known as a surrogate key, to act as an identifier for each row. Usually this surrogate key is called “key” or “id,” and it’s a number that has no meaning in relation to the record or data in the table.
+A **surrogate key** is a system-generated identifier with no business meaning.
 
-The “film_id” in Figure 2 is an example of a surrogate key; it’s only purpose is to identify each record in the table.
+The `transaction_id` column is a surrogate key; its only purpose is to uniquely identify each transaction.
 
-<!-- TODO Provide an examples -->
+| transaction_id | order_id | product_id | quantity | total_sales |
+|----------------|----------|------------|----------|-------------|
+| 1001           | 501      | 12         | 1        | 49.99       |
+| 1002           | 501      | 18         | 2        | 19.99       |
+| 1003           | 502      | 12         | 1        | 49.99       |
+| 1004           | 503      | 25         | 1        | 89.99       |
+
+Surrogate keys are often used even when natural or composite keys exist.
+
+They are preferred in analytical systems because they:
+
+- simplify joins
+- reduce index size
+- improve query readability
+- remain stable even if business rules change
 
 #### Foreign Key
 
-A **foreign key** is a column, or set of columns, that refers to the primary key in another table. **Foreign keys are used to establish relationships between tables** and are helpful in navigating from one table to another. Let’s look at the example in Figure 3. See how the primary key from the language table, `language_id` has been copied into the film table; however, here it’s a **foreign key.** The arrow between the two tables illustrates this connection.
 
-**Foreign keys play an important role in relational databases, so you can expect to learn a lot more about them later.**
+A **foreign key** is a column (or set of columns) that references a primary key in another table.
 
-::: {.callout-tip}
-The concept of keys
-If you remember, you have learned the concept of keys back in Achievement 1 when you were integrating data sets in Excel. The logic here is very much the same, even if it’s expanded—a key serves as an identifier so that you can link two or more data sets.
+For example, the `product_id` column in the `sales` table references the `product_id` primary key in the `products` table.  
+Foreign keys establish relationships between tables and allow us to join data across entities.
+
+Thus, Foreign key enforces **referential integrity** between the two tables which is crucial:
+
+- prevent invalid data (e.g., sales for non-existent products)
+- define how tables are related
+- enable joins between tables
+- preserve data consistency
+
+![](../../img/sql/fk_sales_vs_products.png)
+
+::: {.callout-important}
+In **analytical databases**, foreign keys are sometimes not physically enforced
+for performance reasons, but they are always enforced **logically** in the data model.
 :::
 
 
-<!-- TODO Provide relationship with example  -->
+
+---
+
+## Indexes
+
+Imagine searching through a book to find all pages starting with the letter **A**.  
+Without an index, you would scan every page.  
+With an index (like a dictionary), you jump directly to the correct section.
+
+Indexes work the same way in databases.
+
+Indexes do **not** store new data.  
+They are special lookup structures that improve **query performance**.
 
 
-### Index
+![](../../img/sql/index.png)
 
-
-Imagine you have a book and someone asks you to note down the number of every page that starts with the letter **A**. Doing this manually would take a long time, and the longer the book is, the more time the task requires.
-
-Now imagine the book is a **dictionary**. Instead of checking pages one by one, you jump directly to the section marked **A**, immediately reaching the pages you need.
-
-This is exactly how **indexes** work in databases.
-
-Indexes do **not** add new data to a table. Instead, they are **special lookup structures** that arrange existing records in a way that makes retrieval much faster.
-
-<!-- Todo example of a book -->
-
-::: {.callout-note title="the title"}
-When a query searches through **every** record in a table instead of using an index, this is called a **full scan**.
+::: {.callout-note title="Full Table Scan"}
+When a query checks **every row** instead of using an index, this is called a **full scan**.
 :::
 
+Indexes improve read performance but come with trade-offs:
 
-While indexes improve query performance, they come with trade-offs.  
-They consume storage space and require maintenance whenever data changes.
+- extra storage
+- slower inserts and updates
+- maintenance overhead
 
+### When Not to Create Indexes
 
-**Before Creating an Index:**
-
-- Avoid indexing **small tables** — scanning them is usually faster.
-- Avoid indexing **frequently updated tables** — indexes must be updated after every insert/update.
-- Avoid indexing columns with many **NULL** values.
-- Avoid indexing columns that are **frequently manipulated** (e.g., columns in constant arithmetic operations).
-:::
-
-Below are the main types of indexes relevant for data analysts.
+- Very small tables
+- Frequently updated columns
+- Columns with many NULL values
+- Columns with very low cardinality
 
 
-#### Single-Column Index
+### Single-Column Index
 
-A single-column index is based on **one** column in a table. Consider the example below: the table contains employee details such as `name`, `contact number`, `age`, and a `primary key`.  
-If you frequently search employees by name, you may create a **single-column index** on the `name` column so that records are sorted alphabetically.
+A **single-column index** is built on one column.
 
 | Employee ID | Name    | Contact Number | Age |
 |-------------|---------|----------------|-----|
 | 1           | Max     | 800692692      | 24  |
 | 2           | Jessica | 800123456      | 35  |
 | 3           | Mikeal  | 800745547      | 49  |
-| …           |         |                |     |
-| 7393        | John    | 800900900      | 48  |
 
-A single-column index improves the speed of queries filtering on one field, but it does not help when filtering across multiple fields. 
+
+
+
+### Composite Index
+
+Consider the same employees table, but now imagine that queries often filter by both name and age at the same time. Thus,  **composite index** spans multiple columns, such as `(name, age)`.
+
+Composite indexes are most effective when queries filter columns in the **same left-to-right order** as the index definition.
+
+
+| employee_id | name    | age | department |
+|-------------|---------|-----|------------|
+| 1           | Max     | 24  | Sales      |
+| 2           | Jessica | 35  | Marketing  |
+| 3           | Max     | 35  | Finance    |
+
+
+or an index defined as `(name, age)`:
+
+- Efficient for queries filtering on `name`
+- Efficient for queries filtering on `name` **and** `age`
+- **Not efficient** for queries filtering on `age` only
+
+
+For an index defined as `(name, age)`:
+
+- Efficient for queries filtering on `name`
+- Efficient for queries filtering on `name` **and** `age`
+- **Not efficient** for queries filtering on `age` only
+`   
+
+### Unique Index
+
+
+Unlike a regular index, a unique index enforces a rule, not just performance.
+A **unique index** ensures that values are not duplicated. 
+
+
+| customer_id | customer_name | email                    |
+|-------------|---------------|--------------------------|
+| 3001        | Alice Johnson | alice@email.com          |
+| 3002        | Mark Thompson | mark@email.com           |
+| 3003        | Elena Petrova | elena@email.com          |
+
+In the aboive table:
+
+- `email` values are unique
+- No two customers share the same email address
+
+Creating a unique index on `email`:
+
+- prevents duplicate emails
+- guarantees data integrity
+
+Use a unique index when:
+
+- values must be unique across rows
+- the column is frequently used for lookup
+- **uniqueness is part of business logic**
+
+
+
+## Data Types
+
+Data types define **what kind of data** a column can store.  
+They ensure consistency, enable validation, and affect performance.
+
+Consider the following example:
+
+| Employee Name | Salary ($) |
+|---------------|------------|
+| Jan           | 100000     |
+| Alex          | One hundred thousand |
+| Kim           | 70k        |
+
+::: {.callout-caution}
+
+Inconsistent data types make analysis impossible.
+
+To calculate averages or totals, the column must enforce a numeric type.
+:::
 
 ---
 
-#### Multiple Column / Composite Index
+::: {.callout-important title="Are Keys Also Indexes?"}
 
-A **multiple-column**, or **composite**, index is applied to **two or more** columns.  
-This is useful when queries frequently filter based on several fields at the same time.
+### Keys vs Indexes — Storage Perspective
 
-For example, using the same employee table, you might create an index on **(name, age)** if your queries often filter or sort using both columns.
+From a **database engine and storage point of view**, keys and indexes are closely related, but they are **not the same thing**.
+
+- A **key** defines a **logical rule** (uniqueness, relationships)
+- An **index** is a **physical data structure** stored on disk to speed up access
+
+#### How PostgreSQL Handles Them
+
+| Concept | Enforces Uniqueness | Improves Query Speed | Stored as Index |
+|-------|---------------------|----------------------|-----------------|
+| Primary Key | Yes | Yes | Yes (unique index) |
+| Unique Constraint | Yes | Yes | Yes (unique index) |
+| Foreign Key | No | Sometimes | No (by default) |
+| Regular Index | No | Yes | Yes |
+
+#### Important Notes
+
+- Creating a **primary key** automatically creates a **unique index**
+- Creating a **unique constraint** automatically creates a **unique index**
+- **Foreign keys do NOT create indexes automatically**
+- Indexes exist to improve performance; keys exist to enforce rules
 
 
-Composite indexes are most effective when query filters follow the **same left-to-right order** of the index definition.
+:::
 
 
+
+## Data Types in PostgreSQL
+
+1. Numeric
+2. Character
+3. Date & Time
+4. Boolean & Categorical
+5. Identifier & Auto-Increment
+6. JSON and Semi-Structured
+7. Array
+8. Special Data Types
 
 ---
 
-#### Unique Index
+### Numeric Data Types
 
-Indexes can also be categorized as **unique** or **non-unique**.  
-A **unique index** ensures that no two rows contain the same value in the indexed column(s). This enforces data integrity and prevents duplication.
+**Used for:** counts, quantities, prices, measurements
 
-- **Unique index:** prohibits duplicate values  
-- **Non-unique index:** allows duplicates  
-- Both single-column and composite indexes can be **unique or non-unique**  
+| Data Type | Description | Example | Use Case |
+|----------|------------|---------|---------|
+| `INTEGER` | Whole numbers | `2500` | Counts |
+| `BIGINT` | Large integers | `9876543210` | IDs |
+| `NUMERIC(p,s)` | Exact decimals | `15432.75` | Revenue |
+| `DOUBLE PRECISION` | Approximate | `0.123456` | KPIs |
 
+::: {.callout-important}
+Use `NUMERIC` for money, floating-point for ratios.
+:::
+
+---
+
+### Character Data Types
+
+| Type | Description | Example |
+|-----|------------|--------|
+| `CHAR(n)` | Fixed length | `'US   '` |
+| `VARCHAR(n)` | Variable length | `'Karen'` |
+| `TEXT` | Unlimited | Product descriptions |
+
+---
+
+### Date & Time Data Types
+
+| Type | Description | Example |
+|-----|------------|--------|
+| `DATE` | Date only | `2025-03-15` |
+| `TIMESTAMP` | Date + time | `2025-03-15 14:30` |
+| `TIMESTAMPTZ` | Time zone aware | `2025-03-15 10:30+00` |
+| `INTERVAL` | Duration | `3 days` |
+
+---
+
+### Boolean & Categorical Data Types
+
+| Type | Example | Use |
+|-----|--------|----|
+| `BOOLEAN` | `TRUE` | Flags |
+| `ENUM` | `'low','medium','high'` | Categories |
+| `VARCHAR` | `'premium'` | Segments |
+
+---
+
+### Special & Advanced Data Types
+
+| Type | Use |
+|-----|----|
+| `JSONB` | Logs, APIs |
+| `UUID` | Distributed IDs |
+| `INET` | IP addresses |
+| `GEOMETRY` | Geospatial |
+| `pgRouting` | Networks |
+
+::: {.callout-warning}
+Advanced data types require specialized indexes.
+:::
+
+---
+
+## Relational Database Schema
+
+### What Is a Schema?
+
+A **schema** describes the structure of a database: tables, columns, keys, and relationships.
+
+---
+
+### Star Schema
+
+A **star schema** consists of:
+
+- one central **fact table**
+- multiple surrounding **dimension tables**
+
+![](../../img/sql/star_schema.png)
+
+::: {.callout-important}
+Although our database is transactional, its structure closely resembles a star schema, making it well-suited for analytics.
+:::
+
+---
+
+### Snowflake Schema
+
+A **snowflake schema** extends the star schema by normalizing dimension tables into sub-dimensions.
+
+![](../../img/sql/snowflake_schema.png)
+
+---
+
+### Entity Relationship Diagram (ERD)
+
+Try to generate the ERD for the sales database using your SQL client.  
+Identify primary keys, foreign keys, and relationships.
+
+![](../../img/sql/generate_erd.png)
+
+---
+
+## Data Dictionary
+
+A **data dictionary** documents metadata such as:
+
+- table names
+- column descriptions
+- keys and constraints
+- relationships
+
+As an analyst, the data dictionary helps you understand where data lives and how to query it correctly.
+
+#### Overview
+
+This data dictionary describes the structure and meaning of the tables used in the **sales analytics database**.
+
+It documents:
+
+- table purpose
+- column definitions
+- data types
+- keys and relationships
+
+---
+
+#### Table: `employees`
+
+**Description**  
+Stores information about employees involved in the sales process.
+
+| Column Name | Data Type | Key | Description |
+|------------|----------|-----|-------------|
+| `employee_id` | `SERIAL` | PK | Unique identifier for each employee |
+| `first_name` | `TEXT` |  | Employee first name |
+| `last_name` | `TEXT` |  | Employee last name |
+| `email` | `TEXT` |  | Employee email address |
+| `salary` | `NUMERIC` |  | Employee salary |
+
+---
+
+#### Table: `customers`
+
+**Description**  
+Stores customer profile and location information.
+
+| Column Name | Data Type | Key | Description |
+|------------|----------|-----|-------------|
+| `customer_id` | `INTEGER` | PK | Unique identifier for each customer |
+| `customer_name` | `TEXT` |  | Full customer name |
+| `address` | `TEXT` |  | Customer address |
+| `city` | `TEXT` |  | City of residence |
+| `zip_code` | `TEXT` |  | Postal / ZIP code |
+
+---
+
+#### Table: `products`
+
+**Description**  
+Contains product catalog information.
+
+| Column Name | Data Type | Key | Description |
+|------------|----------|-----|-------------|
+| `product_id` | `INTEGER` | PK | Unique product identifier |
+| `product_name` | `TEXT` |  | Name of the product |
+| `price` | `NUMERIC` |  | Unit price of the product |
+| `description` | `TEXT` |  | Product description |
+| `category` | `TEXT` |  | Product category |
+
+---
+
+#### Table: `orders`
+
+**Description**  
+Stores order-level information and time attributes.
+
+| Column Name | Data Type | Key | Description |
+|------------|----------|-----|-------------|
+| `order_id` | `INTEGER` | PK | Unique order identifier |
+| `order_date` | `TIMESTAMP` |  | Date and time when the order was placed |
+| `year` | `INTEGER` |  | Order year (derived) |
+| `quarter` | `INTEGER` |  | Order quarter (derived) |
+| `month` | `TEXT` |  | Order month name (derived) |
+
+---
+
+#### Table: `sales`
+
+**Description**  
+Central fact table storing individual sales transaction lines.
+
+| Column Name | Data Type | Key | Description |
+|------------|----------|-----|-------------|
+| `transaction_id` | `INTEGER` | PK | Unique transaction identifier (surrogate key) |
+| `order_id` | `INTEGER` | FK | References `orders(order_id)` |
+| `product_id` | `INTEGER` | FK | References `products(product_id)` |
+| `customer_id` | `INTEGER` | FK | References `customers(customer_id)` |
+| `employee_id` | `INTEGER` | FK | References `employees(employee_id)` |
+| `total_sales` | `NUMERIC` |  | Total sales value for the transaction |
+| `quantity` | `INTEGER` |  | Number of units sold |
+| `discount` | `NUMERIC` |  | Discount applied to the transaction |
+
+---
+
+#### Relationships Summary
+
+| From Table | Column | To Table | Column | Relationship Type |
+|-----------|--------|----------|--------|-------------------|
+| `sales` | `order_id` | `orders` | `order_id` | Many-to-one |
+| `sales` | `product_id` | `products` | `product_id` | Many-to-one |
+| `sales` | `customer_id` | `customers` | `customer_id` | Many-to-one |
+| `sales` | `employee_id` | `employees` | `employee_id` | Many-to-one |
+
+---
+
+#### Indexes
+
+| Index Name | Table | Column(s) | Purpose |
+|-----------|------|-----------|--------|
+| `idx_sales_order_id` | `sales` | `order_id` | Speed up joins with orders |
+| `idx_sales_product_id` | `sales` | `product_id` | Speed up product analysis |
+| `idx_sales_customer_id` | `sales` | `customer_id` | Speed up customer analysis |
+| `idx_orders_date` | `orders` | `order_date` | Speed up time-based queries |
+
+---
+
+#### Analyst Notes
+
+- `sales` is the **fact table**
+- Other tables act as **dimensions**
+- `transaction_id` is a **surrogate key**
+- Time attributes are intentionally **denormalized**
+- Foreign keys may be **logically enforced** in analytical systems
