@@ -395,15 +395,15 @@ To calculate averages or totals, the column must enforce a numeric type.
 
 #### Main Numeric Data Types
 
-| Data Type          | Description                     | Example Value                | Typical Use Case         |
-| ------------------ | ------------------------------- | ---------------------------- | ------------------------ |
-| SMALLINT         | Small-range whole numbers       | 12                         | Status codes, flags      |
-| INTEGER / INT  | Standard whole numbers          | 2500                       | Quantities, counts       |
-| BIGINT           | Very large whole numbers        | 9876543210                 | IDs, large counters      |
-| NUMERIC(p, s)    | Exact precision decimal         | NUMERIC(10,2) → 15432.75 | Salary, revenue          |
-| DECIMAL(p, s)    | Same as NUMERIC (SQL standard)  | DECIMAL(8,3) → 123.456   | Financial data           |
-| REAL             | Approximate floating-point      | 3.14159                    | Scientific values        |
-| DOUBLE PRECISION | Higher-precision floating-point | 0.0000123456789            | Statistical calculations |
+| Data Type              | Description                     | Example Value                | Memory Size  | Typical Use Case         |
+| ---------------------- | ------------------------------- | ---------------------------- | ------------ | ------------------------ |
+| SMALLINT               | Small-range whole numbers       | 12                           | 2 bytes      | Status codes, flags      |
+| INTEGER / INT          | Standard whole numbers          | 2500                         | 4 bytes      | Quantities, counts       |
+| BIGINT                 | Very large whole numbers        | 9876543210                   | 8 bytes      | IDs, large counters      |
+| NUMERIC(p, s)          | Exact precision decimal         | NUMERIC(10,2) → 15432.75     | Variable     | Salary, revenue          |
+| DECIMAL(p, s)          | Same as NUMERIC (SQL standard)  | DECIMAL(8,3) → 123.456       | Variable     | Financial data           |
+| REAL                   | Approximate floating-point      | 3.14159                      | 4 bytes      | Scientific values        |
+| DOUBLE PRECISION       | Higher-precision floating-point | 0.0000123456789              | 8 bytes      | Statistical calculations |
 
 ::: {.callout-note}
 Notice how **exact numerics** (NUMERIC, DECIMAL) preserve precision, while **floating-point types** (REAL, DOUBLE PRECISION) may introduce rounding differences.
@@ -463,12 +463,12 @@ Character data types are used to store **textual information** such as names, de
 
 #### Main Character Data Types
 
-| Data Type | Description | Example Value | Typical Use Case |
-|----------|-------------|---------------|------------------|
-| CHAR(n) | Fixed-length character string | CHAR(5) → 'US   ' | Country codes, fixed formats |
-| VARCHAR(n) | Variable-length string with limit | VARCHAR(50) → 'Karen Hovhannisyan' | Names, emails |
-| TEXT | Variable-length string, no limit | 'This product has been discontinued.' | Descriptions, comments |
-| CHARACTER VARYING(n) | SQL-standard name for VARCHAR | CHARACTER VARYING(20) → 'A123XZ' | Codes, identifiers |
+| Data Type              | Description                        | Example Value                                  | Memory Size      | Typical Use Case         |
+|------------------------|------------------------------------|-------------------------------------------------|------------------|--------------------------|
+| CHAR(n)                | Fixed-length character string      | CHAR(5) → 'US   '                               | n bytes (fixed)  | Country codes, fixed formats |
+| VARCHAR(n)             | Variable-length string with limit  | VARCHAR(50) → 'Karen Hovhannisyan'              | Variable (≤ n)   | Names, emails            |
+| TEXT                   | Variable-length string, no limit   | 'This product has been discontinued.'           | Variable         | Descriptions, comments   |
+| CHARACTER VARYING(n)   | SQL-standard name for VARCHAR      | CHARACTER VARYING(20) → 'A123XZ'                | Variable (≤ n)   | Codes, identifiers       |
 
 ::: {.callout-note}
 VARCHAR(n) and TEXT behave **almost identically** in PostgreSQL.  
@@ -530,14 +530,14 @@ They are critical for analytics involving **time series**, **trends**, **seasona
 
 #### Main Date & Time Data Types 
 
-| Data Type | Description | Example Value | Typical Use Case |
-|----------|-------------|---------------|------------------|
-| DATE | Calendar date (no time) | 2025-03-15 | Birth dates, order dates |
-| TIME | Time of day (no date) | 14:30:00 | Opening hours |
-| TIME WITH TIME ZONE | Time with time zone info | 14:30:00+04 | Cross-region schedules |
-| TIMESTAMP | Date and time (no timezone) | 2025-03-15 14:30:00 | Local event logs |
-| TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ) | Date and time with timezone handling | 2025-03-15 10:30:00+00 | Auditing, analytics |
-| INTERVAL | Time duration | 3 days 4 hours | Session length, SLA |
+| Data Type                           | Description                              | Example Value                    | Memory Size | Typical Use Case         |
+|-------------------------------------|------------------------------------------|----------------------------------|-------------|--------------------------|
+| DATE                                | Calendar date (no time)                  | 2025-03-15                       | 4 bytes     | Birth dates, order dates |
+| TIME                                | Time of day (no date)                    | 14:30:00                         | 8 bytes     | Opening hours            |
+| TIME WITH TIME ZONE                 | Time with time zone info                 | 14:30:00+04                      | 12 bytes    | Cross-region schedules   |
+| TIMESTAMP                           | Date and time (no timezone)              | 2025-03-15 14:30:00              | 8 bytes     | Local event logs         |
+| TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ) | Date and time with timezone handling | 2025-03-15 10:30:00+00           | 8 bytes     | Auditing, analytics      |
+| INTERVAL                            | Time duration                            | 3 days 4 hours                   | 16 bytes    | Session length, SLA      |
 
 ::: {.callout-note}
 TIMESTAMPTZ does **not** store the time zone itself.  
@@ -601,13 +601,13 @@ They are especially important for **filtering**, **segmentation**, and **busines
 
 #### Main Boolean & Categorical Data Types
 
-| Data Type | Description | Example Value | Typical Use Case |
-|----------|-------------|---------------|------------------|
-| BOOLEAN | Logical true / false value | TRUE, FALSE | Active flags, eligibility |
-| CHAR(n) | Fixed-length category code | CHAR(1) → 'Y' | Yes/No indicators |
-| VARCHAR(n) | Short categorical label | 'premium' | Customer segments |
-| TEXT | Free-form category label | 'high_value_customer' | Tags, labels |
-| ENUM | Predefined set of values | ('low','medium','high') | Controlled categories |
+| Data Type | Description | Example Value | Memory Size | Typical Use Case |
+|----------|-------------|---------------|-------------|------------------|
+| BOOLEAN | Logical true / false value | TRUE, FALSE | 1 byte | Active flags, eligibility |
+| CHAR(n) | Fixed-length category code | CHAR(1) → 'Y' | n bytes (fixed) | Yes/No indicators |
+| VARCHAR(n) | Short categorical label | 'premium' | Variable (≤ n) | Customer segments |
+| TEXT | Free-form category label | 'high_value_customer' | Variable | Tags, labels |
+| ENUM | Predefined set of values | ('low','medium','high') | 4 bytes | Controlled categories |
 
 ::: {.callout-caution}
 **PostgreSQL accepts multiple boolean literals:**
@@ -1039,7 +1039,7 @@ WHERE transaction_id = 1004;
 
 ## SQL Rules and Best Practices
 
-Now that you’ve seen the most common SQL statements, let’s get to grips with some basic rules and best practices for using SQL. Before starting, however, you should know that this list is by no means exhaustive, rather, a starting point, as you’re bound to pick up more tricks and tips once on the job.
+Now that you’ve seen the most common SQL statements, let’s get to grips with some basic rules and best practices for using **SQL**. Before starting, however, you should know that this list is by no means exhaustive, rather, a starting point, as you’re bound to pick up more tricks and tips once on the job.
 
 ### Numbers and Underscores
 
