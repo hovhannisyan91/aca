@@ -1106,7 +1106,133 @@ PostgreSQL accepts **single quotes only ('')** for string literals, while some o
 
 :::
 
+
+## Constraints
+
+I used the constraints above the lecture note, and decided to do a deep dive here as well :)
+
+In this section, you’ll be looking at **constraints**, which play a crucial role in keeping your data organized.
+
+Constraints specify what type of data a table or column can accept, and they are typically set when a table is created. When defined correctly, constraints:
+
+- enforce data integrity  
+- prevent invalid or inconsistent data  
+- act as built-in data quality checks  
+
+Below are the most common constraints you will encounter when designing relational databases.
+
+### UNIQUE Constraint
+
+The `UNIQUE` constraint ensures that **all values in a column are distinct**.  
+It is commonly used to prevent duplicate records for attributes that must be unique across entities.
+
+Typical use cases include:
+- email addresses
+- usernames
+- national identification numbers
+
+**Example:** ensure each customer email is unique.
+
+```sql
+CREATE TABLE customers (
+  customer_id INTEGER PRIMARY KEY,
+  email TEXT UNIQUE,
+  phone_number TEXT
+);
+```
+
+With this constraint in place, PostgreSQL will reject any attempt to insert a duplicate email address.
+
+### NOT NULL Constraint
+
+The `NOT NULL` constraint ensures that a column **cannot contain empty (NULL) values**.
+
+Use this constraint for fields that are mandatory and must always be provided.
+
+Typical use cases include:
+- primary identifiers
+- contact information
+- transaction timestamps
+
+**Example:** ensure every customer has a phone number.
+
+```sql
+CREATE TABLE customers (
+  customer_id INTEGER PRIMARY KEY,
+  phone_number TEXT NOT NULL,
+  email TEXT
+);
+```
+
+If an insert is attempted without a phone number, PostgreSQL will return an error.
+
+### PRIMARY KEY Constraint
+
+A `PRIMARY KEY` uniquely identifies each row in a table.
+
+A primary key:
+- must be unique
+- cannot contain NULL values
+- exists only once per table
+
+**Example:** define a primary key for a products table.
+
+```sql
+CREATE TABLE products (
+  product_id INTEGER PRIMARY KEY,
+  product_name TEXT NOT NULL,
+  price NUMERIC(10, 2)
+);
+```
+
+The `PRIMARY KEY` constraint automatically enforces both `UNIQUE` and `NOT NULL`.
+
+### FOREIGN KEY Constraint
+
+A `FOREIGN KEY` creates a relationship between two tables by referencing the primary key of another table.
+
+It ensures **referential integrity**, meaning that referenced values must exist in the parent table.
+
+**Example:** link sales records to customers.
+
+```sql
+CREATE TABLE sales (
+  transaction_id INTEGER PRIMARY KEY,
+  customer_id INTEGER,
+  total_sales NUMERIC(10, 2),
+  FOREIGN KEY (customer_id)
+    REFERENCES customers (customer_id)
+);
+```
+
+With this constraint, you cannot insert a sale for a customer that does not exist in the `customers` table.
+
+### CHECK Constraint
+
+The `CHECK` constraint restricts the range or condition of values that can be inserted into a column.
+
+It validates data based on logical expressions.
+
+Typical use cases include:
+- value ranges
+- minimum or maximum limits
+- domain rules
+
+**Example:** ensure total sales values are non-negative.
+
+```sql
+CREATE TABLE sales (
+  transaction_id INTEGER PRIMARY KEY,
+  total_sales NUMERIC(10, 2) CHECK (total_sales >= 0)
+);
+```
+
+If a value violates the condition, the insert or update will fail with an error.
+
+
+<!-- ------------ -->
 ## SQL Rules and Best Practices
+
 
 Now that you’ve seen the most common SQL statements, let’s get to grips with some basic rules and best practices for using **SQL**.  
 This list is not exhaustive—it is a starting point. As you gain hands-on experience, you will naturally pick up additional techniques and conventions.
@@ -1232,4 +1358,11 @@ JOIN products AS p
 ::: {.callout-tip}
 [Here](https://dzone.com/articles/24-rules-to-the-sql-formatting-standard) you will find much more tips
 :::
+
+
+
+
+
+
+
 
