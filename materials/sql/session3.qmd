@@ -1,5 +1,5 @@
 ---
-title: "SQL Session 02: DRAFT"
+title: "SQL Session 03: DRAFT"
 categories: [SQL, Data Types, Schemas, Keys, Indexes, Syntax]
 ---
 
@@ -682,4 +682,248 @@ Which command do you think is faster: `GROUP BY` or `DISTINCT`?
 Use `EXPLAIN` to generate query plans for both queries and compare their estimated costs to see which one runs more efficiently in PostgreSQL.
 
 
-## Task
+## Task | Draft
+
+Assume the following:
+
+- Tables `customers`, `products`, and `sales` already exist
+- Their schemas and columns are already documented
+- Your task is **not discovery**, but **improvement, enforcement, and optimization**
+
+You must **not** recreate tables or re-document schemas.
+
+---
+
+### Task 1 — Enforce Missing Business Rules with ALTER TABLE
+
+Even with a documented schema, databases often lack enforced rules.
+
+Apply the following constraints using `ALTER TABLE`:
+
+Business rules:
+- Customer emails must be unique
+- Customer phone numbers must be mandatory
+- Product prices must be non-negative
+- Sales totals must be non-negative
+
+```sql
+ALTER TABLE customers
+ADD CONSTRAINT uq_customers_email UNIQUE (email);
+```
+
+```sql
+ALTER TABLE customers
+ALTER COLUMN phone_number SET NOT NULL;
+```
+
+```sql
+ALTER TABLE products
+ADD CONSTRAINT chk_products_price CHECK (price >= 0);
+```
+
+```sql
+ALTER TABLE sales
+ADD CONSTRAINT chk_sales_total CHECK (total_sales >= 0);
+```
+
+---
+
+### Task 2 — Add a New Analytical Attribute
+
+The business now wants to analyze sales performance by channel.
+
+Add a new column to the `sales` table:
+
+- Column name: `sales_channel`
+- Allowed values: `'online'`, `'store'`
+
+```sql
+ALTER TABLE sales
+ADD COLUMN sales_channel TEXT;
+```
+
+Add a constraint to enforce valid values.
+
+```sql
+ALTER TABLE sales
+ADD CONSTRAINT chk_sales_channel
+CHECK (sales_channel IN ('online', 'store'));
+```
+
+Populate the column with sample values.
+
+```sql
+UPDATE sales
+SET sales_channel = 'online'
+WHERE transaction_id % 2 = 0;
+```
+
+---
+
+### Task 3 — Add Indexes for Query Performance
+
+Based on common analytical queries, create indexes on columns that are frequently used for:
+
+- joins
+- grouping
+- filtering
+
+Create the following indexes:
+
+```sql
+CREATE INDEX idx_sales_product_id
+ON sales (product_id);
+```
+
+```sql
+CREATE INDEX idx_sales_customer_id
+ON sales (customer_id);
+```
+
+```sql
+CREATE INDEX idx_products_category
+ON products (category);
+```
+
+---
+
+### Task 4 — Validate Index Usage with EXPLAIN
+
+Run `EXPLAIN` on an aggregation query that is commonly used in reporting.
+
+```sql
+EXPLAIN
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id;
+```
+
+Write a short interpretation:
+- Is a sequential scan used?
+- Does PostgreSQL leverage the index?
+- Why might the planner choose this plan?
+
+---
+
+### Task 5 — Reduce Query Cost by Refining SELECT
+
+Rewrite a reporting query to avoid unnecessary data retrieval.
+
+Original query:
+```sql
+SELECT *
+FROM sales;
+```
+
+Refined query:
+```sql
+SELECT
+  transaction_id,
+  product_id,
+  total_sales
+FROM sales;
+```
+
+Explain in 2–3 sentences:
+- why this reduces cost
+- when `SELECT *` might still be acceptable
+
+---
+
+### Task 6 — ORDER BY and LIMIT for Business Questions
+
+Marketing wants to identify the **top 5 products by total revenue**.
+
+Write a query that:
+- aggregates sales
+- sorts by revenue
+- limits the output
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id
+ORDER BY total_revenue DESC
+LIMIT 5;
+```
+
+Run `EXPLAIN` and comment on:
+- sorting cost
+- whether indexes help in this case
+
+---
+
+### Task 7 — DISTINCT vs GROUP BY (Efficiency Comparison)
+
+Retrieve unique combinations of `category` and `price` using both approaches.
+
+Using `DISTINCT`:
+
+```sql
+EXPLAIN
+SELECT DISTINCT
+  category,
+  price
+FROM products;
+```
+
+Using `GROUP BY`:
+
+```sql
+EXPLAIN
+SELECT
+  category,
+  price
+FROM products
+GROUP BY category, price;
+```
+
+Answer briefly:
+- Are the query plans similar?
+- Which has lower estimated cost?
+- Why might PostgreSQL optimize them the same way?
+
+---
+
+### Task 8 — Constraint Enforcement Test
+
+Attempt to violate at least **two constraints** you added earlier and observe the errors.
+
+Examples:
+```sql
+UPDATE products
+SET price = -5
+WHERE product_id = 101;
+```
+
+```sql
+INSERT INTO customers (customer_id, email, phone_number)
+VALUES (999, 'anna@example.com', '091000999');
+```
+
+Explain:
+- which constraint was triggered
+- why this protects data quality
+
+---
+
+### Task 9 — Reflection (Short Answer)
+
+Answer briefly (3–5 sentences total):
+
+- Which constraints provide the highest business value?
+- Which index would you prioritize in a production environment?
+- What signals tell you a query needs optimization?
+
+---
+
+### Submission Rules
+
+- No table creation
+- No schema documentation
+- Only `ALTER`, `CREATE INDEX`, `UPDATE`, `EXPLAIN`, and `SELECT`
+- Include SQL and short written interpretations
