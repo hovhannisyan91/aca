@@ -1,50 +1,62 @@
 ---
-title: "SQL Session 03: DRAFT"
+title: "Session 03: Data Analysis with SQL | Part I"
 categories: [SQL, Data Types, Schemas, Keys, Indexes, Syntax]
 ---
+
+
+## Learning Goals
+
+<!-- TODO  -->
 
 ## Behind the Scenes
 
 Before diving into more SQL syntax, let’s pause for a moment to consider what happens **behind the scenes** when a SQL query is executed.
 
-To understand why this matters, think about an e-commerce company that sells products online. If management wants to reduce operational costs or improve customer experience, they must analyze and optimize many background processes—inventory management, order fulfillment, payment processing, and delivery.  
+To understand why this matters, think about an `e-commerce` company that sells products online (**similar to our case study**). If management wants to reduce operational costs or improve customer experience, they must analyze and optimize many background processes—inventory management, order fulfillment, payment processing, and delivery.  
 
-The same idea applies when running SQL queries. What you write is only part of the story; how the database executes it matters just as much.
+The same idea applies when running SQL queries. 
+
+::: {.callout-important}
+What you write is only part of the story; how the database executes it matters just as much.
+:::
 
 ### SQL as a Declarative Language
 
 The first key concept to understand is that **SQL is a declarative programming language**.
 
-This means:
+**This means:**
+
 - You tell the database **what** result you want
 - You do **not** tell it **how** to get that result
 
+
+::: {.callout-important}
 When you write a `SELECT` statement, you describe the desired output, and the database engine (RDBMS) decides the most efficient way to retrieve the data.
+:::
 
-### Example: Declarative Query
-
-Consider the following query:
+Consider the following `Declarative Query`:
 
 ```sql
 SELECT product_name
 FROM products;
 ```
 
-This statement tells the database:
+**This statement tells the database:**
 
 - return all values from the `product_name` column
 - read the data from the `products` table
 
 What it **does not** specify:
+
 - which indexes to use
 - how the data should be scanned
 - whether to read data sequentially or via an index
 
-All of these decisions are handled internally by the database engine.
+All of these decisions are handled internally by the **database engine.**
 
 ### Query Optimization Happens Automatically
 
-When a query is submitted:
+**When a query is submitted:**
 
 1. The database **parses** the SQL statement
 2. It checks syntax and permissions
@@ -64,13 +76,16 @@ As a data analyst, this means:
 - Proper indexes and constraints support faster queries
 
 Understanding what happens behind the scenes will help you:
+
 - interpret slow queries
 - write more efficient SQL
-- collaborate more effectively with data engineers and DBAs
+- collaborate more effectively with data engineers and database admistrators
 
-This foundation becomes especially important as datasets grow larger and queries become more complex.
+This foundation becomes especially important as **datasets grow larger and queries become more complex.**
 
-Don’t worry if this query plan looks confusing right now. You don’t need to understand every last detail. In fact, the only element you need to take note of is the cost. Now, this “cost” doesn’t refer to the actual cost of running the query, rather it’s an arbitrary unit that’s used to indicate the estimated run time of the query. The “cost,” or time, of returning the first row is 0, but the cost of returning all the rows is 64. Since the cost unit doesn’t refer to a specific second or minute, all this tells us is that a query with a cost of 64 will take longer than a query with a cost of 30.
+
+<!-- todo rechack this one to align with my data -->
+If this **query plan** looks confusing right now. You don’t need to understand every  detail. In fact, the only element you need to take note of is the cost. Now, this `cost` doesn’t refer to the actual cost of running the query, rather it’s an arbitrary unit that’s used to indicate the estimated run time of the query. The `cost`, or time, of returning the first row is 0, but the cost of returning all the rows is 64. Since the cost unit doesn’t refer to a specific second or minute, all this tells us is that a query with a cost of 64 will take longer than a query with a cost of 30.
 
 ## Query Plan
 
@@ -80,7 +95,8 @@ When working with large databases—often containing millions or billions of rec
 For example, imagine working with a large transactional system that stores **sales** and **product** data.  
 Running a poorly optimized query on a frequently accessed table could significantly slow down reports and increase infrastructure costs. That’s why queries that run often should be optimized **before** being deployed.
 
-Faster queries mean:
+**Faster queries mean:**
+
 - lower computational cost
 - better system performance
 - quicker insights for decision-makers
@@ -89,14 +105,13 @@ Faster queries mean:
 
 A **query plan** shows how the database intends to execute a SQL query.
 
-Most relational database management systems (RDBMS), including PostgreSQL, can estimate:
+**Most relational database management systems (RDBMS), including PostgreSQL, can estimate:**
+
 - how long a query will take
 - how many rows will be processed
-- which operations will be performed (scans, joins, filters)
+- which operations will be performed (`scans`, `joins`, `filters`)
 
 To generate a query plan, you simply add the keyword `EXPLAIN` before your SQL query.
-
-### Generating a Query Plan
 
 Suppose you want to retrieve all records from a `sales` table and understand how expensive this operation might be.
 
@@ -109,30 +124,34 @@ FROM sales;
 When this query is executed, PostgreSQL does **not** return the data itself.  
 Instead, it returns a **query plan** describing how the data would be retrieved.
 
-### Interpreting a Simple Query Plan
-
-A basic query plan might look like this:
+**A basic query plan might look like this:**
 
 ```text
-Seq Scan on sales  (cost=0.00..85.40 rows=2500 width=96)
+"Seq Scan on sales  (cost=0.00..92.00 rows=5000 width=34)"
 ```
 
-This output tells us:
+**This output tells us:**
 
 - **Seq Scan**: PostgreSQL is performing a sequential scan, reading every row in the table
 - **sales**: the table being scanned
 - **cost**: an internal estimate of startup and total execution cost
 - **rows**: estimated number of rows returned
-- **width**: average size of each row in bytes
+- **width**: average size of each row in **bytes**
 
-A sequential scan is common when:
+**A sequential scan is common when:**
+
 - the table is relatively small
 - no suitable index exists
 - most rows are expected to be returned
 
-### Why Query Plans Matter for Data Analysts
 
-Understanding query plans helps you:
+::: {.callout-tip}
+Try yourself
+:::
+
+
+
+**Understanding query plans helps you:**
 
 - diagnose slow queries
 - decide when indexes are needed
@@ -145,14 +164,18 @@ Learning to read and reason about query plans is a key step toward writing **pro
 
 ::: {.callout-tip}
 
-Query optimization is a huge topic, most of which goes beyond the scope of this Achievement and the role of a data analyst. Just know that writing optimized queries is a good habit to get into, especially queries that will be executed frequently.
+Query optimization is a huge topic, most of which goes beyond the scope of the bootcamp and the role of a data analyst. Just know that writing optimized queries is a good habit to get into, especially queries that will be executed frequently.
 
-If you’d like to read more about query optimization, this tutorial is a good place to start: SQL Tuning or Query Optimization
+If you’d like to read more about query optimization:
+
+- [this articale is a good place to start: SQL Tuning or Query Optimization](https://www.geeksforgeeks.org/sql/sql-performance-tuning/)
+- [PostgreSQL tuning](ttps://www.youtube.com/watch?v=BHwzDmr6d7s)
+- [Execution order](https://www.youtube.com/watch?v=BHwzDmr6d7s)
 :::
 
 ## Refining Your SQL Queries
 
-You’ve learned that reducing the **cost of your queries** is important.  
+We have learned that reducing the **cost of your queries** is important.  
 But how do you actually optimize SQL queries in practice?
 
 One of the simplest and most effective ways is to be **precise about what data you request**.  
@@ -172,9 +195,7 @@ FROM table_name;
 
 If you want to retrieve multiple columns, you list them separated by commas.
 
-### Example: Selecting Specific Columns
-
-Consider a transactional database that contains a `products` table.
+Consider the `products` table:
 
 ```sql
 SELECT product_name,
@@ -183,7 +204,7 @@ SELECT product_name,
 FROM products;
 ```
 
-This query tells the database to:
+**This query tells the database to:**
 
 - return the `product_name`
 - return the `price`
@@ -192,52 +213,44 @@ This query tells the database to:
 
 Only these three columns will be included in the result set.
 
-### Why Column Selection Matters
+### Why Column Selection Matters?
 
-Selecting only the columns you actually need:
+**Selecting only the columns you actually need:**
 
 - reduces the amount of data transferred
 - improves query performance
 - makes results easier to read and interpret
 
-Compare the following two queries:
+
+::: {.callout-important title = "Try yourself"}
+
+**Compare the following two queries:**
 
 ```sql
+EXPLAIN
 SELECT *
 FROM products;
 ```
 
 ```sql
+EXPLAIN
 SELECT product_name, price
 FROM products;
 ```
 
 The second query is usually preferable when you only need product names and prices.
 
-### What’s Next?
-
-In the next sections, you’ll learn how to further refine `SELECT` statements by:
-
-- sorting results
-- filtering rows
-- grouping data
-- limiting output size
-- partitioning results for analysis
-
-As always, practice running these queries in PostgreSQL as you learn them—hands-on experience is the fastest way to build strong SQL intuition.
+:::
 
 
-
-## ORDER BY
+### ORDER BY
 
 The `ORDER BY` clause sorts query results in **ascending** or **descending** order.  
 It is commonly used when you want to view:
 
-- the first or last records
-- highest or lowest values
-- alphabetically ordered text data
-
-### Basic ORDER BY Syntax
+- the `first` or `last` records
+- `highest` or `lowest` values
+- `alphabetically` ordered text data
 
 By default, `ORDER BY` sorts results in **ascending order**.
 
@@ -247,13 +260,12 @@ FROM table_name
 ORDER BY column_name;
 ```
 
-You can explicitly control the sorting direction using:
+**You can explicitly control the sorting direction using:**
+
 - `ASC` for ascending order
 - `DESC` for descending order
 
-### Example: Sorting Text Data
-
-Suppose you want to view products sorted by name in **descending alphabetical order** (Z → A).
+Suppose you want to view products sorted by name in **descending alphabetical order** (Z $\rightarrow$ A).
 
 ```sql
 SELECT
@@ -263,15 +275,15 @@ FROM products
 ORDER BY product_name DESC;
 ```
 
-This query returns:
+**This query returns:**
+
 - `product_name`
 - `category`
 
 sorted from **Z to A**, because `product_name` is a text (character) column.
 
-### Example: Sorting Numeric Data
 
-If you sort a numeric column in descending order, results are ordered from **largest to smallest**.
+If you sort a **numeric column** in descending order, results are ordered from **largest to smallest**.
 
 ```sql
 SELECT
@@ -281,11 +293,11 @@ FROM products
 ORDER BY price DESC;
 ```
 
-This query returns the most expensive products first.
+This query returns the **most expensive** products first.
 
-### Sorting by Multiple Columns
 
-You can sort by more than one column.  
+
+**You can sort by more than one column.  **
 The database applies sorting **from left to right**.
 
 ```sql
@@ -298,10 +310,12 @@ ORDER BY category ASC, price DESC;
 ```
 
 This means:
-1. Products are grouped by `category` (A → Z)
-2. Within each category, products are sorted by `price` (high → low)
 
-### Key Points to Remember
+1. Products are grouped by `category` (A $\rightarrow$ Z)
+2. Within each category, products are sorted by `price` (high $\rightarrow$ low)
+
+
+**To sum up:**
 
 - `ORDER BY` is applied **after** `SELECT` and `FROM`
 - Default sort order is **ascending**
@@ -311,16 +325,32 @@ This means:
 - Multiple columns can be combined for fine-grained control
 
 
-## LIMIT
+::: {.callout-tip}
+In the ORDER BY statment, instead of writing column names , we can simply provide its index. 
+
+**For example:**
+
+```sql
+SELECT
+  product_name,
+  category,
+  price
+FROM products
+ORDER BY 2 ASC, 3 DESC;
+```
+:::
+
+### LIMIT
 
 The `LIMIT` clause restricts the **number of rows** returned by a query.
 
-It is useful when:
+**It is useful when:**
+
 - you only need a small sample of the data
 - you want to preview results
 - you want to reduce query cost and execution time
 
-### Basic LIMIT Syntax
+**Basic Syntax:**
 
 ```sql
 SELECT column_name
@@ -330,7 +360,7 @@ LIMIT number_of_rows;
 
 The value provided to `LIMIT` must always be a **number**.
 
-### Example: Limiting Sorted Results
+**Example:**
 
 Suppose you want to retrieve product names and prices, sorted by price from highest to lowest, but you only care about the **top 10 most expensive products**.
 
@@ -343,43 +373,54 @@ ORDER BY price DESC
 LIMIT 10;
 ```
 
-This query:
+**This query:**
+
 - sorts products by price in descending order
 - returns only the first 10 rows
 
 Using `LIMIT` in this way saves time and computational resources, especially when working with large tables.
 
-### Important Notes About LIMIT
-
+::: {.callout-important}
 - `LIMIT` is always written **at the end** of a query
 - it must be placed after `ORDER BY` (if present)
 - the value must be numeric
 
 If `LIMIT` is placed elsewhere in the query, PostgreSQL will return an error.
+:::
 
-### Database Compatibility Note
+--- 
 
-Not all SQL databases use `LIMIT`.
+:::{.callout-note title = "Database Compatibility Note"}
 
-- PostgreSQL, MySQL, SQLite → `LIMIT`
-- SQL Server → `TOP`
+**Not all SQL databases use** `LIMIT`.
 
----
+- PostgreSQL, MySQL, SQLite $\rightarrow$ `LIMIT`
+- SQL Server $\rightarrow$ `TOP`
 
-## GROUP BY
+:::
+
+### GROUP BY
+
+The `GROUP BY` clause is very popular among data analysts :)
 
 The `GROUP BY` clause allows you to **group rows that share the same values** in one or more columns.
 
 It is commonly used together with **aggregate functions** to summarize data.
 
-Typical aggregate functions include:
+**Typical aggregate functions include:**
+
 - `COUNT()`
 - `SUM()`
 - `AVG()`
 - `MIN()`
 - `MAX()`
 
-### Example: Grouping Sales by Product
+
+::: {.callout-note}
+We are going to learn more functions later.
+:::
+
+#### Example | Grouping Sales by Product
 
 Suppose you want to calculate total sales per product.
 
@@ -391,19 +432,20 @@ FROM sales
 GROUP BY product_id;
 ```
 
-This query:
+**This query:**
+
 - groups rows by `product_id`
 - calculates total revenue per product
 - returns one row per product
 
-### Key Rules for GROUP BY
+#### Key Rules for GROUP BY
 
 - Every column in `SELECT` must either:
   - appear in the `GROUP BY` clause, or
   - be wrapped in an aggregate function
 - `GROUP BY` is evaluated **after** `WHERE` and **before** `ORDER BY`
 
-### Example: Grouping with Sorting and Limiting
+#### Example | Grouping with Sorting and Limiting
 
 ```sql
 SELECT
@@ -417,26 +459,16 @@ LIMIT 5;
 
 This query returns the **top 5 products by total revenue**.
 
-### Key Takeaways
 
+::: {.callout-tip}
 - `LIMIT` controls **how many rows** are returned
 - `GROUP BY` controls **how rows are aggregated**
 - Both are essential tools for efficient, scalable data analysis
 - They are often used together in real-world analytical queries
+:::
 
 
-## GROUP BY
-
-The `GROUP BY` clause allows you to **group rows that share the same values** in a column to produce a **summary**.
-
-It is most commonly used together with **aggregate functions** such as:
-- `COUNT()`
-- `SUM()`
-- `AVG()`
-- `MIN()`
-- `MAX()`
-
-### GROUP BY for Discovering Distinct Values
+#### Example | Discovering Distinct Values
 
 `GROUP BY` can also be used to identify **distinct values** in a column.  
 This is useful when you want to understand how data is organized without seeing every individual row.
@@ -448,28 +480,28 @@ SELECT category
 FROM products;
 ```
 
-This query returns the category for **every product**, which may include many duplicates.
-
-### Using GROUP BY to Summarize Categories
-
-If you only want to know **which categories exist**, `GROUP BY` is the right tool.
+This query returns the category for **every product**, which may include many duplicates. If you only want to know **which categories exist**, `GROUP BY` is the right tool.
 
 ```sql
-SELECT category
+SELECT 
+  category
+  COUNT(*)
 FROM products
 GROUP BY category;
 ```
 
-This query:
+**This query:**
+
 - groups rows by `category`
 - returns one row per unique category
 - removes duplicate category values from the output
 
 The result is a concise summary of the different product categories stored in the database.
 
-### Why This Is Useful
+
 
 Using `GROUP BY` in this way helps you:
+
 - explore the structure of a dataset
 - validate categorical columns
 - prepare data for aggregation and reporting
