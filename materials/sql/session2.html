@@ -768,12 +768,18 @@ window.Quarto = {
   <li><a href="#special-advanced-data-types-optional" id="toc-special-advanced-data-types-optional" class="nav-link" data-scroll-target="#special-advanced-data-types-optional">Special &amp; Advanced Data Types | OPTIONAL</a></li>
   </ul></li>
   <li><a href="#data-dictionary" id="toc-data-dictionary" class="nav-link" data-scroll-target="#data-dictionary">Data Dictionary</a></li>
-  <li><a href="#crud" id="toc-crud" class="nav-link" data-scroll-target="#crud">CRUD</a>
+  <li><a href="#ddl-data-definition-language" id="toc-ddl-data-definition-language" class="nav-link" data-scroll-target="#ddl-data-definition-language">DDL: Data Definition Language</a>
   <ul class="collapse">
-  <li><a href="#create" id="toc-create" class="nav-link" data-scroll-target="#create">CREATE</a></li>
-  <li><a href="#select" id="toc-select" class="nav-link" data-scroll-target="#select">SELECT</a></li>
-  <li><a href="#from" id="toc-from" class="nav-link" data-scroll-target="#from">FROM</a></li>
-  <li><a href="#where" id="toc-where" class="nav-link" data-scroll-target="#where">WHERE</a></li>
+  <li><a href="#common-ddl-statements" id="toc-common-ddl-statements" class="nav-link" data-scroll-target="#common-ddl-statements">Common DDL Statements</a></li>
+  <li><a href="#create-ddl-context" id="toc-create-ddl-context" class="nav-link" data-scroll-target="#create-ddl-context">CREATE (DDL Context)</a></li>
+  <li><a href="#alter" id="toc-alter" class="nav-link" data-scroll-target="#alter">ALTER</a></li>
+  <li><a href="#drop" id="toc-drop" class="nav-link" data-scroll-target="#drop">DROP</a></li>
+  <li><a href="#truncate" id="toc-truncate" class="nav-link" data-scroll-target="#truncate">TRUNCATE</a></li>
+  </ul></li>
+  <li><a href="#crud-data-manipulation-in-practice" id="toc-crud-data-manipulation-in-practice" class="nav-link" data-scroll-target="#crud-data-manipulation-in-practice">CRUD: Data Manipulation in Practice</a>
+  <ul class="collapse">
+  <li><a href="#create-crud-rightarrow-insert" id="toc-create-crud-rightarrow-insert" class="nav-link" data-scroll-target="#create-crud-rightarrow-insert">CREATE (CRUD <span class="math inline">\(\rightarrow\)</span> INSERT)</a></li>
+  <li><a href="#read-select" id="toc-read-select" class="nav-link" data-scroll-target="#read-select">READ (SELECT)</a></li>
   <li><a href="#update" id="toc-update" class="nav-link" data-scroll-target="#update">UPDATE</a></li>
   <li><a href="#delete" id="toc-delete" class="nav-link" data-scroll-target="#delete">DELETE</a></li>
   </ul></li>
@@ -2677,174 +2683,175 @@ Central fact table storing individual sales transaction lines.</p>
 ## Syntax
 
 ## Convention -->
-<!-- TODO Write about that the SQL statements neeeds to be all capps , column names aetss -->
 </section>
 </section>
-<section id="crud" class="level2">
-<h2 class="anchored" data-anchor-id="crud">CRUD</h2>
-<p>This section will introduce the most common SQL commands, known as CRUD operations. The acronym CRUD stands for create, read, update, and delete, and it describes the four operations that can be performed with a database.</p>
-<p><strong>CRUD</strong> stands:</p>
+<section id="ddl-data-definition-language" class="level2">
+<h2 class="anchored" data-anchor-id="ddl-data-definition-language">DDL: Data Definition Language</h2>
+<p>DDL (Data Definition Language) is responsible for defining and managing the <strong>structure</strong> of a database.</p>
+<p>DDL statements operate on <strong>database objects</strong>, not on individual rows.<br>
+They describe <em>what the database looks like</em>, not <em>what data it contains</em>.</p>
+<p><strong>DDL is foundational:</strong> every data operation you perform later depends on decisions made at the DDL level.</p>
+<section id="common-ddl-statements" class="level3">
+<h3 class="anchored" data-anchor-id="common-ddl-statements">Common DDL Statements</h3>
+<p>DDL includes the following core commands:</p>
 <ul>
-<li>CREATE</li>
-<li>SELECT</li>
-<li>UPDATE</li>
-<li>DELETE</li>
+<li><code>CREATE</code></li>
+<li><code>ALTER</code></li>
+<li><code>DROP</code></li>
+<li><code>TRUNCATE</code></li>
 </ul>
-<div class="callout callout-style-default callout-tip callout-titled">
+<p>Each of these affects database <strong>schema and metadata</strong>.</p>
+</section>
+<section id="create-ddl-context" class="level3">
+<h3 class="anchored" data-anchor-id="create-ddl-context">CREATE (DDL Context)</h3>
+<p>In the context of <strong>DDL</strong>, <code>CREATE</code> is used to define <strong>new database objects</strong>, such as tables and indexes.</p>
+<p>Typical use cases include:</p>
+<ul>
+<li>creating analytical tables</li>
+<li>creating staging tables</li>
+<li>creating indexes to improve performance</li>
+</ul>
+<p>Example: create an index to support analytical queries.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_product_id</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> sales (product_id);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command does <strong>not</strong> modify data.<br>
+It changes how efficiently the database can access existing data.</p>
+</section>
+<section id="alter" class="level3">
+<h3 class="anchored" data-anchor-id="alter">ALTER</h3>
+<p>The <code>ALTER</code> statement modifies the structure of an <strong>existing</strong> database object.</p>
+<p>Common use cases include:</p>
+<ul>
+<li>adding columns</li>
+<li>enforcing constraints</li>
+<li>changing column properties</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> products</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_products_price</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">CHECK</span> (price <span class="op">&gt;=</span> <span class="dv">0</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="drop" class="level3">
+<h3 class="anchored" data-anchor-id="drop">DROP</h3>
+<p>The <code>DROP</code> statement permanently removes a database object.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">DROP</span> <span class="kw">INDEX</span> idx_sales_product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">DROP</span> <span class="kw">TABLE</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>This operation is irreversible and should be used with extreme caution.</strong></p>
+</section>
+<section id="truncate" class="level3">
+<h3 class="anchored" data-anchor-id="truncate">TRUNCATE</h3>
+<p><code>TRUNCATE</code> removes <strong>all rows</strong> from a table while keeping its structure intact.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">TRUNCATE</span> <span class="kw">TABLE</span> sales_staging;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="crud-data-manipulation-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="crud-data-manipulation-in-practice">CRUD: Data Manipulation in Practice</h2>
+<p>CRUD describes how we <strong>work with data inside existing tables</strong>.<br>
+These are the SQL operations data analysts use most frequently.</p>
+<p>CRUD stands for:</p>
+<ul>
+<li><strong>CREATE</strong></li>
+<li><strong>READ</strong></li>
+<li><strong>UPDATE</strong></li>
+<li><strong>DELETE</strong></li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled" title="Critical Terminology Clarification">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+<span class="screen-reader-only">Important</span>Critical Terminology Clarification
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><a href="https://images.careerfoundry.com/public/courses/data-immersion/A3/E3.3/SQL-Commands-Cheat-Sheet.pdf">SQL cheet sheet</a></p>
+<p>The word <strong>CREATE</strong> means <strong>different things</strong> in different contexts.</p>
+<ul>
+<li><strong>DDL CREATE <span class="math inline">\(\rightarrow\)</span> creates database objects</strong> (tables, indexes)</li>
+<li><strong>CRUD CREATE <span class="math inline">\(\rightarrow\)</span> inserts new data</strong> (<code>INSERT</code>)</li>
+</ul>
+<p>Confusing these two is one of the most common beginner mistakes.</p>
 </div>
 </div>
-<section id="create" class="level3">
-<h3 class="anchored" data-anchor-id="create">CREATE</h3>
-<p><code>CREATE</code> commands are used to create new entities in a database, such as tables or indexes.<br>
-Compared to other CRUD operations, <code>CREATE</code> is more complex because it requires you to define the <strong>rules and properties</strong> (constraints) of the database objects.</p>
-<p>Before learning about constraints, let’s walk through the <code>CREATE</code> command to understand:</p>
+<div class="callout callout-style-default callout-note callout-titled" title="DDL vs CRUD — Conceptual Comparison">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>DDL vs CRUD — Conceptual Comparison
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <ul>
-<li>when you might encounter it on the job</li>
-<li>why it’s important</li>
-<li>how it’s commonly used</li>
+<li><strong>DDL <span class="math inline">\(\rightarrow\)</span> defines the structure</strong></li>
+<li><strong>CRUD <span class="math inline">\(\rightarrow\)</span> manipulates the data</strong></li>
+<li><strong>DDL <span class="math inline">\(\rightarrow\)</span> happens rarely</strong></li>
+<li><strong>CRUD <span class="math inline">\(\rightarrow\)</span> happens constantly</strong></li>
 </ul>
-<p>Imagine you are a data analyst and your manager asks you to create new tables in the database and insert the correct data. This is an important task because raw data must be organized into related tables, an essential feature of relational databases.</p>
-<p>Let’s walk through the main steps involved.</p>
-<p>When creating a table, you must define:</p>
-<ul>
-<li>the table name</li>
-<li>its columns</li>
-<li>the data types</li>
-<li>the primary key</li>
-</ul>
-<p><code>CREATE</code> commands are used to define <strong>new database objects</strong>, such as tables or indexes.</p>
-<p>Compared to other CRUD operations, <code>CREATE</code> is more complex because it requires you to explicitly define:</p>
-<ul>
-<li>structure</li>
-<li>data types</li>
-<li>rules and constraints</li>
-</ul>
-<p>Use the <code>CREATE TABLE</code> command to define this structure in PostgreSQL.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> products (</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  product_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  product_name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  price <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span> TEXT</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<!-- here -->
-<section id="create-index" class="level4">
-<h4 class="anchored" data-anchor-id="create-index">CREATE INDEX</h4>
-<p>Indexes help organize data so it can be retrieved faster.</p>
-<p>Indexes are especially useful when:</p>
-<ul>
-<li>tables contain many rows</li>
-<li>columns are frequently used in <code>WHERE</code>, <code>JOIN</code>, or <code>ORDER BY</code> clauses</li>
-</ul>
-<p>If a table contains many rows, creating an index can significantly improve query performance.</p>
-<p>You can create an index on one or more columns using the <code>CREATE INDEX</code> command.</p>
-<p>For more information about the index you can check the <a href="#indexes">Indexes</a> section.</p>
-<p><strong>Example: index on product category</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_products_category</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> products (<span class="kw">category</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>DDL</strong> sets the rules.<br>
+<strong>CRUD</strong> must follow them.</p>
+</blockquote>
+</div>
+</div>
+<section id="create-crud-rightarrow-insert" class="level3">
+<h3 class="anchored" data-anchor-id="create-crud-rightarrow-insert">CREATE (CRUD <span class="math inline">\(\rightarrow\)</span> INSERT)</h3>
+<p>In the <strong>CRUD context</strong>, CREATE means <strong>adding new rows</strong> to an existing table.</p>
+<p>This is done using the <code>INSERT</code> statement.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> products (product_id, product_name, price, <span class="kw">category</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">101</span>, <span class="st">'Wireless Mouse'</span>, <span class="fl">24.99</span>, <span class="st">'Accessories'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You may omit columns that allow <code>NULL</code> or have default values.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> products (product_id, product_name, price)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">102</span>, <span class="st">'USB-C Cable'</span>, <span class="fl">9.99</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="insert" class="level4">
-<h4 class="anchored" data-anchor-id="insert">INSERT</h4>
-<p>After creating a table, you need to add data to it.</p>
-<p>The <code>INSERT</code> command is used to add a new row to a table.</p>
-<ul>
-<li>If the statement is correct, PostgreSQL will confirm that the record was inserted successfully.</li>
-<li>If there is an error, PostgreSQL will return a message explaining why the insertion failed.</li>
-</ul>
-<p>You can also use the <code>DEFAULT</code> keyword to insert default values when some fields are omitted.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> products (product_id, product_name, price, <span class="kw">category</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">101</span>, <span class="st">'Wireless Mouse'</span>, <span class="fl">24.99</span>, <span class="st">'Accessories'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>You can omit columns that have default values or allow <code>NULL</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> products (product_id, product_name, price)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">102</span>, <span class="st">'USB-C Cable'</span>, <span class="fl">9.99</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="alter" class="level4">
-<h4 class="anchored" data-anchor-id="alter">ALTER</h4>
-<p>After creating a table, you may realize that changes are needed.</p>
-<p>The <code>ALTER</code> statement allows you to:</p>
-<ul>
-<li>add columns</li>
-<li>remove columns</li>
-<li>rename columns</li>
-<li>rename tables</li>
-</ul>
-<p>This makes it possible to evolve database structures over time.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> products</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">COLUMN</span> stock_quantity <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-</section>
-<section id="select" class="level3">
-<h3 class="anchored" data-anchor-id="select">SELECT</h3>
-<p>The second CRUD operation is <strong>READ</strong>, which is implemented using the <code>SELECT</code> command.</p>
-<p><code>SELECT</code> is used to specify which data you want to retrieve, and it is one of the most frequently used SQL commands among data analysts.</p>
-<p>You have already used <code>SELECT</code> statements to retrieve data from tables.<br>
-Next, you will practice writing more <code>SELECT</code> queries in PostgreSQL.</p>
-</section>
-<section id="from" class="level3">
-<h3 class="anchored" data-anchor-id="from">FROM</h3>
-<p>The <code>FROM</code> clause specifies <strong>where the data comes from</strong>, usually a table.</p>
-<p>Example: retrieve product identifiers and names from the <code>products</code> table.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  product_id, product_name</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="where" class="level3">
-<h3 class="anchored" data-anchor-id="where">WHERE</h3>
-<p>The <code>WHERE</code> clause is used to <strong>filter rows</strong> returned by a query based on one or more conditions.</p>
-<p>Without <code>WHERE</code>, a query returns <strong>all rows</strong> from a table.</p>
-<p>Example: return all sales transactions where the total sales value is less than 50.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> total_sales <span class="op">&lt;</span> <span class="dv">50</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="read-select" class="level3">
+<h3 class="anchored" data-anchor-id="read-select">READ (SELECT)</h3>
+<p>The <strong>READ</strong> operation retrieves data and is implemented using <code>SELECT</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  product_name</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Filtering rows is done using <code>WHERE</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> total_sales <span class="op">&lt;</span> <span class="dv">50</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="update" class="level3">
 <h3 class="anchored" data-anchor-id="update">UPDATE</h3>
-<p>The <code>UPDATE</code> statement is used to <strong>modify existing records</strong> in a table.</p>
-<p>Updates should almost always be applied to <strong>specific rows</strong>, not entire tables.</p>
-<p><strong>Example:</strong> update the price of a specific product.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> products</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> price <span class="op">=</span> <span class="fl">49.99</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">12</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="insert-1" class="level4">
-<h4 class="anchored" data-anchor-id="insert-1">INSERT</h4>
-<p>After creating a table, you need to add data to it.</p>
-<p>The <code>INSERT</code> command is used to add a new row to a table.<br>
-If the statement is correct, PostgreSQL will confirm that the record was inserted successfully.</p>
-<p>If there is an error, PostgreSQL will return a message explaining why the insertion failed.</p>
-<p>You can also use the <code>DEFAULT</code> keyword to insert default values when some fields are omitted.</p>
-<hr>
-</section>
-<section id="alter-1" class="level4">
-<h4 class="anchored" data-anchor-id="alter-1">ALTER</h4>
-<p>After creating a table, you may realize that changes are needed.</p>
-<p>The <code>ALTER</code> statement allows you to:</p>
-<ul>
-<li>add columns</li>
-<li>remove columns</li>
-<li>rename columns</li>
-<li>rename tables</li>
-</ul>
-<p>This makes it possible to evolve database structures over time.</p>
-</section>
+<p>The <code>UPDATE</code> statement modifies <strong>existing records</strong>.</p>
+<p>Updates should always target <strong>specific rows</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> products</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> price <span class="op">=</span> <span class="fl">49.99</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">12</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="delete" class="level3">
 <h3 class="anchored" data-anchor-id="delete">DELETE</h3>
-<p>The <code>DELETE</code> statement is used to <strong>remove records</strong> from a table.</p>
-<p>Because deletions are <strong>irreversible</strong>, this command must be used <strong>with extreme caution</strong>.</p>
-<p><strong>Example:</strong> delete a single sales transaction.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">DELETE</span> <span class="kw">FROM</span> sales</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> transaction_id <span class="op">=</span> <span class="dv">1004</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>DELETE</code> statement removes records from a table.</p>
+<p>Because deletions are irreversible, this command must be used with extreme caution.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">DELETE</span> <span class="kw">FROM</span> sales</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> transaction_id <span class="op">=</span> <span class="dv">1004</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="Mental Model to Remember">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Mental Model to Remember
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>DDL <span class="math inline">\(\rightarrow\)</span> defines tables, columns, constraints, indexes</strong><br>
+</li>
+<li><strong>CRUD <span class="math inline">\(\rightarrow\)</span> inserts, reads, updates, deletes rows</strong><br>
+</li>
+<li><strong>DML <span class="math inline">\(\rightarrow\)</span> SQL language (<code>INSERT</code>, <code>SELECT</code>, <code>UPDATE</code>, <code>DELETE</code>) implementing CRUD</strong></li>
+</ul>
+<p>The first part of <strong>DML</strong> will be introduced in <strong>Session 3</strong>.<br>
+You can revisit it here: <a href="session3.html">Session 3 DML Basics</a></p>
+</div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled" title="To Quote or Not to Quote?">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2884,38 +2891,53 @@ If the statement is correct, PostgreSQL will confirm that the record was inserte
 <h3 class="anchored" data-anchor-id="unique-constraint">UNIQUE Constraint</h3>
 <p>The <code>UNIQUE</code> constraint ensures that <strong>all values in a column are distinct</strong>.<br>
 It is commonly used to prevent duplicate records for attributes that must be unique across entities.</p>
-<p>Typical use cases include: - email addresses - usernames - national identification numbers</p>
+<p>Typical use cases include:</p>
+<ul>
+<li>email addresses</li>
+<li>usernames</li>
+<li>national identification numbers</li>
+</ul>
 <p><strong>Example:</strong> ensure each customer email is unique.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers (</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  customer_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  email TEXT <span class="kw">UNIQUE</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  phone_number TEXT</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  customer_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  email TEXT <span class="kw">UNIQUE</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  phone_number TEXT</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>With this constraint in place, PostgreSQL will reject any attempt to insert a duplicate email address.</p>
 </section>
 <section id="not-null-constraint" class="level3">
 <h3 class="anchored" data-anchor-id="not-null-constraint">NOT NULL Constraint</h3>
 <p>The <code>NOT NULL</code> constraint ensures that a column <strong>cannot contain empty (NULL) values</strong>.</p>
 <p>Use this constraint for fields that are mandatory and must always be provided.</p>
-<p>Typical use cases include: - primary identifiers - contact information - transaction timestamps</p>
+<p>Typical use cases include:</p>
+<ul>
+<li>primary identifiers</li>
+<li>contact information</li>
+<li>transaction timestamps</li>
+</ul>
 <p><strong>Example:</strong> ensure every customer has a phone number.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers (</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  customer_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  phone_number TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  email TEXT</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  customer_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  phone_number TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  email TEXT</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>If an insert is attempted without a phone number, PostgreSQL will return an error.</p>
 </section>
 <section id="primary-key-constraint" class="level3">
 <h3 class="anchored" data-anchor-id="primary-key-constraint">PRIMARY KEY Constraint</h3>
 <p>A <code>PRIMARY KEY</code> uniquely identifies each row in a table.</p>
-<p>A primary key: - must be unique - cannot contain NULL values - exists only once per table</p>
+<p>A primary key:</p>
+<ul>
+<li>must be unique</li>
+<li>cannot contain NULL values</li>
+<li>exists only once per table</li>
+</ul>
 <p><strong>Example:</strong> define a primary key for a products table.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> products (</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  product_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  product_name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  price <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> products (</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  product_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  product_name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  price <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>PRIMARY KEY</code> constraint automatically enforces both <code>UNIQUE</code> and <code>NOT NULL</code>.</p>
 </section>
 <section id="foreign-key-constraint" class="level3">
@@ -2923,25 +2945,30 @@ It is commonly used to prevent duplicate records for attributes that must be uni
 <p>A <code>FOREIGN KEY</code> creates a relationship between two tables by referencing the primary key of another table.</p>
 <p>It ensures <strong>referential integrity</strong>, meaning that referenced values must exist in the parent table.</p>
 <p><strong>Example:</strong> link sales records to customers.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales (</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  transaction_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  customer_id <span class="dt">INTEGER</span>,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  total_sales <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>),</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (customer_id)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">REFERENCES</span> customers (customer_id)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  transaction_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  customer_id <span class="dt">INTEGER</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  total_sales <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (customer_id)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">REFERENCES</span> customers (customer_id)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>With this constraint, you cannot insert a sale for a customer that does not exist in the <code>customers</code> table.</p>
 </section>
 <section id="check-constraint" class="level3">
 <h3 class="anchored" data-anchor-id="check-constraint">CHECK Constraint</h3>
 <p>The <code>CHECK</code> constraint restricts the range or condition of values that can be inserted into a column.</p>
 <p>It validates data based on logical expressions.</p>
-<p>Typical use cases include: - value ranges - minimum or maximum limits - domain rules</p>
+<p>Typical use cases include:</p>
+<ul>
+<li>value ranges</li>
+<li>minimum or maximum limits</li>
+<li>domain rules</li>
+</ul>
 <p><strong>Example:</strong> ensure total sales values are non-negative.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales (</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  transaction_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  total_sales <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>) <span class="kw">CHECK</span> (total_sales <span class="op">&gt;=</span> <span class="dv">0</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales (</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  transaction_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  total_sales <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>) <span class="kw">CHECK</span> (total_sales <span class="op">&gt;=</span> <span class="dv">0</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>If a value violates the condition, the insert or update will fail with an error.</p>
 <!-- ------------ -->
 </section>
@@ -2960,11 +2987,11 @@ This list is not exhaustive—it is a starting point. As you gain hands-on exper
 </ul>
 <p>This improves compatibility and readability.</p>
 <p><strong>Recommended</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer_lifecycle;</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer_lifecycle;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Not Recommended</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer lifecycle;</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="dv">3</span>customer;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer lifecycle;</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="dv">3</span>customer;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="capitalization" class="level3">
 <h3 class="anchored" data-anchor-id="capitalization">Capitalization</h3>
@@ -2976,34 +3003,34 @@ This list is not exhaustive—it is a starting point. As you gain hands-on exper
 </ul>
 <p>This makes queries easier to scan and understand.</p>
 <p><strong>Recommended</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> product_id, product_name</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> transaction_id, total_sales</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> product_id, product_name</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> transaction_id, total_sales</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Not Recommended</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">Select</span> PRODUCT_ID, PRODUCT_NAME <span class="kw">From</span> PRODUCTS;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> TRANSACTION_ID, TOTAL_SALES <span class="kw">FROM</span> SALES;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">Select</span> PRODUCT_ID, PRODUCT_NAME <span class="kw">From</span> PRODUCTS;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> TRANSACTION_ID, TOTAL_SALES <span class="kw">FROM</span> SALES;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="commenting" class="level3">
 <h3 class="anchored" data-anchor-id="commenting">Commenting</h3>
 <p>It is good practice to <strong>comment your SQL code</strong> so that other analysts and developers can easily read and understand your queries.</p>
 <p>Comments do <strong>not</strong> affect query execution—they exist purely for <strong>documentation and readability</strong>.</p>
 <p>Use <code>--</code> for single-line comments.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- select and display the first 10 rows from the sales table</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- select and display the first 10 rows from the sales table</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Multi-line comments can also be used to <strong>temporarily disable blocks of SQL code</strong> during testing or debugging.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">SELECT</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">  s.transaction_id,</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">  p.product_name,</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">  s.total_sales</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">FROM sales s</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">JOIN products p</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">  ON s.product_id = p.product_id</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">WHERE s.total_sales &gt; 100;</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">*/</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">SELECT</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">  s.transaction_id,</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">  p.product_name,</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co">  s.total_sales</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co">FROM sales s</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">JOIN products p</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">  ON s.product_id = p.product_id</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="co">WHERE s.total_sales &gt; 100;</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co">*/</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="aliasing" class="level3">
 <h3 class="anchored" data-anchor-id="aliasing">Aliasing</h3>
@@ -3015,18 +3042,18 @@ This list is not exhaustive—it is a starting point. As you gain hands-on exper
 <li>resolving ambiguity in joins</li>
 </ul>
 <p>Column aliases rename columns in the <strong>query output</strong>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  product_name <span class="kw">AS</span> item_name,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  price <span class="kw">AS</span> unit_price</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  product_name <span class="kw">AS</span> item_name,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  price <span class="kw">AS</span> unit_price</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Table aliases are commonly used in joins.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  s.transaction_id,</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  p.product_name,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  s.total_sales</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales <span class="kw">AS</span> s</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">JOIN</span> products <span class="kw">AS</span> p</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">ON</span> s.product_id <span class="op">=</span> p.product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  s.transaction_id,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  p.product_name,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  s.total_sales</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales <span class="kw">AS</span> s</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="kw">JOIN</span> products <span class="kw">AS</span> p</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">ON</span> s.product_id <span class="op">=</span> p.product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

@@ -757,36 +757,15 @@ window.Quarto = {
   </ul></li>
   <li><a href="#refining-your-sql-queries" id="toc-refining-your-sql-queries" class="nav-link" data-scroll-target="#refining-your-sql-queries">Refining Your SQL Queries</a>
   <ul class="collapse">
-  <li><a href="#revisiting-select" id="toc-revisiting-select" class="nav-link" data-scroll-target="#revisiting-select">Revisiting SELECT</a></li>
+  <li><a href="#select" id="toc-select" class="nav-link" data-scroll-target="#select">SELECT</a></li>
   <li><a href="#why-column-selection-matters" id="toc-why-column-selection-matters" class="nav-link" data-scroll-target="#why-column-selection-matters">Why Column Selection Matters?</a></li>
   <li><a href="#order-by" id="toc-order-by" class="nav-link" data-scroll-target="#order-by">ORDER BY</a></li>
   <li><a href="#limit" id="toc-limit" class="nav-link" data-scroll-target="#limit">LIMIT</a></li>
   <li><a href="#group-by" id="toc-group-by" class="nav-link" data-scroll-target="#group-by">GROUP BY</a></li>
+  <li><a href="#distinct" id="toc-distinct" class="nav-link" data-scroll-target="#distinct">DISTINCT</a></li>
+  <li><a href="#group-by-vs-distinct" id="toc-group-by-vs-distinct" class="nav-link" data-scroll-target="#group-by-vs-distinct">GROUP BY vs DISTINCT</a></li>
   </ul></li>
-  <li><a href="#aggregate-functions" id="toc-aggregate-functions" class="nav-link" data-scroll-target="#aggregate-functions">Aggregate Functions</a>
-  <ul class="collapse">
-  <li><a href="#using-aggregate-functions-with-group-by" id="toc-using-aggregate-functions-with-group-by" class="nav-link" data-scroll-target="#using-aggregate-functions-with-group-by">Using Aggregate Functions with GROUP BY</a></li>
-  <li><a href="#example-counting-records-per-group" id="toc-example-counting-records-per-group" class="nav-link" data-scroll-target="#example-counting-records-per-group">Example: Counting Records per Group</a></li>
-  <li><a href="#example-aggregating-numeric-values" id="toc-example-aggregating-numeric-values" class="nav-link" data-scroll-target="#example-aggregating-numeric-values">Example: Aggregating Numeric Values</a></li>
-  <li><a href="#example-average-price-by-category" id="toc-example-average-price-by-category" class="nav-link" data-scroll-target="#example-average-price-by-category">Example: Average Price by Category</a></li>
-  <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways">Key Takeaways</a></li>
-  </ul></li>
-  <li><a href="#group-by-with-multiple-columns" id="toc-group-by-with-multiple-columns" class="nav-link" data-scroll-target="#group-by-with-multiple-columns">GROUP BY with Multiple Columns</a>
-  <ul class="collapse">
-  <li><a href="#example-grouping-by-multiple-attributes" id="toc-example-grouping-by-multiple-attributes" class="nav-link" data-scroll-target="#example-grouping-by-multiple-attributes">Example: Grouping by Multiple Attributes</a></li>
-  <li><a href="#how-to-read-the-result" id="toc-how-to-read-the-result" class="nav-link" data-scroll-target="#how-to-read-the-result">How to Read the Result</a></li>
-  <li><a href="#why-grouping-by-multiple-columns-is-useful" id="toc-why-grouping-by-multiple-columns-is-useful" class="nav-link" data-scroll-target="#why-grouping-by-multiple-columns-is-useful">Why Grouping by Multiple Columns Is Useful</a></li>
-  </ul></li>
-  <li><a href="#distinct" id="toc-distinct" class="nav-link" data-scroll-target="#distinct">DISTINCT</a>
-  <ul class="collapse">
-  <li><a href="#basic-distinct-syntax" id="toc-basic-distinct-syntax" class="nav-link" data-scroll-target="#basic-distinct-syntax">Basic DISTINCT Syntax</a></li>
-  <li><a href="#example-finding-unique-values" id="toc-example-finding-unique-values" class="nav-link" data-scroll-target="#example-finding-unique-values">Example: Finding Unique Values</a></li>
-  <li><a href="#distinct-with-multiple-columns" id="toc-distinct-with-multiple-columns" class="nav-link" data-scroll-target="#distinct-with-multiple-columns">DISTINCT with Multiple Columns</a></li>
-  <li><a href="#distinct-vs-group-by" id="toc-distinct-vs-group-by" class="nav-link" data-scroll-target="#distinct-vs-group-by">DISTINCT vs GROUP BY</a></li>
-  <li><a href="#when-to-use-distinct" id="toc-when-to-use-distinct" class="nav-link" data-scroll-target="#when-to-use-distinct">When to Use DISTINCT</a></li>
-  <li><a href="#practice" id="toc-practice" class="nav-link" data-scroll-target="#practice">Practice</a></li>
-  </ul></li>
-  <li><a href="#task-draft" id="toc-task-draft" class="nav-link" data-scroll-target="#task-draft">Task | Draft</a>
+  <li><a href="#practice-2" id="toc-practice-2" class="nav-link" data-scroll-target="#practice-2">Practice 2</a>
   <ul class="collapse">
   <li><a href="#task-1-enforce-missing-business-rules-with-alter-table" id="toc-task-1-enforce-missing-business-rules-with-alter-table" class="nav-link" data-scroll-target="#task-1-enforce-missing-business-rules-with-alter-table">Task 1 — Enforce Missing Business Rules with ALTER TABLE</a></li>
   <li><a href="#task-2-add-a-new-analytical-attribute" id="toc-task-2-add-a-new-analytical-attribute" class="nav-link" data-scroll-target="#task-2-add-a-new-analytical-attribute">Task 2 — Add a New Analytical Attribute</a></li>
@@ -1017,8 +996,8 @@ Tip
 But how do you actually optimize SQL queries in practice?</p>
 <p>One of the simplest and most effective ways is to be <strong>precise about what data you request</strong>.<br>
 Before introducing additional commands, it’s worth revisiting <code>SELECT</code>, because it is the foundation of almost every analytical query.</p>
-<section id="revisiting-select" class="level3">
-<h3 class="anchored" data-anchor-id="revisiting-select">Revisiting SELECT</h3>
+<section id="select" class="level3">
+<h3 class="anchored" data-anchor-id="select">SELECT</h3>
 <p>As you already know, <code>SELECT</code> allows you to retrieve data from a database.</p>
 <p>A <code>SELECT</code> statement usually follows this structure:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> column_name_1,</span>
@@ -1217,13 +1196,15 @@ Important
 <p>The <code>GROUP BY</code> clause is very popular among data analysts :)</p>
 <p>The <code>GROUP BY</code> clause allows you to <strong>group rows that share the same values</strong> in one or more columns.</p>
 <p>It is commonly used together with <strong>aggregate functions</strong> to summarize data.</p>
-<p><strong>Typical aggregate functions include:</strong></p>
+<p>Similar to <code>Excel</code>, <code>SQL</code> provides several <strong>aggregate functions</strong> that allow you to perform calculations across multiple rows of data.</p>
+<p>Below is a list of commonly used aggregate functions.<br>
+Note that <code>SUM</code> and <code>AVG</code> can only be applied to <strong>numeric columns</strong>.</p>
 <ul>
-<li><code>COUNT()</code></li>
-<li><code>SUM()</code></li>
-<li><code>AVG()</code></li>
-<li><code>MIN()</code></li>
-<li><code>MAX()</code></li>
+<li><code>COUNT()</code> counts the number of rows</li>
+<li><code>MAX()</code> finds the maximum value in a column</li>
+<li><code>MIN()</code> finds the minimum value in a column</li>
+<li><code>SUM()</code> adds up all numeric values in a column</li>
+<li><code>AVG()</code> calculates the average of numeric values in a column</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -1298,8 +1279,9 @@ Tip
 <p><code>GROUP BY</code> can also be used to identify <strong>distinct values</strong> in a column.<br>
 This is useful when you want to understand how data is organized without seeing every individual row.</p>
 <p>To see all product categories in the database, you could start with:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">category</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This query returns the category for <strong>every product</strong>, which may include many duplicates. If you only want to know <strong>which categories exist</strong>, <code>GROUP BY</code> is the right tool.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span></span>
@@ -1321,112 +1303,102 @@ This is useful when you want to understand how data is organized without seeing 
 </ul>
 <p>In practice, <code>GROUP BY</code> becomes even more powerful when combined with aggregate functions, which you’ll explore next.</p>
 </section>
-</section>
-</section>
-<section id="aggregate-functions" class="level2">
-<h2 class="anchored" data-anchor-id="aggregate-functions">Aggregate Functions</h2>
-<p>Similar to Excel, SQL provides several <strong>aggregate functions</strong> that allow you to perform calculations across multiple rows of data.</p>
-<p>Below is a list of commonly used aggregate functions.<br>
-Note that <code>SUM</code> and <code>AVG</code> can only be applied to <strong>numeric columns</strong>.</p>
-<ul>
-<li><code>COUNT()</code> counts the number of rows</li>
-<li><code>MAX()</code> finds the maximum value in a column</li>
-<li><code>MIN()</code> finds the minimum value in a column</li>
-<li><code>SUM()</code> adds up all numeric values in a column</li>
-<li><code>AVG()</code> calculates the average of numeric values in a column</li>
-</ul>
-<section id="using-aggregate-functions-with-group-by" class="level3">
-<h3 class="anchored" data-anchor-id="using-aggregate-functions-with-group-by">Using Aggregate Functions with GROUP BY</h3>
-<p>Aggregate functions are most powerful when combined with <code>GROUP BY</code>, which allows you to summarize data across categories.</p>
-<p>Suppose you are working with a sales database and want to understand <strong>how many sales transactions exist per product</strong>.</p>
+<section id="example-sales-per-pruduct" class="level4">
+<h4 class="anchored" data-anchor-id="example-sales-per-pruduct">Example | Sales per Pruduct</h4>
+<p>Aggregate functions are most powerful when combined with <code>GROUP BY</code>, which allows you to summarize data across categories. Suppose you are working with a sales department and want to understand <strong>how many sales transactions exist per product</strong>.</p>
 <p>To begin, recall that the <code>sales</code> table may contain many rows per product.</p>
-</section>
-<section id="example-counting-records-per-group" class="level3">
-<h3 class="anchored" data-anchor-id="example-counting-records-per-group">Example: Counting Records per Group</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(transaction_id) <span class="kw">AS</span> number_of_transactions</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This query: - groups rows by <code>product_id</code> - counts how many transactions exist for each product - returns one row per product</p>
+<p><strong>This query:</strong></p>
+<ul>
+<li>groups rows by <code>product_id</code></li>
+<li>counts how many transactions exist for each product</li>
+<li>returns one row per product</li>
+</ul>
 </section>
-<section id="example-aggregating-numeric-values" class="level3">
-<h3 class="anchored" data-anchor-id="example-aggregating-numeric-values">Example: Aggregating Numeric Values</h3>
+<section id="example-total-revenue-per-product" class="level4">
+<h4 class="anchored" data-anchor-id="example-total-revenue-per-product">Example | Total Revenue per Product</h4>
 <p>You can also summarize numeric columns such as total revenue.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Here: - <code>SUM(total_sales)</code> adds up all sales values per product - the result shows total revenue generated by each product</p>
+<p>Here:</p>
+<ul>
+<li><code>SUM(total_sales)</code> adds up all sales values per product</li>
+<li>the result shows total revenue generated by each product</li>
+</ul>
 </section>
-<section id="example-average-price-by-category" class="level3">
-<h3 class="anchored" data-anchor-id="example-average-price-by-category">Example: Average Price by Category</h3>
+<section id="example-average-price-by-category" class="level4">
+<h4 class="anchored" data-anchor-id="example-average-price-by-category">Example | Average Price by Category</h4>
 <p>Aggregate functions are often used for higher-level analysis.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(price) <span class="kw">AS</span> average_price</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products</span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This query: - groups products by category - calculates the average price within each category</p>
-</section>
-<section id="key-takeaways" class="level3">
-<h3 class="anchored" data-anchor-id="key-takeaways">Key Takeaways</h3>
+<p><strong>This query:</strong></p>
 <ul>
-<li>Aggregate functions summarize data across multiple rows</li>
-<li><code>GROUP BY</code> defines <strong>how</strong> rows are grouped</li>
-<li>Every non-aggregated column in <code>SELECT</code> must appear in <code>GROUP BY</code></li>
-<li>These functions are essential for reporting, dashboards, and business insights</li>
+<li>groups products by category</li>
+<li>calculates the average price within each category</li>
 </ul>
 </section>
-</section>
-<section id="group-by-with-multiple-columns" class="level2">
-<h2 class="anchored" data-anchor-id="group-by-with-multiple-columns">GROUP BY with Multiple Columns</h2>
+<section id="group-by-with-multiple-columns" class="level4">
+<h4 class="anchored" data-anchor-id="group-by-with-multiple-columns">GROUP BY with Multiple Columns</h4>
 <p>You can also group data by <strong>multiple columns</strong>.<br>
 To do this, simply list <strong>all grouping columns</strong> after <code>GROUP BY</code>, separated by commas.</p>
 <p>This allows you to create more granular summaries by combining multiple dimensions.</p>
-<section id="example-grouping-by-multiple-attributes" class="level3">
-<h3 class="anchored" data-anchor-id="example-grouping-by-multiple-attributes">Example: Grouping by Multiple Attributes</h3>
-<p>Suppose you want to understand <strong>how many sales transactions exist for each product and sales channel combination</strong>.</p>
+<section id="example-grouping-by-multiple-attributes" class="level5">
+<h5 class="anchored" data-anchor-id="example-grouping-by-multiple-attributes">Example | Grouping by Multiple Attributes</h5>
+<p>Suppose you want to understand <strong>how many sales transactions exist for each product and employee_id (later we will get the employee name) combination</strong>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  sales_channel,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  ,</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(transaction_id) <span class="kw">AS</span> transaction_count</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id, sales_channel;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This query: - groups records by both <code>product_id</code> and <code>sales_channel</code> - counts the number of transactions in each combination - returns one row per unique <code>(product_id, sales_channel)</code> pair</p>
-</section>
-<section id="how-to-read-the-result" class="level3">
-<h3 class="anchored" data-anchor-id="how-to-read-the-result">How to Read the Result</h3>
-<p>The output represents: - one row per product and channel combination - the total number of transactions for that specific combination</p>
-<p>For example: - Product A sold online - Product A sold in-store<br>
-are treated as <strong>two separate groups</strong>.</p>
-</section>
-<section id="why-grouping-by-multiple-columns-is-useful" class="level3">
-<h3 class="anchored" data-anchor-id="why-grouping-by-multiple-columns-is-useful">Why Grouping by Multiple Columns Is Useful</h3>
-<p>Grouping by multiple columns helps you: - analyze performance across multiple dimensions - break down metrics by category, region, channel, or time - build detailed summaries for dashboards and reports</p>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id, </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">COUNT</span>(transaction_id) <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>This query:</strong></p>
+<ul>
+<li>groups records by both <code>product_id</code> and <code>employee_id</code></li>
+<li>counts the number of transactions in each combination</li>
+<li>returns one row per unique <code>(product_id, employee_id)</code> pair</li>
+</ul>
+<p><strong>The output represents:</strong></p>
+<ul>
+<li>one row per product and employee combination</li>
+<li>the total number of transactions for that specific combination</li>
+</ul>
+<p><strong>Grouping by multiple columns helps you:</strong></p>
+<ul>
+<li>analyze performance across multiple dimensions</li>
+<li>break down metrics by category, region, channel, or time</li>
+<li>build detailed summaries for dashboards and reports</li>
+</ul>
 <p>You will get more practice using multi-column <code>GROUP BY</code> as you move into data summarization, aggregation, and data cleaning tasks later in the course.</p>
 </section>
 </section>
-<section id="distinct" class="level2">
-<h2 class="anchored" data-anchor-id="distinct">DISTINCT</h2>
-<p>You’ll get more practice using aggregate functions later in this course, when you learn about summarizing and cleaning data.</p>
+</section>
+<section id="distinct" class="level3">
+<h3 class="anchored" data-anchor-id="distinct">DISTINCT</h3>
 <p>The <code>DISTINCT</code> keyword is used to return <strong>unique values</strong> from a column or a combination of columns.<br>
 It is especially useful when a dataset contains duplicate values and you want to understand the <strong>unique categories or combinations</strong> present in the data.</p>
-<section id="basic-distinct-syntax" class="level3">
-<h3 class="anchored" data-anchor-id="basic-distinct-syntax">Basic DISTINCT Syntax</h3>
+<p><strong>Syntax</strong></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> column_name</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> table_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="example-finding-unique-values" class="level3">
-<h3 class="anchored" data-anchor-id="example-finding-unique-values">Example: Finding Unique Values</h3>
+<section id="example-finding-unique-values" class="level4">
+<h4 class="anchored" data-anchor-id="example-finding-unique-values">Example | Finding Unique Values</h4>
 <p>Suppose you want to see all unique product categories in the <code>products</code> table.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> <span class="kw">category</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This query returns one row per unique category, even if multiple products belong to the same category.</p>
 </section>
-<section id="distinct-with-multiple-columns" class="level3">
-<h3 class="anchored" data-anchor-id="distinct-with-multiple-columns">DISTINCT with Multiple Columns</h3>
+<section id="distinct-with-multiple-columns" class="level4">
+<h4 class="anchored" data-anchor-id="distinct-with-multiple-columns">DISTINCT with Multiple Columns</h4>
 <p><code>DISTINCT</code> can also be applied to <strong>multiple columns</strong> to find unique combinations.</p>
 <p>For example, to find unique combinations of product category and price:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
@@ -1435,57 +1407,78 @@ It is especially useful when a dataset contains duplicate values and you want to
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This returns each unique <code>(category, price)</code> pair found in the table.</p>
 </section>
-<section id="distinct-vs-group-by" class="level3">
-<h3 class="anchored" data-anchor-id="distinct-vs-group-by">DISTINCT vs GROUP BY</h3>
+<section id="distinct-with-count" class="level4">
+<h4 class="anchored" data-anchor-id="distinct-with-count">DISTINCT with COUNT</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="kw">category</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> <span class="kw">category</span>) ,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="distinct-vs-group-by" class="level4">
+<h4 class="anchored" data-anchor-id="distinct-vs-group-by">DISTINCT vs GROUP BY</h4>
 <p>In many cases, <code>DISTINCT</code> and <code>GROUP BY</code> can produce the same result when no aggregate functions are used.</p>
 <p>Using <code>DISTINCT</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  price</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Using <code>GROUP BY</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  price</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>, price;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Using <code>GROUP BY</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  price</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>, price;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Both queries return the unique combinations of <code>category</code> and <code>price</code>.</p>
 </section>
-<section id="when-to-use-distinct" class="level3">
-<h3 class="anchored" data-anchor-id="when-to-use-distinct">When to Use DISTINCT</h3>
-<p>Use <code>DISTINCT</code> when: - you only need unique values - no aggregation is required - you want simpler, more readable SQL</p>
-<p>Use <code>GROUP BY</code> when: - you need aggregate functions - you want more control over grouping logic</p>
+<section id="when-to-use-distinct" class="level4">
+<h4 class="anchored" data-anchor-id="when-to-use-distinct">When to Use DISTINCT</h4>
+<p>Use <code>DISTINCT</code> when:</p>
+<ul>
+<li>you only need unique values</li>
+<li>no aggregation is required</li>
+<li>you want simpler, more readable SQL</li>
+</ul>
+<p>Use <code>GROUP BY</code> when:</p>
+<ul>
+<li>you need aggregate functions</li>
+<li>you want more control over grouping logic</li>
+</ul>
 </section>
-<section id="practice" class="level3">
-<h3 class="anchored" data-anchor-id="practice">Practice</h3>
+</section>
+<section id="group-by-vs-distinct" class="level3">
+<h3 class="anchored" data-anchor-id="group-by-vs-distinct">GROUP BY vs DISTINCT</h3>
 <p>Which command do you think is faster: <code>GROUP BY</code> or <code>DISTINCT</code>?</p>
-<p>Use <code>EXPLAIN</code> to generate query plans for both queries and compare their estimated costs to see which one runs more efficiently in PostgreSQL.</p>
+<p>Use <code>EXPLAIN</code> to generate query plans for both queries and compare their estimated costs to see which one runs more efficiently in <code>PostgreSQL</code>.</p>
 </section>
 </section>
-<section id="task-draft" class="level2">
-<h2 class="anchored" data-anchor-id="task-draft">Task | Draft</h2>
-<p>Assume the following:</p>
+<section id="practice-2" class="level2">
+<h2 class="anchored" data-anchor-id="practice-2">Practice 2</h2>
+<p><strong>Assume the following:</strong></p>
 <ul>
 <li>Tables <code>customers</code>, <code>products</code>, and <code>sales</code> already exist</li>
 <li>Their schemas and columns are already documented</li>
 <li>Your task is <strong>not discovery</strong>, but <strong>improvement, enforcement, and optimization</strong></li>
 </ul>
 <p>You must <strong>not</strong> recreate tables or re-document schemas.</p>
-<hr>
 <section id="task-1-enforce-missing-business-rules-with-alter-table" class="level3">
 <h3 class="anchored" data-anchor-id="task-1-enforce-missing-business-rules-with-alter-table">Task 1 — Enforce Missing Business Rules with ALTER TABLE</h3>
 <p>Even with a documented schema, databases often lack enforced rules.</p>
 <p>Apply the following constraints using <code>ALTER TABLE</code>:</p>
-<p>Business rules: - Customer emails must be unique - Customer phone numbers must be mandatory - Product prices must be non-negative - Sales totals must be non-negative</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> customers</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> uq_customers_email <span class="kw">UNIQUE</span> (email);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Business rules:</strong></p>
+<ul>
+<li>Customer emails must be unique</li>
+<li>Customer phone numbers must be mandatory</li>
+<li>Product prices must be non-negative</li>
+<li>Sales totals must be non-negative</li>
+</ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> customers</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">COLUMN</span> phone_number <span class="kw">SET</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> products</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_products_price <span class="kw">CHECK</span> (price <span class="op">&gt;=</span> <span class="dv">0</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> sales</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_sales_total <span class="kw">CHECK</span> (total_sales <span class="op">&gt;=</span> <span class="dv">0</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> uq_customers_email <span class="kw">UNIQUE</span> (email);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> customers</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">COLUMN</span> phone_number <span class="kw">SET</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> products</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_products_price <span class="kw">CHECK</span> (price <span class="op">&gt;=</span> <span class="dv">0</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> sales</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_sales_total <span class="kw">CHECK</span> (total_sales <span class="op">&gt;=</span> <span class="dv">0</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="task-2-add-a-new-analytical-attribute" class="level3">
 <h3 class="anchored" data-anchor-id="task-2-add-a-new-analytical-attribute">Task 2 — Add a New Analytical Attribute</h3>
@@ -1495,116 +1488,148 @@ It is especially useful when a dataset contains duplicate values and you want to
 <li>Column name: <code>sales_channel</code></li>
 <li>Allowed values: <code>'online'</code>, <code>'store'</code></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> sales</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">COLUMN</span> sales_channel TEXT;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Add a constraint to enforce valid values.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> sales</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_sales_channel</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="kw">CHECK</span> (sales_channel <span class="kw">IN</span> (<span class="st">'online'</span>, <span class="st">'store'</span>));</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Populate the column with sample values.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> sales</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> sales_channel <span class="op">=</span> <span class="st">'online'</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> transaction_id % <span class="dv">2</span> <span class="op">=</span> <span class="dv">0</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">COLUMN</span> sales_channel TEXT;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Add a constraint to enforce valid values.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> sales</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_sales_channel</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="kw">CHECK</span> (sales_channel <span class="kw">IN</span> (<span class="st">'online'</span>, <span class="st">'store'</span>));</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Populate the column with sample values.</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> sales</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> sales_channel <span class="op">=</span> <span class="st">'online'</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> transaction_id % <span class="dv">2</span> <span class="op">=</span> <span class="dv">0</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>write an explanation</p>
+</div>
+</div>
 </section>
 <section id="task-3-add-indexes-for-query-performance" class="level3">
 <h3 class="anchored" data-anchor-id="task-3-add-indexes-for-query-performance">Task 3 — Add Indexes for Query Performance</h3>
-<p>Based on common analytical queries, create indexes on columns that are frequently used for:</p>
-<ul>
-<li>joins</li>
-<li>grouping</li>
-<li>filtering</li>
-</ul>
-<p>Create the following indexes:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_product_id</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> sales (product_id);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_customer_id</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> sales (customer_id);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_products_category</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> products (<span class="kw">category</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Based on common analytical queries, create indexes on columns that are frequently used for (according to you): </strong> - <code>joins</code> - <code>grouping</code> - <code>filtering</code></p>
+<p><strong>Create the following indexes:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_product_id</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> sales (product_id);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_customer_id</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> sales (customer_id);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_products_category</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> products (<span class="kw">category</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="task-4-validate-index-usage-with-explain" class="level3">
 <h3 class="anchored" data-anchor-id="task-4-validate-index-usage-with-explain">Task 4 — Validate Index Usage with EXPLAIN</h3>
 <p>Run <code>EXPLAIN</code> on an aggregation query that is commonly used in reporting.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Write a short interpretation: - Is a sequential scan used? - Does PostgreSQL leverage the index? - Why might the planner choose this plan?</p>
-<hr>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Write a short interpretation:</strong></p>
+<ul>
+<li>Is a sequential scan used?</li>
+<li>Does PostgreSQL leverage the index?</li>
+<li>Why might the planner choose this plan?</li>
+</ul>
 </section>
 <section id="task-5-reduce-query-cost-by-refining-select" class="level3">
 <h3 class="anchored" data-anchor-id="task-5-reduce-query-cost-by-refining-select">Task 5 — Reduce Query Cost by Refining SELECT</h3>
 <p>Rewrite a reporting query to avoid unnecessary data retrieval.</p>
-<p>Original query:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Refined query:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  total_sales</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Explain in 2–3 sentences: - why this reduces cost - when <code>SELECT *</code> might still be acceptable</p>
+<p><strong>Original query:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Refined query:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  total_sales</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Explain in 2–3 sentences:</strong></p>
+<ul>
+<li>why this reduces cost</li>
+<li>when <code>SELECT *</code> might still be acceptable</li>
+</ul>
 <hr>
 </section>
 <section id="task-6-order-by-and-limit-for-business-questions" class="level3">
 <h3 class="anchored" data-anchor-id="task-6-order-by-and-limit-for-business-questions">Task 6 — ORDER BY and LIMIT for Business Questions</h3>
 <p>Marketing wants to identify the <strong>top 5 products by total revenue</strong>.</p>
-<p>Write a query that: - aggregates sales - sorts by revenue - limits the output</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_revenue <span class="kw">DESC</span></span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Run <code>EXPLAIN</code> and comment on: - sorting cost - whether indexes help in this case</p>
+<p><strong>Write a query that:</strong></p>
+<ul>
+<li>aggregates sales</li>
+<li>sorts by revenue</li>
+<li>limits the output</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  product_id,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_revenue <span class="kw">DESC</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Run <code>EXPLAIN</code> and comment on:</strong></p>
+<ul>
+<li>sorting cost</li>
+<li>whether indexes help in this case</li>
+</ul>
 <hr>
 </section>
 <section id="task-7-distinct-vs-group-by-efficiency-comparison" class="level3">
 <h3 class="anchored" data-anchor-id="task-7-distinct-vs-group-by-efficiency-comparison">Task 7 — DISTINCT vs GROUP BY (Efficiency Comparison)</h3>
 <p>Retrieve unique combinations of <code>category</code> and <code>price</code> using both approaches.</p>
 <p>Using <code>DISTINCT</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  price</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Using <code>GROUP BY</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  price</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>, price;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Answer briefly: - Are the query plans similar? - Which has lower estimated cost? - Why might PostgreSQL optimize them the same way?</p>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Using <code>GROUP BY</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  price</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> products</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>, price;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Answer briefly:</strong></p>
+<ul>
+<li>Are the query plans similar?</li>
+<li>Which has lower estimated cost?</li>
+<li>Why might PostgreSQL optimize them the same way?</li>
+</ul>
 <hr>
 </section>
 <section id="task-8-constraint-enforcement-test" class="level3">
 <h3 class="anchored" data-anchor-id="task-8-constraint-enforcement-test">Task 8 — Constraint Enforcement Test</h3>
 <p>Attempt to violate at least <strong>two constraints</strong> you added earlier and observe the errors.</p>
-<p>Examples:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> products</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> price <span class="op">=</span> <span class="op">-</span><span class="dv">5</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">101</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> customers (customer_id, email, phone_number)</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">999</span>, <span class="st">'anna@example.com'</span>, <span class="st">'091000999'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Explain: - which constraint was triggered - why this protects data quality</p>
+<p><strong>Examples:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> products</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> price <span class="op">=</span> <span class="op">-</span><span class="dv">5</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">101</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> customers (customer_id, email, phone_number)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">999</span>, <span class="st">'anna@example.com'</span>, <span class="st">'091000999'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Explain:</strong></p>
+<ul>
+<li>which constraint was triggered</li>
+<li>why this protects data quality</li>
+</ul>
 <hr>
 </section>
 <section id="task-9-reflection-short-answer" class="level3">
 <h3 class="anchored" data-anchor-id="task-9-reflection-short-answer">Task 9 — Reflection (Short Answer)</h3>
-<p>Answer briefly (3–5 sentences total):</p>
+<p><strong>Answer briefly (3–5 sentences total):</strong></p>
 <ul>
 <li>Which constraints provide the highest business value?</li>
 <li>Which index would you prioritize in a production environment?</li>
 <li>What signals tell you a query needs optimization?</li>
 </ul>
-<hr>
 </section>
 <section id="submission-rules" class="level3">
 <h3 class="anchored" data-anchor-id="submission-rules">Submission Rules</h3>
