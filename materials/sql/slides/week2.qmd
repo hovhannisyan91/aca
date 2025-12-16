@@ -370,7 +370,7 @@ Common capabilities:
 - Area coverage
 
 ::: {.callout-important}
-As a data analyst you are **not expected** to design **PostGIS** schemas or routing graphs — but you *will* query them.
+As a data analyst you are **not expected** to design **PostGIS** schemas or routing graphs, but you *will* query them.
 
 Documentation you can find [here](https://postgis.net/workshops/postgis-intro/)
 :::
@@ -413,3 +413,575 @@ Try to generate the ERD for the sales database using your SQL client.
 Identify primary keys, foreign keys, and relationships.
 
 ![](../../../img/sql/generate_erd.png)
+
+
+# DDL | Data Definition Language
+
+## What Is DDL?
+
+DDL (Data Definition Language) is used to **define and manage database structure**.
+
+- operates on database objects, not rows
+- describes how data is stored
+- forms the foundation for all queries and analysis
+
+---
+
+## DDL Scope
+
+DDL affects:
+
+- tables
+- columns
+- constraints
+- indexes
+
+DDL decisions directly impact:
+
+- data quality
+- query performance
+- scalability
+
+---
+
+## Common DDL Statements
+
+The most common DDL commands are:
+
+- `CREATE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+
+Each command changes the database **schema or metadata**.
+
+
+
+## CREATE (DDL Context)
+
+In DDL, `CREATE` is used to define **new database objects**.
+
+Typical use cases:
+
+- creating tables
+- creating indexes
+- creating schemas
+
+
+
+## CREATE Example | Index
+
+Example: create an index to improve analytical queries.
+
+```sql
+CREATE INDEX idx_sales_product_id
+ON sales (product_id);
+```
+
+This command:
+
+- does not change data
+- improves data access performance
+
+
+
+## ALTER
+
+`ALTER` modifies the structure of an **existing object**.
+
+It allows schema evolution without recreating tables.
+
+---
+
+## ALTER Example | Constraint
+
+Example: enforce a business rule on existing data.
+
+```sql
+ALTER TABLE products
+ADD CONSTRAINT chk_products_price
+CHECK (price >= 0);
+```
+
+
+
+## DROP
+
+`DROP` permanently removes a database object.
+
+- structure is deleted
+- data is lost
+- operation is irreversible
+
+
+
+## DROP Example
+
+Example: remove an unused index.
+
+```sql
+DROP INDEX idx_sales_product_id;
+```
+
+
+
+## TRUNCATE
+
+`TRUNCATE` removes **all rows** from a table while keeping its structure.
+
+Compared to `DELETE`:
+
+- much faster
+- no `WHERE` clause
+- limited rollback support
+
+
+
+## TRUNCATE Example
+
+```sql
+TRUNCATE TABLE sales_staging;
+```
+
+
+
+# CRUD | Data Manipulation
+
+## What Is CRUD?
+
+CRUD represents operations used to **work with data inside tables**.
+
+CRUD stands for:
+
+- CREATE
+- READ
+- UPDATE
+- DELETE
+
+
+
+## Critical Terminology Clarification
+
+The word **CREATE** means different things depending on context.
+
+- **DDL CREATE $\rightarrow$ defines structure**
+- **CRUD CREATE $\rightarrow$ inserts data**
+
+Confusing these is a common beginner mistake.
+
+## DDL vs CRUD | Mental Model
+
+- **DDL $\rightarrow$ defines the rules**
+- **CRUD $\rightarrow$ follows the rules**
+- **DDL $\rightarrow$ structure**
+- **CRUD $\rightarrow$ data**
+
+
+
+## CREATE (CRUD $\rightarrow$ INSERT)
+
+In CRUD, CREATE means **adding new rows**.
+
+This is done using `INSERT`.
+
+```sql
+INSERT INTO products (product_id, product_name, price, category)
+VALUES (101, 'Wireless Mouse', 24.99, 'Accessories');
+```
+
+
+
+## READ (SELECT)
+
+READ retrieves data and is implemented using `SELECT`.
+
+```sql
+SELECT
+  product_id,
+  product_name
+FROM products;
+```
+
+
+
+## READ with Filtering
+
+Filtering rows is done using `WHERE`.
+
+```sql
+SELECT
+  *
+FROM sales
+WHERE total_sales < 50;
+```
+
+
+
+## UPDATE
+
+`UPDATE` modifies existing records.
+
+Always use `WHERE` to target specific rows.
+
+```sql
+UPDATE products
+SET price = 49.99
+WHERE product_id = 12;
+```
+
+
+
+## DELETE
+
+`DELETE` removes records from a table.
+
+Deletions are irreversible and must be used with caution.
+
+```sql
+DELETE FROM sales
+WHERE transaction_id = 1004;
+```
+
+
+
+# Constraints
+
+## Why Constraints Matter
+
+Constraints play a crucial role in keeping your data **organized, consistent, and reliable**.
+
+They define what type of data a table or column can accept and are typically applied when tables are created or later via `ALTER TABLE`.
+
+When defined correctly, constraints:
+
+| enforce data integrity  
+| prevent invalid or inconsistent data  
+| act as built-in data quality checks  
+
+---
+
+## Types of Constraints
+
+The most common constraints you will encounter are:
+
+| UNIQUE  
+| NOT NULL  
+| PRIMARY KEY  
+| FOREIGN KEY  
+| CHECK  
+
+Each constraint enforces a specific business or technical rule.
+
+---
+
+## UNIQUE Constraint
+
+The `UNIQUE` constraint ensures that **all values in a column are distinct**.
+
+It is commonly used for attributes that must be unique across entities.
+
+Typical use cases include:
+
+| email addresses  
+| usernames  
+| national identification numbers  
+
+---
+
+## UNIQUE Constraint | Example
+
+Ensure each customer email is unique.
+
+```sql
+CREATE TABLE customers (
+  customer_id INTEGER PRIMARY KEY,
+  email TEXT UNIQUE,
+  phone_number TEXT
+);
+```
+
+With this constraint in place, PostgreSQL will reject any attempt to insert a duplicate email address.
+
+---
+
+## NOT NULL Constraint
+
+The `NOT NULL` constraint ensures that a column **cannot contain NULL values**.
+
+Use this constraint for fields that are mandatory and must always be provided.
+
+Typical use cases include:
+
+| primary identifiers  
+| contact information  
+| transaction timestamps  
+
+---
+
+## NOT NULL Constraint | Example
+
+Ensure every customer has a phone number.
+
+```sql
+CREATE TABLE customers (
+  customer_id INTEGER PRIMARY KEY,
+  phone_number TEXT NOT NULL,
+  email TEXT
+);
+```
+
+If an insert is attempted without a phone number, PostgreSQL will return an error.
+
+---
+
+## PRIMARY KEY Constraint
+
+A `PRIMARY KEY` uniquely identifies each row in a table.
+
+A primary key:
+
+| must be unique  
+| cannot contain NULL values  
+| exists only once per table  
+
+---
+
+## PRIMARY KEY Constraint | Example
+
+Define a primary key for a products table.
+
+```sql
+CREATE TABLE products (
+  product_id INTEGER PRIMARY KEY,
+  product_name TEXT NOT NULL,
+  price NUMERIC(10, 2)
+);
+```
+
+The `PRIMARY KEY` constraint automatically enforces both `UNIQUE` and `NOT NULL`.
+
+---
+
+## FOREIGN KEY Constraint
+
+A `FOREIGN KEY` creates a relationship between two tables.
+
+It ensures **referential integrity**, meaning referenced values must exist in the parent table.
+
+---
+
+## FOREIGN KEY Constraint | Example
+
+Link sales records to customers.
+
+```sql
+CREATE TABLE sales (
+  transaction_id INTEGER PRIMARY KEY,
+  customer_id INTEGER,
+  total_sales NUMERIC(10, 2),
+  FOREIGN KEY (customer_id)
+    REFERENCES customers (customer_id)
+);
+```
+
+With this constraint, you cannot insert a sale for a customer that does not exist.
+
+---
+
+## CHECK Constraint
+
+The `CHECK` constraint restricts the range or condition of values that can be inserted into a column.
+
+It validates data using logical expressions.
+
+Typical use cases include:
+
+| value ranges  
+| minimum or maximum limits  
+| domain rules  
+
+---
+
+## CHECK Constraint | Example
+
+Ensure total sales values are non-negative.
+
+```sql
+CREATE TABLE sales (
+  transaction_id INTEGER PRIMARY KEY,
+  total_sales NUMERIC(10, 2) CHECK (total_sales >= 0)
+);
+```
+
+If a value violates the condition, the insert or update will fail.
+
+---
+
+# SQL Rules and Best Practices
+
+## Why Best Practices Matter
+
+Writing SQL that works is not enough.
+
+Good SQL should be:
+
+| readable  
+| consistent  
+| maintainable  
+| easy to debug  
+
+These rules help teams collaborate and reduce errors.
+
+---
+
+## Numbers and Underscores
+
+In relational databases:
+
+| table names cannot start with a number  
+| column names cannot contain spaces  
+| underscores should be used to separate words  
+
+This improves compatibility and readability.
+
+---
+
+## Naming | Examples
+
+**Recommended:**
+
+```sql
+CREATE TABLE customer_lifecycle;
+CREATE TABLE customer;
+```
+
+**Not recommended:**
+
+```sql
+CREATE TABLE customer lifecycle;
+CREATE TABLE 3customer;
+```
+
+---
+
+## Capitalization
+
+A widely accepted convention is:
+
+| SQL keywords $\rightarrow$ UPPERCASE  
+| table names $\rightarrow$ lowercase  
+| column names $\rightarrow$ lowercase  
+
+This improves readability and consistency.
+
+---
+
+## Capitalization | Examples
+
+**Recommended:**
+
+```sql
+SELECT product_id, product_name
+FROM products;
+```
+
+```sql
+SELECT transaction_id, total_sales
+FROM sales;
+```
+
+**Not recommended:**
+
+```sql
+Select PRODUCT_ID, PRODUCT_NAME From PRODUCTS;
+```
+
+```sql
+SELECT TRANSACTION_ID, TOTAL_SALES FROM SALES;
+```
+
+---
+
+## Commenting SQL Code
+
+Commenting helps others (and your future self) understand your logic.
+
+**Comments:**
+
+| do not affect execution  
+| improve documentation  
+| help during debugging  
+
+---
+
+## Commenting | Examples
+
+Single-line comments:
+
+```sql
+-- select and display the first 10 rows from the sales table
+SELECT *
+FROM sales
+LIMIT 10;
+```
+
+Multi-line comments:
+
+```sql
+/*
+SELECT
+  s.transaction_id,
+  p.product_name,
+  s.total_sales
+FROM sales s
+JOIN products p
+  ON s.product_id = p.product_id
+WHERE s.total_sales > 100;
+*/
+```
+
+---
+
+## Aliasing
+
+Aliases assign **temporary names** to tables or columns.
+
+They are useful for:
+
+| improving readability  
+| shortening long names  
+| resolving ambiguity in joins  
+
+---
+
+## Aliasing | Examples
+
+Column aliases:
+
+```sql
+SELECT
+  product_name AS item_name,
+  price AS unit_price
+FROM products;
+```
+
+Table aliases in joins:
+
+```sql
+SELECT
+  s.transaction_id,
+  p.product_name,
+  s.total_sales
+FROM sales AS s
+JOIN products AS p
+  ON s.product_id = p.product_id;
+```
+
+---
+
+## Key Takeaways
+
+| constraints protect data quality  
+| best practices improve readability  
+| consistent SQL scales better in teams  
+| clean SQL enables better optimization  
