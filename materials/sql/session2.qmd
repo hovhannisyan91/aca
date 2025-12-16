@@ -853,242 +853,198 @@ Central fact table storing individual sales transaction lines.
 
 ## Convention -->
 
-<!-- TODO Write about that the SQL statements neeeds to be all capps , column names aetss -->
+
+## DDL:  Data Definition Language
 
 
-## CRUD
+DDL (Data Definition Language) is responsible for defining and managing the **structure** of a database.
 
-This section will introduce the most common SQL commands, known as CRUD operations. The acronym CRUD stands for create, read, update, and delete, and it describes the four operations that can be performed with a database.
+DDL statements operate on **database objects**, not on individual rows.  
+They describe *what the database looks like*, not *what data it contains*.
 
-**CRUD** stands:
+**DDL is foundational:** every data operation you perform later depends on decisions made at the DDL level.
 
-- CREATE
-- SELECT
-- UPDATE
-- DELETE
-  
+### Common DDL Statements
 
-::: {.callout-tip}
-[SQL cheet sheet](https://images.careerfoundry.com/public/courses/data-immersion/A3/E3.3/SQL-Commands-Cheat-Sheet.pdf) 
+DDL includes the following core commands:
+
+- `CREATE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+
+Each of these affects database **schema and metadata**.
+
+### CREATE (DDL Context)
+
+In the context of **DDL**, `CREATE` is used to define **new database objects**, such as tables and indexes.
+
+Typical use cases include:
+
+- creating analytical tables
+- creating staging tables
+- creating indexes to improve performance
+
+Example: create an index to support analytical queries.
+
+```sql
+CREATE INDEX idx_sales_product_id
+ON sales (product_id);
+```
+
+This command does **not** modify data.  
+It changes how efficiently the database can access existing data.
+
+### ALTER
+
+The `ALTER` statement modifies the structure of an **existing** database object.
+
+Common use cases include:
+
+- adding columns
+- enforcing constraints
+- changing column properties
+
+```sql
+ALTER TABLE products
+ADD CONSTRAINT chk_products_price
+CHECK (price >= 0);
+```
+
+### DROP
+
+The `DROP` statement permanently removes a database object.
+
+```sql
+DROP INDEX idx_sales_product_id;
+```
+
+```sql
+DROP TABLE products;
+```
+
+
+**This operation is irreversible and should be used with extreme caution.**
+
+### TRUNCATE
+
+`TRUNCATE` removes **all rows** from a table while keeping its structure intact.
+
+```sql
+TRUNCATE TABLE sales_staging;
+```
+
+
+## CRUD: Data Manipulation in Practice
+
+CRUD describes how we **work with data inside existing tables**.  
+These are the SQL operations data analysts use most frequently.
+
+CRUD stands for:
+
+- **CREATE**
+- **READ**
+- **UPDATE**
+- **DELETE**
+
+::: {.callout-important title="Critical Terminology Clarification"}
+
+The word **CREATE** means **different things** in different contexts.
+
+- **DDL CREATE $\rightarrow$ creates database objects** (tables, indexes)
+- **CRUD CREATE $\rightarrow$ inserts new data** (`INSERT`)
+
+Confusing these two is one of the most common beginner mistakes.
+
+:::
+
+::: {.callout-note title="DDL vs CRUD — Conceptual Comparison"}
+
+- **DDL $\rightarrow$ defines the structure**
+- **CRUD $\rightarrow$ manipulates the data**
+- **DDL $\rightarrow$ happens rarely**
+- **CRUD $\rightarrow$ happens constantly**
+
+>**DDL** sets the rules.  
+>**CRUD** must follow them.
+
 :::
 
 
-### CREATE
+### CREATE (CRUD $\rightarrow$ INSERT)
 
-`CREATE` commands are used to create new entities in a database, such as tables or indexes.  
-Compared to other CRUD operations, `CREATE` is more complex because it requires you to define the **rules and properties** (constraints) of the database objects.
+In the **CRUD context**, CREATE means **adding new rows** to an existing table.
 
-Before learning about constraints, let’s walk through the `CREATE` command to understand:
-
-- when you might encounter it on the job
-- why it’s important
-- how it’s commonly used
-
-Imagine you are a data analyst and your manager asks you to create new tables in the database and insert the correct data. This is an important task because raw data must be organized into related tables, an essential feature of relational databases.
-
-Let’s walk through the main steps involved.
-
-
-When creating a table, you must define:
-
-- the table name
-- its columns
-- the data types
-- the primary key
-
-`CREATE` commands are used to define **new database objects**, such as tables or indexes.
-
-Compared to other CRUD operations, `CREATE` is more complex because it requires you to explicitly define:
-
-- structure
-- data types
-- rules and constraints
-  
-
-Use the `CREATE TABLE` command to define this structure in PostgreSQL.
-
-```sql
-CREATE TABLE products (
-  product_id INTEGER PRIMARY KEY,
-  product_name TEXT NOT NULL,
-  price NUMERIC(10, 2) NOT NULL,
-  category TEXT
-);
-```
-
-<!-- here -->
-#### CREATE INDEX
-
-
-Indexes help organize data so it can be retrieved faster.
-
-Indexes are especially useful when:
-
-- tables contain many rows
-- columns are frequently used in `WHERE`, `JOIN`, or `ORDER BY` clauses
-
-If a table contains many rows, creating an index can significantly improve query performance.  
-
-You can create an index on one or more columns using the `CREATE INDEX` command.
-
-For more information about the index you can check the [Indexes](#indexes) section.
-
-
-**Example: index on product category**
-
-```sql
-CREATE INDEX idx_products_category
-ON products (category);
-```
-
-
-#### INSERT
-
-After creating a table, you need to add data to it.
-
-The `INSERT` command is used to add a new row to a table.  
-
-- If the statement is correct, PostgreSQL will confirm that the record was inserted successfully.
-- If there is an error, PostgreSQL will return a message explaining why the insertion failed.
-
-You can also use the `DEFAULT` keyword to insert default values when some fields are omitted.
+This is done using the `INSERT` statement.
 
 ```sql
 INSERT INTO products (product_id, product_name, price, category)
 VALUES (101, 'Wireless Mouse', 24.99, 'Accessories');
 ```
 
-You can omit columns that have default values or allow `NULL`.
+You may omit columns that allow `NULL` or have default values.
 
 ```sql
 INSERT INTO products (product_id, product_name, price)
 VALUES (102, 'USB-C Cable', 9.99);
 ```
 
+### READ (SELECT)
 
-#### ALTER
-
-After creating a table, you may realize that changes are needed.
-
-The `ALTER` statement allows you to:
-
-- add columns
-- remove columns
-- rename columns
-- rename tables
-
-This makes it possible to evolve database structures over time.
-
+The **READ** operation retrieves data and is implemented using `SELECT`.
 
 ```sql
-ALTER TABLE products
-ADD COLUMN stock_quantity INTEGER DEFAULT 0;
-```
-
----
-
-
-
-### SELECT
-
-The second CRUD operation is **READ**, which is implemented using the `SELECT` command.
-
-`SELECT` is used to specify which data you want to retrieve, and it is one of the most frequently used SQL commands among data analysts.
-
-You have already used `SELECT` statements to retrieve data from tables.  
-Next, you will practice writing more `SELECT` queries in PostgreSQL.
-
-
-
-### FROM
-
-The `FROM` clause specifies **where the data comes from**, usually a table.
-
-Example: retrieve product identifiers and names from the `products` table.
-
-```sql
-SELECT 
-  product_id, product_name
+SELECT
+  product_id,
+  product_name
 FROM products;
 ```
 
-### WHERE
-
-The `WHERE` clause is used to **filter rows** returned by a query based on one or more conditions.
-
-Without `WHERE`, a query returns **all rows** from a table.
-
-
-Example: return all sales transactions where the total sales value is less than 50.
+Filtering rows is done using `WHERE`.
 
 ```sql
-SELECT 
+SELECT
   *
 FROM sales
 WHERE total_sales < 50;
 ```
 
+
+
 ### UPDATE
 
+The `UPDATE` statement modifies **existing records**.
 
-The `UPDATE` statement is used to **modify existing records** in a table.
-
-Updates should almost always be applied to **specific rows**, not entire tables.
-
-
-**Example:** update the price of a specific product.
+Updates should always target **specific rows**.
 
 ```sql
 UPDATE products
 SET price = 49.99
 WHERE product_id = 12;
-
 ```
-
-
-
-
-
-
-#### INSERT
-
-After creating a table, you need to add data to it.
-
-The `INSERT` command is used to add a new row to a table.  
-If the statement is correct, PostgreSQL will confirm that the record was inserted successfully.
-
-If there is an error, PostgreSQL will return a message explaining why the insertion failed.
-
-You can also use the `DEFAULT` keyword to insert default values when some fields are omitted.
-
----
-
-#### ALTER
-
-After creating a table, you may realize that changes are needed.
-
-The `ALTER` statement allows you to:
-
-- add columns
-- remove columns
-- rename columns
-- rename tables
-
-This makes it possible to evolve database structures over time.
 
 ### DELETE
 
-The `DELETE` statement is used to **remove records** from a table.
+The `DELETE` statement removes records from a table.
 
-Because deletions are **irreversible**, this command must be used **with extreme caution**.
-
-
-**Example:** delete a single sales transaction.
+Because deletions are irreversible, this command must be used with extreme caution.
 
 ```sql
 DELETE FROM sales
 WHERE transaction_id = 1004;
 ```
+
+
+::: {.callout-important title="Mental Model to Remember"}
+
+- **DDL $\rightarrow$ defines tables, columns, constraints, indexes**  
+- **CRUD $\rightarrow$ inserts, reads, updates, deletes rows**  
+- **DML $\rightarrow$ SQL language (`INSERT`, `SELECT`, `UPDATE`, `DELETE`) implementing CRUD**
+
+The first part of **DML** will be introduced in **Session 3**.  
+You can revisit it here: [Session 3  DML Basics](session3.html)
+
+:::
 
 
 ::: {.callout-note title="To Quote or Not to Quote?"}
@@ -1127,6 +1083,7 @@ The `UNIQUE` constraint ensures that **all values in a column are distinct**.
 It is commonly used to prevent duplicate records for attributes that must be unique across entities.
 
 Typical use cases include:
+
 - email addresses
 - usernames
 - national identification numbers
@@ -1150,6 +1107,7 @@ The `NOT NULL` constraint ensures that a column **cannot contain empty (NULL) va
 Use this constraint for fields that are mandatory and must always be provided.
 
 Typical use cases include:
+
 - primary identifiers
 - contact information
 - transaction timestamps
@@ -1171,6 +1129,7 @@ If an insert is attempted without a phone number, PostgreSQL will return an erro
 A `PRIMARY KEY` uniquely identifies each row in a table.
 
 A primary key:
+
 - must be unique
 - cannot contain NULL values
 - exists only once per table
@@ -1214,6 +1173,7 @@ The `CHECK` constraint restricts the range or condition of values that can be in
 It validates data based on logical expressions.
 
 Typical use cases include:
+
 - value ranges
 - minimum or maximum limits
 - domain rules
@@ -1228,7 +1188,6 @@ CREATE TABLE sales (
 ```
 
 If a value violates the condition, the insert or update will fail with an error.
-
 
 <!-- ------------ -->
 ## SQL Rules and Best Practices
