@@ -705,7 +705,7 @@ Use `EXPLAIN` to generate query plans for both queries and compare their estimat
 
 ### HAVING
 
-### Why HAVING Exists
+#### Why HAVING Exists
 
 The `HAVING` clause is designed to **filter aggregated results**.
 
@@ -719,9 +719,9 @@ At that stage, row-level filtering is no longer sufficient.
 
 Understanding this distinction is essential for correct and efficient SQL.
 
----
 
-### WHERE vs HAVING — Conceptual Difference
+
+#### WHERE vs HAVING
 
 Think of SQL execution as a pipeline.
 
@@ -736,9 +736,8 @@ This leads to a clear separation of responsibilities:
 - `GROUP BY` $\rightarrow$ aggregation
 - `HAVING` $\rightarrow$ group-level filtering
 
----
 
-### Logical Query Execution Order
+#### Logical Query Execution Order
 
 Although SQL is written top-down, it is executed in a different logical order.
 
@@ -754,9 +753,9 @@ At a high level:
 
 This order explains **why aggregate functions cannot appear in `WHERE`**, but are allowed in `HAVING`.
 
----
 
-### Basic HAVING Syntax
+
+#### Basic HAVING Syntax
 
 A typical query using `HAVING` looks like this:
 
@@ -777,7 +776,7 @@ Important points:
 
 ---
 
-### HAVING Example — Filtering by Total Revenue
+#### HAVING Example | Filtering by Total Revenue
 
 Suppose you want to identify products that generated **more than 10,000 in total revenue**.
 
@@ -796,9 +795,8 @@ This query:
 - calculates total revenue per product
 - keeps only products above the revenue threshold
 
----
 
-### HAVING vs WHERE — Common Mistake
+#### HAVING vs WHERE — Common Mistake
 
 Using `WHERE` with aggregate functions is not allowed.
 
@@ -817,7 +815,7 @@ This fails because `SUM(total_sales)` does not exist at the `WHERE` stage of exe
 
 ---
 
-### Combining WHERE and HAVING
+#### Combining WHERE and HAVING
 
 In real-world analytical queries, `WHERE` and `HAVING` are often used together.
 
@@ -840,7 +838,7 @@ This approach is usually **more efficient** than relying on `HAVING` alone.
 
 ---
 
-### HAVING with COUNT
+#### HAVING with COUNT
 
 `HAVING` is frequently used with `COUNT()`.
 
@@ -862,7 +860,7 @@ Here:
 
 ---
 
-### HAVING with Multiple Conditions
+#### HAVING with Multiple Conditions
 
 Multiple aggregate conditions can be combined using logical operators.
 
@@ -882,7 +880,7 @@ This allows you to enforce **compound business rules** at the group level.
 
 ---
 
-### When to Use HAVING
+#### When to Use HAVING
 
 Use `HAVING` when:
 
@@ -891,16 +889,6 @@ Use `HAVING` when:
 - working with `SUM`, `COUNT`, `AVG`, `MIN`, or `MAX`
 
 Do not use `HAVING` when row-level filtering with `WHERE` is sufficient.
-
----
-
-### Key Takeaways
-
-- `WHERE` $\rightarrow$ filters rows before aggregation
-- `HAVING` $\rightarrow$ filters groups after aggregation
-- aggregate functions belong in `HAVING`, not `WHERE`
-- combining `WHERE` and `HAVING` improves performance
-- `HAVING` is essential for analytical SQL
 
 
 ## Practice 2
@@ -913,7 +901,8 @@ Do not use `HAVING` when row-level filtering with `WHERE` is sufficient.
 
 You must **not** recreate tables or re-document schemas.
 
-### Task 1 — Enforce Missing Business Rules with ALTER TABLE
+
+### Task 1 | Enforce Missing Business Rules with ALTER TABLE
 
 Even with a documented schema, databases often lack enforced rules.
 
@@ -946,7 +935,7 @@ ALTER TABLE sales
 ADD CONSTRAINT chk_sales_total CHECK (total_sales >= 0);
 ```
 
-### Task 2 — Add a New Analytical Attribute
+### Task 2 | Add a New Analytical Attribute
 
 The business now wants to analyze sales performance by channel.
 
@@ -981,7 +970,7 @@ write an explanation
 :::
 
 
-### Task 3 — Add Indexes for Query Performance
+### Task 3 | Add Indexes for Query Performance
 
 **Based on common analytical queries, create indexes on columns that are frequently used for (according to you):
 **
@@ -1006,9 +995,8 @@ CREATE INDEX idx_products_category
 ON products (category);
 ```
 
----
 
-### Task 4 — Validate Index Usage with EXPLAIN
+### Task 4 | Validate Index Usage with EXPLAIN
 
 Run `EXPLAIN` on an aggregation query that is commonly used in reporting.
 
@@ -1028,7 +1016,7 @@ GROUP BY product_id;
 - Why might the planner choose this plan?
 
 
-### Task 5 — Reduce Query Cost by Refining SELECT
+### Task 5 | Reduce Query Cost by Refining SELECT
 
 Rewrite a reporting query to avoid unnecessary data retrieval.
 
@@ -1054,9 +1042,9 @@ FROM sales;
 - why this reduces cost
 - when `SELECT *` might still be acceptable
 
----
 
-### Task 6 — ORDER BY and LIMIT for Business Questions
+
+### Task 6 | ORDER BY and LIMIT for Business Questions
 
 Marketing wants to identify the **top 5 products by total revenue**.
 
@@ -1083,7 +1071,7 @@ LIMIT 5;
 
 ---
 
-### Task 7 — DISTINCT vs GROUP BY (Efficiency Comparison)
+### Task 7 | DISTINCT vs GROUP BY (Efficiency Comparison)
 
 Retrieve unique combinations of `category` and `price` using both approaches.
 
@@ -1114,9 +1102,8 @@ GROUP BY category, price;
 - Which has lower estimated cost?
 - Why might PostgreSQL optimize them the same way?
 
----
 
-### Task 8 — Constraint Enforcement Test
+### Task 8 | Constraint Enforcement Test
 
 Attempt to violate at least **two constraints** you added earlier and observe the errors.
 
@@ -1140,7 +1127,7 @@ VALUES (999, 'anna@example.com', '091000999');
 
 ---
 
-### Task 9 — Reflection (Short Answer)
+### Task 9 | Reflection (Short Answer)
 
 **Answer briefly (3–5 sentences total):**
 
@@ -1155,3 +1142,4 @@ VALUES (999, 'anna@example.com', '091000999');
 - No schema documentation
 - Only `ALTER`, `CREATE INDEX`, `UPDATE`, `EXPLAIN`, and `SELECT`
 - Include SQL and short written interpretations
+- Push to GitHub!
