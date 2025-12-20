@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.8.25">
 
   <meta name="author" content="Karen Hovhannisyan">
-  <meta name="dcterms.date" content="2025-12-18">
+  <meta name="dcterms.date" content="2025-12-20">
   <title>Data Analytics Bootcamp – Basic Queries: DDL DLM</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,6 +30,72 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-534cd8e3a96973385dffff3f4709048d.css">
   <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
@@ -151,13 +217,551 @@ Karen Hovhannisyan
 </div>
 </div>
 
-  <p class="date">2025-12-18</p>
+  <p class="date">2025-12-20</p>
 </section>
-<section id="terms" class="slide level2">
-<h2>Terms</h2>
+<section>
+<section id="learning-goals" class="title-slide slide level1 center">
+<h1>Learning Goals</h1>
+
+</section>
+<section id="learning-goals-1" class="slide level2">
+<h2>Learning Goals</h2>
+<p>By the end of this section, you will be able to:</p>
+<ul>
+<li>explain what happens behind the scenes when a SQL query is executed</li>
+<li>understand SQL as a declarative language</li>
+<li>interpret query plans at a high level</li>
+<li>write more efficient analytical queries</li>
+<li>use core SQL clauses to refine query performance</li>
+</ul>
+</section></section>
+<section>
+<section id="behind-the-scenes" class="title-slide slide level1 center">
+<h1>Behind the Scenes</h1>
+
+</section>
+<section id="why-behind-the-scenes-matters" class="slide level2">
+<h2>Why “Behind the Scenes” Matters</h2>
+<p>Before diving into more SQL syntax, let’s pause to understand what happens <strong>behind the scenes</strong> when a SQL query is executed.</p>
+<p>Think about an <strong>e-commerce company</strong>, similar to our products–sales case study.</p>
+<ul>
+<li>inventory management</li>
+<li>order fulfillment</li>
+<li>payment processing</li>
+<li>delivery optimization</li>
+</ul>
+<p>The same idea applies to SQL queries.</p>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>What you write is only part of the story; how the database executes it matters just as much.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sql-as-a-declarative-language" class="slide level2">
+<h2>SQL as a Declarative Language</h2>
+<p>SQL is a <strong>declarative programming language</strong>.</p>
+<p>This means:</p>
+<ul>
+<li>you tell the database <strong>what</strong> result you want</li>
+<li>you do <strong>not</strong> tell it <strong>how</strong> to get that result</li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>The database engine (RDBMS) decides the most efficient execution strategy.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="declarative-query-example" class="slide level2">
+<h2>Declarative Query Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a></a><span class="kw">SELECT</span> product_name</span>
+<span id="cb1-2"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This statement tells the database:</p>
+<ul>
+<li>return values from <code>product_name</code></li>
+<li>read data from the <code>products</code> table</li>
+</ul>
+<p>It does <strong>not</strong> specify:</p>
+<ul>
+<li>which index to use</li>
+<li>how rows are scanned</li>
+<li>whether execution is sequential or indexed</li>
+</ul>
+<p>All of this is handled internally by the database engine.</p>
+</section>
+<section id="query-optimization-happens-automatically" class="slide level2">
+<h2>Query Optimization Happens Automatically</h2>
+<p>When a query is submitted:</p>
+<ul>
+<li>the database parses the SQL</li>
+<li>syntax and permissions are checked</li>
+<li>the query planner evaluates execution strategies</li>
+<li>the optimizer selects the best plan</li>
+<li>results are returned</li>
+</ul>
+<p>Writing efficient SQL means <strong>trusting the database</strong>, while still writing clear and well-structured queries.</p>
+</section>
+<section id="why-this-matters-for-data-analysts" class="slide level2">
+<h2>Why This Matters for Data Analysts</h2>
+<p>As a data analyst:</p>
+<ul>
+<li>you focus on business logic and correctness</li>
+<li>the database focuses on performance and execution</li>
+<li>clean SQL enables better optimization</li>
+<li>proper indexes and constraints improve speed</li>
+</ul>
+<p>Understanding this process helps you:</p>
+<ul>
+<li>diagnose slow queries</li>
+<li>write scalable SQL</li>
+<li>collaborate with data engineers and DBAs</li>
+</ul>
+</section></section>
+<section>
+<section id="query-plan" class="title-slide slide level1 center">
+<h1>Query Plan</h1>
+
+</section>
+<section id="why-query-plans-matter" class="slide level2">
+<h2>Why Query Plans Matter</h2>
+<p>As queries grow more complex and datasets become larger, <strong>performance matters</strong>.</p>
+<p><strong>Poorly optimized queries can:</strong></p>
+<ul>
+<li>slow down dashboards</li>
+<li>increase infrastructure costs</li>
+<li>delay decision-making</li>
+</ul>
+<p><strong>Faster queries mean:</strong></p>
+<ul>
+<li>lower computational cost</li>
+<li>better system performance</li>
+<li>quicker insights</li>
+</ul>
+</section>
+<section id="what-is-a-query-plan" class="slide level2">
+<h2>What Is a Query Plan?</h2>
+<p>A <strong>query plan</strong> shows how the database intends to execute a query.</p>
+<p>Most RDBMSs (including PostgreSQL) estimate:</p>
+<ul>
+<li>execution cost</li>
+<li>number of rows processed</li>
+<li>operations such as scans, joins, filters</li>
+</ul>
+<p>You generate a query plan using <code>EXPLAIN</code>.</p>
+</section>
+<section id="query-plan-example" class="slide level2">
+<h2>Query Plan Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a></a><span class="kw">EXPLAIN</span></span>
+<span id="cb2-2"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb2-3"><a></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>PostgreSQL returns a plan, not the data.</p>
+<p><strong>Example output:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb3-1"><a></a>Seq Scan on sales  (cost=0.00..92.00 rows=5000 width=34)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="reading-a-simple-query-plan" class="slide level2">
+<h2>Reading a Simple Query Plan</h2>
+<ul>
+<li><strong>Seq Scan</strong> → full table scan</li>
+<li><strong>sales</strong> → table being scanned</li>
+<li><strong>cost</strong> → estimated execution cost</li>
+<li><strong>rows</strong> → estimated number of rows</li>
+<li><strong>width</strong> → average row size in bytes</li>
+</ul>
+<p><strong>Sequential scans are common when:</strong></p>
+<ul>
+<li>tables are small</li>
+<li>no suitable index exists</li>
+<li>most rows are needed</li>
+</ul>
+</section></section>
+<section>
+<section id="refining-your-sql-queries" class="title-slide slide level1 center">
+<h1>Refining Your SQL Queries</h1>
+
+</section>
+<section id="why-refinement-matters" class="slide level2">
+<h2>Why Refinement Matters</h2>
+<p>Reducing query cost often starts with <strong>requesting less data</strong>.</p>
+<p>The foundation of almost every analytical query is <code>SELECT</code>.</p>
+</section>
+<section id="select-refresher" class="slide level2">
+<h2>SELECT Refresher</h2>
+<p>Basic structure:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a></a><span class="kw">SELECT</span> column_name_1,</span>
+<span id="cb4-2"><a></a>       column_name_2</span>
+<span id="cb4-3"><a></a><span class="kw">FROM</span> table_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Example using <code>products</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb5-2"><a></a>  product_name,</span>
+<span id="cb5-3"><a></a>  price,</span>
+<span id="cb5-4"><a></a>  <span class="kw">category</span></span>
+<span id="cb5-5"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="why-column-selection-matters" class="slide level2">
+<h2>Why Column Selection Matters</h2>
+<p><strong>Selecting only needed columns:</strong></p>
+<ul>
+<li>reduces data transfer</li>
+<li>improves performance</li>
+<li>makes results easier to interpret</li>
+</ul>
+<div title="Try It Yourself">
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Try It Yourself</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Compare:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a></a><span class="kw">EXPLAIN</span></span>
+<span id="cb6-2"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb6-3"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="kw">EXPLAIN</span></span>
+<span id="cb7-2"><a></a><span class="kw">SELECT</span> product_name, price</span>
+<span id="cb7-3"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="order-by" class="title-slide slide level1 center">
+<h1>ORDER BY</h1>
+
+</section>
+<section id="sorting-results" class="slide level2">
+<h2>Sorting Results</h2>
+<p><code>ORDER BY</code> sorts results in ascending or descending order.</p>
+<p><strong>Common use cases:</strong></p>
+<ul>
+<li>first or last records</li>
+<li>highest or lowest values</li>
+<li>alphabetical ordering</li>
+</ul>
+</section>
+<section id="order-by-examples" class="slide level2 smaller">
+<h2>ORDER BY Examples</h2>
+<p>Default (ascending):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">SELECT</span> product_name</span>
+<span id="cb8-2"><a></a><span class="kw">FROM</span> products</span>
+<span id="cb8-3"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> product_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Descending (Z <span class="math inline">\(\rightarrow\)</span> A):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a></a>  product_name,</span>
+<span id="cb9-3"><a></a>  <span class="kw">category</span></span>
+<span id="cb9-4"><a></a><span class="kw">FROM</span> products</span>
+<span id="cb9-5"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> product_name <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Numeric sorting:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb10-2"><a></a>  product_name,</span>
+<span id="cb10-3"><a></a>  price</span>
+<span id="cb10-4"><a></a><span class="kw">FROM</span> products</span>
+<span id="cb10-5"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> price <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="order-by-key-rules" class="slide level2">
+<h2>ORDER BY Key Rules</h2>
+<ul>
+<li>applied after <code>SELECT</code> and <code>FROM</code></li>
+<li>default order is ascending</li>
+<li><code>DESC</code> reverses order</li>
+<li>supports multiple columns</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="kw">category</span> <span class="kw">ASC</span>, price <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="limit" class="title-slide slide level1 center">
+<h1>LIMIT</h1>
+
+</section>
+<section id="limiting-output-size" class="slide level2">
+<h2>Limiting Output Size</h2>
+<p><code>LIMIT</code> restricts the number of rows returned.</p>
+<p>Useful when:</p>
+<ul>
+<li>previewing data</li>
+<li>reducing cost</li>
+<li>retrieving top-N results</li>
+</ul>
+</section>
+<section id="limit-example" class="slide level2 smaller">
+<h2>LIMIT Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a></a>  product_name,</span>
+<span id="cb12-3"><a></a>  price</span>
+<span id="cb12-4"><a></a><span class="kw">FROM</span> products</span>
+<span id="cb12-5"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> price <span class="kw">DESC</span></span>
+<span id="cb12-6"><a></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This query:</p>
+<ul>
+<li>sorts by price</li>
+<li>returns only 10 rows</li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li><code>LIMIT</code> must be at the end</li>
+<li>value must be numeric</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="group-by" class="title-slide slide level1 center">
+<h1>GROUP BY</h1>
+
+</section>
+<section id="group-by-basics" class="slide level2">
+<h2>GROUP BY Basics</h2>
+<p><code>GROUP BY</code> groups rows sharing the same values.</p>
+<p>It is commonly used with aggregate functions:</p>
+<ul>
+<li><code>COUNT()</code></li>
+<li><code>SUM()</code></li>
+<li><code>AVG()</code></li>
+<li><code>MIN()</code></li>
+<li><code>MAX()</code></li>
+</ul>
+</section>
+<section id="group-by-example" class="slide level2">
+<h2>GROUP BY Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a></a>  product_id,</span>
+<span id="cb13-3"><a></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb13-4"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb13-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This query:</p>
+<ul>
+<li>groups by product</li>
+<li>aggregates revenue</li>
+<li>returns one row per product</li>
+</ul>
+</section>
+<section id="group-by-with-order-by-and-limit" class="slide level2">
+<h2>GROUP BY with ORDER BY and LIMIT</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb14-2"><a></a>  product_id,</span>
+<span id="cb14-3"><a></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb14-4"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb14-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
+<span id="cb14-6"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_revenue <span class="kw">DESC</span></span>
+<span id="cb14-7"><a></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns top 5 products by revenue.</p>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="distinct" class="title-slide slide level1 center">
+<h1>DISTINCT</h1>
+
+</section>
+<section id="distinct-basics" class="slide level2">
+<h2>DISTINCT Basics</h2>
+<p><code>DISTINCT</code> returns <strong>unique values</strong>.</p>
+<p>Syntax:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> column_name</span>
+<span id="cb15-2"><a></a><span class="kw">FROM</span> table_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="distinct-examples" class="slide level2">
+<h2>DISTINCT Examples</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> <span class="kw">category</span></span>
+<span id="cb16-2"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Multiple columns:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
+<span id="cb17-2"><a></a>  <span class="kw">category</span>,</span>
+<span id="cb17-3"><a></a>  price</span>
+<span id="cb17-4"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="distinct-vs-group-by" class="slide level2">
+<h2>DISTINCT vs GROUP BY</h2>
+<p>Both can return unique combinations.</p>
+<p><code>DISTINCT</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a></a><span class="kw">SELECT</span> <span class="kw">DISTINCT</span></span>
+<span id="cb18-2"><a></a>  <span class="kw">category</span>,</span>
+<span id="cb18-3"><a></a>  price</span>
+<span id="cb18-4"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>GROUP BY</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb19-2"><a></a>  <span class="kw">category</span>,</span>
+<span id="cb19-3"><a></a>  price</span>
+<span id="cb19-4"><a></a><span class="kw">FROM</span> products</span>
+<span id="cb19-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>, price;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Use:</p>
+<ul>
+<li><code>DISTINCT</code> for simplicity</li>
+<li><code>GROUP BY</code> when aggregation is needed</li>
+</ul>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="having" class="title-slide slide level1 center">
+<h1>HAVING</h1>
+
+</section>
+<section id="why-having-exists" class="slide level2">
+<h2>Why HAVING Exists</h2>
+<p><code>HAVING</code> is used to <strong>filter aggregated results</strong>.</p>
+<p>While <code>WHERE</code> filters <strong>rows before aggregation</strong>,<br>
+<code>HAVING</code> filters <strong>groups after aggregation</strong>.</p>
+<p>This distinction is critical for analytical queries.</p>
+</section>
+<section id="where-vs-having-conceptual-difference" class="slide level2">
+<h2>WHERE vs HAVING — Conceptual Difference</h2>
+<ul>
+<li><code>WHERE</code> <span class="math inline">\(\rightarrow\)</span> filters raw rows</li>
+<li><code>GROUP BY</code> <span class="math inline">\(\rightarrow\)</span> creates groups</li>
+<li><code>HAVING</code> <span class="math inline">\(\rightarrow\)</span> filters aggregated groups</li>
+</ul>
+<p>You cannot use aggregate functions in <code>WHERE</code>.</p>
+</section>
+<section id="logical-query-execution-order" class="slide level2">
+<h2>Logical Query Execution Order</h2>
+<p>SQL is written top-down, but executed differently.</p>
+<p>Logical order (simplified):</p>
+<ul>
+<li><code>FROM</code></li>
+<li><code>WHERE</code></li>
+<li><code>GROUP BY</code></li>
+<li><code>HAVING</code></li>
+<li><code>SELECT</code></li>
+<li><code>ORDER BY</code></li>
+<li><code>LIMIT</code></li>
+</ul>
+<p>This explains why <code>HAVING</code> exists.</p>
+</section>
+<section id="basic-having-syntax" class="slide level2">
+<h2>Basic HAVING Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a></a>  group_column,</span>
+<span id="cb20-3"><a></a>  AGGREGATE_FUNCTION(<span class="kw">column</span>)</span>
+<span id="cb20-4"><a></a><span class="kw">FROM</span> table_name</span>
+<span id="cb20-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> group_column</span>
+<span id="cb20-6"><a></a><span class="kw">HAVING</span> AGGREGATE_FUNCTION(<span class="kw">column</span>) condition;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>HAVING</code> always works <strong>together with <code>GROUP BY</code></strong>.</p>
+</section>
+<section id="having-example-filter-by-total-revenue" class="slide level2">
+<h2>HAVING Example — Filter by Total Revenue</h2>
+<p>Suppose you want products that generated <strong>more than 10,000</strong> in total revenue.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb21-2"><a></a>  product_id,</span>
+<span id="cb21-3"><a></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb21-4"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb21-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
+<span id="cb21-6"><a></a><span class="kw">HAVING</span> <span class="fu">SUM</span>(total_sales) <span class="op">&gt;</span> <span class="dv">10000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This query:</p>
+<ul>
+<li>groups sales by product</li>
+<li>calculates total revenue per product</li>
+<li>keeps only products above the threshold</li>
+</ul>
+</section>
+<section id="having-vs-where-practical-comparison" class="slide level2">
+<h2>HAVING vs WHERE — Practical Comparison</h2>
+<p>Using <code>WHERE</code> (incorrect):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb22-2"><a></a>  product_id,</span>
+<span id="cb22-3"><a></a>  <span class="fu">SUM</span>(total_sales)</span>
+<span id="cb22-4"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb22-5"><a></a><span class="kw">WHERE</span> <span class="fu">SUM</span>(total_sales) <span class="op">&gt;</span> <span class="dv">10000</span></span>
+<span id="cb22-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This query fails because <code>SUM()</code> is not available at the <code>WHERE</code> stage.</p>
+</section>
+<section id="combining-where-and-having" class="slide level2">
+<h2>Combining WHERE and HAVING</h2>
+<p>You can (and often should) use <strong>both</strong>.</p>
+<p>Example: - <code>WHERE</code> filters rows early - <code>HAVING</code> filters aggregated results</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a></a>  product_id,</span>
+<span id="cb23-3"><a></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb23-4"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb23-5"><a></a><span class="kw">WHERE</span> total_sales <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb23-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
+<span id="cb23-7"><a></a><span class="kw">HAVING</span> <span class="fu">SUM</span>(total_sales) <span class="op">&gt;</span> <span class="dv">10000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is more efficient than using <code>HAVING</code> alone.</p>
+</section>
+<section id="having-with-count" class="slide level2">
+<h2>HAVING with COUNT</h2>
+<p>Find products with <strong>at least 50 transactions</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a></a>  product_id,</span>
+<span id="cb24-3"><a></a>  <span class="fu">COUNT</span>(transaction_id) <span class="kw">AS</span> transaction_count</span>
+<span id="cb24-4"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb24-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
+<span id="cb24-6"><a></a><span class="kw">HAVING</span> <span class="fu">COUNT</span>(transaction_id) <span class="op">&gt;=</span> <span class="dv">50</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="having-with-multiple-conditions" class="slide level2">
+<h2>HAVING with Multiple Conditions</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb25-2"><a></a>  product_id,</span>
+<span id="cb25-3"><a></a>  <span class="fu">COUNT</span>(transaction_id) <span class="kw">AS</span> transaction_count,</span>
+<span id="cb25-4"><a></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb25-5"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb25-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_id</span>
+<span id="cb25-7"><a></a><span class="kw">HAVING</span></span>
+<span id="cb25-8"><a></a>  <span class="fu">COUNT</span>(transaction_id) <span class="op">&gt;=</span> <span class="dv">50</span></span>
+<span id="cb25-9"><a></a>  <span class="kw">AND</span> <span class="fu">SUM</span>(total_sales) <span class="op">&gt;</span> <span class="dv">10000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This filters on <strong>multiple aggregated metrics</strong>.</p>
+</section>
+<section id="when-to-use-having" class="slide level2">
+<h2>When to Use HAVING</h2>
+<p>Use <code>HAVING</code> when:</p>
+<ul>
+<li>filtering aggregated results</li>
+<li>working with <code>SUM</code>, <code>COUNT</code>, <code>AVG</code>, etc.</li>
+<li>applying business thresholds to groups</li>
+</ul>
+<p>Do <strong>not</strong> use <code>HAVING</code> when row-level filtering is sufficient.</p>
+</section>
+<section id="execution-order" class="slide level2">
+<h2>Execution order</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26" data-code-line-numbers="4,5,7,8,2,9,10,11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a></a><span class="kw">SELECT</span>                                   <span class="co">-- 6</span></span>
+<span id="cb26-2"><a></a>  p.product_id,</span>
+<span id="cb26-3"><a></a>  <span class="fu">SUM</span>(s.total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb26-4"><a></a><span class="kw">FROM</span> sales <span class="kw">AS</span> s                          <span class="co">-- 1</span></span>
+<span id="cb26-5"><a></a><span class="kw">JOIN</span> products <span class="kw">AS</span> p                       <span class="co">-- 2</span></span>
+<span id="cb26-6"><a></a>  <span class="kw">ON</span> s.product_id <span class="op">=</span> p.product_id         <span class="co">-- 3</span></span>
+<span id="cb26-7"><a></a><span class="kw">WHERE</span> s.total_sales <span class="op">&gt;</span> <span class="dv">0</span>                  <span class="co">-- 4</span></span>
+<span id="cb26-8"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> p.product_id                    <span class="co">-- 5</span></span>
+<span id="cb26-9"><a></a><span class="kw">HAVING</span> <span class="fu">SUM</span>(s.total_sales) <span class="op">&gt;</span> <span class="dv">10000</span>        <span class="co">-- 6</span></span>
+<span id="cb26-10"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_revenue <span class="kw">DESC</span>              <span class="co">-- 7</span></span>
+<span id="cb26-11"><a></a><span class="kw">LIMIT</span> <span class="dv">5</span>;                                 <span class="co">-- 8</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
-</section>
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="../../../img/favicon.png" class="slide-logo"></p>
