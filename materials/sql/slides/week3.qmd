@@ -28,6 +28,620 @@ format:
           </style>
 ---
 
-## Terms
+# Learning Goals
+
+## Learning Goals
+
+By the end of this section, you will be able to:
+
+- explain what happens behind the scenes when a SQL query is executed
+- understand SQL as a declarative language
+- interpret query plans at a high level
+- write more efficient analytical queries
+- use core SQL clauses to refine query performance
+
+
+
+# Behind the Scenes
+
+## Why “Behind the Scenes” Matters
+
+Before diving into more SQL syntax, let’s pause to understand what happens **behind the scenes** when a SQL query is executed.
+
+Think about an **e-commerce company**, similar to our products–sales case study.
+
+- inventory management
+- order fulfillment
+- payment processing
+- delivery optimization
+
+The same idea applies to SQL queries.
+
+::: {.callout-important}
+What you write is only part of the story; how the database executes it matters just as much.
+:::
+
+
+## SQL as a Declarative Language
+
+SQL is a **declarative programming language**.
+
+This means:
+
+- you tell the database **what** result you want
+- you do **not** tell it **how** to get that result
+
+::: {.callout-important}
+The database engine (RDBMS) decides the most efficient execution strategy.
+:::
+
+---
+
+## Declarative Query Example
+
+```sql
+SELECT product_name
+FROM products;
+```
+
+This statement tells the database:
+
+- return values from `product_name`
+- read data from the `products` table
+
+It does **not** specify:
+
+- which index to use
+- how rows are scanned
+- whether execution is sequential or indexed
+
+All of this is handled internally by the database engine.
+
+
+
+## Query Optimization Happens Automatically
+
+When a query is submitted:
+
+- the database parses the SQL
+- syntax and permissions are checked
+- the query planner evaluates execution strategies
+- the optimizer selects the best plan
+- results are returned
+
+Writing efficient SQL means **trusting the database**, while still writing clear and well-structured queries.
+
+---
+
+## Why This Matters for Data Analysts
+
+As a data analyst:
+
+- you focus on business logic and correctness
+- the database focuses on performance and execution
+- clean SQL enables better optimization
+- proper indexes and constraints improve speed
+
+Understanding this process helps you:
+
+- diagnose slow queries
+- write scalable SQL
+- collaborate with data engineers and DBAs
+
+
+
+# Query Plan
+
+## Why Query Plans Matter
+
+As queries grow more complex and datasets become larger, **performance matters**.
+
+**Poorly optimized queries can:**
+
+- slow down dashboards
+- increase infrastructure costs
+- delay decision-making
+
+**Faster queries mean:**
+
+- lower computational cost
+- better system performance
+- quicker insights
+
+---
+
+## What Is a Query Plan?
+
+A **query plan** shows how the database intends to execute a query.
+
+Most RDBMSs (including PostgreSQL) estimate:
+
+- execution cost
+- number of rows processed
+- operations such as scans, joins, filters
+
+You generate a query plan using `EXPLAIN`.
+
+---
+
+## Query Plan Example
+
+```sql
+EXPLAIN
+SELECT *
+FROM sales;
+```
+
+PostgreSQL returns a plan, not the data.
+
+**Example output:**
+
+```text
+Seq Scan on sales  (cost=0.00..92.00 rows=5000 width=34)
+```
+
+---
+
+## Reading a Simple Query Plan
+
+
+- **Seq Scan** → full table scan
+- **sales** → table being scanned
+- **cost** → estimated execution cost
+- **rows** → estimated number of rows
+- **width** → average row size in bytes
+
+**Sequential scans are common when:**
+
+- tables are small
+- no suitable index exists
+- most rows are needed
+
+
+# Refining Your SQL Queries
+
+## Why Refinement Matters
+
+Reducing query cost often starts with **requesting less data**.
+
+The foundation of almost every analytical query is `SELECT`.
+
+
+## SELECT Refresher
+
+Basic structure:
+
+```sql
+SELECT column_name_1,
+       column_name_2
+FROM table_name;
+```
+
+Example using `products`:
+
+```sql
+SELECT
+  product_name,
+  price,
+  category
+FROM products;
+```
+
+---
+
+## Why Column Selection Matters
+
+**Selecting only needed columns:**
+
+- reduces data transfer
+- improves performance
+- makes results easier to interpret
+
+::: {.callout-important title="Try It Yourself"}
+**Compare:**
+
+```sql
+EXPLAIN
+SELECT *
+FROM products;
+```
+
+```sql
+EXPLAIN
+SELECT product_name, price
+FROM products;
+```
+:::
+
+---
+
+# ORDER BY
+
+## Sorting Results
+
+`ORDER BY` sorts results in ascending or descending order.
+
+**Common use cases:**
+
+- first or last records
+- highest or lowest values
+- alphabetical ordering
+
+---
+
+## ORDER BY Examples {.smaller}
+
+Default (ascending):
+
+```sql
+SELECT product_name
+FROM products
+ORDER BY product_name;
+```
+
+Descending (Z $\rightarrow$ A):
+
+```sql
+SELECT
+  product_name,
+  category
+FROM products
+ORDER BY product_name DESC;
+```
+
+**Numeric sorting:**
+
+```sql
+SELECT
+  product_name,
+  price
+FROM products
+ORDER BY price DESC;
+```
+
+
+
+## ORDER BY Key Rules
+
+- applied after `SELECT` and `FROM`
+- default order is ascending
+- `DESC` reverses order
+- supports multiple columns
+
+```sql
+ORDER BY category ASC, price DESC;
+```
+
+
+
+# LIMIT
+
+## Limiting Output Size
+
+`LIMIT` restricts the number of rows returned.
+
+Useful when:
+
+- previewing data
+- reducing cost
+- retrieving top-N results
+
+---
+
+## LIMIT Example {.smaller}
+
+```sql
+SELECT
+  product_name,
+  price
+FROM products
+ORDER BY price DESC
+LIMIT 10;
+```
+
+This query:
+
+- sorts by price
+- returns only 10 rows
+
+::: {.callout-important}
+- `LIMIT` must be at the end
+- value must be numeric
+:::
+
+---
+
+# GROUP BY
+
+## GROUP BY Basics
+
+`GROUP BY` groups rows sharing the same values.
+
+It is commonly used with aggregate functions:
+
+- `COUNT()`
+- `SUM()`
+- `AVG()`
+- `MIN()`
+- `MAX()`
+
+---
+
+## GROUP BY Example
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id;
+```
+
+This query:
+
+- groups by product
+- aggregates revenue
+- returns one row per product
+
+---
+
+## GROUP BY with ORDER BY and LIMIT
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id
+ORDER BY total_revenue DESC
+LIMIT 5;
+```
+
+Returns top 5 products by revenue.
+
+---
+
+# DISTINCT
+
+## DISTINCT Basics
+
+`DISTINCT` returns **unique values**.
+
+Syntax:
+
+```sql
+SELECT DISTINCT column_name
+FROM table_name;
+```
+
+---
+
+## DISTINCT Examples
+
+```sql
+SELECT DISTINCT category
+FROM products;
+```
+
+Multiple columns:
+
+```sql
+SELECT DISTINCT
+  category,
+  price
+FROM products;
+```
+
+---
+
+## DISTINCT vs GROUP BY
+
+Both can return unique combinations.
+
+`DISTINCT`:
+
+```sql
+SELECT DISTINCT
+  category,
+  price
+FROM products;
+```
+
+`GROUP BY`:
+
+```sql
+SELECT
+  category,
+  price
+FROM products
+GROUP BY category, price;
+```
+
+Use:
+
+- `DISTINCT` for simplicity
+- `GROUP BY` when aggregation is needed
+
+---
+
+# HAVING
+
+## Why HAVING Exists
+
+`HAVING` is used to **filter aggregated results**.
+
+While `WHERE` filters **rows before aggregation**,  
+`HAVING` filters **groups after aggregation**.
+
+This distinction is critical for analytical queries.
+
+---
+
+## WHERE vs HAVING — Conceptual Difference
+
+- `WHERE` $\rightarrow$ filters raw rows
+- `GROUP BY` $\rightarrow$ creates groups
+- `HAVING` $\rightarrow$ filters aggregated groups
+
+You cannot use aggregate functions in `WHERE`.
+
+---
+
+## Logical Query Execution Order
+
+SQL is written top-down, but executed differently.
+
+Logical order (simplified):
+
+- `FROM`
+- `WHERE`
+- `GROUP BY`
+- `HAVING`
+- `SELECT`
+- `ORDER BY`
+- `LIMIT`
+
+This explains why `HAVING` exists.
+
+---
+
+## Basic HAVING Syntax
+
+```sql
+SELECT
+  group_column,
+  AGGREGATE_FUNCTION(column)
+FROM table_name
+GROUP BY group_column
+HAVING AGGREGATE_FUNCTION(column) condition;
+```
+
+`HAVING` always works **together with `GROUP BY`**.
+
+---
+
+## HAVING Example — Filter by Total Revenue
+
+Suppose you want products that generated **more than 10,000** in total revenue.
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id
+HAVING SUM(total_sales) > 10000;
+```
+
+This query:
+
+- groups sales by product
+- calculates total revenue per product
+- keeps only products above the threshold
+
+---
+
+## HAVING vs WHERE — Practical Comparison
+
+Using `WHERE` (incorrect):
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales)
+FROM sales
+WHERE SUM(total_sales) > 10000
+GROUP BY product_id;
+```
+
+This query fails because `SUM()` is not available at the `WHERE` stage.
+
+---
+
+## Combining WHERE and HAVING
+
+You can (and often should) use **both**.
+
+Example:
+- `WHERE` filters rows early
+- `HAVING` filters aggregated results
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+WHERE total_sales > 0
+GROUP BY product_id
+HAVING SUM(total_sales) > 10000;
+```
+
+This is more efficient than using `HAVING` alone.
+
+---
+
+## HAVING with COUNT
+
+Find products with **at least 50 transactions**.
+
+```sql
+SELECT
+  product_id,
+  COUNT(transaction_id) AS transaction_count
+FROM sales
+GROUP BY product_id
+HAVING COUNT(transaction_id) >= 50;
+```
+
+---
+
+## HAVING with Multiple Conditions
+
+```sql
+SELECT
+  product_id,
+  COUNT(transaction_id) AS transaction_count,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id
+HAVING
+  COUNT(transaction_id) >= 50
+  AND SUM(total_sales) > 10000;
+```
+
+This filters on **multiple aggregated metrics**.
+
+---
+
+## When to Use HAVING
+
+Use `HAVING` when:
+
+- filtering aggregated results
+- working with `SUM`, `COUNT`, `AVG`, etc.
+- applying business thresholds to groups
+
+Do **not** use `HAVING` when row-level filtering is sufficient.
+
+
+## Execution order
+
+
+
+```sql {.sql code-line-numbers="4,5,7,8,2,9,10,11"}
+SELECT                                   -- 6
+  p.product_id,
+  SUM(s.total_sales) AS total_revenue
+FROM sales AS s                          -- 1
+JOIN products AS p                       -- 2
+  ON s.product_id = p.product_id         -- 3
+WHERE s.total_sales > 0                  -- 4
+GROUP BY p.product_id                    -- 5
+HAVING SUM(s.total_sales) > 10000        -- 6
+ORDER BY total_revenue DESC              -- 7
+LIMIT 5;                                 -- 8
+```
+
+
 
 
