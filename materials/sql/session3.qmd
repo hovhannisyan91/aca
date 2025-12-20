@@ -703,6 +703,206 @@ Which command do you think is faster: `GROUP BY` or `DISTINCT`?
 Use `EXPLAIN` to generate query plans for both queries and compare their estimated costs to see which one runs more efficiently in `PostgreSQL`.
 
 
+### HAVING
+
+### Why HAVING Exists
+
+The `HAVING` clause is designed to **filter aggregated results**.
+
+In analytical queries, data is often grouped and summarized before it becomes meaningful.  
+At that stage, row-level filtering is no longer sufficient.
+
+`HAVING` fills this gap.
+
+- `WHERE` $\rightarrow$ filters **rows before aggregation**
+- `HAVING` $\rightarrow$ filters **groups after aggregation**
+
+Understanding this distinction is essential for correct and efficient SQL.
+
+---
+
+### WHERE vs HAVING — Conceptual Difference
+
+Think of SQL execution as a pipeline.
+
+- raw rows are first filtered
+- rows are then grouped
+- aggregates are calculated
+- groups are filtered again if needed
+
+This leads to a clear separation of responsibilities:
+
+- `WHERE` $\rightarrow$ row-level filtering
+- `GROUP BY` $\rightarrow$ aggregation
+- `HAVING` $\rightarrow$ group-level filtering
+
+---
+
+### Logical Query Execution Order
+
+Although SQL is written top-down, it is executed in a different logical order.
+
+At a high level:
+
+- `FROM`
+- `WHERE`
+- `GROUP BY`
+- `HAVING`
+- `SELECT`
+- `ORDER BY`
+- `LIMIT`
+
+This order explains **why aggregate functions cannot appear in `WHERE`**, but are allowed in `HAVING`.
+
+---
+
+### Basic HAVING Syntax
+
+A typical query using `HAVING` looks like this:
+
+```sql
+SELECT
+  group_column,
+  AGGREGATE_FUNCTION(column)
+FROM table_name
+GROUP BY group_column
+HAVING AGGREGATE_FUNCTION(column) condition;
+```
+
+Important points:
+
+- `HAVING` is evaluated **after** aggregation
+- it almost always appears together with `GROUP BY`
+- it works on aggregated values, not raw rows
+
+---
+
+### HAVING Example — Filtering by Total Revenue
+
+Suppose you want to identify products that generated **more than 10,000 in total revenue**.
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id
+HAVING SUM(total_sales) > 10000;
+```
+
+This query:
+
+- groups sales by product
+- calculates total revenue per product
+- keeps only products above the revenue threshold
+
+---
+
+### HAVING vs WHERE — Common Mistake
+
+Using `WHERE` with aggregate functions is not allowed.
+
+Incorrect example:
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales)
+FROM sales
+WHERE SUM(total_sales) > 10000
+GROUP BY product_id;
+```
+
+This fails because `SUM(total_sales)` does not exist at the `WHERE` stage of execution.
+
+---
+
+### Combining WHERE and HAVING
+
+In real-world analytical queries, `WHERE` and `HAVING` are often used together.
+
+Their roles are complementary:
+
+- `WHERE` removes unnecessary rows early
+- `HAVING` applies business rules after aggregation
+
+```sql
+SELECT
+  product_id,
+  SUM(total_sales) AS total_revenue
+FROM sales
+WHERE total_sales > 0
+GROUP BY product_id
+HAVING SUM(total_sales) > 10000;
+```
+
+This approach is usually **more efficient** than relying on `HAVING` alone.
+
+---
+
+### HAVING with COUNT
+
+`HAVING` is frequently used with `COUNT()`.
+
+Example: find products with **at least 50 transactions**.
+
+```sql
+SELECT
+  product_id,
+  COUNT(transaction_id) AS transaction_count
+FROM sales
+GROUP BY product_id
+HAVING COUNT(transaction_id) >= 50;
+```
+
+Here:
+
+- transactions are grouped by product
+- only frequently sold products are retained
+
+---
+
+### HAVING with Multiple Conditions
+
+Multiple aggregate conditions can be combined using logical operators.
+
+```sql
+SELECT
+  product_id,
+  COUNT(transaction_id) AS transaction_count,
+  SUM(total_sales) AS total_revenue
+FROM sales
+GROUP BY product_id
+HAVING
+  COUNT(transaction_id) >= 50
+  AND SUM(total_sales) > 10000;
+```
+
+This allows you to enforce **compound business rules** at the group level.
+
+---
+
+### When to Use HAVING
+
+Use `HAVING` when:
+
+- filtering aggregated results
+- applying thresholds to groups
+- working with `SUM`, `COUNT`, `AVG`, `MIN`, or `MAX`
+
+Do not use `HAVING` when row-level filtering with `WHERE` is sufficient.
+
+---
+
+### Key Takeaways
+
+- `WHERE` $\rightarrow$ filters rows before aggregation
+- `HAVING` $\rightarrow$ filters groups after aggregation
+- aggregate functions belong in `HAVING`, not `WHERE`
+- combining `WHERE` and `HAVING` improves performance
+- `HAVING` is essential for analytical SQL
+
+
 ## Practice 2
 
 **Assume the following:**
