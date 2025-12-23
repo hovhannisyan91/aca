@@ -1,0 +1,824 @@
+---
+title: "Session 04: Data Analysis with SQL | Part II"
+categories: [SQL, Filtering,]
+---
+
+
+
+## Introduction
+
+Now, we will be taking a closer look at how to filter data using the `WHERE` clause and the `HAVING` statement. With lots of examples and use cases along the way to prepare you for writing queries in the **real world.**
+
+After `SELECT`, these are the most widely used commands for a data analyst, so having a solid grasp of them is essential. The good news is that mastering them is easier than you think—you’ll see why in just a moment.
+
+Once you’re comfortable using the `WHERE` and `HAVING` clauses to pinpoint the information you want, we’ll introduce the `CASE` statement, which you can use to build new categories out of your data.
+
+
+## Creating a Denormalized Analysis Table
+
+Before diving deeper into filtering techniques, we will create a single, denormalized table that brings together all relevant columns needed for analysis.
+
+The goal of this table is to simplify analytical queries by:
+
+- Joining all related tables into one structure
+
+- Keeping only business-relevant attributes used for filtering and analysis
+
+- Ignoring surrogate and foreign keys, except for the transactional identifier
+
+This approach is common in analytics and reporting, where ease of querying is more important than strict normalization.
+
+### Denormalized Table Design
+
+The denormalized table will be built around the `sales` table and will include:
+
+- Transaction-level information  
+- Order time attributes  
+- Product attributes  
+- Customer attributes  
+- Employee attributes  
+
+The only identifier retained will be the transaction identifier.
+
+### Creating `sales_analysis` Table
+
+```sql
+CREATE TABLE IF NOT EXISTS sales_analysis AS
+SELECT
+    s.transaction_id,
+
+    o.order_date,
+    o.year,
+    o.quarter,
+    o.month,
+
+    c.customer_name,
+    c.city,
+    c.zip_code,
+
+    p.product_name,
+    p.category,
+    p.price,
+
+    e.first_name  AS employee_first_name,
+    e.last_name   AS employee_last_name,
+    e.salary      AS employee_salary,
+
+    s.quantity,
+    s.discount,
+    s.total_sales
+
+FROM sales AS s
+JOIN orders AS o
+    ON s.order_id = o.order_id
+JOIN customers AS c
+    ON s.customer_id = c.customer_id
+JOIN products AS p
+    ON s.product_id = p.product_id
+LEFT JOIN employees AS e
+    ON s.employee_id = e.employee_id;
+```
+
+### Adding indexes
+
+```sql
+CREATE INDEX idx_sales_analysis_order_date
+    ON sales_analysis(order_date_date);
+
+CREATE INDEX idx_sales_analysis_year
+    ON sales_analysis(year);
+
+CREATE INDEX idx_sales_analysis_city
+    ON sales_analysis(city);
+
+CREATE INDEX idx_sales_analysis_category
+    ON sales_analysis(category);
+```
+
+The `sales_analysis` table now stores both timestamp-level and date-level order information and will serve as the base table for all filtering examples in this session.
+
+::: {.callout-warning}
+We are going to learn the `JOIN`s so for now do not worry and simply *capy and paste* the above code
+
+:::
+
+## WHERE
+
+When conducting an analysis, you will almost never work with every single record in a database. Instead, you will focus on a specific subset of data that is relevant to the business question you are trying to answer.
+
+In the context of our case study, this might mean 
+
+- analyzing sales made in a particular year, 
+- transactions with high discounts, 
+- products belonging to a specific category, or 
+- customers from a certain city. 
+- etc. 
+
+*To extract only the records that matter for your analysis, you need to filter the data.*
+
+In SQL, filtering is primarily done using the `WHERE` clause. The `WHERE` clause allows you to include or exclude rows based on conditions applied to columns in your tables. 
+
+::: {.callout-tip}
+
+For example, you may want to look only at sales where: 
+
+- the total sales amount exceeds a certain threshold, 
+- orders placed in a specific quarter
+-  products priced above the average.
+
+:::
+
+To define these filtering conditions, the `WHERE` clause is combined with operators. 
+
+Some of these operators are intuitive and closely resemble everyday language, such as `BETWEEN`, `OR`, `IN`, `AND` or `LIKE`. 
+
+By understanding how these operators work, you can precisely control which rows from tables like `sales`, `orders`, `products`, or `customers` are included in your analysis.
+
+
+### Simple WHERE Conditions
+
+::: {.callout}
+
+JUST a REMINDER 
+
+:::
+
+You can filter rows based on a single condition.
+
+Example: select transactions where total sales exceed 100,000.
+
+```sql
+SELECT
+    transaction_id,
+    order_date_date,
+    product_name,
+    total_sales
+FROM sales_analysis
+WHERE total_sales > 1000;
+```
+
+Only rows with `total_sales` greater than `1000` are included in the result.
+
+Example: select transactions for products in the Electronics category.
+
+```sql
+SELECT
+    transaction_id,
+    product_name,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE category = 'Electronics';
+```
+
+### Combining Conditions with AND
+
+The `AND` operator requires all conditions to be true for a row to be included.
+
+**Example:** select transactions from `2024` with `high total sales`.
+
+```sql
+SELECT
+    transaction_id,
+    order_date_date,
+    year,
+    product_name,
+    total_sales
+FROM sales_analysis
+WHERE year = 2023
+  AND total_sales > 10000;
+```
+
+Rows must satisfy both conditions at the same time.
+
+Example: select Electronics sales from the city of East Amanda.
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE city = 'East Amanda'
+  AND category = 'Electronics';
+```
+
+### Combining Conditions with OR
+
+The `OR` operator requires at least one condition to be true.
+
+Example: select transactions that occurred either in East Amanda or Smithside.
+
+```sql
+SELECT
+    transaction_id,
+    order_date_date,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE city = 'East Amanda'
+   OR city = 'Smithside';
+```
+
+Example: select transactions for products in either the Toys or Books categories.
+
+```sql
+SELECT
+    transaction_id,
+    product_name,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE category = 'Toys'
+   OR category = 'Books';
+```
+
+### Using BETWEEN for Ranges
+
+The `BETWEEN` operator is used to filter values within a specified range.
+
+The range is inclusive of both boundary values.
+
+Example: select transactions with total sales between 50,000 and 150,000.
+
+```sql
+SELECT
+    transaction_id,
+    order_date_date,
+    total_sales
+FROM sales_analysis
+WHERE total_sales BETWEEN 50000 AND 150000;
+```
+
+Example: select transactions from years between 2022 and 2024.
+
+```sql
+SELECT
+    transaction_id,
+    year,
+    total_sales
+FROM sales_analysis
+WHERE year BETWEEN 2022 AND 2024;
+```
+
+::: {.callout-note}
+
+we can achieve the same result by doing:
+
+```sql
+WHERE year>=2022 and year<2024
+```
+
+:::
+
+When filtering against a fixed list of known values, the `IN` and `NOT IN` operators provide a cleaner and more readable alternative to multiple `OR` conditions.
+
+---
+
+### Using IN
+
+The `IN` operator checks whether a value matches **any value** in a specified list.
+
+Example: select transactions from selected cities.
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE city IN ('East Amanda', 'Smithside', 'Lake Thomas');
+```
+
+This query is functionally equivalent to combining multiple `OR` conditions, but is easier to read and maintain.
+
+**Example: select transactions for specific product categories.**
+
+```sql
+SELECT
+    transaction_id,
+    product_name,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE category IN ('Electronics', 'Books');
+```
+
+---
+
+### Using NOT IN
+
+The `NOT IN` operator excludes rows that match any value in the specified list.
+
+**Example: exclude transactions from specific cities.**
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE city NOT IN ('East Lori', 'Anthonymouth');
+```
+
+Example: exclude low-priority product categories.
+
+```sql
+SELECT
+    transaction_id,
+    product_name,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE category NOT IN ('Toys', 'Books');
+```
+
+
+### Filtering Text with LIKE
+
+
+The `LIKE` operator is used for pattern matching on text columns.
+
+The percent sign `%` represents zero or more characters.
+
+**Example: select products whose name starts with the letter "E".**
+
+```sql
+SELECT
+    transaction_id,
+    product_name,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE product_name LIKE 'E%';
+```
+
+Example: select cities whose name contains the word "North".
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE city LIKE '%North%';
+```
+
+| LIKE Operator Example                         | Description                                                     |
+|----------------------------------------------|-----------------------------------------------------------------|
+| `WHERE product_name LIKE 'Elec%'`             | Finds values that start with "Elec"                              |
+| `WHERE product_name LIKE '%Phone'`            | Finds values that end with "Phone"                               |
+| `WHERE product_name LIKE '%Pro%'`             | Finds values that contain "Pro" anywhere                         |
+| `WHERE city LIKE '_ast%'`                     | Finds values with "ast" starting from the second character       |
+| `WHERE city LIKE 'N%_%'`                      | Finds values that start with "N" and are at least 3 characters   |
+| `WHERE category LIKE 'B%ks'`                  | Finds values that start with "B" and end with "ks"               |
+
+
+::: {.callout-warning title="capitalization"}
+
+When using the `LIKE` operator, it is important to pay attention to capitalization. In PostgreSQL, `LIKE` is case-sensitive by default. This means that searching for a value with different letter casing may return no results.
+
+For example, product categories such as `Electronics` or city names like `East Amanda` must be matched using the correct capitalization. Searching for `'electronics'` or `'east amanda'` with `LIKE` would not return any rows.
+
+To handle this, you can normalize the text by converting both the column and the search pattern to the same case using string functions. Common approaches include using `LOWER()` or `UPPER()` to make the comparison case-insensitive.
+
+Alternatively, PostgreSQL provides the `ILIKE` operator, which performs case-insensitive pattern matching and is often more convenient when working with user-entered text or inconsistent capitalization.
+
+:::
+
+
+### Handling NULL Values Correctly
+
+::: {.callout-caution title="IS NULL or NOT NULL"}
+
+
+
+
+In SQL, `NULL` represents missing or unknown data.  
+It is **not** equal to anything, including another `NULL`.
+
+This means the following will **not work as expected**:
+
+```sql
+WHERE discount = NULL
+```
+
+
+To correctly filter missing values, always use:
+
+```sql
+WHERE discount IS NULL
+```
+
+To filter rows where a value exists, use:
+
+```sql
+WHERE discount IS NOT NULL
+```
+
+Be especially careful when using `NOT IN`.  
+If the list contains a `NULL`, the condition may return no rows at all.
+
+When working with columns that may contain missing values, consider explicitly handling `NULL` values before applying `IN` or `NOT IN`.
+:::
+
+
+## HAVING
+
+
+### Detecting Duplicates with HAVING
+
+In analytical work, identifying duplicate records is an important data quality task.  
+Duplicates can distort metrics, inflate counts, and lead to incorrect conclusions.
+
+The `HAVING` clause combined with `COUNT()` is commonly used to detect duplicates after grouping.
+
+---
+
+### Identifying Duplicate Transactions
+
+Although `transaction_id` is expected to be unique, this example demonstrates the general technique for detecting duplicates.
+
+```sql
+SELECT
+    transaction_id,
+    COUNT(*) AS occurrence_count
+FROM sales_analysis
+GROUP BY transaction_id
+HAVING COUNT(*) > 1;
+```
+
+If this query returns rows, it indicates duplicated transaction records in the analysis table.
+
+---
+
+### Detecting Duplicate Product Sales on the Same Date
+
+This example checks whether the same product appears multiple times on the same date, which may or may not be expected depending on the business logic.
+
+```sql
+SELECT
+    product_name,
+    order_date_date,
+    COUNT(*) AS occurrence_count
+FROM sales_analysis
+GROUP BY product_name, order_date_date
+HAVING COUNT(*) > 1
+ORDER BY occurrence_count DESC;
+```
+
+This helps identify repeated entries for the same product on a given day.
+
+---
+
+### Finding Customers with Multiple Transactions on the Same Day
+
+This analysis identifies customers who made multiple purchases on the same date.
+
+```sql
+SELECT
+    customer_name,
+    order_date_date,
+    COUNT(*) AS transaction_count
+FROM sales_analysis
+GROUP BY customer_name, order_date_date
+HAVING COUNT(*) > 1
+ORDER BY transaction_count DESC;
+```
+
+This can reveal bulk purchases, repeat behavior, or potential data duplication.
+
+---
+
+### Identifying Potential Duplicate Sales Amounts
+
+Sometimes duplicates appear as identical sales values repeated multiple times.
+
+```sql
+SELECT
+    total_sales,
+    order_date_date,
+    COUNT(*) AS occurrence_count
+FROM sales_analysis
+GROUP BY total_sales, order_date_date
+HAVING COUNT(*) > 1
+ORDER BY occurrence_count DESC;
+```
+
+This pattern can signal repeated transactions or data loading issues.
+
+
+### Revenue-Focused Analysis
+
+This example focuses on identifying product categories that generated significant revenue during a specific period.
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY category
+HAVING SUM(total_sales) > 500000
+ORDER BY total_sales_amount DESC;
+```
+
+This analysis highlights the strongest revenue-driving categories for the year and filters out categories with marginal impact.
+
+---
+
+### Transaction Volume Analysis by City
+
+Here, the focus is on understanding customer activity levels across different cities.
+
+```sql
+SELECT
+    city,
+    COUNT(transaction_id) AS transaction_count
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY city
+HAVING COUNT(transaction_id) > 1000
+ORDER BY transaction_count DESC;
+```
+
+This helps identify cities with consistently high transaction volumes.
+
+---
+
+### Revenue Performance by City
+
+Transaction volume alone does not fully describe performance. This example focuses on revenue contribution by city.
+
+```sql
+SELECT
+    city,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY city
+HAVING SUM(total_sales) > 400000
+ORDER BY total_sales_amount DESC;
+```
+
+This distinguishes cities that generate substantial revenue from those driven primarily by transaction count.
+
+---
+
+### High-Frequency, Low-Revenue Categories
+
+This analysis helps detect categories that sell often but contribute relatively little to total revenue.
+
+```sql
+SELECT
+    category,
+    COUNT(transaction_id) AS transaction_count,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY category
+HAVING COUNT(transaction_id) > 500
+   AND SUM(total_sales) < 300000
+ORDER BY transaction_count DESC;
+```
+
+Such patterns may indicate lower-priced items or aggressive discounting strategies.
+
+---
+
+### Average Transaction Value by City
+
+Instead of total revenue, this example focuses on transaction quality.
+
+```sql
+SELECT
+    city,
+    AVG(total_sales) AS avg_transaction_value
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY city
+HAVING AVG(total_sales) > 800
+ORDER BY avg_transaction_value DESC;
+```
+
+This highlights markets where customers tend to make higher-value purchases.
+
+---
+
+### Revenue with Controlled Discounting
+
+This analysis combines revenue performance with pricing discipline.
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount,
+    AVG(discount) AS avg_discount
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY category
+HAVING SUM(total_sales) > 400000
+   AND AVG(discount) < 0.15
+ORDER BY total_sales_amount DESC;
+```
+
+This helps identify categories that perform well financially without relying heavily on discounts.
+
+
+### Using HAVING Instead of WHERE — Common Interview Trap
+
+::: {.callout-warning}
+
+It is possible to filter by non-aggregated columns (such as `category` or `city`) using the `HAVING` clause **if those columns appear in the `GROUP BY` clause**.
+
+For example, this query is syntactically valid:
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+GROUP BY category
+HAVING category = 'Electronics';
+```
+
+However, **this is not equivalent in intent or best practice** to using `WHERE`.
+
+The preferred and correct approach is:
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE category = 'Electronics'
+GROUP BY category;
+```
+
+#### Will the results be the same?
+
+Yes — **in this specific case, the final result will be the same**.
+
+But the execution logic is different:
+
+- `WHERE` filters rows **before aggregation**
+- `HAVING` filters groups **after aggregation**
+
+Using `HAVING` to filter non-aggregated columns means:
+
+- More rows are processed than necessary
+- Aggregation work is done first, then filtered
+- Performance may be worse on large datasets
+
+#### Interview takeaway
+
+- Filtering **raw columns** → use `WHERE`
+- Filtering **aggregated results** → use `HAVING`
+- Using `HAVING` instead of `WHERE` for column filters is usually a **code smell**, even if it returns the same result
+
+Interviewers often ask this to test whether you understand **query execution order**, not just syntax.
+:::
+
+
+## CASE Statement
+
+Now that you are comfortable filtering data, you can move on to creating **derived logic** directly inside your queries using the `CASE` statement.
+
+The `CASE` statement allows you to define conditional rules and return different values depending on whether those conditions are met. Conceptually, it works very similarly to everyday logic:
+
+- If a condition is true, return one value  
+
+- If another condition is true, return a different value  
+
+- Otherwise, return a default value  
+
+In SQL, this logic is expressed using `WHEN`, `THEN`, `ELSE`, and `END`.
+
+---
+
+### Basic Structure of CASE
+
+The general structure of a `CASE` statement looks like this:
+
+```sql
+CASE
+    WHEN condition_1 THEN result_1
+    WHEN condition_2 THEN result_2
+    ELSE default_result
+END
+```
+
+The `CASE` statement is typically written inside the `SELECT` clause and creates a **new derived column** in the query result.
+
+---
+
+### Categorizing Transactions by Sales Size
+
+Example: classify each transaction based on its total sales amount.
+
+```sql
+SELECT
+    transaction_id,
+    total_sales,
+    CASE
+        WHEN total_sales >= 100000 THEN 'High Value'
+        WHEN total_sales >= 50000 THEN 'Medium Value'
+        ELSE 'Low Value'
+    END AS sales_segment
+FROM sales_analysis;
+```
+
+This query creates a new column called `sales_segment` that categorizes each transaction based on business-defined thresholds.
+
+---
+
+### Creating Customer-Facing Labels
+
+Example: label transactions based on discount behavior.
+
+```sql
+SELECT
+    transaction_id,
+    discount,
+    CASE
+        WHEN discount IS NULL THEN 'No Discount Information'
+        WHEN discount = 0 THEN 'No Discount'
+        WHEN discount <= 0.10 THEN 'Low Discount'
+        ELSE 'High Discount'
+    END AS discount_category
+FROM sales_analysis;
+```
+
+This is useful when translating raw numeric values into interpretable categories.
+
+
+
+### Categorizing Products by Price Range
+
+Example: group products into pricing tiers.
+
+```sql
+SELECT
+    product_name,
+    price,
+    CASE
+        WHEN price >= 1000 THEN 'Premium'
+        WHEN price >= 500 THEN 'Mid-Range'
+        ELSE 'Budget'
+    END AS price_category
+FROM sales_analysis;
+```
+
+This type of logic is frequently used in reporting and segmentation.
+
+
+### CASE with Dates and Time-Based Logic
+
+Example: label transactions as early or late in the year.
+
+```sql
+SELECT
+    transaction_id,
+    order_date_date,
+    CASE
+        WHEN quarter IN (1, 2) THEN 'First Half'
+        ELSE 'Second Half'
+    END AS year_period
+FROM sales_analysis;
+```
+
+This helps simplify time-based analysis without modifying the underlying table.
+
+---
+
+### CASE with Aggregation
+
+`CASE` can also be combined with aggregation to create conditional metrics.
+
+Example: calculate total sales for discounted vs non-discounted transactions.
+
+```sql
+SELECT
+    CASE
+        WHEN discount > 0 THEN 'Discounted'
+        ELSE 'Full Price'
+    END AS pricing_type,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+GROUP BY pricing_type;
+```
+
+Here, the `CASE` expression defines the grouping logic.
+
+---
+
+::: {.callout-tip}
+### Important Note About CASE
+
+A `CASE` statement creates a derived column **only in the query result**.  
+It does **not** create or modify columns in the underlying database table.
+
+If you need to store the result permanently, you must use `CREATE TABLE AS` or `ALTER TABLE` with an update statement.
+:::
+
