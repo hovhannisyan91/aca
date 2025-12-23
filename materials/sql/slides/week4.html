@@ -12,7 +12,7 @@
 
   <meta name="author" content="Karen Hovhannisyan">
   <meta name="dcterms.date" content="2025-12-23">
-  <title>Data Analytics Bootcamp – Data Types</title>
+  <title>Data Analytics Bootcamp – Filtering</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -191,9 +191,6 @@
       margin-right: 0; 
     }
   </style>
-  <script src="../../../site_libs/quarto-diagram/mermaid.min.js"></script>
-  <script src="../../../site_libs/quarto-diagram/mermaid-init.js"></script>
-  <link href="../../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .icon-xxl { font-size: 84px; }
@@ -209,8 +206,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Data Types</h1>
-  <p class="subtitle">Statistical Thinking</p>
+  <h1 class="title">Filtering</h1>
+  <p class="subtitle">SQL for Data Analysis</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -222,718 +219,327 @@ Karen Hovhannisyan
 
   <p class="date">2025-12-23</p>
 </section>
-<section id="why-data-types-matter" class="slide level2">
-<h2>Why Data Types Matter</h2>
-<p>Before calculating averages or plotting charts, it’s essential to recognize what kind of data you’re working with.</p>
-<p>The classification of a variable determines:</p>
+<section id="agenda" class="slide level2">
+<h2>Agenda</h2>
+<p><br></p>
 <ul>
-<li>Which <strong>summary statistics</strong> are meaningful?</li>
-<li>Which <strong>visualizations</strong> can be used?</li>
-<li>How relationships between variables should be <strong>interpreted</strong>?</li>
+<li>Build an analysis-ready denormalized table (<code>sales_analysis</code>)</li>
+<li>Filter rows with <code>WHERE</code> using key operators</li>
+<li>Filter aggregated results with <code>HAVING</code></li>
+<li>Use <code>CASE WHEN</code> to create analytical categories</li>
 </ul>
 </section>
-<section id="qualitative-data" class="slide level2 smaller">
-<h2>Qualitative Data</h2>
-<p>Qualitative data describe <strong>qualities, categories, or labels</strong> rather than numbers.</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 31%">
-<col style="width: 35%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>Subtype</strong></th>
-<th><strong>Definition</strong></th>
-<th><strong>Examples</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Nominal</strong></td>
-<td>Categories with <strong>no natural order</strong></td>
-<td>Gender (Male/Female), City (Paris, Yerevan, Tokyo)</td>
-</tr>
-<tr class="even">
-<td><strong>Ordinal</strong></td>
-<td>Categories with a <strong>meaningful order</strong>, but <strong>unequal spacing</strong></td>
-<td>Education Level (High &lt; Bachelor &lt; Master &lt; PhD), Satisfaction (Low–Medium–High)</td>
-</tr>
-</tbody>
-</table>
+<section id="run-docker" class="slide level2">
+<h2>Run Docker</h2>
+<p>Open Docker Desktop, Run and open <strong>Pgadmin</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="quantitative-data" class="slide level2 smaller">
-<h2>Quantitative Data</h2>
-<p>Quantitative data represent <strong>measurable quantities</strong> that can be used in arithmetic operations.</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 31%">
-<col style="width: 35%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>Subtype</strong></th>
-<th><strong>Definition</strong></th>
-<th><strong>Examples</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Discrete</strong></td>
-<td>Countable numbers, often integers</td>
-<td>Number of customers, Complaints per day</td>
-</tr>
-<tr class="even">
-<td><strong>Continuous</strong></td>
-<td>Measured values within a range</td>
-<td>Temperature, Age, Revenue, Weight</td>
-</tr>
-</tbody>
-</table>
+<section id="create-sales_analysis" class="slide level2 smaller">
+<h2>Create <code>sales_analysis</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> sales_analysis;</span>
+<span id="cb2-2"><a></a></span>
+<span id="cb2-3"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales_analysis <span class="kw">AS</span></span>
+<span id="cb2-4"><a></a><span class="kw">SELECT</span></span>
+<span id="cb2-5"><a></a>    s.transaction_id,</span>
+<span id="cb2-6"><a></a></span>
+<span id="cb2-7"><a></a>    o.order_date,</span>
+<span id="cb2-8"><a></a>    <span class="dt">DATE</span>(o.order_date) <span class="kw">AS</span> order_date_date,</span>
+<span id="cb2-9"><a></a>    o.<span class="dt">year</span>,</span>
+<span id="cb2-10"><a></a>    o.quarter,</span>
+<span id="cb2-11"><a></a>    o.<span class="dt">month</span>,</span>
+<span id="cb2-12"><a></a></span>
+<span id="cb2-13"><a></a>    c.customer_name,</span>
+<span id="cb2-14"><a></a>    c.city,</span>
+<span id="cb2-15"><a></a>    c.zip_code,</span>
+<span id="cb2-16"><a></a></span>
+<span id="cb2-17"><a></a>    p.product_name,</span>
+<span id="cb2-18"><a></a>    p.<span class="kw">category</span>,</span>
+<span id="cb2-19"><a></a>    p.price,</span>
+<span id="cb2-20"><a></a></span>
+<span id="cb2-21"><a></a>    e.first_name <span class="kw">AS</span> employee_first_name,</span>
+<span id="cb2-22"><a></a>    e.last_name  <span class="kw">AS</span> employee_last_name,</span>
+<span id="cb2-23"><a></a>    e.salary     <span class="kw">AS</span> employee_salary,</span>
+<span id="cb2-24"><a></a></span>
+<span id="cb2-25"><a></a>    s.quantity,</span>
+<span id="cb2-26"><a></a>    s.discount,</span>
+<span id="cb2-27"><a></a>    s.total_sales</span>
+<span id="cb2-28"><a></a><span class="kw">FROM</span> sales <span class="kw">AS</span> s</span>
+<span id="cb2-29"><a></a><span class="kw">JOIN</span> orders <span class="kw">AS</span> o</span>
+<span id="cb2-30"><a></a>    <span class="kw">ON</span> s.order_id <span class="op">=</span> o.order_id</span>
+<span id="cb2-31"><a></a><span class="kw">JOIN</span> customers <span class="kw">AS</span> c</span>
+<span id="cb2-32"><a></a>    <span class="kw">ON</span> s.customer_id <span class="op">=</span> c.customer_id</span>
+<span id="cb2-33"><a></a><span class="kw">JOIN</span> products <span class="kw">AS</span> p</span>
+<span id="cb2-34"><a></a>    <span class="kw">ON</span> s.product_id <span class="op">=</span> p.product_id</span>
+<span id="cb2-35"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> employees <span class="kw">AS</span> e</span>
+<span id="cb2-36"><a></a>    <span class="kw">ON</span> s.employee_id <span class="op">=</span> e.employee_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="additional-data-types" class="slide level2 smaller">
-<h2>Additional Data Types</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 29%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>Type</strong></th>
-<th><strong>Definition</strong></th>
-<th><strong>Example Applications</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Binary</strong></td>
-<td>Two possible outcomes (Yes/No, 0/1)</td>
-<td>Subscription status, churn indicator</td>
-</tr>
-<tr class="even">
-<td><strong>Time-Series</strong></td>
-<td>Observations recorded sequentially over time</td>
-<td>Daily sales, hourly temperature</td>
-</tr>
-<tr class="odd">
-<td><strong>Textual / Unstructured</strong></td>
-<td>Words, sentences, or documents</td>
-<td>Customer reviews, tweets</td>
-</tr>
-<tr class="even">
-<td><strong>Spatial / Geographical</strong></td>
-<td>Location-based information</td>
-<td>Store coordinates, delivery zones</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="flowchart" class="slide level2">
-<h2>Flowchart</h2>
-<div class="cell" data-reveal="true" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class=""><p></p>
-<div>
-<pre class="mermaid mermaid-js">%%{init: {"theme": "default", "logLevel": "fatal"}}%%
-graph TD
-    A["Data Types"] --&gt; B["Qualitative (Categorical)"]
-    A --&gt; C["Quantitative (Numerical)"]
-
-    B --&gt; D["Nominal"]
-    B --&gt; E["Ordinal"]
-
-    C --&gt; F["Discrete"]
-    C --&gt; G["Continuous"]
-
-    A --&gt; H["Other Types"]
-    H --&gt; I["Binary"]
-    H --&gt; J["Time-Series"]
-    H --&gt; K["Textual / Unstructured"]
-    H --&gt; L["Spatial / Geographical"]
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
+<section id="indexes-for-filtering-performance" class="slide level2">
+<h2>Indexes for Filtering Performance</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_order_date</span>
+<span id="cb3-2"><a></a>    <span class="kw">ON</span> sales_analysis(order_date_date);</span>
+<span id="cb3-3"><a></a></span>
+<span id="cb3-4"><a></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_year</span>
+<span id="cb3-5"><a></a>    <span class="kw">ON</span> sales_analysis(<span class="dt">year</span>);</span>
+<span id="cb3-6"><a></a></span>
+<span id="cb3-7"><a></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_city</span>
+<span id="cb3-8"><a></a>    <span class="kw">ON</span> sales_analysis(city);</span>
+<span id="cb3-9"><a></a></span>
+<span id="cb3-10"><a></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_category</span>
+<span id="cb3-11"><a></a>    <span class="kw">ON</span> sales_analysis(<span class="kw">category</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section>
-<section id="measures-of-central-tendency" class="title-slide slide level1 center">
-<h1>Measures of Central Tendency</h1>
-<p>Once we understand our data types, the next step is to summarize them with simple, representative numbers.<br>
-These are called <strong>measures of central tendency</strong>, and they tell us where the “center” of our data lies.</p>
-<p>The three most common measures are:</p>
-<ul>
-<li><strong>Mean</strong> — the average value<br>
-</li>
-<li><strong>Median</strong> — the middle value<br>
-</li>
-<li><strong>Mode</strong> — the most frequent value</li>
-</ul>
-</section>
-<section id="mean" class="slide level2 smaller">
-<h2>Mean</h2>
-<p>The <strong>mean</strong> is the sum of all values divided by the number of observations.</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Example</th>
-<th>Calculation</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Data: 5, 7, 8, 10</td>
-<td>Mean = (5 + 7 + 8 + 10) / 4 = <strong>7.5</strong></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Sample Mean</strong></p>
-<p><span class="math display">\[
-\bar{x} = \frac{\sum_{i=1}^{n} x_i}{n}
-\]</span></p>
-<p><strong>Population Mean</strong></p>
-<blockquote>
-<p>(same, only notation is different)</p>
-</blockquote>
-<p><span class="math display">\[
-\mu = \frac{\sum_{i=1}^{N} x_i}{N}
-\]</span></p>
-</section>
-<section id="weighted-mean" class="slide level2">
-<h2>Weighted Mean</h2>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Score</th>
-<th>Weight (%)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Exam</td>
-<td>94</td>
-<td>50</td>
-</tr>
-<tr class="even">
-<td>Project</td>
-<td>92</td>
-<td>35</td>
-</tr>
-<tr class="odd">
-<td>Homework</td>
-<td>100</td>
-<td>15</td>
-</tr>
-</tbody>
-</table>
-<p>(<em>Weights do not need to add up to one!</em>)</p>
-<p><span class="math display">\[
-\bar{x} =
-\frac{\displaystyle \sum_{i=1}^{n} (w_i x_i)}
-     {\displaystyle \sum_{i=1}^{n} w_i}
-\]</span></p>
-</section>
-<section id="sample-mean-example" class="slide level2 smaller">
-<h2>Sample Mean Example</h2>
-<blockquote>
-<p><strong>When to Use:</strong><br>
-- Conveinent measurement clear to everybody - Works well with <strong>continuous or discrete numerical data</strong>.<br>
-- Sensitive to <strong>outliers</strong> (extreme values can distort the result).</p>
-</blockquote>
-<p>Given the 5 observations:</p>
-<p><span class="math display">\[
-\bar{x}
-= \frac{\sum_{i=1}^{5} x_i}{5}
-= \frac{14.2 + 19.6 + 22.7 + 13.1 + 20.9}{5}
-= \frac{90.5}{5}
-= 18.1 \
-\]</span></p>
-</section>
-<section class="slide level2">
+<section id="where-filtering" class="title-slide slide level1 center">
+<h1>WHERE Filtering</h1>
 
-<p><span class="math display">\[
-\mu
-= \frac{\sum_{i=1}^{5} x_i}{5}
-= \frac{300 + 320 + 270 + 210 + 8{,}000}{5}
-= \frac{9{,}100}{5}
-= 1{,}820
-\]</span></p>
 </section>
-<section id="median" class="slide level2">
-<h2>Median</h2>
-<p>The <strong>median</strong> is the value that separates the dataset into two equal halves.</p>
-<p><strong>Steps to calculate:</strong></p>
-<ol type="1">
-<li>Order the data from smallest to largest.<br>
-</li>
-<li>If the number of observations is odd → middle value.<br>
-</li>
-<li>If even → average of the two middle values.</li>
-</ol>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Example</th>
-<th>Calculation</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Data: 2, 5, 7, 9, 12</td>
-<td>Median = 7</td>
-</tr>
-<tr class="even">
-<td>Data: 3, 5, 8, 10</td>
-<td>Median = (5 + 8)/2 = <strong>6.5</strong></td>
-</tr>
-</tbody>
-</table>
+<section id="simple-where-examples" class="slide level2 smaller">
+<h2>Simple WHERE Examples</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb4-2"><a></a>    transaction_id,</span>
+<span id="cb4-3"><a></a>    order_date_date,</span>
+<span id="cb4-4"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb4-5"><a></a>    total_sales</span>
+<span id="cb4-6"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb4-7"><a></a><span class="kw">WHERE</span> total_sales <span class="op">&gt;</span> <span class="dv">100000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb5-2"><a></a>    transaction_id,</span>
+<span id="cb5-3"><a></a>    city,</span>
+<span id="cb5-4"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb5-5"><a></a>    total_sales</span>
+<span id="cb5-6"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb5-7"><a></a><span class="kw">WHERE</span> city <span class="op">=</span> <span class="st">'East Amanda'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="mode" class="slide level2">
-<h2>Mode</h2>
-<p>The <strong>mode</strong> is the value that appears most often.</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Example</th>
-<th>Calculation</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Data: 2, 3, 3, 4, 5, 5, 5, 7</td>
-<td>Mode = <strong>5</strong></td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>When to Use:</strong><br>
-- Ideal for <strong>categorical or discrete data</strong>.<br>
-- A dataset can have: - <strong>One mode</strong> → unimodal<br>
-- <strong>Two modes</strong> → bimodal<br>
-- <strong>More than two</strong> → multimodal</p>
-</blockquote>
+<section id="and-combine-conditions" class="slide level2 smaller">
+<h2>AND: Combine Conditions</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb6-2"><a></a>    transaction_id,</span>
+<span id="cb6-3"><a></a>    <span class="dt">year</span>,</span>
+<span id="cb6-4"><a></a>    city,</span>
+<span id="cb6-5"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb6-6"><a></a>    total_sales</span>
+<span id="cb6-7"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb6-8"><a></a><span class="kw">WHERE</span> <span class="dt">year</span> <span class="op">=</span> <span class="dv">2023</span></span>
+<span id="cb6-9"><a></a>  <span class="kw">AND</span> <span class="kw">category</span> <span class="op">=</span> <span class="st">'Electronics'</span></span>
+<span id="cb6-10"><a></a>  <span class="kw">AND</span> total_sales <span class="op">&gt;</span> <span class="dv">100000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="comparison-of-mean-median-and-mode" class="slide level2 smaller">
-<h2>Comparison of Mean, Median, and Mode</h2>
+<section id="or-multiple-acceptable-conditions" class="slide level2 smaller">
+<h2>OR: Multiple Acceptable Conditions</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a></a>    transaction_id,</span>
+<span id="cb7-3"><a></a>    <span class="dt">year</span>,</span>
+<span id="cb7-4"><a></a>    city,</span>
+<span id="cb7-5"><a></a>    total_sales</span>
+<span id="cb7-6"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb7-7"><a></a><span class="kw">WHERE</span> <span class="dt">year</span> <span class="op">=</span> <span class="dv">2023</span></span>
+<span id="cb7-8"><a></a>  <span class="kw">AND</span> (city <span class="op">=</span> <span class="st">'Smithside'</span> <span class="kw">OR</span> city <span class="op">=</span> <span class="st">'Lake Thomas'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="in-and-not-in-cleaner-than-many-ors" class="slide level2 smaller">
+<h2>IN and NOT IN: Cleaner Than Many ORs</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a></a>    transaction_id,</span>
+<span id="cb8-3"><a></a>    city,</span>
+<span id="cb8-4"><a></a>    total_sales</span>
+<span id="cb8-5"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb8-6"><a></a><span class="kw">WHERE</span> city <span class="kw">IN</span> (<span class="st">'East Amanda'</span>, <span class="st">'Smithside'</span>, <span class="st">'Lake Thomas'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a></a>    transaction_id,</span>
+<span id="cb9-3"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb9-4"><a></a>    total_sales</span>
+<span id="cb9-5"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb9-6"><a></a><span class="kw">WHERE</span> <span class="kw">category</span> <span class="kw">NOT</span> <span class="kw">IN</span> (<span class="st">'Toys'</span>, <span class="st">'Books'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="like-pattern-filtering-wildcards" class="slide level2 smaller">
+<h2>LIKE: Pattern Filtering (Wildcards)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb10-2"><a></a>    transaction_id,</span>
+<span id="cb10-3"><a></a>    city,</span>
+<span id="cb10-4"><a></a>    total_sales</span>
+<span id="cb10-5"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb10-6"><a></a><span class="kw">WHERE</span> city <span class="kw">LIKE</span> <span class="st">'East%'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb11-2"><a></a>    transaction_id,</span>
+<span id="cb11-3"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb11-4"><a></a>    total_sales</span>
+<span id="cb11-5"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb11-6"><a></a><span class="kw">WHERE</span> <span class="kw">category</span> <span class="kw">LIKE</span> <span class="st">'%Garden%'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="like-wildcards-cheatsheet" class="slide level2 smaller">
+<h2>LIKE Wildcards Cheatsheet</h2>
 <table class="caption-top">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 30%">
-<col style="width: 16%">
-<col style="width: 23%">
+<col style="width: 80%">
+<col style="width: 19%">
 </colgroup>
 <thead>
 <tr class="header">
-<th><strong>Measure</strong></th>
-<th><strong>Best For</strong></th>
-<th><strong>Sensitive to Outliers?</strong></th>
-<th><strong>Data Type</strong></th>
-<th><strong>Example Context</strong></th>
+<th>Pattern Example</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>Mean</strong></td>
-<td>Symmetrical distributions</td>
-<td>Yes</td>
-<td>Continuous, Discrete</td>
-<td>Average income</td>
+<td><code>WHERE product_name LIKE 'Elec%'</code></td>
+<td>Starts with “Elec”</td>
 </tr>
 <tr class="even">
-<td><strong>Median</strong></td>
-<td>Skewed distributions</td>
-<td>No</td>
-<td>Continuous</td>
-<td>Typical housing price</td>
+<td><code>WHERE product_name LIKE '%Phone'</code></td>
+<td>Ends with “Phone”</td>
 </tr>
 <tr class="odd">
-<td><strong>Mode</strong></td>
-<td>Categorical / Repeated values</td>
-<td>No</td>
-<td>Nominal, Ordinal</td>
-<td>Most common product category</td>
+<td><code>WHERE product_name LIKE '%Pro%'</code></td>
+<td>Contains “Pro” anywhere</td>
+</tr>
+<tr class="even">
+<td><code>WHERE city LIKE '_ast%'</code></td>
+<td>“ast” begins at the second character</td>
+</tr>
+<tr class="odd">
+<td><code>WHERE city LIKE 'N%_%'</code></td>
+<td>Starts with “N” and has at least 3 characters</td>
+</tr>
+<tr class="even">
+<td><code>WHERE category LIKE 'B%ks'</code></td>
+<td>Starts with “B” and ends with “ks”</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="frequency-distributions" class="slide level2">
-<h2>Frequency Distributions</h2>
-<p><strong>Visual Insight:</strong></p>
+<section id="null-filtering" class="slide level2 smaller">
+<h2>NULL Filtering</h2>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
 <ul>
-<li>In a <strong>perfectly symmetrical</strong> distribution → Mean = Median = Mode<br>
-</li>
-<li>In a <strong>right-skewed</strong> distribution → Mean &gt; Median &gt; Mode<br>
-</li>
-<li>In a <strong>left-skewed</strong> distribution → Mean &lt; Median &lt; Mode</li>
+<li><p>Use <code>IS NULL</code> and <code>IS NOT NULL</code></p></li>
+<li><p>Do not use <code>= NULL</code> or <code>&lt;&gt; NULL</code></p></li>
 </ul>
-</section>
-<section id="symmetric-distribution" class="slide level2 smaller">
-<h2>Symmetric Distribution</h2>
-<p>Mean ~ Median</p>
-<div id="d5ba1789" class="cell" data-execution_count="1">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="week2_files/figure-revealjs/cell-2-output-1.png" width="585" height="376"></p>
-</figure>
 </div>
 </div>
 </div>
-</section>
-<section id="left-skewed-distributions" class="slide level2">
-<h2>Left Skewed Distributions</h2>
-<div id="33397827" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="week2_files/figure-revealjs/cell-3-output-1.png" width="595" height="376"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="right-skewed-distributions" class="slide level2">
-<h2>Right Skewed Distributions</h2>
-<div id="64a98c16" class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="week2_files/figure-revealjs/cell-4-output-1.png" width="585" height="376"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="symmetric-left-skewed-and-right-skewed-distributions" class="slide level2">
-<h2>Symmetric, Left-Skewed, and Right-Skewed Distributions</h2>
-<div id="94ea7b05" class="cell" data-execution_count="4">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="week2_files/figure-revealjs/cell-5-output-1.png" width="1431" height="373"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="better-visual" class="slide level2">
-<h2>Better Visual</h2>
-<div id="3c76beaf" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="week2_files/figure-revealjs/cell-6-output-1.png" width="1501" height="385"></p>
-</figure>
-</div>
-</div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a></a>    transaction_id,</span>
+<span id="cb12-3"><a></a>    discount</span>
+<span id="cb12-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb12-5"><a></a><span class="kw">WHERE</span> discount <span class="kw">IS</span> <span class="kw">NULL</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a></a>    transaction_id,</span>
+<span id="cb13-3"><a></a>    discount</span>
+<span id="cb13-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb13-5"><a></a><span class="kw">WHERE</span> discount <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section></section>
 <section>
-<section id="measures-of-variability" class="title-slide slide level1 center">
-<h1>Measures of Variability</h1>
+<section id="having" class="title-slide slide level1 center">
+<h1>HAVING</h1>
 
 </section>
-<section id="measures-of-variability-1" class="slide level2">
-<h2>Measures of Variability</h2>
-<ul>
-<li>Range</li>
-<li>Variance</li>
-<li>Standard Deviation (SD)</li>
-</ul>
+<section id="wrong-vs-correct-count" class="slide level2 smaller">
+<h2>Wrong vs Correct (COUNT)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb14-2"><a></a>    city,</span>
+<span id="cb14-3"><a></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transaction_count</span>
+<span id="cb14-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb14-5"><a></a><span class="kw">WHERE</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="op">&gt;</span> <span class="dv">1000</span></span>
+<span id="cb14-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> city;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb15-2"><a></a>    city,</span>
+<span id="cb15-3"><a></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transaction_count</span>
+<span id="cb15-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb15-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> city</span>
+<span id="cb15-6"><a></a><span class="kw">HAVING</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="op">&gt;</span> <span class="dv">1000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="range" class="slide level2">
-<h2>Range</h2>
-<p><span class="math display">\[
-\text{Range = Highest Value - Lowest Value}
-\]</span></p>
-<blockquote>
-
-<ul>
-<li>Think about where is it applicable?</li>
-<li>Are there any limitations</li>
-</ul>
-
-</blockquote>
+<section id="analytical-having-example-2023" class="slide level2 smaller">
+<h2>Analytical HAVING Example (2023)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb16-3"><a></a>    <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_sales_amount</span>
+<span id="cb16-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb16-5"><a></a><span class="kw">WHERE</span> <span class="dt">year</span> <span class="op">=</span> <span class="dv">2023</span></span>
+<span id="cb16-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span></span>
+<span id="cb16-7"><a></a><span class="kw">HAVING</span> <span class="fu">SUM</span>(total_sales) <span class="op">&gt;</span> <span class="dv">500000</span></span>
+<span id="cb16-8"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_sales_amount <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="variance" class="slide level2">
-<h2>Variance</h2>
-<p><strong>Sample Variance:</strong></p>
-<p><span class="math display">\[
-s^{2} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})^{2}}{n - 1}
-\]</span></p>
-<p><strong>Population Variance</strong></p>
-<p><span class="math display">\[
-\sigma^{2}
-=
-\frac{
-\displaystyle \sum_{i=1}^{N} (x_i - \mu)^{2}
-}{
-N
-}
-\]</span></p>
+<section id="detect-duplicates-with-having" class="slide level2 smaller">
+<h2>Detect Duplicates with HAVING</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb17-2"><a></a>    transaction_id,</span>
+<span id="cb17-3"><a></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> occurrence_count</span>
+<span id="cb17-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb17-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> transaction_id</span>
+<span id="cb17-6"><a></a><span class="kw">HAVING</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="op">&gt;</span> <span class="dv">1</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="standard-deviation" class="slide level2">
-<h2>Standard Deviation</h2>
-<p><strong>Sample Standard Deviation (Standard Error)</strong></p>
-<p><span class="math display">\[
-s \;=\; \sqrt{s^{2}}
-\;=\;
-\sqrt{
-\frac{
-\displaystyle \sum_{i=1}^{n} (x_i - \bar{x})^{2}
-}{
-n - 1
-}
-}
-\]</span></p>
-<p><strong>Population standard deviation</strong></p>
-<p><span class="math display">\[
-\sigma
-=
-\sqrt{
-\frac{
-\displaystyle \sum_{i=1}^{N} (x_i - \mu)^{2}
-}{
-N
-}
-}
-\]</span></p>
-</section>
-<section id="how-to-compare-variability" class="slide level2">
-<h2>How to compare variability?</h2>
-<p>In which cases you can compare standard deviations?</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Box</th>
-<th>Sample 1</th>
-<th>Sample 2</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Box 1</td>
-<td>14.2</td>
-<td>18.2</td>
-</tr>
-<tr class="even">
-<td>Box 2</td>
-<td>19.6</td>
-<td>17.9</td>
-</tr>
-<tr class="odd">
-<td>Box 3</td>
-<td>22.7</td>
-<td>18.1</td>
-</tr>
-<tr class="even">
-<td>Box 4</td>
-<td>13.1</td>
-<td>18.1</td>
-</tr>
-<tr class="odd">
-<td>Box 5</td>
-<td>20.9</td>
-<td>18.2</td>
-</tr>
-<tr class="even">
-<td><strong>Mean</strong></td>
-<td><strong>18.1</strong></td>
-<td><strong>18.1</strong></td>
-</tr>
-<tr class="odd">
-<td><strong>Standard deviation</strong></td>
-<td><strong>4.23</strong></td>
-<td><strong>0.12</strong></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="visual-comparison-of-variability" class="slide level2">
-<h2>Visual Comparison of Variability</h2>
-<div id="ac84e43f" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="week2_files/figure-revealjs/cell-7-output-1.png" width="659" height="357"></p>
-</figure>
+<section id="having-vs-where-interview-trap" class="slide level2 smaller">
+<h2>HAVING vs WHERE (Interview Trap)</h2>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>Filtering raw columns belongs in <code>WHERE</code>.<br>
+<code>HAVING</code> is for aggregated conditions.</p>
 </div>
 </div>
 </div>
-</section>
-<section id="when-variability-is-bad" class="slide level2">
-<h2>When variability is <strong>bad</strong>?</h2>
-<ul>
-<li>When consistency and quality control are important<br>
-</li>
-<li>Product weights, drug dosages, machine precision<br>
-</li>
-<li>Delivery times, service response times<br>
-</li>
-<li>Financial risk (greater uncertainty)</li>
-</ul>
-</section>
-<section id="when-variability-is-good" class="slide level2">
-<h2>When variability is <strong>good</strong>?</h2>
-<ul>
-<li>Biological diversity and adaptability<br>
-</li>
-<li>Marketing segmentation &amp; A/B testing<br>
-</li>
-<li>Creativity and innovation<br>
-</li>
-<li>Investments seeking higher upside<br>
-</li>
-<li>Identifying top performers (sports, hiring)</li>
-</ul>
-</section>
-<section id="when-variability-is-neutral" class="slide level2">
-<h2>When variability is <strong>neutral</strong>?</h2>
-<ul>
-<li>Natural randomness (weather, height, sampling variation)</li>
-</ul>
-<blockquote>
-<p><strong>Variability is not inherently good or bad—its value depends on what you are trying to achieve.</strong></p>
-</blockquote>
-</section>
-<section id="why-n-1" class="slide level2">
-<h2>Why <span class="math inline">\(N-1\)</span>?</h2>
-<p>A <strong>degree of freedom (df)</strong> is an independent piece of information that can vary freely.<br>
-Whenever we estimate a parameter from the sample, we introduce a constraint.<br>
-Each constraint removes one degree of freedom.</p>
-<p>The universal rule is:</p>
-<p><span class="math display">\[
-df = n - \text{(number of estimated parameters)}.
-\]</span></p>
-<p>During the mean estimation, since we have one constraint we remove only 1 hence</p>
-<p><span class="math display">\[
-df = n - 1
-\]</span></p>
-<!-- TODO -->
-</section>
-<section id="coefficient-of-variation-normalization" class="slide level2 smaller">
-<h2>Coefficient of Variation (Normalization)</h2>
-<p>The coefficient of variation (CV) is a measure of <em>relative variability</em>.<br>
-It allows us to compare the variability of two datasets <strong>even when their units or scales differ</strong>.</p>
-<p><strong>Data</strong></p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Date</th>
-<th>Nike</th>
-<th>Google</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>September 14, 2012</td>
-<td>48.32</td>
-<td>709.68</td>
-</tr>
-<tr class="even">
-<td>October 15, 2012</td>
-<td>47.81</td>
-<td>740.98</td>
-</tr>
-<tr class="odd">
-<td>November 15, 2012</td>
-<td>45.42</td>
-<td>647.26</td>
-</tr>
-<tr class="even">
-<td>December 14, 2012</td>
-<td>48.46</td>
-<td>701.96</td>
-</tr>
-<tr class="odd">
-<td>January 15, 2013</td>
-<td>53.64</td>
-<td>724.93</td>
-</tr>
-<tr class="even">
-<td>February 15, 2013</td>
-<td>54.95</td>
-<td>792.89</td>
-</tr>
-<tr class="odd">
-<td><strong>Mean</strong></td>
-<td><strong>49.77</strong></td>
-<td><strong>719.62</strong></td>
-</tr>
-<tr class="even">
-<td><strong>Standard deviation</strong></td>
-<td><strong>3.70</strong></td>
-<td><strong>47.96</strong></td>
-</tr>
-</tbody>
-</table>
-<p><span class="math display">\[
-\text{CV} = \frac{s}{\bar{x}} \times 100
-\]</span></p>
-<p>Where:</p>
-<ul>
-<li><span class="math inline">\(s\)</span> = standard deviation<br>
-</li>
-<li><span class="math inline">\(\bar{x}\)</span> = mean<br>
-</li>
-<li>CV is expressed as a <strong>percentage</strong></li>
-</ul>
-</section>
-<section class="slide level2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb18-2"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb18-3"><a></a>    <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_sales_amount</span>
+<span id="cb18-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb18-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span></span>
+<span id="cb18-6"><a></a><span class="kw">HAVING</span> <span class="kw">category</span> <span class="op">=</span> <span class="st">'Electronics'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb19-2"><a></a>    <span class="kw">category</span>,</span>
+<span id="cb19-3"><a></a>    <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_sales_amount</span>
+<span id="cb19-4"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb19-5"><a></a><span class="kw">WHERE</span> <span class="kw">category</span> <span class="op">=</span> <span class="st">'Electronics'</span></span>
+<span id="cb19-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="case-statement" class="title-slide slide level1 center">
+<h1>CASE Statement</h1>
 
-<p><strong>Nike</strong></p>
-<p><span class="math display">\[
-\text{CV}_{\text{Nike}}
-= \frac{3.70}{49.77} \times 100
-\approx 7.4\%
-\]</span></p>
-<p><strong>Google</strong></p>
-<p><span class="math display">\[
-\text{CV}_{\text{Google}}
-= \frac{47.96}{719.62} \times 100
-\approx 6.7\%
-\]</span></p>
 </section>
-<section id="z-score" class="slide level2 smaller">
-<h2>Z-score</h2>
-<p>Number of standard deviations that particular value is farther from the mean of its population or sample:</p>
-<p><strong>Population:</strong></p>
-<p><span class="math display">\[
-z = \frac{x - \mu}{\sigma}
-\]</span></p>
-<p><strong>Sample:</strong></p>
-<p><span class="math display">\[
-z = \frac{x - \bar{x}}{s}
-\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">=STANDARDIZE</span><span class="er">(</span><span class="ex">x,</span> mean, standard_deviation<span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>PS. z-score also called a <em>standard score.</em></p>
-<p>Suppose we have:</p>
+<section id="case-when-derived-categories" class="slide level2">
+<h2>CASE WHEN: Derived Categories</h2>
+<p><br></p>
 <ul>
-<li>x = 540</li>
-<li>mean = 776.3</li>
-<li>standard deviation = 385.1</li>
-</ul>
-<!-- To Slide -->
-<ul>
-<li><code>z-score &lt; 0:</code> bellow mean</li>
-<li><code>z-score = 0:</code> exactly on the mean</li>
-<li><code>z-score &gt; 0:</code> above the mean</li>
+<li>Create analytical labels</li>
+<li>Translate numeric logic into business meaning</li>
 </ul>
 </section>
-<section class="slide level2">
-
-<p><strong>Rule of Thumb for identifying outliers:</strong> Data values that have z-scores above <code>+3</code> and below <code>-3</code> can be categorized as outliers.</p>
-<!-- 
-
- -->
+<section id="case-transaction-segmentation" class="slide level2 smaller">
+<h2>CASE: Transaction Segmentation</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a></a>    transaction_id,</span>
+<span id="cb20-3"><a></a>    total_sales,</span>
+<span id="cb20-4"><a></a>    <span class="cf">CASE</span></span>
+<span id="cb20-5"><a></a>        <span class="cf">WHEN</span> total_sales <span class="op">&gt;=</span> <span class="dv">100000</span> <span class="cf">THEN</span> <span class="st">'High Value'</span></span>
+<span id="cb20-6"><a></a>        <span class="cf">WHEN</span> total_sales <span class="op">&gt;=</span> <span class="dv">50000</span> <span class="cf">THEN</span> <span class="st">'Medium Value'</span></span>
+<span id="cb20-7"><a></a>        <span class="cf">ELSE</span> <span class="st">'Low Value'</span></span>
+<span id="cb20-8"><a></a>    <span class="cf">END</span> <span class="kw">AS</span> sales_segment</span>
+<span id="cb20-9"><a></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="case-with-aggregation" class="slide level2 smaller">
+<h2>CASE with Aggregation</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb21-2"><a></a>    <span class="cf">CASE</span></span>
+<span id="cb21-3"><a></a>        <span class="cf">WHEN</span> discount <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="st">'Discounted'</span></span>
+<span id="cb21-4"><a></a>        <span class="cf">ELSE</span> <span class="st">'Full Price'</span></span>
+<span id="cb21-5"><a></a>    <span class="cf">END</span> <span class="kw">AS</span> pricing_type,</span>
+<span id="cb21-6"><a></a>    <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_sales_amount</span>
+<span id="cb21-7"><a></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb21-8"><a></a><span class="kw">WHERE</span> <span class="dt">year</span> <span class="op">=</span> <span class="dv">2023</span></span>
+<span id="cb21-9"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> pricing_type;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section></section>
@@ -941,7 +547,7 @@ z = \frac{x - \bar{x}}{s}
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="../../../img/favicon.png" class="slide-logo"></p>
 <div class="footer footer-default">
-<p><a href="../session2.html">Back to chapter</a></p>
+<p><a href="../../../materials/sql/session4.html" target="_blank">Back to chapter target</a></p>
 </div>
 </div></div>
 
