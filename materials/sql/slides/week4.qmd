@@ -1,0 +1,356 @@
+---
+title: "Filtering"
+subtitle: "SQL for Data Analysis"
+author: "Karen Hovhannisyan"
+date: last-modified
+format:
+  revealjs: 
+    touch: true
+    slide-number: false
+    chalkboard: true
+
+    preview-links: auto
+    width: 1500
+    transition: slide
+    logo: ../../../img/favicon.png
+    footer: "<a href=\"../session4.qmd\" target= _blank>Back to chapter target</a>"
+    # css: ../../../reveal_styles.css
+    include-in-header:
+      - text: |
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+          <style>
+            .icon-xxl { font-size: 84px; }
+            .icon-xl  { font-size: 64px; }
+            .icon-lg  { font-size: 48px; }
+            .muted { opacity: .8 }
+            .pill { border-radius: 10px; }
+            .circle { border-radius: 50%; }
+          </style>
+---
+
+
+## Agenda
+
+<br>
+
+- Build an analysis-ready denormalized table (`sales_analysis`)
+- Filter rows with `WHERE` using key operators
+- Filter aggregated results with `HAVING`
+- Use `CASE WHEN` to create analytical categories
+
+
+## Run Docker
+
+Open Docker Desktop, Run and open **Pgadmin**:
+
+```bash
+docker compose up -d
+```
+
+## Create `sales_analysis` {.smaller}
+
+```sql
+DROP TABLE IF EXISTS sales_analysis;
+
+CREATE TABLE sales_analysis AS
+SELECT
+    s.transaction_id,
+
+    o.order_date,
+    DATE(o.order_date) AS order_date_date,
+    o.year,
+    o.quarter,
+    o.month,
+
+    c.customer_name,
+    c.city,
+    c.zip_code,
+
+    p.product_name,
+    p.category,
+    p.price,
+
+    e.first_name AS employee_first_name,
+    e.last_name  AS employee_last_name,
+    e.salary     AS employee_salary,
+
+    s.quantity,
+    s.discount,
+    s.total_sales
+FROM sales AS s
+JOIN orders AS o
+    ON s.order_id = o.order_id
+JOIN customers AS c
+    ON s.customer_id = c.customer_id
+JOIN products AS p
+    ON s.product_id = p.product_id
+LEFT JOIN employees AS e
+    ON s.employee_id = e.employee_id;
+```
+
+
+## Indexes for Filtering Performance
+
+```sql
+CREATE INDEX idx_sales_analysis_order_date
+    ON sales_analysis(order_date_date);
+
+CREATE INDEX idx_sales_analysis_year
+    ON sales_analysis(year);
+
+CREATE INDEX idx_sales_analysis_city
+    ON sales_analysis(city);
+
+CREATE INDEX idx_sales_analysis_category
+    ON sales_analysis(category);
+```
+
+# WHERE Filtering
+
+## Simple WHERE Examples {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    order_date_date,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE total_sales > 100000;
+```
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE city = 'East Amanda';
+```
+## AND: Combine Conditions {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    year,
+    city,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE year = 2023
+  AND category = 'Electronics'
+  AND total_sales > 100000;
+```
+
+
+## OR: Multiple Acceptable Conditions {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    year,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE year = 2023
+  AND (city = 'Smithside' OR city = 'Lake Thomas');
+```
+
+## IN and NOT IN: Cleaner Than Many ORs {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE city IN ('East Amanda', 'Smithside', 'Lake Thomas');
+```
+
+```sql
+SELECT
+    transaction_id,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE category NOT IN ('Toys', 'Books');
+```
+
+
+## LIKE: Pattern Filtering (Wildcards) {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    city,
+    total_sales
+FROM sales_analysis
+WHERE city LIKE 'East%';
+```
+
+```sql
+SELECT
+    transaction_id,
+    category,
+    total_sales
+FROM sales_analysis
+WHERE category LIKE '%Garden%';
+```
+
+
+## LIKE Wildcards Cheatsheet {.smaller}
+
+| Pattern Example                      | Meaning |
+|--------------------------------------|---------|
+| `WHERE product_name LIKE 'Elec%'`    | Starts with "Elec" |
+| `WHERE product_name LIKE '%Phone'`   | Ends with "Phone" |
+| `WHERE product_name LIKE '%Pro%'`    | Contains "Pro" anywhere |
+| `WHERE city LIKE '_ast%'`            | "ast" begins at the second character |
+| `WHERE city LIKE 'N%_%'`             | Starts with "N" and has at least 3 characters |
+| `WHERE category LIKE 'B%ks'`         | Starts with "B" and ends with "ks" |
+
+
+## NULL Filtering {.smaller}
+
+::: {.callout-tip}
+
+- Use `IS NULL` and `IS NOT NULL`
+
+- Do not use `= NULL` or `<> NULL`
+:::
+
+. . .
+
+
+```sql
+SELECT
+    transaction_id,
+    discount
+FROM sales_analysis
+WHERE discount IS NULL;
+```
+
+```sql
+SELECT
+    transaction_id,
+    discount
+FROM sales_analysis
+WHERE discount IS NOT NULL;
+```
+
+# HAVING
+
+
+## Wrong vs Correct (COUNT) {.smaller}
+
+```sql
+SELECT
+    city,
+    COUNT(*) AS transaction_count
+FROM sales_analysis
+WHERE COUNT(*) > 1000
+GROUP BY city;
+```
+
+```sql
+SELECT
+    city,
+    COUNT(*) AS transaction_count
+FROM sales_analysis
+GROUP BY city
+HAVING COUNT(*) > 1000;
+```
+
+
+## Analytical HAVING Example (2023) {.smaller}
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY category
+HAVING SUM(total_sales) > 500000
+ORDER BY total_sales_amount DESC;
+```
+
+---
+
+## Detect Duplicates with HAVING {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    COUNT(*) AS occurrence_count
+FROM sales_analysis
+GROUP BY transaction_id
+HAVING COUNT(*) > 1;
+```
+
+---
+
+## HAVING vs WHERE (Interview Trap) {.smaller}
+
+::: {.callout-warning}
+Filtering raw columns belongs in `WHERE`.  
+`HAVING` is for aggregated conditions.
+:::
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+GROUP BY category
+HAVING category = 'Electronics';
+```
+
+```sql
+SELECT
+    category,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE category = 'Electronics'
+GROUP BY category;
+```
+
+# CASE Statement
+
+## CASE WHEN: Derived Categories
+
+<br>
+
+- Create analytical labels
+- Translate numeric logic into business meaning
+
+## CASE: Transaction Segmentation {.smaller}
+
+```sql
+SELECT
+    transaction_id,
+    total_sales,
+    CASE
+        WHEN total_sales >= 100000 THEN 'High Value'
+        WHEN total_sales >= 50000 THEN 'Medium Value'
+        ELSE 'Low Value'
+    END AS sales_segment
+FROM sales_analysis;
+```
+
+---
+
+## CASE with Aggregation {.smaller}
+
+```sql
+SELECT
+    CASE
+        WHEN discount > 0 THEN 'Discounted'
+        ELSE 'Full Price'
+    END AS pricing_type,
+    SUM(total_sales) AS total_sales_amount
+FROM sales_analysis
+WHERE year = 2023
+GROUP BY pricing_type;
+```
