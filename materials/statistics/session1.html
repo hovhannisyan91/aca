@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Statistics Session 01: Descriptive Stats – Data Analytics Bootcamp</title>
+<title>Statistics Session 01: Data Layers and Bias in Data – Data Analytics Bootcamp</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -77,6 +77,35 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
 <link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -307,7 +336,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session1.html">Statistics Session 01: Descriptive Stats</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session1.html">Statistics Session 01: Data Layers and Bias in Data</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -358,7 +387,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/statistics/session1.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Statistics Session 01: Descriptive Stats</span></a>
+ <span class="menu-text">Statistics Session 01: Data Layers and Bias in Data</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -685,7 +714,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#explanation-with-lego" id="toc-explanation-with-lego" class="nav-link" data-scroll-target="#explanation-with-lego">Explanation with Lego</a></li>
   <li><a href="#the-data-lifecycle-and-professional-roles" id="toc-the-data-lifecycle-and-professional-roles" class="nav-link" data-scroll-target="#the-data-lifecycle-and-professional-roles">The Data Lifecycle and Professional Roles</a></li>
   </ul></li>
-  <li><a href="#types-of-data-used-commonly" id="toc-types-of-data-used-commonly" class="nav-link" data-scroll-target="#types-of-data-used-commonly">Types of data used commonly</a>
+  <li><a href="#the-data-layers" id="toc-the-data-layers" class="nav-link" data-scroll-target="#the-data-layers">The Data Layers</a>
   <ul class="collapse">
   <li><a href="#definition-of-data" id="toc-definition-of-data" class="nav-link" data-scroll-target="#definition-of-data">Definition of data</a></li>
   <li><a href="#zero-party-data" id="toc-zero-party-data" class="nav-link" data-scroll-target="#zero-party-data">Zero-party data</a></li>
@@ -695,8 +724,10 @@ ul.task-list li input[type="checkbox"] {
   </ul></li>
   <li><a href="#definition-of-insight" id="toc-definition-of-insight" class="nav-link" data-scroll-target="#definition-of-insight">Definition of insight</a>
   <ul class="collapse">
+  <li><a href="#definition-of-reporting" id="toc-definition-of-reporting" class="nav-link" data-scroll-target="#definition-of-reporting">Definition of Reporting</a></li>
+  <li><a href="#definition-of-storytelling" id="toc-definition-of-storytelling" class="nav-link" data-scroll-target="#definition-of-storytelling">Definition of Storytelling</a></li>
   <li><a href="#data-reporting-vs-data-story" id="toc-data-reporting-vs-data-story" class="nav-link" data-scroll-target="#data-reporting-vs-data-story">Data Reporting vs Data Story</a></li>
-  <li><a href="#definition-of-storytelling" id="toc-definition-of-storytelling" class="nav-link" data-scroll-target="#definition-of-storytelling">Definition of storytelling</a></li>
+  <li><a href="#single-source-of-truth-ssot" id="toc-single-source-of-truth-ssot" class="nav-link" data-scroll-target="#single-source-of-truth-ssot">Single Source of Truth (SSOT)</a></li>
   </ul></li>
   <li><a href="#videos" id="toc-videos" class="nav-link" data-scroll-target="#videos">Videos</a></li>
   <li><a href="#articles" id="toc-articles" class="nav-link" data-scroll-target="#articles">Articles</a></li>
@@ -704,22 +735,12 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#assingment" id="toc-assingment" class="nav-link" data-scroll-target="#assingment">Assingment</a></li>
   <li><a href="#types-of-bias-in-data" id="toc-types-of-bias-in-data" class="nav-link" data-scroll-target="#types-of-bias-in-data">Types of Bias in Data</a>
   <ul class="collapse">
-  <li><a href="#selection-bias" id="toc-selection-bias" class="nav-link" data-scroll-target="#selection-bias">Selection Bias</a></li>
-  <li><a href="#sampling-bias" id="toc-sampling-bias" class="nav-link" data-scroll-target="#sampling-bias">Sampling Bias</a></li>
-  <li><a href="#measurement-bias" id="toc-measurement-bias" class="nav-link" data-scroll-target="#measurement-bias">Measurement Bias</a></li>
-  <li><a href="#recall-bias" id="toc-recall-bias" class="nav-link" data-scroll-target="#recall-bias">Recall Bias</a></li>
-  <li><a href="#observer-bias" id="toc-observer-bias" class="nav-link" data-scroll-target="#observer-bias">Observer Bias</a></li>
-  <li><a href="#response-bias" id="toc-response-bias" class="nav-link" data-scroll-target="#response-bias">Response Bias</a></li>
-  <li><a href="#confirmation-bias" id="toc-confirmation-bias" class="nav-link" data-scroll-target="#confirmation-bias">Confirmation Bias</a></li>
-  <li><a href="#survivorship-bias" id="toc-survivorship-bias" class="nav-link" data-scroll-target="#survivorship-bias">Survivorship Bias</a></li>
-  <li><a href="#historical-bias" id="toc-historical-bias" class="nav-link" data-scroll-target="#historical-bias">Historical Bias</a></li>
-  <li><a href="#exclusion-bias" id="toc-exclusion-bias" class="nav-link" data-scroll-target="#exclusion-bias">Exclusion Bias</a></li>
-  <li><a href="#algorithmic-bias" id="toc-algorithmic-bias" class="nav-link" data-scroll-target="#algorithmic-bias">Algorithmic Bias</a></li>
-  <li><a href="#reporting-bias" id="toc-reporting-bias" class="nav-link" data-scroll-target="#reporting-bias">Reporting Bias</a></li>
-  <li><a href="#availability-bias" id="toc-availability-bias" class="nav-link" data-scroll-target="#availability-bias">Availability Bias</a></li>
-  <li><a href="#bias-summary" id="toc-bias-summary" class="nav-link" data-scroll-target="#bias-summary">Bias Summary</a></li>
+  <li><a href="#data-coverage-inclusion-biases" id="toc-data-coverage-inclusion-biases" class="nav-link" data-scroll-target="#data-coverage-inclusion-biases">Data Coverage &amp; Inclusion Biases</a></li>
+  <li><a href="#data-collection-measurement-biases" id="toc-data-collection-measurement-biases" class="nav-link" data-scroll-target="#data-collection-measurement-biases">Data Collection &amp; Measurement Biases</a></li>
+  <li><a href="#analysis-modeling-biases" id="toc-analysis-modeling-biases" class="nav-link" data-scroll-target="#analysis-modeling-biases">Analysis &amp; Modeling Biases</a></li>
+  <li><a href="#reporting-communication-biases" id="toc-reporting-communication-biases" class="nav-link" data-scroll-target="#reporting-communication-biases">Reporting &amp; Communication Biases</a></li>
+  <li><a href="#bias-summary" id="toc-bias-summary" class="nav-link" data-scroll-target="#bias-summary"><strong>Bias Summary</strong></a></li>
   </ul></li>
-  <li><a href="#preview-of-next-class" id="toc-preview-of-next-class" class="nav-link" data-scroll-target="#preview-of-next-class">Preview of Next Class</a></li>
   </ul>
 </nav>
     </div>
@@ -727,10 +748,10 @@ ul.task-list li input[type="checkbox"] {
 <main class="content column-body" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session1.html">Statistics Session 01: Descriptive Stats</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistical Thinking</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/index.html">Statistics</a></li><li class="breadcrumb-item"><a href="../../materials/statistics/session1.html">Statistics Session 01: Data Layers and Bias in Data</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Statistics Session 01: Descriptive Stats</h1>
-<p class="subtitle lead">Distributions, central tendency, spread, and visualization</p>
+<h1 class="title">Statistics Session 01: Data Layers and Bias in Data</h1>
+<p class="subtitle lead">What is Data Analytics, Data Layers, Types of Biases</p>
   <div class="quarto-categories">
     <div class="quarto-category">statistics</div>
   </div>
@@ -775,7 +796,6 @@ In practice, it bridges raw data and business strategy. The process typically fo
 <li><strong>Communication and Action</strong> – visualizations, dashboards, and reports communicate insights for business decisions.</li>
 </ol>
 <p>This <code>“data-to-insight”</code> flow is iterative; every analysis generates new questions that feed the next cycle.</p>
-<hr>
 <section id="business-applications-of-data-analytics" class="level3">
 <h3 class="anchored" data-anchor-id="business-applications-of-data-analytics">Business Applications of Data Analytics</h3>
 <p>Analytics supports decision-making across many domains:</p>
@@ -916,30 +936,30 @@ Tip
 <p></p><figure class="figure"><p></p>
 <div>
 <pre class="mermaid mermaid-js">flowchart LR
-    A[Capture / Collection] --&gt; B[Storage / Management]
-    B --&gt; C[Processing / Transformation]
-    C --&gt; D[Analysis / Modeling]
-    D --&gt; E[Communication / Decision]
+A[Capture / Collection] --&gt; B[Storage / Management]
+B --&gt; C[Processing / Transformation]
+C --&gt; D[Analysis / Modeling]
+D --&gt; E[Communication / Decision]
 
-    classDef stage fill:#f4f4f4,stroke:#555,stroke-width:1px,color:#000,font-weight:bold;
-    class A,B,C,D,E stage;
+classDef stage fill:#f4f4f4,stroke:#555,stroke-width:1px,color:#000,font-weight:bold;
+class A,B,C,D,E stage;
 
-    subgraph Roles [Key Roles]
-        DE[Data Engineer]
-        AE[Analytics Engineer]
-        DA[Data Analyst]
-        DS[Data Scientist]
-        BM[Business Manager]
-    end
+subgraph Roles [Key Roles]
+   DE[Data Engineer]
+   AE[Analytics Engineer]
+   DA[Data Analyst]
+   DS[Data Scientist]
+   BM[Business Manager]
+end
 
-    DE -. supports .-&gt; A
-    DE -. builds pipelines .-&gt; B
-    AE -. transforms data .-&gt; C
-    DA -. explores data .-&gt; D
-    DS -. models data .-&gt; D
-    BM -. acts on insight .-&gt; E
+DE -. supports .-&gt; A
+DE -. builds pipelines .-&gt; B
+AE -. transforms data .-&gt; C
+DA -. explores data .-&gt; D
+DS -. models data .-&gt; D
+BM -. acts on insight .-&gt; E
 
-    style Roles fill:#f9f9f9,stroke:#ccc,stroke-width:1px,color:#333;
+style Roles fill:#f9f9f9,stroke:#ccc,stroke-width:1px,color:#333;
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -951,8 +971,8 @@ Tip
 <!-- ## 5. ETL vs ELT -->
 </section>
 </section>
-<section id="types-of-data-used-commonly" class="level2">
-<h2 class="anchored" data-anchor-id="types-of-data-used-commonly">Types of data used commonly</h2>
+<section id="the-data-layers" class="level2">
+<h2 class="anchored" data-anchor-id="the-data-layers">The Data Layers</h2>
 <section id="definition-of-data" class="level3">
 <h3 class="anchored" data-anchor-id="definition-of-data">Definition of data</h3>
 <p><strong>Data</strong> is used in its broadest sense: <em>observations, measurements and facts</em> (both quantitative and qualitative) that serve as information or evidence.</p>
@@ -967,7 +987,8 @@ Tip
 </section>
 <section id="first-party-data" class="level3">
 <h3 class="anchored" data-anchor-id="first-party-data">First-party data</h3>
-<p>Proprietary data collected directly (with consent) via a company’s own channels. It typically captures behaviours and is a key marketing asset. Common sources include:</p>
+<p>Proprietary data collected directly (with consent) via a company’s own channels. It typically captures behaviours and is a key marketing asset.</p>
+<p><strong>Common sources include:</strong></p>
 <ul>
 <li>Digital interactions (website, apps)</li>
 <li>Customer Relationship Management (CRM) systems</li>
@@ -976,7 +997,7 @@ Tip
 <li>Transactions (accounting systems)</li>
 <li>Interactions with digital support and call centres</li>
 </ul>
-<p>Examples of first-party data products:</p>
+<p><strong>Examples of first-party data products:</strong></p>
 <ul>
 <li>Sales performance metrics by region/country/category</li>
 <li>CRM extracts: contact info, purchase and interaction history for segmentation/personalization</li>
@@ -986,13 +1007,14 @@ Tip
 </section>
 <section id="second-party-data" class="level3">
 <h3 class="anchored" data-anchor-id="second-party-data">Second-party data</h3>
-<p>Data not collected by the business itself but associated with its customers/audiences and obtained via a partnership or contractual agreement. Examples:</p>
+<p>Data not collected by the business itself but associated with its customers/audiences and obtained via a partnership or contractual agreement.</p>
+<p><strong>Examples:</strong></p>
 <ul>
 <li>Retail purchase data</li>
 <li>Market research and survey data</li>
 <li>Channel partner/supplier data treated as first-party within that relationship</li>
 </ul>
-<p>Typical second-party sources in business:</p>
+<p><strong>Typical second-party sources in business:</strong></p>
 <ul>
 <li>In-store shopper research</li>
 <li>Panels/retail share data (e.g., Kantar/Nielsen/IRI/Mintel)</li>
@@ -1003,7 +1025,7 @@ Tip
 <section id="third-party-data" class="level3">
 <h3 class="anchored" data-anchor-id="third-party-data">Third-party data</h3>
 <p>Data collected by another entity that doesn’t have a direct link to your customers/audiences, often aggregated and licensed for use. (Note: privacy regulations like GDPR have tightened access and usage.)</p>
-<p>Trusted third-party examples:</p>
+<p><strong>Trusted third-party examples:</strong></p>
 <ul>
 <li>Social platforms’ aggregated audience and behaviour insights</li>
 <li>External website analytics (e.g., Google Analytics) offering traffic, conversion, and interaction insights</li>
@@ -1011,7 +1033,7 @@ Tip
 <li>Open/public data (e.g., census aggregates)</li>
 </ul>
 <blockquote class="blockquote">
-<p>In practice, most marketing teams draw from managed datasets in databases, platforms, or portals. These are often cleaned, contain business logic, and may blend multiple sources (e.g., CRM + ad-platform performance + third-party segments).</p>
+<p>In practice, most analytical teams draw from managed datasets in databases, platforms, or portals. These are often cleaned, contain business logic, and may blend multiple sources (e.g., CRM + ad-platform performance + third-party segments).</p>
 </blockquote>
 </section>
 </section>
@@ -1027,17 +1049,46 @@ Tip
 </li>
 <li><strong>Now what?</strong> — the recommended action</li>
 </ul>
-<p>Key reminders:</p>
+<p><strong>Key reminders:</strong></p>
 <ul>
 <li>A data point isn’t useful unless it links to <strong>why</strong> it matters.</li>
 <li>It isn’t insightful unless it answers <strong>so what</strong> (why it’s relevant/important).</li>
 <li>It isn’t actionable unless it leads to a feasible <strong>now what</strong> recommendation.</li>
 </ul>
 <p><img src="../../img/statistics/insight.png" class="img-fluid"></p>
-<hr>
+<p>–</p>
+<section id="definition-of-reporting" class="level3">
+<h3 class="anchored" data-anchor-id="definition-of-reporting">Definition of Reporting</h3>
+<p><strong>Reporting</strong> refers to the <strong>systematic process</strong> of turning raw data into <em>structured</em>, <em>interpretable</em> information that supports monitoring, decision-making, and accountability across an organization.</p>
+<p><strong>In other words Reporting is the practice of:</strong></p>
+<ul>
+<li>Collecting data from one or more sources</li>
+<li>Transforming and aggregating it according to agreed business rules</li>
+<li>Presenting it in a consistent, repeatable format (tables, charts, dashboards, PDFs, spreadsheets)</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled" title="keyword">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>keyword
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>the key word is <strong>standardized</strong></p>
+</div>
+</div>
+</section>
+<section id="definition-of-storytelling" class="level3">
+<h3 class="anchored" data-anchor-id="definition-of-storytelling">Definition of Storytelling</h3>
+<p><strong>Storytelling</strong> is the creation and telling of stories. In business settings, it is a form of communication that adapts structures from wider storytelling to persuade audiences to think, feel and act.</p>
+<p><strong>Data storytelling</strong> applies storytelling techniques to <code>communicate insights</code>, <code>actions</code> and <code>ideas</code> that come <strong>from data</strong> (rather than the raw data alone). It starts by understanding the data available within the broader goals, then draws out meaning from the background noise to guide the right conversations and decisions.</p>
+</section>
 <section id="data-reporting-vs-data-story" class="level3">
 <h3 class="anchored" data-anchor-id="data-reporting-vs-data-story">Data Reporting vs Data Story</h3>
-<p>Reporting focuses on standardized, repeatable outputs that explain the data point itself. Storytelling focuses on synthesizing evidence, reducing noise, and surfacing meaning and judgement to drive decisions and action. Visualization helps, but visualization alone is not a story.</p>
+<p><strong>Reporting</strong> focuses on standardized, repeatable outputs that explain the data point itself.</p>
+<p><strong>Storytelling</strong> focuses on <em>synthesizing evidence</em>, <em>reducing noise</em>, and surfacing meaning and judgement to drive decisions and action. Visualization helps, but visualization alone is not a story.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -1075,10 +1126,34 @@ Tip
 </tbody>
 </table>
 </section>
-<section id="definition-of-storytelling" class="level3">
-<h3 class="anchored" data-anchor-id="definition-of-storytelling">Definition of storytelling</h3>
-<p><strong>Storytelling</strong> is the creation and telling of stories. In business settings, it is a form of communication that adapts structures from wider storytelling to persuade audiences to think, feel and act.</p>
-<p><strong>Data storytelling</strong> applies storytelling techniques to <code>communicate insights</code>, <code>actions</code> and <code>ideas</code> that come <strong>from data</strong> (rather than the raw data alone). It starts by understanding the data available within the broader goals, then draws out meaning from the background noise to guide the right conversations and decisions.</p>
+<section id="single-source-of-truth-ssot" class="level3">
+<h3 class="anchored" data-anchor-id="single-source-of-truth-ssot">Single Source of Truth (SSOT)</h3>
+<p>A <strong>Single Source of Truth (SSOT)</strong> is a practice in data management where <strong>one authoritative, trusted data source</strong> is designated for each data domain or metric.<br>
+All reports, dashboards, analyses, and decisions must rely on this source, ensuring consistency across the organization.</p>
+<p><strong>In simple terms:</strong></p>
+<p><strong>one question <span class="math inline">\(\rightarrow\)</span> one correct answer</strong>, regardless of who asks it or where it is asked.</p>
+<p>Without SSOT, organizations face inconsistent numbers, duplicated logic, and loss of trust in data. With SSOT, data becomes a <strong>strategic asset</strong>, not a source of conflict.</p>
+<p><strong>Key benefits include:</strong></p>
+<ul>
+<li><strong>Consistency</strong> – The same metric (e.g., revenue, churn, active users) has the same value everywhere.</li>
+<li><strong>Trust</strong> – Stakeholders trust data when numbers do not change between reports.</li>
+<li><strong>Efficiency</strong> – Analysts and engineers stop re-implementing the same logic repeatedly.</li>
+<li><strong>Faster decision-making</strong> – Less time spent reconciling discrepancies.</li>
+<li><strong>Governance &amp; compliance</strong> – Clear ownership and traceability of data definitions.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We are going to re-address this topics during the <strong>Capstone Project.</strong></p>
+</div>
+</div>
 </section>
 </section>
 <section id="videos" class="level2">
@@ -1088,9 +1163,9 @@ Tip
 </li>
 <li><strong>Making Friends with ML</strong>: <a href="https://www.youtube.com/watch?v=lKXv19eRLZg&amp;list=PLRKtJ4IpxJpDxl0NTvNYQWKCYzHNuy2xG&amp;ab_channel=CassieKozyrkov">Watch here</a><br>
 </li>
-<li><strong>Storytelling with data</strong> <a href="https://www.youtube.com/watch?v=r5_34YnCmMY">Watch here</a> <!-- 3. **Statistical vs Practical Significance**: [Watch here](https://www.youtube.com/watch?v=xYvWbELefjY&ab_channel=NNgroup) --></li>
+<li><strong>Storytelling with data</strong> <a href="https://www.youtube.com/watch?v=r5_34YnCmMY">Watch here</a></li>
 </ol>
-<hr>
+<!-- 3. **Statistical vs Practical Significance**: [Watch here](https://www.youtube.com/watch?v=xYvWbELefjY&ab_channel=NNgroup) -->
 </section>
 <section id="articles" class="level2">
 <h2 class="anchored" data-anchor-id="articles">Articles</h2>
@@ -1101,13 +1176,13 @@ Tip
 </li>
 <li><a href="http://insightsoftware.com/blog/comparing-descriptive-predictive-prescriptive-and-diagnostic-analytics/"><strong>About the Types of Analytics</strong></a></li>
 <li><a href="https://www.zdnet.com/article/volume-velocity-and-variety-understanding-the-three-vs-of-big-data/"><strong>Big Data</strong></a></li>
+<li><a href=""><strong>SSOT</strong></a></li>
 </ol>
 </section>
 <section id="books-used-so-far" class="level2">
 <h2 class="anchored" data-anchor-id="books-used-so-far">Books Used so far</h2>
 <ul>
-<li><strong>Thinking with Data</strong> – by Max Shron.<br>
-<a href="https://drive.google.com/file/d/11pVUnfU6lklIrGNwh2nKxQKBPEerQd_u/view?usp=drive_link">Download here</a></li>
+<li><strong>Thinking with Data</strong> – by Max Shron. <a href="https://drive.google.com/file/d/11pVUnfU6lklIrGNwh2nKxQKBPEerQd_u/view?usp=drive_link">Download here</a></li>
 <li><strong>Storytelling in Marketing</strong> - by Caroline Florence <a href="https://drive.google.com/file/d/1hVeyAR_9Kuh9wwgj2APb6zsKJE18O-Xf/view?usp=drive_link">Downlaod here</a></li>
 </ul>
 </section>
@@ -1115,60 +1190,98 @@ Tip
 <h2 class="anchored" data-anchor-id="assingment">Assingment</h2>
 <p><strong>Choose an industry or organization that interests you and answer:</strong></p>
 <ol type="1">
-<li><p><strong>What is a recurring business question that data could help answer?</strong></p>
+<li><strong>What is a recurring business question that data could help answer?</strong></li>
+</ol>
 <ul>
 <li>Clearly state one repeated business problem or question.</li>
 <li>Explain briefly why this question matters to the organization.</li>
-</ul></li>
-<li><p><strong>What data sources would be needed to address it?</strong></p>
+</ul>
+<ol start="2" type="1">
+<li><strong>What data sources would be needed to address it?</strong></li>
+</ol>
 <ul>
 <li>Internal data sources (e.g., transactions, customers, operations).</li>
 <li>External data sources (e.g., market data, competitors, environment).</li>
 <li>Briefly explain what each source provides.</li>
-</ul></li>
-<li><p><strong>Which type of analytics (descriptive, diagnostic, predictive, prescriptive) is most common today at your organization?</strong></p></li>
+</ul>
+<ol start="3" type="1">
+<li><strong>Which type of analytics (descriptive, diagnostic, predictive, prescriptive) is most common today at your organization?</strong></li>
 </ol>
 <ul>
 <li>Identify the most commonly used analytics type.</li>
 <li>Explain how it is currently used (reports, dashboards, summaries).</li>
 </ul>
 <ol start="4" type="1">
-<li><strong>Which type of analytics would apply?</strong>
+<li><strong>Which type of analytics would apply?</strong></li>
+</ol>
 <ul>
 <li>Identify the most suitable analytics type for the business question.</li>
 <li>Explain why this type is more appropriate or valuable.</li>
-</ul></li>
-<li><strong>What kind of decisions rely on data?</strong>
+</ul>
+<ol start="5" type="1">
+<li><strong>What kind of decisions rely on data?</strong></li>
+</ol>
 <ul>
 <li>Strategic decisions (long-term planning).</li>
 <li>Tactical decisions (campaigns, resource allocation).</li>
 <li>Operational decisions (day-to-day actions).</li>
-</ul></li>
-<li><strong>Where do you see opportunities for improvement—better data, more automation, or clearer communication?</strong>
+</ul>
+<ol start="6" type="1">
+<li><strong>Where do you see opportunities for improvement—better data, more automation, or clearer communication?</strong></li>
+</ol>
 <ul>
 <li>Data quality or availability improvements.</li>
 <li>Automation of data pipelines or reporting.</li>
 <li>Better visualization or communication of insights.</li>
-</ul></li>
-<li><strong>Sketch a simple flow diagram describing how data would move from source to insight.</strong>
+</ul>
+<ol start="7" type="1">
+<li><strong>Sketch a simple flow diagram describing how data would move from source to insight.</strong></li>
+</ol>
 <ul>
 <li>Data sources.</li>
 <li>Data collection and storage.</li>
 <li>Data cleaning and processing.</li>
 <li>Analysis and modeling.</li>
 <li>Insights and decision-making.</li>
-</ul></li>
-</ol>
+</ul>
 </section>
 <section id="types-of-bias-in-data" class="level2">
 <h2 class="anchored" data-anchor-id="types-of-bias-in-data">Types of Bias in Data</h2>
 <p>Understanding bias is crucial in data analytics, as it affects the reliability and fairness of insights and models.</p>
 <p>Below are the <strong>main types of bias</strong> with examples and ways to avoid them.</p>
-<section id="selection-bias" class="level3">
-<h3 class="anchored" data-anchor-id="selection-bias">Selection Bias</h3>
+<p>As junior data analyist it’s easy to fall into the trap of believing that <strong>the data is objective</strong>, that it’s the raw truth, and that it can’t be spun or misinterpreted. If you were to believe these things, however, you’d be wrong.</p>
+<p>Data is produced either <strong>by humans</strong> or <strong>by machines</strong> and <strong>algorithms</strong> that have been created by humans.</p>
+<p>In other words, data lends itself to human bias, which can lead to poor decision-making or the adoption of false beliefs. Fortunately, there’s a solution to this problem, and while it may not eliminate <code>100%</code> of the analytical pitfalls of bias, it can help you see the truth you seek whenever you initiate a data analytics project.</p>
+<p>This solution is <em>data ethics</em>, and one of its guiding principles is transparency around the way data is sampled, tested, and processed.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="definition">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>definition
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Bias can enter the data lifecycle at multiple stages.<br>
+To reason about it systematically, biases are grouped by <strong>where they originate</strong> and <strong>how they propagate downstream</strong>.</p>
+</div>
+</div>
+<section id="data-coverage-inclusion-biases" class="level3">
+<h3 class="anchored" data-anchor-id="data-coverage-inclusion-biases">Data Coverage &amp; Inclusion Biases</h3>
+<p>Biases at this stage affect <strong>representation</strong>.</p>
+<p>If present, all downstream analysis is structurally compromised.</p>
+<p><strong>Sellection Bias:</strong></p>
+<ul>
+<li>Sampling Bias</li>
+<li>Exclusion Bias</li>
+<li>Survivorship Bias</li>
+</ul>
+<section id="selection-bias" class="level4">
+<h4 class="anchored" data-anchor-id="selection-bias"><strong>Selection Bias</strong></h4>
 <p>Happens when certain groups are <code>systematically excluded or included</code> due to how data is selected.</p>
 <p><strong>Example:</strong></p>
-<p>A marketing campaign’s success is evaluated only on customers who opened emails, ignoring those who didn’t → engagement appears artificially high.</p>
+<p><em>A marketing campaign’s success is evaluated only on customers who opened emails, ignoring those who didn’t <span class="math inline">\(\rightarrow\)</span> engagement appears artificially high.</em></p>
 <p><strong>How to avoid:</strong></p>
 <ul>
 <li>Randomize inclusion criteria; avoid convenience filtering (e.g., “openers only”).<br>
@@ -1177,12 +1290,12 @@ Tip
 </li>
 <li>Expand recruitment channels and reduce barriers to inclusion.</li>
 </ul>
+<p><img src="../../img/statistics/selection_bias.png" class="img-fluid"></p>
 <blockquote class="blockquote">
 <p><a href="https://en.wikipedia.org/wiki/Selection_bias">reading</a></p>
 </blockquote>
-</section>
-<section id="sampling-bias" class="level3">
-<h3 class="anchored" data-anchor-id="sampling-bias">Sampling Bias</h3>
+<section id="sampling-bias" class="level5">
+<h5 class="anchored" data-anchor-id="sampling-bias"><strong>Sampling Bias</strong></h5>
 <p>Occurs when the data collected is not representative of the entire population.</p>
 <p><strong>Example:</strong></p>
 <p>A telecom company predicts churn using data only from urban customers, ignoring rural ones. The model will likely perform poorly for rural areas.</p>
@@ -1194,12 +1307,67 @@ Tip
 </li>
 <li>Monitor sample composition continuously and correct drift.</li>
 </ul>
+<p><img src="../../img/statistics/sampling_bias.png" class="img-fluid"></p>
 <blockquote class="blockquote">
 <p><a href="https://en.wikipedia.org/wiki/Sampling_bias">reading</a></p>
 </blockquote>
 </section>
-<section id="measurement-bias" class="level3">
-<h3 class="anchored" data-anchor-id="measurement-bias">Measurement Bias</h3>
+<section id="survivorship-bias" class="level5">
+<h5 class="anchored" data-anchor-id="survivorship-bias"><strong>Survivorship Bias</strong></h5>
+<p>Focusing only on successful cases while ignoring failures.</p>
+<p><strong>Example:</strong><br>
+Analyzing only successful marketing campaigns inflates perceived effectiveness.</p>
+<p><strong>How to avoid:</strong></p>
+<ul>
+<li>Track full cohorts, including churned/inactive or failed tests.<br>
+</li>
+<li>Report denominator/attrition; analyze exits explicitly.<br>
+</li>
+<li>Avoid filtering by “survived” outcomes in exploratory steps.</li>
+</ul>
+<!-- TODO  -->
+<p><img src="../../img/statistics/survivorship_bias.png" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p><a href="https://en.wikipedia.org/wiki/Survivorship_bias">reading</a></p>
+</blockquote>
+</section>
+<section id="exclusion-bias" class="level5">
+<h5 class="anchored" data-anchor-id="exclusion-bias"><strong>Exclusion Bias</strong></h5>
+<p>Important variables are <strong>mistakenly</strong> left out during data collection or preprocessing.</p>
+<p><strong>Example:</strong></p>
+<p>An e-commerce model excludes <code>device_type</code> (mobile vs.&nbsp;desktop), missing behavior differences that affect conversion.</p>
+<p><strong>How to avoid:</strong></p>
+<ul>
+<li>Map requirements with domain experts; maintain a <code>"must-have"</code> variable inventory.<br>
+</li>
+<li>Trace feature lineage; run ablation tests to detect missing signal.<br>
+</li>
+<li>Iterate collection forms/ETL to capture omitted fields.</li>
+</ul>
+<p><img src="../../img/statistics/exclusion_bias.png" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p><a href="https://web.stanford.edu/~fafchamp/ExclusionBias.pdf">reading</a></p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="data-collection-measurement-biases" class="level3">
+<h3 class="anchored" data-anchor-id="data-collection-measurement-biases">Data Collection &amp; Measurement Biases</h3>
+<p>Biases at this stage affect <strong>how data is recorded and reported</strong>.<br>
+Even with correct population coverage, poor measurement distorts reality.</p>
+<p><strong>Measurement Biases:</strong></p>
+<ul>
+<li>Measurement Bias<br>
+</li>
+<li>Recall Bias<br>
+</li>
+<li>Response Bias<br>
+</li>
+<li>Observer Bias</li>
+</ul>
+<hr>
+<section id="measurement-bias" class="level4">
+<h4 class="anchored" data-anchor-id="measurement-bias"><strong>Measurement Bias</strong></h4>
 <p>Arises from inaccurate tools or methods used to collect data.</p>
 <p><strong>Example:</strong></p>
 <p>A survey app records <code>0</code> when users skip a question instead of <code>missing</code>, misleading analysts to think respondents selected zero.</p>
@@ -1214,9 +1382,8 @@ Tip
 <blockquote class="blockquote">
 <p><a href="https://www.scribbr.com/frequently-asked-questions/measurement-bias/">reading</a></p>
 </blockquote>
-</section>
-<section id="recall-bias" class="level3">
-<h3 class="anchored" data-anchor-id="recall-bias">Recall Bias</h3>
+<section id="recall-bias" class="level5">
+<h5 class="anchored" data-anchor-id="recall-bias"><strong>Recall Bias</strong></h5>
 <p>Occurs when participants don’t accurately remember past events.</p>
 <p><strong>Example:</strong></p>
 <p>When asked how many times they visited a store last month, respondents under/over-report due to memory errors.</p>
@@ -1231,26 +1398,10 @@ Tip
 <blockquote class="blockquote">
 <p><a href="https://en.wikipedia.org/wiki/Recall_bias">reading</a></p>
 </blockquote>
+<hr>
 </section>
-<section id="observer-bias" class="level3">
-<h3 class="anchored" data-anchor-id="observer-bias">Observer Bias</h3>
-<p>A researcher’s expectations influence data collection or interpretation.</p>
-<p><strong>Example:</strong></p>
-<p>An analyst expecting a new ad to perform better focuses on positive feedback and downplays negatives.</p>
-<p><strong>How to avoid:</strong></p>
-<ul>
-<li>Blind analysts to treatment where feasible; pre-register analysis plans.<br>
-</li>
-<li>Use objective scoring rubrics and inter-rater reliability checks.<br>
-</li>
-<li>Automate extraction/labeling where appropriate.</li>
-</ul>
-<blockquote class="blockquote">
-<p><a href="https://en.wikipedia.org/wiki/Observer_bias">reading</a></p>
-</blockquote>
-</section>
-<section id="response-bias" class="level3">
-<h3 class="anchored" data-anchor-id="response-bias">Response Bias</h3>
+<section id="response-bias" class="level5">
+<h5 class="anchored" data-anchor-id="response-bias"><strong>Response Bias</strong></h5>
 <p>Participants give socially desirable or expected answers rather than truthful ones.</p>
 <p><strong>Example:</strong></p>
 <p>In a satisfaction survey, customers rate service higher to appear polite.</p>
@@ -1265,9 +1416,45 @@ Tip
 <blockquote class="blockquote">
 <p><a href="https://en.wikipedia.org/wiki/Response_bias">reading</a></p>
 </blockquote>
+<hr>
 </section>
-<section id="confirmation-bias" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation-bias">Confirmation Bias</h3>
+<section id="observer-bias" class="level5">
+<h5 class="anchored" data-anchor-id="observer-bias"><strong>Observer Bias</strong></h5>
+<p>A researcher’s expectations influence data collection or interpretation.</p>
+<p><strong>Example:</strong></p>
+<p>An analyst expecting a new ad to perform better focuses on positive feedback and downplays negatives.</p>
+<p><strong>How to avoid:</strong></p>
+<ul>
+<li>Blind analysts to treatment where feasible; pre-register analysis plans.<br>
+</li>
+<li>Use objective scoring rubrics and inter-rater reliability checks.<br>
+</li>
+<li>Automate extraction or labeling where appropriate.</li>
+</ul>
+<blockquote class="blockquote">
+<p><a href="https://en.wikipedia.org/wiki/Observer_bias">reading</a></p>
+</blockquote>
+<hr>
+</section>
+</section>
+</section>
+<section id="analysis-modeling-biases" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-modeling-biases">Analysis &amp; Modeling Biases</h3>
+<p>Biases at this stage affect <strong>interpretation, reasoning, and model learning</strong>.<br>
+They often amplify earlier data issues.</p>
+<p><strong>Analysis Biases:</strong></p>
+<ul>
+<li>Confirmation Bias<br>
+</li>
+<li>Availability Bias<br>
+</li>
+<li>Historical Bias<br>
+</li>
+<li>Algorithmic Bias</li>
+</ul>
+<hr>
+<section id="confirmation-bias" class="level4">
+<h4 class="anchored" data-anchor-id="confirmation-bias"><strong>Confirmation Bias</strong></h4>
 <p>Tendency to favor data that confirms existing beliefs or hypotheses.</p>
 <p><strong>Example:</strong></p>
 <p>A data scientist believes discounts improve retention and analyzes only high-discount months.</p>
@@ -1279,29 +1466,30 @@ Tip
 </li>
 <li>Use holdout periods and peer review.</li>
 </ul>
+<p><img src="../../img/statistics/confirmation_bias.png" class="img-fluid"></p>
 <blockquote class="blockquote">
 <p><a href="https://en.wikipedia.org/wiki/Confirmation_bias">reading</a></p>
 </blockquote>
+<hr>
 </section>
-<section id="survivorship-bias" class="level3">
-<h3 class="anchored" data-anchor-id="survivorship-bias">Survivorship Bias</h3>
-<p>Focusing only on successful cases while ignoring failures.</p>
-<p><strong>Example:</strong><br>
-Analyzing only successful marketing campaigns inflates perceived effectiveness.</p>
+<section id="availability-bias" class="level4">
+<h4 class="anchored" data-anchor-id="availability-bias"><strong>Availability Bias</strong></h4>
+<p>Recent or vivid events are over-weighted in judgment.</p>
+<p><strong>Example:</strong></p>
+<p>After widely covered plane crashes, people overestimate crash risk.</p>
 <p><strong>How to avoid:</strong></p>
 <ul>
-<li>Track full cohorts, including churned/inactive or failed tests.<br>
+<li>Use base rates and long-run averages; automate risk calculations.<br>
 </li>
-<li>Report denominator/attrition; analyze exits explicitly.<br>
-</li>
-<li>Avoid filtering by “survived” outcomes in exploratory steps.</li>
+<li>Seek counter-examples and historical context before concluding.</li>
 </ul>
 <blockquote class="blockquote">
-<p><a href="https://en.wikipedia.org/wiki/Survivorship_bias">reading</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Availability_heuristic">reading</a></p>
 </blockquote>
+<hr>
 </section>
-<section id="historical-bias" class="level3">
-<h3 class="anchored" data-anchor-id="historical-bias">Historical Bias</h3>
+<section id="historical-bias" class="level4">
+<h4 class="anchored" data-anchor-id="historical-bias"><strong>Historical Bias</strong></h4>
 <p>Outdated or biased historical data perpetuates inequalities.</p>
 <p><strong>Example:</strong></p>
 <p>A credit model trained on years of biased lending data continues to disadvantage certain income groups.</p>
@@ -1314,45 +1502,34 @@ Analyzing only successful marketing campaigns inflates perceived effectiveness.<
 <li>Apply fairness constraints and monitor subgroup performance.</li>
 </ul>
 <blockquote class="blockquote">
-<p><a href="https://en.wikipedia.org/wiki/Survivorship_bias">reading</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Historical_bias">reading</a></p>
 </blockquote>
+<hr>
 </section>
-<section id="exclusion-bias" class="level3">
-<h3 class="anchored" data-anchor-id="exclusion-bias">Exclusion Bias</h3>
-<p>Important variables are mistakenly left out during data collection or preprocessing.</p>
-<p><strong>Example:</strong></p>
-<p>An e-commerce model excludes <code>device_type</code> (mobile vs.&nbsp;desktop), missing behavior differences that affect conversion.</p>
-<p><strong>How to avoid:</strong></p>
-<ul>
-<li>Map requirements with domain experts; maintain a “must-have” variable inventory.<br>
-</li>
-<li>Trace feature lineage; run ablation tests to detect missing signal.<br>
-</li>
-<li>Iterate collection forms/ETL to capture omitted fields.</li>
-</ul>
-<blockquote class="blockquote">
-<p><a href="https://web.stanford.edu/~fafchamp/ExclusionBias.pdf">reading</a></p>
-</blockquote>
-</section>
-<section id="algorithmic-bias" class="level3">
-<h3 class="anchored" data-anchor-id="algorithmic-bias">Algorithmic Bias</h3>
+<section id="algorithmic-bias" class="level4">
+<h4 class="anchored" data-anchor-id="algorithmic-bias"><strong>Algorithmic Bias</strong></h4>
 <p>Algorithms learn or amplify biased patterns from data.</p>
-<p><strong>Example:</strong><br>
-A hiring model trained on past decisions that favored men continues to favor male applicants.</p>
+<p><strong>Example:</strong></p>
+<p>A hiring model trained on past decisions that favored men continues to favor male applicants.</p>
 <p><strong>How to avoid:</strong></p>
 <ul>
 <li>Remove or regularize proxy features; conduct fairness and drift audits.<br>
 </li>
 <li>Evaluate with subgroup metrics (e.g., TPR/FPR parity) and add constraints.<br>
 </li>
-<li>Retrain with de-biased data; use post-processing (thresholding) by group where lawful.</li>
+<li>Retrain with de-biased data; use post-processing where lawful.</li>
 </ul>
 <blockquote class="blockquote">
 <p><a href="https://www.ibm.com/think/topics/algorithmic-bias">reading</a></p>
 </blockquote>
+<hr>
 </section>
-<section id="reporting-bias" class="level3">
-<h3 class="anchored" data-anchor-id="reporting-bias">Reporting Bias</h3>
+</section>
+<section id="reporting-communication-biases" class="level3">
+<h3 class="anchored" data-anchor-id="reporting-communication-biases">Reporting &amp; Communication Biases</h3>
+<p>Biases at this stage affect <strong>how insights are presented and interpreted by decision-makers</strong>.</p>
+<section id="reporting-bias" class="level4">
+<h4 class="anchored" data-anchor-id="reporting-bias"><strong>Reporting Bias</strong></h4>
 <p>Selective presentation of data or results that favor a narrative.</p>
 <p><strong>Example:</strong></p>
 <p>A company highlights higher click-through rate but hides the drop in customer satisfaction.</p>
@@ -1368,23 +1545,9 @@ A hiring model trained on past decisions that favored men continues to favor mal
 <p><a href="https://en.wikipedia.org/wiki/Reporting_bias">reading</a></p>
 </blockquote>
 </section>
-<section id="availability-bias" class="level3">
-<h3 class="anchored" data-anchor-id="availability-bias">Availability Bias</h3>
-<p>Recent or vivid events are over-weighted in judgment.</p>
-<p><strong>Example:</strong><br>
-After widely covered plane crashes, people overestimate crash risk.</p>
-<p><strong>How to avoid:</strong></p>
-<ul>
-<li>Use base rates and long-run averages; automate risk calculations.<br>
-</li>
-<li>Seek counter-examples and historical context before concluding.</li>
-</ul>
-<blockquote class="blockquote">
-<p><a href="https://en.wikipedia.org/wiki/Availability_heuristic">reading</a></p>
-</blockquote>
 </section>
 <section id="bias-summary" class="level3">
-<h3 class="anchored" data-anchor-id="bias-summary">Bias Summary</h3>
+<h3 class="anchored" data-anchor-id="bias-summary"><strong>Bias Summary</strong></h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -1400,34 +1563,44 @@ After widely covered plane crashes, people overestimate crash risk.</p>
 </thead>
 <tbody>
 <tr class="odd">
+<td>Selection Bias</td>
+<td>Non-random inclusion/exclusion</td>
+<td>Only counting email openers</td>
+</tr>
+<tr class="even">
 <td>Sampling Bias</td>
 <td>Non-representative sample</td>
 <td>Using only urban data for churn model</td>
 </tr>
+<tr class="odd">
+<td>Survivorship Bias</td>
+<td>Ignoring failures or exits</td>
+<td>Studying only successful campaigns</td>
+</tr>
 <tr class="even">
-<td>Selection Bias</td>
-<td>Inclusion/exclusion errors</td>
-<td>Only counting email openers</td>
+<td>Exclusion Bias</td>
+<td>Missing important variables</td>
+<td>Omitting device type in conversion model</td>
 </tr>
 <tr class="odd">
 <td>Measurement Bias</td>
-<td>Faulty data collection</td>
-<td><code>0</code> recorded for missing survey data</td>
+<td>Faulty data collection or encoding</td>
+<td><code>0</code> recorded instead of missing</td>
 </tr>
 <tr class="even">
 <td>Recall Bias</td>
 <td>Inaccurate memory</td>
-<td>Self-reported visits per month</td>
+<td>Self-reported store visits</td>
 </tr>
 <tr class="odd">
+<td>Response Bias</td>
+<td>Social desirability</td>
+<td>Overrated satisfaction scores</td>
+</tr>
+<tr class="even">
 <td>Observer Bias</td>
 <td>Researcher expectations</td>
 <td>Analyst highlights positive feedback</td>
-</tr>
-<tr class="even">
-<td>Response Bias</td>
-<td>Social desirability</td>
-<td>Overrated service satisfaction</td>
 </tr>
 <tr class="odd">
 <td>Confirmation Bias</td>
@@ -1435,45 +1608,39 @@ After widely covered plane crashes, people overestimate crash risk.</p>
 <td>Ignoring non-discount periods</td>
 </tr>
 <tr class="even">
-<td>Survivorship Bias</td>
-<td>Ignoring failures</td>
-<td>Studying only successful campaigns</td>
+<td>Availability Bias</td>
+<td>Recency or vividness</td>
+<td>Overestimating crash risk after news</td>
 </tr>
 <tr class="odd">
 <td>Historical Bias</td>
-<td>Biased historical data</td>
+<td>Biased legacy data</td>
 <td>Credit score discrimination</td>
 </tr>
 <tr class="even">
-<td>Exclusion Bias</td>
-<td>Missing variables</td>
-<td>Omitting device type in model</td>
-</tr>
-<tr class="odd">
 <td>Algorithmic Bias</td>
-<td>Model learning bias</td>
+<td>Model amplifies biased patterns</td>
 <td>Gender bias in hiring model</td>
 </tr>
-<tr class="even">
-<td>Reporting Bias</td>
-<td>Selective reporting</td>
-<td>Hiding negative KPIs</td>
-</tr>
 <tr class="odd">
-<td>Availability Bias</td>
-<td>Recency/vividness overweighted</td>
-<td>Overestimating crash risk after news</td>
+<td>Reporting Bias</td>
+<td>Selective result presentation</td>
+<td>Hiding negative KPIs</td>
 </tr>
 </tbody>
 </table>
-</section>
-</section>
-<section id="preview-of-next-class" class="level2">
-<h2 class="anchored" data-anchor-id="preview-of-next-class">Preview of Next Class</h2>
-<p>The next chapter introduces <strong>Descriptive Statistics and Introductory Visualization</strong>.<br>
-Students will summarize real datasets using both Excel as the step toward exploratory data analysis.</p>
+<!-- ## Preview of Next Class
+
+The next chapter introduces **Descriptive Statistics and Introductory Visualization**.  
+Students will summarize real datasets using both Excel as the step toward exploratory data analysis.
+
+As a junior data analyst, you probably won’t be asked to transform and load large amounts of raw data into a database; rather, you’ll be working with structured data which, after cleaning, will be ready for analysis. It’s easy to fall into the trap of believing that this data is objective, that it’s the raw truth, and that it can’t be spun or misinterpreted. If you were to believe these things, however, you’d be wrong.
+
+Data is produced either by humans or by machines and algorithms that have been created by humans. In other words, data lends itself to human bias, which can lead to poor decision-making or the adoption of false beliefs. Fortunately, there’s a solution to this problem, and while it may not eliminate 100 percent of the analytical pitfalls of bias, it can help you see the truth you seek whenever you initiate a data analytics project. This solution is data ethics, and one of its guiding principles is transparency around the way data is sampled, tested, and processed.
+ -->
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
