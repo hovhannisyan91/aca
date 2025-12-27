@@ -1,0 +1,1178 @@
+---
+title: "Functions"
+subtitle: "Numeric Functions"
+author: "Karen Hovhannisyan"
+date: last-modified
+format:
+  revealjs: 
+    touch: true
+    slide-number: false
+    chalkboard: true
+
+    preview-links: auto
+    width: 1500
+    transition: slide
+    logo: ../../../img/favicon.png
+    footer: "<a href=\"../session5.qmd\" target= _blank>Back to chapter target</a>"
+    # css: ../../../reveal_styles.css
+    include-in-header:
+      - text: |
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+          <style>
+            .icon-xxl { font-size: 84px; }
+            .icon-xl  { font-size: 64px; }
+            .icon-lg  { font-size: 48px; }
+            .muted { opacity: .8 }
+            .pill { border-radius: 10px; }
+            .circle { border-radius: 50%; }
+          </style>
+---
+
+
+## Functions
+
+We are going to cover the **Built-in** SQL functions which will deal with the
+<br>
+
+- Numbers
+- Texts
+- Dates
+- Data Types
+
+
+# From Session 4
+
+## Run Docker
+
+Open Docker Desktop, Run and open **Pgadmin**:
+
+```bash
+docker compose up -d
+```
+
+## Create `sales_analysis` {.smaller}
+
+```sql
+DROP TABLE IF EXISTS sales_analysis;
+
+CREATE TABLE sales_analysis AS
+SELECT
+    s.transaction_id,
+
+    o.order_date,
+    DATE(o.order_date) AS order_date_date,
+    o.year,
+    o.quarter,
+    o.month,
+
+    c.customer_name,
+    c.city,
+    c.zip_code,
+
+    p.product_name,
+    p.category,
+    p.price,
+
+    e.first_name AS employee_first_name,
+    e.last_name  AS employee_last_name,
+    e.salary     AS employee_salary,
+
+    s.quantity,
+    s.discount,
+    s.total_sales
+FROM sales AS s
+JOIN orders AS o
+    ON s.order_id = o.order_id
+JOIN customers AS c
+    ON s.customer_id = c.customer_id
+JOIN products AS p
+    ON s.product_id = p.product_id
+LEFT JOIN employees AS e
+    ON s.employee_id = e.employee_id;
+```
+
+
+## Indexes for Filtering Performance
+
+```sql
+CREATE INDEX idx_sales_analysis_order_date
+    ON sales_analysis(order_date_date);
+
+CREATE INDEX idx_sales_analysis_year
+    ON sales_analysis(year);
+
+CREATE INDEX idx_sales_analysis_city
+    ON sales_analysis(city);
+
+CREATE INDEX idx_sales_analysis_category
+    ON sales_analysis(category);
+```
+
+
+## What is a Function ? 
+
+<!-- TODO: input and output , use latex formulas to exmplain  -->
+
+
+# SUM()
+
+## SUM() | Basic {.smaller}
+ 
+
+| transaction_id | total_sales |
+|----------------|-------------|
+| 1001           | 120.50      |
+| 1002           | NULL        |
+| 1003           | 99.50       |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| total_revenue |
+|---------------|
+| 220.00        |
+
+## SUM() | with GROUP BY {.smaller .scrollable}
+
+
+| category     | total_sales |
+|--------------|-------------|
+| Accessories  | 50.00       |
+| Accessories  | 70.00       |
+| Electronics  | 120.00      |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  category,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY category;
+```
+
+$$\downarrow$$
+
+| category     | total_revenue |
+|--------------|---------------|
+| Accessories  | 120.00        |
+| Electronics  | 120.00        |
+
+
+
+
+## SUM() | Use Cases
+
+- **Simple**
+  - total revenue calculation  
+  - total cost or volume  
+  - high-level KPI reporting  
+- **Aggregated**
+  - revenue by product category  
+  - cost by department  
+  - KPI breakdowns for dashboards  
+
+## SUM() | ATTENTION
+
+::: {.callout-warning title="Analytical Warning | Always Check the Grain"}
+
+Before using `SUM()`, always verify the **grain of the table**.
+
+- `sales_analysis` is at the **transaction level**  
+- summing values duplicated per transaction (e.g. salaries) produces incorrect results  
+- aggregation must match the **entity you want to measure**
+
+Correct use of `SUM()` depends as much on **data structure** as on SQL syntax.
+
+:::
+
+
+
+# AVG()
+
+## AVG() | What It Does?
+
+<br>
+
+`AVG()` calculates the **arithmetic mean** of numeric values.
+
+**It answers the question:** $\rightarrow$ "What is the **typical** value?"
+
+
+## AVG() | Basic {.smaller}
+
+| transaction_id | discount |
+|----------------|----------|
+| 1001           | 0.10     |
+| 1002           | 0.00     |
+| 1003           | 0.20     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  AVG(discount) AS avg_discount
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+
+
+| avg_discount |
+|--------------|
+| 0.10         |
+
+---
+
+## AVG() | NULL Behavior {.smaller}
+
+`AVG()` **ignores NULL values**.
+
+| transaction_id | discount |
+|----------------|----------|
+| 1001           | 0.10     |
+| 1002           | NULL     |
+| 1003           | 0.20     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  AVG(discount) AS avg_discount
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+ 
+. . . 
+
+| avg_discount |
+|--------------|
+| 0.15         |
+
+---
+
+## AVG() | Why This Happens? {.smaller}
+
+What `AVG()` actually computes:
+
+$$
+\frac{\text{SUM of non-NULL values}}{\text{COUNT of non-NULL values}}
+$$
+
+**In this case:**
+
+$$
+\frac{0.10 + 0.20}{2} = 0.15
+$$
+
+---
+
+## AVG() | with GROUP BY {.smaller .scrollable}
+
+| category     | price |
+|--------------|-------|
+| Accessories  | 25.00 |
+| Accessories  | 35.00 |
+| Electronics  | 120.00 |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  category,
+  AVG(price) AS avg_price
+FROM sales_analysis
+GROUP BY category;
+```
+
+$$\downarrow$$
+
+| category     | avg_price |
+|--------------|-----------|
+| Accessories  | 30.00     |
+| Electronics  | 120.00    |
+
+---
+
+## AVG() | Per-Entity Analysis {.smaller}
+
+This shifts analysis from **global** to **behavioral**.
+
+
+```sql
+SELECT
+  customer_name,
+  AVG(total_sales) AS avg_transaction_value
+FROM sales_analysis
+GROUP BY customer_name;
+```
+---
+
+## AVG() | Use Cases
+
+- **Simple**
+  - average order value  
+  - average discount rate  
+  - average price  
+
+- **Aggregated**
+  - average sales per customer  
+  - average price by category  
+  - benchmarking typical performance  
+
+---
+
+## AVG() | ATTENTION
+
+::: {.callout-warning title="Analytical Warning | Distribution Matters"}
+
+**The Average is **sensitive to outliers:**
+
+- one extreme value can distort the result  
+- skewed data leads to misleading averages  
+
+**Before using `AVG()`, always consider:**
+
+- outliers  
+- skewness  
+- whether a “typical” value makes sense  
+
+:::
+
+
+## ... {.center}
+
+**interpretation matters more than syntax**
+
+
+
+# MIN() and MAX()
+
+## MIN() and MAX() | What They Do? {.smaller}
+
+`MIN()` and `MAX()` are aggregate functions used to identify **extreme values** in a dataset.
+
+**They answer:**
+
+- What is the **smallest** value?
+- What is the **largest** value?
+
+**Commonly used in:**
+
+- exploratory analysis
+- data validation
+- boundary checks
+
+
+## MIN() and MAX() | Basic {.smaller}
+
+| transaction_id | total_sales |
+|----------------|-------------|
+| 1001           | 120.50      |
+| 1002           | 80.00       |
+| 1003           | 99.50       |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  MIN(total_sales) AS min_sale,
+  MAX(total_sales) AS max_sale
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| min_sale | max_sale |
+|----------|----------|
+| 80.00    | 120.50   |
+
+
+
+## MIN() and MAX() | NULL Behavior {.smaller}
+
+Both `MIN()` and `MAX()` **ignore NULL values**.
+
+| transaction_id | total_sales |
+|----------------|-------------|
+| 1001           | 120.50      |
+| 1002           | NULL        |
+| 1003           | 99.50       |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  MIN(total_sales) AS min_sale,
+  MAX(total_sales) AS max_sale
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| min_sale | max_sale |
+|----------|----------|
+| 99.50    | 120.50   |
+
+---
+
+## MIN() and MAX() | with GROUP BY {.smaller .scrollable}
+
+| category     | price |
+|--------------|-------|
+| Accessories  | 25.00 |
+| Accessories  | 35.00 |
+| Electronics  | 120.00 |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  category,
+  MIN(price) AS min_price,
+  MAX(price) AS max_price
+FROM sales_analysis
+GROUP BY category;
+```
+
+$$\downarrow$$
+
+| category     | min_price | max_price |
+|--------------|-----------|-----------|
+| Accessories  | 25.00     | 35.00     |
+| Electronics  | 120.00    | 120.00    |
+
+---
+
+## MIN() and MAX() | Text Columns {.smaller}
+
+| product_name |
+|--------------|
+| Cable        |
+| Mouse        |
+| Keyboard     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  MIN(product_name) AS first_product,
+  MAX(product_name) AS last_product
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| first_product | last_product |
+|---------------|--------------|
+| Cable         | Mouse        |
+
+---
+
+## MIN() and MAX() | Use Cases
+
+- **Numeric**
+  - cheapest and most expensive products
+  - minimum and maximum sales values
+  - boundary validation
+- **Text / Dates**
+  - first and last records
+  - alphabetical boundary checks
+  - earliest and latest dates
+
+---
+
+## MIN() and MAX() | ATTENTION
+
+::: {.callout-warning title="Analytical Warning | Extremes Are Not Typical"}
+
+`MIN()` and `MAX()` show **boundaries**, not typical behavior:
+
+- they are sensitive to outliers
+- a single abnormal value can dominate the result
+
+Always combine extremes with:
+
+- `AVG()`
+- `COUNT()`
+- distribution analysis
+
+to get a reliable analytical picture.
+
+:::
+
+---
+
+## ... {.center}
+
+**MIN() and MAX() define limits, not reality**
+
+# COUNT()
+
+## COUNT() | What It Does {.smaller}
+
+`COUNT()` measures **how many** rows or values exist.
+
+**It is used for:**
+
+- volume
+- cardinality
+- data completeness
+
+Unlike `SUM()` or `AVG()`, it does **not** depend on numeric magnitude.
+
+---
+
+## COUNT() | Basic Row Counting {.smaller}
+
+| transaction_id | discount |
+|----------------|----------|
+| 1001           | 0.10     |
+| 1002           | NULL     |
+| 1003           | 0.20     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  COUNT(*) AS total_rows
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| total_rows |
+|------------|
+| 3          |
+
+
+
+---
+
+## COUNT(column) | Non-NULL Values {.smaller}
+
+| transaction_id | discount |
+|----------------|----------|
+| 1001           | 0.10     |
+| 1002           | NULL     |
+| 1003           | 0.20     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  COUNT(discount) AS non_null_discounts
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| non_null_discounts |
+|--------------------|
+| 2                  |
+
+
+
+## COUNT() | with GROUP BY {.smaller .scrollable}
+
+| product_name | transaction_id |
+|--------------|----------------|
+| Mouse        | 1001           |
+| Mouse        | 1002           |
+| Keyboard     | 1003           |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  product_name,
+  COUNT(*) AS transaction_count
+FROM sales_analysis
+GROUP BY product_name;
+```
+
+$$\downarrow$$
+
+| product_name | transaction_count |
+|--------------|-------------------|
+| Mouse        | 2                 |
+| Keyboard     | 1                 |
+
+
+---
+
+## COUNT(DISTINCT) | Unique Values {.smaller}
+
+**To answer:**
+
+- how many unique customers exist?
+- how many unique entities are present?
+
+. . .
+
+```sql
+SELECT
+  COUNT(DISTINCT customer_name) AS unique_customers
+FROM sales_analysis;
+```
+
+
+
+## COUNT(DISTINCT) | with GROUP BY {.smaller}
+
+
+**Number of Customers per City?**
+
+. . .
+
+```sql
+SELECT
+  city,
+  COUNT(DISTINCT customer_name) AS unique_customers
+FROM sales_analysis
+GROUP BY city;
+```
+
+
+## COUNT() | Duplicate Detection {.smaller}
+
+```sql
+SELECT
+  transaction_id,
+  COUNT(*) AS duplicate_count
+FROM sales_analysis
+GROUP BY transaction_id
+HAVING COUNT(*) > 1;
+```
+
+---
+
+## COUNT() | NULL Rules {.smaller}
+
+- `COUNT(*)` counts rows (NULLs included)
+- `COUNT(column)` ignores NULLs
+- `COUNT(DISTINCT column)` ignores NULLs and duplicates
+- all NULL values → result is `0`
+
+**Understanding this prevents silent metric errors.**
+
+
+## COUNT() | ATTENTION
+
+::: {.callout-warning title="Analytical Warning | Define What You Are Counting"}
+
+Before using `COUNT()`, always ask:
+
+- am I counting rows or entities?
+- do I need `DISTINCT`?
+- is the table grain aligned with my question?
+
+
+
+:::
+
+---
+
+## ... {.center}
+
+***Correct syntax does not guarantee correct analytics***
+
+
+# Row-Level Arithmetic
+
+## What Is Row-Level Arithmetic? {.smaller}
+
+Row-level arithmetic refers to **calculations performed on each individual row** of a table.
+
+Unlike aggregate functions (`SUM`, `AVG`, `COUNT`):
+
+- rows are **not reduced**
+- new **derived columns** are created
+  
+---
+
+## Why Row-Level Arithmetic Matters {.smaller}
+
+**Row-level arithmetic is foundational for:**
+
+- feature engineering
+- revenue and cost calculations
+- metric normalization
+- preparing data for aggregation
+
+**In practice:**
+
+**row-level calculations → aggregation**
+
+
+
+## Basic Calculation {.smaller}
+
+| transaction_id | quantity | price |
+|----------------|----------|-------|
+| 1001           | 2        | 25.00 |
+| 1002           | 1        | 80.00 |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  transaction_id,
+  quantity * price AS calculated_revenue
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| transaction_id | calculated_revenue |
+|----------------|--------------------|
+| 1001           | 50.00              |
+| 1002           | 80.00              |
+
+
+---
+
+## Combining Multiple Columns {.smaller}
+
+| transaction_id | quantity | price | discount |
+|----------------|----------|-------|----------|
+| 1001           | 2        | 25.00 | 0.10     |
+| 1002           | 1        | 80.00 | 0.00     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  transaction_id,
+  quantity * price * (1 - discount) AS net_revenue
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| transaction_id | net_revenue |
+|----------------|-------------|
+| 1001           | 45.00       |
+| 1002           | 80.00       |
+
+
+## Order of Operations {.smaller}
+
+SQL follows standard arithmetic precedence:
+
+1. parentheses `()`
+2. multiplication `*` and division `/`
+3. addition `+` and subtraction `-`
+
+**Use parentheses to make logic explicit.**
+
+```sql
+SELECT
+  transaction_id,
+  (quantity * price) - (quantity * price * discount) AS net_revenue
+FROM sales_analysis;
+```
+
+
+## Numeric Transformations {.smaller}
+
+Row-level arithmetic is often combined with numeric functions.
+
+```sql
+SELECT
+  transaction_id,
+  ROUND(quantity * price, 2) AS rounded_revenue
+FROM sales_analysis;
+```
+
+## Row-Level vs Aggregation {.smaller}
+
+**Two distinct concepts:**
+
+- **row-level calculations** → preserve rows
+- **aggregate calculations** → reduce rows
+
+```sql
+SELECT
+  SUM(quantity * price) AS total_revenue
+FROM sales_analysis;
+```
+
+**Here:**
+
+- calculation happens **per row**
+- aggregation happens **after**
+
+
+---
+
+## ATTENTION {.smaller}
+
+::: {.callout-warning title="Analytical Warning | NULL Propagation"}
+
+**In arithmetic expressions:**
+
+- if **any operand is NULL**, the result is NULL
+- `NULLs` can silently remove rows from aggregations
+:::
+
+---
+
+## ... {.center}
+
+**Row-level arithmetic is the bridge between raw data and analytics**
+
+
+
+<!-- HERE -->
+# CEILING() and FLOOR()
+
+## What Are CEILING() and FLOOR()? {.smaller}
+
+`CEILING()` and `FLOOR()` are numeric functions used to **round values to integer boundaries**.
+
+- `CEILING()` rounds a value **up** to the nearest integer  
+- `FLOOR()` rounds a value **down** to the nearest integer  
+
+**They are commonly used for:**
+
+- threshold logic
+- range construction
+- distribution analysis
+
+## Thresholds and Ranges | Input {.smaller}
+
+| transaction_id | total_sales |
+|----------------|-------------|
+| 1001           | 120.10      |
+| 1002           | 80.90       |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  transaction_id,
+  CEILING(total_sales) AS rounded_up,
+  FLOOR(total_sales)   AS rounded_down
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| transaction_id | rounded_up | rounded_down |
+|----------------|------------|--------------|
+| 1001           | 121        | 120          |
+| 1002           | 81         | 80           |
+
+## Thresholds and Ranges | Interpretation {.smaller}
+
+- `CEILING()` is useful when values must meet a **minimum threshold**
+- `FLOOR()` is useful when values must not exceed a **maximum threshold**
+
+## CEILING() and FLOOR() | Use Cases
+
+- billing thresholds (minimum chargeable units)
+- rounding prices or quantities for operational rules
+- **constructing numeric ranges**
+- **discretizing continuous values**
+
+
+## CEILING() with GROUP BY {.smaller}
+
+`CEILING()` can be used to group **continuous numeric values** into **fixed-width ranges**.
+
+**This is a common technique in:**
+
+- exploratory analysis
+- descriptive analytics
+- dashboard preparation
+
+## CEILING() with GROUP BY | Input {.smaller .scrollable}
+
+
+| transaction_id | total_sales |
+|----------------|-------------|
+| 1001           | 12.40       |
+| 1002           | 47.80       |
+| 1003           | 52.10       |
+| 1004           | 79.90       |
+| 1005           | 101.25      |
+| 1006           | 138.60      |
+
+
+## CEILING() with GROUP BY | Output
+
+| transaction_id | total_sales | **revenue_range (50)** |
+|----------------|-------------|------------------------|
+| 1001           | 12.40       | **50**                 |
+| 1002           | 47.80       | **50**                 |
+| 1003           | 52.10       | **100**                |
+| 1004           | 79.90       | **100**                |
+| 1005           | 101.25      | **150**                |
+| 1006           | 138.60      | **150**                |
+
+
+## CEILING() with GROUP BY | Range Logic {.smaller}
+
+Range assignment formula:
+
+$$
+\text{revenue_range} = \lceil \frac{\text{total_sales}}{50} \rceil \times 50
+$$
+
+**This means:**
+
+- $0 < x \le 50 \rightarrow 50$
+- $50 < x \le 100 \rightarrow 100$
+- $100 < x \le 150 \rightarrow 150$
+
+## CEILING() with GROUP BY | Query {.smaller}
+
+```sql
+SELECT
+  CEILING(total_sales / 50.0) * 50 AS revenue_range,
+  COUNT(*) AS transactions,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY CEILING(total_sales / 50.0) * 50
+ORDER BY revenue_range;
+```
+
+## Revenue Ranges | Intermediate Mapping {.smaller .scrollable}
+
+| transaction_id | total_sales | revenue_range |
+|----------------|-------------|---------------|
+| 1001           | 12.40       | 50            |
+| 1002           | 47.80       | 50            |
+| 1003           | 52.10       | 100           |
+| 1004           | 79.90       | 100           |
+| 1005           | 101.25      | 150           |
+| 1006           | 138.60      | 150           |
+
+## CEILING() with GROUP BY | Query Output {.smaller}
+
+| revenue_range | transactions | total_revenue |
+|---------------|--------------|---------------|
+| 50            | 2            | 60.20         |
+| 100           | 2            | 132.00        |
+| 150           | 2            | 239.85        |
+
+## CEILING() with GROUP BY | Interpretation {.smaller}
+
+Each row represents a **revenue range**, not individual transactions.
+
+- `revenue_range = 100` represents  
+  $$50 < \text{total\_sales} \le 100$$
+- `transactions` shows how many transactions fall into that range
+- `total_revenue` shows the total sales within the range
+
+
+## Revenue Ranges | ATTENTION
+
+::: {.callout-warning title="Analytical Warning | Ranges Are Design Choices"}
+
+Ranges created with `CEILING()` or `FLOOR()` are **analytical assumptions**.
+
+- different range widths lead to different interpretations
+- overly wide ranges hide structure
+- overly narrow ranges introduce noise
+
+**Always justify:**
+
+- range size
+- boundary logic
+- business meaning
+
+:::
+
+
+## ... {.center}
+
+`CEILING()` and `FLOOR()` help transform continuous values into  
+**interpretable analytical structures** given the fact that ranges are chosen deliberately
+
+
+
+
+
+# COALESCE()
+
+## COALESCE() | What It Does {.smaller}
+
+`COALESCE()` is a SQL function used for **explicit NULL handling**.
+
+---
+
+## COALESCE() | Why It Matters {.smaller}
+
+By default, most aggregate functions **ignore `NULL` values**.
+
+::: {.callout-note}
+**`COALESCE()` lets you override this behavior intentionally.**
+:::
+
+**Common strategies include:**
+
+- replacing `NULL` with `0`
+- replacing `NULL` with the **average**
+- replacing `NULL` with the **median**
+
+
+## Treat Missing as Zero | Input {.smaller}
+
+
+| transaction_id | discount |
+|----------------|----------|
+| 1001           | 0.10     |
+| 1002           | NULL     |
+| 1003           | 0.20     |
+
+$$\downarrow$$
+
+```sql
+SELECT
+  AVG(COALESCE(discount, 0)) AS avg_discount_with_zeros
+FROM sales_analysis;
+```
+
+$$\downarrow$$
+
+| avg_discount_with_zeros |
+|-------------------------|
+| 0.10                    |
+
+---
+
+## Treat Missing as Zero | Interpretation {.smaller}
+
+$$
+(0.10 + 0 + 0.20) / 3 = 0.10
+$$
+
+**When to Use**
+
+- `NULL` truly means *zero impact*
+- KPIs explicitly require zero inclusion
+- operational metrics (counts, volumes)
+
+
+## Mean Imputation | Concept {.smaller}
+
+Missing values are replaced with the **overall average**
+
+```sql
+SELECT AVG(discount) AS avg_discount
+       FROM sales_analysis
+```
+
+$$\downarrow$$
+
+```sql
+SELECT
+  AVG(COALESCE(discount, avg_discount)) AS avg_discount_mean_imputed
+FROM sales_analysis;
+```
+
+
+
+## Mean Imputation | When to Use {.smaller}
+
+**Appropriate when:**
+
+. . .
+
+- distribution is approximately symmetric
+- no strong outliers exist
+- missing values are random and rare
+- reporting-level analysis
+
+
+**Avoid when:**
+
+. . .
+
+- data is skewed
+- outliers are present
+- performance or incentive metrics are involved
+
+
+## Robust Imputation | Concept {.smaller}
+
+Median imputation is **more robust** than average imputation  because it is **not affected by outliers**.
+
+PostgreSQL supports median via `PERCENTILE_CONT(0.5)`.
+
+$$\downarrow$$
+
+```sql
+SELECT
+         PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY discount) AS median_discount
+FROM sales_analysis
+```
+
+$$\downarrow$$
+
+```sql
+SELECT
+  AVG(COALESCE(discount, median_discount)) AS avg_discount_median_imputed
+FROM sales_analysis,
+```
+
+---
+
+## Median Imputation | Notes {.smaller}
+
+**When to Use**
+
+. . .
+
+- skewed distributions
+- presence of outliers
+- financial or behavioral metrics
+- fairness-sensitive analysis
+
+**When NOT to Use**
+
+. . .
+
+- very small datasets
+- strict business rules
+- operational counting logic
+
+
+
+## Practical Rule of Thumb {.center}
+
+- average ≈ median → symmetric  
+- average > median → right-skewed  
+- average < median → left-skewed  
+
+::: {.callout-tip}
+Review skewness concepts from  
+[Intro to Statistics – Distributions](https://hovhannisyan91.github.io/aca/materials/statistics/session2.html#symmetric-left-skewed-and-right-skewed-distributions)
+:::
+
+## Average vs Median
+
+| Scenario                           | Prefer  |
+|-----------------------------------|---------|
+| Symmetric distribution            | Average |
+| Skewed distribution               | Median  |
+| Presence of outliers              | Median  |
+| KPI reporting                     | Average |
+| Robust / fairness analysis        | Median  |
+| Modeling or downstream ML         | Median  |
+
+
+
+
+
