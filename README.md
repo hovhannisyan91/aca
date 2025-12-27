@@ -6,5 +6,13 @@
 
 
 
+```sql
+SELECT 
+    * 
+FROM aca_courses 
+WHERE level = 'advanced';
+```
+
+
 
 
