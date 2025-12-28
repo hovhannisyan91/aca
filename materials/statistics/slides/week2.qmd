@@ -48,7 +48,7 @@ Qualitative data describe **qualities, categories, or labels** rather than numbe
 | **Subtype** | **Definition** | **Examples** |
 |--------------|----------------|---------------|
 | **Nominal** | Categories with **no natural order** | Gender (Male/Female), City (Paris, Yerevan, Tokyo) |
-| **Ordinal** | Categories with a **meaningful order**, but **unequal spacing** | Education Level (High < Bachelor < Master < PhD), Satisfaction (Low–Medium–High) |
+| **Ordinal** | Categories with a **meaningful order**, but **unequal spacing** | Education Level *(High < Bachelor < Master < PhD)*, Satisfaction * (Low–Medium–High)* |
 
 
 ## Quantitative Data {.smaller}
@@ -98,7 +98,7 @@ graph TD
 # Measures of Central Tendency
 
 Once we understand our data types, the next step is to summarize them with simple, representative numbers.  
-These are called **measures of central tendency**, and they tell us where the “center” of our data lies.
+These are called **measures of central tendency**, and they tell us where the `“center”` of our data lies.
 
 The three most common measures are:
 
@@ -154,13 +154,15 @@ $$
 
 
 
-> **When to Use:**  
-> - Conveinent measurement clear to everybody
-> - Works well with **continuous or discrete numerical data**.  
-> - Sensitive to **outliers** (extreme values can distort the result).
+::: {.callout-tip title="**When to Use?**"}
+- Conveinent measurement clear to everybody
+- Works well with **continuous or discrete numerical data**.  
+- Sensitive to **outliers** (extreme values can distort the result).
+:::
 
-Given the 5 observations:
+. . .
 
+**Given the 5 observations:**
 
 $$
 \bar{x} 
@@ -171,7 +173,7 @@ $$
 $$
 
 
----
+. . . 
 
 $$
 \mu
@@ -190,7 +192,7 @@ The **median** is the value that separates the dataset into two equal halves.
 **Steps to calculate:**
 
 1. Order the data from smallest to largest.  
-2. If the number of observations is odd → middle value.  
+2. If the number of observations is odd → midfdle value.  
 3. If even → average of the two middle values.
 
 | Example | Calculation |
@@ -207,12 +209,19 @@ The **mode** is the value that appears most often.
 |----------|--------------|
 | Data: 2, 3, 3, 4, 5, 5, 5, 7 | Mode = **5** |
 
-> **When to Use:**  
-> - Ideal for **categorical or discrete data**.  
-> - A dataset can have:
->   - **One mode** → unimodal  
->   - **Two modes** → bimodal  
->   - **More than two** → multimodal
+
+. . .
+
+::: {.callout-tip title="**When to Use?**"}
+
+- Ideal for **categorical or discretfe data**.  
+- A dataset can have:
+  - **One mode** → unimodal  
+  - **Two modes** → bimodal  
+  - **More than two** → multimodal
+:::
+
+
 
 ---
 
@@ -582,10 +591,12 @@ plt.show()
 ## When variability is **neutral**?
 
 - Natural randomness (weather, height, sampling variation)
+  
+. . .
 
- 
->**Variability is not inherently good or bad—its value depends on what you are trying to achieve.**
-
+::: {.callout-caution}
+**Variability is not inherently good or bad as its value depends on what you are trying to achieve.**
+:::
 
 ## Why $N-1$?
 
@@ -593,7 +604,7 @@ A **degree of freedom (df)** is an independent piece of information that can var
 Whenever we estimate a parameter from the sample, we introduce a constraint.  
 Each constraint removes one degree of freedom.
 
-The universal rule is:
+**The universal rule is:**
 
 $$
 df = n - \text{(number of estimated parameters)}.
@@ -610,8 +621,7 @@ $$
 
 The coefficient of variation (CV) is a measure of *relative variability*.  
 It allows us to compare the variability of two datasets **even when their units or scales differ**.
-
-**Data**
+ 
 
 | Date               | Nike  | Google |
 |--------------------|----------|------------|
@@ -676,25 +686,438 @@ $$
 ```bash
 =STANDARDIZE(x, mean, standard_deviation)
 ```
-PS. z-score also called a *standard score.*
 
-Suppose we have:
+**PS. z-score also called a *standard score.***
+
+## Z-score | Calculation {.smaller}
+
+**Suppose we have:**
 
 - x = 540
 - mean = 776.3
 - standard deviation = 385.1
 
+$$z=\frac{540-776.3}{385.1}=0.61$$
 
 <!-- To Slide -->
 
-- `z-score < 0:` bellow mean
-- `z-score = 0:` exactly on the mean
-- `z-score > 0:` above the mean
+- `z-score < 0:` $\rightarrow$ bellow mean
+- `z-score = 0:` $\rightarrow$ exactly on the mean
+- `z-score > 0:` $\rightarrow$ above the mean
 
---- 
+
 
 **Rule of Thumb for identifying outliers:** Data values that have z-scores above `+3` and below `-3` can be categorized as outliers.
 
-<!-- 
+## Empiracal Rule
 
- -->
+
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+
+
+mu = 100
+sigma = 15
+x = np.linspace(mu - 4*sigma, mu + 4*sigma, 400)
+y = 1/(sigma*np.sqrt(2*np.pi)) * np.exp(-(x-mu)**2/(2*sigma**2))
+
+fig, axes = plt.subplots(1, 3, figsize=(12,4))
+
+# 68%
+axes[0].plot(x, y)
+axes[0].fill_between(x, y, where=(x >= mu-sigma) & (x <= mu+sigma), alpha=0.3)
+axes[0].set_title("68% (μ ± 1σ)")
+axes[0].set_xlabel("Value"); axes[0].set_ylabel("Density")
+axes[0].grid(True)
+
+# 95%
+axes[1].plot(x, y)
+axes[1].fill_between(x, y, where=(x >= mu-2*sigma) & (x <= mu+2*sigma), alpha=0.3)
+axes[1].set_title("95% (μ ± 2σ)")
+axes[1].set_xlabel("Value"); axes[1].set_ylabel("Density")
+axes[1].grid(True)
+
+# 99.7%
+axes[2].plot(x, y)
+axes[2].fill_between(x, y, where=(x >= mu-3*sigma) & (x <= mu+3*sigma), alpha=0.3)
+axes[2].set_title("99.7% (μ ± 3σ)")
+axes[2].set_xlabel("Value"); axes[2].set_ylabel("Density")
+axes[2].grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+## Empirical Rule | Example 1 {.smaller}
+
+Daily step counts for a person over several months often form a normal-like distribution.
+
+**Assuming:**
+
+- Average steps per day: $\mu = 8{,}000$  
+- Standard deviation: $\sigma = 1{,}500$
+
+**Then:**
+
+- **68%** of days fall within: $[6500,\ 9500]$
+- **95%** of days fall within: $[5000,\ 11000]$
+- **99.7%** of days fall within: $[3500,\ 12500]$
+ 
+Fitness coaches use this rule to identify `unusually inactive` or `exceptionally active` days.
+
+
+## Empirical Rule | Example 2 {.smaller}
+
+Large standardized tests tend to be approximately normal.
+
+Suppose:
+
+- Mean SAT Math score: $\mu = 520$  
+- Standard deviation: $\sigma = 100$
+
+Then:
+
+- **68%** score between: $520 \pm 100 = [420,\ 620]$
+- **95%** score between: $520 \pm 200 = [320,\ 720]$
+- **99.7%** score between: $520 \pm 300 = [220,\ 820]$
+
+
+Admissions departments use this distribution to benchmark `typical`, `strong`, or `exceptional` performance.
+
+## Empirical Rule | Summary {.smaller}
+
+| Scenario                 | Mean ($\mu$)      | Std ($\sigma$) | 68% Range      | 95% Range               | 99.7% Range              |
+|-------------------------|--------------------|----------------|------------------------|--------------------------|---------------------------|
+| Body Temperature (°C)   | 37°C               | 0.3°C          | 36.7–37.3°C     | 36.4–37.6°C             | 36.1–37.9°C              |
+| SAT Math Score          | 520                | 100            | 420–620         | 320–720                 | 220–820                  |
+| Steps per Day           | 8000               | 1500           | 6500–9500             | 5000–11000              | 3500–12500               |
+| Rod Length (mm)         | 100                | 2              | 98–102                | 96–104                  | 94–106                   |
+| Reaction Time (sec)     | 0.25               | 0.04           | 0.21–0.29             | 0.17–0.33               | 0.13–0.37                |
+
+
+## Chebyshev’s Theorem {.smaller}
+
+
+Any value of  $(z > 1)$, **at least** the following percentage of observations lie within  \( z \) standard deviations of the mean:
+
+$$
+\left( 1 - \frac{1}{z^2} \right) \times 100
+$$ 
+
+
+| Z-Score Band      | Chebyshev Minimum                             | Interpretation                                                |
+|-------------------|-----------------------------------------------|----------------------------------------------------------------|
+| $|Z| < 1.5$       | $1 - \frac{1}{2.25} = 0.556 \rightarrow 55.6\%$    | At least $55.6\%$ of data have z-scores between –1.5 and +1.5 |
+| $|Z| < 2$         | $1 - \frac{1}{4} = 0.75 \rightarrow 75\%$           | At least $75\%$ fall within –2 ≤ Z ≤ +2                      |
+| $|Z| < 3$         | $1 - \frac{1}{9} = 0.889 \rightarrow 88.9\%$        | At least $88.9\%$ fall within –3 ≤ Z ≤ +3                    |
+| $|Z| < 4$         | $1 - \frac{1}{16} = 0.9375\rightarrow 93.75\%$     | At least $93.75\%$ fall within –4 ≤ Z ≤ +4    
+
+
+
+
+## Chebyshev vs Empirical Rule {.smaller}
+
+| Goal | Normal Data | Any Data |
+|------|-------------|-----------|
+| Want precise result | Use z-scores + Empirical Rule | Not valid |
+| Want a minimum guarantee? | Optional | **Use z-scores + Chebyshev** |
+| Data is non symmetric? | Not valid | **Chebyshev works** |
+| Distribution unknown? | Not valid | **Chebyshev works** |
+
+
+# Relative Positions
+
+## Relative Positions | Percentiles {.smaller}
+
+**Percentiles describe where a value lies within a distribution.**
+  
+- **Percentile**: percentage of values below a given value  
+- The **$p$-th percentile**: at least $p$ percent of observations lie below it  
+- **Median** = **50th percentile**  
+- Do **not** confuse percentiles with percentages  
+
+## Percentile Index Formula {.smaller}
+
+$$
+i = \frac{p}{100}(n)
+$$
+
+**Where:**
+
+- $p$ = desired percentile  
+- $n$ = number of observations  
+- $i$ = index in the **ordered** dataset  
+
+. . .  
+
+- If $i$ is **not** a whole number → round **up**  
+- If $i$ **is** a whole number → take the **midpoint** of positions $i$ and $i+1$  
+
+
+## Percentile Rank
+
+$$
+\text{Percentile Rank} =
+\frac{\text{Number of values below } x + 0.5}{\text{Total number of values}} \times 100
+$$
+
+
+## Percentile Rank Example
+
+There are **14** scores below John.
+
+$$
+\frac{14 + 0.5}{16} \times 100 = 90.625
+$$
+
+. . .
+  
+- John is in the **91st percentile**  
+- He scored better than **91%** of individuals  
+
+
+## Ordered Dataset Example
+
+2, 4, 5, 7, 8, 9, 10, 12, 14, 15, 18, 21  
+
+$n = 12$
+
+  
+- Find $P_{25}$  
+- Find $P_{50}$  
+- Find $P_{75}$  
+
+
+
+## Finding the 25th Percentile ($P_{25}$)
+
+$$
+i = \frac{25}{100}(12) = 3
+$$
+
+  
+- 3rd value = 5  
+- 4th value = 7  
+
+$$
+P_{25} = \frac{5 + 7}{2} = 6
+$$
+
+
+## Finding the Median ($P_{50}$)
+
+$$
+i = \frac{50}{100}(12) = 6
+$$
+
+  
+- 6th value = 9  
+- 7th value = 10  
+
+$$
+P_{50} = \frac{9 + 10}{2} = 10
+$$
+
+
+## Finding the 75th Percentile ($P_{75}$)
+
+$$
+i = \frac{75}{100}(12) = 9
+$$
+
+  
+- 9th value = 14  
+- 10th value = 18  
+
+$$
+P_{75} = \frac{14 + 18}{2} = 16
+$$
+
+
+
+
+## Quartiles
+
+**Quartiles divide data into four equal parts.**
+
+  
+- $Q_1$ = 25th percentile  
+- $Q_2$ = 50th percentile (median)  
+- $Q_3$ = 75th percentile  
+
+
+## Interquartile Range (IQR)
+
+$$
+\text{IQR} = Q_3 - Q_1
+$$
+
+  
+- Measures spread of the **middle 50%**  
+- Robust to outliers  
+
+
+---
+
+## Boxplot Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| fig-align: center
+
+import matplotlib.pyplot as plt
+
+data = [2, 4, 5, 7, 8, 9, 10, 12, 14, 15, 18, 21]
+plt.boxplot(data, vert=True)
+plt.title("Boxplot Example")
+plt.ylabel("Values")
+plt.show()
+```
+
+---
+
+## Measures of Association
+
+Measures of association describe how two variables move together.
+
+  
+- Direction  
+
+- Strength  
+
+- Linearity  
+
+
+---
+
+## Scatter Plot Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| fig-align: center
+
+import matplotlib.pyplot as plt
+
+hours = [3, 7, 5, 4, 3, 2]
+grades = [86, 98, 92, 83, 78, 79]
+
+plt.scatter(hours, grades)
+plt.xlabel("Hours of Study")
+plt.ylabel("Exam Grade")
+plt.title("Hours of Study vs Exam Grade")
+plt.grid(True)
+plt.show()
+```
+
+---
+
+## Covariance
+
+  
+- Indicates **direction** of linear relationship  
+- Positive → move together  
+- Negative → move oppositely  
+- Magnitude is **not interpretable**  
+
+$$
+s_{xy} =
+\frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{n - 1}
+$$
+
+
+---
+
+## Correlation
+
+Correlation standardizes covariance.
+
+$$
+r_{xy} = \frac{s_{xy}}{s_x s_y}
+$$
+
+  
+- Range: $[-1, 1]$  
+- Shows **direction and strength**  
+- $r = 0$ → no linear relationship  
+
+
+---
+
+## Correlation Interpretation
+
+  
+- $r > 0$ → positive relationship  
+- $r < 0$ → negative relationship  
+- $|r|$ close to 1 → strong relationship  
+
+
+---
+
+## Correlation vs Causation
+
+  
+- Correlation does **not** imply causation  
+- Possible explanations:
+  - Reverse causality  
+  - Common causes  
+  - Selection bias  
+
+
+
+
+## Ice Cream and Drowning Example
+
+  
+- Ice cream sales rise in summer  
+- Drowning incidents rise in summer  
+- **Common cause**: hot weather  
+
+
+---
+
+## Firefighters and Fire Damage
+
+  
+- Large fires → more firefighters  
+- Large fires → more damage  
+- **Cause**: fire severity  
+- Firefighters do **not** cause damage  
+
+
+---
+
+## Salary and Coffee Consumption
+
+  
+- Higher salary → more coffee consumption  
+- **Confounder**: job seniority  
+- Coffee does **not** cause higher pay  
+
+
+---
+
+## Shoe Size and Reading Scores
+
+  
+- Larger shoe size → higher reading score  
+- **Confounder**: age  
+- Shoe size does **not** improve reading  
+
+
+
+
+
