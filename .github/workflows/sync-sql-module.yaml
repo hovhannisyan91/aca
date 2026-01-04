@@ -33,11 +33,17 @@ jobs:
             target/
 
       - name: Commit and push if changed
+        env:
+          GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
         run: |
           cd target
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
           git diff --cached --quiet || git commit -m "Sync SQL module from course repo"
-          git push "https://${{ secrets.SQL_PORTFOLIO_PAT }}@github.com/hovhannisyan91/sql-analytics-portfolio.git" HEAD:main
+
+          CLEAN_TOKEN=$(printf "%s" "$GH_TOKEN")
+          git remote set-url origin "https://${CLEAN_TOKEN}@github.com/hovhannisyan91/sql-analytics-portfolio.git"
+          git push origin HEAD:main
+
 
