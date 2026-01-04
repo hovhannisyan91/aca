@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "lab/sql_module/**"
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -19,9 +20,9 @@ jobs:
         with:
           repository: hovhannisyan91/sql-analytics-portfolio
           token: ${{ secrets.SQL_PORTFOLIO_PAT }}
-          path: portfolio
+          path: target
 
-      - name: Sync sql_module into repo root (preserve metadata)
+      - name: Sync sql_module into target repo root (preserve metadata)
         run: |
           rsync -av --delete \
             --exclude ".git/" \
@@ -29,14 +30,14 @@ jobs:
             --exclude ".gitignore" \
             --exclude "LICENSE" \
             lab/sql_module/ \
-            portfolio/
+            target/
 
       - name: Commit and push if changed
         run: |
+          cd target
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
           git diff --cached --quiet || git commit -m "Sync SQL module from course repo"
-          git remote set-url origin https://${{ secrets.SQL_PORTFOLIO_PAT }}@github.com/hovhannisyan91/sql-analytics-portfolio.git
+          git remote set-url origin https://${{secrets.SQL_PORTFOLIO_PAT}}@github.com/hovhannisyan91/sql-analytics-portfolio.git
           git push origin main
-
