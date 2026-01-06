@@ -503,3 +503,135 @@ FROM phone_numbers_demo;
 
 **Consistency matters more than preference.**
 
+
+
+# REPLACE()
+
+## Why REPLACE() Matters {.smaller}
+
+After handling **whitespace** and **capitalization**, the next common issue is  
+**structural noise inside text values**.
+
+**Typical examples include:**
+
+- hyphens in phone numbers  
+- spaces used as separators  
+- dots (`.`), slashes(`\`,`/`), or underscores  
+- inconsistent formatting characters  
+
+## Analytical Principle
+
+`REPLACE()` removes or substitutes **known, explicit characters**.
+
+**This makes it ideal when:**
+
+- the pattern is simple  
+- the character to remove is known in advance  
+- rules are deterministic  
+
+`REPLACE()` is **not pattern-based** > it is **literal and predictable**.
+
+---
+
+## Removing Hyphens {.smaller}
+
+Phone numbers often contain hyphens as visual separators.
+
+```sql
+SELECT
+  raw_phone,
+  REPLACE(raw_phone, '-', '') AS phone_no_hyphen
+FROM phone_numbers_demo;
+```
+
+---
+
+## Output {.smaller}
+
+| raw_phone            | phone_no_hyphen     |
+|----------------------|---------------------|
+| `077-600-045`        | `077600045`         |
+| `(374)-77-600-945`   | `(374)77600945`     |
+| `077600945`          | `077600945`         |
+
+Hyphens are removed, but **other characters remain**.
+
+---
+
+## Chaining Replacements {.smaller}
+
+You can apply `REPLACE()` multiple times to remove different characters.
+
+```sql
+SELECT
+  raw_phone,
+  REPLACE(
+    REPLACE(
+      REPLACE(TRIM(raw_phone), '-', ''),
+    '(', ''),
+  ')', '') AS phone_clean_partial
+FROM phone_numbers_demo;
+```
+
+---
+
+## Partial Cleanup Result {.smaller}
+
+| raw_phone            | phone_clean_partial |
+|----------------------|---------------------|
+| `(374)-77-600-945`   | `37477600945`       |
+| `077-600-045`        | `077600045`         |
+| `   077600945  `     | `077600945`         |
+
+This is **progress**, but still not fully standardized.
+
+---
+
+## Why We Stop Here
+
+At this stage:
+
+- separators are removed  
+- formatting noise is reduced  
+- but **digits are not guaranteed**  
+
+**We still have:**
+
+- country codes  
+- variable lengths  
+- inconsistent prefixes  
+
+This tells us `REPLACE()` alone is **not sufficient**.
+
+---
+
+## REPLACE() | When to Use
+
+**Use `REPLACE()` when:**
+
+- the character to remove is known  
+- rules are simple and explicit  
+- you want maximum transparency  
+
+**Avoid it when:**
+
+- patterns vary  
+- rules depend on position  
+- you need validation  
+
+---
+
+## Analytical Warning
+
+::: {.callout-warning title="Analytical Warning | Hard-Coded Rules"}
+
+Every `REPLACE()` encodes a **business assumption**.
+
+- what characters are allowed?  
+- what characters are noise?  
+- what if formats change later?  
+
+**Document these decisions!**
+
+:::
+

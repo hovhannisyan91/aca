@@ -506,3 +506,154 @@ A common and robust pattern is:
 - must be applied **consistently**
 
 Like `TRIM()`, these functions remove **noise**, not meaning.
+
+
+
+## REPLACE()
+
+After handling **whitespace** (`TRIM()`) and **capitalization** (`LOWER()`, `UPPER()`, `INITCAP()`), the next common problem in real-world text data is **structural noise inside strings**.
+
+Structural noise refers to characters that are part of *visual formatting* but carry **no analytical meaning**.
+
+Typical examples include:
+
+- hyphens in phone numbers  
+- spaces used as separators  
+- parentheses around country codes  
+- dots, slashes, or underscores  
+
+If these characters are not removed, text values that represent the **same entity** remain incomparable.
+
+---
+
+### Why REPLACE() Matters in Analytics
+
+`REPLACE()` allows you to **explicitly remove or substitute known characters**.
+
+From an analytical perspective:
+
+- the rule is **deterministic**
+- the transformation is **transparent**
+- the outcome is **fully explainable**
+
+This makes `REPLACE()` suitable for **early-stage structural cleanup**, before applying more advanced pattern-based logic.
+
+---
+
+### Basic Usage
+
+The `REPLACE()` function has the following structure:
+
+```sql
+REPLACE(text, old_value, new_value)
+```
+
+It replaces **all occurrences** of `old_value` with `new_value`.
+
+---
+
+### Removing Known Separators
+
+Phone numbers often include hyphens for readability.
+
+```sql
+SELECT
+  raw_phone,
+  REPLACE(raw_phone, '-', '') AS phone_no_hyphen
+FROM phone_numbers_demo;
+```
+
+**Conceptual Effect**
+
+| raw_phone          | phone_no_hyphen |
+|--------------------|-----------------|
+| `077-600-045`      | `077600045`     |
+| `(374)-77-600-945` | `(374)77600945` |
+
+Only the hyphen is removed.  
+All other characters remain untouched.
+
+---
+
+### Chaining REPLACE() Calls
+
+When multiple unwanted characters are present, `REPLACE()` calls can be **nested**.
+
+```sql
+SELECT
+  raw_phone,
+  REPLACE(
+    REPLACE(
+      REPLACE(TRIM(raw_phone), '-', ''),
+    '(', ''),
+  ')', '') AS phone_partial_clean
+FROM phone_numbers_demo;
+```
+
+This removes:
+
+- leading and trailing spaces  
+- hyphens  
+- parentheses  
+
+**Resulting Pattern**
+
+| raw_phone          | phone_partial_clean |
+|--------------------|---------------------|
+| `(374)-77-600-945` | `37477600945`       |
+| `077-600-045`      | `077600045`         |
+
+At this stage, formatting noise is reduced, but the value is **still not standardized**.
+
+---
+
+### Analytical Limitations of REPLACE()
+
+While `REPLACE()` is useful, it has important limitations:
+
+- it works only on **explicit characters**
+- it does not understand **patterns**
+- it cannot validate correctness
+- rules must be hard-coded
+
+For example:
+
+- it cannot remove “everything that is not a digit”
+- it cannot enforce length rules
+- it cannot adapt to new formats
+
+Because of this, `REPLACE()` is rarely the *final* cleaning step.
+
+---
+
+### When to Use REPLACE()
+
+Use `REPLACE()` when:
+
+- the unwanted character is known  
+- formatting rules are simple  
+- transformations must be transparent  
+
+Avoid relying on `REPLACE()` when:
+
+- formats vary widely  
+- patterns are unknown  
+- validation is required  
+
+
+::: {.callout-warning title="Analytical Warning | Hard-Coded Assumptions"}
+
+Every `REPLACE()` call encodes an **assumption**:
+
+- which characters are noise  
+- which characters are meaningful  
+- what happens if formats change  
+
+These assumptions must be:
+
+- documented  
+- reviewed  
+- justified by business logic  
+
+:::
+
