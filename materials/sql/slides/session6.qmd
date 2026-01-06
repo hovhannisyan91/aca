@@ -1,0 +1,505 @@
+---
+title: "Functions"
+subtitle: "String Functions"
+author: "Karen Hovhannisyan"
+date: last-modified
+format:
+  revealjs: 
+    touch: true
+    slide-number: false
+    chalkboard: true
+
+    preview-links: auto
+    width: 1500
+    transition: slide
+    logo: ../../../img/favicon.png
+    footer: "<a href=\"../session6.qmd\" target= _blank>Back to chapter target</a>"
+    # css: ../../../reveal_styles.css
+    include-in-header:
+      - text: |
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+          <style>
+            .icon-xxl { font-size: 84px; }
+            .icon-xl  { font-size: 64px; }
+            .icon-lg  { font-size: 48px; }
+            .muted { opacity: .8 }
+            .pill { border-radius: 10px; }
+            .circle { border-radius: 50%; }
+          </style>
+---
+
+
+# Text Functions
+
+Text (string) functions operate at the **row level**  and are used to **inspect, clean, standardize, and transform** textual data.
+
+They are **data quality tools**, not cosmetic helpers.
+
+
+# From Session 4
+
+## Run Docker
+
+Open Docker Desktop, Run and open **Pgadmin**:
+
+```bash
+docker compose up -d
+```
+
+## Create `sales_analysis` {.smaller}
+
+```sql
+DROP TABLE IF EXISTS sales_analysis;
+
+CREATE TABLE sales_analysis AS
+SELECT
+    s.transaction_id,
+
+    o.order_date,
+    DATE(o.order_date) AS order_date_date,
+    o.year,
+    o.quarter,
+    o.month,
+
+    c.customer_name,
+    c.city,
+    c.zip_code,
+
+    p.product_name,
+    p.category,
+    p.price,
+
+    e.first_name AS employee_first_name,
+    e.last_name  AS employee_last_name,
+    e.salary     AS employee_salary,
+
+    s.quantity,
+    s.discount,
+    s.total_sales
+FROM sales AS s
+JOIN orders AS o
+    ON s.order_id = o.order_id
+JOIN customers AS c
+    ON s.customer_id = c.customer_id
+JOIN products AS p
+    ON s.product_id = p.product_id
+LEFT JOIN employees AS e
+    ON s.employee_id = e.employee_id;
+```
+
+
+## Indexes for Filtering Performance
+
+```sql
+CREATE INDEX idx_sales_analysis_order_date
+    ON sales_analysis(order_date_date);
+
+CREATE INDEX idx_sales_analysis_year
+    ON sales_analysis(year);
+
+CREATE INDEX idx_sales_analysis_city
+    ON sales_analysis(city);
+
+CREATE INDEX idx_sales_analysis_category
+    ON sales_analysis(category);
+```
+
+
+## Text Functions | Analytical Reality {.smaller}
+
+**Real-world text data is rarely clean:**
+
+- inconsistent casing
+- extra spaces
+- annotations and symbols
+- mixed formats
+- partial or malformed values
+
+
+**If left untreated:**
+
+. . . 
+
+- `GROUP BY` fragments categories
+- `COUNT(DISTINCT ...)` overcounts
+- joins silently fail
+- KPIs drift across dashboards
+
+
+##  Workflow
+
+**Correct analytical order:**
+
+1. inspect  
+2. measure  
+3. classify  
+4. clean  
+5. validate  
+6. aggregate  
+
+We always start with **measurement**, not transformation.
+
+
+# Dummy Setup
+
+## Raw Phone Numbers {.smaller}
+
+We use a controlled dummy table  
+with deliberately **inconsistent phone formats**.
+
+```sql
+DROP TABLE IF EXISTS phone_numbers_demo;
+
+CREATE TABLE phone_numbers_demo (
+  raw_phone   TEXT,
+  first_name  TEXT,
+  last_name   TEXT
+);
+
+INSERT INTO phone_numbers_demo (raw_phone, first_name, last_name) VALUES
+  ('   077600945  ', 'john',        'DOE'),
+  ('077600945',      'ANNa',        'smith'),
+  ('77600945',       'mARy',        'joHNson'),
+  ('077-600-045',    'geORGe',      'brown'),
+  ('(374)-77-600-945','ALEx',       'O''NEILL'),
+  ('37477600945',    'lAuRA',       'van dyke');
+```
+
+---
+
+## Target Standard
+
+Our target standardized phone number is:
+
+**`77600945`**
+
+**At this stage:**
+
+- no cleaning
+- no assumptions
+- only inspection
+
+
+
+
+
+# LENGTH()
+
+## What It Does
+
+`LENGTH()` returns the **number of characters** in a text value.
+
+It is a **diagnostic function**, not a cleaning function.
+
+---
+
+## Analytical Question
+
+**Before cleaning, we ask:**
+
+> **Do all values have the same length?**
+
+. . .
+
+*If not, they cannot be directly comparable.*
+
+---
+
+## Inspecting the Data {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  LENGTH(raw_phone) AS phone_length
+FROM phone_numbers_demo;
+```
+
+---
+
+## Output {.smaller}
+
+| raw_phone             | phone_length |
+|-----------------------|--------------|
+| `'   077600945  '`    | 13           |
+| `'077600945'`         | 9            |
+| `'77600945'`          | 8            |
+| `'077-600-045'`       | 11           |
+| `'(374)-77-600-945'`  | 15           |
+| `'37477600945'`       | 11           |
+
+---
+
+## Interpretation
+
+**Even without cleaning, patterns emerge:**
+
+- **8 characters** → already standardized  
+- **9 characters** → leading zero  
+- **11 characters** → country code or separators  
+- **13+ characters** → whitespace and symbols  
+
+
+## What We Just Learned
+
+**Without modifying data, we detected:**
+
+- whitespace issues
+- formatting symbols
+- country prefixes
+- multiple structural patterns
+
+This prevents **blind transformations** later.
+
+---
+
+## Why This Is Critical
+
+**Using `LENGTH()` early allows you to:**
+
+- detect malformed rows
+- classify data quality patterns
+- design targeted cleaning rules
+- avoid one-size-fits-all logic
+
+
+## Analytical Insight
+
+- the target `77600945` has a **known expected length**
+- this becomes a **post-cleaning validation rule**
+- any row failing this rule is still dirty
+
+
+
+# TRIM()
+
+## Why TRIM() Matters
+
+**Whitespace issues are:
+**
+- visually invisible
+- common in manual or legacy inputs
+- a frequent cause of failed joins and false duplicates
+
+Yet they are often **overlooked** in analysis.
+
+
+## Analytical Principle
+
+Whitespace has **no business meaning**.
+
+- removing it does **not change semantics**
+- but significantly improves comparability
+
+This makes `TRIM()` a **safe first transformation**.
+
+
+
+## Applying TRIM {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  LENGTH(raw_phone) AS length,
+  TRIM(raw_phone) AS trimmed_phone,
+  LENGTH(TRIM(raw_phone)) AS trimmed_length
+FROM phone_numbers_demo;
+```
+
+## Output {.smaller}
+
+**What Changed?**
+
+| raw_phone             | length | trimmed_phone        | trimmed_length |
+|-----------------------|--------|----------------------|----------------|
+| `'   077600945  '`    | 13     | `'077600945'`        | 9              |
+| `'077600945'`         | 9      | `'077600945'`        | 9              |
+| `'77600945'`          | 8      | `'77600945'`         | 8              |
+| `'077-600-045'`       | 11     | `'077-600-045'`      | 11             |
+| `'(374)-77-600-945'`  | 15     | `'(374)-77-600-945'` | 15             |
+| `'37477600945'`       | 11     | `'37477600945'`      | 11             |
+
+
+
+## LTRIM vs RTRIM
+
+**SQL also provides directional variants:**
+
+```sql
+LTRIM(raw_phone)   -- removes leading spaces | only LEFT
+RTRIM(raw_phone)   -- removes trailing spaces | ONLY right
+```
+
+`TRIM()` is equivalent to applying **both**.
+
+
+## Validation Check
+
+After trimming, we re-measure:
+
+```sql
+SELECT
+  raw_phone,
+  LENGTH(TRIM(raw_phone)) AS cleaned_length
+FROM phone_numbers_demo;
+```
+
+This tells us whether whitespace was the **only issue**.
+
+
+## Analytical Insight
+
+`TRIM()` helps us decide:
+
+- which rows were only cosmetically broken
+- which rows require structural cleaning
+- how many patterns remain
+
+**Measurement → transformation → re-measurement**
+
+## Try Yourself
+
+- Apply `LTRIM(raw_phone)`
+- Apply `RTRIM(raw_number)`
+
+
+
+# LOWER(), UPPER(), INITCAP()
+
+## Why Case Normalization Matters {.smaller}
+
+Text values often differ only by **capitalization**, even though they represent the **same entity**.
+
+. . .
+
+**From an analytical perspective:**
+
+- capitalization has **no business meaning**
+- SQL treats differently cased strings as **different values**
+- this leads to fragmented groups and incorrect counts
+
+---
+
+## Case Normalization | The Problem {.smaller}
+
+**Examples of equivalent values treated as different:**
+
+- `john`, `John`, `JOHN`
+- `van dyke`, `Van Dyke`, `VAN DYKE`
+
+**If left untreated:**
+
+- `GROUP BY` fragments categories
+- `COUNT(DISTINCT ...)` overcounts
+- joins silently fail
+
+---
+
+## LOWER() | Normalize for Analysis {.smaller}
+
+`LOWER()` converts all characters to **lowercase**.
+
+**Best suited for:**
+
+- joins  
+- grouping keys  
+- deduplication  
+
+```sql
+SELECT
+  first_name,
+  LOWER(first_name) AS first_name_lower
+FROM phone_numbers_demo;
+```
+
+---
+
+## LOWER() | Output {.smaller}
+
+| first_name | first_name_lower |
+|------------|------------------|
+| `john`     | `john`           |
+| `ANNa`     | `anna`           |
+| `mARy`     | `mary`           |
+| `geORGe`   | `george`         |
+| `ALEx`     | `alex`           |
+| `lAuRA`    | `laura`          |
+
+---
+
+## UPPER() | Normalize for Codes {.smaller}
+
+`UPPER()` converts all characters to **uppercase**.
+
+Often used for:
+
+- codes  
+- abbreviations  
+- legacy-system compatibility  
+
+```sql
+SELECT
+  last_name,
+  UPPER(last_name) AS last_name_upper
+FROM phone_numbers_demo;
+```
+
+---
+
+## UPPER() | Output {.smaller}
+
+| last_name  | last_name_upper |
+|------------|-----------------|
+| `DOE`      | `DOE`           |
+| `smith`   | `SMITH`         |
+| `joHNson` | `JOHNSON`       |
+| `brown`   | `BROWN`         |
+| `O'NEILL` | `O'NEILL`       |
+| `van dyke`| `VAN DYKE`      |
+
+---
+
+## INITCAP() | Presentation Formatting {.smaller}
+
+`INITCAP()` converts text to **title case**:
+
+- first letter uppercase  
+- remaining letters lowercase  
+
+```sql
+SELECT
+  first_name,
+  INITCAP(first_name) AS first_name_clean
+FROM phone_numbers_demo;
+```
+
+---
+
+## INITCAP() | Output {.smaller}
+
+| first_name | first_name_clean |
+|------------|------------------|
+| `john`     | `John`           |
+| `ANNa`     | `Anna`           |
+| `mARy`     | `Mary`           |
+| `geORGe`   | `George`         |
+| `ALEx`     | `Alex`           |
+| `lAuRA`    | `Laura`          |
+
+---
+
+## Choosing the Right Function {.smaller}
+
+| Function   | Best Used For |
+|-----------|---------------|
+| `LOWER()` | joins, grouping, deduplication |
+| `UPPER()` | codes, abbreviations |
+| `INITCAP()` | names, presentation |
+
+. . . 
+
+**never mix raw and normalized text in analysis **
+
+. . .
+
+**Consistency matters more than preference.**
+

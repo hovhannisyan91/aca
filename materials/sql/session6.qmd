@@ -1,0 +1,508 @@
+---
+title: "Session 06 Data Analysis with SQL | Functions"
+categories: [SQL, String Functions]
+---
+
+## From Session 4
+
+Before jumping to the built-in SQL Funcions let's ensure that we have `sales_analysis` table.
+
+### Running Docker 
+
+
+Lets run the Docker in **detached mode:**
+
+```bash
+docker compose up -d
+```
+
+### Create `sales_analysis` table
+
+```sql
+DROP TABLE IF EXISTS sales_analysis;
+
+CREATE TABLE sales_analysis AS
+SELECT
+    s.transaction_id,
+
+    o.order_date,
+    DATE(o.order_date) AS order_date_date,
+    o.year,
+    o.quarter,
+    o.month,
+
+    c.customer_name,
+    c.city,
+    c.zip_code,
+
+    p.product_name,
+    p.category,
+    p.price,
+
+    e.first_name AS employee_first_name,
+    e.last_name  AS employee_last_name,
+    e.salary     AS employee_salary,
+
+    s.quantity,
+    s.discount,
+    s.total_sales
+FROM sales AS s
+JOIN orders AS o
+    ON s.order_id = o.order_id
+JOIN customers AS c
+    ON s.customer_id = c.customer_id
+JOIN products AS p
+    ON s.product_id = p.product_id
+LEFT JOIN employees AS e
+    ON s.employee_id = e.employee_id;
+```
+
+### Indexes for Filtering Performance
+
+```sql
+CREATE INDEX idx_sales_analysis_order_date
+    ON sales_analysis(order_date_date);
+
+CREATE INDEX idx_sales_analysis_year
+    ON sales_analysis(year);
+
+CREATE INDEX idx_sales_analysis_city
+    ON sales_analysis(city);
+
+CREATE INDEX idx_sales_analysis_category
+    ON sales_analysis(category);
+```
+
+
+::: {.callout-note}
+Note, that we are going to take closer look on `JOINs` during the next session.
+:::
+
+## Text Functions | General Overview
+
+Text (string) functions are used to **inspect, clean, standardize, and transform textual data** at the **row level**.
+
+Unlike numeric aggregate functions (`SUM`, `AVG`, `COUNT`), most text functions:
+
+- operate **per row**
+- return **derived text columns**
+- do **not reduce** the number of rows on their own
+
+In analytical workflows, text functions are typically applied **before aggregation** to ensure that grouping, counting, and summarization behave correctly.
+
+---
+
+### Why Text Functions Matter in Analytics
+
+Real-world text data is often **dirty, inconsistent, and ambiguous**.
+
+Common issues include:
+
+- inconsistent casing (`Electronics` vs `electronics`)
+- leading or trailing spaces
+- annotations inside text (`Category (Promo)`)
+- mixed formats (`ID-123`, `ID_123`, `123`)
+- missing or partially filled values
+
+If these issues are not handled explicitly:
+
+- `GROUP BY` produces fragmented categories
+- `COUNT(DISTINCT ...)` overcounts entities
+- KPIs become inconsistent across dashboards
+- joins silently fail
+
+Text functions are therefore **data quality tools**, not cosmetic helpers.
+
+---
+
+### Typical Analytical Use Cases
+
+Text functions are commonly used for:
+
+- **data cleaning**
+  - trimming spaces
+  - normalizing case
+  - removing annotations
+
+- **standardization**
+  - making categories comparable
+  - ensuring consistent grouping keys
+
+- **feature engineering**
+  - extracting parts of strings
+  - building derived text features
+
+- **validation**
+  - detecting malformed values
+  - identifying unexpected formats
+
+
+
+
+### Analytical Principle
+
+Text transformations change **how rows are grouped**.
+
+Because of this:
+
+- text cleaning is an **analytical decision**
+- not a purely technical step
+- and must be done **intentionally and consistently**
+
+In the following sections, we will cover **built-in text functions one by one**, using the same structured approach as in Session 05:
+
+- what the function does  
+- why it matters analytically  
+- input → query → output  
+- common pitfalls and best practices  
+
+This foundation will prepare you to build **trustworthy categorical metrics** and **clean analytical dimensions** using SQL.
+
+
+### Dummy Setup | Raw Phone Numbers and Names
+
+To demonstrate **text normalization beyond phone numbers**, we extend the dummy table to include **first name** and **last name** fields with **inconsistent capitalization and formatting**.
+
+This allows us to later apply functions such as `UPPER()`, `LOWER()`, `INITCAP()`, and validation logic on names.
+
+```sql
+DROP TABLE IF EXISTS phone_numbers_demo;
+
+CREATE TABLE phone_numbers_demo (
+  raw_phone   TEXT,
+  first_name  TEXT,
+  last_name   TEXT
+);
+
+INSERT INTO phone_numbers_demo (raw_phone, first_name, last_name) VALUES
+  ('   077600945  ', 'john',        'DOE'),
+  ('077600945',      'ANNa',        'smith'),
+  ('77600945',       'mARy',        'joHNson'),
+  ('077-600-045',    'geORGe',      'brown'),
+  ('(374)-77-600-945','ALEx',       'O''NEILL'),
+  ('37477600945',    'lAuRA',       'van dyke');
+```
+
+**What this setup gives us**
+
+- **phone numbers** with inconsistent formatting  
+- **names with:**
+  - random capitalization  
+  - mixed casing within the same value  
+  - multi-part last names  
+
+This mirrors **real-world dirty text data** and prepares us for the next set of string functions focused on **standardization and normalization**.
+
+
+## LENGTH()
+
+Text fields such as **phone numbers** often arrive in many inconsistent formats.  
+Before attempting to *clean* or *standardize* them, a good analyst first tries to **detect which rows are malformed**.
+
+The `LENGTH()` function is a simple but powerful diagnostic tool for this purpose.
+
+
+### Inspecting the Lengths
+
+The first question to ask is:
+
+> **Do all values have the same length?**
+
+```sql
+SELECT
+  raw_phone,
+  LENGTH(raw_phone) AS phone_length
+FROM phone_numbers_demo;
+```
+
+---
+
+**Output**
+
+| raw_phone             | phone_length |
+|-----------------------|--------------|
+| `'   077600945  '`    | 13           |
+| `'077600945'`         | 9            |
+| `'77600945'`          | 8            |
+| `'077-600-045'`       | 11           |
+| `'(374)-77-600-945'`  | 15           |
+| `'37477600945'`       | 11           |
+
+---
+
+### Interpretation
+
+Even before cleaning, we can already classify rows:
+
+- **8 characters:** likely already standardized → `77600945`
+- **9 characters**  likely correct number with **leading zero** → `077600945`
+- **11 characters**  likely contains **country code or separators**
+- **13+ characters**  clearly contains **whitespace and formatting symbols**
+
+**At this point:**
+
+- spaces  
+- hyphens  
+- parentheses  
+- country prefixes  
+
+
+### Why This Step Is Critical
+
+By using `LENGTH()` **before cleaning**, you can:
+
+- detect formatting issues early  
+- identify multiple data quality patterns  
+- avoid applying a one-size-fits-all transformation  
+- design targeted cleaning rules  
+
+**This avoids silent errors later when:**
+
+- grouping  
+- joining  
+- deduplicating  
+
+---
+
+### Analytical Insight
+
+**Notice that:**
+
+- `LENGTH()` alone already tells us **which rows cannot possibly match the target**
+- the target `77600945` has a **clear expected length**
+
+This gives us a **validation rule** we can enforce *after cleaning*.
+
+
+## TRIM()
+
+Text fields often contain **invisible formatting noise**, such as leading or trailing spaces.  
+Although these spaces are not obvious when visually inspecting data, they can:
+
+- break joins  
+- fragment groups  
+- cause false duplicates  
+- invalidate validation rules  
+
+The `TRIM()` function is used to **remove unnecessary whitespace** from the beginning and end of text values.
+
+Importantly, `TRIM()` removes **noise**, not meaning.
+
+---
+
+### Why TRIM() Matters in Analytics
+
+Whitespace has **no business semantics**.
+
+That means:
+
+- removing it does **not change the underlying value**
+- but failing to remove it can distort analytical results
+
+Because of this, `TRIM()` is considered a **safe and low-risk transformation** and is usually applied **early** in data-cleaning pipelines.
+
+---
+
+### Applying TRIM()
+
+Below we apply `TRIM()` to raw phone numbers and compare lengths **before and after** trimming.
+
+```sql
+SELECT
+  raw_phone,
+  LENGTH(raw_phone) AS length,
+  TRIM(raw_phone) AS trimmed_phone,
+  LENGTH(TRIM(raw_phone)) AS trimmed_length
+FROM phone_numbers_demo;
+```
+
+---
+
+### Result Interpretation
+
+From the output, we observe that:
+
+- leading and trailing spaces are removed  
+- internal characters (digits, hyphens, parentheses) remain unchanged  
+- some rows move closer to the expected target length  
+- others still violate formatting rules  
+
+This confirms that:
+
+- whitespace was only **one of several issues**
+- further transformations are required for full standardization  
+
+---
+
+### Directional Variants
+
+SQL also provides directional trimming functions:
+
+```sql
+LTRIM(raw_phone)   -- removes leading spaces only
+RTRIM(raw_phone)   -- removes trailing spaces only
+```
+
+Using `TRIM()` is equivalent to applying **both**.
+
+---
+
+### Analytical Best Practice
+
+Always follow this pattern:
+
+1. **Measure** (e.g., `LENGTH()`)
+2. **Transform** (e.g., `TRIM()`)
+3. **Re-measure** to validate impact
+
+**This makes transformations:**
+
+- transparent  
+- auditable  
+- analytically defensible  
+
+
+::: {.callout-important}
+
+- `TRIM()` removes invisible formatting noise  
+- it does not alter business meaning  
+- it prepares text data for structural cleaning  
+- it should almost always be applied **before** more aggressive text transformations  
+
+**Whitespace** issues are subtle, but ignoring them leads to **silent analytical errors**.
+:::
+
+## LOWER(), UPPER(), INITCAP()
+
+Text values often differ only by **capitalization**, even though they represent the **same entity**.
+
+For example:
+
+- `john`, `John`, `JOHN`
+- `van dyke`, `Van Dyke`, `VAN DYKE`
+
+From an analytical perspective, these differences are **purely cosmetic**, but if left untreated they lead to:
+
+- fragmented groups  
+- inflated `COUNT(DISTINCT ...)`  
+- failed joins  
+- inconsistent reporting  
+
+SQL provides several functions to **normalize text case**.
+
+---
+
+### Why Case Normalization Matters
+
+Capitalization has **no business meaning**, but SQL treats differently cased strings as **different values**.
+
+**That means:**
+
+- `'john' ≠ 'John' ≠ 'JOHN'`
+- grouping becomes unreliable
+- deduplication becomes inaccurate
+
+Case normalization is therefore a **data quality operation**, not a formatting preference.
+
+---
+
+### LOWER() | Normalize to Lowercase
+
+`LOWER()` converts all characters in a string to **lowercase**.
+
+This is the most common choice for:
+
+- grouping keys  
+- joins  
+- deduplication  
+- categorical dimensions  
+
+```sql
+SELECT
+  first_name,
+  LOWER(first_name) AS first_name_lower
+FROM phone_numbers_demo;
+```
+
+**When to Use**
+
+- internal identifiers  
+- grouping and joins  
+- text comparison logic  
+
+---
+
+### UPPER() | Normalize to Uppercase
+
+`UPPER()` converts all characters in a string to **uppercase**.
+
+This is often used for:
+
+- codes  
+- abbreviations  
+- country or region identifiers  
+
+```sql
+SELECT
+  last_name,
+  UPPER(last_name) AS last_name_upper
+FROM phone_numbers_demo;
+```
+
+**When to Use**
+
+- standardized codes  
+- reporting conventions  
+- legacy system alignment  
+
+---
+
+### INITCAP() | Proper Name Formatting
+
+`INITCAP()` converts text to **title case**:
+
+- first letter uppercase  
+- remaining letters lowercase  
+
+```sql
+SELECT
+  first_name,
+  INITCAP(first_name) AS first_name_clean
+FROM phone_numbers_demo;
+```
+
+**Example Transformations**
+
+| raw value   | INITCAP result |
+|------------|----------------|
+| `john`     | `John`         |
+| `mARy`     | `Mary`         |
+| `van dyke`| `Van Dyke`     |
+
+---
+
+### Analytical Comparison
+
+| Function  | Best Use Case |
+|----------|---------------|
+| `LOWER()` | joins, grouping, deduplication |
+| `UPPER()` | codes, abbreviations |
+| `INITCAP()` | presentation, names |
+
+---
+
+### Analytical Best Practice
+
+A common and robust pattern is:
+
+- use `LOWER()` for **keys and joins**
+- use `INITCAP()` for **display purposes**
+- never mix raw and normalized text in analysis
+
+**Case normalization:**
+
+- changes **how rows group**
+- affects **counts and uniqueness**
+- must be applied **consistently**
+
+Like `TRIM()`, these functions remove **noise**, not meaning.
