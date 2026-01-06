@@ -2240,23 +2240,9 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#agenda",
-    "href": "materials/sql/slides/session4.html#agenda",
-    "title": "Filtering",
-    "section": "Agenda",
-    "text": "Agenda\n\n\nBuild an analysis-ready denormalized table (sales_analysis)\nFilter rows with WHERE using key operators\nFilter aggregated results with HAVING\nUse CASE WHEN to create analytical categories",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "Filtering"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session4.html#run-docker",
-    "href": "materials/sql/slides/session4.html#run-docker",
-    "title": "Filtering",
+    "objectID": "materials/sql/slides/session6.html#run-docker",
+    "href": "materials/sql/slides/session6.html#run-docker",
+    "title": "Functions",
     "section": "Run Docker",
     "text": "Run Docker\nOpen Docker Desktop, Run and open Pgadmin:\ndocker compose up -d",
     "crumbs": [
@@ -2264,13 +2250,13 @@
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#create-sales_analysis",
-    "href": "materials/sql/slides/session4.html#create-sales_analysis",
-    "title": "Filtering",
+    "objectID": "materials/sql/slides/session6.html#create-sales_analysis",
+    "href": "materials/sql/slides/session6.html#create-sales_analysis",
+    "title": "Functions",
     "section": "Create sales_analysis",
     "text": "Create sales_analysis\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;",
     "crumbs": [
@@ -2278,13 +2264,13 @@
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#indexes-for-filtering-performance",
-    "href": "materials/sql/slides/session4.html#indexes-for-filtering-performance",
-    "title": "Filtering",
+    "objectID": "materials/sql/slides/session6.html#indexes-for-filtering-performance",
+    "href": "materials/sql/slides/session6.html#indexes-for-filtering-performance",
+    "title": "Functions",
     "section": "Indexes for Filtering Performance",
     "text": "Indexes for Filtering Performance\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);",
     "crumbs": [
@@ -2292,214 +2278,569 @@
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#simple-where-examples",
-    "href": "materials/sql/slides/session4.html#simple-where-examples",
-    "title": "Filtering",
-    "section": "Simple WHERE Examples",
-    "text": "Simple WHERE Examples\nSELECT\n    transaction_id,\n    order_date_date,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE total_sales &gt; 100000;\nSELECT\n    transaction_id,\n    city,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE city = 'East Amanda';",
+    "objectID": "materials/sql/slides/session6.html#text-functions-analytical-reality",
+    "href": "materials/sql/slides/session6.html#text-functions-analytical-reality",
+    "title": "Functions",
+    "section": "Text Functions | Analytical Reality",
+    "text": "Text Functions | Analytical Reality\nReal-world text data is rarely clean:\n\ninconsistent casing\nextra spaces\nannotations and symbols\nmixed formats\npartial or malformed values\n\nIf left untreated:\n\n\nGROUP BY fragments categories\nCOUNT(DISTINCT ...) overcounts\njoins silently fail\nKPIs drift across dashboards",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#and-combine-conditions",
-    "href": "materials/sql/slides/session4.html#and-combine-conditions",
-    "title": "Filtering",
-    "section": "AND: Combine Conditions",
-    "text": "AND: Combine Conditions\nSELECT\n    transaction_id,\n    year,\n    city,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE year = 2023\n  AND category = 'Electronics'\n  AND total_sales &gt; 100000;",
+    "objectID": "materials/sql/slides/session6.html#workflow",
+    "href": "materials/sql/slides/session6.html#workflow",
+    "title": "Functions",
+    "section": "Workflow",
+    "text": "Workflow\nCorrect analytical order:\n\ninspect\n\nmeasure\n\nclassify\n\nclean\n\nvalidate\n\naggregate\n\nWe always start with measurement, not transformation.",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#or-multiple-acceptable-conditions",
-    "href": "materials/sql/slides/session4.html#or-multiple-acceptable-conditions",
-    "title": "Filtering",
-    "section": "OR: Multiple Acceptable Conditions",
-    "text": "OR: Multiple Acceptable Conditions\nSELECT\n    transaction_id,\n    year,\n    city,\n    total_sales\nFROM sales_analysis\nWHERE year = 2023\n  AND (city = 'Smithside' OR city = 'Lake Thomas');",
+    "objectID": "materials/sql/slides/session6.html#raw-phone-numbers",
+    "href": "materials/sql/slides/session6.html#raw-phone-numbers",
+    "title": "Functions",
+    "section": "Raw Phone Numbers",
+    "text": "Raw Phone Numbers\nWe use a controlled dummy table\nwith deliberately inconsistent phone formats.\nDROP TABLE IF EXISTS phone_numbers_demo;\n\nCREATE TABLE phone_numbers_demo (\n  raw_phone   TEXT,\n  first_name  TEXT,\n  last_name   TEXT\n);\n\nINSERT INTO phone_numbers_demo (raw_phone, first_name, last_name) VALUES\n  ('   077600945  ', 'john',        'DOE'),\n  ('077600945',      'ANNa',        'smith'),\n  ('77600945',       'mARy',        'joHNson'),\n  ('077-600-045',    'geORGe',      'brown'),\n  ('(374)-77-600-945','ALEx',       'O''NEILL'),\n  ('37477600945',    'lAuRA',       'van dyke');",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#in-and-not-in-cleaner-than-many-ors",
-    "href": "materials/sql/slides/session4.html#in-and-not-in-cleaner-than-many-ors",
-    "title": "Filtering",
-    "section": "IN and NOT IN: Cleaner Than Many ORs",
-    "text": "IN and NOT IN: Cleaner Than Many ORs\nSELECT\n    transaction_id,\n    city,\n    total_sales\nFROM sales_analysis\nWHERE city IN ('East Amanda', 'Smithside', 'Lake Thomas');\nSELECT\n    transaction_id,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE category NOT IN ('Toys', 'Books');",
+    "objectID": "materials/sql/slides/session6.html#target-standard",
+    "href": "materials/sql/slides/session6.html#target-standard",
+    "title": "Functions",
+    "section": "Target Standard",
+    "text": "Target Standard\nOur target standardized phone number is:\n77600945\nAt this stage:\n\nno cleaning\nno assumptions\nonly inspection",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#like-pattern-filtering-wildcards",
-    "href": "materials/sql/slides/session4.html#like-pattern-filtering-wildcards",
-    "title": "Filtering",
-    "section": "LIKE: Pattern Filtering (Wildcards)",
-    "text": "LIKE: Pattern Filtering (Wildcards)\nSELECT\n    transaction_id,\n    city,\n    total_sales\nFROM sales_analysis\nWHERE city LIKE 'East%';\nSELECT\n    transaction_id,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE category LIKE '%Garden%';",
+    "objectID": "materials/sql/slides/session6.html#what-it-does",
+    "href": "materials/sql/slides/session6.html#what-it-does",
+    "title": "Functions",
+    "section": "What It Does",
+    "text": "What It Does\nLENGTH() returns the number of characters in a text value.\nIt is a diagnostic function, not a cleaning function.",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#like-wildcards-cheatsheet",
-    "href": "materials/sql/slides/session4.html#like-wildcards-cheatsheet",
-    "title": "Filtering",
-    "section": "LIKE Wildcards Cheatsheet",
-    "text": "LIKE Wildcards Cheatsheet\n\n\n\n\n\n\n\nPattern Example\nMeaning\n\n\n\n\nWHERE product_name LIKE 'Elec%'\nStarts with “Elec”\n\n\nWHERE product_name LIKE '%Phone'\nEnds with “Phone”\n\n\nWHERE product_name LIKE '%Pro%'\nContains “Pro” anywhere\n\n\nWHERE city LIKE '_ast%'\n“ast” begins at the second character\n\n\nWHERE city LIKE 'N%_%'\nStarts with “N” and has at least 3 characters\n\n\nWHERE category LIKE 'B%ks'\nStarts with “B” and ends with “ks”",
+    "objectID": "materials/sql/slides/session6.html#analytical-question",
+    "href": "materials/sql/slides/session6.html#analytical-question",
+    "title": "Functions",
+    "section": "Analytical Question",
+    "text": "Analytical Question\nBefore cleaning, we ask:\n\nDo all values have the same length?\n\n\nIf not, they cannot be directly comparable.",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#null-filtering",
-    "href": "materials/sql/slides/session4.html#null-filtering",
-    "title": "Filtering",
-    "section": "NULL Filtering",
-    "text": "NULL Filtering\n\n\n\n\n\n\nTip\n\n\n\nUse IS NULL and IS NOT NULL\nDo not use = NULL or &lt;&gt; NULL\n\n\n\n\n\nSELECT\n    transaction_id,\n    discount\nFROM sales_analysis\nWHERE discount IS NULL;\nSELECT\n    transaction_id,\n    discount\nFROM sales_analysis\nWHERE discount IS NOT NULL;",
+    "objectID": "materials/sql/slides/session6.html#inspecting-the-data",
+    "href": "materials/sql/slides/session6.html#inspecting-the-data",
+    "title": "Functions",
+    "section": "Inspecting the Data",
+    "text": "Inspecting the Data\nSELECT\n  raw_phone,\n  LENGTH(raw_phone) AS phone_length\nFROM phone_numbers_demo;",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#wrong-vs-correct-count",
-    "href": "materials/sql/slides/session4.html#wrong-vs-correct-count",
-    "title": "Filtering",
-    "section": "Wrong vs Correct (COUNT)",
-    "text": "Wrong vs Correct (COUNT)\nSELECT\n    city,\n    COUNT(*) AS transaction_count\nFROM sales_analysis\nWHERE COUNT(*) &gt; 1000\nGROUP BY city;\nSELECT\n    city,\n    COUNT(*) AS transaction_count\nFROM sales_analysis\nGROUP BY city\nHAVING COUNT(*) &gt; 1000;",
+    "objectID": "materials/sql/slides/session6.html#output",
+    "href": "materials/sql/slides/session6.html#output",
+    "title": "Functions",
+    "section": "Output",
+    "text": "Output\n\n\n\nraw_phone\nphone_length\n\n\n\n\n'   077600945  '\n13\n\n\n'077600945'\n9\n\n\n'77600945'\n8\n\n\n'077-600-045'\n11\n\n\n'(374)-77-600-945'\n15\n\n\n'37477600945'\n11",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#analytical-having-example-2023",
-    "href": "materials/sql/slides/session4.html#analytical-having-example-2023",
-    "title": "Filtering",
-    "section": "Analytical HAVING Example (2023)",
-    "text": "Analytical HAVING Example (2023)\nSELECT\n    category,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nWHERE year = 2023\nGROUP BY category\nHAVING SUM(total_sales) &gt; 500000\nORDER BY total_sales_amount DESC;",
+    "objectID": "materials/sql/slides/session6.html#interpretation",
+    "href": "materials/sql/slides/session6.html#interpretation",
+    "title": "Functions",
+    "section": "Interpretation",
+    "text": "Interpretation\nEven without cleaning, patterns emerge:\n\n8 characters → already standardized\n\n9 characters → leading zero\n\n11 characters → country code or separators\n\n13+ characters → whitespace and symbols",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#detect-duplicates-with-having",
-    "href": "materials/sql/slides/session4.html#detect-duplicates-with-having",
-    "title": "Filtering",
-    "section": "Detect Duplicates with HAVING",
-    "text": "Detect Duplicates with HAVING\nSELECT\n    transaction_id,\n    COUNT(*) AS occurrence_count\nFROM sales_analysis\nGROUP BY transaction_id\nHAVING COUNT(*) &gt; 1;",
+    "objectID": "materials/sql/slides/session6.html#what-we-just-learned",
+    "href": "materials/sql/slides/session6.html#what-we-just-learned",
+    "title": "Functions",
+    "section": "What We Just Learned",
+    "text": "What We Just Learned\nWithout modifying data, we detected:\n\nwhitespace issues\nformatting symbols\ncountry prefixes\nmultiple structural patterns\n\nThis prevents blind transformations later.",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#having-vs-where-interview-trap",
-    "href": "materials/sql/slides/session4.html#having-vs-where-interview-trap",
-    "title": "Filtering",
-    "section": "HAVING vs WHERE (Interview Trap)",
-    "text": "HAVING vs WHERE (Interview Trap)\n\n\n\n\n\n\nWarning\n\n\nFiltering raw columns belongs in WHERE.\nHAVING is for aggregated conditions.\n\n\n\nSELECT\n    category,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nGROUP BY category\nHAVING category = 'Electronics';\nSELECT\n    category,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nWHERE category = 'Electronics'\nGROUP BY category;",
+    "objectID": "materials/sql/slides/session6.html#why-this-is-critical",
+    "href": "materials/sql/slides/session6.html#why-this-is-critical",
+    "title": "Functions",
+    "section": "Why This Is Critical",
+    "text": "Why This Is Critical\nUsing LENGTH() early allows you to:\n\ndetect malformed rows\nclassify data quality patterns\ndesign targeted cleaning rules\navoid one-size-fits-all logic",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#case-when-derived-categories",
-    "href": "materials/sql/slides/session4.html#case-when-derived-categories",
-    "title": "Filtering",
-    "section": "CASE WHEN: Derived Categories",
-    "text": "CASE WHEN: Derived Categories\n\n\nCreate analytical labels\nTranslate numeric logic into business meaning",
+    "objectID": "materials/sql/slides/session6.html#analytical-insight",
+    "href": "materials/sql/slides/session6.html#analytical-insight",
+    "title": "Functions",
+    "section": "Analytical Insight",
+    "text": "Analytical Insight\n\nthe target 77600945 has a known expected length\nthis becomes a post-cleaning validation rule\nany row failing this rule is still dirty",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#case-transaction-segmentation",
-    "href": "materials/sql/slides/session4.html#case-transaction-segmentation",
-    "title": "Filtering",
-    "section": "CASE: Transaction Segmentation",
-    "text": "CASE: Transaction Segmentation\nSELECT\n    transaction_id,\n    total_sales,\n    CASE\n        WHEN total_sales &gt;= 100000 THEN 'High Value'\n        WHEN total_sales &gt;= 50000 THEN 'Medium Value'\n        ELSE 'Low Value'\n    END AS sales_segment\nFROM sales_analysis;",
+    "objectID": "materials/sql/slides/session6.html#why-trim-matters",
+    "href": "materials/sql/slides/session6.html#why-trim-matters",
+    "title": "Functions",
+    "section": "Why TRIM() Matters",
+    "text": "Why TRIM() Matters\nWhitespace issues are:  - visually invisible - common in manual or legacy inputs - a frequent cause of failed joins and false duplicates\nYet they are often overlooked in analysis.",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/slides/session4.html#case-with-aggregation",
-    "href": "materials/sql/slides/session4.html#case-with-aggregation",
-    "title": "Filtering",
-    "section": "CASE with Aggregation",
-    "text": "CASE with Aggregation\nSELECT\n    CASE\n        WHEN discount &gt; 0 THEN 'Discounted'\n        ELSE 'Full Price'\n    END AS pricing_type,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nWHERE year = 2023\nGROUP BY pricing_type;",
+    "objectID": "materials/sql/slides/session6.html#analytical-principle",
+    "href": "materials/sql/slides/session6.html#analytical-principle",
+    "title": "Functions",
+    "section": "Analytical Principle",
+    "text": "Analytical Principle\nWhitespace has no business meaning.\n\nremoving it does not change semantics\nbut significantly improves comparability\n\nThis makes TRIM() a safe first transformation.",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Filtering"
+      "Functions"
     ]
   },
   {
-    "objectID": "materials/sql/index.html",
-    "href": "materials/sql/index.html",
-    "title": "SQL",
+    "objectID": "materials/sql/slides/session6.html#applying-trim",
+    "href": "materials/sql/slides/session6.html#applying-trim",
+    "title": "Functions",
+    "section": "Applying TRIM",
+    "text": "Applying TRIM\nSELECT\n  raw_phone,\n  LENGTH(raw_phone) AS length,\n  TRIM(raw_phone) AS trimmed_phone,\n  LENGTH(TRIM(raw_phone)) AS trimmed_length\nFROM phone_numbers_demo;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#output-1",
+    "href": "materials/sql/slides/session6.html#output-1",
+    "title": "Functions",
+    "section": "Output",
+    "text": "Output\nWhat Changed?\n\n\n\n\n\n\n\n\n\nraw_phone\nlength\ntrimmed_phone\ntrimmed_length\n\n\n\n\n'   077600945  '\n13\n'077600945'\n9\n\n\n'077600945'\n9\n'077600945'\n9\n\n\n'77600945'\n8\n'77600945'\n8\n\n\n'077-600-045'\n11\n'077-600-045'\n11\n\n\n'(374)-77-600-945'\n15\n'(374)-77-600-945'\n15\n\n\n'37477600945'\n11\n'37477600945'\n11",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#ltrim-vs-rtrim",
+    "href": "materials/sql/slides/session6.html#ltrim-vs-rtrim",
+    "title": "Functions",
+    "section": "LTRIM vs RTRIM",
+    "text": "LTRIM vs RTRIM\nSQL also provides directional variants:\nLTRIM(raw_phone)   -- removes leading spaces | only LEFT\nRTRIM(raw_phone)   -- removes trailing spaces | ONLY right\nTRIM() is equivalent to applying both.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#validation-check",
+    "href": "materials/sql/slides/session6.html#validation-check",
+    "title": "Functions",
+    "section": "Validation Check",
+    "text": "Validation Check\nAfter trimming, we re-measure:\nSELECT\n  raw_phone,\n  LENGTH(TRIM(raw_phone)) AS cleaned_length\nFROM phone_numbers_demo;\nThis tells us whether whitespace was the only issue.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#analytical-insight-1",
+    "href": "materials/sql/slides/session6.html#analytical-insight-1",
+    "title": "Functions",
+    "section": "Analytical Insight",
+    "text": "Analytical Insight\nTRIM() helps us decide:\n\nwhich rows were only cosmetically broken\nwhich rows require structural cleaning\nhow many patterns remain\n\nMeasurement → transformation → re-measurement",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#try-yourself",
+    "href": "materials/sql/slides/session6.html#try-yourself",
+    "title": "Functions",
+    "section": "Try Yourself",
+    "text": "Try Yourself\n\nApply LTRIM(raw_phone)\nApply RTRIM(raw_number)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#why-case-normalization-matters",
+    "href": "materials/sql/slides/session6.html#why-case-normalization-matters",
+    "title": "Functions",
+    "section": "Why Case Normalization Matters",
+    "text": "Why Case Normalization Matters\nText values often differ only by capitalization, even though they represent the same entity.\n\nFrom an analytical perspective:\n\ncapitalization has no business meaning\nSQL treats differently cased strings as different values\nthis leads to fragmented groups and incorrect counts",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#case-normalization-the-problem",
+    "href": "materials/sql/slides/session6.html#case-normalization-the-problem",
+    "title": "Functions",
+    "section": "Case Normalization | The Problem",
+    "text": "Case Normalization | The Problem\nExamples of equivalent values treated as different:\n\njohn, John, JOHN\nvan dyke, Van Dyke, VAN DYKE\n\nIf left untreated:\n\nGROUP BY fragments categories\nCOUNT(DISTINCT ...) overcounts\njoins silently fail",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#lower-normalize-for-analysis",
+    "href": "materials/sql/slides/session6.html#lower-normalize-for-analysis",
+    "title": "Functions",
+    "section": "LOWER() | Normalize for Analysis",
+    "text": "LOWER() | Normalize for Analysis\nLOWER() converts all characters to lowercase.\nBest suited for:\n\njoins\n\ngrouping keys\n\ndeduplication\n\nSELECT\n  first_name,\n  LOWER(first_name) AS first_name_lower\nFROM phone_numbers_demo;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#lower-output",
+    "href": "materials/sql/slides/session6.html#lower-output",
+    "title": "Functions",
+    "section": "LOWER() | Output",
+    "text": "LOWER() | Output\n\n\n\nfirst_name\nfirst_name_lower\n\n\n\n\njohn\njohn\n\n\nANNa\nanna\n\n\nmARy\nmary\n\n\ngeORGe\ngeorge\n\n\nALEx\nalex\n\n\nlAuRA\nlaura",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#upper-normalize-for-codes",
+    "href": "materials/sql/slides/session6.html#upper-normalize-for-codes",
+    "title": "Functions",
+    "section": "UPPER() | Normalize for Codes",
+    "text": "UPPER() | Normalize for Codes\nUPPER() converts all characters to uppercase.\nOften used for:\n\ncodes\n\nabbreviations\n\nlegacy-system compatibility\n\nSELECT\n  last_name,\n  UPPER(last_name) AS last_name_upper\nFROM phone_numbers_demo;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#upper-output",
+    "href": "materials/sql/slides/session6.html#upper-output",
+    "title": "Functions",
+    "section": "UPPER() | Output",
+    "text": "UPPER() | Output\n\n\n\nlast_name\nlast_name_upper\n\n\n\n\nDOE\nDOE\n\n\nsmith\nSMITH\n\n\njoHNson\nJOHNSON\n\n\nbrown\nBROWN\n\n\nO'NEILL\nO'NEILL\n\n\nvan dyke\nVAN DYKE",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#initcap-presentation-formatting",
+    "href": "materials/sql/slides/session6.html#initcap-presentation-formatting",
+    "title": "Functions",
+    "section": "INITCAP() | Presentation Formatting",
+    "text": "INITCAP() | Presentation Formatting\nINITCAP() converts text to title case:\n\nfirst letter uppercase\n\nremaining letters lowercase\n\nSELECT\n  first_name,\n  INITCAP(first_name) AS first_name_clean\nFROM phone_numbers_demo;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#initcap-output",
+    "href": "materials/sql/slides/session6.html#initcap-output",
+    "title": "Functions",
+    "section": "INITCAP() | Output",
+    "text": "INITCAP() | Output\n\n\n\nfirst_name\nfirst_name_clean\n\n\n\n\njohn\nJohn\n\n\nANNa\nAnna\n\n\nmARy\nMary\n\n\ngeORGe\nGeorge\n\n\nALEx\nAlex\n\n\nlAuRA\nLaura",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#choosing-the-right-function",
+    "href": "materials/sql/slides/session6.html#choosing-the-right-function",
+    "title": "Functions",
+    "section": "Choosing the Right Function",
+    "text": "Choosing the Right Function\n\n\n\nFunction\nBest Used For\n\n\n\n\nLOWER()\njoins, grouping, deduplication\n\n\nUPPER()\ncodes, abbreviations\n\n\nINITCAP()\nnames, presentation\n\n\n\n\nnever mix raw and normalized text in analysis \n\n\nConsistency matters more than preference.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session1.html",
+    "href": "materials/sql/session1.html",
+    "title": "Session 01: Intro to Relational Databases",
     "section": "",
-    "text": "Session 01: Intro to Relational Databases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 02: Intro to PostgreSQL\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 03: Data Analysis with SQL | Part I\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 04: Data Analysis with SQL | Part II\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 05 Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\nNo matching items",
+    "text": "Explain the difference between relational databases and non-relational databases\nExplain the importance of online analytical processing databases (OLAP) and relational database management systems (RDBMS)\nData Warehouse vs Data Mart vs Data Lake vs Data Lakehouse\nSet up a database environment using docker",
     "crumbs": [
       "Syllabus",
-      "SQL"
+      "SQL",
+      "SQL",
+      "Session 01: Intro to Relational Databases"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session1.html#learning-goals",
+    "href": "materials/sql/session1.html#learning-goals",
+    "title": "Session 01: Intro to Relational Databases",
+    "section": "",
+    "text": "Explain the difference between relational databases and non-relational databases\nExplain the importance of online analytical processing databases (OLAP) and relational database management systems (RDBMS)\nData Warehouse vs Data Mart vs Data Lake vs Data Lakehouse\nSet up a database environment using docker",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 01: Intro to Relational Databases"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session1.html#introduction",
+    "href": "materials/sql/session1.html#introduction",
+    "title": "Session 01: Intro to Relational Databases",
+    "section": "Introduction",
+    "text": "Introduction\nNow, you’ve reached the stage in the Program where you need to learn how to manage your data in an institutional way.\nTo do so, you’ll need to know structured query language (SQL), the first language of:\n\nData analysts\nAnalytics Engineers\nData engineers\nData scientists.\n\n\n\n\n\n\n\nTipAbout the importance of SQL\n\n\n\nYou can’t call yourself a data analyst until you know the basics of SQL\n\nSQL is the language of Tables!\n\n\nBesides SQL, you’ll explore various types of databases and what makes them different from Excel. During the rest of the session, you will get in-depth look at current, everyday practices in the field.\nSince the best way to learn SQL is to use it, you’ll get hands-on tasks at the end of every Exercise.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 01: Intro to Relational Databases"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session1.html#what-is-a-database",
+    "href": "materials/sql/session1.html#what-is-a-database",
+    "title": "Session 01: Intro to Relational Databases",
+    "section": "What is a Database",
+    "text": "What is a Database\nA database is a collection of stored data, usually organized in tables of rows and columns and managed by a database management system (DBMS). Analysts collectively refer to the data, the DBMS, and other related tools as the database.\nWhile there are several ways to store data in a database, the most common approach is to store the data in columns and rows. The intersection of each column and row is called a cell, and each cell represents a data element.\nA Data element could be:\n\nnumeric:\ntext\nyou name it… \n\nTable: Example of rows, columns, and a highlighted cell\n\n\n\n\nCol A\nCol B\nCol C\n\n\n\n\nRow 1\nA1\nB1\nC1\n\n\nRow 2\nA2\nB2 (Cell)\nC2\n\n\nRow 3\nA3\nB3\nC3\n\n\n\nCell = intersection of Row 2 and Column B → B2.\n\nSpreadsheets vs. Databases\nDatabases differ from spreadsheets (excel-like tools) in several important ways, particularly in scalability, performance, and the ability to support multiple users. The key distinctions include:\n\nUser Access\n\nSpreadsheets are typically designed for single-user access.\nDatabases allow multiple users to access and manipulate the data simultaneously.\n\nData Capacity\n\nSpreadsheets handle relatively small datasets (usually up to a few hundred thousand rows).\nDatabases can efficiently store and process millions or even billions of records.\n\nPerformance\n\nSpreadsheets load the entire dataset into memory when opened.\nDatabases retrieve only the necessary records, improving speed and scalability.\n\nQuery Capability\n\nSpreadsheets require manual filtering, sorting, and counting.\nDatabases allow precise and fast queries using SQL.\n\n\nTo illustrate the difference, consider the following dataset of actors stored in a database table:\nTable: Example of Actor Records in a Database\n\n\n\nactor_id\nfirst_name\nlast_name\nlast_update\n\n\n\n\n1\nPenelope\nGuiness\n2013-05-26 14:47:57.62\n\n\n2\nNick\nWahlberg\n2013-05-26 14:47:57.62\n\n\n3\nEd\nChase\n2013-05-26 14:47:57.62\n\n\n4\nJennifer\nDavis\n2013-05-26 14:47:57.62\n\n\n5\nJohnny\nLollobrigida\n2013-05-26 14:47:57.62\n\n\n\n\nSpreadsheet vs. Database Workflow\nWhen performing tasks such as counting how many actors have the first name “Ed”, the difference between spreadsheets and databases becomes clear:\n\nUsing a Spreadsheet:\n\nYou must manually filter the first_name column to show only rows containing “Ed.”\nAfter filtering, you manually count the matching rows or read the count displayed by the spreadsheet application.\nWith large datasets, loading, filtering, and recalculating can be slow and resource-intensive, causing delays and potential crashes.\nSpreadsheets can process only one query at a time, limiting efficiency.\n\nUsing a Database\n\nInstead of loading the entire dataset, you can execute a single SQL query such as:\nSELECT COUNT(*) \nFROM actor\nWHERE first_name = 'Ed';\nThe result is returned almost instantly, even with very large datasets.\nDatabases support multiple users running queries simultaneously without performance degradation.\nThey are optimized for complex, concurrent data manipulation and retrieval, making them more suitable for scalable and shared environments.\n\n\n\n\n\n\n\n\nNote\n\n\n\nOverall, spreadsheets may be adequate for small, single-user datasets, but databases provide far superior performance, scalability, and efficiency when working with larger datasets or multiple users.\n\n\n\n\nSpreadsheets vs. Databases\n\n\n\n\n\n\n\nSPREADSHEET\nDATABASE\n\n\n\n\nDesigned for single-user access\nDesigned for multiple-user access\n\n\nOnly one user can manipulate the data at one point in time\nMultiple users can manipulate the data at one point in time\n\n\nHandles a limited amount of data\nHandles small to massive amounts of data\n\n\nBasic to moderate data operations\nBasic to complex data operations\n\n\nSlow or unable to manipulate, extract, transform, and aggregate large amounts of data\nFaster to manipulate, extract, transform, and aggregate large amounts of data\n\n\n\n\n\n\nStructured vs Unstructured Data\nBefore we learn about different types of databases, we should understand the distinction between them. Broadly speaking, these below terms refer to how data is organized:\n\nstructured\nunstructured\nsemi-structured data.\n\n\nStructured Data\nEach row in the table represents a distinct entity (in this case, an actor), while each column corresponds to a specific attribute such as the actor’s first name. The intersection of a row and a column forms a cell, and each cell contains a single data value.\nImportantly, every column is assigned a predefined data type, which determines the kind of information it can store. For example, the first_name column uses a text data type, meaning all values in this column must consist of alphabetical characters only.\n\nSample Data\n\n\n\nactor_id\nfirst_name\nlast_name\nlast_update\n\n\n\n\n1\nPenelope\nGuiness\n2013-05-26 14:47:57.62\n\n\n2\nNick\nWahlberg\n2013-05-26 14:47:57.62\n\n\n3\nEd\nChase\n2013-05-26 14:47:57.62\n\n\n4\nJennifer\nDavis\n2013-05-26 14:47:57.62\n\n\n5\nJohnny\nLollobrigida\n2013-05-26 14:47:57.62\n\n\n6\nBette\nNicholson\n2013-05-26 14:47:57.62\n\n\n7\nGrace\nMostel\n2013-05-26 14:47:57.62\n\n\n8\nMatthew\nJohansson\n2013-05-26 14:47:57.62\n\n\n9\nJoe\nSwank\n2013-05-26 14:47:57.62\n\n\n10\nChristian\nGable\n2013-05-26 14:47:57.62\n\n\n\n\n\n\nUnstructured Data\nUnstructured data refers to information that does not follow a predefined model or tabular format. Unlike structured data, it has no fixed rows, columns, or consistent organization. Common examples include:\n\nEmails\n\nText messages\n\nImages and graphics\n\nAudio and video files\n\nBecause it lacks a clear structure, unstructured data is more difficult to search, process, and analyze. Extracting useful information often requires significant manual effort or specialized tools. It can be compared to searching for every instance of a specific word in a book—possible, but time-consuming and inefficient without the right indexing or processing methods.\n\n\n\nSemi-Structured Data\nSemi-structured data lies between structured and unstructured data. While it does not follow a rigid tabular format, it still maintains a discernible organizational framework, making it more flexible than strictly structured data.\nThis type of data can be analyzed effectively only when you understand the organizational rules embedded within it. A common example is HTML: although it is not stored in rows and columns, it contains predictable tags and nested elements that define the structure of the information. To locate specific content within an HTML file, you must first understand what each tag represents.\nSemi-structured data therefore offers:\n\nMore flexibility than structured tables\n\nMore organization than raw unstructured content\n\nBetter adaptability for evolving or complex data formats\n\n\n\nExamples of Each Data Type\n\n\n\n\n\n\n\nType\nExamples\n\n\n\n\nStructured Data\nCustomer tables, sales transactions, employee records, relational database tables (SQL).\n\n\nUnstructured Data\nEmails, PDFs, text documents, social media posts, images, videos, audio recordings.\n\n\nSemi-Structured Data\nHTML documents, JSON files, XML files, log files, key–value store outputs.\n\n\n\n\n\n\n\nIntro to SQL\nSQL (Structured Query Language) was first developed by IBM in the early 1970s and released publicly in 1979. It was later standardized by the American National Standards Institute (ANSI), establishing it as the primary language for interacting with relational databases.\nSQL is used for three core tasks:\n\nManipulating Data: inserting, updating, or deleting records within a database.\nSearching Data: retrieving all films that feature a specific actor (e.g., Ed Chase).\nDefining Database Structures: For instance, creating new tables or adding columns to existing ones.\n\nLike any language, SQL follows specific syntax rules.\n\nAn English sentence ends with a period.\n\nA SQL statement ends with a semicolon (;).\n\n\n\n\n\n\n\nWarning\n\n\n\nWhile the foundational syntax is consistent, slight variations may occur depending on the database system (e.g., PostgreSQL vs. SQL Server). Understanding these conventions is essential before writing your own SQL queries.\n\n\n\n\n\n\n\n\n\nNoteIs SQL a Programing Language?\n\n\n\nSQL generally counts as code even though it’s not technically a programming language. You’ll encounter a common phenomenon when you start working with it—you’ll find yourself in situations where you can’t solve a coding problem using only your existing knowledge. Don’t worry—this happens to all beginners, and it’s something you’ll have to learn to deal with.\nMost coders spend a fair amount of time researching answers to their problems online. There’s no need to get frustrated if you run into a brick wall—simply Google what you’re trying to achieve in SQL (or any other language), and you may be surprised how quickly you’ll find an answer to your problem!\n\n\n\n\nTypes of Databases\nAs you learn about SQL, you’ll be working with a relational database, a common type of database that all analysts need to be familiar with. That said, relational databases aren’t the only type of database out there. Let’s look at the most important ones and their defining features:\n\nRelational Databases\nNoSQL Databases\nGraph Databases\n\n\n\n\n\n\n\n\nDatabases could also be centralized or distributed.\nDatabases could also be online analytical processing (OLAP) or online transaction processing (OLTP) system.\n\n\n\n\n\nRelational Databases\nA relational database is a collection of data stored in one or more tables of rows and columns.\nBetween the different tables, there are links, known as relationships. As you’ve already learned, data analysts use SQL to query and manipulate the data in relational databases.\n\nPopular relational database management systems (RDBMS) include Microsoft SQL Server,MySQL, Oracle DB and PostgreSQL. Each of these RDBMS is owned by different companies:\n\nPostgreSQL: PostgreSQL Community\nMySQL: Oracle\nOracle: Oracle\nMSSQL: Microsoft\n\n\n\n\n\n\n\n\n\n\n\n\nFeature\nPostgreSQL\nSQL Server\nOracle\nMySQL\n\n\n\n\nLicense\nOpen-source\nCommercial + Express\nCommercial\nOpen-source (Oracle-owned)\n\n\nOS Support\nLinux, macOS, Windows\nWindows, Linux\nLinux, Unix, Windows\nLinux, Windows\n\n\nStrengths\nStandards compliant, JSONB, extensible\nEnterprise BI, T-SQL, Microsoft ecosystem\nScalability, security, enterprise features\nFast reads, simple web workloads\n\n\nBest Use Cases\nAnalytics, complex apps, data science\nBI, ERP, corporate apps\nFinance, telecom, large enterprises\nWeb apps, lightweight services\n\n\n\n\n\nNoSQL Databases\n\nNoSQL stands for Not Only SQL and refers to database systems that are generally non-relational, designed for flexible schemas and distributed workloads.\nSome NoSQL systems provide SQL-like query interfaces, but they do not follow the relational model.\n\nUnlike relational databases, NoSQL databases have a flexible data model, and they’re used to store unstructured, semi-structured, and even structured data. In general, you wouldn’t use SQL to access a NoSQL database, though some have SQL-like languages.\nAs web applications have become more complex, NoSQL databases have become popular thanks to their flexibility. NoSQL databases are used for applications that change frequently as new functions and features are added; for instance, the social networking site LinkedIn uses a NoSQL database.\nThus, NoSQL databases are non-relational systems designed for scalability, flexibility, and high-volume data. They fall into several major categories depending on their data model.\n\nKey–Value Databases\n\nConcept: Simple key → value storage.\nPopular systems: Redis, Amazon DynamoDB, Riak KV\nExample (Redis):\n\n{\n  'course':'Data Analytics',\n  'company':'ACA'\n}\n\n\n\n\nDocument Databases\n\nConcept: JSON-like documents with flexible schema.\nPopular systems: MongoDB, CouchDB, Firestore\nExample (MongoDB):\n\n{\n  \"user_id\": 1001,\n  \"name\": \"Maria\",\n  \"roles\": [\"admin\", \"manager\"]\n}\n\n\n\n\nColumn-Family (Wide-Column) Databases\n\nConcept: Data stored in column families across distributed nodes.\nPopular systems: Apache Cassandra, HBase, ScyllaDB\nExample (Cassandra CQL):\n\nINSERT INTO users (user_id, name, age)\nVALUES (1001, 'Maria', 33);\n\n\n\n\nGraph Databases\n\nConcept: Nodes and relationships.\nPopular systems: Neo4j, ArangoDB, Amazon Neptune\nExample (Neo4j Cypher):\n\nCREATE (u:User {name: \"Maria\"})\nCREATE (p:Project {title: \"Analytics App\"})\nCREATE (u)-[:LEADS]-&gt;(p);\n\n\n\n\nTime-Series Databases\n\nConcept: Optimized for timestamped metrics.\nPopular systems: InfluxDB, TimescaleDB, Prometheus\nExample (InfluxDB Line Protocol):\n\n\nMostly used among DevOps for monitoring  —\n\n\nSearch Engine Databases\n\nConcept: Full-text indexing and search.\nPopular systems: Elasticsearch, OpenSearch, Apache Solr\nExample (Elasticsearch Query):\n\n{\n  \"query\": {\n    \"match\": {\n      \"message\": \"database error\"\n    }\n  }\n}\n\n\nMostly used for querying logs\n\n\n\n\nSummary Table\n\n\n\n\n\n\n\n\nNoSQL Type\nKey Concept\nPopular Databases\n\n\n\n\nKey–Value\nKey → Value lookups\nRedis, DynamoDB, Riak\n\n\nDocument\nJSON-like documents\nMongoDB, CouchDB, Firestore\n\n\nColumn-Family\nWide-column storage\nCassandra, HBase, ScyllaDB\n\n\nGraph\nNodes + edges\nNeo4j, ArangoDB, Amazon Neptune\n\n\nTime-Series\nTime-stamped metrics\nInfluxDB, TimescaleDB, Prometheus\n\n\nSearch Engine\nText search and indexing\nElasticsearch, OpenSearch, Solr\n\n\n\n\n\n\n\n\n\nNoneReading\n\n\n\nSQL vs NoSQL\n\n\n\n\n\n\nCentralized vs Distributed Databases\nThe three kinds of databases discussed above can be centralized or distributed. Put simply, these concepts refer to where the database is stored.\n\n\n\n\nIllustration of centralized vs distributed databases\n\n\n\n\nCentralized Databases\nA centralized database runs on a single machine (single-node). All users, analysts, and administrators connect to this one server.\nKey Features:\n\nAll data lives in one powerful machine.\nEasy to manage and maintain.\nCan handle billions of records and terabytes of data.\nScaling requires buying larger, more expensive hardware (vertical scaling).\nOnce the system reaches hardware limits, performance and management become challenging.\n\nCommon in: Traditional enterprises, internal IT systems, on-premise setups.\nAnalogy: A workstation or laptop, but with high-end server specifications.\n\n\n\nDistributed Databases\nA distributed database stores data across multiple machines (nodes). These nodes work together to form one logical database.\n\nKey Features:\n\nDesigned for massive-scale data.\nScales horizontally by adding more machines.\nFaster data access and search due to parallel processing.\nMore cost-effective storage.\nHigher availability and fault tolerance.\n\n\n\nCommon in:\n\nBanking systems\n\nTelecommunications\n\nLarge tech companies (Google, Facebook, Amazon, Netflix)\n\n\n\nWhy it’s used?\nTo handle constantly growing data, high query loads, global users, and real-time applications.\n\n\n\nCentralized vs Distributed Databases: Summary\n\n\n\n\n\n\n\n\nFeature\nCentralized Database\nDistributed Database\n\n\n\n\nStorage location\nOne machine\nMany machines\n\n\nScalability\nVertical (add more power)\nHorizontal (add more nodes)\n\n\nTypical capacity\nHigh but limited by hardware\nExtremely high, virtually unlimited\n\n\nCost\nExpensive to scale\nMore cost-efficient\n\n\n\n\n\nOLAP Systems (Online Analytical Processing)\n\nOLAP systems are optimized for READ-heavy analytical workloads. They store large volumes of historical data and support complex queries, aggregations, and trend analysis.\nKey Features:\n\nDesigned primarily for reading and analyzing data.\nNot optimized for frequent inserts/updates/deletes.\nStores historical and summarized information.\nSupports advanced analytics: dashboards, reports, trends, forecasting.\nTypically powered by data warehouses or data marts.\n\nExample: An e-commerce analyst retrieves last year’s order data from a data warehouse and analyzes trends across months, categories, or customer segments.\nCommon Technologies: Amazon Redshift, Snowflake,BigQuery, Apache Hive, Microsoft SQL Server Analysis Services.\n\n\n\n\nOLTP Systems (Online Transaction Processing)\n\nOLTP systems are optimized for fast inserts, updates, and deletes. They handle high-volume transactional operations in real time.\nKey Features:\n\nProcesses large numbers of small, atomic transactions.\nEnsures consistency using ACID properties.\nOptimized for real-time operations.\nUsed by operational systems rather than analytics.\n\nExample: A bank’s ATM network continuously inserts, updates, or deletes records as customers make withdrawals, deposits, or transfers.\nCommon Technologies: PostgreSQL, MySQL, Oracle, SQL Server, MongoDB (as transactional store).\n\n\n\n\n\n\nImportantAbout ACID, BASE and CAP Theorem\n\n\n\nIn computer science, ACID (atomicity, consistency, isolation, durability)** is a set of properties of database transactions intended to guarantee data validity despite errors, power failures, and other mishaps. For example, a transfer of funds from one bank account to another, even involving multiple changes such as debiting one account and crediting another, is a single transaction.\n\nThe opposite of ACID is BASE (basically available, soft state, and eventually consistent).\nIn ACID the whole transaction fails if an error occurs in any step within the transaction; in contrast, BASE databases prioritize availability over consistency: instead of failing the transaction, users can access inconsistent data temporarily: data consistency is achieved, but not immediately.\nIn distributed systems, trade-offs described by the CAP theorem mean that databases often lean toward ACID or BASE characteristics, depending on design and workload.\nModern systems may implement hybrid approaches, but trade-offs always exist. But it cannot be both according to CAP theorem.\nFor example, SQL databases (like MySQL, PostgreSQL, AWS RedShift) are structured over the ACID model, while NoSQL databases (like DynamoDB[4] or MongoDB) use the BASE architecture. However, some NoSQL databases might exhibit certain ACID traits\n\n\n\n\n\nOLAP vs OLTP: Summary\n\n\n\n\n\n\n\n\nFeature\nOLAP\nOLTP\n\n\n\n\nPrimary purpose\nAnalytics, reporting\nReal-time transactions\n\n\nQuery type\nRead-heavy, complex\nWrite-heavy, simple\n\n\nData volume\nHistorical, large datasets\nCurrent transactional data\n\n\nPerformance optimized for\nAggregations, scans\nFast inserts/updates/deletes\n\n\nCommon use cases\nDashboards, BI, trend analysis\nBanking, retail transactions, booking systems\n\n\nUsers\nAnalysts, data scientists\nEnd-users, applications, machines\n\n\n\n\n\n\n\n\n\n\nNoteReading\n\n\n\nOLTPvsOLAP",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 01: Intro to Relational Databases"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session1.html#data-management-architectures",
+    "href": "materials/sql/session1.html#data-management-architectures",
+    "title": "Session 01: Intro to Relational Databases",
+    "section": "Data Management Architectures",
+    "text": "Data Management Architectures\nOkay, we got high level understanding about the databases and their types, however in real life applications we need to master the so called Data Management Architecture (DMA). Let’s go over them chronologically:\n\nData Warehouse (DW)\nData Mart (DM)\nData Lake (DL)\nData Lakehouse (DLH)\n\n\nData Warehouse (DW)\nThe earliest large-scale analytics storage (1980-90s).\nA Data Warehouse is a centralized, structured, and governed analytical storage designed for reporting, business intelligence, and decision-making. Everything inside is modeled, cleaned, validated, and optimized for SQL analytics.\n\n\nPurpose\n\nProvide a single version of truth for the organization.\nServe business reporting, dashboards, KPIs.\nAllow analysts to run consistent, repeatable metrics.\n\n\n\nArchitecture\n\nCore storage: relational tables in Star or Snowflake schema.\nETL/ELT pipelines transform raw data into structured models.\nStrong governance: data quality rules, validation layers, semantic models.\n\n\n\nSchema Approach\n\nSchema-on-write: data must be modeled before it enters.\nFacts (large numerical tables).\nDimensions (lookup tables with business attributes).\nConformed dimensions for uniform interpretation (e.g., Customer, Product).\n\n\n\nQuery Model\n\nAggregations, joins, slicing/dicing, reporting.\nOptimized for read-heavy workloads.\n\n\n\nAdvantages\n\nHigh data quality\nStrong governance\nFast SQL analytics\nBusiness-friendly, predictable models\n\n\n\nLimitations\n\nRigid: changes require redesign\nPoor for raw, unstructured data\nExpensive for large-scale storage\nNot ideal for ML pipelines that need raw historical data\n\n\n\nTypical Tools/Platforms\n\nSnowflake (warehouse mode)\nAmazon Redshift\nGoogle BigQuery (classic DW usage)\nTeradata\nOracle Exadata\n\n\n\nRelationship to others\n\nDW is the parent of DM.\nDW predates DL and DLH.\n\n\n\n\nData Mart (DM)\nIntroduced after Data Warehouses (late 1990s).\nA Data Mart is a subject-specific, department-focused subset of a Data Warehouse. It is optimized for a particular business domain such as Marketing, Finance, Sales, HR, or Operations.\n\n\nPurpose\n\nReduce load on the central Data Warehouse.\nDeliver faster, domain-specific analytics.\nAllow departments to have tailored KPIs and models.\nImprove performance by minimizing unnecessary joins and tables.\n\n\n\nArchitecture\n\nUsually built as dependent data marts, sourced from the DW.\nSometimes built as independent data marts (less common today).\nDomain-specific schemas (e.g., Marketing Mart, Finance Mart).\nCan use star/snowflake schemas but simplified for a business unit.\n\n\n\nSchema Approach\n\nSchema-on-write (same as DW).\nContains facts/dimensions relevant only to one business domain.\nMay extend or customize dimensions (e.g., Marketing_Customer).\n\n\n\nQuery Model\n\nFaster analytical queries for a single domain.\nReduced table complexity.\nSupports dashboards, KPI reporting, and departmental insights.\n\n\n\nAdvantages\n\nHigh performance for domain-specific workloads\nReduces contention on the central DW\nSimpler models for end users\nEnables data ownership by individual departments\n\n\n\nLimitations\n\nCan create data silos if unmanaged\nRequires synchronization with DW\nPotential duplication of logic if marts diverge\n\n\nData Silo\n\n\n\nTypical Tools/Platforms\n\nSnowflake Data Marts\nRedshift Data Marts\nBigQuery departmental datasets\nMicrosoft SQL Server departmental warehouses\n\n\n\nRelationship to others\n\nDM is the child of DW.\nRelies on DW for consistency.\nNot directly related to Data Lakes or Lakehouses except in hybrid architectures.\n\n\n\n\n\nData Lake (DL)\nIntroduced during the Big Data era (2010s).\nA Data Lake is a large-scale, low-cost, raw-data storage system that can ingest structured, semi-structured, and unstructured data without modeling.\n\n\nPurpose\n\nStore massive amounts of raw data cheaply.\nSupport machine learning and exploratory analytics.\nCapture logs, JSON files, clickstreams, IoT data, images, audio.\nPreserve granular, historical data with no loss.\n\n\n\nArchitecture\n\nBuilt on object storage (S3, GCS, ADLS, or HDFS).\nOrganized into zones: raw, curated, prepared.\nIngestion via ELT pipelines.\nOften uses frameworks like Spark, Hive, Presto, or Dremio.\n\n\n\nSchema Approach\n\nSchema-on-read: structure is applied only at query time.\nSupports open formats: Parquet, ORC, Avro, CSV, JSON.\nCan handle unstructured formats (text, logs, images).\n\n\n\nQuery Model\n\nFlexible but slower than DW for SQL analytics.\nBest for ML workloads requiring raw historical data.\nHandles batch and streaming ingestion.\n\n\n\nAdvantages\n\nExtremely flexible storage model\nVery low cost for large-scale data\nExcellent for ML, experimentation, and data science\nDecouples storage from compute\n\n\n\nLimitations\n\nNo ACID guarantees in traditional lakes\nPoor governance (risk of “data swamp”)\nHard for business teams to use directly\nNot optimized for BI dashboards\n\n\n\nTypical Tools/Platforms\n\nAWS S3 + Athena / EMR\nAzure Data Lake Storage\nGoogle Cloud Storage + BigQuery external tables\nHadoop HDFS\nDatabricks in lake mode\n\n\n\nRelationship to others\n\nDL evolved after DW and DM.\nPredecessor of the DLH.\nDW and DL often coexist in two-tier architectures.\n\n\n\n\nData Lakehouse (DLH)\nThe most modern architecture (2020s).\nA Data Lakehouse is a unified, ACID-compliant, analytics + ML architecture built on top of Data Lake storage.\nIt merges the strengths of Data Warehouses and Data Lakes into a single system.\n\n\nPurpose\n\nProvide a single platform for SQL analytics, BI, ML, and streaming.\nAvoid duplication between DW and DL.\nGuarantee ACID transactions and strong governance on cheap lake storage.\nSupport both structured and unstructured data.\n\n\n\nArchitecture\n\nStorage on cloud object stores (S3, ADLS, GCS).\nACID table formats: Delta Lake, Apache Iceberg, Apache Hudi.\nMetadata layers for schema enforcement, governance, versioning.\nCompute engines: Spark, Databricks, Presto/Trino, Snowflake, BigQuery.\n\n\n\nSchema Approach\n\nSupports both schema-on-write and schema-on-read.\nAllows schema evolution, time travel, and versioning.\nEnforces constraints even on raw lake storage.\n\n\n\nQuery Model\n\nHigh-performance SQL (warehouse-like).\nML workloads (lake-like).\nSupports batch, streaming, and real-time analytics.\nWorks for both BI dashboards and ML pipelines.\n\n\n\nAdvantages\n\nUnifies DW + DL into one architecture\nACID guarantees on object storage\nSuitable for both BI and ML\nSimplifies pipelines and governance\nScalable and cost-effective\n\n\n\nLimitations\n\nRequires organizational adoption and re-skilling\nGovernance maturity varies by platform\nClassic DW teams may struggle to transition\n\n\n\nTypical Tools/Platforms\n\nDatabricks Lakehouse (Delta)\nSnowflake (Unistore + Iceberg)\nBigQuery (Lakehouse-friendly design)\nApache Iceberg + Trino/Presto\nApache Hudi platforms\n\n\n\nRelationship to others\n\nDLH is the evolution of the Data Lake.\nDLH aims to unify and simplify analytics workloads.\nDLH may replace DW in modern architectures.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 01: Intro to Relational Databases"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session1.html#building-our-first-database",
+    "href": "materials/sql/session1.html#building-our-first-database",
+    "title": "Session 01: Intro to Relational Databases",
+    "section": "Building our first Database",
+    "text": "Building our first Database\nNow that we have high level understanding about the databases, their types and architectures, it is high time to build our first database and continue.\nIn order to be able to build and run the database you need to keep docker desktop active. If you haven’t installed Docker yet, check out the installation and testing steps here\nPS you will see how easy it is.\n\nWhat are we going to achieve?\nWe are going to build a relational database which will consist of the following tables.\n\nSales\nTime Dimension\nProduct Dimension\nEmployee Dimension\nCustomer Dimension\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThis is going to be part of your portfolio, make sure the make it as structured as possible.\n\n\n\n\nStep 1: Create New GitHub Repository\n\nLog in to GitHub.\n\nClick New Repository.\n\nRepository name: sql-analytics-portfolio\n\nCheck Add a README file.\n\nCheck Add .gitignore and choose None.\n\nClick Create Repository.\n\n\n\nStep 2: Clone the Repository\n\nCreate a folder named aca on your Desktop or wherever you want\nOpen your terminal there. You should see ~/aca\nType in your terminal:\n\ngit clone &lt;your-repository-url&gt;\n\nNavigate to that folder by typing:\n\ncd  &lt;your-repository-url&gt;\n\ntype code . to open the project with VS Code\nRECOMMENDED save the project in VS Code using the Project Manager extension\n\n\n\nStep 3: Download the data\n\nCreate a new folder inside of the project named data\nDownload the following csv files and put in the data folder\n\ncustomers.csv\n\nemployees.csv\n\norders.csv\n\nproducts.csv\n\nsales.csv\n\nAdd and commit the changes done so far\n\ngit add .\ngit commit -m \"Added data folder with CSV datasets\"\n\n\nStep 4: Update .gitignore\n\nOpen the .gitignore file in your repository and add the following two lines at the bottom:\n\npgadmin_data/\npostgres_data/\n\nAgain add and commit\n\ngit add .gitignore\ngit commit -m \"Updated .gitignore to exclude database volumes\"\n\n\nStep 5: Creating Init folder and SQL files\nWe are going to create init files which will be executed only during the first db initialization.\n\nCreate a folder named init\nInside of the init folder create a file named 01_schema.sql for database schema code. Copy the respective chunk there\nInside of the init folder create a file named 02_etl.sql for data loading to SQL\nAdd and Commit the changes\n\n  git add init/\n  git commit -m \"Added initial schema and ETL SQL files\"\n\n01_schema.sql\n-- 01_schema.sql\n\n-- Safety: drop if you are iterating (comment these in production)\n-- DROP TABLE IF EXISTS sales CASCADE;\n-- DROP TABLE IF EXISTS orders CASCADE;\n-- DROP TABLE IF EXISTS products CASCADE;\n-- DROP TABLE IF EXISTS customers CASCADE;\n-- DROP TABLE IF EXISTS employees CASCADE;\n\nCREATE TABLE IF NOT EXISTS employees (\n  employee_id   SERIAL PRIMARY KEY,\n  first_name    TEXT,\n  last_name     TEXT,\n  email         TEXT,\n  salary        NUMERIC\n);\n\nCREATE TABLE IF NOT EXISTS customers (\n  customer_id   INTEGER PRIMARY KEY,\n  customer_name TEXT,\n  address       TEXT,\n  city          TEXT,\n  zip_code      TEXT\n);\n\nCREATE TABLE IF NOT EXISTS products (\n  product_id    INTEGER PRIMARY KEY,\n  product_name  TEXT,\n  price         NUMERIC,\n  description   TEXT,\n  category      TEXT\n);\n\n-- orders: include year/quarter/month as stored columns (loaded from CSV)\nCREATE TABLE IF NOT EXISTS orders (\n  order_id    INTEGER PRIMARY KEY,\n  order_date  TIMESTAMP,\n  year        INT,\n  quarter     INT,\n  month       TEXT\n);\n\nCREATE TABLE IF NOT EXISTS sales (\n  transaction_id INTEGER PRIMARY KEY,\n  order_id       INTEGER REFERENCES orders(order_id)     ON DELETE RESTRICT,\n  product_id     INTEGER REFERENCES products(product_id) ON DELETE RESTRICT,\n  customer_id    INTEGER REFERENCES customers(customer_id) ON DELETE RESTRICT,\n  employee_id    INTEGER REFERENCES employees(employee_id) ON DELETE SET NULL,\n  total_sales    NUMERIC,\n  quantity       INTEGER,\n  discount       NUMERIC\n);\n\n-- Helpful indexes\nCREATE INDEX IF NOT EXISTS idx_sales_order_id   ON sales(order_id);\nCREATE INDEX IF NOT EXISTS idx_sales_product_id ON sales(product_id);\nCREATE INDEX IF NOT EXISTS idx_sales_customer_id ON sales(customer_id);\nCREATE INDEX IF NOT EXISTS idx_orders_date      ON orders(order_date);\n\n\n02_etl.sql\n-- 03_seed_from_csv.sql\n-- COPY must read files inside the container; we mounted ./data to /docker-entrypoint-initdb.d/data\n\n\\echo 'Loading employees...'\nCOPY employees(employee_id,first_name,last_name,email,salary)\nFROM '/docker-entrypoint-initdb.d/data/employees.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading customers...'\nCOPY customers(customer_id,customer_name,address,city,zip_code)\nFROM '/docker-entrypoint-initdb.d/data/customers.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading products...'\nCOPY products(product_id,product_name,price,description,category)\nFROM '/docker-entrypoint-initdb.d/data/products.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading orders...'\n\\echo 'Loading orders...'\nCOPY orders(order_id,order_date,year,quarter,month)\nFROM '/docker-entrypoint-initdb.d/data/orders.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading sales...'\nCOPY sales(transaction_id,order_id,product_id,customer_id,employee_id,total_sales,quantity,discount)\nFROM '/docker-entrypoint-initdb.d/data/sales.csv'\nWITH (FORMAT csv, HEADER true);\n\n\n\n\n\n\nCaution\n\n\n\nPay attention to the orders and think about it.\n\n\n\n\n\nStep 6: Create .env file\nThis file is going to setup the database parameters\n\nCreate .env file in the root\nCopy and paste the following there\n\nPORT=5432\nDB_USER=admin\nDB_PASSWORD=password\nDB_NAME=aca\nPGADMIN_EMAIL=admin@admin.com\nPGADMIN_PASSWORD=admin\n\nAdd and commit .env file\n\n\ngit add .env\ngit commit -m \"Added environment variables for PostgreSQL\"\n\n\nStep 7: Create the docker-compose.yaml File\n\nCreate docker-compose.yaml file\ncopy and paste the following code there\n\nservices:\n  db:\n    container_name: postgresql_db_aca\n    image: postgres:17\n    restart: always\n    env_file: .env\n    environment:\n      POSTGRES_USER: ${DB_USER}\n      POSTGRES_PASSWORD: ${DB_PASSWORD}\n      POSTGRES_DB: ${DB_NAME}\n    ports:\n      - \"5432:5432\"\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U ${DB_USER} -d ${DB_NAME}\"]\n      interval: 10s\n      timeout: 5s\n      retries: 10\n    volumes:\n      # Persist database data (keep your bind mount; a named volume also works)\n      - ./postgres_data:/var/lib/postgresql/data\n      # Run these once on first initialization\n      - ./init:/docker-entrypoint-initdb.d\n      # Make CSVs available to COPY during init (read-only)\n      - ./data:/docker-entrypoint-initdb.d/data:ro\n\n  pgadmin:\n    container_name: pgadmin_aca\n    image: dpage/pgadmin4\n    restart: always\n    env_file: .env\n    environment:\n      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}\n      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}\n    ports:\n      - \"5050:80\"\n    volumes:\n      - ./pgadmin_data:/var/lib/pgadmin\n    depends_on:\n      - db\n\nAdd and commit\n\n\ngit add docker-compose.yaml\ngit commit -m \"Added Docker Compose configuration for PostgreSQL and pgAdmin\"\n\nNow your repository must have the following structure\n\n.\n├── README.md\n├── .gitignore                     # Ignoring\n├── .env                     # Environment variables for PostgreSQL\n├── docker-compose.yaml      # Docker Compose configuration\n├── data/                    # CSV datasets\n│   ├── customers.csv\n│   ├── employees.csv\n│   ├── orders.csv\n│   ├── products.csv\n│   ├── sales.csv\n├── init/                    # SQL initialization scripts\n│   ├── 01_schema.sql        # Database schema creation\n│   ├── 02_etl.sql           # Data loading and ETL process\n\n\nStep 8: Run the Docker Environment\n\nOpen the integrated terminal in VS Code.\nEnsure Docker Desktop is running on your machine.\nThen start the database services:\n\ndocker compose up\n\n\nStep 9: View the Tables\n\nOnce running, access pgAdmin in your browser by http://localhost:5050\nusername: admin@admin.com\npassword: admin\n\n\n\nOpen Object\\(\\rightarrow\\)Register\\(\\rightarrow\\)Server \nIn the general under the name column \nClick on the connection and fill in:\n\nhostname must be the same as the postgres service name in docker-compose.yaml, which is db,\nport 5432\nmaintenance database: aca\nusername: admin\npassword: password \n\nNavigate to in my case: \\(any_name \\rightarrow aca \\rightarrow Schemas \\rightarrow public \\rightarrow Tables\\)\n\nClick on the query tool copy and paste the queries provided in the Step 10\n\n\n\n\nStep 10: Our First Queries | Preview\nUse the following SQL statements to preview the first 10 rows from each table after loading your CSV data.\nA schema is a logical container inside a PostgreSQL database. You can think of it as a folder that holds database objects.\nThe default schema is public.\nSELECT * FROM public.customers LIMIT 10;\n\nSELECT * FROM public.employees LIMIT 10;\n\nSELECT * FROM public.orders LIMIT 10;\n\nSELECT * FROM public.products LIMIT 10;\n\nSELECT * FROM public.sales LIMIT 10;\n\n\nStep 11: Close and Delete Containers\nAs soon as you finish the job related to the DB, remove the containers by typing\ndocker-compose down\n\n\nStep 12: Every time you re-run\nWe are going to deactivate and activate constantly, so you will get used to it. Don’t worry :)\ndocker-compose up\n\n\n\n\n\n\nImportant\n\n\n\nIn case of ANY CHANGE in the docker-compose.yaml file:\n\ndocker compose down -v\ndelete postgres_data folder\ndocker compose up --build",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 01: Intro to Relational Databases"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html",
+    "href": "materials/sql/session6.html",
+    "title": "Session 06 Data Analysis with SQL | Functions",
+    "section": "",
+    "text": "Before jumping to the built-in SQL Funcions let’s ensure that we have sales_analysis table.\n\n\nLets run the Docker in detached mode:\ndocker compose up -d\n\n\n\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;\n\n\n\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);\n\n\n\n\n\n\nNote\n\n\n\nNote, that we are going to take closer look on JOINs during the next session.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06 Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#from-session-4",
+    "href": "materials/sql/session6.html#from-session-4",
+    "title": "Session 06 Data Analysis with SQL | Functions",
+    "section": "",
+    "text": "Before jumping to the built-in SQL Funcions let’s ensure that we have sales_analysis table.\n\n\nLets run the Docker in detached mode:\ndocker compose up -d\n\n\n\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;\n\n\n\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);\n\n\n\n\n\n\nNote\n\n\n\nNote, that we are going to take closer look on JOINs during the next session.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06 Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#text-functions-general-overview",
+    "href": "materials/sql/session6.html#text-functions-general-overview",
+    "title": "Session 06 Data Analysis with SQL | Functions",
+    "section": "Text Functions | General Overview",
+    "text": "Text Functions | General Overview\nText (string) functions are used to inspect, clean, standardize, and transform textual data at the row level.\nUnlike numeric aggregate functions (SUM, AVG, COUNT), most text functions:\n\noperate per row\nreturn derived text columns\ndo not reduce the number of rows on their own\n\nIn analytical workflows, text functions are typically applied before aggregation to ensure that grouping, counting, and summarization behave correctly.\n\n\nWhy Text Functions Matter in Analytics\nReal-world text data is often dirty, inconsistent, and ambiguous.\nCommon issues include:\n\ninconsistent casing (Electronics vs electronics)\nleading or trailing spaces\nannotations inside text (Category (Promo))\nmixed formats (ID-123, ID_123, 123)\nmissing or partially filled values\n\nIf these issues are not handled explicitly:\n\nGROUP BY produces fragmented categories\nCOUNT(DISTINCT ...) overcounts entities\nKPIs become inconsistent across dashboards\njoins silently fail\n\nText functions are therefore data quality tools, not cosmetic helpers.\n\n\n\nTypical Analytical Use Cases\nText functions are commonly used for:\n\ndata cleaning\n\ntrimming spaces\nnormalizing case\nremoving annotations\n\nstandardization\n\nmaking categories comparable\nensuring consistent grouping keys\n\nfeature engineering\n\nextracting parts of strings\nbuilding derived text features\n\nvalidation\n\ndetecting malformed values\nidentifying unexpected formats\n\n\n\n\nAnalytical Principle\nText transformations change how rows are grouped.\nBecause of this:\n\ntext cleaning is an analytical decision\nnot a purely technical step\nand must be done intentionally and consistently\n\nIn the following sections, we will cover built-in text functions one by one, using the same structured approach as in Session 05:\n\nwhat the function does\n\nwhy it matters analytically\n\ninput → query → output\n\ncommon pitfalls and best practices\n\nThis foundation will prepare you to build trustworthy categorical metrics and clean analytical dimensions using SQL.\n\n\nDummy Setup | Raw Phone Numbers and Names\nTo demonstrate text normalization beyond phone numbers, we extend the dummy table to include first name and last name fields with inconsistent capitalization and formatting.\nThis allows us to later apply functions such as UPPER(), LOWER(), INITCAP(), and validation logic on names.\nDROP TABLE IF EXISTS phone_numbers_demo;\n\nCREATE TABLE phone_numbers_demo (\n  raw_phone   TEXT,\n  first_name  TEXT,\n  last_name   TEXT\n);\n\nINSERT INTO phone_numbers_demo (raw_phone, first_name, last_name) VALUES\n  ('   077600945  ', 'john',        'DOE'),\n  ('077600945',      'ANNa',        'smith'),\n  ('77600945',       'mARy',        'joHNson'),\n  ('077-600-045',    'geORGe',      'brown'),\n  ('(374)-77-600-945','ALEx',       'O''NEILL'),\n  ('37477600945',    'lAuRA',       'van dyke');\nWhat this setup gives us\n\nphone numbers with inconsistent formatting\n\nnames with:\n\nrandom capitalization\n\nmixed casing within the same value\n\nmulti-part last names\n\n\nThis mirrors real-world dirty text data and prepares us for the next set of string functions focused on standardization and normalization.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06 Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#length",
+    "href": "materials/sql/session6.html#length",
+    "title": "Session 06 Data Analysis with SQL | Functions",
+    "section": "LENGTH()",
+    "text": "LENGTH()\nText fields such as phone numbers often arrive in many inconsistent formats.\nBefore attempting to clean or standardize them, a good analyst first tries to detect which rows are malformed.\nThe LENGTH() function is a simple but powerful diagnostic tool for this purpose.\n\nInspecting the Lengths\nThe first question to ask is:\n\nDo all values have the same length?\n\nSELECT\n  raw_phone,\n  LENGTH(raw_phone) AS phone_length\nFROM phone_numbers_demo;\n\nOutput\n\n\n\nraw_phone\nphone_length\n\n\n\n\n'   077600945  '\n13\n\n\n'077600945'\n9\n\n\n'77600945'\n8\n\n\n'077-600-045'\n11\n\n\n'(374)-77-600-945'\n15\n\n\n'37477600945'\n11\n\n\n\n\n\n\nInterpretation\nEven before cleaning, we can already classify rows:\n\n8 characters: likely already standardized → 77600945\n9 characters likely correct number with leading zero → 077600945\n11 characters likely contains country code or separators\n13+ characters clearly contains whitespace and formatting symbols\n\nAt this point:\n\nspaces\n\nhyphens\n\nparentheses\n\ncountry prefixes\n\n\n\nWhy This Step Is Critical\nBy using LENGTH() before cleaning, you can:\n\ndetect formatting issues early\n\nidentify multiple data quality patterns\n\navoid applying a one-size-fits-all transformation\n\ndesign targeted cleaning rules\n\nThis avoids silent errors later when:\n\ngrouping\n\njoining\n\ndeduplicating\n\n\n\n\nAnalytical Insight\nNotice that:\n\nLENGTH() alone already tells us which rows cannot possibly match the target\nthe target 77600945 has a clear expected length\n\nThis gives us a validation rule we can enforce after cleaning.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06 Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#trim",
+    "href": "materials/sql/session6.html#trim",
+    "title": "Session 06 Data Analysis with SQL | Functions",
+    "section": "TRIM()",
+    "text": "TRIM()\nText fields often contain invisible formatting noise, such as leading or trailing spaces.\nAlthough these spaces are not obvious when visually inspecting data, they can:\n\nbreak joins\n\nfragment groups\n\ncause false duplicates\n\ninvalidate validation rules\n\nThe TRIM() function is used to remove unnecessary whitespace from the beginning and end of text values.\nImportantly, TRIM() removes noise, not meaning.\n\n\nWhy TRIM() Matters in Analytics\nWhitespace has no business semantics.\nThat means:\n\nremoving it does not change the underlying value\nbut failing to remove it can distort analytical results\n\nBecause of this, TRIM() is considered a safe and low-risk transformation and is usually applied early in data-cleaning pipelines.\n\n\n\nApplying TRIM()\nBelow we apply TRIM() to raw phone numbers and compare lengths before and after trimming.\nSELECT\n  raw_phone,\n  LENGTH(raw_phone) AS length,\n  TRIM(raw_phone) AS trimmed_phone,\n  LENGTH(TRIM(raw_phone)) AS trimmed_length\nFROM phone_numbers_demo;\n\n\n\nResult Interpretation\nFrom the output, we observe that:\n\nleading and trailing spaces are removed\n\ninternal characters (digits, hyphens, parentheses) remain unchanged\n\nsome rows move closer to the expected target length\n\nothers still violate formatting rules\n\nThis confirms that:\n\nwhitespace was only one of several issues\nfurther transformations are required for full standardization\n\n\n\n\nDirectional Variants\nSQL also provides directional trimming functions:\nLTRIM(raw_phone)   -- removes leading spaces only\nRTRIM(raw_phone)   -- removes trailing spaces only\nUsing TRIM() is equivalent to applying both.\n\n\n\nAnalytical Best Practice\nAlways follow this pattern:\n\nMeasure (e.g., LENGTH())\nTransform (e.g., TRIM())\nRe-measure to validate impact\n\nThis makes transformations:\n\ntransparent\n\nauditable\n\nanalytically defensible\n\n\n\n\n\n\n\nImportant\n\n\n\n\nTRIM() removes invisible formatting noise\n\nit does not alter business meaning\n\nit prepares text data for structural cleaning\n\nit should almost always be applied before more aggressive text transformations\n\nWhitespace issues are subtle, but ignoring them leads to silent analytical errors.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06 Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#lower-upper-initcap",
+    "href": "materials/sql/session6.html#lower-upper-initcap",
+    "title": "Session 06 Data Analysis with SQL | Functions",
+    "section": "LOWER(), UPPER(), INITCAP()",
+    "text": "LOWER(), UPPER(), INITCAP()\nText values often differ only by capitalization, even though they represent the same entity.\nFor example:\n\njohn, John, JOHN\nvan dyke, Van Dyke, VAN DYKE\n\nFrom an analytical perspective, these differences are purely cosmetic, but if left untreated they lead to:\n\nfragmented groups\n\ninflated COUNT(DISTINCT ...)\n\nfailed joins\n\ninconsistent reporting\n\nSQL provides several functions to normalize text case.\n\n\nWhy Case Normalization Matters\nCapitalization has no business meaning, but SQL treats differently cased strings as different values.\nThat means:\n\n'john' ≠ 'John' ≠ 'JOHN'\ngrouping becomes unreliable\ndeduplication becomes inaccurate\n\nCase normalization is therefore a data quality operation, not a formatting preference.\n\n\n\nLOWER() | Normalize to Lowercase\nLOWER() converts all characters in a string to lowercase.\nThis is the most common choice for:\n\ngrouping keys\n\njoins\n\ndeduplication\n\ncategorical dimensions\n\nSELECT\n  first_name,\n  LOWER(first_name) AS first_name_lower\nFROM phone_numbers_demo;\nWhen to Use\n\ninternal identifiers\n\ngrouping and joins\n\ntext comparison logic\n\n\n\n\nUPPER() | Normalize to Uppercase\nUPPER() converts all characters in a string to uppercase.\nThis is often used for:\n\ncodes\n\nabbreviations\n\ncountry or region identifiers\n\nSELECT\n  last_name,\n  UPPER(last_name) AS last_name_upper\nFROM phone_numbers_demo;\nWhen to Use\n\nstandardized codes\n\nreporting conventions\n\nlegacy system alignment\n\n\n\n\nINITCAP() | Proper Name Formatting\nINITCAP() converts text to title case:\n\nfirst letter uppercase\n\nremaining letters lowercase\n\nSELECT\n  first_name,\n  INITCAP(first_name) AS first_name_clean\nFROM phone_numbers_demo;\nExample Transformations\n\n\n\nraw value\nINITCAP result\n\n\n\n\njohn\nJohn\n\n\nmARy\nMary\n\n\nvan dyke\nVan Dyke\n\n\n\n\n\n\nAnalytical Comparison\n\n\n\nFunction\nBest Use Case\n\n\n\n\nLOWER()\njoins, grouping, deduplication\n\n\nUPPER()\ncodes, abbreviations\n\n\nINITCAP()\npresentation, names\n\n\n\n\n\n\nAnalytical Best Practice\nA common and robust pattern is:\n\nuse LOWER() for keys and joins\nuse INITCAP() for display purposes\nnever mix raw and normalized text in analysis\n\nCase normalization:\n\nchanges how rows group\naffects counts and uniqueness\nmust be applied consistently\n\nLike TRIM(), these functions remove noise, not meaning.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06 Data Analysis with SQL | Functions"
     ]
   },
   {
@@ -5705,81 +6046,266 @@
     ]
   },
   {
-    "objectID": "materials/sql/session1.html",
-    "href": "materials/sql/session1.html",
-    "title": "Session 01: Intro to Relational Databases",
+    "objectID": "materials/sql/index.html",
+    "href": "materials/sql/index.html",
+    "title": "SQL",
     "section": "",
-    "text": "Explain the difference between relational databases and non-relational databases\nExplain the importance of online analytical processing databases (OLAP) and relational database management systems (RDBMS)\nData Warehouse vs Data Mart vs Data Lake vs Data Lakehouse\nSet up a database environment using docker",
+    "text": "Session 01: Intro to Relational Databases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 02: Intro to PostgreSQL\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 03: Data Analysis with SQL | Part I\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 04: Data Analysis with SQL | Part II\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 05 Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 06 Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\nNo matching items",
     "crumbs": [
       "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 01: Intro to Relational Databases"
+      "SQL"
     ]
   },
   {
-    "objectID": "materials/sql/session1.html#learning-goals",
-    "href": "materials/sql/session1.html#learning-goals",
-    "title": "Session 01: Intro to Relational Databases",
-    "section": "",
-    "text": "Explain the difference between relational databases and non-relational databases\nExplain the importance of online analytical processing databases (OLAP) and relational database management systems (RDBMS)\nData Warehouse vs Data Mart vs Data Lake vs Data Lakehouse\nSet up a database environment using docker",
+    "objectID": "materials/sql/slides/session4.html#agenda",
+    "href": "materials/sql/slides/session4.html#agenda",
+    "title": "Filtering",
+    "section": "Agenda",
+    "text": "Agenda\n\n\nBuild an analysis-ready denormalized table (sales_analysis)\nFilter rows with WHERE using key operators\nFilter aggregated results with HAVING\nUse CASE WHEN to create analytical categories",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
-      "Session 01: Intro to Relational Databases"
+      "Slides",
+      "Filtering"
     ]
   },
   {
-    "objectID": "materials/sql/session1.html#introduction",
-    "href": "materials/sql/session1.html#introduction",
-    "title": "Session 01: Intro to Relational Databases",
-    "section": "Introduction",
-    "text": "Introduction\nNow, you’ve reached the stage in the Program where you need to learn how to manage your data in an institutional way.\nTo do so, you’ll need to know structured query language (SQL), the first language of:\n\nData analysts\nAnalytics Engineers\nData engineers\nData scientists.\n\n\n\n\n\n\n\nTipAbout the importance of SQL\n\n\n\nYou can’t call yourself a data analyst until you know the basics of SQL\n\nSQL is the language of Tables!\n\n\nBesides SQL, you’ll explore various types of databases and what makes them different from Excel. During the rest of the session, you will get in-depth look at current, everyday practices in the field.\nSince the best way to learn SQL is to use it, you’ll get hands-on tasks at the end of every Exercise.",
+    "objectID": "materials/sql/slides/session4.html#run-docker",
+    "href": "materials/sql/slides/session4.html#run-docker",
+    "title": "Filtering",
+    "section": "Run Docker",
+    "text": "Run Docker\nOpen Docker Desktop, Run and open Pgadmin:\ndocker compose up -d",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
-      "Session 01: Intro to Relational Databases"
+      "Slides",
+      "Filtering"
     ]
   },
   {
-    "objectID": "materials/sql/session1.html#what-is-a-database",
-    "href": "materials/sql/session1.html#what-is-a-database",
-    "title": "Session 01: Intro to Relational Databases",
-    "section": "What is a Database",
-    "text": "What is a Database\nA database is a collection of stored data, usually organized in tables of rows and columns and managed by a database management system (DBMS). Analysts collectively refer to the data, the DBMS, and other related tools as the database.\nWhile there are several ways to store data in a database, the most common approach is to store the data in columns and rows. The intersection of each column and row is called a cell, and each cell represents a data element.\nA Data element could be:\n\nnumeric:\ntext\nyou name it… \n\nTable: Example of rows, columns, and a highlighted cell\n\n\n\n\nCol A\nCol B\nCol C\n\n\n\n\nRow 1\nA1\nB1\nC1\n\n\nRow 2\nA2\nB2 (Cell)\nC2\n\n\nRow 3\nA3\nB3\nC3\n\n\n\nCell = intersection of Row 2 and Column B → B2.\n\nSpreadsheets vs. Databases\nDatabases differ from spreadsheets (excel-like tools) in several important ways, particularly in scalability, performance, and the ability to support multiple users. The key distinctions include:\n\nUser Access\n\nSpreadsheets are typically designed for single-user access.\nDatabases allow multiple users to access and manipulate the data simultaneously.\n\nData Capacity\n\nSpreadsheets handle relatively small datasets (usually up to a few hundred thousand rows).\nDatabases can efficiently store and process millions or even billions of records.\n\nPerformance\n\nSpreadsheets load the entire dataset into memory when opened.\nDatabases retrieve only the necessary records, improving speed and scalability.\n\nQuery Capability\n\nSpreadsheets require manual filtering, sorting, and counting.\nDatabases allow precise and fast queries using SQL.\n\n\nTo illustrate the difference, consider the following dataset of actors stored in a database table:\nTable: Example of Actor Records in a Database\n\n\n\nactor_id\nfirst_name\nlast_name\nlast_update\n\n\n\n\n1\nPenelope\nGuiness\n2013-05-26 14:47:57.62\n\n\n2\nNick\nWahlberg\n2013-05-26 14:47:57.62\n\n\n3\nEd\nChase\n2013-05-26 14:47:57.62\n\n\n4\nJennifer\nDavis\n2013-05-26 14:47:57.62\n\n\n5\nJohnny\nLollobrigida\n2013-05-26 14:47:57.62\n\n\n\n\nSpreadsheet vs. Database Workflow\nWhen performing tasks such as counting how many actors have the first name “Ed”, the difference between spreadsheets and databases becomes clear:\n\nUsing a Spreadsheet:\n\nYou must manually filter the first_name column to show only rows containing “Ed.”\nAfter filtering, you manually count the matching rows or read the count displayed by the spreadsheet application.\nWith large datasets, loading, filtering, and recalculating can be slow and resource-intensive, causing delays and potential crashes.\nSpreadsheets can process only one query at a time, limiting efficiency.\n\nUsing a Database\n\nInstead of loading the entire dataset, you can execute a single SQL query such as:\nSELECT COUNT(*) \nFROM actor\nWHERE first_name = 'Ed';\nThe result is returned almost instantly, even with very large datasets.\nDatabases support multiple users running queries simultaneously without performance degradation.\nThey are optimized for complex, concurrent data manipulation and retrieval, making them more suitable for scalable and shared environments.\n\n\n\n\n\n\n\n\nNote\n\n\n\nOverall, spreadsheets may be adequate for small, single-user datasets, but databases provide far superior performance, scalability, and efficiency when working with larger datasets or multiple users.\n\n\n\n\nSpreadsheets vs. Databases\n\n\n\n\n\n\n\nSPREADSHEET\nDATABASE\n\n\n\n\nDesigned for single-user access\nDesigned for multiple-user access\n\n\nOnly one user can manipulate the data at one point in time\nMultiple users can manipulate the data at one point in time\n\n\nHandles a limited amount of data\nHandles small to massive amounts of data\n\n\nBasic to moderate data operations\nBasic to complex data operations\n\n\nSlow or unable to manipulate, extract, transform, and aggregate large amounts of data\nFaster to manipulate, extract, transform, and aggregate large amounts of data\n\n\n\n\n\n\nStructured vs Unstructured Data\nBefore we learn about different types of databases, we should understand the distinction between them. Broadly speaking, these below terms refer to how data is organized:\n\nstructured\nunstructured\nsemi-structured data.\n\n\nStructured Data\nEach row in the table represents a distinct entity (in this case, an actor), while each column corresponds to a specific attribute such as the actor’s first name. The intersection of a row and a column forms a cell, and each cell contains a single data value.\nImportantly, every column is assigned a predefined data type, which determines the kind of information it can store. For example, the first_name column uses a text data type, meaning all values in this column must consist of alphabetical characters only.\n\nSample Data\n\n\n\nactor_id\nfirst_name\nlast_name\nlast_update\n\n\n\n\n1\nPenelope\nGuiness\n2013-05-26 14:47:57.62\n\n\n2\nNick\nWahlberg\n2013-05-26 14:47:57.62\n\n\n3\nEd\nChase\n2013-05-26 14:47:57.62\n\n\n4\nJennifer\nDavis\n2013-05-26 14:47:57.62\n\n\n5\nJohnny\nLollobrigida\n2013-05-26 14:47:57.62\n\n\n6\nBette\nNicholson\n2013-05-26 14:47:57.62\n\n\n7\nGrace\nMostel\n2013-05-26 14:47:57.62\n\n\n8\nMatthew\nJohansson\n2013-05-26 14:47:57.62\n\n\n9\nJoe\nSwank\n2013-05-26 14:47:57.62\n\n\n10\nChristian\nGable\n2013-05-26 14:47:57.62\n\n\n\n\n\n\nUnstructured Data\nUnstructured data refers to information that does not follow a predefined model or tabular format. Unlike structured data, it has no fixed rows, columns, or consistent organization. Common examples include:\n\nEmails\n\nText messages\n\nImages and graphics\n\nAudio and video files\n\nBecause it lacks a clear structure, unstructured data is more difficult to search, process, and analyze. Extracting useful information often requires significant manual effort or specialized tools. It can be compared to searching for every instance of a specific word in a book—possible, but time-consuming and inefficient without the right indexing or processing methods.\n\n\n\nSemi-Structured Data\nSemi-structured data lies between structured and unstructured data. While it does not follow a rigid tabular format, it still maintains a discernible organizational framework, making it more flexible than strictly structured data.\nThis type of data can be analyzed effectively only when you understand the organizational rules embedded within it. A common example is HTML: although it is not stored in rows and columns, it contains predictable tags and nested elements that define the structure of the information. To locate specific content within an HTML file, you must first understand what each tag represents.\nSemi-structured data therefore offers:\n\nMore flexibility than structured tables\n\nMore organization than raw unstructured content\n\nBetter adaptability for evolving or complex data formats\n\n\n\nExamples of Each Data Type\n\n\n\n\n\n\n\nType\nExamples\n\n\n\n\nStructured Data\nCustomer tables, sales transactions, employee records, relational database tables (SQL).\n\n\nUnstructured Data\nEmails, PDFs, text documents, social media posts, images, videos, audio recordings.\n\n\nSemi-Structured Data\nHTML documents, JSON files, XML files, log files, key–value store outputs.\n\n\n\n\n\n\n\nIntro to SQL\nSQL (Structured Query Language) was first developed by IBM in the early 1970s and released publicly in 1979. It was later standardized by the American National Standards Institute (ANSI), establishing it as the primary language for interacting with relational databases.\nSQL is used for three core tasks:\n\nManipulating Data: inserting, updating, or deleting records within a database.\nSearching Data: retrieving all films that feature a specific actor (e.g., Ed Chase).\nDefining Database Structures: For instance, creating new tables or adding columns to existing ones.\n\nLike any language, SQL follows specific syntax rules.\n\nAn English sentence ends with a period.\n\nA SQL statement ends with a semicolon (;).\n\n\n\n\n\n\n\nWarning\n\n\n\nWhile the foundational syntax is consistent, slight variations may occur depending on the database system (e.g., PostgreSQL vs. SQL Server). Understanding these conventions is essential before writing your own SQL queries.\n\n\n\n\n\n\n\n\n\nNoteIs SQL a Programing Language?\n\n\n\nSQL generally counts as code even though it’s not technically a programming language. You’ll encounter a common phenomenon when you start working with it—you’ll find yourself in situations where you can’t solve a coding problem using only your existing knowledge. Don’t worry—this happens to all beginners, and it’s something you’ll have to learn to deal with.\nMost coders spend a fair amount of time researching answers to their problems online. There’s no need to get frustrated if you run into a brick wall—simply Google what you’re trying to achieve in SQL (or any other language), and you may be surprised how quickly you’ll find an answer to your problem!\n\n\n\n\nTypes of Databases\nAs you learn about SQL, you’ll be working with a relational database, a common type of database that all analysts need to be familiar with. That said, relational databases aren’t the only type of database out there. Let’s look at the most important ones and their defining features:\n\nRelational Databases\nNoSQL Databases\nGraph Databases\n\n\n\n\n\n\n\n\nDatabases could also be centralized or distributed.\nDatabases could also be online analytical processing (OLAP) or online transaction processing (OLTP) system.\n\n\n\n\n\nRelational Databases\nA relational database is a collection of data stored in one or more tables of rows and columns.\nBetween the different tables, there are links, known as relationships. As you’ve already learned, data analysts use SQL to query and manipulate the data in relational databases.\n\nPopular relational database management systems (RDBMS) include Microsoft SQL Server,MySQL, Oracle DB and PostgreSQL. Each of these RDBMS is owned by different companies:\n\nPostgreSQL: PostgreSQL Community\nMySQL: Oracle\nOracle: Oracle\nMSSQL: Microsoft\n\n\n\n\n\n\n\n\n\n\n\n\nFeature\nPostgreSQL\nSQL Server\nOracle\nMySQL\n\n\n\n\nLicense\nOpen-source\nCommercial + Express\nCommercial\nOpen-source (Oracle-owned)\n\n\nOS Support\nLinux, macOS, Windows\nWindows, Linux\nLinux, Unix, Windows\nLinux, Windows\n\n\nStrengths\nStandards compliant, JSONB, extensible\nEnterprise BI, T-SQL, Microsoft ecosystem\nScalability, security, enterprise features\nFast reads, simple web workloads\n\n\nBest Use Cases\nAnalytics, complex apps, data science\nBI, ERP, corporate apps\nFinance, telecom, large enterprises\nWeb apps, lightweight services\n\n\n\n\n\nNoSQL Databases\n\nNoSQL stands for Not Only SQL and refers to database systems that are generally non-relational, designed for flexible schemas and distributed workloads.\nSome NoSQL systems provide SQL-like query interfaces, but they do not follow the relational model.\n\nUnlike relational databases, NoSQL databases have a flexible data model, and they’re used to store unstructured, semi-structured, and even structured data. In general, you wouldn’t use SQL to access a NoSQL database, though some have SQL-like languages.\nAs web applications have become more complex, NoSQL databases have become popular thanks to their flexibility. NoSQL databases are used for applications that change frequently as new functions and features are added; for instance, the social networking site LinkedIn uses a NoSQL database.\nThus, NoSQL databases are non-relational systems designed for scalability, flexibility, and high-volume data. They fall into several major categories depending on their data model.\n\nKey–Value Databases\n\nConcept: Simple key → value storage.\nPopular systems: Redis, Amazon DynamoDB, Riak KV\nExample (Redis):\n\n{\n  'course':'Data Analytics',\n  'company':'ACA'\n}\n\n\n\n\nDocument Databases\n\nConcept: JSON-like documents with flexible schema.\nPopular systems: MongoDB, CouchDB, Firestore\nExample (MongoDB):\n\n{\n  \"user_id\": 1001,\n  \"name\": \"Maria\",\n  \"roles\": [\"admin\", \"manager\"]\n}\n\n\n\n\nColumn-Family (Wide-Column) Databases\n\nConcept: Data stored in column families across distributed nodes.\nPopular systems: Apache Cassandra, HBase, ScyllaDB\nExample (Cassandra CQL):\n\nINSERT INTO users (user_id, name, age)\nVALUES (1001, 'Maria', 33);\n\n\n\n\nGraph Databases\n\nConcept: Nodes and relationships.\nPopular systems: Neo4j, ArangoDB, Amazon Neptune\nExample (Neo4j Cypher):\n\nCREATE (u:User {name: \"Maria\"})\nCREATE (p:Project {title: \"Analytics App\"})\nCREATE (u)-[:LEADS]-&gt;(p);\n\n\n\n\nTime-Series Databases\n\nConcept: Optimized for timestamped metrics.\nPopular systems: InfluxDB, TimescaleDB, Prometheus\nExample (InfluxDB Line Protocol):\n\n\nMostly used among DevOps for monitoring  —\n\n\nSearch Engine Databases\n\nConcept: Full-text indexing and search.\nPopular systems: Elasticsearch, OpenSearch, Apache Solr\nExample (Elasticsearch Query):\n\n{\n  \"query\": {\n    \"match\": {\n      \"message\": \"database error\"\n    }\n  }\n}\n\n\nMostly used for querying logs\n\n\n\n\nSummary Table\n\n\n\n\n\n\n\n\nNoSQL Type\nKey Concept\nPopular Databases\n\n\n\n\nKey–Value\nKey → Value lookups\nRedis, DynamoDB, Riak\n\n\nDocument\nJSON-like documents\nMongoDB, CouchDB, Firestore\n\n\nColumn-Family\nWide-column storage\nCassandra, HBase, ScyllaDB\n\n\nGraph\nNodes + edges\nNeo4j, ArangoDB, Amazon Neptune\n\n\nTime-Series\nTime-stamped metrics\nInfluxDB, TimescaleDB, Prometheus\n\n\nSearch Engine\nText search and indexing\nElasticsearch, OpenSearch, Solr\n\n\n\n\n\n\n\n\n\nNoneReading\n\n\n\nSQL vs NoSQL\n\n\n\n\n\n\nCentralized vs Distributed Databases\nThe three kinds of databases discussed above can be centralized or distributed. Put simply, these concepts refer to where the database is stored.\n\n\n\n\nIllustration of centralized vs distributed databases\n\n\n\n\nCentralized Databases\nA centralized database runs on a single machine (single-node). All users, analysts, and administrators connect to this one server.\nKey Features:\n\nAll data lives in one powerful machine.\nEasy to manage and maintain.\nCan handle billions of records and terabytes of data.\nScaling requires buying larger, more expensive hardware (vertical scaling).\nOnce the system reaches hardware limits, performance and management become challenging.\n\nCommon in: Traditional enterprises, internal IT systems, on-premise setups.\nAnalogy: A workstation or laptop, but with high-end server specifications.\n\n\n\nDistributed Databases\nA distributed database stores data across multiple machines (nodes). These nodes work together to form one logical database.\n\nKey Features:\n\nDesigned for massive-scale data.\nScales horizontally by adding more machines.\nFaster data access and search due to parallel processing.\nMore cost-effective storage.\nHigher availability and fault tolerance.\n\n\n\nCommon in:\n\nBanking systems\n\nTelecommunications\n\nLarge tech companies (Google, Facebook, Amazon, Netflix)\n\n\n\nWhy it’s used?\nTo handle constantly growing data, high query loads, global users, and real-time applications.\n\n\n\nCentralized vs Distributed Databases: Summary\n\n\n\n\n\n\n\n\nFeature\nCentralized Database\nDistributed Database\n\n\n\n\nStorage location\nOne machine\nMany machines\n\n\nScalability\nVertical (add more power)\nHorizontal (add more nodes)\n\n\nTypical capacity\nHigh but limited by hardware\nExtremely high, virtually unlimited\n\n\nCost\nExpensive to scale\nMore cost-efficient\n\n\n\n\n\nOLAP Systems (Online Analytical Processing)\n\nOLAP systems are optimized for READ-heavy analytical workloads. They store large volumes of historical data and support complex queries, aggregations, and trend analysis.\nKey Features:\n\nDesigned primarily for reading and analyzing data.\nNot optimized for frequent inserts/updates/deletes.\nStores historical and summarized information.\nSupports advanced analytics: dashboards, reports, trends, forecasting.\nTypically powered by data warehouses or data marts.\n\nExample: An e-commerce analyst retrieves last year’s order data from a data warehouse and analyzes trends across months, categories, or customer segments.\nCommon Technologies: Amazon Redshift, Snowflake,BigQuery, Apache Hive, Microsoft SQL Server Analysis Services.\n\n\n\n\nOLTP Systems (Online Transaction Processing)\n\nOLTP systems are optimized for fast inserts, updates, and deletes. They handle high-volume transactional operations in real time.\nKey Features:\n\nProcesses large numbers of small, atomic transactions.\nEnsures consistency using ACID properties.\nOptimized for real-time operations.\nUsed by operational systems rather than analytics.\n\nExample: A bank’s ATM network continuously inserts, updates, or deletes records as customers make withdrawals, deposits, or transfers.\nCommon Technologies: PostgreSQL, MySQL, Oracle, SQL Server, MongoDB (as transactional store).\n\n\n\n\n\n\nImportantAbout ACID, BASE and CAP Theorem\n\n\n\nIn computer science, ACID (atomicity, consistency, isolation, durability)** is a set of properties of database transactions intended to guarantee data validity despite errors, power failures, and other mishaps. For example, a transfer of funds from one bank account to another, even involving multiple changes such as debiting one account and crediting another, is a single transaction.\n\nThe opposite of ACID is BASE (basically available, soft state, and eventually consistent).\nIn ACID the whole transaction fails if an error occurs in any step within the transaction; in contrast, BASE databases prioritize availability over consistency: instead of failing the transaction, users can access inconsistent data temporarily: data consistency is achieved, but not immediately.\nIn distributed systems, trade-offs described by the CAP theorem mean that databases often lean toward ACID or BASE characteristics, depending on design and workload.\nModern systems may implement hybrid approaches, but trade-offs always exist. But it cannot be both according to CAP theorem.\nFor example, SQL databases (like MySQL, PostgreSQL, AWS RedShift) are structured over the ACID model, while NoSQL databases (like DynamoDB[4] or MongoDB) use the BASE architecture. However, some NoSQL databases might exhibit certain ACID traits\n\n\n\n\n\nOLAP vs OLTP: Summary\n\n\n\n\n\n\n\n\nFeature\nOLAP\nOLTP\n\n\n\n\nPrimary purpose\nAnalytics, reporting\nReal-time transactions\n\n\nQuery type\nRead-heavy, complex\nWrite-heavy, simple\n\n\nData volume\nHistorical, large datasets\nCurrent transactional data\n\n\nPerformance optimized for\nAggregations, scans\nFast inserts/updates/deletes\n\n\nCommon use cases\nDashboards, BI, trend analysis\nBanking, retail transactions, booking systems\n\n\nUsers\nAnalysts, data scientists\nEnd-users, applications, machines\n\n\n\n\n\n\n\n\n\n\nNoteReading\n\n\n\nOLTPvsOLAP",
+    "objectID": "materials/sql/slides/session4.html#create-sales_analysis",
+    "href": "materials/sql/slides/session4.html#create-sales_analysis",
+    "title": "Filtering",
+    "section": "Create sales_analysis",
+    "text": "Create sales_analysis\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
-      "Session 01: Intro to Relational Databases"
+      "Slides",
+      "Filtering"
     ]
   },
   {
-    "objectID": "materials/sql/session1.html#data-management-architectures",
-    "href": "materials/sql/session1.html#data-management-architectures",
-    "title": "Session 01: Intro to Relational Databases",
-    "section": "Data Management Architectures",
-    "text": "Data Management Architectures\nOkay, we got high level understanding about the databases and their types, however in real life applications we need to master the so called Data Management Architecture (DMA). Let’s go over them chronologically:\n\nData Warehouse (DW)\nData Mart (DM)\nData Lake (DL)\nData Lakehouse (DLH)\n\n\nData Warehouse (DW)\nThe earliest large-scale analytics storage (1980-90s).\nA Data Warehouse is a centralized, structured, and governed analytical storage designed for reporting, business intelligence, and decision-making. Everything inside is modeled, cleaned, validated, and optimized for SQL analytics.\n\n\nPurpose\n\nProvide a single version of truth for the organization.\nServe business reporting, dashboards, KPIs.\nAllow analysts to run consistent, repeatable metrics.\n\n\n\nArchitecture\n\nCore storage: relational tables in Star or Snowflake schema.\nETL/ELT pipelines transform raw data into structured models.\nStrong governance: data quality rules, validation layers, semantic models.\n\n\n\nSchema Approach\n\nSchema-on-write: data must be modeled before it enters.\nFacts (large numerical tables).\nDimensions (lookup tables with business attributes).\nConformed dimensions for uniform interpretation (e.g., Customer, Product).\n\n\n\nQuery Model\n\nAggregations, joins, slicing/dicing, reporting.\nOptimized for read-heavy workloads.\n\n\n\nAdvantages\n\nHigh data quality\nStrong governance\nFast SQL analytics\nBusiness-friendly, predictable models\n\n\n\nLimitations\n\nRigid: changes require redesign\nPoor for raw, unstructured data\nExpensive for large-scale storage\nNot ideal for ML pipelines that need raw historical data\n\n\n\nTypical Tools/Platforms\n\nSnowflake (warehouse mode)\nAmazon Redshift\nGoogle BigQuery (classic DW usage)\nTeradata\nOracle Exadata\n\n\n\nRelationship to others\n\nDW is the parent of DM.\nDW predates DL and DLH.\n\n\n\n\nData Mart (DM)\nIntroduced after Data Warehouses (late 1990s).\nA Data Mart is a subject-specific, department-focused subset of a Data Warehouse. It is optimized for a particular business domain such as Marketing, Finance, Sales, HR, or Operations.\n\n\nPurpose\n\nReduce load on the central Data Warehouse.\nDeliver faster, domain-specific analytics.\nAllow departments to have tailored KPIs and models.\nImprove performance by minimizing unnecessary joins and tables.\n\n\n\nArchitecture\n\nUsually built as dependent data marts, sourced from the DW.\nSometimes built as independent data marts (less common today).\nDomain-specific schemas (e.g., Marketing Mart, Finance Mart).\nCan use star/snowflake schemas but simplified for a business unit.\n\n\n\nSchema Approach\n\nSchema-on-write (same as DW).\nContains facts/dimensions relevant only to one business domain.\nMay extend or customize dimensions (e.g., Marketing_Customer).\n\n\n\nQuery Model\n\nFaster analytical queries for a single domain.\nReduced table complexity.\nSupports dashboards, KPI reporting, and departmental insights.\n\n\n\nAdvantages\n\nHigh performance for domain-specific workloads\nReduces contention on the central DW\nSimpler models for end users\nEnables data ownership by individual departments\n\n\n\nLimitations\n\nCan create data silos if unmanaged\nRequires synchronization with DW\nPotential duplication of logic if marts diverge\n\n\nData Silo\n\n\n\nTypical Tools/Platforms\n\nSnowflake Data Marts\nRedshift Data Marts\nBigQuery departmental datasets\nMicrosoft SQL Server departmental warehouses\n\n\n\nRelationship to others\n\nDM is the child of DW.\nRelies on DW for consistency.\nNot directly related to Data Lakes or Lakehouses except in hybrid architectures.\n\n\n\n\n\nData Lake (DL)\nIntroduced during the Big Data era (2010s).\nA Data Lake is a large-scale, low-cost, raw-data storage system that can ingest structured, semi-structured, and unstructured data without modeling.\n\n\nPurpose\n\nStore massive amounts of raw data cheaply.\nSupport machine learning and exploratory analytics.\nCapture logs, JSON files, clickstreams, IoT data, images, audio.\nPreserve granular, historical data with no loss.\n\n\n\nArchitecture\n\nBuilt on object storage (S3, GCS, ADLS, or HDFS).\nOrganized into zones: raw, curated, prepared.\nIngestion via ELT pipelines.\nOften uses frameworks like Spark, Hive, Presto, or Dremio.\n\n\n\nSchema Approach\n\nSchema-on-read: structure is applied only at query time.\nSupports open formats: Parquet, ORC, Avro, CSV, JSON.\nCan handle unstructured formats (text, logs, images).\n\n\n\nQuery Model\n\nFlexible but slower than DW for SQL analytics.\nBest for ML workloads requiring raw historical data.\nHandles batch and streaming ingestion.\n\n\n\nAdvantages\n\nExtremely flexible storage model\nVery low cost for large-scale data\nExcellent for ML, experimentation, and data science\nDecouples storage from compute\n\n\n\nLimitations\n\nNo ACID guarantees in traditional lakes\nPoor governance (risk of “data swamp”)\nHard for business teams to use directly\nNot optimized for BI dashboards\n\n\n\nTypical Tools/Platforms\n\nAWS S3 + Athena / EMR\nAzure Data Lake Storage\nGoogle Cloud Storage + BigQuery external tables\nHadoop HDFS\nDatabricks in lake mode\n\n\n\nRelationship to others\n\nDL evolved after DW and DM.\nPredecessor of the DLH.\nDW and DL often coexist in two-tier architectures.\n\n\n\n\nData Lakehouse (DLH)\nThe most modern architecture (2020s).\nA Data Lakehouse is a unified, ACID-compliant, analytics + ML architecture built on top of Data Lake storage.\nIt merges the strengths of Data Warehouses and Data Lakes into a single system.\n\n\nPurpose\n\nProvide a single platform for SQL analytics, BI, ML, and streaming.\nAvoid duplication between DW and DL.\nGuarantee ACID transactions and strong governance on cheap lake storage.\nSupport both structured and unstructured data.\n\n\n\nArchitecture\n\nStorage on cloud object stores (S3, ADLS, GCS).\nACID table formats: Delta Lake, Apache Iceberg, Apache Hudi.\nMetadata layers for schema enforcement, governance, versioning.\nCompute engines: Spark, Databricks, Presto/Trino, Snowflake, BigQuery.\n\n\n\nSchema Approach\n\nSupports both schema-on-write and schema-on-read.\nAllows schema evolution, time travel, and versioning.\nEnforces constraints even on raw lake storage.\n\n\n\nQuery Model\n\nHigh-performance SQL (warehouse-like).\nML workloads (lake-like).\nSupports batch, streaming, and real-time analytics.\nWorks for both BI dashboards and ML pipelines.\n\n\n\nAdvantages\n\nUnifies DW + DL into one architecture\nACID guarantees on object storage\nSuitable for both BI and ML\nSimplifies pipelines and governance\nScalable and cost-effective\n\n\n\nLimitations\n\nRequires organizational adoption and re-skilling\nGovernance maturity varies by platform\nClassic DW teams may struggle to transition\n\n\n\nTypical Tools/Platforms\n\nDatabricks Lakehouse (Delta)\nSnowflake (Unistore + Iceberg)\nBigQuery (Lakehouse-friendly design)\nApache Iceberg + Trino/Presto\nApache Hudi platforms\n\n\n\nRelationship to others\n\nDLH is the evolution of the Data Lake.\nDLH aims to unify and simplify analytics workloads.\nDLH may replace DW in modern architectures.",
+    "objectID": "materials/sql/slides/session4.html#indexes-for-filtering-performance",
+    "href": "materials/sql/slides/session4.html#indexes-for-filtering-performance",
+    "title": "Filtering",
+    "section": "Indexes for Filtering Performance",
+    "text": "Indexes for Filtering Performance\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
-      "Session 01: Intro to Relational Databases"
+      "Slides",
+      "Filtering"
     ]
   },
   {
-    "objectID": "materials/sql/session1.html#building-our-first-database",
-    "href": "materials/sql/session1.html#building-our-first-database",
-    "title": "Session 01: Intro to Relational Databases",
-    "section": "Building our first Database",
-    "text": "Building our first Database\nNow that we have high level understanding about the databases, their types and architectures, it is high time to build our first database and continue.\nIn order to be able to build and run the database you need to keep docker desktop active. If you haven’t installed Docker yet, check out the installation and testing steps here\nPS you will see how easy it is.\n\nWhat are we going to achieve?\nWe are going to build a relational database which will consist of the following tables.\n\nSales\nTime Dimension\nProduct Dimension\nEmployee Dimension\nCustomer Dimension\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThis is going to be part of your portfolio, make sure the make it as structured as possible.\n\n\n\n\nStep 1: Create New GitHub Repository\n\nLog in to GitHub.\n\nClick New Repository.\n\nRepository name: sql-analytics-portfolio\n\nCheck Add a README file.\n\nCheck Add .gitignore and choose None.\n\nClick Create Repository.\n\n\n\nStep 2: Clone the Repository\n\nCreate a folder named aca on your Desktop or wherever you want\nOpen your terminal there. You should see ~/aca\nType in your terminal:\n\ngit clone &lt;your-repository-url&gt;\n\nNavigate to that folder by typing:\n\ncd  &lt;your-repository-url&gt;\n\ntype code . to open the project with VS Code\nRECOMMENDED save the project in VS Code using the Project Manager extension\n\n\n\nStep 3: Download the data\n\nCreate a new folder inside of the project named data\nDownload the following csv files and put in the data folder\n\ncustomers.csv\n\nemployees.csv\n\norders.csv\n\nproducts.csv\n\nsales.csv\n\nAdd and commit the changes done so far\n\ngit add .\ngit commit -m \"Added data folder with CSV datasets\"\n\n\nStep 4: Update .gitignore\n\nOpen the .gitignore file in your repository and add the following two lines at the bottom:\n\npgadmin_data/\npostgres_data/\n\nAgain add and commit\n\ngit add .gitignore\ngit commit -m \"Updated .gitignore to exclude database volumes\"\n\n\nStep 5: Creating Init folder and SQL files\nWe are going to create init files which will be executed only during the first db initialization.\n\nCreate a folder named init\nInside of the init folder create a file named 01_schema.sql for database schema code. Copy the respective chunk there\nInside of the init folder create a file named 02_etl.sql for data loading to SQL\nAdd and Commit the changes\n\n  git add init/\n  git commit -m \"Added initial schema and ETL SQL files\"\n\n01_schema.sql\n-- 01_schema.sql\n\n-- Safety: drop if you are iterating (comment these in production)\n-- DROP TABLE IF EXISTS sales CASCADE;\n-- DROP TABLE IF EXISTS orders CASCADE;\n-- DROP TABLE IF EXISTS products CASCADE;\n-- DROP TABLE IF EXISTS customers CASCADE;\n-- DROP TABLE IF EXISTS employees CASCADE;\n\nCREATE TABLE IF NOT EXISTS employees (\n  employee_id   SERIAL PRIMARY KEY,\n  first_name    TEXT,\n  last_name     TEXT,\n  email         TEXT,\n  salary        NUMERIC\n);\n\nCREATE TABLE IF NOT EXISTS customers (\n  customer_id   INTEGER PRIMARY KEY,\n  customer_name TEXT,\n  address       TEXT,\n  city          TEXT,\n  zip_code      TEXT\n);\n\nCREATE TABLE IF NOT EXISTS products (\n  product_id    INTEGER PRIMARY KEY,\n  product_name  TEXT,\n  price         NUMERIC,\n  description   TEXT,\n  category      TEXT\n);\n\n-- orders: include year/quarter/month as stored columns (loaded from CSV)\nCREATE TABLE IF NOT EXISTS orders (\n  order_id    INTEGER PRIMARY KEY,\n  order_date  TIMESTAMP,\n  year        INT,\n  quarter     INT,\n  month       TEXT\n);\n\nCREATE TABLE IF NOT EXISTS sales (\n  transaction_id INTEGER PRIMARY KEY,\n  order_id       INTEGER REFERENCES orders(order_id)     ON DELETE RESTRICT,\n  product_id     INTEGER REFERENCES products(product_id) ON DELETE RESTRICT,\n  customer_id    INTEGER REFERENCES customers(customer_id) ON DELETE RESTRICT,\n  employee_id    INTEGER REFERENCES employees(employee_id) ON DELETE SET NULL,\n  total_sales    NUMERIC,\n  quantity       INTEGER,\n  discount       NUMERIC\n);\n\n-- Helpful indexes\nCREATE INDEX IF NOT EXISTS idx_sales_order_id   ON sales(order_id);\nCREATE INDEX IF NOT EXISTS idx_sales_product_id ON sales(product_id);\nCREATE INDEX IF NOT EXISTS idx_sales_customer_id ON sales(customer_id);\nCREATE INDEX IF NOT EXISTS idx_orders_date      ON orders(order_date);\n\n\n02_etl.sql\n-- 03_seed_from_csv.sql\n-- COPY must read files inside the container; we mounted ./data to /docker-entrypoint-initdb.d/data\n\n\\echo 'Loading employees...'\nCOPY employees(employee_id,first_name,last_name,email,salary)\nFROM '/docker-entrypoint-initdb.d/data/employees.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading customers...'\nCOPY customers(customer_id,customer_name,address,city,zip_code)\nFROM '/docker-entrypoint-initdb.d/data/customers.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading products...'\nCOPY products(product_id,product_name,price,description,category)\nFROM '/docker-entrypoint-initdb.d/data/products.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading orders...'\n\\echo 'Loading orders...'\nCOPY orders(order_id,order_date,year,quarter,month)\nFROM '/docker-entrypoint-initdb.d/data/orders.csv'\nWITH (FORMAT csv, HEADER true);\n\n\\echo 'Loading sales...'\nCOPY sales(transaction_id,order_id,product_id,customer_id,employee_id,total_sales,quantity,discount)\nFROM '/docker-entrypoint-initdb.d/data/sales.csv'\nWITH (FORMAT csv, HEADER true);\n\n\n\n\n\n\nCaution\n\n\n\nPay attention to the orders and think about it.\n\n\n\n\n\nStep 6: Create .env file\nThis file is going to setup the database parameters\n\nCreate .env file in the root\nCopy and paste the following there\n\nPORT=5432\nDB_USER=admin\nDB_PASSWORD=password\nDB_NAME=aca\nPGADMIN_EMAIL=admin@admin.com\nPGADMIN_PASSWORD=admin\n\nAdd and commit .env file\n\n\ngit add .env\ngit commit -m \"Added environment variables for PostgreSQL\"\n\n\nStep 7: Create the docker-compose.yaml File\n\nCreate docker-compose.yaml file\ncopy and paste the following code there\n\nservices:\n  db:\n    container_name: postgresql_db_aca\n    image: postgres:17\n    restart: always\n    env_file: .env\n    environment:\n      POSTGRES_USER: ${DB_USER}\n      POSTGRES_PASSWORD: ${DB_PASSWORD}\n      POSTGRES_DB: ${DB_NAME}\n    ports:\n      - \"5432:5432\"\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U ${DB_USER} -d ${DB_NAME}\"]\n      interval: 10s\n      timeout: 5s\n      retries: 10\n    volumes:\n      # Persist database data (keep your bind mount; a named volume also works)\n      - ./postgres_data:/var/lib/postgresql/data\n      # Run these once on first initialization\n      - ./init:/docker-entrypoint-initdb.d\n      # Make CSVs available to COPY during init (read-only)\n      - ./data:/docker-entrypoint-initdb.d/data:ro\n\n  pgadmin:\n    container_name: pgadmin_aca\n    image: dpage/pgadmin4\n    restart: always\n    env_file: .env\n    environment:\n      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}\n      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}\n    ports:\n      - \"5050:80\"\n    volumes:\n      - ./pgadmin_data:/var/lib/pgadmin\n    depends_on:\n      - db\n\nAdd and commit\n\n\ngit add docker-compose.yaml\ngit commit -m \"Added Docker Compose configuration for PostgreSQL and pgAdmin\"\n\nNow your repository must have the following structure\n\n.\n├── README.md\n├── .gitignore                     # Ignoring\n├── .env                     # Environment variables for PostgreSQL\n├── docker-compose.yaml      # Docker Compose configuration\n├── data/                    # CSV datasets\n│   ├── customers.csv\n│   ├── employees.csv\n│   ├── orders.csv\n│   ├── products.csv\n│   ├── sales.csv\n├── init/                    # SQL initialization scripts\n│   ├── 01_schema.sql        # Database schema creation\n│   ├── 02_etl.sql           # Data loading and ETL process\n\n\nStep 8: Run the Docker Environment\n\nOpen the integrated terminal in VS Code.\nEnsure Docker Desktop is running on your machine.\nThen start the database services:\n\ndocker compose up\n\n\nStep 9: View the Tables\n\nOnce running, access pgAdmin in your browser by http://localhost:5050\nusername: admin@admin.com\npassword: admin\n\n\n\nOpen Object\\(\\rightarrow\\)Register\\(\\rightarrow\\)Server \nIn the general under the name column \nClick on the connection and fill in:\n\nhostname must be the same as the postgres service name in docker-compose.yaml, which is db,\nport 5432\nmaintenance database: aca\nusername: admin\npassword: password \n\nNavigate to in my case: \\(any_name \\rightarrow aca \\rightarrow Schemas \\rightarrow public \\rightarrow Tables\\)\n\nClick on the query tool copy and paste the queries provided in the Step 10\n\n\n\n\nStep 10: Our First Queries | Preview\nUse the following SQL statements to preview the first 10 rows from each table after loading your CSV data.\nA schema is a logical container inside a PostgreSQL database. You can think of it as a folder that holds database objects.\nThe default schema is public.\nSELECT * FROM public.customers LIMIT 10;\n\nSELECT * FROM public.employees LIMIT 10;\n\nSELECT * FROM public.orders LIMIT 10;\n\nSELECT * FROM public.products LIMIT 10;\n\nSELECT * FROM public.sales LIMIT 10;\n\n\nStep 11: Close and Delete Containers\nAs soon as you finish the job related to the DB, remove the containers by typing\ndocker-compose down\n\n\nStep 12: Every time you re-run\nWe are going to deactivate and activate constantly, so you will get used to it. Don’t worry :)\ndocker-compose up\n\n\n\n\n\n\nImportant\n\n\n\nIn case of ANY CHANGE in the docker-compose.yaml file:\n\ndocker compose down -v\ndelete postgres_data folder\ndocker compose up --build",
+    "objectID": "materials/sql/slides/session4.html#simple-where-examples",
+    "href": "materials/sql/slides/session4.html#simple-where-examples",
+    "title": "Filtering",
+    "section": "Simple WHERE Examples",
+    "text": "Simple WHERE Examples\nSELECT\n    transaction_id,\n    order_date_date,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE total_sales &gt; 100000;\nSELECT\n    transaction_id,\n    city,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE city = 'East Amanda';",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
-      "Session 01: Intro to Relational Databases"
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#and-combine-conditions",
+    "href": "materials/sql/slides/session4.html#and-combine-conditions",
+    "title": "Filtering",
+    "section": "AND: Combine Conditions",
+    "text": "AND: Combine Conditions\nSELECT\n    transaction_id,\n    year,\n    city,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE year = 2023\n  AND category = 'Electronics'\n  AND total_sales &gt; 100000;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#or-multiple-acceptable-conditions",
+    "href": "materials/sql/slides/session4.html#or-multiple-acceptable-conditions",
+    "title": "Filtering",
+    "section": "OR: Multiple Acceptable Conditions",
+    "text": "OR: Multiple Acceptable Conditions\nSELECT\n    transaction_id,\n    year,\n    city,\n    total_sales\nFROM sales_analysis\nWHERE year = 2023\n  AND (city = 'Smithside' OR city = 'Lake Thomas');",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#in-and-not-in-cleaner-than-many-ors",
+    "href": "materials/sql/slides/session4.html#in-and-not-in-cleaner-than-many-ors",
+    "title": "Filtering",
+    "section": "IN and NOT IN: Cleaner Than Many ORs",
+    "text": "IN and NOT IN: Cleaner Than Many ORs\nSELECT\n    transaction_id,\n    city,\n    total_sales\nFROM sales_analysis\nWHERE city IN ('East Amanda', 'Smithside', 'Lake Thomas');\nSELECT\n    transaction_id,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE category NOT IN ('Toys', 'Books');",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#like-pattern-filtering-wildcards",
+    "href": "materials/sql/slides/session4.html#like-pattern-filtering-wildcards",
+    "title": "Filtering",
+    "section": "LIKE: Pattern Filtering (Wildcards)",
+    "text": "LIKE: Pattern Filtering (Wildcards)\nSELECT\n    transaction_id,\n    city,\n    total_sales\nFROM sales_analysis\nWHERE city LIKE 'East%';\nSELECT\n    transaction_id,\n    category,\n    total_sales\nFROM sales_analysis\nWHERE category LIKE '%Garden%';",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#like-wildcards-cheatsheet",
+    "href": "materials/sql/slides/session4.html#like-wildcards-cheatsheet",
+    "title": "Filtering",
+    "section": "LIKE Wildcards Cheatsheet",
+    "text": "LIKE Wildcards Cheatsheet\n\n\n\n\n\n\n\nPattern Example\nMeaning\n\n\n\n\nWHERE product_name LIKE 'Elec%'\nStarts with “Elec”\n\n\nWHERE product_name LIKE '%Phone'\nEnds with “Phone”\n\n\nWHERE product_name LIKE '%Pro%'\nContains “Pro” anywhere\n\n\nWHERE city LIKE '_ast%'\n“ast” begins at the second character\n\n\nWHERE city LIKE 'N%_%'\nStarts with “N” and has at least 3 characters\n\n\nWHERE category LIKE 'B%ks'\nStarts with “B” and ends with “ks”",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#null-filtering",
+    "href": "materials/sql/slides/session4.html#null-filtering",
+    "title": "Filtering",
+    "section": "NULL Filtering",
+    "text": "NULL Filtering\n\n\n\n\n\n\nTip\n\n\n\nUse IS NULL and IS NOT NULL\nDo not use = NULL or &lt;&gt; NULL\n\n\n\n\n\nSELECT\n    transaction_id,\n    discount\nFROM sales_analysis\nWHERE discount IS NULL;\nSELECT\n    transaction_id,\n    discount\nFROM sales_analysis\nWHERE discount IS NOT NULL;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#wrong-vs-correct-count",
+    "href": "materials/sql/slides/session4.html#wrong-vs-correct-count",
+    "title": "Filtering",
+    "section": "Wrong vs Correct (COUNT)",
+    "text": "Wrong vs Correct (COUNT)\nSELECT\n    city,\n    COUNT(*) AS transaction_count\nFROM sales_analysis\nWHERE COUNT(*) &gt; 1000\nGROUP BY city;\nSELECT\n    city,\n    COUNT(*) AS transaction_count\nFROM sales_analysis\nGROUP BY city\nHAVING COUNT(*) &gt; 1000;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#analytical-having-example-2023",
+    "href": "materials/sql/slides/session4.html#analytical-having-example-2023",
+    "title": "Filtering",
+    "section": "Analytical HAVING Example (2023)",
+    "text": "Analytical HAVING Example (2023)\nSELECT\n    category,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nWHERE year = 2023\nGROUP BY category\nHAVING SUM(total_sales) &gt; 500000\nORDER BY total_sales_amount DESC;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#detect-duplicates-with-having",
+    "href": "materials/sql/slides/session4.html#detect-duplicates-with-having",
+    "title": "Filtering",
+    "section": "Detect Duplicates with HAVING",
+    "text": "Detect Duplicates with HAVING\nSELECT\n    transaction_id,\n    COUNT(*) AS occurrence_count\nFROM sales_analysis\nGROUP BY transaction_id\nHAVING COUNT(*) &gt; 1;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#having-vs-where-interview-trap",
+    "href": "materials/sql/slides/session4.html#having-vs-where-interview-trap",
+    "title": "Filtering",
+    "section": "HAVING vs WHERE (Interview Trap)",
+    "text": "HAVING vs WHERE (Interview Trap)\n\n\n\n\n\n\nWarning\n\n\nFiltering raw columns belongs in WHERE.\nHAVING is for aggregated conditions.\n\n\n\nSELECT\n    category,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nGROUP BY category\nHAVING category = 'Electronics';\nSELECT\n    category,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nWHERE category = 'Electronics'\nGROUP BY category;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#case-when-derived-categories",
+    "href": "materials/sql/slides/session4.html#case-when-derived-categories",
+    "title": "Filtering",
+    "section": "CASE WHEN: Derived Categories",
+    "text": "CASE WHEN: Derived Categories\n\n\nCreate analytical labels\nTranslate numeric logic into business meaning",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#case-transaction-segmentation",
+    "href": "materials/sql/slides/session4.html#case-transaction-segmentation",
+    "title": "Filtering",
+    "section": "CASE: Transaction Segmentation",
+    "text": "CASE: Transaction Segmentation\nSELECT\n    transaction_id,\n    total_sales,\n    CASE\n        WHEN total_sales &gt;= 100000 THEN 'High Value'\n        WHEN total_sales &gt;= 50000 THEN 'Medium Value'\n        ELSE 'Low Value'\n    END AS sales_segment\nFROM sales_analysis;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session4.html#case-with-aggregation",
+    "href": "materials/sql/slides/session4.html#case-with-aggregation",
+    "title": "Filtering",
+    "section": "CASE with Aggregation",
+    "text": "CASE with Aggregation\nSELECT\n    CASE\n        WHEN discount &gt; 0 THEN 'Discounted'\n        ELSE 'Full Price'\n    END AS pricing_type,\n    SUM(total_sales) AS total_sales_amount\nFROM sales_analysis\nWHERE year = 2023\nGROUP BY pricing_type;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Filtering"
     ]
   },
   {
@@ -6949,7 +7475,7 @@
     "href": "materials/sql/session5.html",
     "title": "Session 05 Data Analysis with SQL | Functions",
     "section": "",
-    "text": "Before jumping to the built-in SQL Funcions let’s ensure that we have sales_analysis table.\n\n\nLets run the Docker in detached mode:\ndocker compose up -d\n\n\n\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;\n``` --&gt;\n\n\n&lt;!-- ### Indexes for Filtering Performance\n\n```sql\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);\n\n\n\n\n\n\nNote\n\n\n\nNote, that we are going to take closer look on JOINs during the next session.",
+    "text": "Before jumping to the built-in SQL Funcions let’s ensure that we have sales_analysis table.\n\n\nLets run the Docker in detached mode:\ndocker compose up -d\n\n\n\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;\n\n\n\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);\n\n\n\n\n\n\nNote\n\n\n\nNote, that we are going to take closer look on JOINs during the next session.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -6962,7 +7488,7 @@
     "href": "materials/sql/session5.html#from-session-4",
     "title": "Session 05 Data Analysis with SQL | Functions",
     "section": "",
-    "text": "Before jumping to the built-in SQL Funcions let’s ensure that we have sales_analysis table.\n\n\nLets run the Docker in detached mode:\ndocker compose up -d\n\n\n\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;\n``` --&gt;\n\n\n&lt;!-- ### Indexes for Filtering Performance\n\n```sql\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);\n\n\n\n\n\n\nNote\n\n\n\nNote, that we are going to take closer look on JOINs during the next session.",
+    "text": "Before jumping to the built-in SQL Funcions let’s ensure that we have sales_analysis table.\n\n\nLets run the Docker in detached mode:\ndocker compose up -d\n\n\n\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;\n\n\n\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);\n\n\n\n\n\n\nNote\n\n\n\nNote, that we are going to take closer look on JOINs during the next session.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -6975,7 +7501,20 @@
     "href": "materials/sql/session5.html#numeric-functions",
     "title": "Session 05 Data Analysis with SQL | Functions",
     "section": "Numeric Functions",
-    "text": "Numeric Functions\nThis section provides a clean, end-to-end coverage of numeric functions, organized from basic to advanced, with a strong analytical mindset.\nFor each function, you will see:\n\na conceptual input table\nthe SQL query\nthe output table\ncommon analytical use cases\nanalytical interpretation\n\nAll examples assume the sales_analysis table.\n\n\nSUM()\nSUM() is one of the most frequently used SQL functions.\n\nSUM() Basic Aggregation\nSUM() adds numeric values across multiple rows.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\n80.00\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntotal_revenue\n\n\n\n\n300.00\n\n\n\n\n\nSUM() and NULL Values | Default Behavior\nBy default, SUM() ignores NULL values.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\nNULL\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntotal_revenue\n\n\n\n\n220.00\n\n\n\nKey points\n\nNULL values do not contribute to the sum\n\nNULL does not mean zero\n\nif all values are NULL, the result of SUM() is NULL\n\nHandling missing values explicitly will be covered later in a dedicated chapter. \n\n\n\nSUM() with GROUP BY | Aggregation by Category\nGrouping allows SUM() to operate per dimension.\nInput\n\n\n\ncategory\ntotal_sales\n\n\n\n\nAccessories\n50.00\n\n\nAccessories\n70.00\n\n\nElectronics\n120.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  category,\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis\nGROUP BY category;\n\\[\\downarrow\\]\n\n\n\ncategory\ntotal_revenue\n\n\n\n\nAccessories\n120.00\n\n\nElectronics\n120.00\n\n\n\n\n\nAnalytical Use Cases\n\ntotal revenue calculation\n\ntotal cost or volume\n\nhigh-level KPI reporting\n\n\n\nrevenue by product category\n\ncost by department\n\nKPI breakdowns for dashboards\n\n\n\n\n\n\n\nWarningAnalytical Warning | Always Check the Grain\n\n\n\nBefore using SUM(), always verify the grain of the table.\n\nsales_analysis is at the transaction level\n\nsumming values duplicated per transaction (e.g. salaries) produces incorrect results\n\naggregation must match the entity you want to measure\n\nCorrect use of SUM() depends as much on data structure as on SQL syntax.\n\n\n\n\n\n\nAVG()\nAVG() is a numeric aggregate function used to calculate the arithmetic mean of a set of values.\nIn analytics, averages are commonly used to understand typical behavior, but they must be interpreted carefully—especially in the presence of NULL values, outliers, and skewed distributions.\n\n\nAVG() Basic Aggregation\nAVG() calculates the sum of values divided by the number of non-NULL observations.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\n0.00\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  AVG(discount) AS avg_discount\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\navg_discount\n\n\n\n\n0.10\n\n\n\nThe average discount is calculated as:\n\\[\n\\frac{0.10 + 0.00 + 0.20}{3} = 0.10\n\\]\n\n\n\nAVG() and NULL Values | Default Behavior\nBy default, AVG() ignores NULL values in both the numerator and the denominator.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  AVG(discount) AS avg_discount\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\navg_discount\n\n\n\n\n0.15\n\n\n\nExplanation\n\nonly non-NULL values are used\n\ndenominator is 2, not 3\n\n\\[\n\\frac{0.10 + 0.20}{2} = 0.15\n\\]\n\n\n\n\n\n\nImportant\n\n\n\nThis behavior is often unexpected for beginners and must be understood clearly.\n\n\n\n\n\nAVG() with GROUP BY | Average per Category\nGrouping allows AVG() to compute averages per dimension.\nInput\n\n\n\ncategory\nprice\n\n\n\n\nAccessories\n25.00\n\n\nAccessories\n35.00\n\n\nElectronics\n120.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  category,\n  AVG(price) AS avg_price\nFROM sales_analysis\nGROUP BY category;\n\\[\\downarrow\\]\n\n\n\ncategory\navg_price\n\n\n\n\nAccessories\n30.00\n\n\nElectronics\n120.00\n\n\n\n\n\n\nAVG() with GROUP BY | Average Sales per Customer\nA common analytical use case is average behavior per entity.\nSELECT\n  customer_name,\n  AVG(total_sales) AS avg_transaction_value\nFROM sales_analysis\nGROUP BY customer_name;\nThis answers questions such as:\n\nwhat is the typical transaction value per customer?\nwho are high-value vs low-value customers?\n\n\n\n\nAnalytical Interpretation | When AVG() Is Appropriate\nUse AVG() when:\n\ndata is symmetrically distributed\nextreme values are rare\nyou want a representative “typical” value\n\nTypical examples:\n\naverage order value\n\naverage discount rate\n\naverage price per category\n\n\n\n\nAnalytical Limitation | Sensitivity to Outliers\nAVG() is highly sensitive to outliers.\nExample scenario\n\n\n\ntotal_sales\n\n\n\n\n20\n\n\n25\n\n\n30\n\n\n500\n\n\n\nThe average is pulled upward by a single extreme value.\nIn such cases, the average may misrepresent typical behavior.\n\n\n\nAVG() vs Median | Conceptual Note\n\nAVG() reflects the mean\nthe median reflects the middle value\n\nUse:\n\nAVG → for stable, normally distributed data\n\nMedian → for skewed data or income-like variables\n\nMedian calculations will be covered later in the course.\n\n\n\n\n\n\nWarningAnalytical Warning | Always Check the Distribution\n\n\n\nBefore relying on AVG(), consider:\n\npresence of outliers\n\nskewness of the data\n\nwhether “typical” behavior is meaningful\n\nBlindly using averages is one of the most common analytical mistakes.\n\n\n\n\nAnalytical Use Cases\n\naverage order value\n\naverage discount per transaction\n\naverage price by category\n\nbenchmarking typical performance\n\n\n\nAVG() computes the arithmetic mean\n\nNULL values are ignored by default\n\ngrouping enables per-dimension averages\n\naverages are sensitive to outliers\n\ndistribution shape matters for interpretation\n\n\n\n\n\n\n\nImportant\n\n\n\nUnderstanding when not to use AVG() is just as important as knowing how to write it.\n\n\n\n\n\nMIN() and MAX()\nMIN() and MAX() are aggregate functions used to identify extreme values in a dataset.\nThey answer the questions:\n\nWhat is the smallest value?\nWhat is the largest value?\n\nThese functions are widely used in exploratory analysis, data validation, and boundary checks.\n\n\nMIN() and MAX() | Basic Aggregation\nMIN() returns the lowest value, and MAX() returns the highest value in a column.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\n80.00\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  MIN(total_sales) AS min_sale,\n  MAX(total_sales) AS max_sale\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nmin_sale\nmax_sale\n\n\n\n\n80.00\n120.50\n\n\n\n\n\n\nMIN() and MAX() and NULL Values | Default Behavior\nBoth MIN() and MAX() ignore NULL values by default.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\nNULL\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  MIN(total_sales) AS min_sale,\n  MAX(total_sales) AS max_sale\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nmin_sale\nmax_sale\n\n\n\n\n99.50\n120.50\n\n\n\nKey points\n\nNULL values do not participate in comparisons\n\nif all values are NULL, the result is NULL\n\n\n\n\nMIN() and MAX() with GROUP BY | Extremes per Category\nGrouping allows you to find minimum and maximum values per dimension.\nInput\n\n\n\ncategory\nprice\n\n\n\n\nAccessories\n25.00\n\n\nAccessories\n35.00\n\n\nElectronics\n120.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  category,\n  MIN(price) AS min_price,\n  MAX(price) AS max_price\nFROM sales_analysis\nGROUP BY category;\n\\[\\downarrow\\]\n\n\n\ncategory\nmin_price\nmax_price\n\n\n\n\nAccessories\n25.00\n35.00\n\n\nElectronics\n120.00\n120.00\n\n\n\n\n\n\nMIN() and MAX() on Text Columns\nMIN() and MAX() also work on text (string) columns.\nFor text values:\n\nMIN() returns the alphabetically first value\n\nMAX() returns the alphabetically last value\n\nInput\n\n\n\nproduct_name\n\n\n\n\nCable\n\n\nMouse\n\n\nKeyboard\n\n\n\n\\[\\downarrow\\]\nSELECT\n  MIN(product_name) AS first_product,\n  MAX(product_name) AS last_product\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nfirst_product\nlast_product\n\n\n\n\nCable\nMouse\n\n\n\n\nThis behavior is based on lexicographical (alphabetical) ordering.\n\n\n\n\nAnalytical Use Cases\n\nidentifying cheapest and most expensive products\n\nfinding first and last dates in time-based data\n\nvalidating numeric ranges\n\ndetecting unexpected extreme values\n\nalphabetical boundary checks for text data\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Extremes Are Not Typical\n\n\n\nMIN() and MAX() show boundaries, not typical behavior.\n\nthey are highly sensitive to outliers\n\na single abnormal value can dominate the result\n\nAlways pair extremes with other statistics such as:\n\nAVG()\n\nCOUNT()\n\ndistribution analysis\n\nto get a complete picture.\n\nMIN() and MAX() are essential tools for understanding the limits of your data, but they should never be used in isolation.\n\n\n\n\n\nCOUNT()\nCOUNT() is one of the most fundamental SQL aggregate functions.\nIt is used to measure volume, cardinality, and data completeness.\nUnlike SUM() or AVG(), COUNT() does not depend on numeric magnitude.\nIt answers a simpler—but critically important—question:\n\nHow many rows or values exist?\n\nIn analytics, incorrect use of COUNT() is a common source of silent errors, especially when NULLs or duplicates are involved.\n\n\nCOUNT() | Basic Row Counting\nCOUNT(*) counts the number of rows returned by a query.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  COUNT(*) AS total_rows\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntotal_rows\n\n\n\n\n3\n\n\n\nCOUNT(*) includes all rows, regardless of NULL values.\n\n\n\nCOUNT(column) | Counting Non-NULL Values\nCOUNT(column) counts only non-NULL values in a specific column.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  COUNT(discount) AS non_null_discounts\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nnon_null_discounts\n\n\n\n\n2\n\n\n\nKey distinction\n\nCOUNT(*) → counts rows\nCOUNT(column) → counts existing values\n\n\n\n\nCOUNT() with GROUP BY | Volume per Dimension\nGrouping allows COUNT() to measure volume by category.\nInput\n\n\n\nproduct_name\ntransaction_id\n\n\n\n\nMouse\n1001\n\n\nMouse\n1002\n\n\nKeyboard\n1003\n\n\n\n\\[\\downarrow\\]\nSELECT\n  product_name,\n  COUNT(*) AS transaction_count\nFROM sales_analysis\nGROUP BY product_name;\n\\[\\downarrow\\]\n\n\n\nproduct_name\ntransaction_count\n\n\n\n\nMouse\n2\n\n\nKeyboard\n1\n\n\n\nThis is one of the most common analytical patterns in SQL.\n\n\n\nCOUNT(DISTINCT) | Counting Unique Values\nCOUNT(DISTINCT column) counts the number of unique, non-NULL values.\nSELECT\n  COUNT(DISTINCT customer_name) AS unique_customers\nFROM sales_analysis;\nThis answers questions like:\n\nhow many unique customers exist?\nhow many unique products were sold?\n\n\n\n\nCOUNT(DISTINCT) with GROUP BY | Unique Entities per Group\nSELECT\n  city,\n  COUNT(DISTINCT customer_name) AS unique_customers\nFROM sales_analysis\nGROUP BY city;\nThis pattern is commonly used for:\n\nmarket reach analysis\ncustomer distribution by geography\npenetration metrics\n\n\n\n\nCOUNT() for Duplicate Detection\nDuplicates are detected using COUNT() together with GROUP BY and HAVING.\nExample | Duplicate Transactions\nSELECT\n  transaction_id,\n  COUNT(*) AS duplicate_count\nFROM sales_analysis\nGROUP BY transaction_id\nHAVING COUNT(*) &gt; 1;\nAny returned row indicates a duplicate transaction ID.\n\n\n\nCOUNT() and NULL Values | Key Rules\n\nCOUNT(*) counts rows, including those with NULLs\nCOUNT(column) ignores NULLs\nCOUNT(DISTINCT column) ignores NULLs and duplicates\nif all values are NULL, COUNT(column) returns 0\n\nUnderstanding these rules is essential for correct metrics.\n\n\n\n\n\n\n\nWarningAnalytical Warning | Define What You Are Counting\n\n\n\nBefore using COUNT(), always ask:\n\nam I counting rows or entities?\ndo I need DISTINCT?\nis the table grain aligned with my question?\n\nCounting the wrong thing leads to misleading KPIs even when SQL syntax is correct.\n\n\n\n\n\nAnalytical Use Cases\n\nnumber of transactions\nnumber of customers\ndata completeness checks\nduplicate detection\ndenominator for rates and averages\n\n\n\n\n\n\n\nImportant\n\n\n\nMastering COUNT() is a prerequisite for trustworthy analytical SQL.\n\n\n\n\n\nRow-Level Arithmetic\nRow-level arithmetic refers to calculations performed on each individual row of a table.\nUnlike aggregate functions (SUM, AVG, COUNT), these operations do not reduce rows, istead they create derived columns.\nRow-level arithmetic is foundational for:\n\nfeature engineering\n\nrevenue and cost calculations\n\nmetric normalization\n\npreparing data for aggregation\n\nIn practice, most analytical pipelines combine row-level calculations first, followed by aggregation.\n\n\nBasic Calculation\nA common example is calculating revenue at the transaction level.\nInput\n\n\n\ntransaction_id\nquantity\nprice\n\n\n\n\n1001\n2\n25.00\n\n\n1002\n1\n80.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  transaction_id,\n  quantity * price AS calculated_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntransaction_id\ncalculated_revenue\n\n\n\n\n1001\n50.00\n\n\n1002\n80.00\n\n\n\nEach row is processed independently, producing a new derived value.\n\n\nCombining Multiple Columns\nYou can combine more than two columns in a single expression.\nInput\n\n\n\ntransaction_id\nquantity\nprice\ndiscount\n\n\n\n\n1001\n2\n25.00\n0.10\n\n\n1002\n1\n80.00\n0.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  transaction_id,\n  quantity * price * (1 - discount) AS net_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntransaction_id\nnet_revenue\n\n\n\n\n1001\n45.00\n\n\n1002\n80.00\n\n\n\nThis pattern is common in pricing, discounting, and billing logic.\n\n\nOrder of Operations\nSQL follows standard arithmetic precedence:\n\nparentheses\n\nmultiplication and division\n\naddition and subtraction\n\nUse parentheses to make calculations explicit and readable.\nSELECT\n  transaction_id,\n  (quantity * price) - (quantity * price * discount) AS net_revenue\nFROM sales_analysis;\nThis is equivalent to the previous example but often clearer in business contexts.\n\n\n\nNumeric Transformations\nRow-level arithmetic is often combined with numeric functions such as ROUND, CEILING, or FLOOR.\nSELECT\n  transaction_id,\n  ROUND(quantity * price, 2) AS rounded_revenue\nFROM sales_analysis;\nThis is especially important for financial reporting.\n\n\n\nRow-Level Arithmetic vs Aggregation\nIt is critical to distinguish between:\n\nrow-level calculations → preserve rows\n\naggregate calculations → reduce rows\n\nSELECT\n  SUM(quantity * price) AS total_revenue\nFROM sales_analysis;\nHere:\n\nquantity * price is computed per row\nSUM() aggregates those results into a single value\n\nThis pattern—calculate first, aggregate second—is a core analytical principle.\n\n\nCommon Analytical Use Cases\n\ntransaction-level revenue\n\nnet revenue after discounts\n\ncost per unit\n\nmargin calculations\n\nnormalized metrics\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Check NULL Propagation\n\n\n\nIn arithmetic expressions:\n\nif any operand is NULL, the result is NULL\nthis can silently remove rows from later aggregations\n\nUnderstanding NULL behavior is essential and will be revisited in a dedicated NULL-handling chapter.\n\nRow-level arithmetic is the bridge between raw data and meaningful analytical metrics.\n\n\n\n\n\nCEILING() and FLOOR()\nCEILING() and FLOOR() are numeric functions used to round values to integer boundaries.\n\nCEILING() rounds a value up to the nearest integer\n\nFLOOR() rounds a value down to the nearest integer\n\nThese functions are commonly used for:\n\nthreshold logic\nrange construction\ndistribution analysis\n\n\nThresholds and Ranges\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.10\n\n\n1002\n80.90\n\n\n\n\\[\\downarrow\\]\nSELECT\n  transaction_id,\n  CEILING(total_sales) AS rounded_up,\n  FLOOR(total_sales)   AS rounded_down\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntransaction_id\nrounded_up\nrounded_down\n\n\n\n\n1001\n121\n120\n\n\n1002\n81\n80\n\n\n\nHere:\n\nCEILING() is useful when values must meet a minimum threshold\nFLOOR() is useful when values must not exceed a maximum threshold\n\n\n\n\nAnalytical Use Cases\n\nbilling thresholds (minimum chargeable units)\n\nrounding prices or quantities for operational rules\n\nconstructing numeric ranges\n\ndiscretizing continuous values\n\n\n\nCEILING() with GROUP BY | Revenue Ranges\nCEILING() can be used to group continuous numeric values into fixed-width ranges, which is a common technique in exploratory and descriptive analytics.\nIn this example, transaction revenues are grouped into 50-unit revenue ranges.\n\nInput (sales_analysis — simplified view)\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n12.40\n\n\n1002\n47.80\n\n\n1003\n52.10\n\n\n1004\n79.90\n\n\n1005\n101.25\n\n\n1006\n138.60\n\n\n\n\nStep 1 | Range Assignment Logic\nThe expression below assigns each row to a range:\n\\[\n\\text{revenue\\_range} = \\lceil \\frac{\\text{total\\_sales}}{50} \\rceil \\times 50\n\\]\nThis means:\n\nvalues from 0 &lt; x ≤ 50 → range 50\nvalues from 50 &lt; x ≤ 100 → range 100\nvalues from 100 &lt; x ≤ 150 → range 150\n\n\nQuery\nSELECT\n  CEILING(total_sales / 50.0) * 50 AS revenue_range,\n  COUNT(*) AS transactions,\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis\nGROUP BY CEILING(total_sales / 50.0) * 50\nORDER BY revenue_range;\n\nIntermediate Mapping (Conceptual)\n\n\n\ntransaction_id\ntotal_sales\nrevenue_range\n\n\n\n\n1001\n12.40\n50\n\n\n1002\n47.80\n50\n\n\n1003\n52.10\n100\n\n\n1004\n79.90\n100\n\n\n1005\n101.25\n150\n\n\n1006\n138.60\n150\n\n\n\n\nOutput\n\n\n\nrevenue_range\ntransactions\ntotal_revenue\n\n\n\n\n50\n2\n60.20\n\n\n100\n2\n132.00\n\n\n150\n2\n239.85\n\n\n\n\nHow to Interpret the Output\nEach row represents a revenue range, not individual transactions.\nFor example:\n\nrevenue_range = 100 represents all transactions where\n\\[50 &lt; \\text{total\\_sales} \\le 100\\]\ntransactions shows how many transactions fall into that range\ntotal_revenue shows the sum of sales within the range\n\n\n\n\nAnalytical Use Cases\n\ndistribution analysis\n\nrevenue concentration analysis\n\nidentifying dominant transaction ranges\n\npreparing binned metrics for dashboards\n\nexploratory analysis before modeling\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Ranges Are Design Choices\n\n\n\nRanges created with CEILING() or FLOOR() are analytical assumptions.\n\ndifferent range widths lead to different interpretations\n\noverly wide ranges hide structure\n\noverly narrow ranges introduce noise\n\nAlways justify:\n\nrange size\n\nboundary logic\n\nbusiness meaning\n\n\n\nCEILING() combined with GROUP BY is a powerful technique for turning continuous numeric data into interpretable analytical summaries, but its effectiveness depends on thoughtful range design.\n\n\n\nCOALESCE()\nCOALESCE() is a SQL function used for explicit NULL handling.\nIt replaces NULL values with a specified substitute, allowing you to control how missing data is treated before aggregation or analysis.\nHandling NULL values explicitly is a critical analytical step, because different substitution strategies lead to different interpretations and KPIs.\nCommon strategies include:\n\nreplacing NULL with 0\nreplacing NULL with the average\nreplacing NULL with the median\n\nEach choice has distinct analytical implications.\n\n\n\n\n\n\nNote\n\n\n\nBy default, most aggregate functions ignore NULL values.\nCOALESCE() lets you override this behavior intentionally.\n\n\n\nCOALESCE() with Zero | Treat Missing as Zero\nUse this approach only when business logic clearly defines NULL as zero,\nfor example:\n\nno discount applied\nno quantity sold\nno activity recorded\n\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  AVG(COALESCE(discount, 0)) AS avg_discount_with_zeros\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\navg_discount_with_zeros\n\n\n\n\n0.10\n\n\n\nInterpretation\n\\[\n(0.10 + 0 + 0.20) / 3 = 0.10\n\\]\nWhen to Use\n\nNULL truly means zero impact\nKPIs explicitly require zero inclusion\noperational metrics (counts, volumes)\n\n\n\n\nCOALESCE() with Average | Mean Imputation\nIn this approach, missing values are replaced with the overall average.\nThis preserves the mean level of the data but reduces variability, since all missing values become identical.\n\\[\\downarrow\\]\nSELECT\n  AVG(COALESCE(discount, avg_discount)) AS avg_discount_mean_imputed\nFROM sales_analysis,\nConceptual Effect:\n\nNULL values become the average\noverall mean remains unchanged\nvariance is reduced\n\nWhen to Use Average Imputation\n\ndistribution is approximately symmetric\nno strong outliers exist\nmissing values are random and rare\nreporting-level analysis\n\nWhen NOT to Use\n\nskewed distributions\npresence of outliers\nperformance or incentive analysis\n\n\n\n\nCOALESCE() with Median | Robust Imputation\nMedian imputation is more robust than average imputation\nbecause it is not affected by outliers.\nPostgreSQL supports median calculation using PERCENTILE_CONT(0.5).\n\\[\\downarrow\\]\nSELECT\n  AVG(COALESCE(discount, median_discount)) AS avg_discount_median_imputed\nFROM sales_analysis;\n\n\n\n\n\n\nWarning\n\n\n\nThe function below is a window function, which will be covered in upcoming sessions.\nPERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY discount)\nSELECT\n         PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY discount) AS median_discount\nFROM sales_analysis\n\n\nWhen to Use Median Imputation\n\nskewed distributions\npresence of outliers\nfinancial or behavioral metrics\nfairness-sensitive analysis\n\nWhen NOT to Use\n\nvery small datasets\nwhen business rules require exact values\noperational counting logic\n\n\n\n\nAverage vs Median | How to Choose\n\n\n\nScenario\nPrefer\n\n\n\n\nSymmetric distribution\nAverage\n\n\nSkewed distribution\nMedian\n\n\nPresence of outliers\nMedian\n\n\nKPI reporting (business averages)\nAverage\n\n\nRobust or fairness analysis\nMedian\n\n\nModeling or downstream ML\nMedian\n\n\n\n\n\n\nKey Analytical Warning\nImputation is not neutral.\n\nit changes distributions\nit affects KPIs\nit must be documented\n\nBefore using COALESCE(), always ask:\n\nwhat does NULL represent?\nam I preserving reality or convenience?\nwill this decision influence decisions or incentives?\n\n\n\n\n\n\n\n\nImportant\n\n\n\n\nCOALESCE() gives you control over missing data\nzero imputation is a business decision, not a default\naverage imputation preserves the mean\nmedian imputation preserves robustness\nchoosing the wrong strategy leads to misleading insights\n\nNULL handling is not just a technical detail — it is a core analytical responsibility. :::## Case Study Assignment | Sales Performance & Data Quality Analysis\n\nContext\nYou are working as a data analyst for an e-commerce company.\nManagement relies on the sales_analysis table for reporting, performance tracking, and decision-making.\nRecently, stakeholders raised concerns about:\n\ninconsistent KPIs across dashboards\n\nunclear handling of missing values\n\nmisleading averages in reports\n\nlack of visibility into revenue distribution\n\nYour task is to analyze, validate, and redesign key metrics using SQL numeric functions.\nYou are not allowed to modify table structures or insert/update data.\n\n\n\nThe Task\nUsing only SQL queries on the sales_analysis table, produce a single analytical result set (or a small set of related result sets) that answers the following business questions.\nYou may create intermediate queries or CTEs if needed.\n\n\nBusiness Questions to Address\n\n1. Revenue Overview\n\nWhat is the total revenue of the company?\nHow is revenue distributed across product categories?\nWhich category contributes the largest share of revenue?\n\n\n\n\n2. Typical Transaction Value\nManagement wants to understand a “typical” transaction.\n\nCalculate the average transaction value\nCalculate the median transaction value\nBased on the data, explain which metric is more appropriate and why\n\n(Hint: consider skewness)\n\n\n\n3. NULL Impact Assessment\nDiscounts are inconsistently recorded.\n\nHow many transactions have NULL discounts?\nCalculate average discount using:\n\ndefault behavior\nzero imputation\naverage imputation\nmedian imputation\n\nExplain how each approach changes interpretation\n\n\n\n\n4. Revenue Distribution Analysis\nTo improve pricing strategy, management wants to understand revenue ranges.\n\nGroup transactions into 50-unit revenue ranges\nFor each range, compute:\n\nnumber of transactions\ntotal revenue\n\nIdentify the dominant revenue range\n\n\n\n\n5. Data Quality Check\nBefore finalizing KPIs:\n\nCheck for duplicate transaction IDs\nExplain the risk of aggregating employee salary directly from this table\nIdentify one additional potential data quality risk in sales_analysis\n\n\n\n\n\n\nDeliverables\nSubmit one SQL-driven analysis that includes:\n\nSQL queries (PostgreSQL syntax)\nclear column naming\nlogically structured output\nbrief written interpretation (1–2 sentences per section)\n\nYou may submit:\n\none .qmd file\nor\n\none .sql file plus a short explanation document\n\n\n\nEvaluation Criteria\nYour work will be evaluated on:\n\ncorrectness of SQL logic\nappropriate use of numeric functions\ncorrect handling of NULL values\nawareness of table grain\nclarity of analytical reasoning\nalignment with business questions\n\n\n\n\nKey Expectation\nThis is not a syntax exercise.\nYou are expected to demonstrate:\n\nanalytical judgment\nmetric design thinking\nawareness of data limitations\n\n\n\n\nFinal Note\nA correct query can still produce a wrong insight.\nYour goal is to produce results that management can trust.\nThese numeric patterns form a critical foundation for data analysis with SQL.\n\n\nPractical Rule of Thumb\n\naverage ≈ median → distribution is likely symmetric\naverage &gt; median → right-skewed\naverage &lt; median → left-skewed\n\n\n\n\n\n\n\nTip\n\n\n\nRemember to review this part from Intro to Statistics\n\n\n\n\n\nCase Study Assignment | Sales Performance & Data Quality Analysis\n\nContext\nYou are working as a data analyst for an e-commerce company.\nManagement relies on the sales_analysis table for reporting, performance tracking, and decision-making.\nRecently, stakeholders raised concerns about:\n\ninconsistent KPIs across dashboards\n\nunclear handling of missing values\n\nmisleading averages in reports\n\nlack of visibility into revenue distribution\n\nYour task is to analyze, validate, and redesign key metrics using SQL numeric functions.\nYou are not allowed to modify table structures or insert/update data.",
+    "text": "Numeric Functions\nThis section provides a clean, end-to-end coverage of numeric functions, organized from basic to advanced, with a strong analytical mindset.\nFor each function, you will see:\n\na conceptual input table\nthe SQL query\nthe output table\ncommon analytical use cases\nanalytical interpretation\n\nAll examples assume the sales_analysis table.\n\nSUM()\nSUM() is one of the most frequently used SQL functions.\n\nSUM() Basic Aggregation\nSUM() adds numeric values across multiple rows.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\n80.00\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntotal_revenue\n\n\n\n\n300.00\n\n\n\n\n\nSUM() and NULL Values | Default Behavior\nBy default, SUM() ignores NULL values.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\nNULL\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntotal_revenue\n\n\n\n\n220.00\n\n\n\nKey points\n\nNULL values do not contribute to the sum\n\nNULL does not mean zero\n\nif all values are NULL, the result of SUM() is NULL\n\nHandling missing values explicitly will be covered later in a dedicated chapter. \n\n\n\nSUM() with GROUP BY | Aggregation by Category\nGrouping allows SUM() to operate per dimension.\nInput\n\n\n\ncategory\ntotal_sales\n\n\n\n\nAccessories\n50.00\n\n\nAccessories\n70.00\n\n\nElectronics\n120.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  category,\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis\nGROUP BY category;\n\\[\\downarrow\\]\n\n\n\ncategory\ntotal_revenue\n\n\n\n\nAccessories\n120.00\n\n\nElectronics\n120.00\n\n\n\n\n\nAnalytical Use Cases\n\ntotal revenue calculation\n\ntotal cost or volume\n\nhigh-level KPI reporting\n\n\n\nrevenue by product category\n\ncost by department\n\nKPI breakdowns for dashboards\n\n\n\n\n\n\n\nWarningAnalytical Warning | Always Check the Grain\n\n\n\nBefore using SUM(), always verify the grain of the table.\n\nsales_analysis is at the transaction level\n\nsumming values duplicated per transaction (e.g. salaries) produces incorrect results\n\naggregation must match the entity you want to measure\n\nCorrect use of SUM() depends as much on data structure as on SQL syntax.\n\n\n\n\n\n\nAVG()\nAVG() is a numeric aggregate function used to calculate the arithmetic mean of a set of values.\nIn analytics, averages are commonly used to understand typical behavior, but they must be interpreted carefully—especially in the presence of NULL values, outliers, and skewed distributions.\n\n\nAVG() Basic Aggregation\nAVG() calculates the sum of values divided by the number of non-NULL observations.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\n0.00\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  AVG(discount) AS avg_discount\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\navg_discount\n\n\n\n\n0.10\n\n\n\nThe average discount is calculated as:\n\\[\n\\frac{0.10 + 0.00 + 0.20}{3} = 0.10\n\\]\n\n\n\nAVG() and NULL Values | Default Behavior\nBy default, AVG() ignores NULL values in both the numerator and the denominator.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  AVG(discount) AS avg_discount\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\navg_discount\n\n\n\n\n0.15\n\n\n\nExplanation\n\nonly non-NULL values are used\n\ndenominator is 2, not 3\n\n\\[\n\\frac{0.10 + 0.20}{2} = 0.15\n\\]\n\n\n\n\n\n\nImportant\n\n\n\nThis behavior is often unexpected for beginners and must be understood clearly.\n\n\n\n\n\nAVG() with GROUP BY | Average per Category\nGrouping allows AVG() to compute averages per dimension.\nInput\n\n\n\ncategory\nprice\n\n\n\n\nAccessories\n25.00\n\n\nAccessories\n35.00\n\n\nElectronics\n120.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  category,\n  AVG(price) AS avg_price\nFROM sales_analysis\nGROUP BY category;\n\\[\\downarrow\\]\n\n\n\ncategory\navg_price\n\n\n\n\nAccessories\n30.00\n\n\nElectronics\n120.00\n\n\n\n\n\n\nAVG() with GROUP BY | Average Sales per Customer\nA common analytical use case is average behavior per entity.\nSELECT\n  customer_name,\n  AVG(total_sales) AS avg_transaction_value\nFROM sales_analysis\nGROUP BY customer_name;\nThis answers questions such as:\n\nwhat is the typical transaction value per customer?\nwho are high-value vs low-value customers?\n\n\n\n\nAnalytical Interpretation | When AVG() Is Appropriate\nUse AVG() when:\n\ndata is symmetrically distributed\nextreme values are rare\nyou want a representative “typical” value\n\nTypical examples:\n\naverage order value\n\naverage discount rate\n\naverage price per category\n\n\n\n\nAnalytical Limitation | Sensitivity to Outliers\nAVG() is highly sensitive to outliers.\nExample scenario\n\n\n\ntotal_sales\n\n\n\n\n20\n\n\n25\n\n\n30\n\n\n500\n\n\n\nThe average is pulled upward by a single extreme value.\nIn such cases, the average may misrepresent typical behavior.\n\n\n\nAVG() vs Median | Conceptual Note\n\nAVG() reflects the mean\nthe median reflects the middle value\n\nUse:\n\nAVG → for stable, normally distributed data\n\nMedian → for skewed data or income-like variables\n\nMedian calculations will be covered later in the course.\n\n\n\n\n\n\nWarningAnalytical Warning | Always Check the Distribution\n\n\n\nBefore relying on AVG(), consider:\n\npresence of outliers\n\nskewness of the data\n\nwhether “typical” behavior is meaningful\n\nBlindly using averages is one of the most common analytical mistakes.\n\n\n\n\nAnalytical Use Cases\n\naverage order value\n\naverage discount per transaction\n\naverage price by category\n\nbenchmarking typical performance\n\n\n\nAVG() computes the arithmetic mean\n\nNULL values are ignored by default\n\ngrouping enables per-dimension averages\n\naverages are sensitive to outliers\n\ndistribution shape matters for interpretation\n\n\n\n\n\n\n\nImportant\n\n\n\nUnderstanding when not to use AVG() is just as important as knowing how to write it.\n\n\n\n\n\nMIN() and MAX()\nMIN() and MAX() are aggregate functions used to identify extreme values in a dataset.\nThey answer the questions:\n\nWhat is the smallest value?\nWhat is the largest value?\n\nThese functions are widely used in exploratory analysis, data validation, and boundary checks.\n\n\nMIN() and MAX() | Basic Aggregation\nMIN() returns the lowest value, and MAX() returns the highest value in a column.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\n80.00\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  MIN(total_sales) AS min_sale,\n  MAX(total_sales) AS max_sale\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nmin_sale\nmax_sale\n\n\n\n\n80.00\n120.50\n\n\n\n\n\n\nMIN() and MAX() and NULL Values | Default Behavior\nBoth MIN() and MAX() ignore NULL values by default.\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.50\n\n\n1002\nNULL\n\n\n1003\n99.50\n\n\n\n\\[\\downarrow\\]\nSELECT\n  MIN(total_sales) AS min_sale,\n  MAX(total_sales) AS max_sale\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nmin_sale\nmax_sale\n\n\n\n\n99.50\n120.50\n\n\n\nKey points\n\nNULL values do not participate in comparisons\n\nif all values are NULL, the result is NULL\n\n\n\n\nMIN() and MAX() with GROUP BY | Extremes per Category\nGrouping allows you to find minimum and maximum values per dimension.\nInput\n\n\n\ncategory\nprice\n\n\n\n\nAccessories\n25.00\n\n\nAccessories\n35.00\n\n\nElectronics\n120.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  category,\n  MIN(price) AS min_price,\n  MAX(price) AS max_price\nFROM sales_analysis\nGROUP BY category;\n\\[\\downarrow\\]\n\n\n\ncategory\nmin_price\nmax_price\n\n\n\n\nAccessories\n25.00\n35.00\n\n\nElectronics\n120.00\n120.00\n\n\n\n\n\n\nMIN() and MAX() on Text Columns\nMIN() and MAX() also work on text (string) columns.\nFor text values:\n\nMIN() returns the alphabetically first value\n\nMAX() returns the alphabetically last value\n\nInput\n\n\n\nproduct_name\n\n\n\n\nCable\n\n\nMouse\n\n\nKeyboard\n\n\n\n\\[\\downarrow\\]\nSELECT\n  MIN(product_name) AS first_product,\n  MAX(product_name) AS last_product\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nfirst_product\nlast_product\n\n\n\n\nCable\nMouse\n\n\n\n\nThis behavior is based on lexicographical (alphabetical) ordering.\n\n\n\n\nAnalytical Use Cases\n\nidentifying cheapest and most expensive products\n\nfinding first and last dates in time-based data\n\nvalidating numeric ranges\n\ndetecting unexpected extreme values\n\nalphabetical boundary checks for text data\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Extremes Are Not Typical\n\n\n\nMIN() and MAX() show boundaries, not typical behavior.\n\nthey are highly sensitive to outliers\n\na single abnormal value can dominate the result\n\nAlways pair extremes with other statistics such as:\n\nAVG()\n\nCOUNT()\n\ndistribution analysis\n\nto get a complete picture.\n\nMIN() and MAX() are essential tools for understanding the limits of your data, but they should never be used in isolation.\n\n\n\n\n\nCOUNT()\nCOUNT() is one of the most fundamental SQL aggregate functions.\nIt is used to measure volume, cardinality, and data completeness.\nUnlike SUM() or AVG(), COUNT() does not depend on numeric magnitude.\nIt answers a simpler—but critically important—question:\n\nHow many rows or values exist?\n\nIn analytics, incorrect use of COUNT() is a common source of silent errors, especially when NULLs or duplicates are involved.\n\n\nCOUNT() | Basic Row Counting\nCOUNT(*) counts the number of rows returned by a query.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  COUNT(*) AS total_rows\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntotal_rows\n\n\n\n\n3\n\n\n\nCOUNT(*) includes all rows, regardless of NULL values.\n\n\n\nCOUNT(column) | Counting Non-NULL Values\nCOUNT(column) counts only non-NULL values in a specific column.\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  COUNT(discount) AS non_null_discounts\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\nnon_null_discounts\n\n\n\n\n2\n\n\n\nKey distinction\n\nCOUNT(*) → counts rows\nCOUNT(column) → counts existing values\n\n\n\n\nCOUNT() with GROUP BY | Volume per Dimension\nGrouping allows COUNT() to measure volume by category.\nInput\n\n\n\nproduct_name\ntransaction_id\n\n\n\n\nMouse\n1001\n\n\nMouse\n1002\n\n\nKeyboard\n1003\n\n\n\n\\[\\downarrow\\]\nSELECT\n  product_name,\n  COUNT(*) AS transaction_count\nFROM sales_analysis\nGROUP BY product_name;\n\\[\\downarrow\\]\n\n\n\nproduct_name\ntransaction_count\n\n\n\n\nMouse\n2\n\n\nKeyboard\n1\n\n\n\nThis is one of the most common analytical patterns in SQL.\n\n\n\nCOUNT(DISTINCT) | Counting Unique Values\nCOUNT(DISTINCT column) counts the number of unique, non-NULL values.\nSELECT\n  COUNT(DISTINCT customer_name) AS unique_customers\nFROM sales_analysis;\nThis answers questions like:\n\nhow many unique customers exist?\nhow many unique products were sold?\n\n\n\n\nCOUNT(DISTINCT) with GROUP BY | Unique Entities per Group\nSELECT\n  city,\n  COUNT(DISTINCT customer_name) AS unique_customers\nFROM sales_analysis\nGROUP BY city;\nThis pattern is commonly used for:\n\nmarket reach analysis\ncustomer distribution by geography\npenetration metrics\n\n\n\n\nCOUNT() for Duplicate Detection\nDuplicates are detected using COUNT() together with GROUP BY and HAVING.\nExample | Duplicate Transactions\nSELECT\n  transaction_id,\n  COUNT(*) AS duplicate_count\nFROM sales_analysis\nGROUP BY transaction_id\nHAVING COUNT(*) &gt; 1;\nAny returned row indicates a duplicate transaction ID.\n\n\n\nCOUNT() and NULL Values | Key Rules\n\nCOUNT(*) counts rows, including those with NULLs\nCOUNT(column) ignores NULLs\nCOUNT(DISTINCT column) ignores NULLs and duplicates\nif all values are NULL, COUNT(column) returns 0\n\nUnderstanding these rules is essential for correct metrics.\n\n\n\n\n\n\n\nWarningAnalytical Warning | Define What You Are Counting\n\n\n\nBefore using COUNT(), always ask:\n\nam I counting rows or entities?\ndo I need DISTINCT?\nis the table grain aligned with my question?\n\nCounting the wrong thing leads to misleading KPIs even when SQL syntax is correct.\n\n\n\n\n\nAnalytical Use Cases\n\nnumber of transactions\nnumber of customers\ndata completeness checks\nduplicate detection\ndenominator for rates and averages\n\n\n\n\n\n\n\nImportant\n\n\n\nMastering COUNT() is a prerequisite for trustworthy analytical SQL.\n\n\n\n\n\nRow-Level Arithmetic\nRow-level arithmetic refers to calculations performed on each individual row of a table.\nUnlike aggregate functions (SUM, AVG, COUNT), these operations do not reduce rows, istead they create derived columns.\nRow-level arithmetic is foundational for:\n\nfeature engineering\n\nrevenue and cost calculations\n\nmetric normalization\n\npreparing data for aggregation\n\nIn practice, most analytical pipelines combine row-level calculations first, followed by aggregation.\n\n\nBasic Calculation\nA common example is calculating revenue at the transaction level.\nInput\n\n\n\ntransaction_id\nquantity\nprice\n\n\n\n\n1001\n2\n25.00\n\n\n1002\n1\n80.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  transaction_id,\n  quantity * price AS calculated_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntransaction_id\ncalculated_revenue\n\n\n\n\n1001\n50.00\n\n\n1002\n80.00\n\n\n\nEach row is processed independently, producing a new derived value.\n\n\nCombining Multiple Columns\nYou can combine more than two columns in a single expression.\nInput\n\n\n\ntransaction_id\nquantity\nprice\ndiscount\n\n\n\n\n1001\n2\n25.00\n0.10\n\n\n1002\n1\n80.00\n0.00\n\n\n\n\\[\\downarrow\\]\nSELECT\n  transaction_id,\n  quantity * price * (1 - discount) AS net_revenue\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntransaction_id\nnet_revenue\n\n\n\n\n1001\n45.00\n\n\n1002\n80.00\n\n\n\nThis pattern is common in pricing, discounting, and billing logic.\n\n\nOrder of Operations\nSQL follows standard arithmetic precedence:\n\nparentheses\n\nmultiplication and division\n\naddition and subtraction\n\nUse parentheses to make calculations explicit and readable.\nSELECT\n  transaction_id,\n  (quantity * price) - (quantity * price * discount) AS net_revenue\nFROM sales_analysis;\nThis is equivalent to the previous example but often clearer in business contexts.\n\n\n\nNumeric Transformations\nRow-level arithmetic is often combined with numeric functions such as ROUND, CEILING, or FLOOR.\nSELECT\n  transaction_id,\n  ROUND(quantity * price, 2) AS rounded_revenue\nFROM sales_analysis;\nThis is especially important for financial reporting.\n\n\n\nRow-Level Arithmetic vs Aggregation\nIt is critical to distinguish between:\n\nrow-level calculations → preserve rows\n\naggregate calculations → reduce rows\n\nSELECT\n  SUM(quantity * price) AS total_revenue\nFROM sales_analysis;\nHere:\n\nquantity * price is computed per row\nSUM() aggregates those results into a single value\n\nThis pattern—calculate first, aggregate second—is a core analytical principle.\n\n\nCommon Analytical Use Cases\n\ntransaction-level revenue\n\nnet revenue after discounts\n\ncost per unit\n\nmargin calculations\n\nnormalized metrics\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Check NULL Propagation\n\n\n\nIn arithmetic expressions:\n\nif any operand is NULL, the result is NULL\nthis can silently remove rows from later aggregations\n\nUnderstanding NULL behavior is essential and will be revisited in a dedicated NULL-handling chapter.\n\nRow-level arithmetic is the bridge between raw data and meaningful analytical metrics.\n\n\n\n\n\nCEILING() and FLOOR()\nCEILING() and FLOOR() are numeric functions used to round values to integer boundaries.\n\nCEILING() rounds a value up to the nearest integer\n\nFLOOR() rounds a value down to the nearest integer\n\nThese functions are commonly used for:\n\nthreshold logic\nrange construction\ndistribution analysis\n\n\nThresholds and Ranges\nInput\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n120.10\n\n\n1002\n80.90\n\n\n\n\\[\\downarrow\\]\nSELECT\n  transaction_id,\n  CEILING(total_sales) AS rounded_up,\n  FLOOR(total_sales)   AS rounded_down\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\ntransaction_id\nrounded_up\nrounded_down\n\n\n\n\n1001\n121\n120\n\n\n1002\n81\n80\n\n\n\nHere:\n\nCEILING() is useful when values must meet a minimum threshold\nFLOOR() is useful when values must not exceed a maximum threshold\n\n\n\n\nAnalytical Use Cases\n\nbilling thresholds (minimum chargeable units)\n\nrounding prices or quantities for operational rules\n\nconstructing numeric ranges\n\ndiscretizing continuous values\n\n\n\nCEILING() with GROUP BY | Revenue Ranges\nCEILING() can be used to group continuous numeric values into fixed-width ranges, which is a common technique in exploratory and descriptive analytics.\nIn this example, transaction revenues are grouped into 50-unit revenue ranges.\n\nInput (sales_analysis — simplified view)\n\n\n\ntransaction_id\ntotal_sales\n\n\n\n\n1001\n12.40\n\n\n1002\n47.80\n\n\n1003\n52.10\n\n\n1004\n79.90\n\n\n1005\n101.25\n\n\n1006\n138.60\n\n\n\n\nStep 1 | Range Assignment Logic\nThe expression below assigns each row to a range:\n\\[\n\\text{revenue\\_range} = \\lceil \\frac{\\text{total\\_sales}}{50} \\rceil \\times 50\n\\]\nThis means:\n\nvalues from 0 &lt; x ≤ 50 → range 50\nvalues from 50 &lt; x ≤ 100 → range 100\nvalues from 100 &lt; x ≤ 150 → range 150\n\n\nQuery\nSELECT\n  CEILING(total_sales / 50.0) * 50 AS revenue_range,\n  COUNT(*) AS transactions,\n  SUM(total_sales) AS total_revenue\nFROM sales_analysis\nGROUP BY CEILING(total_sales / 50.0) * 50\nORDER BY revenue_range;\n\nIntermediate Mapping (Conceptual)\n\n\n\ntransaction_id\ntotal_sales\nrevenue_range\n\n\n\n\n1001\n12.40\n50\n\n\n1002\n47.80\n50\n\n\n1003\n52.10\n100\n\n\n1004\n79.90\n100\n\n\n1005\n101.25\n150\n\n\n1006\n138.60\n150\n\n\n\n\nOutput\n\n\n\nrevenue_range\ntransactions\ntotal_revenue\n\n\n\n\n50\n2\n60.20\n\n\n100\n2\n132.00\n\n\n150\n2\n239.85\n\n\n\n\nHow to Interpret the Output\nEach row represents a revenue range, not individual transactions.\nFor example:\n\nrevenue_range = 100 represents all transactions where\n\\[50 &lt; \\text{total\\_sales} \\le 100\\]\ntransactions shows how many transactions fall into that range\ntotal_revenue shows the sum of sales within the range\n\n\n\n\nAnalytical Use Cases\n\ndistribution analysis\n\nrevenue concentration analysis\n\nidentifying dominant transaction ranges\n\npreparing binned metrics for dashboards\n\nexploratory analysis before modeling\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Ranges Are Design Choices\n\n\n\nRanges created with CEILING() or FLOOR() are analytical assumptions.\n\ndifferent range widths lead to different interpretations\n\noverly wide ranges hide structure\n\noverly narrow ranges introduce noise\n\nAlways justify:\n\nrange size\n\nboundary logic\n\nbusiness meaning\n\n\n\nCEILING() combined with GROUP BY is a powerful technique for turning continuous numeric data into interpretable analytical summaries, but its effectiveness depends on thoughtful range design.\n\n\n\nCOALESCE()\nCOALESCE() is a SQL function used for explicit NULL handling.\nIt replaces NULL values with a specified substitute, allowing you to control how missing data is treated before aggregation or analysis.\nHandling NULL values explicitly is a critical analytical step, because different substitution strategies lead to different interpretations and KPIs.\nCommon strategies include:\n\nreplacing NULL with 0\nreplacing NULL with the average\nreplacing NULL with the median\n\nEach choice has distinct analytical implications.\n\n\n\n\n\n\nNote\n\n\n\nBy default, most aggregate functions ignore NULL values.\nCOALESCE() lets you override this behavior intentionally.\n\n\n\nCOALESCE() with Zero | Treat Missing as Zero\nUse this approach only when business logic clearly defines NULL as zero,\nfor example:\n\nno discount applied\nno quantity sold\nno activity recorded\n\nInput\n\n\n\ntransaction_id\ndiscount\n\n\n\n\n1001\n0.10\n\n\n1002\nNULL\n\n\n1003\n0.20\n\n\n\n\\[\\downarrow\\]\nSELECT\n  AVG(COALESCE(discount, 0)) AS avg_discount_with_zeros\nFROM sales_analysis;\n\\[\\downarrow\\]\n\n\n\navg_discount_with_zeros\n\n\n\n\n0.10\n\n\n\nInterpretation\n\\[\n(0.10 + 0 + 0.20) / 3 = 0.10\n\\]\nWhen to Use\n\nNULL truly means zero impact\nKPIs explicitly require zero inclusion\noperational metrics (counts, volumes)\n\n\n\n\nCOALESCE() with Average | Mean Imputation\nIn this approach, missing values are replaced with the overall average.\nThis preserves the mean level of the data but reduces variability, since all missing values become identical.\n\\[\\downarrow\\]\nSELECT\n  AVG(COALESCE(discount, avg_discount)) AS avg_discount_mean_imputed\nFROM sales_analysis,\nConceptual Effect:\n\nNULL values become the average\noverall mean remains unchanged\nvariance is reduced\n\nWhen to Use Average Imputation\n\ndistribution is approximately symmetric\nno strong outliers exist\nmissing values are random and rare\nreporting-level analysis\n\nWhen NOT to Use\n\nskewed distributions\npresence of outliers\nperformance or incentive analysis\n\n\n\n\nCOALESCE() with Median | Robust Imputation\nMedian imputation is more robust than average imputation\nbecause it is not affected by outliers.\nPostgreSQL supports median calculation using PERCENTILE_CONT(0.5).\n\\[\\downarrow\\]\nSELECT\n  AVG(COALESCE(discount, median_discount)) AS avg_discount_median_imputed\nFROM sales_analysis;\n\n\n\n\n\n\nWarning\n\n\n\nThe function below is a window function, which will be covered in upcoming sessions.\nPERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY discount)\nSELECT\n         PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY discount) AS median_discount\nFROM sales_analysis\n\n\nWhen to Use Median Imputation\n\nskewed distributions\npresence of outliers\nfinancial or behavioral metrics\nfairness-sensitive analysis\n\nWhen NOT to Use\n\nvery small datasets\nwhen business rules require exact values\noperational counting logic\n\n\n\n\nAverage vs Median | How to Choose\n\n\n\nScenario\nPrefer\n\n\n\n\nSymmetric distribution\nAverage\n\n\nSkewed distribution\nMedian\n\n\nPresence of outliers\nMedian\n\n\nKPI reporting (business averages)\nAverage\n\n\nRobust or fairness analysis\nMedian\n\n\nModeling or downstream ML\nMedian\n\n\n\n\n\n\nKey Analytical Warning\nImputation is not neutral.\n\nit changes distributions\nit affects KPIs\nit must be documented\n\nBefore using COALESCE(), always ask:\n\nwhat does NULL represent?\nam I preserving reality or convenience?\nwill this decision influence decisions or incentives?\n\n\n\n\n\n\n\n\nImportant\n\n\n\n\nCOALESCE() gives you control over missing data\nzero imputation is a business decision, not a default\naverage imputation preserves the mean\nmedian imputation preserves robustness\nchoosing the wrong strategy leads to misleading insights\n\nNULL handling is not just a technical detail — it is a core analytical responsibility.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 05 Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session5.html#case-study-assignment-sales-performance-data-quality-analysis",
+    "href": "materials/sql/session5.html#case-study-assignment-sales-performance-data-quality-analysis",
+    "title": "Session 05 Data Analysis with SQL | Functions",
+    "section": "Case Study Assignment | Sales Performance & Data Quality Analysis",
+    "text": "Case Study Assignment | Sales Performance & Data Quality Analysis\n\nContext\nYou are working as a data analyst for an e-commerce company.\nManagement relies on the sales_analysis table for reporting, performance tracking, and decision-making.\nRecently, stakeholders raised concerns about:\n\ninconsistent KPIs across dashboards\n\nunclear handling of missing values\n\nmisleading averages in reports\n\nlack of visibility into revenue distribution\n\nYour task is to analyze, validate, and redesign key metrics using SQL numeric functions.\nYou are not allowed to modify table structures or insert/update data.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -6988,7 +7527,7 @@
     "href": "materials/sql/session5.html#the-task",
     "title": "Session 05 Data Analysis with SQL | Functions",
     "section": "The Task",
-    "text": "The Task\nUsing only SQL queries on the sales_analysis table, produce a single analytical result set (or a small set of related result sets) that answers the following business questions.\nYou may create intermediate queries or CTEs if needed.\n\n\nBusiness Questions to Address\n\n1. Revenue Overview\n\nWhat is the total revenue of the company?\nHow is revenue distributed across product categories?\nWhich category contributes the largest share of revenue?\n\n\n\n\n2. Typical Transaction Value\nManagement wants to understand a “typical” transaction.\n\nCalculate the average transaction value\nCalculate the median transaction value\nBased on the data, explain which metric is more appropriate and why\n\n(Hint: consider skewness)\n\n\n\n3. NULL Impact Assessment\nDiscounts are inconsistently recorded.\n\nHow many transactions have NULL discounts?\nCalculate average discount using:\n\ndefault behavior\nzero imputation\naverage imputation\nmedian imputation\n\nExplain how each approach changes interpretation\n\n\n\n\n4. Revenue Distribution Analysis\nTo improve pricing strategy, management wants to understand revenue ranges.\n\nGroup transactions into 50-unit revenue ranges\nFor each range, compute:\n\nnumber of transactions\ntotal revenue\n\nIdentify the dominant revenue range\n\n\n\n\n5. Data Quality Check\nBefore finalizing KPIs:\n\nCheck for duplicate transaction IDs\nExplain the risk of aggregating employee salary directly from this table\nIdentify one additional potential data quality risk in sales_analysis",
+    "text": "The Task\nUsing only SQL queries on the sales_analysis table, produce a single analytical result set (or a small set of related result sets) that answers the following business questions.\nYou may create intermediate queries or CTEs if needed.\n\n\nBusiness Questions to Address\n\n1. Revenue Overview\n\nWhat is the total revenue of the company?\nHow is revenue distributed across product categories?\nWhich category contributes the largest share of revenue?\n\n\n\n\n2. Typical Transaction Value\nManagement wants to understand a “typical” transaction.\n\nCalculate the average transaction value\nCalculate the median transaction value\nBased on the data, explain which metric is more appropriate and why\n\n(Hint: consider skewness)\n\n\n\n3. NULL Impact Assessment\nDiscounts are inconsistently recorded.\n\nHow many transactions have NULL discounts?\nCalculate average discount using:\n\ndefault behavior\nzero imputation\naverage imputation\nmedian imputation\n\nExplain how each approach changes interpretation\n\n\n\n\n4. Revenue Distribution Analysis\nTo improve pricing strategy, management wants to understand revenue ranges.\n\nGroup transactions into 50-unit revenue ranges\nFor each range, compute:\n\nnumber of transactions\ntotal revenue\n\nIdentify the dominant revenue range\n\n\n\n\n5. Data Quality Check\nBefore finalizing KPIs:\n\nCheck for duplicate transaction IDs\nExplain the risk of aggregating employee salary directly from this table\nIdentify one additional potential data quality risk in sales_analysis\n\n\n\n\n\nDeliverables\nSubmit one SQL-driven analysis that includes:\n\nSQL queries (PostgreSQL syntax)\nclear column naming\nlogically structured output\nbrief written interpretation (1–2 sentences per section)\n\nYou may submit:\n\none .qmd file\nor\n\none .sql file plus a short explanation document\n\n\n\nEvaluation Criteria\nYour work will be evaluated on:\n\ncorrectness of SQL logic\nappropriate use of numeric functions\ncorrect handling of NULL values\nawareness of table grain\nclarity of analytical reasoning\nalignment with business questions\n\n\n\n\nKey Expectation\nThis is not a syntax exercise.\nYou are expected to demonstrate:\n\nanalytical judgment\nmetric design thinking\nawareness of data limitations\n\n\n\n\nFinal Note\nA correct query can still produce a wrong insight.\nYour goal is to produce results that management can trust.\nThese numeric patterns form a critical foundation for data analysis with SQL.\n\n\nPractical Rule of Thumb\n\naverage ≈ median → distribution is likely symmetric\naverage &gt; median → right-skewed\naverage &lt; median → left-skewed\n\n\n\n\n\n\n\nTip\n\n\n\nRemember to review this part from Intro to Statistics",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -6997,21 +7536,8 @@
     ]
   },
   {
-    "objectID": "materials/sql/session5.html#deliverables",
-    "href": "materials/sql/session5.html#deliverables",
-    "title": "Session 05 Data Analysis with SQL | Functions",
-    "section": "Deliverables",
-    "text": "Deliverables\nSubmit one SQL-driven analysis that includes:\n\nSQL queries (PostgreSQL syntax)\nclear column naming\nlogically structured output\nbrief written interpretation (1–2 sentences per section)\n\nYou may submit:\n\none .qmd file\nor\n\none .sql file plus a short explanation document\n\n\n\nEvaluation Criteria\nYour work will be evaluated on:\n\ncorrectness of SQL logic\nappropriate use of numeric functions\ncorrect handling of NULL values\nawareness of table grain\nclarity of analytical reasoning\nalignment with business questions\n\n\n\n\nKey Expectation\nThis is not a syntax exercise.\nYou are expected to demonstrate:\n\nanalytical judgment\nmetric design thinking\nawareness of data limitations\n\n\n\n\nFinal Note\nA correct query can still produce a wrong insight.\nYour goal is to produce results that management can trust.\nThese numeric patterns form a critical foundation for data analysis with SQL.\n\n\nPractical Rule of Thumb\n\naverage ≈ median → distribution is likely symmetric\naverage &gt; median → right-skewed\naverage &lt; median → left-skewed\n\n\n\n\n\n\n\nTip\n\n\n\nRemember to review this part from Intro to Statistics",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 05 Data Analysis with SQL | Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session5.html#case-study-assignment-sales-performance-data-quality-analysis",
-    "href": "materials/sql/session5.html#case-study-assignment-sales-performance-data-quality-analysis",
+    "objectID": "materials/sql/session5.html#case-study-assignment-sales-performance-data-quality-analysis-1",
+    "href": "materials/sql/session5.html#case-study-assignment-sales-performance-data-quality-analysis-1",
     "title": "Session 05 Data Analysis with SQL | Functions",
     "section": "Case Study Assignment | Sales Performance & Data Quality Analysis",
     "text": "Case Study Assignment | Sales Performance & Data Quality Analysis\n\nContext\nYou are working as a data analyst for an e-commerce company.\nManagement relies on the sales_analysis table for reporting, performance tracking, and decision-making.\nRecently, stakeholders raised concerns about:\n\ninconsistent KPIs across dashboards\n\nunclear handling of missing values\n\nmisleading averages in reports\n\nlack of visibility into revenue distribution\n\nYour task is to analyze, validate, and redesign key metrics using SQL numeric functions.\nYou are not allowed to modify table structures or insert/update data.",

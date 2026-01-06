@@ -533,6 +533,12 @@ window.Quarto = {
  <span class="menu-text">Session 05 Data Analysis with SQL | Functions</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 06 Data Analysis with SQL | Functions</span></a>
+  </div>
+</li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
@@ -569,6 +575,12 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/sql/slides/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session6.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Functions</span></a>
   </div>
 </li>
@@ -754,6 +766,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#running-docker" id="toc-running-docker" class="nav-link" data-scroll-target="#running-docker">Running Docker</a></li>
   <li><a href="#create-sales_analysis-table" id="toc-create-sales_analysis-table" class="nav-link" data-scroll-target="#create-sales_analysis-table">Create <code>sales_analysis</code> table</a></li>
+  <li><a href="#indexes-for-filtering-performance" id="toc-indexes-for-filtering-performance" class="nav-link" data-scroll-target="#indexes-for-filtering-performance">Indexes for Filtering Performance</a></li>
   </ul></li>
   <li><a href="#numeric-functions" id="toc-numeric-functions" class="nav-link" data-scroll-target="#numeric-functions">Numeric Functions</a>
   <ul class="collapse">
@@ -764,6 +777,19 @@ window.Quarto = {
   <li><a href="#row-level-arithmetic" id="toc-row-level-arithmetic" class="nav-link" data-scroll-target="#row-level-arithmetic">Row-Level Arithmetic</a></li>
   <li><a href="#ceiling-and-floor" id="toc-ceiling-and-floor" class="nav-link" data-scroll-target="#ceiling-and-floor">CEILING() and FLOOR()</a></li>
   <li><a href="#coalesce" id="toc-coalesce" class="nav-link" data-scroll-target="#coalesce">COALESCE()</a></li>
+  </ul></li>
+  <li><a href="#case-study-assignment-sales-performance-data-quality-analysis" id="toc-case-study-assignment-sales-performance-data-quality-analysis" class="nav-link" data-scroll-target="#case-study-assignment-sales-performance-data-quality-analysis">Case Study Assignment | Sales Performance &amp; Data Quality Analysis</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context">Context</a></li>
+  </ul></li>
+  <li><a href="#the-task" id="toc-the-task" class="nav-link" data-scroll-target="#the-task">The Task</a>
+  <ul class="collapse">
+  <li><a href="#business-questions-to-address" id="toc-business-questions-to-address" class="nav-link" data-scroll-target="#business-questions-to-address">Business Questions to Address</a></li>
+  <li><a href="#deliverables" id="toc-deliverables" class="nav-link" data-scroll-target="#deliverables">Deliverables</a></li>
+  </ul></li>
+  <li><a href="#case-study-assignment-sales-performance-data-quality-analysis-1" id="toc-case-study-assignment-sales-performance-data-quality-analysis-1" class="nav-link" data-scroll-target="#case-study-assignment-sales-performance-data-quality-analysis-1">Case Study Assignment | Sales Performance &amp; Data Quality Analysis</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1">Context</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -840,24 +866,21 @@ window.Quarto = {
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="kw">JOIN</span> products <span class="kw">AS</span> p</span>
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> s.product_id <span class="op">=</span> p.product_id</span>
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> employees <span class="kw">AS</span> e</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> s.employee_id <span class="op">=</span> e.employee_id;</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>``` <span class="co">--&gt;</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>!<span class="co">-- </span><span class="al">###</span><span class="co"> Indexes for Filtering Performance</span></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>```sql</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_order_date</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(order_date_date);</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_year</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(<span class="dt">year</span>);</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_city</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(city);</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_category</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(<span class="kw">category</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> s.employee_id <span class="op">=</span> e.employee_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="indexes-for-filtering-performance" class="level3">
+<h3 class="anchored" data-anchor-id="indexes-for-filtering-performance">Indexes for Filtering Performance</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_order_date</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(order_date_date);</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_year</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(<span class="dt">year</span>);</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_city</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(city);</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_analysis_category</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> sales_analysis(<span class="kw">category</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -885,7 +908,6 @@ Note
 <li>analytical interpretation</li>
 </ul>
 <p>All examples assume the <code>sales_analysis</code> table.</p>
-<!--? SUM Function -->
 <section id="sum" class="level3">
 <h3 class="anchored" data-anchor-id="sum">SUM()</h3>
 <p><code>SUM()</code> is one of the most frequently used SQL functions.</p>
@@ -916,9 +938,9 @@ Note
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -960,9 +982,9 @@ Note
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1014,11 +1036,11 @@ Note
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1112,9 +1134,9 @@ Note
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(discount) <span class="kw">AS</span> avg_discount</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(discount) <span class="kw">AS</span> avg_discount</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1161,9 +1183,9 @@ Note
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(discount) <span class="kw">AS</span> avg_discount</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(discount) <span class="kw">AS</span> avg_discount</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1228,11 +1250,11 @@ Important
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(price) <span class="kw">AS</span> avg_price</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(price) <span class="kw">AS</span> avg_price</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1257,11 +1279,11 @@ Important
 <section id="avg-with-group-by-average-sales-per-customer" class="level4">
 <h4 class="anchored" data-anchor-id="avg-with-group-by-average-sales-per-customer"><strong>AVG() with GROUP BY | Average Sales per Customer</strong></h4>
 <p>A common analytical use case is <strong>average behavior per entity</strong>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  customer_name,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(total_sales) <span class="kw">AS</span> avg_transaction_value</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> customer_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  customer_name,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(total_sales) <span class="kw">AS</span> avg_transaction_value</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> customer_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This answers questions such as:</p>
 <ul>
 <li>what is the typical transaction value per customer?</li>
@@ -1426,10 +1448,10 @@ Important
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(total_sales) <span class="kw">AS</span> min_sale,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(total_sales) <span class="kw">AS</span> max_sale</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(total_sales) <span class="kw">AS</span> min_sale,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(total_sales) <span class="kw">AS</span> max_sale</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1474,10 +1496,10 @@ Important
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(total_sales) <span class="kw">AS</span> min_sale,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(total_sales) <span class="kw">AS</span> max_sale</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(total_sales) <span class="kw">AS</span> min_sale,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(total_sales) <span class="kw">AS</span> max_sale</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1528,12 +1550,12 @@ Important
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(price) <span class="kw">AS</span> min_price,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(price) <span class="kw">AS</span> max_price</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">category</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(price) <span class="kw">AS</span> min_price,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(price) <span class="kw">AS</span> max_price</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1587,10 +1609,10 @@ Important
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(product_name) <span class="kw">AS</span> first_product,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(product_name) <span class="kw">AS</span> last_product</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(product_name) <span class="kw">AS</span> first_product,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MAX</span>(product_name) <span class="kw">AS</span> last_product</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1694,9 +1716,9 @@ It answers a simpler—but critically important—question:</p>
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> total_rows</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> total_rows</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1740,9 +1762,9 @@ It answers a simpler—but critically important—question:</p>
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(discount) <span class="kw">AS</span> non_null_discounts</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(discount) <span class="kw">AS</span> non_null_discounts</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1790,11 +1812,11 @@ It answers a simpler—but critically important—question:</p>
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  product_name,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transaction_count</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  product_name,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transaction_count</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> product_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -1820,9 +1842,9 @@ It answers a simpler—but critically important—question:</p>
 <section id="countdistinct-counting-unique-values" class="level4">
 <h4 class="anchored" data-anchor-id="countdistinct-counting-unique-values"><strong>COUNT(DISTINCT) | Counting Unique Values</strong></h4>
 <p><code>COUNT(DISTINCT column)</code> counts the number of <strong>unique, non-NULL values</strong>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> customer_name) <span class="kw">AS</span> unique_customers</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> customer_name) <span class="kw">AS</span> unique_customers</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This answers questions like:</p>
 <ul>
 <li>how many unique customers exist?</li>
@@ -1832,11 +1854,11 @@ It answers a simpler—but critically important—question:</p>
 </section>
 <section id="countdistinct-with-group-by-unique-entities-per-group" class="level4">
 <h4 class="anchored" data-anchor-id="countdistinct-with-group-by-unique-entities-per-group"><strong>COUNT(DISTINCT) with GROUP BY | Unique Entities per Group</strong></h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  city,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> customer_name) <span class="kw">AS</span> unique_customers</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> city;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  city,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> customer_name) <span class="kw">AS</span> unique_customers</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> city;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This pattern is commonly used for:</p>
 <ul>
 <li>market reach analysis</li>
@@ -1849,12 +1871,12 @@ It answers a simpler—but critically important—question:</p>
 <h4 class="anchored" data-anchor-id="count-for-duplicate-detection"><strong>COUNT() for Duplicate Detection</strong></h4>
 <p>Duplicates are detected using <code>COUNT()</code> together with <code>GROUP BY</code> and <code>HAVING</code>.</p>
 <p><strong>Example | Duplicate Transactions</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> duplicate_count</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> transaction_id</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="kw">HAVING</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="op">&gt;</span> <span class="dv">1</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> duplicate_count</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> transaction_id</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="kw">HAVING</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="op">&gt;</span> <span class="dv">1</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Any returned row indicates a <strong>duplicate transaction ID</strong>.</p>
 <hr>
 </section>
@@ -1955,10 +1977,10 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  quantity <span class="op">*</span> price <span class="kw">AS</span> calculated_revenue</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  quantity <span class="op">*</span> price <span class="kw">AS</span> calculated_revenue</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -2009,10 +2031,10 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  quantity <span class="op">*</span> price <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> discount) <span class="kw">AS</span> net_revenue</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  quantity <span class="op">*</span> price <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> discount) <span class="kw">AS</span> net_revenue</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -2045,20 +2067,20 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 <li>addition and subtraction</li>
 </ol>
 <p>Use parentheses to make calculations <strong>explicit and readable</strong>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  (quantity <span class="op">*</span> price) <span class="op">-</span> (quantity <span class="op">*</span> price <span class="op">*</span> discount) <span class="kw">AS</span> net_revenue</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  (quantity <span class="op">*</span> price) <span class="op">-</span> (quantity <span class="op">*</span> price <span class="op">*</span> discount) <span class="kw">AS</span> net_revenue</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is equivalent to the previous example but often clearer in business contexts.</p>
 <hr>
 </section>
 <section id="numeric-transformations" class="level4">
 <h4 class="anchored" data-anchor-id="numeric-transformations"><strong>Numeric Transformations</strong></h4>
 <p>Row-level arithmetic is often combined with numeric functions such as <code>ROUND</code>, <code>CEILING</code>, or <code>FLOOR</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ROUND</span>(quantity <span class="op">*</span> price, <span class="dv">2</span>) <span class="kw">AS</span> rounded_revenue</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ROUND</span>(quantity <span class="op">*</span> price, <span class="dv">2</span>) <span class="kw">AS</span> rounded_revenue</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is especially important for <strong>financial reporting</strong>.</p>
 <hr>
 </section>
@@ -2070,9 +2092,9 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 </li>
 <li><strong>aggregate calculations</strong> → reduce rows</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(quantity <span class="op">*</span> price) <span class="kw">AS</span> total_revenue</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(quantity <span class="op">*</span> price) <span class="kw">AS</span> total_revenue</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Here:</strong></p>
 <ul>
 <li><code>quantity * price</code> is computed <strong>per row</strong></li>
@@ -2152,11 +2174,11 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  CEILING(total_sales) <span class="kw">AS</span> rounded_up,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">FLOOR</span>(total_sales)   <span class="kw">AS</span> rounded_down</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  transaction_id,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  CEILING(total_sales) <span class="kw">AS</span> rounded_up,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">FLOOR</span>(total_sales)   <span class="kw">AS</span> rounded_down</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -2252,13 +2274,13 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 </ul>
 <hr>
 <p><strong>Query</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  CEILING(total_sales <span class="op">/</span> <span class="fl">50.0</span>) <span class="op">*</span> <span class="dv">50</span> <span class="kw">AS</span> revenue_range,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transactions,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> CEILING(total_sales <span class="op">/</span> <span class="fl">50.0</span>) <span class="op">*</span> <span class="dv">50</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> revenue_range;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  CEILING(total_sales <span class="op">/</span> <span class="fl">50.0</span>) <span class="op">*</span> <span class="dv">50</span> <span class="kw">AS</span> revenue_range,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transactions,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> CEILING(total_sales <span class="op">/</span> <span class="fl">50.0</span>) <span class="op">*</span> <span class="dv">50</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> revenue_range;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 <p><strong>Intermediate Mapping (Conceptual)</strong></p>
 <table class="caption-top table">
@@ -2388,7 +2410,7 @@ Unlike aggregate functions (<code>SUM</code>, <code>AVG</code>, <code>COUNT</cod
 </section>
 </section>
 <section id="coalesce" class="level3">
-<h3 class="anchored">COALESCE()</h3>
+<h3 class="anchored" data-anchor-id="coalesce">COALESCE()</h3>
 <p><code>COALESCE()</code> is a SQL function used for <strong>explicit NULL handling</strong>.<br>
 It replaces <code>NULL</code> values with a <strong>specified substitute</strong>, allowing you to control how missing data is treated <strong>before aggregation or analysis</strong>.</p>
 <p>Handling <code>NULL</code> values explicitly is a critical analytical step, because different substitution strategies lead to <strong>different interpretations and KPIs</strong>.</p>
@@ -2446,9 +2468,9 @@ Note
 </tbody>
 </table>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="fu">COALESCE</span>(discount, <span class="dv">0</span>)) <span class="kw">AS</span> avg_discount_with_zeros</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="fu">COALESCE</span>(discount, <span class="dv">0</span>)) <span class="kw">AS</span> avg_discount_with_zeros</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top table">
 <thead>
@@ -2479,9 +2501,9 @@ Note
 <p>In this approach, missing values are replaced with the <strong>overall average</strong>.</p>
 <p>This preserves the <strong>mean level</strong> of the data but <strong>reduces variability</strong>, since all missing values become identical.</p>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="fu">COALESCE</span>(discount, avg_discount)) <span class="kw">AS</span> avg_discount_mean_imputed</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis,</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="fu">COALESCE</span>(discount, avg_discount)) <span class="kw">AS</span> avg_discount_mean_imputed</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis,</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Conceptual Effect:</strong></p>
 <ul>
 <li><code>NULL</code> values become the average</li>
@@ -2509,9 +2531,9 @@ Note
 because it is <strong>not affected by outliers</strong>.</p>
 <p>PostgreSQL supports median calculation using <code>PERCENTILE_CONT(0.5)</code>.</p>
 <p><span class="math display">\[\downarrow\]</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="fu">COALESCE</span>(discount, median_discount)) <span class="kw">AS</span> avg_discount_median_imputed</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="fu">COALESCE</span>(discount, median_discount)) <span class="kw">AS</span> avg_discount_median_imputed</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2524,9 +2546,9 @@ Warning
 <div class="callout-body-container callout-body">
 <p>The function below is a <strong>window function</strong>, which will be covered in upcoming sessions.</p>
 <p><code>PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY discount)</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>         <span class="fu">PERCENTILE_CONT</span>(<span class="fl">0.5</span>) WITHIN <span class="kw">GROUP</span> (<span class="kw">ORDER</span> <span class="kw">BY</span> discount) <span class="kw">AS</span> median_discount</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>         <span class="fu">PERCENTILE_CONT</span>(<span class="fl">0.5</span>) WITHIN <span class="kw">GROUP</span> (<span class="kw">ORDER</span> <span class="kw">BY</span> discount) <span class="kw">AS</span> median_discount</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p><strong>When to Use Median Imputation</strong></p>
@@ -2583,7 +2605,7 @@ Warning
 <hr>
 </section>
 <section id="key-analytical-warning" class="level4">
-<h4 class="anchored"><strong>Key Analytical Warning</strong></h4>
+<h4 class="anchored" data-anchor-id="key-analytical-warning"><strong>Key Analytical Warning</strong></h4>
 <p>Imputation is <strong>not neutral</strong>.</p>
 <ul>
 <li>it changes distributions</li>
@@ -2614,7 +2636,14 @@ Important
 <li>median imputation preserves robustness</li>
 <li>choosing the wrong strategy leads to misleading insights</li>
 </ul>
-<p><code>NULL</code> handling is not just a technical detail — it is a <strong>core analytical responsibility</strong>. :::## Case Study Assignment | Sales Performance &amp; Data Quality Analysis</p>
+<p><code>NULL</code> handling is not just a technical detail — it is a <strong>core analytical responsibility</strong>.</p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="case-study-assignment-sales-performance-data-quality-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="case-study-assignment-sales-performance-data-quality-analysis">Case Study Assignment | Sales Performance &amp; Data Quality Analysis</h2>
 <section id="context" class="level3">
 <h3 class="anchored" data-anchor-id="context">Context</h3>
 <p>You are working as a <strong>data analyst</strong> for an e-commerce company.<br>
@@ -2632,6 +2661,7 @@ Management relies on the <code>sales_analysis</code> table for reporting, perfor
 <p>Your task is to <strong>analyze, validate, and redesign key metrics</strong> using SQL numeric functions.</p>
 <p>You are <strong>not allowed</strong> to modify table structures or insert/update data.</p>
 <hr>
+</section>
 </section>
 <section id="the-task" class="level2">
 <h2 class="anchored" data-anchor-id="the-task">The Task</h2>
@@ -2701,9 +2731,8 @@ Management relies on the <code>sales_analysis</code> table for reporting, perfor
 <hr>
 </section>
 </section>
-</section>
-<section id="deliverables" class="level2">
-<h2 class="anchored" data-anchor-id="deliverables">Deliverables</h2>
+<section id="deliverables" class="level3">
+<h3 class="anchored" data-anchor-id="deliverables">Deliverables</h3>
 <p>Submit <strong>one SQL-driven analysis</strong> that includes:</p>
 <ul>
 <li>SQL queries (PostgreSQL syntax)</li>
@@ -2719,8 +2748,8 @@ or<br>
 <li>one <code>.sql</code> file plus a short explanation document</li>
 </ul>
 <hr>
-<section id="evaluation-criteria" class="level3">
-<h3 class="anchored" data-anchor-id="evaluation-criteria">Evaluation Criteria</h3>
+<section id="evaluation-criteria" class="level4">
+<h4 class="anchored" data-anchor-id="evaluation-criteria">Evaluation Criteria</h4>
 <p>Your work will be evaluated on:</p>
 <ul>
 <li>correctness of SQL logic</li>
@@ -2732,8 +2761,8 @@ or<br>
 </ul>
 <hr>
 </section>
-<section id="key-expectation" class="level3">
-<h3 class="anchored" data-anchor-id="key-expectation">Key Expectation</h3>
+<section id="key-expectation" class="level4">
+<h4 class="anchored" data-anchor-id="key-expectation">Key Expectation</h4>
 <p>This is <strong>not</strong> a syntax exercise.</p>
 <p>You are expected to demonstrate:</p>
 <ul>
@@ -2743,14 +2772,14 @@ or<br>
 </ul>
 <hr>
 </section>
-<section id="final-note" class="level3">
-<h3 class="anchored" data-anchor-id="final-note">Final Note</h3>
+<section id="final-note" class="level4">
+<h4 class="anchored" data-anchor-id="final-note">Final Note</h4>
 <p>A correct query can still produce a <strong>wrong insight</strong>.</p>
 <p>Your goal is to produce results that management can <strong>trust</strong>.</p>
 <p>These numeric patterns form a critical foundation for <strong>data analysis with SQL</strong>.</p>
 </section>
-<section id="practical-rule-of-thumb" class="level3">
-<h3 class="anchored" data-anchor-id="practical-rule-of-thumb">Practical Rule of Thumb</h3>
+<section id="practical-rule-of-thumb" class="level4">
+<h4 class="anchored" data-anchor-id="practical-rule-of-thumb">Practical Rule of Thumb</h4>
 <ul>
 <li>average ≈ median → distribution is likely symmetric</li>
 <li>average &gt; median → right-skewed</li>
@@ -2771,8 +2800,9 @@ Tip
 </div>
 </section>
 </section>
-<section id="case-study-assignment-sales-performance-data-quality-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="case-study-assignment-sales-performance-data-quality-analysis">Case Study Assignment | Sales Performance &amp; Data Quality Analysis</h2>
+</section>
+<section id="case-study-assignment-sales-performance-data-quality-analysis-1" class="level2">
+<h2 class="anchored" data-anchor-id="case-study-assignment-sales-performance-data-quality-analysis-1">Case Study Assignment | Sales Performance &amp; Data Quality Analysis</h2>
 <section id="context-1" class="level3">
 <h3 class="anchored" data-anchor-id="context-1">Context</h3>
 <p>You are working as a <strong>data analyst</strong> for an e-commerce company.<br>
@@ -2791,11 +2821,6 @@ Management relies on the <code>sales_analysis</code> table for reporting, perfor
 <p>You are <strong>not allowed</strong> to modify table structures or insert/update data.</p>
 
 
-</section>
-</section>
-</div>
-</div>
-</section>
 </section>
 </section>
 
