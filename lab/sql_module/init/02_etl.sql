@@ -1,4 +1,3 @@
--- 03_seed_from_csv.sql
 -- COPY must read files inside the container; we mounted ./data to /docker-entrypoint-initdb.d/data
 
 \echo 'Loading employees...'
