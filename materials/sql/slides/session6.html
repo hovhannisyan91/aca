@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.8.25">
 
   <meta name="author" content="Karen Hovhannisyan">
-  <meta name="dcterms.date" content="2026-01-06">
+  <meta name="dcterms.date" content="2026-01-08">
   <title>Data Analytics Bootcamp – Functions</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -217,7 +217,7 @@ Karen Hovhannisyan
 </div>
 </div>
 
-  <p class="date">2026-01-06</p>
+  <p class="date">2026-01-08</p>
 </section>
 <section id="text-functions" class="title-slide slide level1 center">
 <h1>Text Functions</h1>
@@ -803,9 +803,179 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </div>
 <div class="fragment">
 <p><strong>Consistency matters more than preference.</strong></p>
-
-
 </div>
+</section></section>
+<section>
+<section id="replace" class="title-slide slide level1 center">
+<h1>REPLACE()</h1>
+
+</section>
+<section id="why-replace-matters" class="slide level2 smaller">
+<h2>Why REPLACE() Matters</h2>
+<p>After handling <strong>whitespace</strong> and <strong>capitalization</strong>, the next common issue is<br>
+<strong>structural noise inside text values</strong>.</p>
+<p><strong>Typical examples include:</strong></p>
+<ul>
+<li>hyphens in phone numbers<br>
+</li>
+<li>spaces used as separators<br>
+</li>
+<li>dots (<code>.</code>), slashes(<code>\</code>,<code>/</code>), or underscores<br>
+</li>
+<li>inconsistent formatting characters</li>
+</ul>
+</section>
+<section id="analytical-principle-1" class="slide level2">
+<h2>Analytical Principle</h2>
+<p><code>REPLACE()</code> removes or substitutes <strong>known, explicit characters</strong>.</p>
+<p><strong>This makes it ideal when:</strong></p>
+<ul>
+<li>the pattern is simple<br>
+</li>
+<li>the character to remove is known in advance<br>
+</li>
+<li>rules are deterministic</li>
+</ul>
+<p><code>REPLACE()</code> is <strong>not pattern-based</strong> &gt; it is <strong>literal and predictable</strong>.</p>
+</section>
+<section id="removing-hyphens" class="slide level2 smaller">
+<h2>Removing Hyphens</h2>
+<p>Phone numbers often contain hyphens as visual separators.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a></a>  raw_phone,</span>
+<span id="cb12-3"><a></a>  <span class="kw">REPLACE</span>(raw_phone, <span class="st">'-'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_no_hyphen</span>
+<span id="cb12-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="output-2" class="slide level2 smaller">
+<h2>Output</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_no_hyphen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+<td><code>077600045</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+<td><code>(374)77600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>077600945</code></td>
+</tr>
+</tbody>
+</table>
+<p>Hyphens are removed, but <strong>other characters remain</strong>.</p>
+</section>
+<section id="chaining-replacements" class="slide level2 smaller">
+<h2>Chaining Replacements</h2>
+<p>You can apply <code>REPLACE()</code> multiple times to remove different characters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a></a>  raw_phone,</span>
+<span id="cb13-3"><a></a>  <span class="kw">REPLACE</span>(</span>
+<span id="cb13-4"><a></a>    <span class="kw">REPLACE</span>(</span>
+<span id="cb13-5"><a></a>      <span class="kw">REPLACE</span>(<span class="fu">TRIM</span>(raw_phone), <span class="st">'-'</span>, <span class="st">''</span>),</span>
+<span id="cb13-6"><a></a>    <span class="st">'('</span>, <span class="st">''</span>),</span>
+<span id="cb13-7"><a></a>  <span class="st">')'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_clean_partial</span>
+<span id="cb13-8"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="partial-cleanup-result" class="slide level2 smaller">
+<h2>Partial Cleanup Result</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_clean_partial</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td><code>37477600945</code></td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td><code>077600045</code></td>
+</tr>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>077600945</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is <strong>progress</strong>, but still not fully standardized.</p>
+</section>
+<section id="why-we-stop-here" class="slide level2">
+<h2>Why We Stop Here</h2>
+<p>At this stage:</p>
+<ul>
+<li>separators are removed<br>
+</li>
+<li>formatting noise is reduced<br>
+</li>
+<li>but <strong>digits are not guaranteed</strong></li>
+</ul>
+<p><strong>We still have:</strong></p>
+<ul>
+<li>country codes<br>
+</li>
+<li>variable lengths<br>
+</li>
+<li>inconsistent prefixes</li>
+</ul>
+<p>This tells us <code>REPLACE()</code> alone is <strong>not sufficient</strong>.</p>
+</section>
+<section id="replace-when-to-use" class="slide level2">
+<h2>REPLACE() | When to Use</h2>
+<p><strong>Use <code>REPLACE()</code> when:</strong></p>
+<ul>
+<li>the character to remove is known<br>
+</li>
+<li>rules are simple and explicit<br>
+</li>
+<li>you want maximum transparency</li>
+</ul>
+<p><strong>Avoid it when:</strong></p>
+<ul>
+<li>patterns vary<br>
+</li>
+<li>rules depend on position<br>
+</li>
+<li>you need validation</li>
+</ul>
+</section>
+<section id="analytical-warning" class="slide level2">
+<h2>Analytical Warning</h2>
+<div title="Analytical Warning | Hard-Coded Rules">
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Analytical Warning | Hard-Coded Rules</strong></p>
+</div>
+<div class="callout-content">
+<p>Every <code>REPLACE()</code> encodes a <strong>business assumption</strong>.</p>
+<ul>
+<li>what characters are allowed?<br>
+</li>
+<li>what characters are noise?<br>
+</li>
+<li>what if formats change later?</li>
+</ul>
+<p><strong>Document these decisions!</strong></p>
+</div>
+</div>
+</div>
+</div>
+
+
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">

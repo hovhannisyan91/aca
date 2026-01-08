@@ -770,6 +770,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#analytical-comparison" id="toc-analytical-comparison" class="nav-link" data-scroll-target="#analytical-comparison">Analytical Comparison</a></li>
   <li><a href="#analytical-best-practice-1" id="toc-analytical-best-practice-1" class="nav-link" data-scroll-target="#analytical-best-practice-1">Analytical Best Practice</a></li>
   </ul></li>
+  <li><a href="#replace" id="toc-replace" class="nav-link" data-scroll-target="#replace">REPLACE()</a>
+  <ul class="collapse">
+  <li><a href="#why-replace-matters-in-analytics" id="toc-why-replace-matters-in-analytics" class="nav-link" data-scroll-target="#why-replace-matters-in-analytics">Why REPLACE() Matters in Analytics</a></li>
+  <li><a href="#basic-usage" id="toc-basic-usage" class="nav-link" data-scroll-target="#basic-usage">Basic Usage</a></li>
+  <li><a href="#removing-known-separators" id="toc-removing-known-separators" class="nav-link" data-scroll-target="#removing-known-separators">Removing Known Separators</a></li>
+  <li><a href="#chaining-replace-calls" id="toc-chaining-replace-calls" class="nav-link" data-scroll-target="#chaining-replace-calls">Chaining REPLACE() Calls</a></li>
+  <li><a href="#analytical-limitations-of-replace" id="toc-analytical-limitations-of-replace" class="nav-link" data-scroll-target="#analytical-limitations-of-replace">Analytical Limitations of REPLACE()</a></li>
+  <li><a href="#when-to-use-replace" id="toc-when-to-use-replace" class="nav-link" data-scroll-target="#when-to-use-replace">When to Use REPLACE()</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1362,6 +1371,178 @@ Important
 <li>must be applied <strong>consistently</strong></li>
 </ul>
 <p>Like <code>TRIM()</code>, these functions remove <strong>noise</strong>, not meaning.</p>
+</section>
+</section>
+<section id="replace" class="level2">
+<h2 class="anchored" data-anchor-id="replace">REPLACE()</h2>
+<p>After handling <strong>whitespace</strong> (<code>TRIM()</code>) and <strong>capitalization</strong> (<code>LOWER()</code>, <code>UPPER()</code>, <code>INITCAP()</code>), the next common problem in real-world text data is <strong>structural noise inside strings</strong>.</p>
+<p>Structural noise refers to characters that are part of <em>visual formatting</em> but carry <strong>no analytical meaning</strong>.</p>
+<p>Typical examples include:</p>
+<ul>
+<li>hyphens in phone numbers<br>
+</li>
+<li>spaces used as separators<br>
+</li>
+<li>parentheses around country codes<br>
+</li>
+<li>dots, slashes, or underscores</li>
+</ul>
+<p>If these characters are not removed, text values that represent the <strong>same entity</strong> remain incomparable.</p>
+<hr>
+<section id="why-replace-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-replace-matters-in-analytics">Why REPLACE() Matters in Analytics</h3>
+<p><code>REPLACE()</code> allows you to <strong>explicitly remove or substitute known characters</strong>.</p>
+<p>From an analytical perspective:</p>
+<ul>
+<li>the rule is <strong>deterministic</strong></li>
+<li>the transformation is <strong>transparent</strong></li>
+<li>the outcome is <strong>fully explainable</strong></li>
+</ul>
+<p>This makes <code>REPLACE()</code> suitable for <strong>early-stage structural cleanup</strong>, before applying more advanced pattern-based logic.</p>
+<hr>
+</section>
+<section id="basic-usage" class="level3">
+<h3 class="anchored" data-anchor-id="basic-usage">Basic Usage</h3>
+<p>The <code>REPLACE()</code> function has the following structure:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">REPLACE</span>(text, old_value, new_value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It replaces <strong>all occurrences</strong> of <code>old_value</code> with <code>new_value</code>.</p>
+<hr>
+</section>
+<section id="removing-known-separators" class="level3">
+<h3 class="anchored" data-anchor-id="removing-known-separators">Removing Known Separators</h3>
+<p>Phone numbers often include hyphens for readability.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">REPLACE</span>(raw_phone, <span class="st">'-'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_no_hyphen</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Conceptual Effect</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_no_hyphen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+<td><code>077600045</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+<td><code>(374)77600945</code></td>
+</tr>
+</tbody>
+</table>
+<p>Only the hyphen is removed.<br>
+All other characters remain untouched.</p>
+<hr>
+</section>
+<section id="chaining-replace-calls" class="level3">
+<h3 class="anchored" data-anchor-id="chaining-replace-calls">Chaining REPLACE() Calls</h3>
+<p>When multiple unwanted characters are present, <code>REPLACE()</code> calls can be <strong>nested</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">REPLACE</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">REPLACE</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">REPLACE</span>(<span class="fu">TRIM</span>(raw_phone), <span class="st">'-'</span>, <span class="st">''</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'('</span>, <span class="st">''</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">')'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_partial_clean</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This removes:</p>
+<ul>
+<li>leading and trailing spaces<br>
+</li>
+<li>hyphens<br>
+</li>
+<li>parentheses</li>
+</ul>
+<p><strong>Resulting Pattern</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_partial_clean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td><code>37477600945</code></td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td><code>077600045</code></td>
+</tr>
+</tbody>
+</table>
+<p>At this stage, formatting noise is reduced, but the value is <strong>still not standardized</strong>.</p>
+<hr>
+</section>
+<section id="analytical-limitations-of-replace" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-limitations-of-replace">Analytical Limitations of REPLACE()</h3>
+<p>While <code>REPLACE()</code> is useful, it has important limitations:</p>
+<ul>
+<li>it works only on <strong>explicit characters</strong></li>
+<li>it does not understand <strong>patterns</strong></li>
+<li>it cannot validate correctness</li>
+<li>rules must be hard-coded</li>
+</ul>
+<p>For example:</p>
+<ul>
+<li>it cannot remove “everything that is not a digit”</li>
+<li>it cannot enforce length rules</li>
+<li>it cannot adapt to new formats</li>
+</ul>
+<p>Because of this, <code>REPLACE()</code> is rarely the <em>final</em> cleaning step.</p>
+<hr>
+</section>
+<section id="when-to-use-replace" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-replace">When to Use REPLACE()</h3>
+<p>Use <code>REPLACE()</code> when:</p>
+<ul>
+<li>the unwanted character is known<br>
+</li>
+<li>formatting rules are simple<br>
+</li>
+<li>transformations must be transparent</li>
+</ul>
+<p>Avoid relying on <code>REPLACE()</code> when:</p>
+<ul>
+<li>formats vary widely<br>
+</li>
+<li>patterns are unknown<br>
+</li>
+<li>validation is required</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Hard-Coded Assumptions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Hard-Coded Assumptions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Every <code>REPLACE()</code> call encodes an <strong>assumption</strong>:</p>
+<ul>
+<li>which characters are noise<br>
+</li>
+<li>which characters are meaningful<br>
+</li>
+<li>what happens if formats change</li>
+</ul>
+<p>These assumptions must be:</p>
+<ul>
+<li>documented<br>
+</li>
+<li>reviewed<br>
+</li>
+<li>justified by business logic</li>
+</ul>
+</div>
+</div>
 
 
 </section>
