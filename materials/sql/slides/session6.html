@@ -2190,6 +2190,301 @@ without using regular expressions.</p>
 </li>
 <li>aggregate only meaningful values</li>
 </ul>
+</section></section>
+<section>
+<section id="left-right" class="title-slide slide level1 center">
+<h1><code>LEFT()</code> / <code>RIGHT()</code></h1>
+
+</section>
+<section id="left-right-why-they-exist" class="slide level2 smaller">
+<h2>LEFT() / RIGHT() | Why They Exist</h2>
+<p>Some analytical fields follow a <strong>fixed directional structure</strong>.</p>
+<div class="fragment">
+<ul>
+<li>prefixes carry meaning<br>
+</li>
+<li>suffixes carry meaning<br>
+</li>
+<li>length is known or enforced</li>
+</ul>
+<p><code>LEFT()</code> and <code>RIGHT()</code> let you extract <strong>directional segments</strong> without complex logic.</p>
+</div>
+</section>
+<section id="left-right-why-they-matter" class="slide level2 smaller">
+<h2>LEFT() / RIGHT() | Why They Matter</h2>
+<p><strong>From an analytical perspective:</strong></p>
+<ul>
+<li>simpler than <code>SUBSTRING()</code><br>
+</li>
+<li>more readable intent<br>
+</li>
+<li>safer for fixed-format fields</li>
+</ul>
+<p>They are often used for:</p>
+<ul>
+<li>country or region prefixes<br>
+</li>
+<li>category codes<br>
+</li>
+<li>version suffixes<br>
+</li>
+<li>short identifiers</li>
+</ul>
+</section>
+<section id="left-right-syntax" class="slide level2 smaller">
+<h2>LEFT() / RIGHT() | Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb43-1"><a></a><span class="kw">LEFT</span>(text, n)</span>
+<span id="cb43-2"><a></a><span class="kw">RIGHT</span>(text, n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>n</code> = number of characters<br>
+</li>
+<li>extraction starts from left or right</li>
+</ul>
+</section>
+<section id="example-1-phone-prefix-detection" class="slide level2 smaller">
+<h2>Example 1 | Phone Prefix Detection</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb44-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb44-2"><a></a>  raw_phone,</span>
+<span id="cb44-3"><a></a>  <span class="kw">LEFT</span>(</span>
+<span id="cb44-4"><a></a>    <span class="fu">REGEXP_REPLACE</span>(raw_phone, <span class="st">'[^0-9]'</span>, <span class="st">''</span>, <span class="st">'g'</span>),</span>
+<span id="cb44-5"><a></a>    <span class="dv">3</span></span>
+<span id="cb44-6"><a></a>  ) <span class="kw">AS</span> phone_prefix</span>
+<span id="cb44-7"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td>077</td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td>077</td>
+</tr>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td>374</td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td>374</td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td>776</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="analytical-interpretation-1" class="slide level2 smaller">
+<h2>Analytical Interpretation</h2>
+<ul>
+<li>prefixes reveal country or operator<br>
+</li>
+<li>supports validation and routing logic<br>
+</li>
+<li>useful before normalization</li>
+</ul>
+</section>
+<section id="example-2-core-identifier-via-right" class="slide level2 smaller">
+<h2>Example 2 | Core Identifier via RIGHT()</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb45-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb45-2"><a></a>  raw_phone,</span>
+<span id="cb45-3"><a></a>  <span class="kw">RIGHT</span>(</span>
+<span id="cb45-4"><a></a>    <span class="fu">REGEXP_REPLACE</span>(raw_phone, <span class="st">'[^0-9]'</span>, <span class="st">''</span>, <span class="st">'g'</span>),</span>
+<span id="cb45-5"><a></a>    <span class="dv">8</span></span>
+<span id="cb45-6"><a></a>  ) <span class="kw">AS</span> phone_core</span>
+<span id="cb45-7"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_core</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td>77600945</td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td>77600945</td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td>77600945</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="leftright-vs-substring" class="slide level2 smaller">
+<h2>LEFT()/RIGHT() vs SUBSTRING()</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Scenario</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fixed prefix/suffix</td>
+<td>LEFT()/RIGHT()</td>
+</tr>
+<tr class="even">
+<td>Dynamic positions</td>
+<td>SUBSTRING()</td>
+</tr>
+<tr class="odd">
+<td>Readability</td>
+<td>LEFT()/RIGHT()</td>
+</tr>
+<tr class="even">
+<td>Complex extraction</td>
+<td>SUBSTRING()</td>
+</tr>
+</tbody>
+</table>
+</section></section>
+<section>
+<section id="in-class-assignment-text-functions-group-by" class="title-slide slide level1 center">
+<h1>In-Class Assignment | Text Functions &amp; GROUP BY</h1>
+
+</section>
+<section id="goal-of-the-exercise" class="slide level2 smaller">
+<h2>Goal of the Exercise</h2>
+<p>In this in-class task, you will work with <strong>intentionally messy transaction data</strong> to understand:</p>
+<ul>
+<li><p>how dirty text breaks <code>GROUP BY</code></p></li>
+<li><p>why measurement must come <strong>before cleaning</strong></p></li>
+<li><p>how text functions affect analytical results</p></li>
+<li><p><strong>Time:</strong> 10–15 minutes<br>
+</p></li>
+<li><p><strong>Mode:</strong> Individual or pairs</p></li>
+</ul>
+</section>
+<section id="step-1-create-messy-transaction-data" class="slide level2 smaller">
+<h2>Step 1 | Create Messy Transaction Data</h2>
+<p>We simulate <strong>real-world dirty text</strong> commonly found in transactional systems.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb46-1"><a></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> transactions_text_demo;</span>
+<span id="cb46-2"><a></a></span>
+<span id="cb46-3"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> transactions_text_demo (</span>
+<span id="cb46-4"><a></a>  transaction_id <span class="dt">INTEGER</span>,</span>
+<span id="cb46-5"><a></a>  customer_id    <span class="dt">INTEGER</span>,</span>
+<span id="cb46-6"><a></a>  raw_phone      TEXT,</span>
+<span id="cb46-7"><a></a>  category_raw   TEXT,</span>
+<span id="cb46-8"><a></a>  quantity       <span class="dt">INTEGER</span>,</span>
+<span id="cb46-9"><a></a>  price          <span class="dt">NUMERIC</span>(<span class="dv">10</span>,<span class="dv">2</span>)</span>
+<span id="cb46-10"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="step-2-insert-1000-rows-of-messy-data" class="slide level2 smaller">
+<h2>Step 2 | Insert 1,000 Rows of Messy Data</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb47-1"><a></a><span class="kw">INSERT</span> <span class="kw">INTO</span> transactions_text_demo</span>
+<span id="cb47-2"><a></a><span class="kw">SELECT</span></span>
+<span id="cb47-3"><a></a>  gs <span class="kw">AS</span> transaction_id,</span>
+<span id="cb47-4"><a></a>  (<span class="kw">RANDOM</span>() <span class="op">*</span> <span class="dv">200</span>):<span class="ch">:INT</span> <span class="op">+</span> <span class="dv">1</span> <span class="kw">AS</span> customer_id,</span>
+<span id="cb47-5"><a></a></span>
+<span id="cb47-6"><a></a>  <span class="cf">CASE</span> (gs % <span class="dv">6</span>)</span>
+<span id="cb47-7"><a></a>    <span class="cf">WHEN</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="st">'   077600945  '</span></span>
+<span id="cb47-8"><a></a>    <span class="cf">WHEN</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="st">'077-600-045'</span></span>
+<span id="cb47-9"><a></a>    <span class="cf">WHEN</span> <span class="dv">2</span> <span class="cf">THEN</span> <span class="st">'(374)-77-600-945'</span></span>
+<span id="cb47-10"><a></a>    <span class="cf">WHEN</span> <span class="dv">3</span> <span class="cf">THEN</span> <span class="st">'37477600945'</span></span>
+<span id="cb47-11"><a></a>    <span class="cf">WHEN</span> <span class="dv">4</span> <span class="cf">THEN</span> <span class="st">'77600945'</span></span>
+<span id="cb47-12"><a></a>    <span class="cf">ELSE</span> <span class="st">'077600945'</span></span>
+<span id="cb47-13"><a></a>  <span class="cf">END</span> <span class="kw">AS</span> raw_phone,</span>
+<span id="cb47-14"><a></a></span>
+<span id="cb47-15"><a></a>  <span class="cf">CASE</span> (gs % <span class="dv">5</span>)</span>
+<span id="cb47-16"><a></a>    <span class="cf">WHEN</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="st">'Accessories (Promo)'</span></span>
+<span id="cb47-17"><a></a>    <span class="cf">WHEN</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="st">'Accessories (Test)'</span></span>
+<span id="cb47-18"><a></a>    <span class="cf">WHEN</span> <span class="dv">2</span> <span class="cf">THEN</span> <span class="st">'Electronics (Old)'</span></span>
+<span id="cb47-19"><a></a>    <span class="cf">WHEN</span> <span class="dv">3</span> <span class="cf">THEN</span> <span class="st">'Electronics (Promo)'</span></span>
+<span id="cb47-20"><a></a>    <span class="cf">ELSE</span> <span class="st">'Accessories'</span></span>
+<span id="cb47-21"><a></a>  <span class="cf">END</span> <span class="kw">AS</span> category_raw,</span>
+<span id="cb47-22"><a></a></span>
+<span id="cb47-23"><a></a>  (<span class="kw">RANDOM</span>() <span class="op">*</span> <span class="dv">5</span>):<span class="ch">:INT</span> <span class="op">+</span> <span class="dv">1</span> <span class="kw">AS</span> quantity,</span>
+<span id="cb47-24"><a></a>  (<span class="kw">RANDOM</span>() <span class="op">*</span> <span class="dv">500</span> <span class="op">+</span> <span class="dv">10</span>):<span class="ch">:NUMERIC</span>(<span class="dv">10</span>,<span class="dv">2</span>) <span class="kw">AS</span> price</span>
+<span id="cb47-25"><a></a><span class="kw">FROM</span> generate_series(<span class="dv">1</span>, <span class="dv">1000</span>) <span class="kw">AS</span> gs;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="step-3-sanity-check" class="slide level2 smaller">
+<h2>Step 3 | Sanity Check</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb48-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb48-2"><a></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> total_rows,</span>
+<span id="cb48-3"><a></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> raw_phone) <span class="kw">AS</span> distinct_raw_phones,</span>
+<span id="cb48-4"><a></a>  <span class="fu">COUNT</span>(<span class="kw">DISTINCT</span> category_raw) <span class="kw">AS</span> distinct_categories</span>
+<span id="cb48-5"><a></a><span class="kw">FROM</span> transactions_text_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Think:</strong></p>
+<ul>
+<li>Do these numbers look reasonable?</li>
+<li>What already looks suspicious?</li>
+</ul>
+</section>
+<section id="task-1-phone-number-diagnostics" class="slide level2 smaller">
+<h2>Task 1 | Phone Number Diagnostics</h2>
+<p>Write a query that shows:</p>
+<ul>
+<li><code>raw_phone</code></li>
+<li><code>LENGTH(raw_phone)</code></li>
+<li>position of <code>'-'</code></li>
+<li>position of <code>'('</code></li>
+<li>number of rows per pattern</li>
+</ul>
+<p><strong>Functions to use:</strong></p>
+<ul>
+<li><code>LENGTH()</code></li>
+<li><code>POSITION()</code> or <code>STRPOS()</code></li>
+<li><code>GROUP BY</code></li>
+</ul>
+</section>
+<section id="task-2-category-fragmentation" class="slide level2 smaller">
+<h2>Task 2 | Category Fragmentation</h2>
+<p>Group by raw category values.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb49-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb49-2"><a></a>  category_raw,</span>
+<span id="cb49-3"><a></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> transactions</span>
+<span id="cb49-4"><a></a><span class="kw">FROM</span> transactions_text_demo</span>
+<span id="cb49-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> category_raw</span>
+<span id="cb49-6"><a></a><span class="kw">ORDER</span> <span class="kw">BY</span> transactions <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Answer:</strong></p>
+<ul>
+<li>how many categories appear?</li>
+<li>how many are actually the <em>same</em> category?</li>
+</ul>
+</section>
+<section id="expected-insights" class="slide level2 smaller">
+<h2>Expected Insights</h2>
+<p>By the end of this exercise, you should clearly see:</p>
+<ul>
+<li>the same phone number appears in many formats</li>
+<li>category annotations fragment grouping</li>
+<li><code>GROUP BY</code> blindly trusts text values</li>
+<li>dirty text leads to <strong>misleading KPIs</strong></li>
+</ul>
+</section>
+<section id="key-analytical-lesson" class="slide level2 smaller">
+<h2>Key Analytical Lesson</h2>
+<ul>
+<li>text cleanliness is <strong>not cosmetic</strong></li>
+<li>it directly affects:
+<ul>
+<li>counts</li>
+<li>revenue aggregation</li>
+<li>uniqueness</li>
+</ul></li>
+<li>cleaning must be <strong>intentional and documented</strong></li>
+</ul>
+<p>Next, we will clean this data and <strong>measure how KPIs change</strong>.</p>
 
 
 </section></section>

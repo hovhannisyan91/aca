@@ -3500,6 +3500,216 @@
     ]
   },
   {
+    "objectID": "materials/sql/slides/session6.html#left-right-why-they-exist",
+    "href": "materials/sql/slides/session6.html#left-right-why-they-exist",
+    "title": "String Functions",
+    "section": "LEFT() / RIGHT() | Why They Exist",
+    "text": "LEFT() / RIGHT() | Why They Exist\nSome analytical fields follow a fixed directional structure.\n\n\nprefixes carry meaning\n\nsuffixes carry meaning\n\nlength is known or enforced\n\nLEFT() and RIGHT() let you extract directional segments without complex logic.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#left-right-why-they-matter",
+    "href": "materials/sql/slides/session6.html#left-right-why-they-matter",
+    "title": "String Functions",
+    "section": "LEFT() / RIGHT() | Why They Matter",
+    "text": "LEFT() / RIGHT() | Why They Matter\nFrom an analytical perspective:\n\nsimpler than SUBSTRING()\n\nmore readable intent\n\nsafer for fixed-format fields\n\nThey are often used for:\n\ncountry or region prefixes\n\ncategory codes\n\nversion suffixes\n\nshort identifiers",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#left-right-syntax",
+    "href": "materials/sql/slides/session6.html#left-right-syntax",
+    "title": "String Functions",
+    "section": "LEFT() / RIGHT() | Syntax",
+    "text": "LEFT() / RIGHT() | Syntax\nLEFT(text, n)\nRIGHT(text, n)\n\nn = number of characters\n\nextraction starts from left or right",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#example-1-phone-prefix-detection",
+    "href": "materials/sql/slides/session6.html#example-1-phone-prefix-detection",
+    "title": "String Functions",
+    "section": "Example 1 | Phone Prefix Detection",
+    "text": "Example 1 | Phone Prefix Detection\nSELECT\n  raw_phone,\n  LEFT(\n    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),\n    3\n  ) AS phone_prefix\nFROM customers_raw_text;\n\n\\[\\downarrow\\]\n\n\n\nraw_phone\nphone_prefix\n\n\n\n\n077600945\n077\n\n\n077-600-045\n077\n\n\n(374)-77-600-945\n374\n\n\n37477600945\n374\n\n\n77600945\n776",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#analytical-interpretation-1",
+    "href": "materials/sql/slides/session6.html#analytical-interpretation-1",
+    "title": "String Functions",
+    "section": "Analytical Interpretation",
+    "text": "Analytical Interpretation\n\nprefixes reveal country or operator\n\nsupports validation and routing logic\n\nuseful before normalization",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#example-2-core-identifier-via-right",
+    "href": "materials/sql/slides/session6.html#example-2-core-identifier-via-right",
+    "title": "String Functions",
+    "section": "Example 2 | Core Identifier via RIGHT()",
+    "text": "Example 2 | Core Identifier via RIGHT()\nSELECT\n  raw_phone,\n  RIGHT(\n    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),\n    8\n  ) AS phone_core\nFROM customers_raw_text;\n\n\\[\\downarrow\\]\n\n\n\nraw_phone\nphone_core\n\n\n\n\n077600945\n77600945\n\n\n37477600945\n77600945\n\n\n77600945\n77600945",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#leftright-vs-substring",
+    "href": "materials/sql/slides/session6.html#leftright-vs-substring",
+    "title": "String Functions",
+    "section": "LEFT()/RIGHT() vs SUBSTRING()",
+    "text": "LEFT()/RIGHT() vs SUBSTRING()\n\n\n\nScenario\nPrefer\n\n\n\n\nFixed prefix/suffix\nLEFT()/RIGHT()\n\n\nDynamic positions\nSUBSTRING()\n\n\nReadability\nLEFT()/RIGHT()\n\n\nComplex extraction\nSUBSTRING()",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#goal-of-the-exercise",
+    "href": "materials/sql/slides/session6.html#goal-of-the-exercise",
+    "title": "String Functions",
+    "section": "Goal of the Exercise",
+    "text": "Goal of the Exercise\nIn this in-class task, you will work with intentionally messy transaction data to understand:\n\nhow dirty text breaks GROUP BY\nwhy measurement must come before cleaning\nhow text functions affect analytical results\nTime: 10–15 minutes\n\nMode: Individual or pairs",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#step-1-create-messy-transaction-data",
+    "href": "materials/sql/slides/session6.html#step-1-create-messy-transaction-data",
+    "title": "String Functions",
+    "section": "Step 1 | Create Messy Transaction Data",
+    "text": "Step 1 | Create Messy Transaction Data\nWe simulate real-world dirty text commonly found in transactional systems.\nDROP TABLE IF EXISTS transactions_text_demo;\n\nCREATE TABLE transactions_text_demo (\n  transaction_id INTEGER,\n  customer_id    INTEGER,\n  raw_phone      TEXT,\n  category_raw   TEXT,\n  quantity       INTEGER,\n  price          NUMERIC(10,2)\n);",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#step-2-insert-1000-rows-of-messy-data",
+    "href": "materials/sql/slides/session6.html#step-2-insert-1000-rows-of-messy-data",
+    "title": "String Functions",
+    "section": "Step 2 | Insert 1,000 Rows of Messy Data",
+    "text": "Step 2 | Insert 1,000 Rows of Messy Data\nINSERT INTO transactions_text_demo\nSELECT\n  gs AS transaction_id,\n  (RANDOM() * 200)::INT + 1 AS customer_id,\n\n  CASE (gs % 6)\n    WHEN 0 THEN '   077600945  '\n    WHEN 1 THEN '077-600-045'\n    WHEN 2 THEN '(374)-77-600-945'\n    WHEN 3 THEN '37477600945'\n    WHEN 4 THEN '77600945'\n    ELSE '077600945'\n  END AS raw_phone,\n\n  CASE (gs % 5)\n    WHEN 0 THEN 'Accessories (Promo)'\n    WHEN 1 THEN 'Accessories (Test)'\n    WHEN 2 THEN 'Electronics (Old)'\n    WHEN 3 THEN 'Electronics (Promo)'\n    ELSE 'Accessories'\n  END AS category_raw,\n\n  (RANDOM() * 5)::INT + 1 AS quantity,\n  (RANDOM() * 500 + 10)::NUMERIC(10,2) AS price\nFROM generate_series(1, 1000) AS gs;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#step-3-sanity-check",
+    "href": "materials/sql/slides/session6.html#step-3-sanity-check",
+    "title": "String Functions",
+    "section": "Step 3 | Sanity Check",
+    "text": "Step 3 | Sanity Check\nSELECT\n  COUNT(*) AS total_rows,\n  COUNT(DISTINCT raw_phone) AS distinct_raw_phones,\n  COUNT(DISTINCT category_raw) AS distinct_categories\nFROM transactions_text_demo;\nThink:\n\nDo these numbers look reasonable?\nWhat already looks suspicious?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#task-1-phone-number-diagnostics",
+    "href": "materials/sql/slides/session6.html#task-1-phone-number-diagnostics",
+    "title": "String Functions",
+    "section": "Task 1 | Phone Number Diagnostics",
+    "text": "Task 1 | Phone Number Diagnostics\nWrite a query that shows:\n\nraw_phone\nLENGTH(raw_phone)\nposition of '-'\nposition of '('\nnumber of rows per pattern\n\nFunctions to use:\n\nLENGTH()\nPOSITION() or STRPOS()\nGROUP BY",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#task-2-category-fragmentation",
+    "href": "materials/sql/slides/session6.html#task-2-category-fragmentation",
+    "title": "String Functions",
+    "section": "Task 2 | Category Fragmentation",
+    "text": "Task 2 | Category Fragmentation\nGroup by raw category values.\nSELECT\n  category_raw,\n  COUNT(*) AS transactions\nFROM transactions_text_demo\nGROUP BY category_raw\nORDER BY transactions DESC;\nAnswer:\n\nhow many categories appear?\nhow many are actually the same category?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#expected-insights",
+    "href": "materials/sql/slides/session6.html#expected-insights",
+    "title": "String Functions",
+    "section": "Expected Insights",
+    "text": "Expected Insights\nBy the end of this exercise, you should clearly see:\n\nthe same phone number appears in many formats\ncategory annotations fragment grouping\nGROUP BY blindly trusts text values\ndirty text leads to misleading KPIs",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session6.html#key-analytical-lesson",
+    "href": "materials/sql/slides/session6.html#key-analytical-lesson",
+    "title": "String Functions",
+    "section": "Key Analytical Lesson",
+    "text": "Key Analytical Lesson\n\ntext cleanliness is not cosmetic\nit directly affects:\n\ncounts\nrevenue aggregation\nuniqueness\n\ncleaning must be intentional and documented\n\nNext, we will clean this data and measure how KPIs change.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "String Functions"
+    ]
+  },
+  {
     "objectID": "materials/sql/session1.html",
     "href": "materials/sql/session1.html",
     "title": "Session 01: Intro to Relational Databases",
@@ -3739,6 +3949,58 @@
     "title": "Session 06: Data Analysis with SQL | Functions",
     "section": "NULLIF()",
     "text": "NULLIF()\nAfter handling extraction, cleaning, and construction of text values, the next important analytical task is preventing misleading values from entering metrics and logic.\nNULLIF() is used to convert specific values into NULL intentionally.\nIt answers the question:\n\nWhen should a value be treated as “missing”?\n\n\n\nWhy NULLIF() Matters in Analytics\nIn real datasets, missing information is often encoded as fake values, such as:\n\nempty strings ''\nplaceholders like 'N/A', 'UNKNOWN'\ndefault values like '0'\n\nFrom an analytical perspective, these values:\n\ndistort counts\n\nbreak averages\n\npollute grouping keys\n\nhide true data quality issues\n\nNULLIF() allows you to restore semantic meaning by converting such placeholders into NULL.\n\n\n\nNULLIF() | Syntax Overview\nNULLIF(value, comparison_value)\nHow it works:\n\nif value = comparison_value → returns NULL\notherwise → returns value\n\n\n\n\nExample 1 | Empty Strings to NULL\nAssume some customers have missing last names stored as empty strings.\nSELECT\n  customer_id,\n  last_name,\n  NULLIF(last_name, '') AS last_name_clean\nFROM customers_raw_text;\n\nConceptual Output\n\n\n\ncustomer_id\nlast_name\nlast_name_clean\n\n\n\n\n1\ndoe\ndoe\n\n\n2\nsmith\nsmith\n\n\n3\njohnson\njohnson\n\n\n4\nVAN DYKE\nVAN DYKE\n\n\n5\n\nNULL\n\n\n\n\n\n\nAnalytical Interpretation\n\nempty strings are not meaningful values\nconverting them to NULL allows:\n\ncorrect COUNT(last_name)\ncorrect COUNT(DISTINCT last_name)\naccurate completeness checks\n\n\n\n\n\nExample 2 | Placeholder Text to NULL\nSometimes missing values are encoded explicitly.\nSELECT\n  category_raw,\n  NULLIF(category_raw, 'UNKNOWN') AS category_clean\nFROM customers_raw_text;\n\n\n\nExample 3 | NULLIF() Before Aggregation\nNULLIF() is often used before aggregation to prevent bad values from entering metrics.\nSELECT\n  COUNT(NULLIF(category_raw, 'UNKNOWN')) AS valid_categories\nFROM customers_raw_text;\nThis ensures that placeholder values do not inflate counts.\n\n\n\nNULLIF() with CONCAT() (Defensive Pattern)\nWhen building labels, NULLIF() can prevent ugly outputs.\nSELECT\n  customer_id,\n  CONCAT(\n    first_name,\n    ' ',\n    NULLIF(last_name, '')\n  ) AS full_name_safe\nFROM customers_raw_text;\nWithout NULLIF(), empty strings may silently produce malformed labels.\n\n\n\nNULLIF() vs COALESCE()\n\n\n\nGoal\nUse\n\n\n\n\nConvert bad value to NULL\nNULLIF()\n\n\nReplace NULL with value\nCOALESCE()\n\n\nRestore missing semantics\nNULLIF()\n\n\nImpute missing values\nCOALESCE()\n\n\n\nThese functions are often used together, but serve opposite purposes.\n\n\n\nAnalytical Best Practice\nBefore aggregation or joins:\n\nidentify placeholder values\n\nconvert them to NULL using NULLIF()\n\nthen apply aggregation or imputation logic\n\nThis keeps business meaning intact.\n\n\n\n\n\n\n\nWarningAnalytical Warning | Silent Placeholders\n\n\n\nPlaceholder values are more dangerous than NULLs.\n\nthey look valid\n\nthey pass filters\n\nthey corrupt metrics silently\n\nAlways audit text fields for placeholder values\nbefore trusting analytical results.\n\n\nNULLIF() is a small function with high analytical impact, especially in data quality and KPI correctness.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06: Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#left-right",
+    "href": "materials/sql/session6.html#left-right",
+    "title": "Session 06: Data Analysis with SQL | Functions",
+    "section": "LEFT() / RIGHT()",
+    "text": "LEFT() / RIGHT()\nAfter working with positional extraction (SUBSTRING()) and pattern-based logic, we often encounter text fields with a fixed directional structure.\nIn such cases, extracting characters from the beginning or the end of a string is clearer and safer than calculating positions.\nThis is exactly what LEFT() and RIGHT() are designed for.\n\n\nWhy LEFT() / RIGHT() Matter in Analytics\nMany analytical identifiers encode meaning at the edges of a string:\n\ncountry or operator prefixes\n\nregional or product codes\n\nfixed-length identifiers\n\nversion or batch suffixes\n\nWhen structure is stable, directional extraction is:\n\nmore readable\n\nless error-prone\n\neasier to audit\n\n\n\n\nSyntax Overview\nLEFT(text, n)\nRIGHT(text, n)\n\ntext → input string\n\nn → number of characters to extract\n\nextraction starts strictly from the left or right\n\n\n\n\nExample 1 | Extract Phone Prefix with LEFT()\nAssume phone numbers have already been cleaned to digits only\nand the first 3 digits represent a country or operator code.\nSELECT\n  raw_phone,\n  LEFT(\n    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),\n    3\n  ) AS phone_prefix\nFROM customers_raw_text;\n\nOutput\n\n\n\nraw_phone\nphone_prefix\n\n\n\n\n077600945\n077\n\n\n077-600-045\n077\n\n\n(374)-77-600-945\n374\n\n\n37477600945\n374\n\n\n77600945\n776\n\n\n\n\n\n\nAnalytical Interpretation\n\nprefixes reveal country or operator\n\nenables routing or segmentation logic\n\nsupports validation of expected formats\n\n\n\n\nExample 2 | Extract Core Identifier with RIGHT()\nIf the last 8 digits uniquely identify a phone number,\nRIGHT() provides a clean and expressive solution.\nSELECT\n  raw_phone,\n  RIGHT(\n    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),\n    8\n  ) AS phone_core\nFROM customers_raw_text;\n\nOutput\n\n\n\nraw_phone\nphone_core\n\n\n\n\n077600945\n77600945\n\n\n37477600945\n77600945\n\n\n77600945\n77600945\n\n\n\n\n\n\nLEFT() / RIGHT() vs SUBSTRING()\n\n\n\nScenario\nPrefer\n\n\n\n\nFixed prefix or suffix\nLEFT() / RIGHT()\n\n\nDynamic position\nSUBSTRING()\n\n\nReadability\nLEFT() / RIGHT()\n\n\nComplex extraction\nSUBSTRING()\n\n\n\n\n\n\nAnalytical Best Practice\n\napply cleaning before directional extraction\n\nvalidate assumptions with LENGTH()\n\nuse LEFT()/RIGHT() only when format is guaranteed\n\ndocument why a specific length was chosen\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Assumed Structure\n\n\n\nDirectional extraction assumes:\n\nstable formatting\n\nconsistent string length\n\nno missing segments\n\nIf upstream formats change, LEFT() and RIGHT() can silently produce incorrect results.\nAlways validate structure before relying on directional logic.\n\n\nLEFT() and RIGHT() are simple functions, but when used correctly, they provide clear, auditable, and efficient extraction for fixed-format analytical fields.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06: Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#dummy-dataset-messy-transaction-text-data",
+    "href": "materials/sql/session6.html#dummy-dataset-messy-transaction-text-data",
+    "title": "Session 06: Data Analysis with SQL | Functions",
+    "section": "Dummy Dataset | Messy Transaction Text Data",
+    "text": "Dummy Dataset | Messy Transaction Text Data\nThis dataset simulates realistic dirty text data commonly seen in transactional systems.\nIt will be used for both in-class exercises and the take-home case study.\nThe table intentionally contains:\n\ninconsistent phone formats\n\nannotated categories\n\nmixed casing\n\nformatting symbols\n\nduplicate logical entities\n\n\n\nStep 1 | Create Dummy Transaction Table\nDROP TABLE IF EXISTS transactions_text_demo;\n\nCREATE TABLE transactions_text_demo (\n  transaction_id INTEGER,\n  customer_id    INTEGER,\n  raw_phone      TEXT,\n  category_raw   TEXT,\n  quantity       INTEGER,\n  price          NUMERIC(10,2)\n);\n\n\n\nStep 2 | Populate with 1,000 Rows of Messy Data\nINSERT INTO transactions_text_demo\nSELECT\n  gs AS transaction_id,\n  (RANDOM() * 200)::INT + 1 AS customer_id,\n\n  CASE (gs % 6)\n    WHEN 0 THEN '   077600945  '\n    WHEN 1 THEN '077-600-045'\n    WHEN 2 THEN '(374)-77-600-945'\n    WHEN 3 THEN '37477600945'\n    WHEN 4 THEN '77600945'\n    ELSE '077600945'\n  END AS raw_phone,\n\n  CASE (gs % 5)\n    WHEN 0 THEN 'Accessories (Promo)'\n    WHEN 1 THEN 'Accessories (Test)'\n    WHEN 2 THEN 'Electronics (Old)'\n    WHEN 3 THEN 'Electronics (Promo)'\n    ELSE 'Accessories'\n  END AS category_raw,\n\n  (RANDOM() * 5)::INT + 1 AS quantity,\n  (RANDOM() * 500 + 10)::NUMERIC(10,2) AS price\nFROM generate_series(1, 1000) AS gs;\n\n\n\nStep 3 | Sanity Check\nSELECT\n  COUNT(*) AS total_rows,\n  COUNT(DISTINCT raw_phone) AS distinct_raw_phones,\n  COUNT(DISTINCT category_raw) AS distinct_categories\nFROM transactions_text_demo;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06: Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#in-class-assignment-text-diagnostics-group-by-1015-minutes",
+    "href": "materials/sql/session6.html#in-class-assignment-text-diagnostics-group-by-1015-minutes",
+    "title": "Session 06: Data Analysis with SQL | Functions",
+    "section": "In-Class Assignment | Text Diagnostics & GROUP BY (10–15 minutes)",
+    "text": "In-Class Assignment | Text Diagnostics & GROUP BY (10–15 minutes)\n\nObjective\nUse measurement-first SQL to understand how dirty text affects grouping and counts.\n\n\n\nTask 1 | Phone Number Diagnostics\nWrite a query that shows:\n\nraw_phone\nLENGTH(raw_phone)\nposition of '-'\nposition of '('\ncount of rows per pattern\n\nUse:\n\nLENGTH()\nPOSITION() or STRPOS()\nGROUP BY\n\n\n\n\nTask 2 | Category Fragmentation\nWrite a query that returns:\n\ncategory_raw\nnumber of transactions per category\n\nGROUP BY category_raw\nORDER BY COUNT(*) DESC;\nAnswer:\n\nhow many logical categories exist?\nhow many categories appear due to annotations?\n\n\n\n\nExpected Insight\nYou should clearly see that:\n\ngrouping on raw text produces fragmented dimensions\nphone numbers represent the same entity in multiple formats",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 06: Data Analysis with SQL | Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session6.html#take-home-case-study-cleaning-grouping-and-kpi-integrity-1.5-hours",
+    "href": "materials/sql/session6.html#take-home-case-study-cleaning-grouping-and-kpi-integrity-1.5-hours",
+    "title": "Session 06: Data Analysis with SQL | Functions",
+    "section": "Take-Home Case Study | Cleaning, Grouping, and KPI Integrity (≈ 1.5 hours)",
+    "text": "Take-Home Case Study | Cleaning, Grouping, and KPI Integrity (≈ 1.5 hours)\n\nScenario\nYou are asked to produce reliable KPIs from transactions_text_demo.\nBusiness questions:\n\nrevenue by category\n\nnumber of unique customers\n\naverage transaction value\n\n\n\n\nPart 1 | Profiling (≈ 25 minutes)\nWrite SQL queries to assess:\n\nphone number format diversity\ncategory fragmentation\nimpact of dirty text on GROUP BY\n\nUse only diagnostic functions.\n\n\n\nPart 2 | Standardization Layer (≈ 40 minutes)\nCreate a cleaned SELECT projection (no updates) that includes:\n\nstandardized phone number (last 8 digits)\ncleaned category (no annotations, trimmed)\nrevenue per transaction\n\nUse:\n\nREGEXP_REPLACE()\nTRIM()\nSUBSTRING()\nCONCAT() where relevant\n\n\n\n\nPart 3 | KPI Comparison (≈ 20 minutes)\nCompute and compare:\n\nrevenue by raw category\nrevenue by cleaned category\nunique customers (raw vs cleaned phone)\n\nUse GROUP BY in all comparisons.\n\n\n\nPart 4 | Analytical Explanation (≈ 15 minutes)\nBriefly explain:\n\nwhy KPIs changed\nwhich cleaning step had the biggest impact\nwhat assumptions you made\nwhat could silently break in production\n\n\n\n\nSubmission Rules\n\nCreate string_functions.sql\nSQL only (no updates or deletes)\nall cleaning must be done in SELECT queries\nresults must be reproducible\nexplanations must be concise and analytical\npush it into GitHub\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThis assignment tests analytical thinking, not just SQL syntax.\nDirty text → broken GROUP BY → misleading KPIs.",
     "crumbs": [
       "Syllabus",
       "SQL",
