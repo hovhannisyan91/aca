@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Session 06 Data Analysis with SQL | Functions – Data Analytics Bootcamp</title>
+<title>Session 06: Data Analysis with SQL | Functions – Data Analytics Bootcamp</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -109,6 +109,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -339,7 +368,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session6.html">Session 06 Data Analysis with SQL | Functions</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session6.html">Session 06: Data Analysis with SQL | Functions</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -501,13 +530,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/sql/session5.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Session 05 Data Analysis with SQL | Functions</span></a>
+ <span class="menu-text">Session 05: Data Analysis with SQL | Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/sql/session6.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Session 06 Data Analysis with SQL | Functions</span></a>
+ <span class="menu-text">Session 06: Data Analysis with SQL | Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item sidebar-item-section">
@@ -546,13 +575,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/sql/slides/session5.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Functions</span></a>
+ <span class="menu-text">Numeric Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/sql/slides/session6.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Functions</span></a>
+ <span class="menu-text">String Functions</span></a>
   </div>
 </li>
       </ul>
@@ -779,6 +808,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#analytical-limitations-of-replace" id="toc-analytical-limitations-of-replace" class="nav-link" data-scroll-target="#analytical-limitations-of-replace">Analytical Limitations of REPLACE()</a></li>
   <li><a href="#when-to-use-replace" id="toc-when-to-use-replace" class="nav-link" data-scroll-target="#when-to-use-replace">When to Use REPLACE()</a></li>
   </ul></li>
+  <li><a href="#regexp_replace" id="toc-regexp_replace" class="nav-link" data-scroll-target="#regexp_replace"><code>REGEXP_REPLACE()</code></a>
+  <ul class="collapse">
+  <li><a href="#why-regexp_replace-matters-in-analytics" id="toc-why-regexp_replace-matters-in-analytics" class="nav-link" data-scroll-target="#why-regexp_replace-matters-in-analytics">Why REGEXP_REPLACE() Matters in Analytics</a></li>
+  <li><a href="#regexp_replace-syntax-overview" id="toc-regexp_replace-syntax-overview" class="nav-link" data-scroll-target="#regexp_replace-syntax-overview">REGEXP_REPLACE() | Syntax Overview</a></li>
+  <li><a href="#extracting-digits-only" id="toc-extracting-digits-only" class="nav-link" data-scroll-target="#extracting-digits-only">Extracting Digits Only</a></li>
+  <li><a href="#removing-annotations-inside-parentheses" id="toc-removing-annotations-inside-parentheses" class="nav-link" data-scroll-target="#removing-annotations-inside-parentheses">Removing Annotations Inside Parentheses</a></li>
+  <li><a href="#regexp-vs-replace-when-to-choose-which" id="toc-regexp-vs-replace-when-to-choose-which" class="nav-link" data-scroll-target="#regexp-vs-replace-when-to-choose-which">REGEXP vs REPLACE | When to Choose Which</a></li>
+  <li><a href="#analytical-warning" id="toc-analytical-warning" class="nav-link" data-scroll-target="#analytical-warning">Analytical Warning</a></li>
+  </ul></li>
+  <li><a href="#substring" id="toc-substring" class="nav-link" data-scroll-target="#substring"><code>SUBSTRING()</code></a>
+  <ul class="collapse">
+  <li><a href="#why-substring-matters-in-analytics" id="toc-why-substring-matters-in-analytics" class="nav-link" data-scroll-target="#why-substring-matters-in-analytics">Why SUBSTRING() Matters in Analytics</a></li>
+  <li><a href="#substring-basic-positional-extraction" id="toc-substring-basic-positional-extraction" class="nav-link" data-scroll-target="#substring-basic-positional-extraction">SUBSTRING() | Basic Positional Extraction</a></li>
+  <li><a href="#example-1-extract-last-8-digits-of-phone-numbers" id="toc-example-1-extract-last-8-digits-of-phone-numbers" class="nav-link" data-scroll-target="#example-1-extract-last-8-digits-of-phone-numbers">Example 1 | Extract Last 8 Digits of Phone Numbers</a></li>
+  <li><a href="#example-2-substring-with-fixed-structure" id="toc-example-2-substring-with-fixed-structure" class="nav-link" data-scroll-target="#example-2-substring-with-fixed-structure">Example 2 | SUBSTRING() with Fixed Structure</a></li>
+  <li><a href="#example-3-extract-digits-using-regex" id="toc-example-3-extract-digits-using-regex" class="nav-link" data-scroll-target="#example-3-extract-digits-using-regex">Example 3 | Extract Digits Using Regex</a></li>
+  <li><a href="#positional-vs-pattern-based-substring" id="toc-positional-vs-pattern-based-substring" class="nav-link" data-scroll-target="#positional-vs-pattern-based-substring">Positional vs Pattern-Based SUBSTRING()</a></li>
+  <li><a href="#analytical-best-practice-2" id="toc-analytical-best-practice-2" class="nav-link" data-scroll-target="#analytical-best-practice-2">Analytical Best Practice</a></li>
+  </ul></li>
+  <li><a href="#concat-and" id="toc-concat-and" class="nav-link" data-scroll-target="#concat-and"><code>CONCAT()</code> and <code>||</code></a>
+  <ul class="collapse">
+  <li><a href="#why-concat-matters-in-analytics" id="toc-why-concat-matters-in-analytics" class="nav-link" data-scroll-target="#why-concat-matters-in-analytics">Why CONCAT() Matters in Analytics</a></li>
+  <li><a href="#concat-syntax-overview" id="toc-concat-syntax-overview" class="nav-link" data-scroll-target="#concat-syntax-overview">CONCAT() | Syntax Overview</a></li>
+  <li><a href="#example-1-building-full-names-raw" id="toc-example-1-building-full-names-raw" class="nav-link" data-scroll-target="#example-1-building-full-names-raw">Example 1 | Building Full Names (Raw)</a></li>
+  <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a></li>
+  <li><a href="#example-2-concat-initcap-recommended-pattern" id="toc-example-2-concat-initcap-recommended-pattern" class="nav-link" data-scroll-target="#example-2-concat-initcap-recommended-pattern">Example 2 | CONCAT() + INITCAP() (Recommended Pattern)</a></li>
+  <li><a href="#output-1" id="toc-output-1" class="nav-link" data-scroll-target="#output-1">Output</a></li>
+  <li><a href="#concat-vs" id="toc-concat-vs" class="nav-link" data-scroll-target="#concat-vs">CONCAT() vs <code>||</code></a></li>
+  <li><a href="#key-difference" id="toc-key-difference" class="nav-link" data-scroll-target="#key-difference">Key Difference</a></li>
+  </ul></li>
+  <li><a href="#position-strpos" id="toc-position-strpos" class="nav-link" data-scroll-target="#position-strpos"><code>POSITION()</code> / <code>STRPOS()</code></a>
+  <ul class="collapse">
+  <li><a href="#why-position-strpos-matters-in-analytics" id="toc-why-position-strpos-matters-in-analytics" class="nav-link" data-scroll-target="#why-position-strpos-matters-in-analytics">Why POSITION() / STRPOS() Matters in Analytics</a></li>
+  <li><a href="#position-syntax-overview" id="toc-position-syntax-overview" class="nav-link" data-scroll-target="#position-syntax-overview">POSITION() | Syntax Overview</a></li>
+  <li><a href="#example-1-detect-parentheses-in-categories" id="toc-example-1-detect-parentheses-in-categories" class="nav-link" data-scroll-target="#example-1-detect-parentheses-in-categories">Example 1 | Detect Parentheses in Categories</a></li>
+  <li><a href="#analytical-interpretation-1" id="toc-analytical-interpretation-1" class="nav-link" data-scroll-target="#analytical-interpretation-1">Analytical Interpretation</a></li>
+  <li><a href="#example-2-strpos-for-phone-number-diagnostics" id="toc-example-2-strpos-for-phone-number-diagnostics" class="nav-link" data-scroll-target="#example-2-strpos-for-phone-number-diagnostics">Example 2 | STRPOS() for Phone Number Diagnostics</a></li>
+  <li><a href="#analytical-interpretation-2" id="toc-analytical-interpretation-2" class="nav-link" data-scroll-target="#analytical-interpretation-2">Analytical Interpretation</a></li>
+  <li><a href="#position-as-a-validation-tool" id="toc-position-as-a-validation-tool" class="nav-link" data-scroll-target="#position-as-a-validation-tool">POSITION() as a Validation Tool</a></li>
+  <li><a href="#position-vs-substring" id="toc-position-vs-substring" class="nav-link" data-scroll-target="#position-vs-substring">POSITION() vs SUBSTRING()</a></li>
+  <li><a href="#analytical-best-practice-3" id="toc-analytical-best-practice-3" class="nav-link" data-scroll-target="#analytical-best-practice-3">Analytical Best Practice</a></li>
+  </ul></li>
+  <li><a href="#split_part" id="toc-split_part" class="nav-link" data-scroll-target="#split_part"><code>SPLIT_PART()</code></a>
+  <ul class="collapse">
+  <li><a href="#why-split_part-matters-in-analytics" id="toc-why-split_part-matters-in-analytics" class="nav-link" data-scroll-target="#why-split_part-matters-in-analytics">Why SPLIT_PART() Matters in Analytics</a></li>
+  <li><a href="#split_part-syntax" id="toc-split_part-syntax" class="nav-link" data-scroll-target="#split_part-syntax">SPLIT_PART() | Syntax</a></li>
+  <li><a href="#example-1-split-phone-numbers-by-hyphen-first-part" id="toc-example-1-split-phone-numbers-by-hyphen-first-part" class="nav-link" data-scroll-target="#example-1-split-phone-numbers-by-hyphen-first-part">Example 1 | Split Phone Numbers by Hyphen (First Part)</a></li>
+  <li><a href="#example-2-split-phone-numbers-by-hyphen-second-part" id="toc-example-2-split-phone-numbers-by-hyphen-second-part" class="nav-link" data-scroll-target="#example-2-split-phone-numbers-by-hyphen-second-part">Example 2 | Split Phone Numbers by Hyphen (Second Part)</a></li>
+  <li><a href="#analytical-interpretation-3" id="toc-analytical-interpretation-3" class="nav-link" data-scroll-target="#analytical-interpretation-3">Analytical Interpretation</a></li>
+  <li><a href="#important-behavior-to-remember" id="toc-important-behavior-to-remember" class="nav-link" data-scroll-target="#important-behavior-to-remember">Important Behavior to Remember</a></li>
+  <li><a href="#example-3-split_part-after-cleaning" id="toc-example-3-split_part-after-cleaning" class="nav-link" data-scroll-target="#example-3-split_part-after-cleaning">Example 3 | SPLIT_PART() After Cleaning</a></li>
+  <li><a href="#split_part-vs-other-string-functions" id="toc-split_part-vs-other-string-functions" class="nav-link" data-scroll-target="#split_part-vs-other-string-functions">SPLIT_PART() vs Other String Functions</a></li>
+  <li><a href="#analytical-best-practice-4" id="toc-analytical-best-practice-4" class="nav-link" data-scroll-target="#analytical-best-practice-4">Analytical Best Practice</a></li>
+  </ul></li>
+  <li><a href="#nullif" id="toc-nullif" class="nav-link" data-scroll-target="#nullif"><code>NULLIF()</code></a>
+  <ul class="collapse">
+  <li><a href="#why-nullif-matters-in-analytics" id="toc-why-nullif-matters-in-analytics" class="nav-link" data-scroll-target="#why-nullif-matters-in-analytics">Why NULLIF() Matters in Analytics</a></li>
+  <li><a href="#nullif-syntax-overview" id="toc-nullif-syntax-overview" class="nav-link" data-scroll-target="#nullif-syntax-overview">NULLIF() | Syntax Overview</a></li>
+  <li><a href="#example-1-empty-strings-to-null" id="toc-example-1-empty-strings-to-null" class="nav-link" data-scroll-target="#example-1-empty-strings-to-null">Example 1 | Empty Strings to NULL</a></li>
+  <li><a href="#analytical-interpretation-4" id="toc-analytical-interpretation-4" class="nav-link" data-scroll-target="#analytical-interpretation-4">Analytical Interpretation</a></li>
+  <li><a href="#example-2-placeholder-text-to-null" id="toc-example-2-placeholder-text-to-null" class="nav-link" data-scroll-target="#example-2-placeholder-text-to-null">Example 2 | Placeholder Text to NULL</a></li>
+  <li><a href="#example-3-nullif-before-aggregation" id="toc-example-3-nullif-before-aggregation" class="nav-link" data-scroll-target="#example-3-nullif-before-aggregation">Example 3 | NULLIF() Before Aggregation</a></li>
+  <li><a href="#nullif-with-concat-defensive-pattern" id="toc-nullif-with-concat-defensive-pattern" class="nav-link" data-scroll-target="#nullif-with-concat-defensive-pattern">NULLIF() with CONCAT() (Defensive Pattern)</a></li>
+  <li><a href="#nullif-vs-coalesce" id="toc-nullif-vs-coalesce" class="nav-link" data-scroll-target="#nullif-vs-coalesce">NULLIF() vs COALESCE()</a></li>
+  <li><a href="#analytical-best-practice-5" id="toc-analytical-best-practice-5" class="nav-link" data-scroll-target="#analytical-best-practice-5">Analytical Best Practice</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -786,9 +881,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content column-body" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session6.html">Session 06 Data Analysis with SQL | Functions</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session6.html">Session 06: Data Analysis with SQL | Functions</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Session 06 Data Analysis with SQL | Functions</h1>
+<h1 class="title">Session 06: Data Analysis with SQL | Functions</h1>
   <div class="quarto-categories">
     <div class="quarto-category">SQL</div>
     <div class="quarto-category">String Functions</div>
@@ -967,22 +1062,32 @@ Note
 <section id="dummy-setup-raw-phone-numbers-and-names" class="level3">
 <h3 class="anchored" data-anchor-id="dummy-setup-raw-phone-numbers-and-names">Dummy Setup | Raw Phone Numbers and Names</h3>
 <p>To demonstrate <strong>text normalization beyond phone numbers</strong>, we extend the dummy table to include <strong>first name</strong> and <strong>last name</strong> fields with <strong>inconsistent capitalization and formatting</strong>.</p>
+<!-- customers_raw_text -->
 <p>This allows us to later apply functions such as <code>UPPER()</code>, <code>LOWER()</code>, <code>INITCAP()</code>, and validation logic on names.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> phone_numbers_demo;</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> customers_raw_text;</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> phone_numbers_demo (</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  raw_phone   TEXT,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  first_name  TEXT,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  last_name   TEXT</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>);</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> phone_numbers_demo (raw_phone, first_name, last_name) <span class="kw">VALUES</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  (<span class="st">'   077600945  '</span>, <span class="st">'john'</span>,        <span class="st">'DOE'</span>),</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  (<span class="st">'077600945'</span>,      <span class="st">'ANNa'</span>,        <span class="st">'smith'</span>),</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  (<span class="st">'77600945'</span>,       <span class="st">'mARy'</span>,        <span class="st">'joHNson'</span>),</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  (<span class="st">'077-600-045'</span>,    <span class="st">'geORGe'</span>,      <span class="st">'brown'</span>),</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  (<span class="st">'(374)-77-600-945'</span>,<span class="st">'ALEx'</span>,       <span class="st">'O</span><span class="ch">''</span><span class="st">NEILL'</span>),</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  (<span class="st">'37477600945'</span>,    <span class="st">'lAuRA'</span>,       <span class="st">'van dyke'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers_raw_text (</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  customer_id   <span class="dt">INTEGER</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  first_name    TEXT,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  last_name     TEXT,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  raw_phone     TEXT,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  category_raw  TEXT,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  birth_date    <span class="dt">DATE</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> customers_raw_text (</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  first_name,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  last_name,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  category_raw,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  birth_date</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>) <span class="kw">VALUES</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span>, <span class="st">'joHN'</span>,     <span class="st">'doE'</span>,        <span class="st">'   077600945  '</span>,   <span class="st">'Accessories (Promo)'</span>, <span class="dt">DATE</span> <span class="st">'1994-03-12'</span>),</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">2</span>, <span class="st">'MARY'</span>,     <span class="st">'sMiTh'</span>,      <span class="st">'077-600-045'</span>,      <span class="st">'Electronics (Old)'</span>,   <span class="dt">DATE</span> <span class="st">'1988-11-05'</span>),</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">3</span>, <span class="st">'aLEx'</span>,     <span class="st">'johnSON'</span>,    <span class="st">'(374)-77-600-945'</span>, <span class="st">'Accessories'</span>,         <span class="dt">DATE</span> <span class="st">'2001-07-23'</span>),</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">4</span>, <span class="st">'anna'</span>,     <span class="st">'VAN DYKE'</span>,   <span class="st">'37477600945'</span>,      <span class="st">'Electronics (Promo)'</span>, <span class="dt">DATE</span> <span class="st">'1999-01-30'</span>),</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">5</span>, <span class="kw">NULL</span>,       <span class="st">'brOwn'</span>,      <span class="st">'77600945'</span>,         <span class="st">'Accessories (Test)'</span>,  <span class="dt">DATE</span> <span class="st">'1994-03-12'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>What this setup gives us</strong></p>
 <ul>
 <li><strong>phone numbers</strong> with inconsistent formatting<br>
@@ -993,7 +1098,9 @@ Note
 </li>
 <li>mixed casing within the same value<br>
 </li>
-<li>multi-part last names</li>
+<li>multi-part last names<br>
+</li>
+<li>unstructured category</li>
 </ul></li>
 </ul>
 <p>This mirrors <strong>real-world dirty text data</strong> and prepares us for the next set of string functions focused on <strong>standardization and normalization</strong>.</p>
@@ -1013,7 +1120,7 @@ Before attempting to <em>clean</em> or <em>standardize</em> them, a good analyst
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">LENGTH</span>(raw_phone) <span class="kw">AS</span> phone_length</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 <p><strong>Output</strong></p>
 <table class="caption-top table">
@@ -1139,7 +1246,7 @@ Although these spaces are not obvious when visually inspecting data, they can:</
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">LENGTH</span>(raw_phone) <span class="kw">AS</span> <span class="fu">length</span>,</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">TRIM</span>(raw_phone) <span class="kw">AS</span> trimmed_phone,</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">LENGTH</span>(<span class="fu">TRIM</span>(raw_phone)) <span class="kw">AS</span> trimmed_length</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="result-interpretation" class="level3">
@@ -1257,7 +1364,7 @@ Important
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  first_name,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">LOWER</span>(first_name) <span class="kw">AS</span> first_name_lower</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>When to Use</strong></p>
 <ul>
 <li>internal identifiers<br>
@@ -1282,7 +1389,7 @@ Important
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  last_name,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">UPPER</span>(last_name) <span class="kw">AS</span> last_name_upper</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>When to Use</strong></p>
 <ul>
 <li>standardized codes<br>
@@ -1304,7 +1411,7 @@ Important
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  first_name,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">INITCAP</span>(first_name) <span class="kw">AS</span> first_name_clean</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Example Transformations</strong></p>
 <table class="caption-top table">
 <thead>
@@ -1392,7 +1499,7 @@ Important
 <section id="why-replace-matters-in-analytics" class="level3">
 <h3 class="anchored" data-anchor-id="why-replace-matters-in-analytics">Why REPLACE() Matters in Analytics</h3>
 <p><code>REPLACE()</code> allows you to <strong>explicitly remove or substitute known characters</strong>.</p>
-<p>From an analytical perspective:</p>
+<p><strong>From an analytical perspective:</strong></p>
 <ul>
 <li>the rule is <strong>deterministic</strong></li>
 <li>the transformation is <strong>transparent</strong></li>
@@ -1414,7 +1521,7 @@ Important
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">REPLACE</span>(raw_phone, <span class="st">'-'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_no_hyphen</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Conceptual Effect</strong></p>
 <table class="caption-top table">
 <thead>
@@ -1448,7 +1555,7 @@ All other characters remain untouched.</p>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">REPLACE</span>(<span class="fu">TRIM</span>(raw_phone), <span class="st">'-'</span>, <span class="st">''</span>),</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'('</span>, <span class="st">''</span>),</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">')'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_partial_clean</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This removes:</p>
 <ul>
 <li>leading and trailing spaces<br>
@@ -1543,6 +1650,1754 @@ All other characters remain untouched.</p>
 </ul>
 </div>
 </div>
+</section>
+</section>
+<section id="regexp_replace" class="level2">
+<h2 class="anchored" data-anchor-id="regexp_replace"><code>REGEXP_REPLACE()</code></h2>
+<p>After handling <strong>explicit characters</strong> with <code>REPLACE()</code>, we move to <strong>pattern-based cleaning</strong>.</p>
+<p>Real-world text often contains <strong>unknown or variable noise</strong>.<br>
+In such cases, hard-coded replacements do not scale.</p>
+<p><code>REGEXP_REPLACE()</code> allows you to define <strong>rules</strong>, not characters.</p>
+<hr>
+<section id="why-regexp_replace-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-regexp_replace-matters-in-analytics">Why REGEXP_REPLACE() Matters in Analytics</h3>
+<p>Regular expressions let you describe <strong>what to keep</strong> or <strong>what to remove</strong>, rather than listing every unwanted symbol.</p>
+<p><strong>From an analytical perspective, this means:</strong></p>
+<ul>
+<li>fewer <strong>hard-coded</strong> assumptions<br>
+</li>
+<li>better generalization to unseen formats<br>
+</li>
+<li>cleaner, more robust standardization rules</li>
+</ul>
+<p><strong>This is especially important for identifiers such as:</strong></p>
+<ul>
+<li>phone numbers<br>
+</li>
+<li>IDs<br>
+</li>
+<li>codes<br>
+</li>
+<li>reference keys</li>
+</ul>
+<hr>
+</section>
+<section id="regexp_replace-syntax-overview" class="level3">
+<h3 class="anchored" data-anchor-id="regexp_replace-syntax-overview">REGEXP_REPLACE() | Syntax Overview</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">REGEXP_REPLACE</span>(text, pattern, replacement [, flags])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Key components:</strong></p>
+<ul>
+<li><strong>text</strong> → the input string<br>
+</li>
+<li><strong>pattern</strong> → a regular expression<br>
+</li>
+<li><strong>replacement</strong> → what to substitute<br>
+</li>
+<li><strong>flags</strong> → optional modifiers (e.g.&nbsp;global replacement)</li>
+</ul>
+<hr>
+</section>
+<section id="extracting-digits-only" class="level3">
+<h3 class="anchored" data-anchor-id="extracting-digits-only">Extracting Digits Only</h3>
+<p>A very common analytical task is to <strong>remove everything except digits</strong>.</p>
+<p><strong>The regex pattern:</strong></p>
+<pre class="text"><code>[^0-9]</code></pre>
+<p><span class="math display">\[\Downarrow\]</span></p>
+<ul>
+<li><code>[]</code> <span class="math inline">\(\rightarrow\)</span> character set<br>
+</li>
+<li><code>^</code> <span class="math inline">\(\rightarrow\)</span> NOT<br>
+</li>
+<li><code>0-9</code> <span class="math inline">\(\rightarrow\)</span> digits</li>
+</ul>
+<p>So the pattern matches <strong>any non-digit character</strong>.</p>
+<hr>
+<section id="query-digits-only-cleaning" class="level4">
+<h4 class="anchored" data-anchor-id="query-digits-only-cleaning">Query | Digits-Only Cleaning</h4>
+<p>Let’s run the bellow code</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">REGEXP_REPLACE</span>(raw_phone, <span class="st">'[^0-9]'</span>, <span class="st">''</span>, <span class="st">'g'</span>) <span class="kw">AS</span> digits_only</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<ul>
+<li><code>'[^0-9]':</code> <strong>regular expression pattern</strong> that defines <strong>what to match</strong>.</li>
+<li><code>'':</code> Replacement</li>
+<li><code>'g':</code>Global Flag, The <code>'g'</code> flag stands for <strong>global replacement</strong>. Without <code>'g'</code>, only the <strong>first match</strong> would be replaced</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Experiment...">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Experiment…
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Feel free to experiment as much as you need!</p>
+</div>
+</div>
+</section>
+<section id="output-conceptual-output" class="level4">
+<h4 class="anchored" data-anchor-id="output-conceptual-output">Output | Conceptual Output</h4>
+<p>The above query would return</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>digits_only</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>'   077600945  '</code></td>
+<td><code>077600945</code></td>
+</tr>
+<tr class="even">
+<td><code>'077600945'</code></td>
+<td><code>077600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>'77600945'</code></td>
+<td><code>77600945</code></td>
+</tr>
+<tr class="even">
+<td><code>'077-600-045'</code></td>
+<td><code>077600045</code></td>
+</tr>
+<tr class="odd">
+<td><code>'(374)-77-600-945'</code></td>
+<td><code>37477600945</code></td>
+</tr>
+<tr class="even">
+<td><code>'37477600945'</code></td>
+<td><code>37477600945</code></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\Downarrow\]</span></p>
+<ul>
+<li>all formatting symbols are removed<br>
+</li>
+<li>only numeric content remains<br>
+</li>
+<li>lengths still vary</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled" title="Primary Goal...">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Primary Goal…
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The goal here is not to memorize regex syntax, but to recognize <strong>reusable analytical patterns</strong>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="removing-annotations-inside-parentheses" class="level3">
+<h3 class="anchored" data-anchor-id="removing-annotations-inside-parentheses">Removing Annotations Inside Parentheses</h3>
+<p>Text fields often contain <strong>annotations or comments</strong> that should not be part of the analytical key</p>
+<p>Recall our dummy table:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 30%">
+<col style="width: 33%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>raw_phone</th>
+<th>category_raw</th>
+<th>birth_date</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>077600945</code></td>
+<td>Accessories (Promo)</td>
+<td>1994-03-12</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>077-600-045</code></td>
+<td>Electronics (Old)</td>
+<td>1988-11-05</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>(374)-77-600-945</code></td>
+<td>Accessories</td>
+<td>2001-07-23</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><code>37477600945</code></td>
+<td>Electronics (Promo)</td>
+<td>1999-01-30</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><code>77600945</code></td>
+<td>Accessories (Test)</td>
+<td>1994-03-12</td>
+</tr>
+</tbody>
+</table>
+<p>Text fields often include <strong>annotations inside parentheses</strong> that are useful for humans but harmful for analytics.</p>
+<p>In analytics, these annotations usually <strong>break grouping and counting</strong>.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li><code>Accessories (Promo)</code></li>
+<li><code>Electronics (Old)</code></li>
+<li><code>Gold Customer (Test)</code></li>
+</ul>
+<p><strong>From an analytical standpoint, these annotations:</strong></p>
+<ul>
+<li>fragment categories<br>
+</li>
+<li>break grouping logic<br>
+</li>
+<li>inflate distinct counts</li>
+</ul>
+<section id="regex-pattern-1-remove-everything-inside" class="level4">
+<h4 class="anchored" data-anchor-id="regex-pattern-1-remove-everything-inside">Regex Pattern 1 | Remove Everything Inside <code>()</code></h4>
+<p><strong>The following pattern removes:</strong></p>
+<ul>
+<li>the opening parenthesis <code>(</code><br>
+</li>
+<li>everything inside<br>
+</li>
+<li>the closing parenthesis <code>)</code></li>
+</ul>
+<pre class="text"><code>\([^)]*\)</code></pre>
+<p><strong>Pattern breakdown:</strong></p>
+<ul>
+<li><code>\(</code> → literal opening parenthesis<br>
+</li>
+<li><code>[^)]*</code> → any characters except <code>)</code> (zero or more)<br>
+</li>
+<li><code>\)</code> → literal closing parenthesis</li>
+</ul>
+<section id="query-cleaning-categories" class="level5">
+<h5 class="anchored" data-anchor-id="query-cleaning-categories">Query | Cleaning Categories</h5>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    category_raw,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\([^)]*\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>   <span class="kw">AS</span> category_clean1</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="output-cleaning-categories" class="level5">
+<h5 class="anchored" data-anchor-id="output-cleaning-categories">Output | Cleaning Categories</h5>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-caution callout-titled" title="Whitespaces">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Whitespaces
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Check the whitespaces!</strong></p>
+</div>
+</div>
+</section>
+</section>
+<section id="regex-pattern-2-remove-parentheses-content-trim-whitespaces" class="level4">
+<h4 class="anchored" data-anchor-id="regex-pattern-2-remove-parentheses-content-trim-whitespaces">Regex Pattern 2 | Remove Parentheses Content + TRIM Whitespaces</h4>
+<p>After removing annotations inside parentheses, <strong>trailing whitespaces often remain</strong>.<br>
+This leads to categories that <em>look identical</em> but fail equality checks.</p>
+<p>To fix this, we <strong>chain <code>TRIM()</code> after <code>REGEXP_REPLACE()</code></strong>.</p>
+<pre class="text"><code>TRIM(REGEXP_REPLACE(category_raw, '\([^)]*\)', '', 'g'))</code></pre>
+<p><strong>What this does:</strong></p>
+<ul>
+<li>removes everything inside <code>()</code><br>
+</li>
+<li>removes the parentheses themselves<br>
+</li>
+<li>trims leading and trailing spaces</li>
+</ul>
+<hr>
+<section id="query-cleaning-categories-trim" class="level5">
+<h5 class="anchored" data-anchor-id="query-cleaning-categories-trim">Query | Cleaning Categories + TRIM</h5>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    category_raw,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">TRIM</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\([^)]*\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> category_clean2</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="output-cleaning-categories-after-trim" class="level5">
+<h5 class="anchored" data-anchor-id="output-cleaning-categories-after-trim">Output | Cleaning Categories (After TRIM)</h5>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="callout callout-style-default callout-note callout-titled" title="Why TRIM Matters">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why TRIM Matters
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Without <code>TRIM()</code>, values like <code>'Accessories '</code> and <code>'Accessories'</code><br>
+would be treated as <strong>different categories</strong> during grouping.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="regex-pattern-3-remove-parentheses-leading-space-in-one-step" class="level4">
+<h4 class="anchored" data-anchor-id="regex-pattern-3-remove-parentheses-leading-space-in-one-step">Regex Pattern 3 | Remove Parentheses + Leading Space in One Step</h4>
+<p>Instead of chaining functions, we can encode <strong>whitespace logic directly into the regex</strong>.</p>
+<pre class="text"><code>\s*\(.*?\)</code></pre>
+<p><strong>Pattern breakdown:</strong></p>
+<ul>
+<li><code>\s*</code> → zero or more whitespace characters<br>
+</li>
+<li><code>\(</code> → opening parenthesis<br>
+</li>
+<li><code>.*?</code> → any characters (non-greedy)<br>
+</li>
+<li><code>\)</code> → closing parenthesis</li>
+</ul>
+<p><strong>This pattern removes:</strong></p>
+<ul>
+<li>the parentheses<br>
+</li>
+<li>the annotation<br>
+</li>
+<li><strong>any space before the parenthesis</strong></li>
+</ul>
+<hr>
+<section id="query-single-step-category-cleaning" class="level5">
+<h5 class="anchored" data-anchor-id="query-single-step-category-cleaning">Query | Single-Step Category Cleaning</h5>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    category_raw,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\s*\(.*?\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">AS</span> category_clean3</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="output-cleaning-categories-single-regex" class="level5">
+<h5 class="anchored" data-anchor-id="output-cleaning-categories-single-regex">Output | Cleaning Categories (Single Regex)</h5>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="comparison-summary" class="level4">
+<h4 class="anchored" data-anchor-id="comparison-summary">Comparison Summary</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Approach</th>
+<th>Result</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pattern 1</td>
+<td><code>Accessories</code></td>
+<td>Leaves trailing spaces</td>
+</tr>
+<tr class="even">
+<td>Pattern 2</td>
+<td><code>Accessories</code></td>
+<td>Safe and explicit</td>
+</tr>
+<tr class="odd">
+<td>Pattern 3</td>
+<td><code>Accessories</code></td>
+<td>Compact, regex-heavy</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Guidance">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Guidance
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Go over the <strong>Pattern 1</strong> when learning, teaching or collaborating</li>
+<li>Prefer <strong>Pattern 2</strong> when teaching or collaborating<br>
+</li>
+<li>Prefer <strong>Pattern 3</strong> when rules are stable and well-documented<br>
+</li>
+<li>Always validate results with <code>COUNT(DISTINCT ...)</code> after cleaning</li>
+</ul>
+<p>Regex-based cleaning directly impacts <strong>grouping, KPIs, and dashboards</strong>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="regexp-vs-replace-when-to-choose-which" class="level3">
+<h3 class="anchored" data-anchor-id="regexp-vs-replace-when-to-choose-which">REGEXP vs REPLACE | When to Choose Which</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Scenario</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Known characters only</td>
+<td><code>REPLACE()</code></td>
+</tr>
+<tr class="even">
+<td>Variable formatting</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+<tr class="odd">
+<td>Validation and extraction</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+<tr class="even">
+<td>Transparency and simplicity</td>
+<td><code>REPLACE()</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-warning" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-warning">Analytical Warning</h3>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Regex Is Powerful but...">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Regex Is Powerful but…
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Regular expressions are powerful but <strong>dangerous</strong> if misused.</p>
+<ul>
+<li>overly broad patterns can remove valid information<br>
+</li>
+<li>unreadable regex becomes technical debt<br>
+</li>
+<li>rules must be documented and tested</li>
+</ul>
+<p>Always combine regex cleaning with <strong>measurement and validation</strong>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="substring" class="level2">
+<h2 class="anchored" data-anchor-id="substring"><code>SUBSTRING()</code></h2>
+<p>After cleaning <strong>whitespace</strong>, <strong>case</strong>, and <strong>structural noise</strong>, the next common analytical task is <strong>extracting meaningful parts of text</strong>.</p>
+<p><code>SUBSTRING()</code> allows you to <strong>select a specific portion of a string</strong> based on position or pattern.<br>
+This is essential when a single text field contains <strong>multiple pieces of information</strong>.</p>
+<p>Unlike <code>REPLACE()</code> or <code>REGEXP_REPLACE()</code>, which <em>remove noise</em>,<br>
+<code>SUBSTRING()</code> is used to <strong>isolate signal</strong>.</p>
+<hr>
+<section id="why-substring-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-substring-matters-in-analytics">Why SUBSTRING() Matters in Analytics</h3>
+<p>Many real-world text fields are <strong>compound fields</strong>, for example:</p>
+<ul>
+<li>phone numbers with prefixes</li>
+<li>codes with embedded meaning</li>
+<li>identifiers with fixed segments</li>
+<li>dates or versions encoded in strings</li>
+</ul>
+<p><strong>From an analytical perspective, this means:</strong></p>
+<ul>
+<li>grouping requires <strong>extracted keys</strong></li>
+<li>joins depend on <strong>consistent substrings</strong></li>
+<li>validation depends on <strong>expected positions</strong></li>
+</ul>
+<hr>
+</section>
+<section id="substring-basic-positional-extraction" class="level3">
+<h3 class="anchored" data-anchor-id="substring-basic-positional-extraction">SUBSTRING() | Basic Positional Extraction</h3>
+<p>The most common form of <code>SUBSTRING()</code> uses <strong>starting position and length</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>SUBSTRING(text <span class="kw">FROM</span> start_position <span class="cf">FOR</span> <span class="fu">length</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-1-extract-last-8-digits-of-phone-numbers" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-extract-last-8-digits-of-phone-numbers">Example 1 | Extract Last 8 Digits of Phone Numbers</h3>
+<p>Assume we have already removed non-digit characters and want to extract the <strong>core phone number</strong>.</p>
+<p><strong>Input</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  SUBSTRING(raw_phone <span class="kw">FROM</span> <span class="fu">LENGTH</span>(raw_phone) <span class="op">-</span> <span class="dv">7</span> <span class="cf">FOR</span> <span class="dv">8</span>) <span class="kw">AS</span> phone_core</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<p><strong>Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_core</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<section id="analytical-interpretation" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-interpretation">Analytical Interpretation</h4>
+<p><strong>This logic:</strong></p>
+<ul>
+<li>assumes the <strong>last 8 digits</strong> uniquely identify the phone number</li>
+<li>removes country codes and prefixes</li>
+<li>creates a <strong>standardized join key</strong></li>
+</ul>
+<p><strong>This pattern is extremely common in:</strong></p>
+<ul>
+<li>telecom analytics</li>
+<li>customer deduplication</li>
+<li>identity resolution</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="example-2-substring-with-fixed-structure" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-substring-with-fixed-structure">Example 2 | SUBSTRING() with Fixed Structure</h3>
+<p>When text follows a <strong>known fixed format</strong>, <code>SUBSTRING()</code> is deterministic and fast.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  category_raw,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  SUBSTRING(category_raw <span class="kw">FROM</span> <span class="dv">1</span> <span class="cf">FOR</span> <span class="dv">11</span>) <span class="kw">AS</span> category_prefix</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\rightarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+<p><strong>This is useful when:</strong></p>
+<ul>
+<li>naming conventions are enforced</li>
+<li>formats are guaranteed upstream</li>
+</ul>
+</section>
+<section id="example-3-extract-digits-using-regex" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-extract-digits-using-regex">Example 3 | Extract Digits Using Regex</h3>
+<p>PostgreSQL also supports regex-based substring extraction.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>SUBSTRING(text <span class="kw">FROM</span> pattern)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  SUBSTRING(raw_phone <span class="kw">FROM</span> <span class="st">'[0-9]+'</span>) <span class="kw">AS</span> first_digit_sequence</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This extracts the <strong>first continuous digit block</strong>.</p>
+<p><span class="math display">\[\rightarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>first_digit_sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>077</code></td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td><code>077</code></td>
+</tr>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td><code>374</code></td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td><code>37477600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="positional-vs-pattern-based-substring" class="level3">
+<h3 class="anchored" data-anchor-id="positional-vs-pattern-based-substring">Positional vs Pattern-Based SUBSTRING()</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Use Case</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fixed-length identifiers</td>
+<td>Positional</td>
+</tr>
+<tr class="even">
+<td>Variable formats</td>
+<td>Regex-based</td>
+</tr>
+<tr class="odd">
+<td>Performance-critical logic</td>
+<td>Positional</td>
+</tr>
+<tr class="even">
+<td>Unknown structure</td>
+<td>Regex-based</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-best-practice-2" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-best-practice-2">Analytical Best Practice</h3>
+<ul>
+<li>use <strong>positional SUBSTRING()</strong> when formats are stable</li>
+<li>use <strong>regex SUBSTRING()</strong> when formats vary</li>
+<li>always validate results with:
+<ul>
+<li><code>LENGTH()</code></li>
+<li><code>COUNT(DISTINCT ...)</code></li>
+</ul></li>
+</ul>
+<hr>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Hidden Assumptions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Hidden Assumptions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Every <code>SUBSTRING()</code> encodes assumptions about:</p>
+<ul>
+<li>string length</li>
+<li>format stability</li>
+<li>semantic meaning of positions</li>
+</ul>
+<p>If formats change upstream, <code>SUBSTRING()</code> can silently break logic.</p>
+<p><strong>Always document:</strong></p>
+<ul>
+<li>why a position was chosen</li>
+<li>what happens if length changes</li>
+</ul>
+</div>
+</div>
+<p><code>SUBSTRING()</code> is a powerful extraction tool, but only when its assumptions are <strong>explicit and validated</strong>.</p>
+</section>
+</section>
+<section id="concat-and" class="level2">
+<h2 class="anchored" data-anchor-id="concat-and"><code>CONCAT()</code> and <code>||</code></h2>
+<p>After extracting and cleaning text (<code>TRIM()</code>, <code>LOWER()</code>, <code>INITCAP()</code>, <code>SUBSTRING()</code>), a very common analytical task is to <strong>construct new text values</strong> from multiple columns.</p>
+<p>This is where <code>CONCAT()</code> and the string concatenation operator <code>||</code> are used.</p>
+<p>They allow you to <strong>build full identifiers</strong>, <strong>labels</strong>, and <strong>display fields</strong> from atomic components.</p>
+<hr>
+<section id="why-concat-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-concat-matters-in-analytics">Why CONCAT() Matters in Analytics</h3>
+<p>In real analytical datasets, information is often <strong>split across columns</strong>:</p>
+<ul>
+<li>first name + last name<br>
+</li>
+<li>city + zip code<br>
+</li>
+<li>category + subcategory<br>
+</li>
+<li>year + quarter</li>
+</ul>
+<p><strong>From an analytical perspective, this means:</strong></p>
+<ul>
+<li>reporting often requires <strong>combined fields</strong></li>
+<li>joins may rely on <strong>constructed keys</strong></li>
+<li>dashboards need <strong>human-readable labels</strong></li>
+</ul>
+<p>Concatenation is therefore a <strong>feature engineering operation</strong>, not just formatting.</p>
+</section>
+<section id="concat-syntax-overview" class="level3">
+<h3 class="anchored" data-anchor-id="concat-syntax-overview">CONCAT() | Syntax Overview</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">CONCAT</span>(value1, value2, <span class="op">..</span>., valueN)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Key properties:</strong></p>
+<ul>
+<li>accepts <strong>multiple arguments</strong></li>
+<li>treats <code>NULL</code> as an empty string</li>
+<li>always returns text</li>
+</ul>
+<p><strong>PostgreSQL also supports the operator form:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>value1 <span class="op">||</span> value2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-1-building-full-names-raw" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-building-full-names-raw">Example 1 | Building Full Names (Raw)</h3>
+<p>Assume we have separate <code>first_name</code> and <code>last_name</code> columns.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  first_name,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  last_name,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">CONCAT</span>(first_name, <span class="st">' '</span>, last_name) <span class="kw">AS</span> full_name</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="output" class="level3">
+<h3 class="anchored" data-anchor-id="output">Output</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>first_name</th>
+<th>last_name</th>
+<th>full_name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>john</td>
+<td>doe</td>
+<td>john doe</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>MARY</td>
+<td>SMITH</td>
+<td>MARY SMITH</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>aLEx</td>
+<td>johnson</td>
+<td>aLEx johnson</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>anna</td>
+<td>VAN DYKE</td>
+<td>anna VAN DYKE</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>NULL</td>
+<td>brown</td>
+<td>brown</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-2-concat-initcap-recommended-pattern" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-concat-initcap-recommended-pattern">Example 2 | CONCAT() + INITCAP() (Recommended Pattern)</h3>
+<p><strong>A very common and safe analytical pattern is:</strong></p>
+<ol type="1">
+<li>normalize case<br>
+</li>
+<li>then concatenate</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">INITCAP</span>(first_name) <span class="kw">AS</span> first_name_clean,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">INITCAP</span>(last_name)  <span class="kw">AS</span> last_name_clean,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">INITCAP</span>(<span class="fu">CONCAT</span>(</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    first_name,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">' '</span>,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    last_name</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  )) <span class="kw">AS</span> full_name_clean</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="output-1" class="level3">
+<h3 class="anchored" data-anchor-id="output-1">Output</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>first_name_clean</th>
+<th>last_name_clean</th>
+<th>full_name_clean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>John</td>
+<td>Doe</td>
+<td>John Doe</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Mary</td>
+<td>Smith</td>
+<td>Mary Smith</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Alex</td>
+<td>Johnson</td>
+<td>Alex Johnson</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Anna</td>
+<td>Van Dyke</td>
+<td>Anna Van Dyke</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>NULL</td>
+<td>Brown</td>
+<td>Brown</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="concat-vs" class="level3">
+<h3 class="anchored" data-anchor-id="concat-vs">CONCAT() vs <code>||</code></h3>
+<p>The same result can be achieved using the operator form.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">INITCAP</span>(first_name) <span class="op">||</span> <span class="st">' '</span> <span class="op">||</span> <span class="fu">INITCAP</span>(last_name) <span class="kw">AS</span> full_name_clean</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="key-difference" class="level3">
+<h3 class="anchored" data-anchor-id="key-difference">Key Difference</h3>
+<ul>
+<li><code>CONCAT()</code> treats <code>NULL</code> as empty<br>
+</li>
+<li><code>||</code> returns <code>NULL</code> if <strong>any operand is NULL</strong></li>
+</ul>
+<p>This difference is <strong>analytically important</strong>.</p>
+<ul>
+<li>use <code>CONCAT()</code> when <code>NULL</code> values are possible<br>
+</li>
+<li>use <code>||</code> when you want <code>NULL</code> propagation<br>
+</li>
+<li>always normalize text <strong>before</strong> concatenation<br>
+</li>
+<li>validate results with <code>COUNT(DISTINCT ...)</code></li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Constructed Fields">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Constructed Fields
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Concatenated fields:</strong></p>
+<ul>
+<li>often look harmless<br>
+</li>
+<li>but frequently become <strong>join keys or grouping dimensions</strong></li>
+</ul>
+<p><strong>If constructed inconsistently, they lead to:</strong></p>
+<ul>
+<li>duplicate entities<br>
+</li>
+<li>broken joins<br>
+</li>
+<li>misleading KPIs</li>
+</ul>
+<p><strong>Always document:</strong></p>
+<ul>
+<li>construction logic<br>
+</li>
+<li>ordering<br>
+</li>
+<li>casing rules</li>
+</ul>
+</div>
+</div>
+<p><code>CONCAT()</code> is a simple function, but it plays a <strong>critical role</strong> in building reliable analytical dimensions.</p>
+</section>
+</section>
+<section id="position-strpos" class="level2">
+<h2 class="anchored" data-anchor-id="position-strpos"><code>POSITION()</code> / <code>STRPOS()</code></h2>
+<p>The next analytical task is often to <strong>locate where something appears inside a string</strong>.</p>
+<p>This is exactly what <code>POSITION()</code> and its PostgreSQL-specific alias <code>STRPOS()</code> do.</p>
+<p>They answer a simple but powerful question:</p>
+<blockquote class="blockquote">
+<p><strong>Where does a given substring start?</strong></p>
+</blockquote>
+<hr>
+<section id="why-position-strpos-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-position-strpos-matters-in-analytics">Why POSITION() / STRPOS() Matters in Analytics</h3>
+<p>In analytical workflows, knowing the <strong>position</strong> of a character or substring allows you to:</p>
+<ul>
+<li>validate expected formats<br>
+</li>
+<li>detect malformed values<br>
+</li>
+<li>drive conditional logic<br>
+</li>
+<li>prepare for controlled extraction</li>
+</ul>
+<p><strong>Typical analytical scenarios include:</strong></p>
+<ul>
+<li>checking if a delimiter exists<br>
+</li>
+<li>identifying country codes in phone numbers<br>
+</li>
+<li>detecting annotations in categories<br>
+</li>
+<li>validating structured identifiers</li>
+</ul>
+<hr>
+</section>
+<section id="position-syntax-overview" class="level3">
+<h3 class="anchored" data-anchor-id="position-syntax-overview">POSITION() | Syntax Overview</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>POSITION(substring <span class="kw">IN</span> text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>returns the <strong>1-based position</strong> of <code>substring</code></li>
+<li>returns <code>0</code> if the substring is <strong>not found</strong></li>
+</ul>
+<p><strong>PostgreSQL also supports:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>STRPOS(text, substring)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Both behave identically.</p>
+<hr>
+</section>
+<section id="example-1-detect-parentheses-in-categories" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-detect-parentheses-in-categories">Example 1 | Detect Parentheses in Categories</h3>
+<p>Before removing annotations, we may want to <strong>detect which rows contain them</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  category_raw,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  POSITION(<span class="st">'('</span> <span class="kw">IN</span> category_raw) <span class="kw">AS</span> open_paren_pos</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<p><strong>Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>open_paren_pos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>13</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-interpretation-1" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-interpretation-1">Analytical Interpretation</h3>
+<ul>
+<li><code>open_paren_pos &gt; 0</code> → annotation exists<br>
+</li>
+<li><code>open_paren_pos = 0</code> → clean category</li>
+</ul>
+<p><strong>This allows you to:</strong></p>
+<ul>
+<li>flag rows for cleaning,<br>
+</li>
+<li>apply conditional logic<br>
+</li>
+<li>measure data quality issues</li>
+</ul>
+<hr>
+</section>
+<section id="example-2-strpos-for-phone-number-diagnostics" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-strpos-for-phone-number-diagnostics">Example 2 | STRPOS() for Phone Number Diagnostics</h3>
+<p>We can also use <code>STRPOS()</code> to detect formatting characters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  STRPOS(raw_phone, <span class="st">'-'</span>) <span class="kw">AS</span> hyphen_pos,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  STRPOS(raw_phone, <span class="st">'('</span>) <span class="kw">AS</span> paren_pos</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<p><strong>Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>hyphen_pos</th>
+<th>paren_pos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td>6</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-interpretation-2" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-interpretation-2">Analytical Interpretation</h3>
+<p>This immediately tells us:</p>
+<ul>
+<li>which rows contain separators<br>
+</li>
+<li>which rows include country codes<br>
+</li>
+<li>which rows are already clean</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is often done <strong>before</strong> applying <code>REGEXP_REPLACE()</code>.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="position-as-a-validation-tool" class="level3">
+<h3 class="anchored" data-anchor-id="position-as-a-validation-tool">POSITION() as a Validation Tool</h3>
+<p>A common analytical pattern is to convert position checks into flags.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  category_raw,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  POSITION(<span class="st">'('</span> <span class="kw">IN</span> category_raw) <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">AS</span> has_annotation</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<p><strong>Conceptual Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>category_raw</th>
+<th>has_annotation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Accessories (Promo)</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Electronics (Old)</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Accessories</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Electronics (Promo)</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Accessories (Test)</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<p><strong>This is useful for:</strong></p>
+<ul>
+<li>data quality reporting<br>
+</li>
+<li>audit checks<br>
+</li>
+<li>conditional cleaning logic</li>
+</ul>
+<hr>
+</section>
+<section id="position-vs-substring" class="level3">
+<h3 class="anchored" data-anchor-id="position-vs-substring">POSITION() vs SUBSTRING()</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Where is it?</td>
+<td><code>POSITION()</code> / <code>STRPOS()</code></td>
+</tr>
+<tr class="even">
+<td>Extract it</td>
+<td><code>SUBSTRING()</code></td>
+</tr>
+<tr class="odd">
+<td>Validate format</td>
+<td><code>POSITION()</code></td>
+</tr>
+<tr class="even">
+<td>Clean text</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-best-practice-3" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-best-practice-3">Analytical Best Practice</h3>
+<ul>
+<li>use <code>POSITION()</code> to <strong>measure and detect</strong></li>
+<li>use <code>SUBSTRING()</code> to <strong>extract</strong></li>
+<li>use <code>REGEXP_REPLACE()</code> to <strong>clean</strong></li>
+<li>never assume structure without checking positions</li>
+</ul>
+<hr>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Silent Assumptions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Silent Assumptions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Assuming a <code>substring</code> exists without checking its position leads to:</p>
+<ul>
+<li>incorrect extractions<br>
+</li>
+<li>unexpected NULLs<br>
+</li>
+<li>silent logic failures</li>
+</ul>
+<p>Always validate structure <strong>before</strong> relying on it.</p>
+</div>
+</div>
+<p><code>POSITION()</code> and <code>STRPOS()</code> are small functions with <strong>high analytical value</strong> when used for validation and diagnostics.</p>
+<!-- now working -->
+</section>
+</section>
+<section id="split_part" class="level2">
+<h2 class="anchored" data-anchor-id="split_part"><code>SPLIT_PART()</code></h2>
+<p>After locating structure with <code>POSITION()</code> and before applying complex regex logic,<br>
+a very common analytical task is to <strong>split a string by a known delimiter</strong>.</p>
+<p><code>SPLIT_PART()</code> extracts a <strong>specific segment</strong> from a delimited text field.<br>
+It is simpler and safer than regex when the structure is <strong>known and consistent</strong>.</p>
+<hr>
+<section id="why-split_part-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-split_part-matters-in-analytics">Why SPLIT_PART() Matters in Analytics</h3>
+<p>In real datasets, multiple values are often stored in a <strong>single column</strong>, separated by delimiters.</p>
+<ul>
+<li>phone numbers (<code>077-600-045</code>)</li>
+<li>composite IDs (<code>ORD-2024-001</code>)</li>
+<li>hierarchical categories (<code>Electronics-Mobile-Android</code>)</li>
+<li>version strings (<code>v1.2.5</code>)</li>
+</ul>
+<p>From an analytical perspective:</p>
+<ul>
+<li>grouping often requires <strong>one specific segment</strong></li>
+<li>joins depend on <strong>consistent extracted parts</strong></li>
+<li>validation depends on <strong>expected segment positions</strong></li>
+</ul>
+<hr>
+</section>
+<section id="split_part-syntax" class="level3">
+<h3 class="anchored" data-anchor-id="split_part-syntax">SPLIT_PART() | Syntax</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>SPLIT_PART(text, delimiter, position)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>text</code> → input string<br>
+</li>
+<li><code>delimiter</code> → character or string used to split<br>
+</li>
+<li><code>position</code> → <strong>1-based index</strong> of the part to return</li>
+</ul>
+<p>If the requested position does not exist, <code>SPLIT_PART()</code> returns an <strong>empty string</strong>.</p>
+<hr>
+</section>
+<section id="example-1-split-phone-numbers-by-hyphen-first-part" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-split-phone-numbers-by-hyphen-first-part">Example 1 | Split Phone Numbers by Hyphen (First Part)</h3>
+<p><strong>Input</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  SPLIT_PART(raw_phone, <span class="st">'-'</span>, <span class="dv">1</span>) <span class="kw">AS</span> first_part</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<p><strong>Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>first_part</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+<td><code>077</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+<td><code>(374)</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="example-2-split-phone-numbers-by-hyphen-second-part" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-split-phone-numbers-by-hyphen-second-part">Example 2 | Split Phone Numbers by Hyphen (Second Part)</h3>
+<p>We can also extract the <strong>second segment</strong>.</p>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  SPLIT_PART(raw_phone, <span class="st">'-'</span>, <span class="dv">2</span>) <span class="kw">AS</span> second_part</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<p><strong>Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>second_part</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+<td><code>600</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+<td><code>77</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-interpretation-3" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-interpretation-3">Analytical Interpretation</h3>
+<ul>
+<li>empty result means the delimiter does <strong>not exist</strong></li>
+<li>empty string is <strong>not NULL</strong></li>
+<li>malformed or inconsistent rows are exposed immediately</li>
+</ul>
+<p>This step is often used as a <strong>diagnostic</strong>, not just extraction.</p>
+<hr>
+</section>
+<section id="important-behavior-to-remember" class="level3">
+<h3 class="anchored" data-anchor-id="important-behavior-to-remember">Important Behavior to Remember</h3>
+<ul>
+<li>missing segments return an <strong>empty string</strong></li>
+<li>empty strings can silently affect:
+<ul>
+<li>grouping</li>
+<li>counting</li>
+<li>joins</li>
+</ul></li>
+</ul>
+<p>Because of this, <code>SPLIT_PART()</code> is often paired with <code>NULLIF()</code>.</p>
+<hr>
+</section>
+<section id="example-3-split_part-after-cleaning" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-split_part-after-cleaning">Example 3 | SPLIT_PART() After Cleaning</h3>
+<p>In practice, <code>SPLIT_PART()</code> is rarely used on raw data.</p>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  raw_phone,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  SPLIT_PART(</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">REGEXP_REPLACE</span>(raw_phone, <span class="st">'[^0-9-]'</span>, <span class="st">''</span>, <span class="st">'g'</span>),</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'-'</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="kw">AS</span> clean_second_part</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This combines:</p>
+<ul>
+<li>pattern-based cleaning<br>
+</li>
+<li>delimiter-based extraction</li>
+</ul>
+<hr>
+</section>
+<section id="split_part-vs-other-string-functions" class="level3">
+<h3 class="anchored" data-anchor-id="split_part-vs-other-string-functions">SPLIT_PART() vs Other String Functions</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Known delimiter</td>
+<td><code>SPLIT_PART()</code></td>
+</tr>
+<tr class="even">
+<td>Fixed character positions</td>
+<td><code>SUBSTRING()</code></td>
+</tr>
+<tr class="odd">
+<td>Variable formats</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+<tr class="even">
+<td>Structure validation</td>
+<td><code>POSITION()</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-best-practice-4" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-best-practice-4">Analytical Best Practice</h3>
+<ul>
+<li>validate delimiter presence with <code>POSITION()</code></li>
+<li>clean text <strong>before splitting</strong></li>
+<li>handle empty strings explicitly</li>
+<li>never assume all rows share the same structure</li>
+</ul>
+<hr>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Empty Strings">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Empty Strings
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>SPLIT_PART()</code> returns <strong>empty strings</strong>, not <code>NULL</code>.</p>
+<p>This can:</p>
+<ul>
+<li>inflate <code>COUNT(DISTINCT ...)</code></li>
+<li>break joins</li>
+<li>hide malformed records</li>
+</ul>
+<p>Always validate results using:</p>
+<ul>
+<li><code>LENGTH()</code></li>
+<li><code>NULLIF()</code></li>
+<li><code>COUNT(DISTINCT ...)</code></li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="nullif" class="level2">
+<h2 class="anchored" data-anchor-id="nullif"><code>NULLIF()</code></h2>
+<p>After handling <strong>extraction</strong>, <strong>cleaning</strong>, and <strong>construction</strong> of text values, the next important analytical task is <strong>preventing misleading values</strong> from entering metrics and logic.</p>
+<p><code>NULLIF()</code> is used to <strong>convert specific values into NULL</strong> intentionally.</p>
+<p>It answers the question:</p>
+<blockquote class="blockquote">
+<p><strong>When should a value be treated as “missing”?</strong></p>
+</blockquote>
+<hr>
+<section id="why-nullif-matters-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="why-nullif-matters-in-analytics">Why NULLIF() Matters in Analytics</h3>
+<p>In real datasets, missing information is often encoded as <strong>fake values</strong>, such as:</p>
+<ul>
+<li>empty strings <code>''</code></li>
+<li>placeholders like <code>'N/A'</code>, <code>'UNKNOWN'</code></li>
+<li>default values like <code>'0'</code></li>
+</ul>
+<p>From an analytical perspective, these values:</p>
+<ul>
+<li>distort counts<br>
+</li>
+<li>break averages<br>
+</li>
+<li>pollute grouping keys<br>
+</li>
+<li>hide true data quality issues</li>
+</ul>
+<p><code>NULLIF()</code> allows you to <strong>restore semantic meaning</strong> by converting such placeholders into <code>NULL</code>.</p>
+<hr>
+</section>
+<section id="nullif-syntax-overview" class="level3">
+<h3 class="anchored" data-anchor-id="nullif-syntax-overview">NULLIF() | Syntax Overview</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NULLIF</span>(<span class="fu">value</span>, comparison_value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>if <code>value = comparison_value</code> → returns <code>NULL</code></li>
+<li>otherwise → returns <code>value</code></li>
+</ul>
+<hr>
+</section>
+<section id="example-1-empty-strings-to-null" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-empty-strings-to-null">Example 1 | Empty Strings to NULL</h3>
+<p>Assume some customers have missing last names stored as empty strings.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  last_name,</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">NULLIF</span>(last_name, <span class="st">''</span>) <span class="kw">AS</span> last_name_clean</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<p><strong>Conceptual Output</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>last_name</th>
+<th>last_name_clean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>doe</td>
+<td>doe</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>smith</td>
+<td>smith</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>johnson</td>
+<td>johnson</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>VAN DYKE</td>
+<td>VAN DYKE</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td></td>
+<td>NULL</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="analytical-interpretation-4" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-interpretation-4">Analytical Interpretation</h3>
+<ul>
+<li>empty strings are <strong>not meaningful values</strong></li>
+<li>converting them to <code>NULL</code> allows:
+<ul>
+<li>correct <code>COUNT(last_name)</code></li>
+<li>correct <code>COUNT(DISTINCT last_name)</code></li>
+<li>accurate completeness checks</li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="example-2-placeholder-text-to-null" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-placeholder-text-to-null">Example 2 | Placeholder Text to NULL</h3>
+<p>Sometimes missing values are encoded explicitly.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  category_raw,</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">NULLIF</span>(category_raw, <span class="st">'UNKNOWN'</span>) <span class="kw">AS</span> category_clean</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-3-nullif-before-aggregation" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-nullif-before-aggregation">Example 3 | NULLIF() Before Aggregation</h3>
+<p><code>NULLIF()</code> is often used <strong>before aggregation</strong> to prevent bad values from entering metrics.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="fu">NULLIF</span>(category_raw, <span class="st">'UNKNOWN'</span>)) <span class="kw">AS</span> valid_categories</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This ensures that placeholder values do <strong>not inflate counts</strong>.</p>
+<hr>
+</section>
+<section id="nullif-with-concat-defensive-pattern" class="level3">
+<h3 class="anchored" data-anchor-id="nullif-with-concat-defensive-pattern">NULLIF() with CONCAT() (Defensive Pattern)</h3>
+<p>When building labels, <code>NULLIF()</code> can prevent ugly outputs.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  customer_id,</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">CONCAT</span>(</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    first_name,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">' '</span>,</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">NULLIF</span>(last_name, <span class="st">''</span>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="kw">AS</span> full_name_safe</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Without <code>NULLIF()</code>, empty strings may silently produce malformed labels.</p>
+<hr>
+</section>
+<section id="nullif-vs-coalesce" class="level3">
+<h3 class="anchored" data-anchor-id="nullif-vs-coalesce">NULLIF() vs COALESCE()</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Goal</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Convert bad value to NULL</td>
+<td><code>NULLIF()</code></td>
+</tr>
+<tr class="even">
+<td>Replace NULL with value</td>
+<td><code>COALESCE()</code></td>
+</tr>
+<tr class="odd">
+<td>Restore missing semantics</td>
+<td><code>NULLIF()</code></td>
+</tr>
+<tr class="even">
+<td>Impute missing values</td>
+<td><code>COALESCE()</code></td>
+</tr>
+</tbody>
+</table>
+<p>These functions are often used <strong>together</strong>, but serve <strong>opposite purposes</strong>.</p>
+<hr>
+</section>
+<section id="analytical-best-practice-5" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-best-practice-5">Analytical Best Practice</h3>
+<p>Before aggregation or joins:</p>
+<ul>
+<li>identify placeholder values<br>
+</li>
+<li>convert them to <code>NULL</code> using <code>NULLIF()</code><br>
+</li>
+<li>then apply aggregation or imputation logic</li>
+</ul>
+<p>This keeps <strong>business meaning</strong> intact.</p>
+<hr>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | Silent Placeholders">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | Silent Placeholders
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Placeholder values are <strong>more dangerous than NULLs</strong>.</p>
+<ul>
+<li>they look valid<br>
+</li>
+<li>they pass filters<br>
+</li>
+<li>they corrupt metrics silently</li>
+</ul>
+<p>Always audit text fields for placeholder values<br>
+before trusting analytical results.</p>
+</div>
+</div>
+<p><code>NULLIF()</code> is a small function with <strong>high analytical impact</strong>, especially in data quality and KPI correctness.</p>
 
 
 </section>

@@ -11,8 +11,8 @@
   <meta name="generator" content="quarto-1.8.25">
 
   <meta name="author" content="Karen Hovhannisyan">
-  <meta name="dcterms.date" content="2026-01-08">
-  <title>Data Analytics Bootcamp – Functions</title>
+  <meta name="dcterms.date" content="2026-01-10">
+  <title>Data Analytics Bootcamp – String Functions</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -206,7 +206,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Functions</h1>
+  <h1 class="title">String Functions</h1>
   <p class="subtitle">String Functions</p>
 
 <div class="quarto-title-authors">
@@ -217,12 +217,14 @@ Karen Hovhannisyan
 </div>
 </div>
 
-  <p class="date">2026-01-08</p>
+  <p class="date">2026-01-10</p>
 </section>
 <section id="text-functions" class="title-slide slide level1 center">
 <h1>Text Functions</h1>
 <p>Text (string) functions operate at the <strong>row level</strong> and are used to <strong>inspect, clean, standardize, and transform</strong> textual data.</p>
+<div class="fragment">
 <p>They are <strong>data quality tools</strong>, not cosmetic helpers.</p>
+</div>
 </section>
 
 <section>
@@ -235,7 +237,7 @@ Karen Hovhannisyan
 <p>Open Docker Desktop, Run and open <strong>Pgadmin</strong>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="create-sales_analysis" class="slide level2 smaller">
+<section id="create-sales_analysis" class="slide level2">
 <h2>Create <code>sales_analysis</code></h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> sales_analysis;</span>
 <span id="cb2-2"><a></a></span>
@@ -333,34 +335,35 @@ Karen Hovhannisyan
 </section>
 <section id="raw-phone-numbers" class="slide level2 smaller">
 <h2>Raw Phone Numbers</h2>
-<p>We use a controlled dummy table<br>
-with deliberately <strong>inconsistent phone formats</strong>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> phone_numbers_demo;</span>
+<p>We use a controlled dummy table with deliberately <strong>inconsistent phone formats</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a></a><span class="kw">DROP</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">EXISTS</span> customers_raw_text;</span>
 <span id="cb4-2"><a></a></span>
-<span id="cb4-3"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> phone_numbers_demo (</span>
-<span id="cb4-4"><a></a>  raw_phone   TEXT,</span>
-<span id="cb4-5"><a></a>  first_name  TEXT,</span>
-<span id="cb4-6"><a></a>  last_name   TEXT</span>
-<span id="cb4-7"><a></a>);</span>
-<span id="cb4-8"><a></a></span>
-<span id="cb4-9"><a></a><span class="kw">INSERT</span> <span class="kw">INTO</span> phone_numbers_demo (raw_phone, first_name, last_name) <span class="kw">VALUES</span></span>
-<span id="cb4-10"><a></a>  (<span class="st">'   077600945  '</span>, <span class="st">'john'</span>,        <span class="st">'DOE'</span>),</span>
-<span id="cb4-11"><a></a>  (<span class="st">'077600945'</span>,      <span class="st">'ANNa'</span>,        <span class="st">'smith'</span>),</span>
-<span id="cb4-12"><a></a>  (<span class="st">'77600945'</span>,       <span class="st">'mARy'</span>,        <span class="st">'joHNson'</span>),</span>
-<span id="cb4-13"><a></a>  (<span class="st">'077-600-045'</span>,    <span class="st">'geORGe'</span>,      <span class="st">'brown'</span>),</span>
-<span id="cb4-14"><a></a>  (<span class="st">'(374)-77-600-945'</span>,<span class="st">'ALEx'</span>,       <span class="st">'O</span><span class="ch">''</span><span class="st">NEILL'</span>),</span>
-<span id="cb4-15"><a></a>  (<span class="st">'37477600945'</span>,    <span class="st">'lAuRA'</span>,       <span class="st">'van dyke'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-3"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers_raw_text (</span>
+<span id="cb4-4"><a></a>  customer_id   <span class="dt">INTEGER</span>,</span>
+<span id="cb4-5"><a></a>  first_name    TEXT,</span>
+<span id="cb4-6"><a></a>  last_name     TEXT,</span>
+<span id="cb4-7"><a></a>  raw_phone     TEXT,</span>
+<span id="cb4-8"><a></a>  category_raw  TEXT,</span>
+<span id="cb4-9"><a></a>  birth_date    <span class="dt">DATE</span></span>
+<span id="cb4-10"><a></a>);</span>
+<span id="cb4-11"><a></a></span>
+<span id="cb4-12"><a></a><span class="kw">INSERT</span> <span class="kw">INTO</span> customers_raw_text (</span>
+<span id="cb4-13"><a></a>  customer_id,</span>
+<span id="cb4-14"><a></a>  first_name,</span>
+<span id="cb4-15"><a></a>  last_name,</span>
+<span id="cb4-16"><a></a>  raw_phone,</span>
+<span id="cb4-17"><a></a>  category_raw,</span>
+<span id="cb4-18"><a></a>  birth_date</span>
+<span id="cb4-19"><a></a>) <span class="kw">VALUES</span></span>
+<span id="cb4-20"><a></a>  (<span class="dv">1</span>, <span class="st">'joHN'</span>,     <span class="st">'doE'</span>,        <span class="st">'   077600945  '</span>,   <span class="st">'Accessories (Promo)'</span>, <span class="dt">DATE</span> <span class="st">'1994-03-12'</span>),</span>
+<span id="cb4-21"><a></a>  (<span class="dv">2</span>, <span class="st">'MARY'</span>,     <span class="st">'sMiTh'</span>,      <span class="st">'077-600-045'</span>,      <span class="st">'Electronics (Old)'</span>,   <span class="dt">DATE</span> <span class="st">'1988-11-05'</span>),</span>
+<span id="cb4-22"><a></a>  (<span class="dv">3</span>, <span class="st">'aLEx'</span>,     <span class="st">'johnSON'</span>,    <span class="st">'(374)-77-600-945'</span>, <span class="st">'Accessories'</span>,         <span class="dt">DATE</span> <span class="st">'2001-07-23'</span>),</span>
+<span id="cb4-23"><a></a>  (<span class="dv">4</span>, <span class="st">'anna'</span>,     <span class="st">'VAN DYKE'</span>,   <span class="st">'37477600945'</span>,      <span class="st">'Electronics (Promo)'</span>, <span class="dt">DATE</span> <span class="st">'1999-01-30'</span>),</span>
+<span id="cb4-24"><a></a>  (<span class="dv">5</span>, <span class="kw">NULL</span>,       <span class="st">'brOwn'</span>,      <span class="st">'77600945'</span>,         <span class="st">'Accessories (Test)'</span>,  <span class="dt">DATE</span> <span class="st">'1994-03-12'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="target-standard" class="slide level2">
 <h2>Target Standard</h2>
-<p>Our target standardized phone number is:</p>
-<p><strong><code>77600945</code></strong></p>
-<p><strong>At this stage:</strong></p>
-<ul>
-<li>no cleaning</li>
-<li>no assumptions</li>
-<li>only inspection</li>
-</ul>
+<p>Our target standardized phone number is: <strong><code>77600945</code></strong></p>
 </section></section>
 <section>
 <section id="length" class="title-slide slide level1 center">
@@ -387,10 +390,9 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a></a><span class="kw">SELECT</span></span>
 <span id="cb5-2"><a></a>  raw_phone,</span>
 <span id="cb5-3"><a></a>  <span class="fu">LENGTH</span>(raw_phone) <span class="kw">AS</span> phone_length</span>
-<span id="cb5-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output" class="slide level2 smaller">
-<h2>Output</h2>
+<span id="cb5-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="fragment">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -425,6 +427,7 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 <section id="interpretation" class="slide level2">
 <h2>Interpretation</h2>
@@ -467,6 +470,10 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 <li>this becomes a <strong>post-cleaning validation rule</strong></li>
 <li>any row failing this rule is still dirty</li>
 </ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a></a><span class="cf">CASE</span> <span class="cf">WHEN</span> <span class="fu">LENGTH</span>(cleaned_phone_number) <span class="op">=</span> <span class="dv">8</span> <span class="cf">THEN</span> <span class="dv">1</span> <span class="cf">ELSE</span> <span class="dv">0</span> <span class="cf">END</span> <span class="kw">as</span> flag</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="cf">CASE</span> <span class="cf">WHEN</span> <span class="fu">LENGTH</span>(cleaned_phone_number) <span class="op">=</span> <span class="dv">8</span> <span class="cf">THEN</span> <span class="st">'Accept'</span> <span class="cf">ELSE</span> <span class="st">'Reject'</span> <span class="cf">END</span> <span class="kw">as</span> flag</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section></section>
 <section>
 <section id="trim" class="title-slide slide level1 center">
@@ -475,7 +482,12 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </section>
 <section id="why-trim-matters" class="slide level2">
 <h2>Why TRIM() Matters</h2>
-<p><strong>Whitespace issues are: </strong> - visually invisible - common in manual or legacy inputs - a frequent cause of failed joins and false duplicates</p>
+<p><strong>Whitespace issues are:</strong></p>
+<ul>
+<li>visually invisible</li>
+<li>common in manual or legacy inputs</li>
+<li>a frequent cause of failed joins and false duplicates</li>
+</ul>
 <p>Yet they are often <strong>overlooked</strong> in analysis.</p>
 </section>
 <section id="analytical-principle" class="slide level2">
@@ -489,16 +501,13 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </section>
 <section id="applying-trim" class="slide level2 smaller">
 <h2>Applying TRIM</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb6-2"><a></a>  raw_phone,</span>
-<span id="cb6-3"><a></a>  <span class="fu">LENGTH</span>(raw_phone) <span class="kw">AS</span> <span class="fu">length</span>,</span>
-<span id="cb6-4"><a></a>  <span class="fu">TRIM</span>(raw_phone) <span class="kw">AS</span> trimmed_phone,</span>
-<span id="cb6-5"><a></a>  <span class="fu">LENGTH</span>(<span class="fu">TRIM</span>(raw_phone)) <span class="kw">AS</span> trimmed_length</span>
-<span id="cb6-6"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output-1" class="slide level2 smaller">
-<h2>Output</h2>
-<p><strong>What Changed?</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a></a>  raw_phone,</span>
+<span id="cb8-3"><a></a>  <span class="fu">LENGTH</span>(raw_phone) <span class="kw">AS</span> <span class="fu">length</span>,</span>
+<span id="cb8-4"><a></a>  <span class="fu">TRIM</span>(raw_phone) <span class="kw">AS</span> trimmed_phone,</span>
+<span id="cb8-5"><a></a>  <span class="fu">LENGTH</span>(<span class="fu">TRIM</span>(raw_phone)) <span class="kw">AS</span> trimmed_length</span>
+<span id="cb8-6"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 33%">
@@ -557,18 +566,9 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 <section id="ltrim-vs-rtrim" class="slide level2">
 <h2>LTRIM vs RTRIM</h2>
 <p><strong>SQL also provides directional variants:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="fu">LTRIM</span>(raw_phone)   <span class="co">-- removes leading spaces | only LEFT</span></span>
-<span id="cb7-2"><a></a><span class="fu">RTRIM</span>(raw_phone)   <span class="co">-- removes trailing spaces | ONLY right</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="fu">LTRIM</span>(raw_phone)   <span class="co">-- removes leading spaces | only LEFT</span></span>
+<span id="cb9-2"><a></a><span class="fu">RTRIM</span>(raw_phone)   <span class="co">-- removes trailing spaces | ONLY right</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>TRIM()</code> is equivalent to applying <strong>both</strong>.</p>
-</section>
-<section id="validation-check" class="slide level2">
-<h2>Validation Check</h2>
-<p>After trimming, we re-measure:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb8-2"><a></a>  raw_phone,</span>
-<span id="cb8-3"><a></a>  <span class="fu">LENGTH</span>(<span class="fu">TRIM</span>(raw_phone)) <span class="kw">AS</span> cleaned_length</span>
-<span id="cb8-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This tells us whether whitespace was the <strong>only issue</strong>.</p>
 </section>
 <section id="analytical-insight-1" class="slide level2">
 <h2>Analytical Insight</h2>
@@ -621,21 +621,12 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 <section id="lower-normalize-for-analysis" class="slide level2 smaller">
 <h2>LOWER() | Normalize for Analysis</h2>
 <p><code>LOWER()</code> converts all characters to <strong>lowercase</strong>.</p>
-<p><strong>Best suited for:</strong></p>
-<ul>
-<li>joins<br>
-</li>
-<li>grouping keys<br>
-</li>
-<li>deduplication</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb9-2"><a></a>  first_name,</span>
-<span id="cb9-3"><a></a>  <span class="fu">LOWER</span>(first_name) <span class="kw">AS</span> first_name_lower</span>
-<span id="cb9-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="lower-output" class="slide level2 smaller">
-<h2>LOWER() | Output</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb10-2"><a></a>  first_name,</span>
+<span id="cb10-3"><a></a>  <span class="fu">LOWER</span>(first_name) <span class="kw">AS</span> first_name_lower</span>
+<span id="cb10-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -670,25 +661,16 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 <section id="upper-normalize-for-codes" class="slide level2 smaller">
 <h2>UPPER() | Normalize for Codes</h2>
 <p><code>UPPER()</code> converts all characters to <strong>uppercase</strong>.</p>
-<p>Often used for:</p>
-<ul>
-<li>codes<br>
-</li>
-<li>abbreviations<br>
-</li>
-<li>legacy-system compatibility</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb10-2"><a></a>  last_name,</span>
-<span id="cb10-3"><a></a>  <span class="fu">UPPER</span>(last_name) <span class="kw">AS</span> last_name_upper</span>
-<span id="cb10-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="upper-output" class="slide level2 smaller">
-<h2>UPPER() | Output</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb11-2"><a></a>  last_name,</span>
+<span id="cb11-3"><a></a>  <span class="fu">UPPER</span>(last_name) <span class="kw">AS</span> last_name_upper</span>
+<span id="cb11-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -726,19 +708,15 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </section>
 <section id="initcap-presentation-formatting" class="slide level2 smaller">
 <h2>INITCAP() | Presentation Formatting</h2>
-<p><code>INITCAP()</code> converts text to <strong>title case</strong>:</p>
-<ul>
-<li>first letter uppercase<br>
-</li>
-<li>remaining letters lowercase</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb11-2"><a></a>  first_name,</span>
-<span id="cb11-3"><a></a>  <span class="fu">INITCAP</span>(first_name) <span class="kw">AS</span> first_name_clean</span>
-<span id="cb11-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="initcap-output" class="slide level2 smaller">
-<h2>INITCAP() | Output</h2>
+<p><code>INITCAP()</code> converts text to <strong>title case</strong>: <code>jOhn sMiTH</code> <span class="math inline">\(\rightarrow\)</span> <code>John Smith</code></p>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a></a>  first_name,</span>
+<span id="cb12-3"><a></a>  <span class="fu">INITCAP</span>(first_name) <span class="kw">AS</span> first_name_clean</span>
+<span id="cb12-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -773,6 +751,7 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 <section id="choosing-the-right-function" class="slide level2 smaller">
 <h2>Choosing the Right Function</h2>
@@ -812,15 +791,13 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </section>
 <section id="why-replace-matters" class="slide level2 smaller">
 <h2>Why REPLACE() Matters</h2>
-<p>After handling <strong>whitespace</strong> and <strong>capitalization</strong>, the next common issue is<br>
-<strong>structural noise inside text values</strong>.</p>
+<p>After handling <strong>whitespace</strong> and <strong>capitalization</strong>, the next common issue is <strong>structural noise inside text values</strong>.</p>
 <p><strong>Typical examples include:</strong></p>
 <ul>
-<li>hyphens in phone numbers<br>
+<li>hyphens in phone numbers: <code>077-600-945</code></li>
+<li>spaces used as separators: <code>077600945</code><br>
 </li>
-<li>spaces used as separators<br>
-</li>
-<li>dots (<code>.</code>), slashes(<code>\</code>,<code>/</code>), or underscores<br>
+<li>dots (<code>.</code>), slashes(<code>\</code>,<code>/</code>), or underscores:<br>
 </li>
 <li>inconsistent formatting characters</li>
 </ul>
@@ -836,18 +813,19 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </li>
 <li>rules are deterministic</li>
 </ul>
+<div class="fragment">
 <p><code>REPLACE()</code> is <strong>not pattern-based</strong> &gt; it is <strong>literal and predictable</strong>.</p>
+</div>
 </section>
 <section id="removing-hyphens" class="slide level2 smaller">
 <h2>Removing Hyphens</h2>
-<p>Phone numbers often contain hyphens as visual separators.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb12-2"><a></a>  raw_phone,</span>
-<span id="cb12-3"><a></a>  <span class="kw">REPLACE</span>(raw_phone, <span class="st">'-'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_no_hyphen</span>
-<span id="cb12-4"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output-2" class="slide level2 smaller">
-<h2>Output</h2>
+<p><strong>Phone numbers often contain hyphens as visual separators.</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a></a>  raw_phone,</span>
+<span id="cb13-3"><a></a>  <span class="kw">REPLACE</span>(raw_phone, <span class="st">'-'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_no_hyphen</span>
+<span id="cb13-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -870,22 +848,21 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </tr>
 </tbody>
 </table>
-<p>Hyphens are removed, but <strong>other characters remain</strong>.</p>
+</div>
 </section>
 <section id="chaining-replacements" class="slide level2 smaller">
 <h2>Chaining Replacements</h2>
 <p>You can apply <code>REPLACE()</code> multiple times to remove different characters.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb13-2"><a></a>  raw_phone,</span>
-<span id="cb13-3"><a></a>  <span class="kw">REPLACE</span>(</span>
-<span id="cb13-4"><a></a>    <span class="kw">REPLACE</span>(</span>
-<span id="cb13-5"><a></a>      <span class="kw">REPLACE</span>(<span class="fu">TRIM</span>(raw_phone), <span class="st">'-'</span>, <span class="st">''</span>),</span>
-<span id="cb13-6"><a></a>    <span class="st">'('</span>, <span class="st">''</span>),</span>
-<span id="cb13-7"><a></a>  <span class="st">')'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_clean_partial</span>
-<span id="cb13-8"><a></a><span class="kw">FROM</span> phone_numbers_demo;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="partial-cleanup-result" class="slide level2 smaller">
-<h2>Partial Cleanup Result</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb14-2"><a></a>  raw_phone,</span>
+<span id="cb14-3"><a></a>  <span class="kw">REPLACE</span>(</span>
+<span id="cb14-4"><a></a>    <span class="kw">REPLACE</span>(</span>
+<span id="cb14-5"><a></a>      <span class="kw">REPLACE</span>(<span class="fu">TRIM</span>(raw_phone), <span class="st">'-'</span>, <span class="st">''</span>),</span>
+<span id="cb14-6"><a></a>    <span class="st">'('</span>, <span class="st">''</span>),</span>
+<span id="cb14-7"><a></a>  <span class="st">')'</span>, <span class="st">''</span>) <span class="kw">AS</span> phone_clean_partial</span>
+<span id="cb14-8"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -909,10 +886,11 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </tbody>
 </table>
 <p>This is <strong>progress</strong>, but still not fully standardized.</p>
+</div>
 </section>
-<section id="why-we-stop-here" class="slide level2">
+<section id="why-we-stop-here" class="slide level2 smaller">
 <h2>Why We Stop Here</h2>
-<p>At this stage:</p>
+<p><strong>At this stage:</strong></p>
 <ul>
 <li>separators are removed<br>
 </li>
@@ -928,9 +906,26 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </li>
 <li>inconsistent prefixes</li>
 </ul>
+<div class="fragment">
 <p>This tells us <code>REPLACE()</code> alone is <strong>not sufficient</strong>.</p>
+</div>
 </section>
-<section id="replace-when-to-use" class="slide level2">
+<section id="replace-analytical-warning" class="slide level2 smaller">
+<h2>REPLACE() | Analytical Warning</h2>
+<!-- TODO use incremental bullet points  -->
+<p>Every <code>REPLACE()</code> encodes a <strong>business assumption</strong>.</p>
+<ul>
+<li>what characters are allowed?<br>
+</li>
+<li>what characters are noise?<br>
+</li>
+<li>what if formats change later?</li>
+</ul>
+<div class="fragment">
+<p><strong>Document these decisions!</strong></p>
+</div>
+</section>
+<section id="replace-when-to-use" class="slide level2 smaller">
 <h2>REPLACE() | When to Use</h2>
 <p><strong>Use <code>REPLACE()</code> when:</strong></p>
 <ul>
@@ -940,7 +935,7 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </li>
 <li>you want maximum transparency</li>
 </ul>
-<p><strong>Avoid it when:</strong></p>
+<p><strong>Avoid <code>REPLACE()</code> when:</strong></p>
 <ul>
 <li>patterns vary<br>
 </li>
@@ -948,32 +943,1253 @@ with deliberately <strong>inconsistent phone formats</strong>.</p>
 </li>
 <li>you need validation</li>
 </ul>
+</section></section>
+<section>
+<section id="regexp_replace" class="title-slide slide level1 center">
+<h1><code>REGEXP_REPLACE()</code></h1>
+
 </section>
-<section id="analytical-warning" class="slide level2">
-<h2>Analytical Warning</h2>
-<div title="Analytical Warning | Hard-Coded Rules">
+<section id="regexp_replace-why-it-exists" class="slide level2 smaller">
+<h2>REGEXP_REPLACE() | Why It Exists</h2>
+<p><code>REGEXP</code> stands for “Regular Expression”</p>
+<div class="fragment">
+<p><code>REGEXP_REPLACE()</code> allows you to define <strong>rules</strong>, not characters.</p>
+</div>
+</section>
+<section id="regexp_replace-why-it-matters" class="slide level2 smaller">
+<h2>REGEXP_REPLACE() | Why It Matters</h2>
+<p><strong>From an analytical perspective:</strong></p>
+<ul>
+<li>fewer hard-coded assumptions</li>
+<li>better generalization to unseen formats</li>
+<li>robust, reusable cleaning logic</li>
+</ul>
+</section>
+<section id="regexp_replace-syntax" class="slide level2 smaller">
+<h2>REGEXP_REPLACE() | Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a></a><span class="fu">REGEXP_REPLACE</span>(text, pattern, replacement [, flags])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>text</code> → input string</li>
+<li><code>pattern</code> → regex rule</li>
+<li><code>replacement</code> → substitution</li>
+<li><code>flags</code> → modifiers (<code>g</code> = global)</li>
+</ul>
+</section>
+<section id="example-1-keep-only-digits" class="slide level2 smaller">
+<h2>Example 1 | Keep Only Digits</h2>
+<p><strong>Pattern:</strong> <code>[^0-9]</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a></a>  raw_phone,</span>
+<span id="cb16-3"><a></a>  <span class="fu">REGEXP_REPLACE</span>(raw_phone, <span class="st">'[^0-9]'</span>, <span class="st">''</span>, <span class="st">'g'</span>) <span class="kw">AS</span> digits_only</span>
+<span id="cb16-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>digits_only</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>077600945</code></td>
+</tr>
+<tr class="even">
+<td><code>077600945</code></td>
+<td><code>077600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td><code>077600045</code></td>
+</tr>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td><code>37477600945</code></td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td><code>37477600945</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="example-2-parentheses-in-categories" class="slide level2 smaller">
+<h2>Example 2 | Parentheses in Categories</h2>
+<!-- TODO: Add table and somehow highlight after click for removing the staff -->
+</section>
+<section id="pattern-1-remove-content" class="slide level2 smaller">
+<h2>Pattern 1 | Remove <code>()</code> Content</h2>
+<p><strong>Pattern:</strong> <code>\([^)]*\)</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb17-2"><a></a>  category_raw,</span>
+<span id="cb17-3"><a></a>  <span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\([^)]*\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>) <span class="kw">AS</span> category_clean1</span>
+<span id="cb17-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section class="slide level2">
+
+<div title="Whitespace Alert">
+<div class="callout callout-caution callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Whitespace Alert</strong></p>
+</div>
+<div class="callout-content">
+<p>Trailing spaces may remain<br>
+<code>'Accessories '</code> ≠ <code>'Accessories'</code></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="pattern-2-regexp_replace" class="slide level2 smaller">
+<h2>Pattern 2 | REGEXP_REPLACE</h2>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a></a><span class="fu">TRIM</span>(<span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\([^)]*\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb19-2"><a></a>  category_raw,</span>
+<span id="cb19-3"><a></a>  <span class="fu">TRIM</span>(</span>
+<span id="cb19-4"><a></a>    <span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\([^)]*\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>)</span>
+<span id="cb19-5"><a></a>  ) <span class="kw">AS</span> category_clean2</span>
+<span id="cb19-6"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="pattern-3-single-step-regex" class="slide level2 smaller">
+<h2>Pattern 3 | Single-Step Regex</h2>
+<p><strong>Pattern:</strong> <code>\s*\(.*?\)</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a></a>  category_raw,</span>
+<span id="cb20-3"><a></a>  <span class="fu">REGEXP_REPLACE</span>(category_raw, <span class="st">'\s*\(.*?\)'</span>, <span class="st">''</span>, <span class="st">'g'</span>)</span>
+<span id="cb20-4"><a></a>    <span class="kw">AS</span> category_clean3</span>
+<span id="cb20-5"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="comparison-summary" class="slide level2 smaller">
+<h2>Comparison Summary</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Approach</th>
+<th>Result</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pattern 1</td>
+<td><code>Accessories</code></td>
+<td>Leaves spaces</td>
+</tr>
+<tr class="even">
+<td>Pattern 2</td>
+<td><code>Accessories</code></td>
+<td>Safe &amp; explicit</td>
+</tr>
+<tr class="odd">
+<td>Pattern 3</td>
+<td><code>Accessories</code></td>
+<td>Compact regex</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="regexp-vs-replace" class="slide level2 smaller">
+<h2>REGEXP vs REPLACE</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Scenario</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Known characters</td>
+<td><code>REPLACE()</code></td>
+</tr>
+<tr class="even">
+<td>Variable formats</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+<tr class="odd">
+<td>Validation &amp; extraction</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+<tr class="even">
+<td>Simplicity</td>
+<td><code>REPLACE()</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="regexp_replace-attention" class="slide level2 smaller">
+<h2>REGEXP_REPLACE() | ATTENTION</h2>
+<div title="Analytical Warning | Regex Is Powerful">
 <div class="callout callout-warning callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Analytical Warning | Hard-Coded Rules</strong></p>
+<p><strong>Analytical Warning | Regex Is Powerful</strong></p>
 </div>
 <div class="callout-content">
-<p>Every <code>REPLACE()</code> encodes a <strong>business assumption</strong>.</p>
 <ul>
-<li>what characters are allowed?<br>
-</li>
-<li>what characters are noise?<br>
-</li>
-<li>what if formats change later?</li>
+<li>broad patterns remove valid data</li>
+<li>unreadable regex creates technical debt</li>
+<li>rules must be documented and validated</li>
 </ul>
-<p><strong>Document these decisions!</strong></p>
+<p>Always validate with:</p>
+<ul>
+<li><code>LENGTH()</code></li>
+<li><code>COUNT(DISTINCT ...)</code></li>
+</ul>
 </div>
 </div>
 </div>
 </div>
+</section></section>
+<section>
+<section id="substring" class="title-slide slide level1 center">
+<h1>SUBSTRING()</h1>
+
+</section>
+<section id="substring-1" class="slide level2">
+<h2>SUBSTRING()</h2>
+
+<img data-src="../../../img/sql/substring.png" class="r-stretch"></section>
+<section id="substring-basic-positional-extraction" class="slide level2 smaller">
+<h2>SUBSTRING() | Basic Positional Extraction</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a>SUBSTRING(text <span class="kw">FROM</span> start_position <span class="cf">FOR</span> <span class="fu">length</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>SUBSTRING()</code> extracts a portion of text based on position or pattern.</p>
+<p>It is used to <strong>isolate signal</strong> from compound fields.</p>
+</section>
+<section id="example-1-extract-last-8-digits-of-phone-numbers" class="slide level2 smaller">
+<h2>Example 1 | Extract Last 8 Digits of Phone Numbers</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb22-2"><a></a>  raw_phone,</span>
+<span id="cb22-3"><a></a>  SUBSTRING(raw_phone <span class="kw">FROM</span> <span class="fu">LENGTH</span>(raw_phone) <span class="op">-</span> <span class="dv">7</span> <span class="cf">FOR</span> <span class="dv">8</span>) <span class="kw">AS</span> phone_core</span>
+<span id="cb22-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>phone_core</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="example-2-substring-with-fixed-structure" class="slide level2 smaller">
+<h2>Example 2 | SUBSTRING() with Fixed Structure</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a></a>  category_raw,</span>
+<span id="cb23-3"><a></a>  SUBSTRING(category_raw <span class="kw">FROM</span> <span class="dv">1</span> <span class="cf">FOR</span> <span class="dv">11</span>) <span class="kw">AS</span> category_prefix</span>
+<span id="cb23-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\rightarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>Electronics</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>Accessories</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="example-3-substring-with-regex" class="slide level2 smaller">
+<h2>Example 3 | SUBSTRING() with Regex</h2>
+<p><strong>PostgreSQL supports regex-based extraction:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a></a>  raw_phone,</span>
+<span id="cb24-3"><a></a>  SUBSTRING(raw_phone <span class="kw">FROM</span> <span class="st">'[0-9]+'</span>) <span class="kw">AS</span> first_digit_sequence</span>
+<span id="cb24-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\rightarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>first_digit_sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td><code>077</code></td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td><code>077</code></td>
+</tr>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td><code>374</code></td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td><code>37477600945</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="positional-vs-pattern-based-substring" class="slide level2 smaller">
+<h2>Positional vs Pattern-Based SUBSTRING()</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Use Case</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fixed-length identifiers</td>
+<td>Positional</td>
+</tr>
+<tr class="even">
+<td>Variable formats</td>
+<td>Regex-based</td>
+</tr>
+<tr class="odd">
+<td>Performance-critical logic</td>
+<td>Positional</td>
+</tr>
+<tr class="even">
+<td>Unknown structure</td>
+<td>Regex-based</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analytical-best-practice" class="slide level2 smaller">
+<h2>Analytical Best Practice</h2>
+<ul>
+<li>use positional <code>SUBSTRING()</code> when formats are stable</li>
+<li>use regex <code>SUBSTRING()</code> when formats vary</li>
+<li>validate results with <code>LENGTH()</code> and <code>COUNT(DISTINCT ...)</code></li>
+</ul>
+</section></section>
+<section>
+<section id="concat-and" class="title-slide slide level1 center">
+<h1><code>CONCAT()</code> and <code>||</code></h1>
+
+</section>
+<section id="concat-why-it-exists" class="slide level2 smaller">
+<h2>CONCAT() | Why It Exists</h2>
+<p><strong>After cleaning text with:</strong></p>
+<ul>
+<li><code>TRIM()</code></li>
+<li><code>LOWER()</code>, <code>UPPER()</code>, <code>INITCAP()</code></li>
+<li><code>SUBSTRING()</code></li>
+</ul>
+<p>we often need to <strong>construct new text values</strong>.</p>
+<div class="fragment">
+<p><code>CONCAT()</code> and <code>||</code> allow us to <strong>combine atomic fields</strong> into meaningful analytical dimensions.</p>
+</div>
+</section>
+<section id="concat-why-it-matters" class="slide level2 smaller">
+<h2>CONCAT() | Why It Matters</h2>
+<p>From an analytical perspective:</p>
+<ul>
+<li>reporting requires <strong>combined labels</strong></li>
+<li>dashboards need <strong>human-readable dimensions</strong></li>
+<li>joins may rely on <strong>constructed keys</strong></li>
+</ul>
+<div class="fragment">
+<p>Concatenation is <strong>feature engineering</strong>, not cosmetic formatting.</p>
+</div>
+</section>
+<section id="concat-syntax" class="slide level2 smaller">
+<h2>CONCAT() | Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a></a><span class="fu">CONCAT</span>(value1, value2, <span class="op">..</span>., valueN)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Key properties:</p>
+<ul>
+<li>accepts multiple arguments</li>
+<li>treats <code>NULL</code> as empty</li>
+<li>always returns text</li>
+</ul>
+</section>
+<section id="concat-operator-form" class="slide level2 smaller">
+<h2>CONCAT() | Operator Form <code>||</code></h2>
+<p>PostgreSQL also supports string concatenation using:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a></a>value1 <span class="op">||</span> value2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Behavior differs when <code>NULL</code> values are present.</p>
+</div>
+</section>
+<section id="example-1-full-name-construction-raw" class="slide level2 smaller">
+<h2>Example 1 | Full Name Construction (Raw)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb27-2"><a></a>  customer_id,</span>
+<span id="cb27-3"><a></a>  first_name,</span>
+<span id="cb27-4"><a></a>  last_name,</span>
+<span id="cb27-5"><a></a>  <span class="fu">CONCAT</span>(first_name, <span class="st">' '</span>, last_name) <span class="kw">AS</span> full_name</span>
+<span id="cb27-6"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>first_name</th>
+<th>last_name</th>
+<th>full_name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>john</td>
+<td>doe</td>
+<td>john doe</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>MARY</td>
+<td>SMITH</td>
+<td>MARY SMITH</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>aLEx</td>
+<td>johnson</td>
+<td>aLEx johnson</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>anna</td>
+<td>VAN DYKE</td>
+<td>anna VAN DYKE</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>NULL</td>
+<td>brown</td>
+<td>brown</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="analytical-observation" class="slide level2 smaller">
+<h2>Analytical Observation</h2>
+<ul>
+<li>concatenation works mechanically</li>
+<li>capitalization is inconsistent</li>
+<li>leading spaces appear when <code>first_name</code> is <code>NULL</code></li>
+</ul>
+<div class="fragment">
+<p>This output is <strong>technically valid</strong> but <strong>analytically weak</strong>.</p>
+</div>
+</section>
+<section id="example-2-concat-initcap" class="slide level2 smaller">
+<h2>Example 2 | CONCAT() + INITCAP()</h2>
+<p><strong>Recommended analytical pattern:</strong> first normalize case and then concatenate</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb28-2"><a></a>  customer_id,</span>
+<span id="cb28-3"><a></a>  <span class="fu">INITCAP</span>(first_name) <span class="kw">AS</span> first_name_clean,</span>
+<span id="cb28-4"><a></a>  <span class="fu">INITCAP</span>(last_name)  <span class="kw">AS</span> last_name_clean,</span>
+<span id="cb28-5"><a></a>  <span class="fu">INITCAP</span>(<span class="fu">CONCAT</span>(first_name, <span class="st">' '</span>, last_name)) <span class="kw">AS</span> full_name_clean</span>
+<span id="cb28-6"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>first_name_clean</th>
+<th>last_name_clean</th>
+<th>full_name_clean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>John</td>
+<td>Doe</td>
+<td>John Doe</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Mary</td>
+<td>Smith</td>
+<td>Mary Smith</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Alex</td>
+<td>Johnson</td>
+<td>Alex Johnson</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Anna</td>
+<td>Van Dyke</td>
+<td>Anna Van Dyke</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>NULL</td>
+<td>Brown</td>
+<td>Brown</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="concat-vs" class="slide level2 smaller">
+<h2>CONCAT() vs <code>||</code></h2>
+<p>Same logic using the operator form:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb29-2"><a></a>  customer_id,</span>
+<span id="cb29-3"><a></a>  <span class="fu">INITCAP</span>(first_name) <span class="op">||</span> <span class="st">' '</span> <span class="op">||</span> <span class="fu">INITCAP</span>(last_name) <span class="kw">AS</span> full_name_clean</span>
+<span id="cb29-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="key-difference" class="slide level2 smaller">
+<h2>Key Difference</h2>
+<ul>
+<li><code>CONCAT()</code> treats <code>NULL</code> as empty</li>
+<li><code>||</code> propagates <code>NULL</code></li>
+</ul>
+<div class="fragment">
+<p>This distinction directly affects analytical results.</p>
+</div>
+</section>
+<section id="when-to-use-which" class="slide level2 smaller">
+<h2>When to Use Which</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Situation</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Possible NULL values</td>
+<td><code>CONCAT()</code></td>
+</tr>
+<tr class="even">
+<td>Strict NULL propagation</td>
+<td><code>||</code></td>
+</tr>
+<tr class="odd">
+<td>Reporting and dashboards</td>
+<td><code>CONCAT()</code></td>
+</tr>
+<tr class="even">
+<td>Validation logic</td>
+<td><code>||</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analytical-best-practice-1" class="slide level2 smaller">
+<h2>Analytical Best Practice</h2>
+<ul>
+<li>normalize text <strong>before</strong> concatenation</li>
+<li>decide explicitly how <code>NULL</code> should behave</li>
+<li>validate constructed fields using:
+<ul>
+<li><code>COUNT(DISTINCT ...)</code></li>
+<li>sample inspection</li>
+</ul></li>
+</ul>
+<!-- now working -->
+</section></section>
+<section>
+<section id="position-strpos" class="title-slide slide level1 center">
+<h1><code>POSITION()</code> / <code>STRPOS()</code></h1>
+
+</section>
+<section id="position-strpos-what-problem-it-solves" class="slide level2 smaller">
+<h2>POSITION() / STRPOS() | What Problem It Solves</h2>
+<blockquote>
+<p><strong>Where does a given substring start?</strong></p>
+</blockquote>
+<p>This is a <strong>diagnostic and validation</strong> step, not a cleaning step.</p>
+</section>
+<section id="position-strpos-why-it-matters" class="slide level2 smaller">
+<h2>POSITION() / STRPOS() | Why It Matters</h2>
+<p><strong>Knowing the position of a substring allows you to:</strong></p>
+<ul>
+<li>validate expected formats</li>
+<li>detect malformed values</li>
+<li>drive conditional logic</li>
+<li>prepare for controlled extraction</li>
+</ul>
+</section>
+<section id="position-syntax" class="slide level2 smaller">
+<h2>POSITION() | Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a></a>POSITION(substring <span class="kw">IN</span> text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>returns a <strong>1-based position</strong></li>
+<li>returns <code>0</code> if the substring is <strong>not found</strong></li>
+</ul>
+</section>
+<section id="strpos-postgresql-alias" class="slide level2 smaller">
+<h2>STRPOS() | PostgreSQL Alias</h2>
+<p>PostgreSQL also supports:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a></a>STRPOS(text, substring)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>identical behavior to <code>POSITION()</code></li>
+<li>often preferred for readability</li>
+</ul>
+</section>
+<section id="example-1-detect-parentheses-in-categories" class="slide level2 smaller">
+<h2>Example 1 | Detect Parentheses in Categories</h2>
+<p>Before cleaning categories, we first <strong>detect annotations</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb32-2"><a></a>  category_raw,</span>
+<span id="cb32-3"><a></a>  POSITION(<span class="st">'('</span> <span class="kw">IN</span> category_raw) <span class="kw">AS</span> open_paren_pos</span>
+<span id="cb32-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>open_paren_pos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories (Promo)</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td>Electronics (Old)</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td>Accessories</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Electronics (Promo)</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td>Accessories (Test)</td>
+<td>13</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="interpreting-the-result" class="slide level2 smaller">
+<h2>Interpreting the Result</h2>
+<ul>
+<li><code>open_paren_pos &gt; 0</code> → annotation exists<br>
+</li>
+<li><code>open_paren_pos = 0</code> → clean category</li>
+</ul>
+<p>This tells us <strong>which rows require cleaning</strong>.</p>
+</section>
+<section id="example-2-strpos-for-phone-diagnostics" class="slide level2 smaller">
+<h2>Example 2 | STRPOS() for Phone Diagnostics</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb33-2"><a></a>  raw_phone,</span>
+<span id="cb33-3"><a></a>  STRPOS(raw_phone, <span class="st">'-'</span>) <span class="kw">AS</span> hyphen_pos,</span>
+<span id="cb33-4"><a></a>  STRPOS(raw_phone, <span class="st">'('</span>) <span class="kw">AS</span> paren_pos</span>
+<span id="cb33-5"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>hyphen_pos</th>
+<th>paren_pos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077600945</code></td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>077-600-045</code></td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>(374)-77-600-945</code></td>
+<td>6</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>37477600945</code></td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="analytical-interpretation" class="slide level2 smaller">
+<h2>Analytical Interpretation</h2>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>This check is usually done <strong>before</strong> applying <code>REGEXP_REPLACE()</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="position-as-a-validation-tool" class="slide level2 smaller">
+<h2>POSITION() as a Validation Tool</h2>
+<p>A common analytical pattern is converting positions into <strong>boolean flags</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb34-2"><a></a>  customer_id,</span>
+<span id="cb34-3"><a></a>  category_raw,</span>
+<span id="cb34-4"><a></a>  POSITION(<span class="st">'('</span> <span class="kw">IN</span> category_raw) <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">AS</span> has_annotation</span>
+<span id="cb34-5"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>category_raw</th>
+<th>has_annotation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Accessories (Promo)</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Electronics (Old)</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Accessories</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Electronics (Promo)</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Accessories (Test)</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="why-this-pattern-is-powerful" class="slide level2 smaller">
+<h2>Why This Pattern Is Powerful</h2>
+<p><strong>This enables:</strong></p>
+<ul>
+<li>data quality reporting<br>
+</li>
+<li>audit checks<br>
+</li>
+<li>conditional cleaning logic</li>
+</ul>
+<div class="fragment">
+<p>Without altering the original data.</p>
+</div>
+</section>
+<section id="position-vs-substring" class="slide level2 smaller">
+<h2>POSITION() vs SUBSTRING()</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Where is it?</td>
+<td><code>POSITION()</code> / <code>STRPOS()</code></td>
+</tr>
+<tr class="even">
+<td>Extract it</td>
+<td><code>SUBSTRING()</code></td>
+</tr>
+<tr class="odd">
+<td>Validate format</td>
+<td><code>POSITION()</code></td>
+</tr>
+<tr class="even">
+<td>Clean text</td>
+<td><code>REGEXP_REPLACE()</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analytical-best-practice-2" class="slide level2 smaller" data-incremental="true">
+<h2>Analytical Best Practice</h2>
+<ul>
+<li>use <code>POSITION()</code> to <strong>measure and detect</strong></li>
+<li>use <code>SUBSTRING()</code> to <strong>extract</strong></li>
+<li>use <code>REGEXP_REPLACE()</code> to <strong>clean</strong></li>
+<li>never assume structure without checking positions</li>
+</ul>
+</section></section>
+<section>
+<section id="split_part" class="title-slide slide level1 center">
+<h1><code>SPLIT_PART()</code></h1>
+
+</section>
+<section id="split_part-what-problem-it-solves" class="slide level2 smaller">
+<h2>SPLIT_PART() | What Problem It Solves</h2>
+<p><code>SPLIT_PART()</code> allows you to <strong>extract a specific segment</strong> from such strings<br>
+without using regular expressions.</p>
+<p><strong>It answers the question:</strong></p>
+<div class="fragment">
+<blockquote>
+<p><strong>Which part of a delimited string do I need?</strong></p>
+</blockquote>
+</div>
+</section>
+<section id="split_part-why-it-exists" class="slide level2 smaller">
+<h2>SPLIT_PART() | Why It Exists</h2>
+<p>Used to extract a <strong>specific segment</strong> from delimited text.</p>
+<p>Known structure → simple logic → high reliability.</p>
+</section>
+<section id="split_part-syntax" class="slide level2 smaller">
+<h2>SPLIT_PART() | Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a></a>SPLIT_PART(text, delimiter, position)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>position is <strong>1-based</strong></li>
+<li>missing part → empty string</li>
+</ul>
+</section>
+<section id="example-1-first-segment" class="slide level2 smaller">
+<h2>Example 1 | First Segment</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb36-2"><a></a>  raw_phone,</span>
+<span id="cb36-3"><a></a>  SPLIT_PART(raw_phone, <span class="st">'-'</span>, <span class="dv">1</span>) <span class="kw">AS</span> first_part</span>
+<span id="cb36-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>first_part</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+<td><code>077</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+<td><code>(374)</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td><code>77600945</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="example-2-second-segment" class="slide level2 smaller">
+<h2>Example 2 | Second Segment</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb37-2"><a></a>  raw_phone,</span>
+<span id="cb37-3"><a></a>  SPLIT_PART(raw_phone, <span class="st">'-'</span>, <span class="dv">2</span>) <span class="kw">AS</span> second_part</span>
+<span id="cb37-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>raw_phone</th>
+<th>second_part</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>077-600-045</code></td>
+<td><code>600</code></td>
+</tr>
+<tr class="even">
+<td><code>(374)-77-600-945</code></td>
+<td><code>77</code></td>
+</tr>
+<tr class="odd">
+<td><code>77600945</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="split_part-attention" class="slide level2 smaller">
+<h2>SPLIT_PART() | ATTENTION</h2>
+<ul>
+<li>empty string ≠ NULL</li>
+<li>delimiter may not exist</li>
+<li>structure must be validated</li>
+</ul>
+<p><strong>Use together with:</strong></p>
+<ul>
+<li><code>POSITION()</code></li>
+<li><code>NULLIF()</code></li>
+</ul>
+</section></section>
+<section>
+<section id="nullif" class="title-slide slide level1 center">
+<h1><code>NULLIF()</code></h1>
+
+</section>
+<section id="nullif-why-it-exists" class="slide level2 smaller">
+<h2>NULLIF() | Why It Exists</h2>
+<p>Real-world data often encodes <strong>missing information as fake values</strong>.</p>
+<div class="fragment">
+<p><code>NULLIF()</code> lets you explicitly decide:</p>
+<blockquote>
+<p><strong>When should a value be treated as missing?</strong></p>
+</blockquote>
+</div>
+</section>
+<section id="nullif-why-it-matters" class="slide level2 smaller">
+<h2>NULLIF() | Why It Matters</h2>
+<p><strong>From an analytical perspective:</strong></p>
+<ul>
+<li>placeholder values distort metrics<br>
+</li>
+<li>empty strings inflate counts<br>
+</li>
+<li>fake defaults hide data quality issues</li>
+</ul>
+<p><code>NULLIF()</code> restores <strong>semantic correctness</strong>.</p>
+</section>
+<section id="nullif-syntax" class="slide level2 smaller">
+<h2>NULLIF() | Syntax</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a></a><span class="fu">NULLIF</span>(<span class="fu">value</span>, comparison_value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>returns <code>NULL</code> if values are equal<br>
+</li>
+<li>otherwise returns the original value</li>
+</ul>
+</section>
+<section id="example-1-empty-strings-to-null" class="slide level2 smaller">
+<h2>Example 1 | Empty Strings to NULL</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb39-2"><a></a>  customer_id,</span>
+<span id="cb39-3"><a></a>  last_name,</span>
+<span id="cb39-4"><a></a>  <span class="fu">NULLIF</span>(last_name, <span class="st">''</span>) <span class="kw">AS</span> last_name_clean</span>
+<span id="cb39-5"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>last_name</th>
+<th>last_name_clean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>doe</td>
+<td>doe</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>smith</td>
+<td>smith</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>johnson</td>
+<td>johnson</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>VAN DYKE</td>
+<td>VAN DYKE</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td></td>
+<td>NULL</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="why-this-matters" class="slide level2 smaller">
+<h2>Why This Matters</h2>
+<p>Without <code>NULLIF()</code>:</p>
+<ul>
+<li>empty strings count as real values<br>
+</li>
+<li><code>COUNT(DISTINCT last_name)</code> is wrong<br>
+</li>
+<li>completeness checks are misleading</li>
+</ul>
+</section>
+<section id="example-2-placeholder-values" class="slide level2 smaller">
+<h2>Example 2 | Placeholder Values</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb40-2"><a></a>  category_raw,</span>
+<span id="cb40-3"><a></a>  <span class="fu">NULLIF</span>(category_raw, <span class="st">'UNKNOWN'</span>) <span class="kw">AS</span> category_clean</span>
+<span id="cb40-4"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>category_raw</th>
+<th>category_clean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accessories</td>
+<td>Accessories</td>
+</tr>
+<tr class="even">
+<td>UNKNOWN</td>
+<td>NULL</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="example-3-nullif-before-aggregation" class="slide level2 smaller">
+<h2>Example 3 | NULLIF() Before Aggregation</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb41-2"><a></a>  <span class="fu">COUNT</span>(<span class="fu">NULLIF</span>(category_raw, <span class="st">'UNKNOWN'</span>)) <span class="kw">AS</span> valid_categories</span>
+<span id="cb41-3"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>This prevents placeholder values from inflating KPIs.</p>
+</div>
+</section>
+<section id="nullif-with-concat" class="slide level2 smaller">
+<h2>NULLIF() with CONCAT()</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb42-2"><a></a>  customer_id,</span>
+<span id="cb42-3"><a></a>  <span class="fu">CONCAT</span>(</span>
+<span id="cb42-4"><a></a>    first_name,</span>
+<span id="cb42-5"><a></a>    <span class="st">' '</span>,</span>
+<span id="cb42-6"><a></a>    <span class="fu">NULLIF</span>(last_name, <span class="st">''</span>)</span>
+<span id="cb42-7"><a></a>  ) <span class="kw">AS</span> full_name_safe</span>
+<span id="cb42-8"><a></a><span class="kw">FROM</span> customers_raw_text;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Avoids malformed labels caused by empty strings.</p>
+</div>
+</section>
+<section id="nullif-vs-coalesce" class="slide level2 smaller">
+<h2>NULLIF() vs COALESCE()</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Goal</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Convert bad value to NULL</td>
+<td><code>NULLIF()</code></td>
+</tr>
+<tr class="even">
+<td>Replace NULL with value</td>
+<td><code>COALESCE()</code></td>
+</tr>
+<tr class="odd">
+<td>Restore missing meaning</td>
+<td><code>NULLIF()</code></td>
+</tr>
+<tr class="even">
+<td>Impute values</td>
+<td><code>COALESCE()</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analytical-best-practice-3" class="slide level2 smaller">
+<h2>Analytical Best Practice</h2>
+<ul>
+<li>audit text fields for placeholders<br>
+</li>
+<li>convert fake values to <code>NULL</code> first<br>
+</li>
+<li>aggregate only meaningful values</li>
+</ul>
 
 
 </section></section>
