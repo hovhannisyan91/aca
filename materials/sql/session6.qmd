@@ -1882,7 +1882,7 @@ These functions are often used **together**, but serve **opposite purposes**.
 
 ### Analytical Best Practice
 
-Before aggregation or joins:
+**Before aggregation or joins:**
 
 - identify placeholder values  
 - convert them to `NULL` using `NULLIF()`  
@@ -1906,3 +1906,359 @@ before trusting analytical results.
 :::
 
 `NULLIF()` is a small function with **high analytical impact**, especially in data quality and KPI correctness.
+
+## `LEFT()` / `RIGHT()`
+
+After working with **positional extraction** (`SUBSTRING()`) and **pattern-based logic**, we often encounter text fields with a **fixed directional structure**.
+
+In such cases, extracting characters **from the beginning or the end** of a string is clearer and safer than calculating positions.
+
+This is exactly what `LEFT()` and `RIGHT()` are designed for.
+
+---
+
+### Why LEFT() / RIGHT() Matter in Analytics
+
+Many analytical identifiers encode meaning at the **edges** of a string:
+
+- country or operator prefixes  
+- regional or product codes  
+- fixed-length identifiers  
+- version or batch suffixes  
+
+When structure is stable, directional extraction is:
+
+- more readable  
+- less error-prone  
+- easier to audit  
+
+---
+
+### Syntax Overview
+
+```sql
+LEFT(text, n)
+RIGHT(text, n)
+```
+
+- `text` → input string  
+- `n` → number of characters to extract  
+- extraction starts strictly from the **left** or **right**
+
+---
+
+### Example 1 | Extract Phone Prefix with LEFT()
+
+Assume phone numbers have already been cleaned to **digits only**  
+and the first **3 digits** represent a country or operator code.
+
+```sql
+SELECT
+  raw_phone,
+  LEFT(
+    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),
+    3
+  ) AS phone_prefix
+FROM customers_raw_text;
+```
+
+---
+
+**Output**
+
+| raw_phone            | phone_prefix |
+|----------------------|--------------|
+| `   077600945  `     | 077 |
+| `077-600-045`        | 077 |
+| `(374)-77-600-945`   | 374 |
+| `37477600945`        | 374 |
+| `77600945`           | 776 |
+
+---
+
+### Analytical Interpretation
+
+- prefixes reveal country or operator  
+- enables routing or segmentation logic  
+- supports validation of expected formats  
+
+---
+
+### Example 2 | Extract Core Identifier with RIGHT()
+
+If the **last 8 digits** uniquely identify a phone number,  
+`RIGHT()` provides a clean and expressive solution.
+
+```sql
+SELECT
+  raw_phone,
+  RIGHT(
+    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),
+    8
+  ) AS phone_core
+FROM customers_raw_text;
+```
+
+---
+
+**Output**
+
+| raw_phone          | phone_core |
+|--------------------|------------|
+| `077600945`        | 77600945 |
+| `37477600945`      | 77600945 |
+| `77600945`         | 77600945 |
+
+---
+
+### LEFT() / RIGHT() vs SUBSTRING()
+
+| Scenario | Prefer |
+|--------|--------|
+| Fixed prefix or suffix | LEFT() / RIGHT() |
+| Dynamic position | SUBSTRING() |
+| Readability | LEFT() / RIGHT() |
+| Complex extraction | SUBSTRING() |
+
+---
+
+### Analytical Best Practice
+
+- apply cleaning **before** directional extraction  
+- validate assumptions with `LENGTH()`  
+- use LEFT()/RIGHT() only when format is guaranteed  
+- document why a specific length was chosen  
+
+---
+
+::: {.callout-warning title="Analytical Warning | Assumed Structure"}
+
+Directional extraction assumes:
+
+- stable formatting  
+- consistent string length  
+- no missing segments  
+
+If upstream formats change, `LEFT()` and `RIGHT()` can silently produce incorrect results.
+
+Always validate structure before relying on directional logic.
+
+:::
+
+`LEFT()` and `RIGHT()` are simple functions, but when used correctly, they provide **clear, auditable, and efficient extraction** for fixed-format analytical fields.
+
+
+## Dummy Dataset | Messy Transaction Text Data
+
+This dataset simulates **realistic dirty text data** commonly seen in transactional systems.  
+It will be used for **both in-class exercises and the take-home case study**.
+
+The table intentionally contains:
+
+- inconsistent phone formats  
+- annotated categories  
+- mixed casing  
+- formatting symbols  
+- duplicate logical entities  
+
+---
+
+### Step 1 | Create Dummy Transaction Table
+
+```sql
+DROP TABLE IF EXISTS transactions_text_demo;
+
+CREATE TABLE transactions_text_demo (
+  transaction_id INTEGER,
+  customer_id    INTEGER,
+  raw_phone      TEXT,
+  category_raw   TEXT,
+  quantity       INTEGER,
+  price          NUMERIC(10,2)
+);
+```
+
+---
+
+### Step 2 | Populate with 1,000 Rows of Messy Data
+
+```sql
+INSERT INTO transactions_text_demo
+SELECT
+  gs AS transaction_id,
+  (RANDOM() * 200)::INT + 1 AS customer_id,
+
+  CASE (gs % 6)
+    WHEN 0 THEN '   077600945  '
+    WHEN 1 THEN '077-600-045'
+    WHEN 2 THEN '(374)-77-600-945'
+    WHEN 3 THEN '37477600945'
+    WHEN 4 THEN '77600945'
+    ELSE '077600945'
+  END AS raw_phone,
+
+  CASE (gs % 5)
+    WHEN 0 THEN 'Accessories (Promo)'
+    WHEN 1 THEN 'Accessories (Test)'
+    WHEN 2 THEN 'Electronics (Old)'
+    WHEN 3 THEN 'Electronics (Promo)'
+    ELSE 'Accessories'
+  END AS category_raw,
+
+  (RANDOM() * 5)::INT + 1 AS quantity,
+  (RANDOM() * 500 + 10)::NUMERIC(10,2) AS price
+FROM generate_series(1, 1000) AS gs;
+```
+
+---
+
+### Step 3 | Sanity Check
+
+```sql
+SELECT
+  COUNT(*) AS total_rows,
+  COUNT(DISTINCT raw_phone) AS distinct_raw_phones,
+  COUNT(DISTINCT category_raw) AS distinct_categories
+FROM transactions_text_demo;
+```
+
+---
+
+## In-Class Assignment | Text Diagnostics & GROUP BY (10–15 minutes)
+
+### Objective
+
+Use **measurement-first SQL** to understand how dirty text affects **grouping and counts**.
+
+---
+
+### Task 1 | Phone Number Diagnostics
+
+Write a query that shows:
+
+- `raw_phone`
+- `LENGTH(raw_phone)`
+- position of `'-'`
+- position of `'('`
+- count of rows per pattern
+
+Use:
+
+- `LENGTH()`
+- `POSITION()` or `STRPOS()`
+- `GROUP BY`
+
+---
+
+### Task 2 | Category Fragmentation
+
+Write a query that returns:
+
+- `category_raw`
+- number of transactions per category
+
+```sql
+GROUP BY category_raw
+ORDER BY COUNT(*) DESC;
+```
+
+Answer:
+
+- how many logical categories exist?
+- how many categories appear due to annotations?
+
+---
+
+### Expected Insight
+
+You should clearly see that:
+
+- grouping on raw text produces **fragmented dimensions**
+- phone numbers represent the same entity in multiple formats
+
+---
+
+## Take-Home Case Study | Cleaning, Grouping, and KPI Integrity (≈ 1.5 hours)
+
+### Scenario
+
+You are asked to produce **reliable KPIs** from `transactions_text_demo`.
+
+Business questions:
+
+- revenue by category  
+- number of unique customers  
+- average transaction value  
+
+---
+
+### Part 1 | Profiling (≈ 25 minutes)
+
+Write SQL queries to assess:
+
+- phone number format diversity
+- category fragmentation
+- impact of dirty text on `GROUP BY`
+
+Use only **diagnostic functions**.
+
+---
+
+### Part 2 | Standardization Layer (≈ 40 minutes)
+
+Create a **cleaned SELECT projection** (no updates) that includes:
+
+- standardized phone number (last 8 digits)
+- cleaned category (no annotations, trimmed)
+- revenue per transaction
+
+Use:
+
+- `REGEXP_REPLACE()`
+- `TRIM()`
+- `SUBSTRING()`
+- `CONCAT()` where relevant
+
+---
+
+### Part 3 | KPI Comparison (≈ 20 minutes)
+
+Compute and compare:
+
+- revenue by raw category
+- revenue by cleaned category
+- unique customers (raw vs cleaned phone)
+
+Use `GROUP BY` in all comparisons.
+
+---
+
+### Part 4 | Analytical Explanation (≈ 15 minutes)
+
+Briefly explain:
+
+- why KPIs changed
+- which cleaning step had the biggest impact
+- what assumptions you made
+- what could silently break in production
+
+---
+
+### Submission Rules
+
+- Create `string_functions.sql`
+- SQL only (no updates or deletes)
+- all cleaning must be done in SELECT queries
+- results must be reproducible
+- explanations must be concise and analytical
+- push it into `GitHub`
+
+
+
+---
+
+::: {.callout-important}
+This assignment tests **analytical thinking**, not just SQL syntax.
+
+Dirty text → broken GROUP BY → misleading KPIs.
+:::

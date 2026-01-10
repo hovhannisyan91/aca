@@ -1481,3 +1481,258 @@ Avoids malformed labels caused by empty strings.
 
 
 
+# `LEFT()` / `RIGHT()`
+
+## LEFT() / RIGHT() | Why They Exist {.smaller}
+
+Some analytical fields follow a **fixed directional structure**.
+
+. . .
+
+- prefixes carry meaning  
+- suffixes carry meaning  
+- length is known or enforced  
+
+`LEFT()` and `RIGHT()` let you extract **directional segments** without complex logic.
+
+---
+
+## LEFT() / RIGHT() | Why They Matter {.smaller}
+
+**From an analytical perspective:**
+
+- simpler than `SUBSTRING()`  
+- more readable intent  
+- safer for fixed-format fields  
+
+They are often used for:
+
+- country or region prefixes  
+- category codes  
+- version suffixes  
+- short identifiers  
+
+---
+
+## LEFT() / RIGHT() | Syntax {.smaller}
+
+```sql
+LEFT(text, n)
+RIGHT(text, n)
+```
+
+- `n` = number of characters  
+- extraction starts from left or right  
+
+---
+
+## Example 1 | Phone Prefix Detection {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  LEFT(
+    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),
+    3
+  ) AS phone_prefix
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| raw_phone            | phone_prefix |
+|----------------------|--------------|
+| `   077600945  `     | 077 |
+| `077-600-045`        | 077 |
+| `(374)-77-600-945`   | 374 |
+| `37477600945`        | 374 |
+| `77600945`           | 776 |
+
+---
+
+## Analytical Interpretation {.smaller}
+
+- prefixes reveal country or operator  
+- supports validation and routing logic  
+- useful before normalization  
+
+---
+
+## Example 2 | Core Identifier via RIGHT() {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  RIGHT(
+    REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g'),
+    8
+  ) AS phone_core
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| raw_phone          | phone_core |
+|--------------------|------------|
+| `077600945`        | 77600945 |
+| `37477600945`      | 77600945 |
+| `77600945`         | 77600945 |
+
+---
+
+## LEFT()/RIGHT() vs SUBSTRING() {.smaller}
+
+| Scenario | Prefer |
+|--------|--------|
+| Fixed prefix/suffix | LEFT()/RIGHT() |
+| Dynamic positions | SUBSTRING() |
+| Readability | LEFT()/RIGHT() |
+| Complex extraction | SUBSTRING() |
+
+
+# In-Class Assignment | Text Functions & GROUP BY
+
+## Goal of the Exercise {.smaller}
+
+In this in-class task, you will work with **intentionally messy transaction data** to understand:
+
+- how dirty text breaks `GROUP BY`
+- why measurement must come **before cleaning**
+- how text functions affect analytical results
+
+- **Time:** 10–15 minutes  
+- **Mode:** Individual or pairs
+
+---
+
+## Step 1 | Create Messy Transaction Data {.smaller}
+
+We simulate **real-world dirty text** commonly found in transactional systems.
+
+```sql
+DROP TABLE IF EXISTS transactions_text_demo;
+
+CREATE TABLE transactions_text_demo (
+  transaction_id INTEGER,
+  customer_id    INTEGER,
+  raw_phone      TEXT,
+  category_raw   TEXT,
+  quantity       INTEGER,
+  price          NUMERIC(10,2)
+);
+```
+
+---
+
+## Step 2 | Insert 1,000 Rows of Messy Data {.smaller}
+
+```sql
+INSERT INTO transactions_text_demo
+SELECT
+  gs AS transaction_id,
+  (RANDOM() * 200)::INT + 1 AS customer_id,
+
+  CASE (gs % 6)
+    WHEN 0 THEN '   077600945  '
+    WHEN 1 THEN '077-600-045'
+    WHEN 2 THEN '(374)-77-600-945'
+    WHEN 3 THEN '37477600945'
+    WHEN 4 THEN '77600945'
+    ELSE '077600945'
+  END AS raw_phone,
+
+  CASE (gs % 5)
+    WHEN 0 THEN 'Accessories (Promo)'
+    WHEN 1 THEN 'Accessories (Test)'
+    WHEN 2 THEN 'Electronics (Old)'
+    WHEN 3 THEN 'Electronics (Promo)'
+    ELSE 'Accessories'
+  END AS category_raw,
+
+  (RANDOM() * 5)::INT + 1 AS quantity,
+  (RANDOM() * 500 + 10)::NUMERIC(10,2) AS price
+FROM generate_series(1, 1000) AS gs;
+```
+
+---
+
+## Step 3 | Sanity Check {.smaller}
+
+```sql
+SELECT
+  COUNT(*) AS total_rows,
+  COUNT(DISTINCT raw_phone) AS distinct_raw_phones,
+  COUNT(DISTINCT category_raw) AS distinct_categories
+FROM transactions_text_demo;
+```
+
+**Think:**
+
+- Do these numbers look reasonable?
+- What already looks suspicious?
+
+---
+
+## Task 1 | Phone Number Diagnostics {.smaller}
+
+Write a query that shows:
+
+- `raw_phone`
+- `LENGTH(raw_phone)`
+- position of `'-'`
+- position of `'('`
+- number of rows per pattern
+
+**Functions to use:**
+
+- `LENGTH()`
+- `POSITION()` or `STRPOS()`
+- `GROUP BY`
+
+---
+
+## Task 2 | Category Fragmentation {.smaller}
+
+Group by raw category values.
+
+```sql
+SELECT
+  category_raw,
+  COUNT(*) AS transactions
+FROM transactions_text_demo
+GROUP BY category_raw
+ORDER BY transactions DESC;
+```
+
+**Answer:**
+
+- how many categories appear?
+- how many are actually the *same* category?
+
+---
+
+## Expected Insights {.smaller}
+
+By the end of this exercise, you should clearly see:
+
+- the same phone number appears in many formats
+- category annotations fragment grouping
+- `GROUP BY` blindly trusts text values
+- dirty text leads to **misleading KPIs**
+
+---
+
+## Key Analytical Lesson {.smaller}
+
+- text cleanliness is **not cosmetic**
+- it directly affects:
+  - counts
+  - revenue aggregation
+  - uniqueness
+- cleaning must be **intentional and documented**
+
+Next, we will clean this data and **measure how KPIs change**.
