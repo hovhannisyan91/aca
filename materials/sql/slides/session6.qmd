@@ -1,5 +1,6 @@
 ---
-title: "Functions"
+# project: false
+title: "String Functions"
 subtitle: "String Functions"
 author: "Karen Hovhannisyan"
 date: last-modified
@@ -33,6 +34,8 @@ format:
 
 Text (string) functions operate at the **row level**  and are used to **inspect, clean, standardize, and transform** textual data.
 
+. . .
+
 They are **data quality tools**, not cosmetic helpers.
 
 
@@ -46,7 +49,7 @@ Open Docker Desktop, Run and open **Pgadmin**:
 docker compose up -d
 ```
 
-## Create `sales_analysis` {.smaller}
+## Create `sales_analysis`
 
 ```sql
 DROP TABLE IF EXISTS sales_analysis;
@@ -144,45 +147,42 @@ We always start with **measurement**, not transformation.
 
 ## Raw Phone Numbers {.smaller}
 
-We use a controlled dummy table  
-with deliberately **inconsistent phone formats**.
+We use a controlled dummy table with deliberately **inconsistent phone formats**.
 
 ```sql
-DROP TABLE IF EXISTS phone_numbers_demo;
+DROP TABLE IF EXISTS customers_raw_text;
 
-CREATE TABLE phone_numbers_demo (
-  raw_phone   TEXT,
-  first_name  TEXT,
-  last_name   TEXT
+CREATE TABLE customers_raw_text (
+  customer_id   INTEGER,
+  first_name    TEXT,
+  last_name     TEXT,
+  raw_phone     TEXT,
+  category_raw  TEXT,
+  birth_date    DATE
 );
 
-INSERT INTO phone_numbers_demo (raw_phone, first_name, last_name) VALUES
-  ('   077600945  ', 'john',        'DOE'),
-  ('077600945',      'ANNa',        'smith'),
-  ('77600945',       'mARy',        'joHNson'),
-  ('077-600-045',    'geORGe',      'brown'),
-  ('(374)-77-600-945','ALEx',       'O''NEILL'),
-  ('37477600945',    'lAuRA',       'van dyke');
+INSERT INTO customers_raw_text (
+  customer_id,
+  first_name,
+  last_name,
+  raw_phone,
+  category_raw,
+  birth_date
+) VALUES
+  (1, 'joHN',     'doE',        '   077600945  ',   'Accessories (Promo)', DATE '1994-03-12'),
+  (2, 'MARY',     'sMiTh',      '077-600-045',      'Electronics (Old)',   DATE '1988-11-05'),
+  (3, 'aLEx',     'johnSON',    '(374)-77-600-945', 'Accessories',         DATE '2001-07-23'),
+  (4, 'anna',     'VAN DYKE',   '37477600945',      'Electronics (Promo)', DATE '1999-01-30'),
+  (5, NULL,       'brOwn',      '77600945',         'Accessories (Test)',  DATE '1994-03-12');
 ```
 
 ---
 
 ## Target Standard
 
-Our target standardized phone number is:
+Our target standardized phone number is:  **`77600945`**
 
-**`77600945`**
-
-**At this stage:**
-
-- no cleaning
-- no assumptions
-- only inspection
-
-
-
-
-
+ 
 # LENGTH()
 
 ## What It Does
@@ -211,12 +211,12 @@ It is a **diagnostic function**, not a cleaning function.
 SELECT
   raw_phone,
   LENGTH(raw_phone) AS phone_length
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
 
----
+$$\downarrow$$
 
-## Output {.smaller}
+. . .
 
 | raw_phone             | phone_length |
 |-----------------------|--------------|
@@ -268,14 +268,23 @@ This prevents **blind transformations** later.
 - this becomes a **post-cleaning validation rule**
 - any row failing this rule is still dirty
 
+```sql
+CASE WHEN LENGTH(cleaned_phone_number) = 8 THEN 1 ELSE 0 END as flag
+```
+
+. . . 
+
+```sql
+CASE WHEN LENGTH(cleaned_phone_number) = 8 THEN 'Accept' ELSE 'Reject' END as flag
+```
 
 
 # TRIM()
 
 ## Why TRIM() Matters
 
-**Whitespace issues are:
-**
+**Whitespace issues are:**
+
 - visually invisible
 - common in manual or legacy inputs
 - a frequent cause of failed joins and false duplicates
@@ -302,12 +311,12 @@ SELECT
   LENGTH(raw_phone) AS length,
   TRIM(raw_phone) AS trimmed_phone,
   LENGTH(TRIM(raw_phone)) AS trimmed_length
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
 
-## Output {.smaller}
+$$\downarrow$$
 
-**What Changed?**
+
 
 | raw_phone             | length | trimmed_phone        | trimmed_length |
 |-----------------------|--------|----------------------|----------------|
@@ -331,19 +340,6 @@ RTRIM(raw_phone)   -- removes trailing spaces | ONLY right
 
 `TRIM()` is equivalent to applying **both**.
 
-
-## Validation Check
-
-After trimming, we re-measure:
-
-```sql
-SELECT
-  raw_phone,
-  LENGTH(TRIM(raw_phone)) AS cleaned_length
-FROM phone_numbers_demo;
-```
-
-This tells us whether whitespace was the **only issue**.
 
 
 ## Analytical Insight
@@ -398,22 +394,17 @@ Text values often differ only by **capitalization**, even though they represent 
 
 `LOWER()` converts all characters to **lowercase**.
 
-**Best suited for:**
-
-- joins  
-- grouping keys  
-- deduplication  
-
 ```sql
 SELECT
   first_name,
   LOWER(first_name) AS first_name_lower
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
 
----
+. . .
 
-## LOWER() | Output {.smaller}
+$$\downarrow$$
+
 
 | first_name | first_name_lower |
 |------------|------------------|
@@ -430,22 +421,14 @@ FROM phone_numbers_demo;
 
 `UPPER()` converts all characters to **uppercase**.
 
-Often used for:
-
-- codes  
-- abbreviations  
-- legacy-system compatibility  
-
 ```sql
 SELECT
   last_name,
   UPPER(last_name) AS last_name_upper
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
 
----
-
-## UPPER() | Output {.smaller}
+$$\downarrow$$
 
 | last_name  | last_name_upper |
 |------------|-----------------|
@@ -460,21 +443,21 @@ FROM phone_numbers_demo;
 
 ## INITCAP() | Presentation Formatting {.smaller}
 
-`INITCAP()` converts text to **title case**:
+`INITCAP()` converts text to **title case**: `jOhn sMiTH` $\rightarrow$ `John Smith`
 
-- first letter uppercase  
-- remaining letters lowercase  
+. . .
 
 ```sql
 SELECT
   first_name,
   INITCAP(first_name) AS first_name_clean
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
 
----
+. . .
 
-## INITCAP() | Output {.smaller}
+$$\downarrow$$
+ 
 
 | first_name | first_name_clean |
 |------------|------------------|
@@ -504,19 +487,17 @@ FROM phone_numbers_demo;
 **Consistency matters more than preference.**
 
 
-
 # REPLACE()
 
 ## Why REPLACE() Matters {.smaller}
 
-After handling **whitespace** and **capitalization**, the next common issue is  
-**structural noise inside text values**.
+After handling **whitespace** and **capitalization**, the next common issue is **structural noise inside text values**.
 
 **Typical examples include:**
 
-- hyphens in phone numbers  
-- spaces used as separators  
-- dots (`.`), slashes(`\`,`/`), or underscores  
+- hyphens in phone numbers: `077-600-945` 
+- spaces used as separators: `  077600945  `  
+- dots (`.`), slashes(`\`,`/`), or underscores:   
 - inconsistent formatting characters  
 
 ## Analytical Principle
@@ -529,24 +510,25 @@ After handling **whitespace** and **capitalization**, the next common issue is
 - the character to remove is known in advance  
 - rules are deterministic  
 
+. . .
+
 `REPLACE()` is **not pattern-based** > it is **literal and predictable**.
 
 ---
 
 ## Removing Hyphens {.smaller}
 
-Phone numbers often contain hyphens as visual separators.
+**Phone numbers often contain hyphens as visual separators.**
 
 ```sql
 SELECT
   raw_phone,
   REPLACE(raw_phone, '-', '') AS phone_no_hyphen
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
+. . .
 
----
-
-## Output {.smaller}
+$$\downarrow$$
 
 | raw_phone            | phone_no_hyphen     |
 |----------------------|---------------------|
@@ -554,9 +536,6 @@ FROM phone_numbers_demo;
 | `(374)-77-600-945`   | `(374)77600945`     |
 | `077600945`          | `077600945`         |
 
-Hyphens are removed, but **other characters remain**.
-
----
 
 ## Chaining Replacements {.smaller}
 
@@ -570,12 +549,12 @@ SELECT
       REPLACE(TRIM(raw_phone), '-', ''),
     '(', ''),
   ')', '') AS phone_clean_partial
-FROM phone_numbers_demo;
+FROM customers_raw_text;
 ```
 
----
+. . .
 
-## Partial Cleanup Result {.smaller}
+$$\downarrow$$
 
 | raw_phone            | phone_clean_partial |
 |----------------------|---------------------|
@@ -587,9 +566,9 @@ This is **progress**, but still not fully standardized.
 
 ---
 
-## Why We Stop Here
+## Why We Stop Here {.smaller}
 
-At this stage:
+**At this stage:**
 
 - separators are removed  
 - formatting noise is reduced  
@@ -601,29 +580,18 @@ At this stage:
 - variable lengths  
 - inconsistent prefixes  
 
+. . .
+
 This tells us `REPLACE()` alone is **not sufficient**.
 
 ---
 
-## REPLACE() | When to Use
 
-**Use `REPLACE()` when:**
 
-- the character to remove is known  
-- rules are simple and explicit  
-- you want maximum transparency  
 
-**Avoid it when:**
+## REPLACE() | Analytical Warning {.smaller}
 
-- patterns vary  
-- rules depend on position  
-- you need validation  
-
----
-
-## Analytical Warning
-
-::: {.callout-warning title="Analytical Warning | Hard-Coded Rules"}
+<!-- TODO use incremental bullet points  -->
 
 Every `REPLACE()` encodes a **business assumption**.
 
@@ -631,7 +599,885 @@ Every `REPLACE()` encodes a **business assumption**.
 - what characters are noise?  
 - what if formats change later?  
 
+. . .
+
 **Document these decisions!**
 
+
+## REPLACE() | When to Use {.smaller}
+
+**Use `REPLACE()` when:**
+
+- the character to remove is known  
+- rules are simple and explicit  
+- you want maximum transparency  
+
+**Avoid `REPLACE()` when:**
+
+- patterns vary  
+- rules depend on position  
+- you need validation  
+
+# `REGEXP_REPLACE()`
+
+## REGEXP_REPLACE() | Why It Exists {.smaller}
+
+`REGEXP` stands for "Regular Expression"
+
+. . .
+
+`REGEXP_REPLACE()` allows you to define **rules**, not characters.
+
+---
+
+## REGEXP_REPLACE() | Why It Matters {.smaller}
+
+**From an analytical perspective:**
+
+- fewer hard-coded assumptions
+- better generalization to unseen formats
+- robust, reusable cleaning logic
+
+---
+
+## REGEXP_REPLACE() | Syntax {.smaller}
+
+```sql
+REGEXP_REPLACE(text, pattern, replacement [, flags])
+```
+
+- `text` → input string
+- `pattern` → regex rule
+- `replacement` → substitution
+- `flags` → modifiers (`g` = global)
+
+---
+
+
+## Example 1 | Keep Only Digits {.smaller}
+
+**Pattern:** `[^0-9]`
+
+```sql
+SELECT
+  raw_phone,
+  REGEXP_REPLACE(raw_phone, '[^0-9]', '', 'g') AS digits_only
+FROM customers_raw_text;
+```
+. . .
+
+$$\downarrow$$
+
+| raw_phone            | digits_only |
+|----------------------|-------------|
+| `   077600945  `     | `077600945` |
+| `077600945`          | `077600945` |
+| `77600945`           | `77600945`  |
+| `077-600-045`        | `077600045` |
+| `(374)-77-600-945`   | `37477600945` |
+| `37477600945`        | `37477600945` |
+
+
+
+
+## Example 2 | Parentheses in Categories {.smaller}
+
+<!-- TODO: Add table and somehow highlight after click for removing the staff -->
+
+---
+
+## Pattern 1 | Remove `()` Content {.smaller}
+
+**Pattern:** `\([^)]*\)`
+
+```sql
+SELECT
+  category_raw,
+  REGEXP_REPLACE(category_raw, '\([^)]*\)', '', 'g') AS category_clean1
+FROM customers_raw_text;
+```
+. . .
+
+$$\downarrow$$
+
+| category_raw           | category_clean1 |
+|------------------------|-----------------|
+| Accessories (Promo)    | Accessories     |
+| Electronics (Old)      | Electronics     |
+| Accessories            | Accessories     |
+| Electronics (Promo)    | Electronics     |
+| Accessories (Test)     | Accessories     |
+
+--- 
+
+::: {.callout-caution title="Whitespace Alert"}
+Trailing spaces may remain  
+`'Accessories '` ≠ `'Accessories'`
 :::
+
+---
+
+## Pattern 2 | REGEXP_REPLACE{.smaller}
+
+. . .
+
+```sql
+TRIM(REGEXP_REPLACE(category_raw, '\([^)]*\)', '', 'g'))
+```
+. . .
+
+```sql
+SELECT
+  category_raw,
+  TRIM(
+    REGEXP_REPLACE(category_raw, '\([^)]*\)', '', 'g')
+  ) AS category_clean2
+FROM customers_raw_text;
+```
+. . .
+
+$$\downarrow$$
+
+| category_raw           | category_clean2 |
+|------------------------|-----------------|
+| Accessories (Promo)    | Accessories     |
+| Electronics (Old)      | Electronics     |
+| Accessories            | Accessories     |
+| Electronics (Promo)    | Electronics     |
+| Accessories (Test)     | Accessories     |
+
+---
+
+## Pattern 3 | Single-Step Regex {.smaller}
+
+**Pattern:** `\s*\(.*?\)`
+
+```sql
+SELECT
+  category_raw,
+  REGEXP_REPLACE(category_raw, '\s*\(.*?\)', '', 'g')
+    AS category_clean3
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| category_raw           | category_clean3 |
+|------------------------|-----------------|
+| Accessories (Promo)    | Accessories     |
+| Electronics (Old)      | Electronics     |
+| Accessories            | Accessories     |
+| Electronics (Promo)    | Electronics     |
+| Accessories (Test)     | Accessories     |
+
+---
+
+## Comparison Summary {.smaller}
+
+| Approach | Result | Notes |
+|--------|--------|-------|
+| Pattern 1 | `Accessories ` | Leaves spaces |
+| Pattern 2 | `Accessories` | Safe & explicit |
+| Pattern 3 | `Accessories` | Compact regex |
+
+---
+
+## REGEXP vs REPLACE {.smaller}
+
+| Scenario | Prefer |
+|--------|--------|
+| Known characters | `REPLACE()` |
+| Variable formats | `REGEXP_REPLACE()` |
+| Validation & extraction | `REGEXP_REPLACE()` |
+| Simplicity | `REPLACE()` |
+
+---
+
+## REGEXP_REPLACE() | ATTENTION {.smaller}
+
+::: {.callout-warning title="Analytical Warning | Regex Is Powerful"}
+
+- broad patterns remove valid data
+- unreadable regex creates technical debt
+- rules must be documented and validated
+
+Always validate with:
+
+- `LENGTH()`
+- `COUNT(DISTINCT ...)`
+
+:::
+
+
+# SUBSTRING()
+
+## SUBSTRING()
+
+![](../../../img/sql/substring.png)
+
+
+## SUBSTRING() | Basic Positional Extraction {.smaller}
+
+```sql
+SUBSTRING(text FROM start_position FOR length)
+```
+
+`SUBSTRING()` extracts a portion of text based on position or pattern.
+
+It is used to **isolate signal** from compound fields.
+
+## Example 1 | Extract Last 8 Digits of Phone Numbers {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  SUBSTRING(raw_phone FROM LENGTH(raw_phone) - 7 FOR 8) AS phone_core
+FROM customers_raw_text;
+```
+. . .
+
+$$\downarrow$$
+
+| raw_phone     | phone_core |
+|---------------|------------|
+| `077600945`   | `77600945` |
+| `37477600945` | `77600945` |
+| `77600945`    | `77600945` |
+
+
+## Example 2 | SUBSTRING() with Fixed Structure {.smaller}
+
+```sql
+SELECT
+  category_raw,
+  SUBSTRING(category_raw FROM 1 FOR 11) AS category_prefix
+FROM customers_raw_text;
+```
+. . .
+
+$$\rightarrow$$
+
+| category_raw           | category_prefix |
+|------------------------|-----------------|
+| Accessories (Promo)    | Accessories     |
+| Electronics (Old)      | Electronics     |
+| Accessories            | Accessories     |
+| Electronics (Promo)    | Electronics     |
+| Accessories (Test)     | Accessories     |
+
+
+
+## Example 3 | SUBSTRING() with Regex {.smaller}
+
+**PostgreSQL supports regex-based extraction:**
+
+```sql
+SELECT
+  raw_phone,
+  SUBSTRING(raw_phone FROM '[0-9]+') AS first_digit_sequence
+FROM customers_raw_text;
+```
+. . .
+
+$$\rightarrow$$
+
+| raw_phone            | first_digit_sequence |
+|----------------------|----------------------|
+| `   077600945  `     | `077`                |
+| `077-600-045`        | `077`                |
+| `(374)-77-600-945`   | `374`                |
+| `37477600945`        | `37477600945`        |
+| `77600945`           | `77600945`           |
+
+---
+
+## Positional vs Pattern-Based SUBSTRING() {.smaller}
+
+| Use Case | Prefer |
+|--------|--------|
+| Fixed-length identifiers | Positional |
+| Variable formats | Regex-based |
+| Performance-critical logic | Positional |
+| Unknown structure | Regex-based |
+
+---
+
+## Analytical Best Practice {.smaller}
+
+- use positional `SUBSTRING()` when formats are stable
+- use regex `SUBSTRING()` when formats vary
+- validate results with `LENGTH()` and `COUNT(DISTINCT ...)`
+
+
+# `CONCAT()` and `||`
+
+## CONCAT() | Why It Exists {.smaller}
+
+**After cleaning text with:**
+
+- `TRIM()`
+- `LOWER()`, `UPPER()`, `INITCAP()`
+- `SUBSTRING()`
+
+we often need to **construct new text values**.
+
+. . .
+
+`CONCAT()` and `||` allow us to **combine atomic fields** into meaningful analytical dimensions.
+
+---
+
+## CONCAT() | Why It Matters {.smaller}
+
+From an analytical perspective:
+
+- reporting requires **combined labels**
+- dashboards need **human-readable dimensions**
+- joins may rely on **constructed keys**
+
+. . .
+
+Concatenation is **feature engineering**, not cosmetic formatting.
+
+---
+
+## CONCAT() | Syntax {.smaller}
+
+```sql
+CONCAT(value1, value2, ..., valueN)
+```
+
+Key properties:
+
+- accepts multiple arguments
+- treats `NULL` as empty
+- always returns text
+
+---
+
+## CONCAT() | Operator Form `||` {.smaller}
+
+PostgreSQL also supports string concatenation using:
+
+```sql
+value1 || value2
+```
+
+. . .
+
+Behavior differs when `NULL` values are present.
+
+---
+
+## Example 1 | Full Name Construction (Raw) {.smaller}
+
+```sql
+SELECT
+  customer_id,
+  first_name,
+  last_name,
+  CONCAT(first_name, ' ', last_name) AS full_name
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| customer_id | first_name | last_name | full_name |
+|------------|------------|-----------|-----------|
+| 1 | john | doe | john doe |
+| 2 | MARY | SMITH | MARY SMITH |
+| 3 | aLEx | johnson | aLEx johnson |
+| 4 | anna | VAN DYKE | anna VAN DYKE |
+| 5 | NULL | brown |  brown |
+
+---
+
+## Analytical Observation {.smaller}
+
+- concatenation works mechanically
+- capitalization is inconsistent
+- leading spaces appear when `first_name` is `NULL`
+
+. . .
+
+This output is **technically valid** but **analytically weak**.
+
+---
+
+## Example 2 | CONCAT() + INITCAP() {.smaller}
+
+**Recommended analytical pattern:** first normalize case and then concatenate
+
+```sql 
+SELECT
+  customer_id,
+  INITCAP(first_name) AS first_name_clean,
+  INITCAP(last_name)  AS last_name_clean,
+  INITCAP(CONCAT(first_name, ' ', last_name)) AS full_name_clean
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| customer_id | first_name_clean | last_name_clean | full_name_clean |
+|------------|------------------|-----------------|-----------------|
+| 1 | John | Doe | John Doe |
+| 2 | Mary | Smith | Mary Smith |
+| 3 | Alex | Johnson | Alex Johnson |
+| 4 | Anna | Van Dyke | Anna Van Dyke |
+| 5 | NULL | Brown |  Brown |
+
+---
+
+## CONCAT() vs `||` {.smaller}
+
+Same logic using the operator form:
+
+```sql
+SELECT
+  customer_id,
+  INITCAP(first_name) || ' ' || INITCAP(last_name) AS full_name_clean
+FROM customers_raw_text;
+```
+
+---
+
+## Key Difference {.smaller}
+
+- `CONCAT()` treats `NULL` as empty
+- `||` propagates `NULL`
+
+. . .
+
+This distinction directly affects analytical results.
+
+---
+
+## When to Use Which {.smaller}
+
+| Situation | Prefer |
+|--------|--------|
+| Possible NULL values | `CONCAT()` |
+| Strict NULL propagation | `||` |
+| Reporting and dashboards | `CONCAT()` |
+| Validation logic | `||` |
+
+---
+
+## Analytical Best Practice {.smaller}
+
+- normalize text **before** concatenation
+- decide explicitly how `NULL` should behave
+- validate constructed fields using:
+  - `COUNT(DISTINCT ...)`
+  - sample inspection
+
+<!-- now working -->
+
+# `POSITION()` / `STRPOS()`
+
+## POSITION() / STRPOS() | What Problem It Solves {.smaller}
+
+
+> **Where does a given substring start?**
+
+This is a **diagnostic and validation** step, not a cleaning step.
+
+---
+
+## POSITION() / STRPOS() | Why It Matters {.smaller}
+
+**Knowing the position of a substring allows you to:**
+
+- validate expected formats
+- detect malformed values
+- drive conditional logic
+- prepare for controlled extraction
+
+
+---
+
+## POSITION() | Syntax {.smaller}
+
+```sql
+POSITION(substring IN text)
+```
+
+- returns a **1-based position**
+- returns `0` if the substring is **not found**
+
+---
+
+## STRPOS() | PostgreSQL Alias {.smaller}
+
+PostgreSQL also supports:
+
+```sql
+STRPOS(text, substring)
+```
+
+- identical behavior to `POSITION()`
+- often preferred for readability
+
+---
+
+## Example 1 | Detect Parentheses in Categories {.smaller}
+
+Before cleaning categories, we first **detect annotations**.
+
+```sql
+SELECT
+  category_raw,
+  POSITION('(' IN category_raw) AS open_paren_pos
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| category_raw           | open_paren_pos |
+|------------------------|----------------|
+| Accessories (Promo)    | 13             |
+| Electronics (Old)      | 13             |
+| Accessories            | 0              |
+| Electronics (Promo)    | 13             |
+| Accessories (Test)     | 13             |
+
+---
+
+## Interpreting the Result {.smaller}
+
+- `open_paren_pos > 0` → annotation exists  
+- `open_paren_pos = 0` → clean category  
+
+This tells us **which rows require cleaning**.
+
+---
+
+## Example 2 | STRPOS() for Phone Diagnostics {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  STRPOS(raw_phone, '-') AS hyphen_pos,
+  STRPOS(raw_phone, '(') AS paren_pos
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| raw_phone            | hyphen_pos | paren_pos |
+|----------------------|------------|-----------|
+| `   077600945  `     | 0          | 0         |
+| `077-600-045`        | 4          | 0         |
+| `(374)-77-600-945`   | 6          | 1         |
+| `37477600945`        | 0          | 0         |
+| `77600945`           | 0          | 0         |
+
+---
+
+## Analytical Interpretation {.smaller}
+
+
+::: {.callout-note}
+This check is usually done **before** applying `REGEXP_REPLACE()`.
+:::
+
+---
+
+## POSITION() as a Validation Tool {.smaller}
+
+A common analytical pattern is converting positions into **boolean flags**.
+
+```sql
+SELECT
+  customer_id,
+  category_raw,
+  POSITION('(' IN category_raw) > 0 AS has_annotation
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| customer_id | category_raw        | has_annotation |
+|------------|---------------------|----------------|
+| 1 | Accessories (Promo) | true |
+| 2 | Electronics (Old)   | true |
+| 3 | Accessories         | false |
+| 4 | Electronics (Promo) | true |
+| 5 | Accessories (Test)  | true |
+
+---
+
+## Why This Pattern Is Powerful {.smaller}
+
+**This enables:**
+
+- data quality reporting  
+- audit checks  
+- conditional cleaning logic  
+
+. . .
+
+Without altering the original data.
+
+---
+
+## POSITION() vs SUBSTRING() {.smaller}
+
+| Question | Prefer |
+|--------|--------|
+| Where is it? | `POSITION()` / `STRPOS()` |
+| Extract it | `SUBSTRING()` |
+| Validate format | `POSITION()` |
+| Clean text | `REGEXP_REPLACE()` |
+
+---
+
+## Analytical Best Practice {.smaller incremental=true}
+
+- use `POSITION()` to **measure and detect**
+- use `SUBSTRING()` to **extract**
+- use `REGEXP_REPLACE()` to **clean**
+- never assume structure without checking positions
+
+
+# `SPLIT_PART()`
+
+## SPLIT_PART() | What Problem It Solves {.smaller}
+
+
+`SPLIT_PART()` allows you to **extract a specific segment** from such strings  
+without using regular expressions.
+
+**It answers the question:**
+
+. . .
+
+> **Which part of a delimited string do I need?**
+
+
+## SPLIT_PART() | Why It Exists {.smaller}
+
+Used to extract a **specific segment** from delimited text.
+
+Known structure → simple logic → high reliability.
+
+---
+
+## SPLIT_PART() | Syntax {.smaller}
+
+```sql
+SPLIT_PART(text, delimiter, position)
+```
+
+- position is **1-based**
+- missing part → empty string
+
+---
+
+## Example 1 | First Segment {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  SPLIT_PART(raw_phone, '-', 1) AS first_part
+FROM customers_raw_text;
+```
+
+. . .
+
+| raw_phone          | first_part |
+|--------------------|------------|
+| `077-600-045`      | `077`      |
+| `(374)-77-600-945` | `(374)`    |
+| `77600945`         | `77600945` |
+
+---
+
+## Example 2 | Second Segment {.smaller}
+
+```sql
+SELECT
+  raw_phone,
+  SPLIT_PART(raw_phone, '-', 2) AS second_part
+FROM customers_raw_text;
+```
+
+. . .
+
+| raw_phone          | second_part |
+|--------------------|-------------|
+| `077-600-045`      | `600`       |
+| `(374)-77-600-945` | `77`        |
+| `77600945`         |             |
+
+---
+
+## SPLIT_PART() | ATTENTION {.smaller}
+
+- empty string ≠ NULL
+- delimiter may not exist
+- structure must be validated
+
+**Use together with:**
+
+- `POSITION()`
+- `NULLIF()`
+
+
+
+# `NULLIF()`
+
+## NULLIF() | Why It Exists {.smaller}
+
+Real-world data often encodes **missing information as fake values**.
+
+. . .
+
+`NULLIF()` lets you explicitly decide:
+
+> **When should a value be treated as missing?**
+
+---
+
+## NULLIF() | Why It Matters {.smaller}
+
+**From an analytical perspective:**
+
+- placeholder values distort metrics  
+- empty strings inflate counts  
+- fake defaults hide data quality issues  
+
+`NULLIF()` restores **semantic correctness**.
+
+---
+
+## NULLIF() | Syntax {.smaller}
+
+```sql
+NULLIF(value, comparison_value)
+```
+
+- returns `NULL` if values are equal  
+- otherwise returns the original value  
+
+---
+
+## Example 1 | Empty Strings to NULL {.smaller}
+
+```sql
+SELECT
+  customer_id,
+  last_name,
+  NULLIF(last_name, '') AS last_name_clean
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| customer_id | last_name | last_name_clean |
+|------------|-----------|-----------------|
+| 1 | doe | doe |
+| 2 | smith | smith |
+| 3 | johnson | johnson |
+| 4 | VAN DYKE | VAN DYKE |
+| 5 |  | NULL |
+
+---
+
+## Why This Matters {.smaller}
+
+Without `NULLIF()`:
+
+- empty strings count as real values  
+- `COUNT(DISTINCT last_name)` is wrong  
+- completeness checks are misleading  
+
+---
+
+## Example 2 | Placeholder Values {.smaller}
+
+```sql
+SELECT
+  category_raw,
+  NULLIF(category_raw, 'UNKNOWN') AS category_clean
+FROM customers_raw_text;
+```
+
+. . .
+
+$$\downarrow$$
+
+| category_raw | category_clean |
+|-------------|----------------|
+| Accessories | Accessories |
+| UNKNOWN | NULL |
+
+---
+
+## Example 3 | NULLIF() Before Aggregation {.smaller}
+
+```sql
+SELECT
+  COUNT(NULLIF(category_raw, 'UNKNOWN')) AS valid_categories
+FROM customers_raw_text;
+```
+
+. . .
+
+This prevents placeholder values from inflating KPIs.
+
+---
+
+## NULLIF() with CONCAT() {.smaller}
+
+```sql
+SELECT
+  customer_id,
+  CONCAT(
+    first_name,
+    ' ',
+    NULLIF(last_name, '')
+  ) AS full_name_safe
+FROM customers_raw_text;
+```
+
+. . .
+
+Avoids malformed labels caused by empty strings.
+
+---
+
+## NULLIF() vs COALESCE() {.smaller}
+
+| Goal | Function |
+|-----|----------|
+| Convert bad value to NULL | `NULLIF()` |
+| Replace NULL with value | `COALESCE()` |
+| Restore missing meaning | `NULLIF()` |
+| Impute values | `COALESCE()` |
+
+---
+
+## Analytical Best Practice {.smaller}
+
+- audit text fields for placeholders  
+- convert fake values to `NULL` first  
+- aggregate only meaningful values  
+
+
 
