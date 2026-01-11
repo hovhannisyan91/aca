@@ -2916,7 +2916,7 @@
     "href": "materials/sql/slides/session6.html#example-3-substring-with-regex",
     "title": "String Functions",
     "section": "Example 3 | SUBSTRING() with Regex",
-    "text": "Example 3 | SUBSTRING() with Regex\nPostgreSQL supports regex-based extraction:\nSELECT\n  raw_phone,\n  SUBSTRING(raw_phone FROM '[0-9]+') AS first_digit_sequence\nFROM customers_raw_text;\n\n\\[\\rightarrow\\]\n\n\n\nraw_phone\nfirst_digit_sequence\n\n\n\n\n077600945\n077\n\n\n077-600-045\n077\n\n\n(374)-77-600-945\n374\n\n\n37477600945\n37477600945\n\n\n77600945\n77600945",
+    "text": "Example 3 | SUBSTRING() with Regex\nPostgreSQL supports regex-based extraction:\nSELECT\n  raw_phone,\n  SUBSTRING(raw_phone FROM '[0-9]+') AS first_digit_sequence\nFROM customers_raw_text;\n\n\\[\\downtarrow\\]\n\n\n\nraw_phone\nfirst_digit_sequence\n\n\n\n\n077600945\n077600945\n\n\n077-600-045\n077\n\n\n(374)-77-600-945\n374\n\n\n37477600945\n37477600945\n\n\n77600945\n77600945",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -3896,7 +3896,7 @@
     "href": "materials/sql/session6.html#substring",
     "title": "Session 06: Data Analysis with SQL | Functions",
     "section": "SUBSTRING()",
-    "text": "SUBSTRING()\nAfter cleaning whitespace, case, and structural noise, the next common analytical task is extracting meaningful parts of text.\nSUBSTRING() allows you to select a specific portion of a string based on position or pattern.\nThis is essential when a single text field contains multiple pieces of information.\nUnlike REPLACE() or REGEXP_REPLACE(), which remove noise,\nSUBSTRING() is used to isolate signal.\n\n\nWhy SUBSTRING() Matters in Analytics\nMany real-world text fields are compound fields, for example:\n\nphone numbers with prefixes\ncodes with embedded meaning\nidentifiers with fixed segments\ndates or versions encoded in strings\n\nFrom an analytical perspective, this means:\n\ngrouping requires extracted keys\njoins depend on consistent substrings\nvalidation depends on expected positions\n\n\n\n\nSUBSTRING() | Basic Positional Extraction\nThe most common form of SUBSTRING() uses starting position and length.\nSUBSTRING(text FROM start_position FOR length)\n\n\n\nExample 1 | Extract Last 8 Digits of Phone Numbers\nAssume we have already removed non-digit characters and want to extract the core phone number.\nInput\n\n\n\nraw_phone\n\n\n\n\n077600945\n\n\n37477600945\n\n\n77600945\n\n\n\n\\[\\downarrow\\]\nSELECT\n  raw_phone,\n  SUBSTRING(raw_phone FROM LENGTH(raw_phone) - 7 FOR 8) AS phone_core\nFROM customers_raw_text;\n\\[\\downarrow\\]\nOutput\n\n\n\nraw_phone\nphone_core\n\n\n\n\n077600945\n77600945\n\n\n37477600945\n77600945\n\n\n77600945\n77600945\n\n\n\n\n\nAnalytical Interpretation\nThis logic:\n\nassumes the last 8 digits uniquely identify the phone number\nremoves country codes and prefixes\ncreates a standardized join key\n\nThis pattern is extremely common in:\n\ntelecom analytics\ncustomer deduplication\nidentity resolution\n\n\n\n\n\nExample 2 | SUBSTRING() with Fixed Structure\nWhen text follows a known fixed format, SUBSTRING() is deterministic and fast.\nSELECT\n  category_raw,\n  SUBSTRING(category_raw FROM 1 FOR 11) AS category_prefix\nFROM customers_raw_text;\n\\[\\rightarrow\\]\n\n\n\ncategory_raw\ncategory_prefix\n\n\n\n\nAccessories (Promo)\nAccessories\n\n\nElectronics (Old)\nElectronics\n\n\nAccessories\nAccessories\n\n\nElectronics (Promo)\nElectronics\n\n\nAccessories (Test)\nAccessories\n\n\n\nThis is useful when:\n\nnaming conventions are enforced\nformats are guaranteed upstream\n\n\n\nExample 3 | Extract Digits Using Regex\nPostgreSQL also supports regex-based substring extraction.\nSUBSTRING(text FROM pattern)\n\nSELECT\n  raw_phone,\n  SUBSTRING(raw_phone FROM '[0-9]+') AS first_digit_sequence\nFROM customers_raw_text;\nThis extracts the first continuous digit block.\n\\[\\rightarrow\\]\n\n\n\nraw_phone\nfirst_digit_sequence\n\n\n\n\n077600945\n077\n\n\n077-600-045\n077\n\n\n(374)-77-600-945\n374\n\n\n37477600945\n37477600945\n\n\n77600945\n77600945\n\n\n\n\n\n\nPositional vs Pattern-Based SUBSTRING()\n\n\n\nUse Case\nPrefer\n\n\n\n\nFixed-length identifiers\nPositional\n\n\nVariable formats\nRegex-based\n\n\nPerformance-critical logic\nPositional\n\n\nUnknown structure\nRegex-based\n\n\n\n\n\n\nAnalytical Best Practice\n\nuse positional SUBSTRING() when formats are stable\nuse regex SUBSTRING() when formats vary\nalways validate results with:\n\nLENGTH()\nCOUNT(DISTINCT ...)\n\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Hidden Assumptions\n\n\n\nEvery SUBSTRING() encodes assumptions about:\n\nstring length\nformat stability\nsemantic meaning of positions\n\nIf formats change upstream, SUBSTRING() can silently break logic.\nAlways document:\n\nwhy a position was chosen\nwhat happens if length changes\n\n\n\nSUBSTRING() is a powerful extraction tool, but only when its assumptions are explicit and validated.",
+    "text": "SUBSTRING()\nAfter cleaning whitespace, case, and structural noise, the next common analytical task is extracting meaningful parts of text.\nSUBSTRING() allows you to select a specific portion of a string based on position or pattern.\nThis is essential when a single text field contains multiple pieces of information.\nUnlike REPLACE() or REGEXP_REPLACE(), which remove noise,\nSUBSTRING() is used to isolate signal.\n\n\nWhy SUBSTRING() Matters in Analytics\nMany real-world text fields are compound fields, for example:\n\nphone numbers with prefixes\ncodes with embedded meaning\nidentifiers with fixed segments\ndates or versions encoded in strings\n\nFrom an analytical perspective, this means:\n\ngrouping requires extracted keys\njoins depend on consistent substrings\nvalidation depends on expected positions\n\n\n\n\nSUBSTRING() | Basic Positional Extraction\nThe most common form of SUBSTRING() uses starting position and length.\nSUBSTRING(text FROM start_position FOR length)\n\n\n\nExample 1 | Extract Last 8 Digits of Phone Numbers\nAssume we have already removed non-digit characters and want to extract the core phone number.\nInput\n\n\n\nraw_phone\n\n\n\n\n077600945\n\n\n37477600945\n\n\n77600945\n\n\n\n\\[\\downarrow\\]\nSELECT\n  raw_phone,\n  SUBSTRING(raw_phone FROM LENGTH(raw_phone) - 7 FOR 8) AS phone_core\nFROM customers_raw_text;\n\\[\\downarrow\\]\nOutput\n\n\n\nraw_phone\nphone_core\n\n\n\n\n077600945\n77600945\n\n\n37477600945\n77600945\n\n\n77600945\n77600945\n\n\n\n\n\nAnalytical Interpretation\nThis logic:\n\nassumes the last 8 digits uniquely identify the phone number\nremoves country codes and prefixes\ncreates a standardized join key\n\nThis pattern is extremely common in:\n\ntelecom analytics\ncustomer deduplication\nidentity resolution\n\n\n\n\n\nExample 2 | SUBSTRING() with Fixed Structure\nWhen text follows a known fixed format, SUBSTRING() is deterministic and fast.\nSELECT\n  category_raw,\n  SUBSTRING(category_raw FROM 1 FOR 11) AS category_prefix\nFROM customers_raw_text;\n\\[\\rightarrow\\]\n\n\n\ncategory_raw\ncategory_prefix\n\n\n\n\nAccessories (Promo)\nAccessories\n\n\nElectronics (Old)\nElectronics\n\n\nAccessories\nAccessories\n\n\nElectronics (Promo)\nElectronics\n\n\nAccessories (Test)\nAccessories\n\n\n\nThis is useful when:\n\nnaming conventions are enforced\nformats are guaranteed upstream\n\n\n\nExample 3 | Extract Digits Using Regex\nPostgreSQL also supports regex-based substring extraction.\nSUBSTRING(text FROM pattern)\n\nSELECT\n  raw_phone,\n  SUBSTRING(raw_phone FROM '[0-9]+') AS first_digit_sequence\nFROM customers_raw_text;\nThis extracts the first continuous digit block.\n\\[\\downarrow\\]\n\n\n\nraw_phone\nfirst_digit_sequence\n\n\n\n\n077600945\n077\n\n\n077-600-045\n077\n\n\n(374)-77-600-945\n374\n\n\n37477600945\n37477600945\n\n\n77600945\n77600945\n\n\n\n\n\n\nPositional vs Pattern-Based SUBSTRING()\n\n\n\nUse Case\nPrefer\n\n\n\n\nFixed-length identifiers\nPositional\n\n\nVariable formats\nRegex-based\n\n\nPerformance-critical logic\nPositional\n\n\nUnknown structure\nRegex-based\n\n\n\n\n\n\nAnalytical Best Practice\n\nuse positional SUBSTRING() when formats are stable\nuse regex SUBSTRING() when formats vary\nalways validate results with:\n\nLENGTH()\nCOUNT(DISTINCT ...)\n\n\n\n\n\n\n\n\n\nWarningAnalytical Warning | Hidden Assumptions\n\n\n\nEvery SUBSTRING() encodes assumptions about:\n\nstring length\nformat stability\nsemantic meaning of positions\n\nIf formats change upstream, SUBSTRING() can silently break logic.\nAlways document:\n\nwhy a position was chosen\nwhat happens if length changes\n\n\n\nSUBSTRING() is a powerful extraction tool, but only when its assumptions are explicit and validated.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -3983,11 +3983,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session6.html#in-class-assignment-text-diagnostics-group-by-1015-minutes",
-    "href": "materials/sql/session6.html#in-class-assignment-text-diagnostics-group-by-1015-minutes",
+    "objectID": "materials/sql/session6.html#in-class-assignment",
+    "href": "materials/sql/session6.html#in-class-assignment",
     "title": "Session 06: Data Analysis with SQL | Functions",
-    "section": "In-Class Assignment | Text Diagnostics & GROUP BY (10–15 minutes)",
-    "text": "In-Class Assignment | Text Diagnostics & GROUP BY (10–15 minutes)\n\nObjective\nUse measurement-first SQL to understand how dirty text affects grouping and counts.\n\n\n\nTask 1 | Phone Number Diagnostics\nWrite a query that shows:\n\nraw_phone\nLENGTH(raw_phone)\nposition of '-'\nposition of '('\ncount of rows per pattern\n\nUse:\n\nLENGTH()\nPOSITION() or STRPOS()\nGROUP BY\n\n\n\n\nTask 2 | Category Fragmentation\nWrite a query that returns:\n\ncategory_raw\nnumber of transactions per category\n\nGROUP BY category_raw\nORDER BY COUNT(*) DESC;\nAnswer:\n\nhow many logical categories exist?\nhow many categories appear due to annotations?\n\n\n\n\nExpected Insight\nYou should clearly see that:\n\ngrouping on raw text produces fragmented dimensions\nphone numbers represent the same entity in multiple formats",
+    "section": "In-Class Assignment",
+    "text": "In-Class Assignment\n\nObjective\nUse measurement-first SQL to understand how dirty text affects grouping and counts.\n\n\n\nTask 1 | Phone Number Diagnostics\nWrite a query that shows:\n\nraw_phone\nLENGTH(raw_phone)\nposition of '-'\nposition of '('\ncount of rows per pattern\n\nUse:\n\nLENGTH()\nPOSITION() or STRPOS()\nGROUP BY\n\n\n\n\nTask 2 | Category Fragmentation\nWrite a query that returns:\n\ncategory_raw\nnumber of transactions per category\n\nGROUP BY category_raw\nORDER BY COUNT(*) DESC;\nAnswer:\n\nhow many logical categories exist?\nhow many categories appear due to annotations?\n\n\n\n\nExpected Insight\nYou should clearly see that:\n\ngrouping on raw text produces fragmented dimensions\nphone numbers represent the same entity in multiple formats",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -3996,11 +3996,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session6.html#take-home-case-study-cleaning-grouping-and-kpi-integrity-1.5-hours",
-    "href": "materials/sql/session6.html#take-home-case-study-cleaning-grouping-and-kpi-integrity-1.5-hours",
+    "objectID": "materials/sql/session6.html#take-home-case-study",
+    "href": "materials/sql/session6.html#take-home-case-study",
     "title": "Session 06: Data Analysis with SQL | Functions",
-    "section": "Take-Home Case Study | Cleaning, Grouping, and KPI Integrity (≈ 1.5 hours)",
-    "text": "Take-Home Case Study | Cleaning, Grouping, and KPI Integrity (≈ 1.5 hours)\n\nScenario\nYou are asked to produce reliable KPIs from transactions_text_demo.\nBusiness questions:\n\nrevenue by category\n\nnumber of unique customers\n\naverage transaction value\n\n\n\n\nPart 1 | Profiling (≈ 25 minutes)\nWrite SQL queries to assess:\n\nphone number format diversity\ncategory fragmentation\nimpact of dirty text on GROUP BY\n\nUse only diagnostic functions.\n\n\n\nPart 2 | Standardization Layer (≈ 40 minutes)\nCreate a cleaned SELECT projection (no updates) that includes:\n\nstandardized phone number (last 8 digits)\ncleaned category (no annotations, trimmed)\nrevenue per transaction\n\nUse:\n\nREGEXP_REPLACE()\nTRIM()\nSUBSTRING()\nCONCAT() where relevant\n\n\n\n\nPart 3 | KPI Comparison (≈ 20 minutes)\nCompute and compare:\n\nrevenue by raw category\nrevenue by cleaned category\nunique customers (raw vs cleaned phone)\n\nUse GROUP BY in all comparisons.\n\n\n\nPart 4 | Analytical Explanation (≈ 15 minutes)\nBriefly explain:\n\nwhy KPIs changed\nwhich cleaning step had the biggest impact\nwhat assumptions you made\nwhat could silently break in production\n\n\n\n\nSubmission Rules\n\nCreate string_functions.sql\nSQL only (no updates or deletes)\nall cleaning must be done in SELECT queries\nresults must be reproducible\nexplanations must be concise and analytical\npush it into GitHub\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThis assignment tests analytical thinking, not just SQL syntax.\nDirty text → broken GROUP BY → misleading KPIs.",
+    "section": "Take-Home Case Study",
+    "text": "Take-Home Case Study\n\nScenario\nYou are asked to produce reliable KPIs from transactions_text_demo.\nBusiness questions:\n\nrevenue by category\n\nnumber of unique customers\n\naverage transaction value\n\n\n\n\nPart 1 | Profiling\nWrite SQL queries to assess:\n\nphone number format diversity\ncategory fragmentation\nimpact of dirty text on GROUP BY\n\nUse only diagnostic functions.\n\n\n\nPart 2 | Standardization Layer\nCreate a cleaned SELECT projection (no updates) that includes:\n\nstandardized phone number (last 8 digits)\ncleaned category (no annotations, trimmed)\nrevenue per transaction\n\nUse:\n\nREGEXP_REPLACE()\nTRIM()\nSUBSTRING()\nCONCAT() where relevant\n\n\n\n\nPart 3 | KPI Comparison\nCompute and compare:\n\nrevenue by raw category\nrevenue by cleaned category\nunique customers (raw vs cleaned phone)\n\nUse GROUP BY in all comparisons.\n\n\n\nPart 4 | Analytical Explanation\nBriefly explain:\n\nwhy KPIs changed\nwhich cleaning step had the biggest impact\nwhat assumptions you made\nwhat could silently break in production\n\n\n\n\nSubmission Rules\n\nCreate string_functions.sql\nSQL only (no updates or deletes)\nall cleaning must be done in SELECT queries\nresults must be reproducible\nexplanations must be concise and analytical\npush it into GitHub\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThis assignment tests analytical thinking, not just SQL syntax.\nDirty text → broken GROUP BY → misleading KPIs.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -5858,7 +5858,7 @@
     "href": "materials/statistics/index.html",
     "title": "Statistics",
     "section": "",
-    "text": "Statistics Session 01: Data Layers and Bias in Data\n\n\nWhat is Data Analytics, Data Layers, Types of Biases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStatistics Session 02: Data Types\n\n\nData Types, Central Tendancy\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStatistics Session 03: Probabilistic Distributions\n\n\nProbabilistic Distributions, Sampling\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStatistics Session 04: Inference Essentials\n\n\nSorytelling with Data\n\n\n\n\n\n\n\n\n\n\n\nNo matching items",
+    "text": "Statistics Session 01: Data Layers and Bias in Data\n\n\nWhat is Data Analytics, Data Layers, Types of Biases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStatistics Session 02: Data Types\n\n\nData Types, Central Tendancy\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStatistics Session 03: Probabilistic Distributions\n\n\nContinues Distributions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStatistics Session 04: Inference Essentials\n\n\nSorytelling with Data\n\n\n\n\n\n\n\n\n\n\n\nNo matching items",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking"
@@ -6845,11 +6845,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#why-probability-distributions",
-    "href": "materials/statistics/slides/session3.html#why-probability-distributions",
+    "objectID": "materials/statistics/slides/session3.html#topics",
+    "href": "materials/statistics/slides/session3.html#topics",
     "title": "Probabilistic Distributions",
-    "section": "Why Probability Distributions?",
-    "text": "Why Probability Distributions?\nA probability distribution is a mathematical description of how values occur.\nIn retail analytics they help us answer questions like:\n\nHow long until the next customer arrives?\n\nHow many customers enter per hour?\n\nWhat is the chance a customer buys after viewing a product?\n\nWhat happens when we know only a range but nothing else?",
+    "section": "Topics",
+    "text": "Topics\n\nProbabilistic Distributions\nContinuous Distributions\nNormal Distribution\nUniform Distribution\nExponential Distribution",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6859,11 +6859,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#normal-distribution",
-    "href": "materials/statistics/slides/session3.html#normal-distribution",
+    "objectID": "materials/statistics/slides/session3.html#what-is-a-probabilistic-distribution",
+    "href": "materials/statistics/slides/session3.html#what-is-a-probabilistic-distribution",
     "title": "Probabilistic Distributions",
-    "section": "Normal Distribution",
-    "text": "Normal Distribution\nThese first five people have heights around the high 144 to high 200.\n\n\n[174, 169, 175, 182, 168]",
+    "section": "What Is a Probabilistic Distribution?",
+    "text": "What Is a Probabilistic Distribution?\nIn Data Analytics, we rarely know outcomes with certainty.\nInstead of saying: “Tomorrow’s sales will be exactly 120 units”\nWe say: “Sales will most likely be around 120, but could reasonably vary”",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6873,11 +6873,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#histogram-with-5-people",
-    "href": "materials/statistics/slides/session3.html#histogram-with-5-people",
+    "objectID": "materials/statistics/slides/session3.html#what-a-distribution-describes",
+    "href": "materials/statistics/slides/session3.html#what-a-distribution-describes",
     "title": "Probabilistic Distributions",
-    "section": "Histogram with 5 People",
-    "text": "Histogram with 5 People",
+    "section": "What a Distribution Describes",
+    "text": "What a Distribution Describes\nA probabilistic distribution answers:\n\nWhat values can a variable take?\nHow likely is each value (or range of values)?\nHow is uncertainty spread across those values?",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6887,11 +6887,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#wider-bins",
-    "href": "materials/statistics/slides/session3.html#wider-bins",
+    "objectID": "materials/statistics/slides/session3.html#from-raw-data-to-distribution",
+    "href": "materials/statistics/slides/session3.html#from-raw-data-to-distribution",
     "title": "Probabilistic Distributions",
-    "section": "Wider Bins",
-    "text": "Wider Bins",
+    "section": "From Raw Data to Distribution",
+    "text": "From Raw Data to Distribution\nWhen we observe data repeatedly: - Customer purchases - Session durations - Delivery times\nPatterns emerge.\nA distribution summarizes these patterns as a model, not a table.",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6901,11 +6901,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#narrower-bins",
-    "href": "materials/statistics/slides/session3.html#narrower-bins",
+    "objectID": "materials/statistics/slides/session3.html#random-variables",
+    "href": "materials/statistics/slides/session3.html#random-variables",
     "title": "Probabilistic Distributions",
-    "section": "Narrower Bins",
-    "text": "Narrower Bins",
+    "section": "Random Variables",
+    "text": "Random Variables\nA random variable is a numerical description of uncertainty.\nExamples:\n\nNumber of purchases today\nTime until customer churns\nEmail opened or not",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6915,11 +6915,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#increasing-sample-size-to-300",
-    "href": "materials/statistics/slides/session3.html#increasing-sample-size-to-300",
+    "objectID": "materials/statistics/slides/session3.html#discrete-vs-continuous",
+    "href": "materials/statistics/slides/session3.html#discrete-vs-continuous",
     "title": "Probabilistic Distributions",
-    "section": "Increasing Sample Size to 300",
-    "text": "Increasing Sample Size to 300",
+    "section": "Discrete vs Continuous",
+    "text": "Discrete vs Continuous\n\nDiscrete: counted outcomes\n\nPurchases\nComplaints\nClick / no click\n\nContinuous: measured outcomes\n\nRevenue\nTime\nWeight\nDistance",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6929,11 +6929,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#generalization",
-    "href": "materials/statistics/slides/session3.html#generalization",
+    "objectID": "materials/statistics/slides/session3.html#continuous-distributions",
+    "href": "materials/statistics/slides/session3.html#continuous-distributions",
     "title": "Probabilistic Distributions",
-    "section": "Generalization",
-    "text": "Generalization\n\\[\nf(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp\\left( -\\,\\frac{(x - \\mu)^2}{2\\sigma^2} \\right)\n\\]",
+    "section": "Continuous Distributions",
+    "text": "Continuous Distributions\nMost business variables are measured, not counted. Examples:\n\nRevenue\nCost\nTime\nDuration",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6943,11 +6943,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#two-normal-distributions",
-    "href": "materials/statistics/slides/session3.html#two-normal-distributions",
+    "objectID": "materials/statistics/slides/session3.html#continuous-core-rule",
+    "href": "materials/statistics/slides/session3.html#continuous-core-rule",
     "title": "Probabilistic Distributions",
-    "section": "Two Normal Distributions",
-    "text": "Two Normal Distributions",
+    "section": "Continuous: Core Rule",
+    "text": "Continuous: Core Rule\n\n\n\n\n\n\n\nRemember\n\n\nFor a continuous random variable \\(X\\): \\[\nP(X = x) = 0\n\\] Only intervals have probability: \\[\nP(a \\le X \\le b)\n\\]",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6957,11 +6957,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#comparison-1",
-    "href": "materials/statistics/slides/session3.html#comparison-1",
+    "objectID": "materials/statistics/slides/session3.html#example-human-heights",
+    "href": "materials/statistics/slides/session3.html#example-human-heights",
     "title": "Probabilistic Distributions",
-    "section": "Comparison | 1",
-    "text": "Comparison | 1\nUniform:\n\nAll values inside a range equally likely\n\nRandom checkout delay\n\nRandom promotion reveal time\n\nRandom banner display duration\n\nRandom delivery pickup window\n\nExponential:\n\nWaiting time until next event\n\nTime between customer arrivals\n\nTime between online purchases\n\nTime between product scans at self-checkout",
+    "section": "Example: Human Heights",
+    "text": "Example: Human Heights\nAssume population height:\n\nMean ≈ 170 cm\nStandard deviation ≈ 8 cm\n\nWe observe people one by one and build a distribution.",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6971,11 +6971,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#comparison-2",
-    "href": "materials/statistics/slides/session3.html#comparison-2",
+    "objectID": "materials/statistics/slides/session3.html#small-sample-noisy-picture",
+    "href": "materials/statistics/slides/session3.html#small-sample-noisy-picture",
     "title": "Probabilistic Distributions",
-    "section": "Comparison |2",
-    "text": "Comparison |2\nPoisson:\n\nNumber of events in a fixed interval\n\nCustomers entering per hour\n\nOnline orders per minute\n\nCarts abandoned per 10-minute window\n\nReturns processed per interval\n\nBernoulli:\n\nSingle yes/no outcome\n\nBuy (1) vs. no-buy (0)\n\nClick vs. no-click\n\nCoupon redeemed vs. not redeemed\n\nLoyalty signup vs. no signup",
+    "section": "Small Sample → Noisy Picture",
+    "text": "Small Sample → Noisy Picture",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6985,11 +6985,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#why-its-important",
-    "href": "materials/statistics/slides/session3.html#why-its-important",
+    "objectID": "materials/statistics/slides/session3.html#larger-sample-structure-emerges",
+    "href": "materials/statistics/slides/session3.html#larger-sample-structure-emerges",
     "title": "Probabilistic Distributions",
-    "section": "Why its important",
-    "text": "Why its important\nThe CLT allows analysts to:\n\nEstimate true average revenue per customer\n\nCompare stores or campaigns reliably\n\nDecide whether a promotion increased average spend\n\nBuild confidence intervals for KPIs\n\nRun A/B tests using sample means\n\nMake strong conclusions from limited data",
+    "section": "Larger Sample → Structure Emerges",
+    "text": "Larger Sample → Structure Emerges",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -6999,11 +6999,207 @@
     ]
   },
   {
-    "objectID": "materials/statistics/slides/session3.html#key-idea",
-    "href": "materials/statistics/slides/session3.html#key-idea",
+    "objectID": "materials/statistics/slides/session3.html#probability-density-function-pdf",
+    "href": "materials/statistics/slides/session3.html#probability-density-function-pdf",
     "title": "Probabilistic Distributions",
-    "section": "Key Idea",
-    "text": "Key Idea",
+    "section": "Probability Density Function (PDF)",
+    "text": "Probability Density Function (PDF)\n\nPDF describes density, not probability\nTotal area under the curve equals 1\n\\[\n\\int_{-\\infty}^{\\infty} f(x)\\,dx = 1\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#expected-value-and-variance",
+    "href": "materials/statistics/slides/session3.html#expected-value-and-variance",
+    "title": "Probabilistic Distributions",
+    "section": "Expected Value and Variance",
+    "text": "Expected Value and Variance\nExpected Value (Mean):\n\\[\nE[X] = \\int_{-\\infty}^{\\infty} x f(x)\\,dx\n\\]\nVariance (Spread):\n\\[\nVar(X) = \\int_{-\\infty}^{\\infty} (x-\\mu)^2 f(x)\\,dx\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#definition",
+    "href": "materials/statistics/slides/session3.html#definition",
+    "title": "Probabilistic Distributions",
+    "section": "Definition",
+    "text": "Definition\nA Normal Distribution is:\n\nSymmetric\nBell-shaped\nFully defined by \\(\\mu\\) and \\(\\sigma^2\\)\n\n\\[\nX \\sim \\mathcal{N}(\\mu, \\sigma^2)\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#normal-pdf",
+    "href": "materials/statistics/slides/session3.html#normal-pdf",
+    "title": "Probabilistic Distributions",
+    "section": "Normal PDF",
+    "text": "Normal PDF\n\\[\nf(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}}\n\\exp\\!\\left(-\\frac{(x-\\mu)^2}{2\\sigma^2}\\right)\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#normal-distribution-visualization",
+    "href": "materials/statistics/slides/session3.html#normal-distribution-visualization",
+    "title": "Probabilistic Distributions",
+    "section": "Normal Distribution: Visualization",
+    "text": "Normal Distribution: Visualization",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#standard-normal-distribution",
+    "href": "materials/statistics/slides/session3.html#standard-normal-distribution",
+    "title": "Probabilistic Distributions",
+    "section": "Standard Normal Distribution",
+    "text": "Standard Normal Distribution\nSpecial case where:\n\\[\n\\mu = 0,\\quad \\sigma = 1\n\\]\n\\[\nZ = \\frac{X-\\mu}{\\sigma}\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#normal-vs-gaussian",
+    "href": "materials/statistics/slides/session3.html#normal-vs-gaussian",
+    "title": "Probabilistic Distributions",
+    "section": "Normal vs Gaussian",
+    "text": "Normal vs Gaussian\n\n\n\n\n\n\nNote\n\n\nNormal and Gaussian distributions are the same thing.",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#definition-1",
+    "href": "materials/statistics/slides/session3.html#definition-1",
+    "title": "Probabilistic Distributions",
+    "section": "Definition",
+    "text": "Definition\n\\[\nX \\sim \\text{Uniform}(a,b)\n\\]\n\\[\nf(x) = \\frac{1}{b-a}, \\quad a \\le x \\le b\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#uniform-mean-and-variance",
+    "href": "materials/statistics/slides/session3.html#uniform-mean-and-variance",
+    "title": "Probabilistic Distributions",
+    "section": "Uniform Mean and Variance",
+    "text": "Uniform Mean and Variance\n\\[\nE[X] = \\frac{a+b}{2}\n\\]\n\\[\nVar(X) = \\frac{(b-a)^2}{12}\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#uniform-visualization",
+    "href": "materials/statistics/slides/session3.html#uniform-visualization",
+    "title": "Probabilistic Distributions",
+    "section": "Uniform Visualization",
+    "text": "Uniform Visualization",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#definition-2",
+    "href": "materials/statistics/slides/session3.html#definition-2",
+    "title": "Probabilistic Distributions",
+    "section": "Definition",
+    "text": "Definition\nExponential distribution models waiting time until an event. \\[\nX \\sim \\text{Exp}(\\lambda)\n\\]\n\\[\nf(x) = \\lambda e^{-\\lambda x}, \\quad x \\ge 0\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#exponential-mean-and-variance",
+    "href": "materials/statistics/slides/session3.html#exponential-mean-and-variance",
+    "title": "Probabilistic Distributions",
+    "section": "Exponential Mean and Variance",
+    "text": "Exponential Mean and Variance\n\\[\nE[X] = \\frac{1}{\\lambda}\n\\]\n\\[\nVar(X) = \\frac{1}{\\lambda^2}\n\\]",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#exponential-visualization",
+    "href": "materials/statistics/slides/session3.html#exponential-visualization",
+    "title": "Probabilistic Distributions",
+    "section": "Exponential Visualization",
+    "text": "Exponential Visualization",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#spreadsheet-summary",
+    "href": "materials/statistics/slides/session3.html#spreadsheet-summary",
+    "title": "Probabilistic Distributions",
+    "section": "Spreadsheet Summary",
+    "text": "Spreadsheet Summary\nNormal: =NORM.INV(RAND(),μ,σ), =NORM.DIST(x,μ,σ,TRUE)\nUniform: =RAND()*(b-a)+a\nExponential: =-LN(1-RAND())/λ",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Slides",
+      "Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/slides/session3.html#section",
+    "href": "materials/statistics/slides/session3.html#section",
+    "title": "Probabilistic Distributions",
+    "section": "",
+    "text": "Distributions model uncertainty\nContinuous variables require PDFs\nNormal, Uniform, Exponential model different behaviors\nCorrect distribution choice drives correct decisions",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -7017,7 +7213,7 @@
     "href": "materials/statistics/session3.html",
     "title": "Statistics Session 03: Probabilistic Distributions",
     "section": "",
-    "text": "Probabilistic Distributions\nSampling\nConfidence Intervals\nHypothesis Testing\n\n\n\n\n\n\n\n\nTo understand a probability distribution, we start with a simple experiment: We go outside and measure people’s heights, one person at a time. Assume the true average height in the population is around 175 cm.\nWe begin with just a few measurements and gradually build the distribution.\n\n\n\nThese first five people have heights around the high 144 to high 200.\n\n\n[174, 169, 175, 182, 168]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\\[\nf(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp\\left( -\\,\\frac{(x - \\mu)^2}{2\\sigma^2} \\right)\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\\[\nf(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp\\!\\left( -\\,\\frac{(x - \\mu)^2}{2\\sigma^2} \\right)\n\\]\n\n\\(f(x)\\) gives the probability density at value \\(x\\). It describes how concentrated the distribution is around that point.\n\\(\\mu\\) is the mean.\n\n\\(\\sigma\\) is the standard deviation.\n\nsmall \\(\\sigma\\) makes the curve narrow and tall,\n\nlarge \\(\\sigma\\) makes it wide and flat.\n\n\nThe term \\(\\frac{1}{\\sigma \\sqrt{2\\pi}}\\) ensures that the total area under the curve equals 1, as required for any probability distribution.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nImagine a telecom system that assigns a customer to one of several identical support bots randomly.\nThe system waits somewhere between 0 and 10 seconds before routing the customer, and every value in that interval is equally likely.\nThis kind of process has no preference:\n\nnot more likely to assign earlier,\nnot more likely to assign later.\n\n\n\n\nIf \\(X \\sim U(a,b)\\), then:\n\\[\nf(x) = \\frac{1}{b - a}, \\quad a \\le x \\le b\n\\]\n\n\\(f(x)=0\\) outside the interval\n\\([a,b]\\) is equally likely.\n\nSuppose we observe a sample \\(x_1, x_2, \\dots, x_n\\) from a uniform distribution \\(U(a,b)\\).\nThe likelihood of the parameters \\((a,b)\\) given the data is:\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=\\prod_{i=1}^n f(x_i)\n\\]\nBecause the PDF is constant inside the interval:\n\nIf all observations lie in \\([a,b]\\):\n\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=\\left(\\frac{1}{b-a}\\right)^n\n\\]\n\nIf any observation lies outside \\([a,b]\\):\n\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=0\n\\]\nSo uniform likelihood is simple:\nconstant if all points are inside, zero otherwise.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nConsider a supermarket or retail chain.\nCustomers arrive at the checkout lanes randomly, and the store wants to model:\nHow long until the next customer arrives at the counter?\n\nIf arrivals are independent and have no memory, then the waiting time** between customer arrivals follows an Exponential distribution.**\n\n\n\nif you’ve been waiting 4 minutes already, the next customer is not due\nevery moment is a fresh start\n\nthe past does NOT influence the future (Markov Chain)\n\n\nThis is very common in retail analytics:\n\ntime until next customer walks into the store,\ntime until next person reaches a self-checkout station,\ntime until next event in an online store: purchase, add-to-cart, click, etc.\n\nAll of these waiting times are modeled well by the Exponential distribution.\n\n\nIf \\(X \\sim \\text{Exp}(\\lambda)\\):\n\\[\nf(x) = \\lambda e^{-\\lambda x}, \\quad x \\ge 0\n\\]\nWhere:\n\n\\(\\lambda\\) = customer arrival rate (customers per minute)\n\n\\(1/\\lambda\\) = average waiting time\n\n\n\n\n\nSuppose we measure actual waiting times between customer arrivals:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood of \\(\\lambda\\) given the data is:\n\\[\nL(\\lambda) = \\prod_{i=1}^n \\lambda e^{-\\lambda x_i}\n\\]\nThis simplifies to:\n\\[\nL(\\lambda)\n= \\lambda^n \\exp\\!\\left(-\\lambda \\sum_{i=1}^n x_i\\right)\n\\]\nLog-likelihood:\n\\[\n\\ell(\\lambda)\n= n \\ln(\\lambda) - \\lambda \\sum x_i\n\\]\nMaximum Likelihood Estimate (MLE):\n\\[\n\\hat{\\lambda} = \\frac{n}{\\sum x_i}\n\\]\nInterpretation:\n\nfast arrivals → large \\(\\lambda\\)\n\nslow arrivals → small \\(\\lambda\\)\n\nJust like checkout traffic in a retail store.\n\n\n\n\nWe use example waiting times in minutes: obs = [1.2, 0.5, 2.0, 0.8]\nThese could be times between customers reaching a checkout lane.\n\nLeft plot → PDF comparison for \\(\\lambda = 1\\) and \\(\\lambda = 0.3\\)\n\nRight plot → Likelihood curve for the observed retail dat\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhen customers arrive quickly and consistently, the waiting times shrink → the likelihood favors a large \\(\\lambda\\).\nWhen customers arrive sporadically or slowly, the waiting times grow → the likelihood favors a small \\(\\lambda\\).\n\nIn our observed data:\n\nAverage waiting time = \\(4.5 / 4 = 1.125\\) minutes\n\nMLE: \\(\\hat{\\lambda} = 4/4.5 = 0.889\\) customers/minute\n\nMeaning:\n\nthe best-fitting model suggests approximately 0.89 customers per minute,\n\nwhich corresponds to one customer roughly every 1.1 minutes.\n\nThis type of analysis is central in retail analytics for understanding staffing requirements, managing checkout lanes, predicting peak hours, and optimizing store operations.\n\n\n\n\n\n\nIn a retail store, the number of customers who walk through the entrance during a fixed time interval (e.g., 1 hour) is often random but follows a stable average rate.\nExamples: - number of customers per hour, - number of purchases per minute in an online shop, - number of returns processed during each 30-minute window, - number of carts abandoned every hour.\nIf these events occur independently and with a constant average rate, then the number of events in a time window follows a Poisson distribution.\n\n\n\n\nIf \\(X \\sim \\text{Poisson}(\\lambda)\\):\n\\[\nP(X = k) = \\frac{\\lambda^k e^{-\\lambda}}{k!}, \\quad k = 0,1,2,\\dots\n\\]\nWhere:\n\n\\(\\lambda\\) is both the average number of events and the variance.\n\n\n\n\n\nSuppose we observe event counts:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood for \\(\\lambda\\) is:\n\\[\nL(\\lambda)\n= \\prod_{i=1}^n \\frac{\\lambda^{x_i} e^{-\\lambda}}{x_i!}\n\\]\nThis simplifies to:\n\\[\nL(\\lambda)\n= \\lambda^{\\sum x_i} \\, e^{-n\\lambda} \\Big/ \\prod x_i!\n\\]\nThe log-likelihood:\n\\[\n\\ell(\\lambda)\n= \\left(\\sum x_i\\right)\\ln(\\lambda) - n\\lambda + \\text{constant}\n\\]\nMaximum likelihood estimate:\n\\[\n\\hat{\\lambda} = \\frac{1}{n} \\sum x_i\n\\]\nwhich is simply the sample mean count.\n\n\n\n\nLeft plot → PMF for \\(\\lambda = 3\\) and \\(\\lambda = 10\\)\n\nRight plot → likelihood as a function of \\(\\lambda\\)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHigher \\(\\lambda\\) means more customers entering per time interval.\n\nLower \\(\\lambda\\) means slower foot traffic.\n\nIn our observed retail data:\n\nTotal customers = \\(S = 23\\)\n\nNumber of intervals = \\(n = 6\\)\n\nMLE: \\(\\hat{\\lambda} = 23/6 = 3.83\\) customers per interval\n\nMeaning:\n\non average, about 3.8 customers arrive every 10 minutes,\n\nwhich translates to roughly 23 customers per hour.\n\nThis insight helps retailers in:\n\nlabor scheduling,\n\ncheckout allocation,\n\nopening a new lane at high-traffic times,\n\nsupply-level decisions,\n\nforecasting hourly demand.\n\n\n\n\n\n\n\nThe Bernoulli distribution describes a single yes/no outcome.\nIn retail, this is everywhere:\n\nA customer buys an item (1) or does not buy it (0)\n\nA visitor clicks an online ad (1) or does not click (0)\n\nA shopper redeems a coupon (1) or does not redeem (0)\n\nA customer signs up for loyalty program (1) or does not (0)\n\nEvery Bernoulli trial has just two outcomes: - success (1) with probability \\(p\\) - failure (0) with probability \\(1 - p\\)\n\n\n\n\nIf \\(X \\sim \\text{Bernoulli}(p)\\):\n\\[\nP(X = 1) = p, \\qquad P(X = 0) = 1 - p\n\\]\n\\(X\\) takes only two values: 0 or 1.\n\n\n\n\nSuppose we observe binary outcomes:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood for \\(p\\) is:\n\\[\nL(p) = p^{\\sum x_i} (1-p)^{n - \\sum x_i}\n\\]\nLog-likelihood:\n\\[\n\\ell(p) = \\left(\\sum x_i\\right)\\ln(p) + \\left(n - \\sum x_i\\right)\\ln(1 - p)\n\\]\nMLE:\n\\[\n\\hat{p} = \\frac{\\sum x_i}{n}\n\\]\nwhich is simply the sample proportion\n(e.g., the observed purchase rate).\n\n\n\n\nWe use sample retail purchase-decision data: obs = [1, 0, 1, 1, 0, 0, 1, 1]\nThis could represent whether a customer bought an item after viewing it online.\n\nLeft plot → PMF for \\(p = 0.2\\) and \\(p = 0.8\\)\n\nRight plot → likelihood curve for \\(p\\) based on the observed data.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHigher \\(p\\) means customers are much more likely to buy the product.\n\nLower \\(p\\) means customers rarely make the purchase.\n\nIn our observed data:\n\nNumber of purchases = \\(S = 5\\)\n\nNumber of customers = \\(n = 8\\)\n\nMLE: \\(\\hat{p} = 5/8 = 0.625\\)\n\nMeaning:\n\nthe best-fitting Bernoulli model suggests approximately 62.5% purchase probability,\n\nmeaning a customer buys the product roughly 3 out of every 5 times they view it.\n\nRetail analysts use this to:\n\nmeasure conversion rate,\n\noptimize product placement,\n\nA/B test promotions,\n\nforecast revenue based on customer behavior,\n\nidentify products with high vs. low purchase likelihood.\n\n\n\n\n\nTo summarize everything covered so far, this we will put the four core distributions side-by-side using their:\n\nvariable type,\nreal-world retail interpretation,\nmathematical form,\nlikelihood intuition,\nand when you should use each one.\n\nThis serves as a compact review page for students.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDistribution\nVariable Type\nWhat It Models\nRetail Example\nKey Parameter\nLikelihood Intuition\n\n\n\n\nUniform\nContinuous (range)\nAll values in an interval equally likely\nRandom delay before assigning a customer to a cashier\n\\(a, b\\)\nLikelihood is constant if all observations lie inside \\([a,b]\\) and zero otherwise. Narrower intervals increase likelihood.\n\n\nExponential\nContinuous (positive)\nTime until next random event\nTime between customer arrivals at checkout\n\\(\\lambda\\)\nLikelihood favors large \\(\\lambda\\) when arrivals are frequent (short waits), small \\(\\lambda\\) when arrivals are sparse (long waits).\n\n\nPoisson\nDiscrete count\nNumber of events in a fixed time window\nNumber of customers entering per hour\n\\(\\lambda\\)\nLikelihood peaks at \\(\\hat{\\lambda} = \\text{sample mean}\\). Higher counts favor larger \\(\\lambda\\).\n\n\nBernoulli\nDiscrete binary\nOne yes/no outcome\nCustomer buys or does not buy a product\n\\(p\\)\nLikelihood increases as \\(p\\) approaches the observed proportion of purchases. Peaks at \\(\\hat{p}=S/n\\).\n\n\n\n\n\n\n\n\n\nUse when you only know the range of possible values but have no reason to believe any value is more likely.\nExamples:\n\nrandom delays,\nrandom arrival windows,\nsimulation/bootstrapping where all outcomes are equally plausible.\n\n\n\n\n\nUse when you are modeling waiting times between independent events.\nExamples:\n\ntime between customers at checkout,\ntime between online purchases,\ntime until next reward point redemption,\ntime until next item is scanned at self-checkout.\n\n\n\n\n\nUse when you count how many events occur in a fixed interval of time.\nExamples:\n\ncustomers entering the store per hour,\nnumber of orders in each 5-minute window,\nnumber of carts abandoned per hour,\nnumber of returns processed every 30 minutes.\n\n\n\n\n\nUse when modeling a single yes/no trial:\nExamples:\n\ncustomer buys (1) or does not buy (0),\ncustomer clicks or does not click a promotion,\ncustomer redeems or does not redeem a coupon,\ncustomer signs up or does not sign up for loyalty program.\n\n\n\n\n\n\n\nUse Uniform for “random within limits.”\n\nUse Exponential for “time until next event.”\n\nUse Poisson for “number of events per interval.”\n\nUse Bernoulli for “one yes/no outcome.”\n\nTogether, these four distributions cover the majority of basic retail/business modeling scenarios:\n\nfoot traffic analysis,\n\ncheckout optimization,\n\nconversion measurement,\n\nforecasting purchase behavior,\n\nand customer journey analytics.\n\nThey also form the foundation for more advanced models:\n\nBinomial,\nGamma,\nNegative Binomial,\nMany Bayesian updates",
+    "text": "Probabilistic Distributions\n\nContinuous Distributions\n\nNormal Distribution\n\nUniform Distribution\n\nExponential Distribution",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -7026,11 +7222,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/session3.html#probabilistic-distributions",
-    "href": "materials/statistics/session3.html#probabilistic-distributions",
+    "objectID": "materials/statistics/session3.html#what-is-a-probabilistic-distributions",
+    "href": "materials/statistics/session3.html#what-is-a-probabilistic-distributions",
     "title": "Statistics Session 03: Probabilistic Distributions",
-    "section": "",
-    "text": "Probabilistic Distributions\nSampling\nConfidence Intervals\nHypothesis Testing\n\n\n\n\n\n\n\n\nTo understand a probability distribution, we start with a simple experiment: We go outside and measure people’s heights, one person at a time. Assume the true average height in the population is around 175 cm.\nWe begin with just a few measurements and gradually build the distribution.\n\n\n\nThese first five people have heights around the high 144 to high 200.\n\n\n[174, 169, 175, 182, 168]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\\[\nf(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp\\left( -\\,\\frac{(x - \\mu)^2}{2\\sigma^2} \\right)\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\\[\nf(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp\\!\\left( -\\,\\frac{(x - \\mu)^2}{2\\sigma^2} \\right)\n\\]\n\n\\(f(x)\\) gives the probability density at value \\(x\\). It describes how concentrated the distribution is around that point.\n\\(\\mu\\) is the mean.\n\n\\(\\sigma\\) is the standard deviation.\n\nsmall \\(\\sigma\\) makes the curve narrow and tall,\n\nlarge \\(\\sigma\\) makes it wide and flat.\n\n\nThe term \\(\\frac{1}{\\sigma \\sqrt{2\\pi}}\\) ensures that the total area under the curve equals 1, as required for any probability distribution.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nImagine a telecom system that assigns a customer to one of several identical support bots randomly.\nThe system waits somewhere between 0 and 10 seconds before routing the customer, and every value in that interval is equally likely.\nThis kind of process has no preference:\n\nnot more likely to assign earlier,\nnot more likely to assign later.\n\n\n\n\nIf \\(X \\sim U(a,b)\\), then:\n\\[\nf(x) = \\frac{1}{b - a}, \\quad a \\le x \\le b\n\\]\n\n\\(f(x)=0\\) outside the interval\n\\([a,b]\\) is equally likely.\n\nSuppose we observe a sample \\(x_1, x_2, \\dots, x_n\\) from a uniform distribution \\(U(a,b)\\).\nThe likelihood of the parameters \\((a,b)\\) given the data is:\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=\\prod_{i=1}^n f(x_i)\n\\]\nBecause the PDF is constant inside the interval:\n\nIf all observations lie in \\([a,b]\\):\n\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=\\left(\\frac{1}{b-a}\\right)^n\n\\]\n\nIf any observation lies outside \\([a,b]\\):\n\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=0\n\\]\nSo uniform likelihood is simple:\nconstant if all points are inside, zero otherwise.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nConsider a supermarket or retail chain.\nCustomers arrive at the checkout lanes randomly, and the store wants to model:\nHow long until the next customer arrives at the counter?\n\nIf arrivals are independent and have no memory, then the waiting time** between customer arrivals follows an Exponential distribution.**\n\n\n\nif you’ve been waiting 4 minutes already, the next customer is not due\nevery moment is a fresh start\n\nthe past does NOT influence the future (Markov Chain)\n\n\nThis is very common in retail analytics:\n\ntime until next customer walks into the store,\ntime until next person reaches a self-checkout station,\ntime until next event in an online store: purchase, add-to-cart, click, etc.\n\nAll of these waiting times are modeled well by the Exponential distribution.\n\n\nIf \\(X \\sim \\text{Exp}(\\lambda)\\):\n\\[\nf(x) = \\lambda e^{-\\lambda x}, \\quad x \\ge 0\n\\]\nWhere:\n\n\\(\\lambda\\) = customer arrival rate (customers per minute)\n\n\\(1/\\lambda\\) = average waiting time\n\n\n\n\n\nSuppose we measure actual waiting times between customer arrivals:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood of \\(\\lambda\\) given the data is:\n\\[\nL(\\lambda) = \\prod_{i=1}^n \\lambda e^{-\\lambda x_i}\n\\]\nThis simplifies to:\n\\[\nL(\\lambda)\n= \\lambda^n \\exp\\!\\left(-\\lambda \\sum_{i=1}^n x_i\\right)\n\\]\nLog-likelihood:\n\\[\n\\ell(\\lambda)\n= n \\ln(\\lambda) - \\lambda \\sum x_i\n\\]\nMaximum Likelihood Estimate (MLE):\n\\[\n\\hat{\\lambda} = \\frac{n}{\\sum x_i}\n\\]\nInterpretation:\n\nfast arrivals → large \\(\\lambda\\)\n\nslow arrivals → small \\(\\lambda\\)\n\nJust like checkout traffic in a retail store.\n\n\n\n\nWe use example waiting times in minutes: obs = [1.2, 0.5, 2.0, 0.8]\nThese could be times between customers reaching a checkout lane.\n\nLeft plot → PDF comparison for \\(\\lambda = 1\\) and \\(\\lambda = 0.3\\)\n\nRight plot → Likelihood curve for the observed retail dat\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhen customers arrive quickly and consistently, the waiting times shrink → the likelihood favors a large \\(\\lambda\\).\nWhen customers arrive sporadically or slowly, the waiting times grow → the likelihood favors a small \\(\\lambda\\).\n\nIn our observed data:\n\nAverage waiting time = \\(4.5 / 4 = 1.125\\) minutes\n\nMLE: \\(\\hat{\\lambda} = 4/4.5 = 0.889\\) customers/minute\n\nMeaning:\n\nthe best-fitting model suggests approximately 0.89 customers per minute,\n\nwhich corresponds to one customer roughly every 1.1 minutes.\n\nThis type of analysis is central in retail analytics for understanding staffing requirements, managing checkout lanes, predicting peak hours, and optimizing store operations.\n\n\n\n\n\n\nIn a retail store, the number of customers who walk through the entrance during a fixed time interval (e.g., 1 hour) is often random but follows a stable average rate.\nExamples: - number of customers per hour, - number of purchases per minute in an online shop, - number of returns processed during each 30-minute window, - number of carts abandoned every hour.\nIf these events occur independently and with a constant average rate, then the number of events in a time window follows a Poisson distribution.\n\n\n\n\nIf \\(X \\sim \\text{Poisson}(\\lambda)\\):\n\\[\nP(X = k) = \\frac{\\lambda^k e^{-\\lambda}}{k!}, \\quad k = 0,1,2,\\dots\n\\]\nWhere:\n\n\\(\\lambda\\) is both the average number of events and the variance.\n\n\n\n\n\nSuppose we observe event counts:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood for \\(\\lambda\\) is:\n\\[\nL(\\lambda)\n= \\prod_{i=1}^n \\frac{\\lambda^{x_i} e^{-\\lambda}}{x_i!}\n\\]\nThis simplifies to:\n\\[\nL(\\lambda)\n= \\lambda^{\\sum x_i} \\, e^{-n\\lambda} \\Big/ \\prod x_i!\n\\]\nThe log-likelihood:\n\\[\n\\ell(\\lambda)\n= \\left(\\sum x_i\\right)\\ln(\\lambda) - n\\lambda + \\text{constant}\n\\]\nMaximum likelihood estimate:\n\\[\n\\hat{\\lambda} = \\frac{1}{n} \\sum x_i\n\\]\nwhich is simply the sample mean count.\n\n\n\n\nLeft plot → PMF for \\(\\lambda = 3\\) and \\(\\lambda = 10\\)\n\nRight plot → likelihood as a function of \\(\\lambda\\)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHigher \\(\\lambda\\) means more customers entering per time interval.\n\nLower \\(\\lambda\\) means slower foot traffic.\n\nIn our observed retail data:\n\nTotal customers = \\(S = 23\\)\n\nNumber of intervals = \\(n = 6\\)\n\nMLE: \\(\\hat{\\lambda} = 23/6 = 3.83\\) customers per interval\n\nMeaning:\n\non average, about 3.8 customers arrive every 10 minutes,\n\nwhich translates to roughly 23 customers per hour.\n\nThis insight helps retailers in:\n\nlabor scheduling,\n\ncheckout allocation,\n\nopening a new lane at high-traffic times,\n\nsupply-level decisions,\n\nforecasting hourly demand.\n\n\n\n\n\n\n\nThe Bernoulli distribution describes a single yes/no outcome.\nIn retail, this is everywhere:\n\nA customer buys an item (1) or does not buy it (0)\n\nA visitor clicks an online ad (1) or does not click (0)\n\nA shopper redeems a coupon (1) or does not redeem (0)\n\nA customer signs up for loyalty program (1) or does not (0)\n\nEvery Bernoulli trial has just two outcomes: - success (1) with probability \\(p\\) - failure (0) with probability \\(1 - p\\)\n\n\n\n\nIf \\(X \\sim \\text{Bernoulli}(p)\\):\n\\[\nP(X = 1) = p, \\qquad P(X = 0) = 1 - p\n\\]\n\\(X\\) takes only two values: 0 or 1.\n\n\n\n\nSuppose we observe binary outcomes:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood for \\(p\\) is:\n\\[\nL(p) = p^{\\sum x_i} (1-p)^{n - \\sum x_i}\n\\]\nLog-likelihood:\n\\[\n\\ell(p) = \\left(\\sum x_i\\right)\\ln(p) + \\left(n - \\sum x_i\\right)\\ln(1 - p)\n\\]\nMLE:\n\\[\n\\hat{p} = \\frac{\\sum x_i}{n}\n\\]\nwhich is simply the sample proportion\n(e.g., the observed purchase rate).\n\n\n\n\nWe use sample retail purchase-decision data: obs = [1, 0, 1, 1, 0, 0, 1, 1]\nThis could represent whether a customer bought an item after viewing it online.\n\nLeft plot → PMF for \\(p = 0.2\\) and \\(p = 0.8\\)\n\nRight plot → likelihood curve for \\(p\\) based on the observed data.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHigher \\(p\\) means customers are much more likely to buy the product.\n\nLower \\(p\\) means customers rarely make the purchase.\n\nIn our observed data:\n\nNumber of purchases = \\(S = 5\\)\n\nNumber of customers = \\(n = 8\\)\n\nMLE: \\(\\hat{p} = 5/8 = 0.625\\)\n\nMeaning:\n\nthe best-fitting Bernoulli model suggests approximately 62.5% purchase probability,\n\nmeaning a customer buys the product roughly 3 out of every 5 times they view it.\n\nRetail analysts use this to:\n\nmeasure conversion rate,\n\noptimize product placement,\n\nA/B test promotions,\n\nforecast revenue based on customer behavior,\n\nidentify products with high vs. low purchase likelihood.\n\n\n\n\n\nTo summarize everything covered so far, this we will put the four core distributions side-by-side using their:\n\nvariable type,\nreal-world retail interpretation,\nmathematical form,\nlikelihood intuition,\nand when you should use each one.\n\nThis serves as a compact review page for students.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDistribution\nVariable Type\nWhat It Models\nRetail Example\nKey Parameter\nLikelihood Intuition\n\n\n\n\nUniform\nContinuous (range)\nAll values in an interval equally likely\nRandom delay before assigning a customer to a cashier\n\\(a, b\\)\nLikelihood is constant if all observations lie inside \\([a,b]\\) and zero otherwise. Narrower intervals increase likelihood.\n\n\nExponential\nContinuous (positive)\nTime until next random event\nTime between customer arrivals at checkout\n\\(\\lambda\\)\nLikelihood favors large \\(\\lambda\\) when arrivals are frequent (short waits), small \\(\\lambda\\) when arrivals are sparse (long waits).\n\n\nPoisson\nDiscrete count\nNumber of events in a fixed time window\nNumber of customers entering per hour\n\\(\\lambda\\)\nLikelihood peaks at \\(\\hat{\\lambda} = \\text{sample mean}\\). Higher counts favor larger \\(\\lambda\\).\n\n\nBernoulli\nDiscrete binary\nOne yes/no outcome\nCustomer buys or does not buy a product\n\\(p\\)\nLikelihood increases as \\(p\\) approaches the observed proportion of purchases. Peaks at \\(\\hat{p}=S/n\\).\n\n\n\n\n\n\n\n\n\nUse when you only know the range of possible values but have no reason to believe any value is more likely.\nExamples:\n\nrandom delays,\nrandom arrival windows,\nsimulation/bootstrapping where all outcomes are equally plausible.\n\n\n\n\n\nUse when you are modeling waiting times between independent events.\nExamples:\n\ntime between customers at checkout,\ntime between online purchases,\ntime until next reward point redemption,\ntime until next item is scanned at self-checkout.\n\n\n\n\n\nUse when you count how many events occur in a fixed interval of time.\nExamples:\n\ncustomers entering the store per hour,\nnumber of orders in each 5-minute window,\nnumber of carts abandoned per hour,\nnumber of returns processed every 30 minutes.\n\n\n\n\n\nUse when modeling a single yes/no trial:\nExamples:\n\ncustomer buys (1) or does not buy (0),\ncustomer clicks or does not click a promotion,\ncustomer redeems or does not redeem a coupon,\ncustomer signs up or does not sign up for loyalty program.\n\n\n\n\n\n\n\nUse Uniform for “random within limits.”\n\nUse Exponential for “time until next event.”\n\nUse Poisson for “number of events per interval.”\n\nUse Bernoulli for “one yes/no outcome.”\n\nTogether, these four distributions cover the majority of basic retail/business modeling scenarios:\n\nfoot traffic analysis,\n\ncheckout optimization,\n\nconversion measurement,\n\nforecasting purchase behavior,\n\nand customer journey analytics.\n\nThey also form the foundation for more advanced models:\n\nBinomial,\nGamma,\nNegative Binomial,\nMany Bayesian updates",
+    "section": "What Is a Probabilistic Distributions",
+    "text": "What Is a Probabilistic Distributions\nIn Data Analytics, we rarely know outcomes with certainty.\nInstead of saying:\n“Tomorrow’s sales will be exactly 120 units”\nWe say:\n“Sales will most likely be around 120, but could reasonably vary”\nA probabilistic distribution is a formal way to describe this uncertainty by answering to the below three questions:\n\nWhat values can a variable take?\n\nHow likely is each value (or range of values)?\n\nHow is uncertainty spread across those values?\n\n\nFrom Raw Data to Distribution\nWhen we observe data repeatedly:\n\nCustomer purchases\n\nSession durations\n\nDelivery times\n\nPatterns emerge.\nA distribution is a model that summarizes those patterns instead of listing every observation.\n\n\nRandom Variables\nA random variable is a numerical description of an uncertain outcome.\nExamples:\n\nNumber of purchases today\n\nTime (in minutes) until a customer churns\n\nWhether a user clicks an ad (1 or 0)\n\nFrom the above example we could notice that the Random Variable could be\n\nDiscrete: take counts , yes/no outcomes\n\nNumber of compaints per day\nNumber of items sold\nEmail opened or not\netc..\n\nContinuous: measured not counted\n\nRevenue\nTime\nWeight\nDistance\netc..\n\n\n\n\nWell-Known Distributions",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -7039,11 +7235,11 @@
     ]
   },
   {
-    "objectID": "materials/statistics/session3.html#central-limit-theorem-clt",
-    "href": "materials/statistics/session3.html#central-limit-theorem-clt",
+    "objectID": "materials/statistics/session3.html#continues-distribution",
+    "href": "materials/statistics/session3.html#continues-distribution",
     "title": "Statistics Session 03: Probabilistic Distributions",
-    "section": "Central Limit Theorem (CLT)",
-    "text": "Central Limit Theorem (CLT)\nThe normal distribution is kind of magical in that we see it a lot in nature. But there’s a reason for that, and that reason makes it super useful for statistics as well. The Central Limit Theorem is the basis for a lot of statistics and the good news is that it is a pretty simple concept. That magic is called The Central Limit Theorem (CLT).\n\n\n“Even if you’re not normal, the average is normal”",
+    "section": "Continues Distribution",
+    "text": "Continues Distribution\nMany real-world business variables are measured: Revenue, Time, Cost, Duration, Distances etc..\nA distribution is continuous if:\n\nThe variable can take any real value in a range\n\nThere are infinitely many possible values\n\nExact values are not meaningful on their own\n\n\n\n\n\n\n\nImportantRemember\n\n\n\nFor a continuous random variable \\(X\\):\n\\[\nP(X = x) = 0\n\\]\nThis is not a mistake.\nProbability only makes sense over intervals:\n\\[\nP(a \\le X \\le b)\n\\]\n\n\nTo understand a Continuous probability distribution, we start with a simple experiment:\nWe go outside and measure people’s heights, one person at a time. Assume the true average height in the population is around 170 cm.\nWe begin with just a few measurements and gradually build the distribution.\nThe heights of the first 5 People:\n\n\n[174, 169, 175, 182, 168]\n\n\n\nHistogram with 5 People\n\n\n\n\n\n\n\n\n\n\n\nWider Bins\n\n\n\n\n\n\n\n\n\n\n\nNarrower Bins\n\n\n\n\n\n\n\n\n\n\n\nIncreasing Sample Size to 300\n\n\n\n\n\n\n\n\n\n\n\nProbability Density Function (PDF)\nContinuous distributions are described by a Probability Density Function (PDF).\nThe PDF:\n\nIs always non-negative\n\nIntegrates to 1 over its entire range\n\nDescribes how “dense” probability is around a value\n\nMathematically:\nImagine as calculating the area under the curves!\n\\[\n\\int_{-\\infty}^{\\infty} f(x)\\,dx = 1\n\\]\n\n\n\n\n\n\nImportant\n\n\n\n\nA higher PDF value means: Values around that point are more likely\n\nIt does not mean: The probability at that exact point is higher\n\n\n\n\n\n\nExpected Value (Mean)\nThe expected value represents the long-run average outcome.\nFor a continuous distribution:\n\\[\nE[X] = \\int_{-\\infty}^{\\infty} x f(x)\\,dx\n\\]\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\nExpected value answers:\n“If we repeated this process many times, what average outcome should we expect?”\n\n\n\n\nVariance\nVariance measures spread or uncertainty around the mean.\nFor a continuous distribution:\n\\[\nVar(X) = \\int_{-\\infty}^{\\infty} (x - \\mu)^2 f(x)\\,dx\n\\]\nwhere \\(\\mu = E[X]\\).\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\n\nLow variance → predictable outcomes\n\nHigh variance → risky or unstable outcomes\n\n\n\n\n\n\nWhy Continuous Distributions Are Powerful in Analytics\nThey allow us to:\n\nModel natural variability\n\nEstimate probabilities over ranges\n\nBuild confidence intervals\n\nPerform forecasting and optimization\n\n\n\nContinuous Distributions in Practice\nIn this course, we focus on:\n\nNormal Distribution\n\nUniform Distribution\n\nExponential Distribution",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
@@ -7052,11 +7248,50 @@
     ]
   },
   {
-    "objectID": "materials/statistics/session3.html#hypothesis-testing",
-    "href": "materials/statistics/session3.html#hypothesis-testing",
+    "objectID": "materials/statistics/session3.html#normal-distribution",
+    "href": "materials/statistics/session3.html#normal-distribution",
     "title": "Statistics Session 03: Probabilistic Distributions",
-    "section": "Hypothesis Testing",
-    "text": "Hypothesis Testing\n\nKeep calm and test the HYPOTHESIS!\n\nHypothesis: Assumption about a population mean\n\nExamples of situations which require hypothesis testing\n\nThe industry that promotes compact fluorescent light (CFL) bulbs claims the bulbs use 75% less energy and last 10 times longer than incandescent bulbs. An independent lab would like to test this claim using hypothesis testing.\nA recent Wall Street Journal article titled “Does the Internet Make You Smarter or Dumber?” posed the possibility that online activities turn us into shallow thinkers. The article cited a statistic claiming that the average time an American spends looking at a Web page is 56 seconds. A researcher at a local university would like to test this claim using a hypothesis test.\nThe average car speed in Yerevan is 15 km/s.\n\nwhat else?\n\n\nNull and Alternative\n\nNull Hypothesis \\(H_0\\) represents the status-quo or current situation. It assumes the population parameter equals (\\(=\\)), is less than or equal (\\(\\le\\)), or greater than or equal (\\(\\ge\\)) a specific value.\nAlternative Hypothesis \\(H_1\\) opposes the null. It states that the population parameter is \\(&lt;\\), \\(&gt;\\), or \\(\\ne\\) a specific value.\nWall Street Journal example (claim about average web page viewing time).\n\nThe purpose of hypothesis statements is to draw a conclusion about population parameters for which we do not have complete knowledge.\n\n\n\n\n\n\n\nConcept\nDescription\n\n\n\n\nNull Hypothesis (\\(H_0\\))\nRepresents status-quo; assumes no change or no effect.\n\n\nAlternative Hypothesis (\\(H_1\\))\nRepresents what we test for; assumes change, effect, or difference exists.\n\n\n\n\nAlternative hypothesis is sometimes called the research hypothesis.\n\n\n\nTwo-Tail Hypothesis Test\nA two-tail hypothesis test is used whenever the alternative hypothesis is expressed as:\n\\[\nH_1 : \\mu \\ne 56\n\\]\nOur Wall Street Journal example has the following hypotheses:\n\\[\nH_0 : \\mu = 56 \\\\\nH_1 : \\mu \\ne 56\n\\]\n\n\n\n\n\n\n\n\n\n\n\nProcedure of Hypothesis Test\n\nCollect a sample of size \\(n\\) and calculate the sample mean. In this example, the sample mean represents the mean viewing time per Web page.\nPlot the sample mean on the x-axis of the sampling distribution curve (Figure 9.1).\nIf the sample mean falls within the white region, we do not reject \\(H_0\\). This means we do not have enough evidence to support \\(H_1\\), which states that the population mean is not equal to 56 seconds.\nIf the sample mean falls in either shaded region (rejection regions), we reject \\(H_0\\). This means we have enough evidence to support \\(H_1\\) — that the true mean is not 56 seconds.\n\n\n\nOne-Tail Test\n\nCFL bulb example:\n\n\\[\nH_0 : \\mu \\le 8000 \\\\\nH_1 : \\mu &gt; 8000\n\\]\nThis is a right-tail hypothesis test where we only consider large values of \\(\\bar{x}\\) as evidence against \\(H_0\\).\n\n\n\n\n\n\n\n\n\n\n\nAnalogy with Legal System\nWe can never accept the null hypothesis. We can only reject it or fail to reject it.\nThe legal system uses a similar structure.\n\nA defendant is assumed innocent until proven guilty.\n\nHypotheses formulated in legal analogy:\n\\(H_0 : \\text{The defendant is innocent (status quo)}\\) \\(H_1 : \\text{The defendant is guilty}\\)\nThe two possible conclusions:\n\nReject \\(H_0\\) → The defendant is guilty\n\nFail to reject \\(H_0\\) → The defendant is not guilty\n\n\n\nType I and Type II Errors\nIn quality control applications:\n\nType I error = producer’s risk\n\nType II error = consumer’s risk\n\nThe table below summarizes the decision outcomes.\n\n\n\nDecision Rule\n\n\n\n\n\n\n\n\nCondition (Reality)\nDecision: Reject \\(H_0\\)\nDecision: Do Not Reject \\(H_0\\)\n\n\n\n\n\\(H_0\\) is actually true\nType I Error (\\(\\alpha\\))\nCorrect Outcome\n\n\n\\(H_0\\) is actually false\nCorrect Outcome\nType II Error (\\(\\beta\\))\n\n\n\nFor quality control applications:\n\nType I error = producer’s risk: \\(H_0 : \\mu = 4.0 \\text{ mm}\\) (process is satisfactory)\nType II error = consumer’s risk: \\(H_1 : \\mu \\ne 4.0 \\text{ mm}\\) (process is not satisfactory)",
+    "section": "Normal Distribution",
+    "text": "Normal Distribution\nAs the sample size increased and bins became finer, the histogram began to resemble a smooth, symmetric, bell-shaped curve. This shape corresponds to the Normal Distribution.\nA Normal Distribution is a continuous distribution that is:\n\nSymmetric around its mean\n\nBell-shaped\n\nFully described by two parameters\n\nMean \\(\\mu\\)\n\nVariance \\(\\sigma^2\\)\n\n\nIt is denoted as:\n\\[\nX \\sim \\mathcal{N}(\\mu, \\sigma^2)\n\\]\n\n\n\n\n\n\n\n\n\n\nProbability Density Function\n\\[\nf(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp\\!\\left( -\\,\\frac{(x - \\mu)^2}{2\\sigma^2} \\right)\n\\]\n\n\\(f(x)\\) gives the probability density at value \\(x\\). It describes how concentrated the distribution is around that point.\n\\(\\mu\\) is the mean.\n\n\\(\\sigma\\) is the standard deviation.\n\nsmall \\(\\sigma\\) makes the curve narrow and tall,\n\nlarge \\(\\sigma\\) makes it wide and flat.\n\n\nThe term \\(\\frac{1}{\\sigma \\sqrt{2\\pi}}\\) ensures that the total area under the curve equals 1, as required for any probability distribution.\n\n\nExpecteed Value\nFor a normal random variable \\(X \\sim \\mathcal{N}(\\mu, \\sigma^2)\\):\n\\[\nE[X] = \\mu\n\\]\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\nThe expected value represents the typical or average outcome.\nExamples:\n\nAverage customer height\n\nAverage daily revenue\n\nAverage delivery time\n\n\n\n\n\nVariance of the Normal Distribution\nFor a normal random variable:\n\\[\nVar(X) = \\sigma^2\n\\]\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\nVariance controls spread:\n\nSmall \\(\\sigma^2\\) → values tightly clustered around the mean\n\nLarge \\(\\sigma^2\\) → values widely spread and more uncertain\n\n\n\n\n\nTwo Normal Distributions\n\n\n\n\n\n\n\n\n\n\n\n\nSpreadsheet Demostration\n\nGeneration: =NORM.INV(RAND(),170,8)\nMean: =AVERAGE(range)\nStandard Deviation: =STDEV.P(range)\nVariance: =VAR.P(range)\nPDF: =NORM.DIST(x, mean, std, FALSE)\nCumulative Probability CDF: =NORM.DIST(x, mean, std, TRUE)\n\n\n\n\n\n\n\nTip\n\n\n\nCheckout the Normal Distribtion on practice here\n\n\n\n\nStandard Normal Distribution\nThe Standard Normal Distribution is a special case of the normal distribution where:\n\\[\n\\mu = 0 \\quad \\text{and} \\quad \\sigma = 1\n\\]\nIt is denoted as:\n\\[\nZ \\sim \\mathcal{N}(0,1)\n\\]\nAny normal random variable \\(X \\sim \\mathcal{N}(\\mu, \\sigma^2)\\) can be transformed into a standard normal variable using standardization:\n\\[\nZ = \\frac{X - \\mu}{\\sigma}\n\\]\n\n\n\n\n\n\nNoteRecall\n\n\n\nStandardization allows us to:\n\nCompare values measured on different scales\n\nCompute probabilities using a single reference distribution\n\nInterpret how many standard deviations a value is from the mean\n\n\n\n\n\n\nNormal vs Gaussian Distribution\nThe Normal Distribution and the Gaussian Distribution are the same thing.\nThey are two names for the same mathematical distribution.\n\nGaussian is the name used in mathematics and physics, after Carl Friedrich Gauss\n\nNormal is the name commonly used in statistics and data analytics\n\nBoth refer to the distribution defined by the PDF:\n\\[\nf(x) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}} \\exp\\left( -\\frac{(x-\\mu)^2}{2\\sigma^2} \\right)\n\\]\nThey are completely interchangeable terms.",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Statistics Session 03: Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/session3.html#uniform-distribution",
+    "href": "materials/statistics/session3.html#uniform-distribution",
+    "title": "Statistics Session 03: Probabilistic Distributions",
+    "section": "Uniform Distribution",
+    "text": "Uniform Distribution\nThe Uniform Distribution models situations where all values within a range are equally likely.\nThere is:\n\nNo center\n\nNo peak\n\nNo value more likely than another\n\nImagine the following situations:\n\nA random number generator picks a number between 0 and 1\n\nA customer arrives at a store at a random time between 09:00 and 10:00\n\nA system assigns users randomly to time slots between 0 and 30 minutes\n\nIn all these cases:\n\nEvery value in the interval is equally likely\n\nAnother example:\nImagine a telecom system that assigns a customer to one of several identical support bots randomly.\nThe system waits somewhere between 0 and 10 seconds before routing the customer, and every value in that interval is equally likely.\nThis kind of process has no preference:\n\nnot more likely to assign earlier,\nnot more likely to assign later.\n\n\nDefinition\nA Uniform Distribution on the interval \\([a, b]\\) is denoted as:\n\\[\nX \\sim \\text{Uniform}(a, b)\n\\]\nwhere:\n\n\\(a\\) is the minimum possible value\n\n\\(b\\) is the maximum possible value\n\n\n\nProbability Density Function (PDF)\nIf \\(X \\sim U(a,b)\\), then:\n\\[\nf(x) = \\frac{1}{b - a}, \\quad a \\le x \\le b\n\\]\n\n\\(f(x)=0\\) outside the interval\n\\([a,b]\\) is equally likely.\n\nSuppose we observe a sample \\(x_1, x_2, \\dots, x_n\\) from a uniform distribution \\(U(a,b)\\).\nThe likelihood of the parameters \\((a,b)\\) given the data is:\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=\\prod_{i=1}^n f(x_i)\n\\]\nBecause the PDF is constant inside the interval:\n\nIf all observations lie in \\([a,b]\\):\n\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=\\left(\\frac{1}{b-a}\\right)^n\n\\]\n\nIf any observation lies outside \\([a,b]\\):\n\n\\[\nL(a,b \\mid x_1,\\dots,x_n)=0\n\\]\nSo uniform likelihood is simple: constant if all points are inside, zero otherwise.\n\n\nVisualizing Uniform Distribution\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nImportantImportant Interpretation\n\n\n\nBecause the PDF is flat:\n\nNo value inside \\([a,b]\\) is more likely than another\n\nProbability depends only on interval length, not position\n\n\n\n\n\nExpected Value (Mean)\nFor a uniform random variable \\(X \\sim \\text{Uniform}(a,b)\\):\n\\[\nE[X] = \\frac{a + b}{2}\n\\]\n\n\nExpected Value (Mean)\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\nThe expected value is simply the midpoint of the interval.\nExample:\nIf arrival time is uniformly distributed between 0 and 60 minutes,\nthe average arrival time is 30 minutes.\n\n\n\n\nVariance\nFor a uniform distribution:\n\\[\nVar(X) = \\frac{(b - a)^2}{12}\n\\]\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\n\nWider interval → higher uncertainty\nNarrow interval → more predictable outcomes\n\n\n\nIf \\(X \\sim \\text{Uniform}(0, 10)\\):\n\\[\nP(2 \\le X \\le 5) = \\frac{5 - 2}{10 - 0} = 0.3\n\\]\n\n\nBusiness Applications of the Uniform Distribution\nUniform distributions are used when:\n\nRandom assignment is required\nNo prior preference exists\n\nExamples:\n\nA/B testing randomization\nLoad balancing\nSimulation baselines\nRandom sampling assumptions\n\n\n\nProbability as Area\nBecause the density is constant:\n\\[\nP(c \\le X \\le d) = \\frac{d - c}{b - a}\n\\]\nThis is simply the fraction of the interval covered.\n\n\nSpreadsheet Demonstration (Uniform Distribution)\n\nGenerate Uniform Data: =RAND()*(b-a)+a\n\nExample for \\([0,10]\\): =RAND()*10\n\nExpected Value: =(a+b)/2\nVariance: =(b-a)^2/12\nProbability Between Two Values \\(c\\) and \\(d\\): =(d-c)/(b-a)\n\n\n\n\n\n\n\nImportant\n\n\n\nThe uniform distribution assumes:\n\nNo structure\n\nNo memory\n\nNo preferred values",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Statistics Session 03: Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/session3.html#exponential-distribution",
+    "href": "materials/statistics/session3.html#exponential-distribution",
+    "title": "Statistics Session 03: Probabilistic Distributions",
+    "section": "Exponential Distribution",
+    "text": "Exponential Distribution\nWe now move to a continuous distribution that models waiting time until an event occurs.\nThis distribution is fundamentally different from Normal and Uniform distributions because:\n\nIt is not symmetric\n\nIt is right-skewed\n\nIt explicitly models time-to-event behavior\n\nConsider a supermarket or retail chain.\nCustomers arrive at the checkout lanes randomly, and the store wants to model:\nHow long until the next customer arrives at the counter?\nIf arrivals are independent and have no memory, then the waiting time** between customer arrivals follows an Exponential distribution.**\n\nif you’ve been waiting 4 minutes already, the next customer is not due\nevery moment is a fresh start\n\nthe past does NOT influence the future (Markov Chain)\n\nThis is very common in retail analytics:\n\ntime until next customer walks into the store,\ntime until next person reaches a self-checkout station,\ntime until next event in an online store: purchase, add-to-cart, click, etc.\n\nAll of these waiting times are modeled by the Exponential distribution.\n\nDefinition\nA random variable \\(X\\) follows an Exponential Distribution if:\n\\[\nX \\sim \\text{Exp}(\\lambda)\n\\]\nwhere:\n\n\\(\\lambda &gt; 0\\) is the arrival rate (events per unit time)\n\\(\\frac{1}{\\lambda}\\) is the average waiting time\n\n\n\nProbability Density Function (PDF)\nIf \\(X \\sim \\text{Exp}(\\lambda)\\):\n\\[\nf(x) = \\lambda e^{-\\lambda x}, \\quad x \\ge 0\n\\]\nWhere:\n\n\\(\\lambda\\) = customer arrival rate (customers per minute)\n\n\\(1/\\lambda\\) = average waiting time\n\n\n\nExpected Value (Mean)\n\\[\nE[X] = \\frac{1}{\\lambda}\n\\]\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\nIf customers arrive at a rate of: \\(\\lambda = 2\\) customers per minute then the expected waiting time is: \\(1/2 = 0.5\\) minutes\n\n\n\n\n\nVariance\n\\[\nVar(X) = \\frac{1}{\\lambda^2}\n\\]\n\n\n\n\n\n\nTipBusiness Interpretation\n\n\n\n\nHigh arrival rate → lower variability\n\nLow arrival rate → higher uncertainty in waiting times\n\n\n\n\n\nLikelihood for Observed Retail Data\nSuppose we measure actual waiting times between customer arrivals:\n\\[\nx_1, x_2, \\dots, x_n\n\\]\nThe likelihood of \\(\\lambda\\) given the data is:\n\\[\nL(\\lambda) = \\prod_{i=1}^n \\lambda e^{-\\lambda x_i}\n\\]\nThis simplifies to:\n\\[\nL(\\lambda)\n= \\lambda^n \\exp\\!\\left(-\\lambda \\sum_{i=1}^n x_i\\right)\n\\]\nLog-likelihood:\n\\[\n\\ell(\\lambda)\n= n \\ln(\\lambda) - \\lambda \\sum x_i\n\\]\nMaximum Likelihood Estimate (MLE):\n\\[\n\\hat{\\lambda} = \\frac{n}{\\sum x_i}\n\\]\nInterpretation:\n\nfast arrivals → large \\(\\lambda\\)\n\nslow arrivals → small \\(\\lambda\\)\n\nJust like checkout traffic in a retail store.\n\n\n\nVisualization\nWe use example waiting times in minutes: obs = [1.2, 0.5, 2.0, 0.8]\nThese could be times between customers reaching a checkout lane.\n\nLeft plot → PDF comparison for \\(\\lambda = 1\\) and \\(\\lambda = 0.3\\)\n\nRight plot → Likelihood curve for the observed retail dat\n\n\n\n\n\n\n\n\n\n\n\n\nInterpretation\n\nWhen customers arrive quickly and consistently, the waiting times shrink → the likelihood favors a large \\(\\lambda\\).\nWhen customers arrive sporadically or slowly, the waiting times grow → the likelihood favors a small \\(\\lambda\\).\n\nIn our observed data:\n\nAverage waiting time = \\(4.5 / 4 = 1.125\\) minutes\n\nMLE: \\(\\hat{\\lambda} = 4/4.5 = 0.889\\) customers/minute\n\nMeaning:\n\nthe best-fitting model suggests approximately 0.89 customers per minute,\n\nwhich corresponds to one customer roughly every 1.1 minutes.\n\nThis type of analysis is central in retail analytics for understanding staffing requirements, managing checkout lanes, predicting peak hours, and optimizing store operations.\n\n\nSpreadsheet Demonstration (Exponential Distribution)\n\nGenerate exponential data: =-LN(1-RAND())/lambda\nExpected value: =1/lambda\nVariance: =1/(lambda^2)\nCDF (event occurs within x): =1-EXP(-lambda*x)",
+    "crumbs": [
+      "Syllabus",
+      "Statistical Thinking",
+      "Statistics",
+      "Statistics Session 03: Probabilistic Distributions"
+    ]
+  },
+  {
+    "objectID": "materials/statistics/session3.html#watching-materials",
+    "href": "materials/statistics/session3.html#watching-materials",
+    "title": "Statistics Session 03: Probabilistic Distributions",
+    "section": "Watching Materials",
+    "text": "Watching Materials\n\nNormal Distribution\nExponential Distribution",
     "crumbs": [
       "Syllabus",
       "Statistical Thinking",
