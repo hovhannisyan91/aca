@@ -1,35 +1,117 @@
 ---
 title: "Statistics Session 03: Probabilistic Distributions"
-subtitle: "Probabilistic Distributions, Sampling"
+subtitle: "Continues Distributions"
 categories: [statistics]
 ---
 
 
-<!-- TODO add PDFs for each distribtuin -->
-
-
-
-## Probabilistic Distributions
-
+<!-- TODO -->
 ### Topics
 
-- Probabilistic Distributions
-- Sampling
-- Confidence Intervals
-- Hypothesis Testing
+
+- Probabilistic Distributions  
+- Continuous Distributions  
+- Normal Distribution  
+- Uniform Distribution  
+- Exponential Distribution 
+
+## What Is a Probabilistic Distributions
+
+In Data Analytics, we **rarely** know outcomes **with certainty**.
+
+**Instead of saying:**
+
+*“Tomorrow’s sales will be exactly 120 units”*
+
+**We say:**  
+
+*“Sales will most likely be around 120, but could reasonably vary”*
+
+A **probabilistic distribution** is a formal way to describe this uncertainty by answering to the below three questions:
+
+- What values can a variable take?  
+- How likely is each value (or range of values)?  
+- How is uncertainty spread across those values?  
+
+### From Raw Data to Distribution
+
+**When we observe data repeatedly:**
+
+- Customer purchases  
+- Session durations  
+- Delivery times  
+
+**Patterns emerge.**
+
+A distribution is a **model** that summarizes those patterns instead of listing every observation.
+
+### Random Variables
+
+A **random variable** is a numerical description of an uncertain outcome.
+
+**Examples:**
+
+- Number of purchases today  
+- Time (in minutes) until a customer churns  
+- Whether a user clicks an ad (1 or 0) 
+
+From the above example we could notice that the `Random Variable` could be
+
+- **Discrete:** take counts , `yes`/`no` outcomes
+  - Number of compaints per day
+  - Number of items sold
+  - Email opened or not
+  - etc..
+- **Continuous:** measured not counted
+  - Revenue
+  - Time
+  - Weight
+  - Distance
+  - etc..
+
+
+
 
 ### Well-Known Distributions
 
 ![](../../img/statistics/probabilistic_distributions.png)
 
-### What is a Probability Distribution?
 
-To understand a probability distribution, we start with a simple experiment:
-We go outside and measure people's heights, one person at a time.  Assume the true average height in the population is around **175 cm**.
+## Continues Distribution
+
+Many real-world business variables are measured: *Revenue, Time, Cost, Duration, Distances etc..*
+
+A distribution is **continuous** if:
+
+- The variable can take **any real value** in a range  
+- There are infinitely many possible values  
+- Exact values are not meaningful on their own
+
+::: {.callout-important title = "Remember"}
+
+For a continuous random variable $X$:
+
+$$
+P(X = x) = 0
+$$
+
+**This is not a mistake.**
+
+Probability only makes sense over **intervals**:
+
+$$
+P(a \le X \le b)
+$$
+
+:::
+
+
+**To understand a Continuous probability distribution, we start with a simple experiment:**
+
+We go outside and measure people's heights, one person at a time.  Assume the true average height in the population is around **170 cm**.
 
 We begin with just a few measurements and gradually build the distribution.
 
-### Normal Distribution
 
 
 ```{python}
@@ -47,7 +129,7 @@ np.random.seed(42)
 heights = np.random.normal(M, SD, N)
 ```
 
-These first five people have heights around the high `{python} int(min(heights))` to high `{python} int(max(heights))`.
+**The heights of the first 5 People:**
 
 ```{python}
 #| echo: false
@@ -56,7 +138,7 @@ sample_5 = heights[:5]
 ```
 
 
-#### Histogram with 5 People
+### Histogram with 5 People
 
 
 ```{python}
@@ -76,7 +158,7 @@ plt.show()
 ```
 
 
-#### Wider Bins
+### Wider Bins
 
 ```{python}
 #| echo: false
@@ -94,7 +176,7 @@ plt.ylabel("Frequency")
 plt.show()
 ```
 
-#### Narrower Bins 
+### Narrower Bins 
 
 
 ```{python}
@@ -114,7 +196,7 @@ plt.show()
 ```
 
 
-#### Increasing Sample Size to {python} N
+### Increasing Sample Size to `{python} N`
 
 
 ```{python}
@@ -133,12 +215,107 @@ plt.ylabel("Frequency")
 plt.show()
 ```
 
+### Probability Density Function (PDF)
 
-#### Generalization
+Continuous distributions are described by a **Probability Density Function (PDF)**.
+
+**The PDF:**
+
+- Is always non-negative  
+- Integrates to 1 over its entire range  
+- Describes how “dense” probability is around a value  
+
+
+**Mathematically:**
+
+*Imagine as calculating the area under the curves!*
 
 $$
-f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\,\frac{(x - \mu)^2}{2\sigma^2} \right)
+\int_{-\infty}^{\infty} f(x)\,dx = 1
 $$
+
+
+
+::: {.callout-important}
+- **A higher PDF value means:** Values around that point are more likely  
+- It does **not** mean: The probability at that exact point is higher  
+:::
+
+
+### Expected Value (Mean)
+
+The **expected value** represents the long-run average outcome.
+
+**For a continuous distribution:**
+
+$$
+E[X] = \int_{-\infty}^{\infty} x f(x)\,dx
+$$
+
+
+::: {.callout-tip title = "Business Interpretation"}
+**Expected value answers:** 
+
+“If we repeated this process many times, what average outcome should we expect?”
+:::
+
+### Variance
+
+Variance measures **spread** or **uncertainty** around the mean.
+
+**For a continuous distribution:**
+
+$$
+Var(X) = \int_{-\infty}^{\infty} (x - \mu)^2 f(x)\,dx
+$$
+
+where $\mu = E[X]$.
+
+
+::: {.callout-tip title = "Business Interpretation"}
+
+- Low variance → predictable outcomes  
+- High variance → risky or unstable outcomes  
+:::
+
+### Why Continuous Distributions Are Powerful in Analytics
+
+**They allow us to:**
+
+- Model natural variability  
+- Estimate probabilities over ranges  
+- Build confidence intervals  
+- Perform forecasting and optimization  
+
+
+### Continuous Distributions in Practice
+
+**In this course, we focus on:**
+
+- Normal Distribution  
+- Uniform Distribution  
+- Exponential Distribution  
+
+
+## Normal Distribution
+
+As the sample size increased and bins became finer, the histogram began to resemble a **smooth, symmetric, bell-shaped curve**. This shape corresponds to the **Normal Distribution**.
+
+A **Normal Distribution** is a continuous distribution that is:
+
+- Symmetric around its mean  
+- Bell-shaped  
+- Fully described by **two parameters**  
+  - Mean $\mu$  
+  - Variance $\sigma^2$  
+
+
+**It is denoted as:**
+
+$$
+X \sim \mathcal{N}(\mu, \sigma^2)
+$$
+
 
 ```{python}
 #| echo: false
@@ -165,7 +342,7 @@ plt.ylabel("Density")
 plt.show()
 ```
 
-#### Probability Density Function
+### Probability Density Function
 
 $$
 f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\!\left( -\,\frac{(x - \mu)^2}{2\sigma^2} \right)
@@ -179,8 +356,48 @@ $$
 
 The term $\frac{1}{\sigma \sqrt{2\pi}}$ ensures that the total area under the curve equals **1**, as required for any probability distribution.
 
+### Expecteed Value
 
-#### Two Normal Distributions
+For a normal random variable $X \sim \mathcal{N}(\mu, \sigma^2)$:
+
+$$
+E[X] = \mu
+$$
+
+
+::: {.callout-tip title="Business Interpretation"}
+
+The expected value represents the **typical** or **average** outcome.
+
+**Examples:**
+
+- Average customer height  
+- Average daily revenue  
+- Average delivery time  
+
+:::
+
+
+### Variance of the Normal Distribution
+
+For a normal random variable:
+
+$$
+Var(X) = \sigma^2
+$$
+
+
+::: {.callout-tip title="Business Interpretation"}
+
+Variance controls **spread**:
+
+- Small $\sigma^2$ → values tightly clustered around the mean  
+- Large $\sigma^2$ → values widely spread and more uncertain  
+
+:::
+
+
+### Two Normal Distributions
 
 ```{python}
 #| echo: false
@@ -227,10 +444,95 @@ plt.tight_layout()
 plt.show()
 ```
 
+<!--  -->
+### Spreadsheet Demostration
 
-### Uniform Distribution
+1. **Generation:** `=NORM.INV(RAND(),170,8)`
+2. **Mean:** `=AVERAGE(range)`
+3. **Standard Deviation:** `=STDEV.P(range)`
+4. **Variance:** `=VAR.P(range)`
+5. **PDF:** `=NORM.DIST(x, mean, std, FALSE)`
+6. **Cumulative Probability CDF:** `=NORM.DIST(x, mean, std, TRUE)`
 
-#### Imagine
+
+::: {.callout-tip}
+Checkout the Normal Distribtion on practice [here](https://docs.google.com/spreadsheets/d/1tJNjOvn8m393UluPVnIAT5W30NrreMnWx3Zhzkj6_WM/edit?usp=sharing)
+:::
+
+### Standard Normal Distribution
+
+The **Standard Normal Distribution** is a special case of the normal distribution where:
+
+$$
+\mu = 0 \quad \text{and} \quad \sigma = 1
+$$
+
+**It is denoted as:**
+
+$$
+Z \sim \mathcal{N}(0,1)
+$$
+
+
+Any normal random variable $X \sim \mathcal{N}(\mu, \sigma^2)$ can be transformed into a standard normal variable using **standardization**:
+
+$$
+Z = \frac{X - \mu}{\sigma}
+$$
+
+
+::: {.callout-note title = "Recall"}
+**Standardization allows us to:**
+
+- Compare values measured on different scales  
+- Compute probabilities using a single reference distribution  
+- Interpret how many **standard deviations** a value is from the mean  
+:::
+
+
+### Normal vs Gaussian Distribution
+
+
+The **Normal Distribution** and the **Gaussian Distribution** are **the same thing**.
+
+They are two names for the **same mathematical distribution**.
+
+- `Gaussian` is the name used in mathematics and physics, after Carl Friedrich Gauss  
+- `Normal` is the name commonly used in statistics and data analytics  
+
+Both refer to the distribution defined by the PDF:
+
+$$
+f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left( -\frac{(x-\mu)^2}{2\sigma^2} \right)
+$$
+
+
+They are **completely interchangeable terms**.
+
+
+
+## Uniform Distribution
+
+The **Uniform Distribution** models situations where **all values within a range are equally likely**.
+
+**There is:**
+
+- No center  
+- No peak  
+- No value more likely than another  
+
+**Imagine the following situations:**
+
+- A random number generator picks a number between 0 and 1  
+- A customer arrives at a store at a random time between 09:00 and 10:00  
+- A system assigns users randomly to time slots between 0 and 30 minutes  
+
+**In all these cases:**
+
+> Every value in the interval is equally likely
+
+
+**Another example:**
 
 Imagine a telecom system that assigns a customer to one of several identical support bots **randomly**.  
 The system waits somewhere between **0 and 10 seconds** before routing the customer, and **every value in that interval is equally likely**.
@@ -240,7 +542,21 @@ This kind of process has **no preference**:
 - not more likely to assign earlier,
 - not more likely to assign later.
 
-#### Probability Density Function (PDF)
+
+### Definition
+
+A **Uniform Distribution** on the interval $[a, b]$ is denoted as:
+
+$$
+X \sim \text{Uniform}(a, b)
+$$
+
+**where:**
+
+- $a$ is the minimum possible value  
+- $b$ is the maximum possible value  
+
+### Probability Density Function (PDF)
 
 If $X \sim U(a,b)$, then:
 
@@ -250,7 +566,6 @@ $$
 
 - $f(x)=0$ outside the interval
 - $[a,b]$ is equally likely.
-
 
 
 Suppose we observe a sample $x_1, x_2, \dots, x_n$ from a uniform distribution $U(a,b)$.  
@@ -274,11 +589,10 @@ $$
 L(a,b \mid x_1,\dots,x_n)=0
 $$
 
-So uniform likelihood is simple:  
-**constant if all points are inside, zero otherwise.**
+So uniform likelihood is simple:  **constant if all points are inside, zero otherwise.**
 
 
-#### Visualizing Uniform Distribution
+### Visualizing Uniform Distribution
 
 ```{python}
 #| echo: false
@@ -355,18 +669,132 @@ plt.show()
 ```
 
 
-### Exponential Distribution
+::: {.callout-important title="Important Interpretation"}
+
+**Because the PDF is flat:**
+
+- No value inside $[a,b]$ is more likely than another  
+- Probability depends **only on interval length**, not position  
+
+:::
+
+
+### Expected Value (Mean)
+
+For a uniform random variable $X \sim \text{Uniform}(a,b)$:
+
+$$
+E[X] = \frac{a + b}{2}
+$$
+
+### Expected Value (Mean)
+
+::: {.callout-tip title="Business Interpretation"}
+
+The expected value is simply the **midpoint** of the interval.
+
+Example:
+
+If arrival time is uniformly distributed between 0 and 60 minutes,  
+the average arrival time is **30 minutes**.
+
+:::
+
+
+### Variance
+
+For a uniform distribution:
+
+$$
+Var(X) = \frac{(b - a)^2}{12}
+$$
+
+
+::: {.callout-tip title="Business Interpretation"}
+
+- Wider interval → higher uncertainty  
+
+- Narrow interval → more predictable outcomes  
+
+:::
+
+
+If $X \sim \text{Uniform}(0, 10)$:
+
+$$
+P(2 \le X \le 5) = \frac{5 - 2}{10 - 0} = 0.3
+$$
+
+### Business Applications of the Uniform Distribution
+
+Uniform distributions are used when:
+
+- Random assignment is required  
+
+- No prior preference exists  
+
+Examples:
+
+- A/B testing randomization  
+
+- Load balancing  
+
+- Simulation baselines  
+
+- Random sampling assumptions  
+
+
+
+### Probability as Area
+
+**Because the density is constant:**
+
+$$
+P(c \le X \le d) = \frac{d - c}{b - a}
+$$
+
+This is simply the **fraction of the interval covered**.
+
+### Spreadsheet Demonstration (Uniform Distribution)
+
+1. **Generate Uniform Data:** `=RAND()*(b-a)+a`
+    - Example for $[0,10]$: `=RAND()*10`
+2. **Expected Value:** `=(a+b)/2`
+3. **Variance:** `=(b-a)^2/12`
+4. **Probability Between Two Values $c$ and $d$:** `=(d-c)/(b-a)`
+
+
+
+::: {.callout-important}
+**The uniform distribution assumes:**
+
+- No structure  
+- No memory  
+- No preferred values 
+:::
+
+
+## Exponential Distribution
+
+
+We now move to a continuous distribution that models **waiting time until an event occurs**.
+
+This distribution is fundamentally different from Normal and Uniform distributions because:
+
+- It is **not symmetric**  
+- It is **right-skewed**  
+- It explicitly models **time-to-event behavior**  
 
 Consider a supermarket or retail chain.  
 Customers arrive at the checkout lanes **randomly**, and the store wants to model:
 
 **How long until the next customer arrives at the counter?**
 
->**If arrivals are independent and have no memory, then the **waiting time** between customer arrivals follows an **Exponential distribution**.**
+**If arrivals are independent and have no memory, then the **waiting time** between customer arrivals follows an **Exponential distribution**.**
 
->- if you've been waiting 4 minutes already,  the next customer is **not** `due`
->- every moment is a fresh start  
->- the past does NOT influence the future  (Markov Chain)
+- if you've been waiting 4 minutes already,  the next customer is **not** `due`
+- every moment is a fresh start  
+- the past does NOT influence the future  (Markov Chain)
 
 
 **This is very common in retail analytics:**
@@ -375,9 +803,23 @@ Customers arrive at the checkout lanes **randomly**, and the store wants to mode
 - *time until next person reaches a self-checkout station,*
 - *time until next event in an online store: purchase, add-to-cart, click, etc.*
 
-All of these waiting times are modeled well by the *Exponential distribution.*
+All of these waiting times are modeled by the *Exponential distribution.*
 
-#### Probability Density Function (PDF)
+### Definition
+
+A random variable $X$ follows an **Exponential Distribution** if:
+
+$$
+X \sim \text{Exp}(\lambda)
+$$
+
+where:
+
+- $\lambda > 0$ is the **arrival rate** (events per unit time)  
+
+- $\frac{1}{\lambda}$ is the **average waiting time**
+
+### Probability Density Function (PDF)
 
 If $X \sim \text{Exp}(\lambda)$:
 
@@ -390,9 +832,37 @@ Where:
 - $\lambda$ = customer arrival **rate** (customers per minute)  
 - $1/\lambda$ = **average waiting time**  
 
+
+### Expected Value (Mean)
+
+$$
+E[X] = \frac{1}{\lambda}
+$$
+
+
+::: {.callout-tip title="Business Interpretation"}
+
+If customers arrive at a rate of:
+$\lambda = 2$ customers per minute  then the expected waiting time is: $1/2 = 0.5$ minutes  
+
+:::
 ---
 
-#### Likelihood for Observed Retail Data
+### Variance
+
+$$
+Var(X) = \frac{1}{\lambda^2}
+$$
+
+
+::: {.callout-tip title="Business Interpretation"}
+
+- High arrival rate → lower variability  
+- Low arrival rate → higher uncertainty in waiting times  
+
+:::
+
+### Likelihood for Observed Retail Data
 
 Suppose we measure actual waiting times between customer arrivals:
 
@@ -426,7 +896,7 @@ $$
 \hat{\lambda} = \frac{n}{\sum x_i}
 $$
 
-Interpretation:
+**Interpretation:**
 
 - fast arrivals → large $\lambda$  
 - slow arrivals → small $\lambda$
@@ -435,7 +905,7 @@ Just like checkout traffic in a retail store.
 
 ---
 
-#### Visualization (PDF + Likelihood Curve)
+### Visualization
 
 We use example waiting times in minutes: `obs = [1.2, 0.5, 2.0, 0.8]`
 
@@ -503,17 +973,17 @@ plt.tight_layout()
 plt.show()
 ```
 
-#### Interpretation 
+### Interpretation 
 
 - When customers arrive quickly and consistently, the waiting times shrink → the likelihood favors a **large** $\lambda$.
 - When customers arrive sporadically or slowly, the waiting times grow → the likelihood favors a **small** $\lambda$.
 
-In our observed data:
+**In our observed data:**
 
 - Average waiting time = $4.5 / 4 = 1.125$ minutes  
 - MLE: $\hat{\lambda} = 4/4.5 = 0.889$ customers/minute  
 
-Meaning:
+**Meaning:**
 
 - the best-fitting model suggests approximately **0.89 customers per minute**,  
 - which corresponds to **one customer roughly every 1.1 minutes**.
@@ -521,7 +991,21 @@ Meaning:
 This type of analysis is central in retail analytics for understanding staffing requirements, managing checkout lanes, predicting peak hours, and optimizing store operations.
 
 
-### Poisson Distribution
+### Spreadsheet Demonstration (Exponential Distribution)
+
+1. **Generate exponential data:**  `=-LN(1-RAND())/lambda`
+2. **Expected value:**  `=1/lambda`
+3. **Variance:**  `=1/(lambda^2)`
+5. **CDF (event occurs within x):**  `=1-EXP(-lambda*x)`
+
+
+## Watching Materials
+
+1. [Normal Distribution](https://www.youtube.com/watch?v=Dn6b9fCIUpM)
+2. [Exponential Distribution](https://www.youtube.com/watch?v=WKFk0NXyO50)
+
+
+<!-- ### Poisson Distribution
 
 #### Real-World Narrative (Retail)
 
@@ -877,7 +1361,8 @@ Use when you only know the *range* of possible values but have no reason to beli
 
 ---
 
-##### Exponential
+#### Exponential
+
 Use when you are modeling **waiting times** between independent events.
 
 **Examples:**
@@ -889,7 +1374,8 @@ Use when you are modeling **waiting times** between independent events.
 
 ---
 
-##### Poisson
+#### Poisson
+
 Use when you count **how many events occur in a fixed interval** of time.
 
 **Examples:**
@@ -901,7 +1387,7 @@ Use when you count **how many events occur in a fixed interval** of time.
 
 ---
 
-##### Bernoulli
+#### Bernoulli
 
 Use when modeling a **single yes/no trial**:
 
@@ -914,7 +1400,7 @@ Use when modeling a **single yes/no trial**:
 
 ---
 
-#### Final Intuition Summary
+### Final Intuition Summary
 
 - Use **Uniform** for “random within limits.”  
 - Use **Exponential** for “time until next event.”  
@@ -943,9 +1429,9 @@ The normal distribution is kind of magical in that we see it a lot in nature. Bu
 
 ![](../../img/statistics/clt.png)
 
-> *"Even if you're not normal, the average is normal"*
+> *"Even if you're not normal, the average is normal"* -->
 
-## Hypothesis Testing
+<!-- ## Hypothesis Testing
 
 >Keep calm and test the HYPOTHESIS!
 
@@ -1140,7 +1626,7 @@ The table below summarizes the decision outcomes.
 **For quality control applications:** 
 
 - Type I error = producer’s risk: $H_0 : \mu = 4.0 \text{ mm}$ (process is satisfactory)
-- Type II error = consumer’s risk: $H_1 : \mu \ne 4.0 \text{ mm}$ (process is not satisfactory)
+- Type II error = consumer’s risk: $H_1 : \mu \ne 4.0 \text{ mm}$ (process is not satisfactory) -->
 
 
 

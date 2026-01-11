@@ -1,6 +1,6 @@
 ---
 title: "Probabilistic Distributions"
-subtitle: "Statistical Thinking"
+subtitle: "Continuous Distributions"
 author: "Karen Hovhannisyan"
 date: last-modified
 format:
@@ -30,482 +30,322 @@ format:
 
 
 
-## Well Known distributions
+## Well Known distributions {.smaller}
 
 ![](../../../img/statistics/probabilistic_distributions.png)
 
 
+## Topics {.smaller}
 
-## Why Probability Distributions? {.smaller}
+- Probabilistic Distributions
+- Continuous Distributions
+- Normal Distribution
+- Uniform Distribution
+- Exponential Distribution
 
-A probability distribution is a mathematical description of how values occur.
+## What Is a Probabilistic Distribution? {.smaller}
 
-In retail analytics they help us answer questions like:
+In Data Analytics, we **rarely** know outcomes **with certainty**.
 
-- How long until the next customer arrives?  
-- How many customers enter per hour?  
-- What is the chance a customer buys after viewing a product?  
-- What happens when we know only a range but nothing else?  
+**Instead of saying:**
+*“Tomorrow’s sales will be exactly 120 units”*
+
+**We say:**
+*“Sales will most likely be around 120, but could reasonably vary”*
+
+## What a Distribution Describes {.smaller}
+
+**A probabilistic distribution answers:**
+
+- What values can a variable take?
+- How likely is each value (or range of values)?
+- How is uncertainty spread across those values?
+
+## From Raw Data to Distribution {.smaller}
+
+When we observe data repeatedly:
+- Customer purchases
+- Session durations
+- Delivery times
+
+Patterns emerge.
+
+A distribution summarizes these patterns as a **model**, not a table.
+
+## Random Variables {.smaller}
+
+A **random variable** is a numerical description of uncertainty.
+
+**Examples:**
+
+- Number of purchases today
+- Time until customer churns
+- Email opened or not
+
+## Discrete vs Continuous {.smaller}
+
+- **Discrete:** counted outcomes
+  - Purchases
+  - Complaints
+  - Click / no click
+- **Continuous:** measured outcomes
+  - Revenue
+  - Time
+  - Weight
+  - Distance
 
 
-## Normal Distribution
+## Continuous Distributions {.smaller}
 
+Most business variables are **measured**, not counted.
+Examples:
+
+- Revenue
+- Cost
+- Time
+- Duration
+
+## Continuous: Core Rule {.smaller}
+
+::: {.callout-important title="Remember"}
+For a continuous random variable $X$:
+$$
+P(X = x) = 0
+$$
+Only **intervals** have probability:
+$$
+P(a \le X \le b)
+$$
+:::
+
+## Example: Human Heights {.smaller}
+
+Assume population height:
+
+- Mean ≈ **170 cm**
+- Standard deviation ≈ **8 cm**
+
+We observe people one by one and build a distribution.
+
+## Small Sample → Noisy Picture {.smaller}
 
 ```{python}
 #| echo: false
-#| message: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| fig-align: center
+
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import norm
-N = 300
-M = 170
-SD = 8
+
 np.random.seed(42)
+sample_5 = np.random.normal(170, 8, 5)
 
-# True underlying distribution ~ Normal(175, 8)
-heights = np.random.normal(M, SD, N)
-```
-
-These first five people have heights around the high `{python} int(min(heights))` to high `{python} int(max(heights))`.
-
-```{python}
-#| echo: false
-sample_5 = heights[:5]
-[round(i) for i in sample_5]
-```
-
-
-## Histogram with 5 People
-
-
-```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
-
-plt.figure(figsize=(7,4))
-plt.hist(sample_5, bins=[160, 170, 180, 190], edgecolor="black")
-plt.title("Histogram with 5 Measurements")
+plt.hist(sample_5, bins=3, edgecolor="black")
+plt.title("Only 5 People")
 plt.xlabel("Height (cm)")
 plt.ylabel("Frequency")
 plt.show()
 ```
 
-
-## Wider Bins
-
+## Larger Sample → Structure Emerges {.smaller}
 ```{python}
 #| echo: false
 #| fig-width: 18
 #| fig-height: 5
 #| out-width: 100%
-#| out-height: auto
 #| fig-align: center
 
-plt.figure(figsize=(7,4))
-plt.hist(sample_5, bins=2, edgecolor="black")
-plt.title("Very Wide Bins (Low Resolution)")
+heights = np.random.normal(170, 8, 300)
+
+plt.hist(heights, bins=20, edgecolor="black")
+plt.title("300 People")
 plt.xlabel("Height (cm)")
 plt.ylabel("Frequency")
 plt.show()
 ```
 
-## Narrower Bins 
+## Probability Density Function (PDF) {.smaller}
 
-
-```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
-
-plt.figure(figsize=(7,4))
-plt.hist(sample_5, bins=5, edgecolor="black")
-plt.title("Narrower Bins but Still Only 5 People")
-plt.xlabel("Height (cm)")
-plt.ylabel("Frequency")
-plt.show()
-```
-
-
-## Increasing Sample Size to `{python} N`
-
-
-```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
-
-plt.figure(figsize=(7,4))
-plt.hist(heights, bins=15, edgecolor="black")
-plt.title("Histogram with 300 People (Medium Bins)")
-plt.xlabel("Height (cm)")
-plt.ylabel("Frequency")
-plt.show()
-```
-
-
-## Generalization
-
-
+- PDF describes **density**, not probability
+- Total area under the curve equals **1**
+- 
 $$
-f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\,\frac{(x - \mu)^2}{2\sigma^2} \right)
+\int_{-\infty}^{\infty} f(x)\,dx = 1
 $$
 
+## Expected Value and Variance {.smaller}
+
+**Expected Value (Mean):**
+
+$$
+E[X] = \int_{-\infty}^{\infty} x f(x)\,dx
+$$
+
+
+**Variance (Spread):**
+
+$$
+Var(X) = \int_{-\infty}^{\infty} (x-\mu)^2 f(x)\,dx
+$$
+
+# Normal Distribution
+
+## Definition {.smaller}
+
+A **Normal Distribution** is:
+
+- Symmetric
+- Bell-shaped
+- Fully defined by $\mu$ and $\sigma^2$
+  
+
+$$
+X \sim \mathcal{N}(\mu, \sigma^2)
+$$
+
+## Normal PDF
+
+$$
+f(x) = \frac{1}{\sigma\sqrt{2\pi}}
+\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
+$$
+
+## Normal Distribution: Visualization
+
 ```{python}
 #| echo: false
 #| fig-width: 18
 #| fig-height: 5
 #| out-width: 100%
-#| out-height: auto
 #| fig-align: center
 
-mu, sigma = np.mean(heights), np.std(heights)
+from scipy.stats import norm
 
-plt.figure(figsize=(7,4))
-
-# Histogram normalized to density
-plt.hist(heights, bins=30, density=True, edgecolor="black")
-
-# Smooth normal curve
-x = np.linspace(min(heights), max(heights), 300)
-plt.plot(x, norm.pdf(x, mu, sigma), linewidth=3)
-
-plt.title("Probability Distribution")
+x = np.linspace(140, 200, 400)
+plt.plot(x, norm.pdf(x, 170, 8), linewidth=3)
+plt.title("Normal Distribution")
 plt.xlabel("Height (cm)")
 plt.ylabel("Density")
 plt.show()
 ```
 
+## Standard Normal Distribution
 
-## Two Normal Distributions
+Special case where:
 
-```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
+$$
+\mu = 0,\quad \sigma = 1
+$$
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+$$
+Z = \frac{X-\mu}{\sigma}
+$$
 
-inch_to_cm = 2.54
+## Normal vs Gaussian
 
-# Newborn distribution
-mu_newborn = 20 * inch_to_cm        # 50.8 cm
-sigma_newborn = 0.6 * inch_to_cm    # ~1.5 cm
-x_newborn = np.linspace(40, 60, 500)
-pdf_newborn = norm.pdf(x_newborn, mu_newborn, sigma_newborn)
+::: {.callout-note}
+**Normal** and **Gaussian** distributions are the **same thing**.
+:::
 
-# Adult distribution
-mu_adult = 70 * inch_to_cm          # 177.8 cm
-sigma_adult = 3 * inch_to_cm        # ~7.6 cm
-x_adult = np.linspace(150, 210, 500)
-pdf_adult = norm.pdf(x_adult, mu_adult, sigma_adult)
+# Uniform Distribution
 
-# Create side-by-side plots
-fig, axes = plt.subplots(1, 2, figsize=(14, 4))
+## Definition
 
-# Newborn curve
-axes[0].plot(x_newborn, pdf_newborn, color="green", linewidth=3)
-axes[0].set_title("Newborn Height (cm)")
-axes[0].set_xlabel("Height (cm)")
-axes[0].set_ylabel("Density")
-
-# Adult curve
-axes[1].plot(x_adult, pdf_adult, color="blue", linewidth=3)
-axes[1].set_title("Adult Height (cm)")
-axes[1].set_xlabel("Height (cm)")
-axes[1].set_ylabel("Density")
-
-plt.tight_layout()
-plt.show()
-```
+$$
+X \sim \text{Uniform}(a,b)
+$$
 
 
+$$
+f(x) = \frac{1}{b-a}, \quad a \le x \le b
+$$
+
+## Uniform Mean and Variance
+
+$$
+E[X] = \frac{a+b}{2}
+$$
 
 
-<!-- ## Setup (run once) -->
+$$
+Var(X) = \frac{(b-a)^2}{12}
+$$
 
-```{python}
-#| echo: false
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-np.random.seed(42)
-```
-
-
-# Uniform {.smaller}
-
-
-- Random checkout routing delay (e.g., anywhere between 0–10 seconds)
-- Random discount reveal time in a promotion mini-game
-- Random product display duration on a marketing banner
-- Random delivery pickup window (e.g., 14:00–16:00)
-- Simulation of uncertain but bounded retail processes
-- Any situation where the value is known to be in a range, and all outcomes inside that range are equally likely
-
-##  
-```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Two uniform intervals (retail examples)
-a1, b1 = 0, 10
-a2, b2 = 30, 60
-
-x1 = np.linspace(a1-2, b1+2, 400)
-x2 = np.linspace(a2-5, b2+5, 400)
-
-f1 = np.where((x1 >= a1) & (x1 <= b1), 1/(b1-a1), 0)
-f2 = np.where((x2 >= a2) & (x2 <= b2), 1/(b2-a2), 0)
-
-fig, axes = plt.subplots(1, 2, figsize=(14, 4))
-
-axes[0].plot(x1, f1, linewidth=3)
-axes[0].set_title("Uniform U(0, 10)")
-axes[0].set_xlabel("x")
-axes[0].set_ylabel("Density")
-
-axes[1].plot(x2, f2, linewidth=3)
-axes[1].set_title("Uniform U(30, 60)")
-axes[1].set_xlabel("x")
-axes[1].set_ylabel("Density")
-
-plt.tight_layout()
-plt.show()
-```
-
-
-
-# Exponential {.smaller}
-
-- Time between customers arriving at checkout  
-- Time between online purchases  
-- Time until next product scan at self-checkout  
-- Time between clicks in an online session  
-- Time until next customer picks up a product from the shelf  
-- Any situation involving “waiting time until the next event” in retail
-
-##
+## Uniform Visualization {.smaller}
 
 ```{python}
 #| echo: false
 #| fig-width: 18
 #| fig-height: 5
 #| out-width: 100%
-#| out-height: auto
 #| fig-align: center
 
-import numpy as np
-import matplotlib.pyplot as plt
+x = np.linspace(-2, 12, 400)
+y = np.where((x>=0)&(x<=10), 1/10, 0)
 
-# Two exponential rates (retail scenarios)
-lam1 = 1.0   # fast arrivals
-lam2 = 0.3   # slow arrivals
-
-x = np.linspace(0, 10, 500)
-f1 = lam1 * np.exp(-lam1 * x)
-f2 = lam2 * np.exp(-lam2 * x)
-
-fig, axes = plt.subplots(1, 2, figsize=(14, 4))
-
-axes[0].plot(x, f1, linewidth=3)
-axes[0].set_title("Exponential (λ = 1.0)\nFast customer arrivals")
-axes[0].set_xlabel("Time")
-axes[0].set_ylabel("Density")
-
-axes[1].plot(x, f2, linewidth=3)
-axes[1].set_title("Exponential (λ = 0.3)\nSlow customer arrivals")
-axes[1].set_xlabel("Time")
-axes[1].set_ylabel("Density")
-
-plt.tight_layout()
+plt.plot(x, y, linewidth=3)
+plt.title("Uniform Distribution U(0,10)")
+plt.xlabel("x")
+plt.ylabel("Density")
 plt.show()
 ```
 
+# Exponential Distribution
 
+## Definition
 
-# POISSON
+Exponential distribution models **waiting time until an event**.
+$$
+X \sim \text{Exp}(\lambda)
+$$
 
+$$
+f(x) = \lambda e^{-\lambda x}, \quad x \ge 0
+$$
 
-# Poisson {.smaller}
+## Exponential Mean and Variance
 
-- Number of customers entering per hour  
-- Number of online orders per minute  
-- Number of carts abandoned in each 10-minute window  
-- Number of returns processed per 30-minute interval  
-- Number of loyalty signups per hour  
-- Any situation involving “how many events occur in a fixed time window”
+$$
+E[X] = \frac{1}{\lambda}
+$$
 
-##
+$$
+Var(X) = \frac{1}{\lambda^2}
+$$
 
+## Exponential Visualization
 ```{python}
 #| echo: false
 #| fig-width: 18
 #| fig-height: 5
 #| out-width: 100%
-#| out-height: auto
 #| fig-align: center
 
-import numpy as np
-import matplotlib.pyplot as plt
-from math import factorial
-
-def pmf(k, lam):
-    return (lam**k * np.exp(-lam)) / factorial(k)
-
-# Two Poisson scenarios
-lam1 = 3     # moderate traffic
-lam2 = 10    # rush hour
-
-k = np.arange(0, 21)
-p1 = np.array([pmf(i, lam1) for i in k])
-p2 = np.array([pmf(i, lam2) for i in k])
-
-fig, axes = plt.subplots(1, 2, figsize=(14, 4))
-
-axes[0].bar(k, p1, color="steelblue")
-axes[0].set_title("Poisson (λ = 3)\nModerate store traffic")
-axes[0].set_xlabel("Customer count")
-axes[0].set_ylabel("Probability")
-
-axes[1].bar(k, p2, color="darkorange")
-axes[1].set_title("Poisson (λ = 10)\nRush hour traffic")
-axes[1].set_xlabel("Customer count")
-axes[1].set_ylabel("Probability")
-
-plt.tight_layout()
+x = np.linspace(0, 10, 400)
+plt.plot(x, 1.0*np.exp(-1.0*x), linewidth=3, label="λ = 1.0")
+plt.plot(x, 0.3*np.exp(-0.3*x), linewidth=3, label="λ = 0.3")
+plt.title("Exponential Distribution")
+plt.xlabel("Time")
+plt.ylabel("Density")
+plt.legend()
 plt.show()
 ```
 
+# Summary
+
+## Spreadsheet Summary
+
+**Normal:** `=NORM.INV(RAND(),μ,σ)`, `=NORM.DIST(x,μ,σ,TRUE)`  
+**Uniform:** `=RAND()*(b-a)+a`  
+**Exponential:** `=-LN(1-RAND())/λ`
+
+## 
+
+- Distributions model uncertainty
+- Continuous variables require PDFs
+- Normal, Uniform, Exponential model different behaviors
+- Correct distribution choice drives correct decisions
 
 
-# Bernoulli {.smaller}
-
-- Customer buys (1) or does not buy (0)  
-- Customer clicks a product (1) or ignores it (0)  
-- Customer redeems a coupon (1) or not (0)  
-- Loyalty signup (1) or no signup (0)  
-- Email open vs. no open  
-- Any situation involving a single yes/no retail event
-
-##
-
-```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-x = np.array([0, 1])
-
-# Two Bernoulli probabilities
-p1 = 0.2   # low purchase / click probability
-p2 = 0.8   # high purchase / click probability
-
-pmf1 = np.array([1-p1, p1])
-pmf2 = np.array([1-p2, p2])
-
-fig, axes = plt.subplots(1, 2, figsize=(14, 4))
-
-axes[0].bar(x, pmf1, width=0.6, color="deepskyblue")
-axes[0].set_title("Bernoulli (p = 0.2)\nLow purchase likelihood")
-axes[0].set_xlabel("Outcome")
-axes[0].set_ylabel("Probability")
-axes[0].set_xticks([0,1])
-
-axes[1].bar(x, pmf2, width=0.6, color="seagreen")
-axes[1].set_title("Bernoulli (p = 0.8)\nHigh purchase likelihood")
-axes[1].set_xlabel("Outcome")
-axes[1].set_ylabel("Probability")
-axes[1].set_xticks([0,1])
-
-plt.tight_layout()
-plt.show()
-```
-
-
-# Comparison of Distributions 
-
-## Comparison | 1 {.smaller}
-
-**Uniform:**
-
-- All values inside a range equally likely  
-- Random checkout delay  
-- Random promotion reveal time  
-- Random banner display duration  
-- Random delivery pickup window
-
-**Exponential:**
-
-- Waiting time until next event  
-- Time between customer arrivals  
-- Time between online purchases  
-- Time between product scans at self-checkout
-
-
-## Comparison |2 {.smaller} 
-
-**Poisson:**
-
-- Number of events in a fixed interval  
-- Customers entering per hour  
-- Online orders per minute  
-- Carts abandoned per 10-minute window  
-- Returns processed per interval
-
-**Bernoulli:**
-
-- Single yes/no outcome  
-- Buy (1) vs. no-buy (0)  
-- Click vs. no-click  
-- Coupon redeemed vs. not redeemed  
-- Loyalty signup vs. no signup
-
-
-# CLT
-
-
-## Why its important
-
-
-**The CLT allows analysts to:**
-
-- Estimate true average revenue per customer  
-- Compare stores or campaigns reliably  
-- Decide whether a promotion increased average spend  
-- Build confidence intervals for KPIs  
-- Run A/B tests using sample means  
-- Make strong conclusions from *limited data*  
-
-
-## Key Idea
-
-![](../../../img/statistics/clt.png)
