@@ -1,0 +1,575 @@
+---
+# project: false
+title: "Date Functions"
+subtitle: "Date Functions"
+author: "Karen Hovhannisyan"
+date: last-modified
+format:
+  revealjs: 
+    touch: true
+    slide-number: false
+    chalkboard: true
+    preview-links: auto
+    # incremental: true
+    width: 1500
+    transition: slide
+    logo: ../../../img/favicon.png
+    footer: "<a href=\"../session7.qmd\" target= _blank>Back to chapter target</a>"
+    # css: ../../../reveal_styles.css
+    include-in-header:
+      - text: |
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+          <style>
+            .icon-xxl { font-size: 84px; }
+            .icon-xl  { font-size: 64px; }
+            .icon-lg  { font-size: 48px; }
+            .muted { opacity: .8 }
+            .pill { border-radius: 10px; }
+            .circle { border-radius: 50%; }
+          </style>
+---
+
+
+## Dates as Stories 
+
+Almost every real business question is, at its core, a **story over time**.
+
+
+
+- What happened **before**? 
+- What changed **after**?
+- How fast did something grow?
+- When did behavior shift?
+- How often did something was happenng?
+
+## Dates Create Analytical Structure {.smaller}
+
+A single timestamp can represent **many analytical dimensions** at once.
+
+  
+- day  
+- week  
+- month  
+- quarter  
+- year  
+- weekday vs weekend  
+
+. . . 
+
+**Without explicitly extracting and structuring these dimensions:**
+
+
+
+- trends disappear  
+- seasonality remains hidden  
+- comparisons become invalid  
+
+. . .
+
+*Dates turn **events** into **patterns**  but only if we ask the right questions.*
+
+
+
+## The Story We Will Follow {.smaller}
+
+Throughout this session, we will use the `sales_analysis` table created earlier.
+
+**Each row represents:**
+
+- one **transaction**  
+- occurring at a specific **point in time**  
+
+**Our goal is to answer progressively deeper analytical questions:**
+
+- *When* did something happen?  
+- *How long* did it take?  
+- *How many* events happened in a period?  
+- *How does time aggregation change interpretation?*  
+
+Each new **date function** will add **structure** to this story.
+
+---
+
+::: {.callout-tip title="Sales Analysis Context"}
+
+Remember to create or recreate the table using the following reference:
+
+<https://hovhannisyan91.github.io/aca/materials/sql/session4.html#creating-sales_analysis-table>
+
+:::
+
+
+## Date vs Timestamp | The First Fork in the Road {.smaller}
+
+Before using any date function, we must answer a fundamental question:
+
+. . .
+
+**What kind of time do we have?**
+
+1. **Date:**
+   - Represents a **calendar day only**.
+   - no time of day  
+   - no ordering within the day  
+   - example: `2024-05-12`  
+2. **TIMESTAMP:** Represents **date + time**.
+   - includes hours, minutes, seconds  
+   - preserves event sequence  
+   - example: `2024-05-12 14:37:22`  
+
+## Why This Distinction Matters {.smaller}
+
+- grouping behaves differently  
+- comparisons behave differently  
+- truncation behaves differently  
+
+Most analytical mistakes with dates begin **right here**.
+
+---
+
+::: {.callout-important title="In Our Dataset"}
+
+In `sales_analysis`:
+
+  
+- `order_date_date` → **DATE**  
+- `order_date` → **TIMESTAMP**  
+
+We will intentionally use **both** to understand their analytical implications.
+
+:::
+
+# `EXTRACT()`
+
+## `EXTRACT()` {.smaller}
+
+Dates contain **multiple dimensions** inside a single value $\rightarrow$ Pulling Meaning from Dates
+
+- year
+- quarter
+- months
+- date
+- weekday
+
+`EXTRACT()` allows us to isolate these components.
+
+```sql
+EXTRACT(field FROM date)
+```
+
+## Example {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+  EXTRACT(YEAR FROM order_date_date)  AS year,
+  EXTRACT(MONTH FROM order_date_date) AS month,
+  EXTRACT(DAY FROM order_date_date)   AS day, 
+  EXTRACT(DOW FROM some_date) as weekday
+FROM sales_analysis
+LIMIT 5
+```
+
+$$\downarrow$$
+
+| order_date_date | year | month | day | weekday |
+|-----------------|------|-------|-----|---------|
+| 2021-02-11      | 2021 | 2     | 11  | 4       |
+| 2022-12-10      | 2022 | 12    | 10  | 6       |
+| 2021-02-22      | 2021 | 2     | 22  | 1       |
+| 2022-07-12      | 2022 | 7     | 12  | 2       |
+| 2021-04-19      | 2021 | 4     | 19  | 1       |
+
+
+## `DATE_PART()`
+
+
+`DATE_PART()` is functionally equivalent to `EXTRACT()`.
+
+```sql
+DATE_PART('month', order_date_date)
+```
+
+Both return numeric components of a date.
+
+
+## When to Prefer Which
+  
+- `EXTRACT()` → ANSI-standard, portable SQL  
+- `DATE_PART()` → PostgreSQL-native, readable  
+
+In this course, we prefer **`EXTRACT()` for consistency**.
+
+
+# `DATE_TRUNC()`
+
+## `DATE_TRUNC()` 
+
+In analytics, **grain matters**.
+
+The same data can tell **very different stories** depending on *how time is grouped*.
+
+
+```sql
+DATE_TRUNC('unit', timestamp)
+```
+
+## Example 1{.smaller}
+
+```sql
+SELECT
+  DATE_TRUNC('month', order_date_date) AS month,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('month', order_date_date)
+ORDER BY month;
+```
+
+$$\downarrow$$
+
+| month                     | total_revenue |
+|---------------------------|---------------|
+| 2020-01-01 00:00:00+00    | 38621.59      |
+| 2020-02-01 00:00:00+00    | 30460.16      |
+| 2020-04-01 00:00:00+00    | 18096.39      |
+| 2020-05-01 00:00:00+00    | 23722.28      |
+| 2020-06-01 00:00:00+00    | 42599.07      |
+
+## Example 2 {.smaller}
+
+```sql
+SELECT
+  DATE_TRUNC('month', order_date_date) AS month,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('month', order_date_date)
+ORDER BY SUM(total_sales) DESC;
+```
+
+$$\downarrow$$
+
+
+| month                     | total_revenue |
+|---------------------------|---------------|
+| 2022-12-01 00:00:00+00    | 52510.67      |
+| 2022-07-01 00:00:00+00    | 49011.10      |
+| 2023-12-01 00:00:00+00    | 46700.47      |
+| 2021-09-01 00:00:00+00    | 46433.23      |
+| 2020-06-01 00:00:00+00    | 42599.07      |
+
+
+## Example 3 {.smaller}
+
+```sql
+SELECT
+  DATE_TRUNC('quarter', order_date_date) AS quarter,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('quarter', order_date_date)
+ORDER BY quarter;
+```
+
+$$\downarrow$$
+
+. . .
+
+
+| quarter                  | total_revenue |
+|--------------------------|---------------|
+| 2020-01-01 00:00:00+00   | 69081.75      |
+| 2020-04-01 00:00:00+00   | 84417.74      |
+| 2020-07-01 00:00:00+00   | 62003.53      |
+| 2020-10-01 00:00:00+00   | 69127.16      |
+| 2021-01-01 00:00:00+00   | 74184.68      |
+| 2021-04-01 00:00:00+00   | 68431.42      |
+| 2021-07-01 00:00:00+00   | 84194.98      |
+| 2021-10-01 00:00:00+00   | 63543.31      |
+
+
+
+
+## Example 4 {.smaller}
+
+
+
+```sql
+SELECT
+  DATE_TRUNC('year', order_date_date) AS year,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('year', order_date_date)
+ORDER BY year;
+```
+
+
+$$\downarrow$$
+
+. . .
+
+
+| year                     | total_revenue |
+|--------------------------|---------------|
+| 2020-01-01 00:00:00+00   | 284630.18     |
+| 2021-01-01 00:00:00+00   | 290354.39     |
+| 2022-01-01 00:00:00+00   | 345714.03     |
+| 2023-01-01 00:00:00+00   | 350319.25     |
+
+
+## Analytical Best Practices {.smaller}
+
+  
+- always justify your chosen time grain  
+- never mix different grains in the same comparison  
+- re-aggregate data before drawing conclusions  
+- validate insights by switching grains  
+
+`DATE_TRUNC()` does not change the data.  
+It changes **how you see the data**.
+
+
+# Working With the Present
+
+## `CURRENT_DATE`, `NOW()` {.smaller}
+
+In analytics, we often need a **reference point** called *now*.
+
+**This allows us to answer questions such as:**
+
+- how recent is this transaction?  
+- how many days ago did something happen?  
+- is this record outdated?  
+
+## `NOW()` {.smaller}
+
+**If you try:**
+
+```sql
+SELECT NOW();
+```
+
+- type: `TIMESTAMP WITH TIME ZONE`  
+- includes hours, minutes, seconds  
+- ideal for **sequence-sensitive logic**
+
+## `CURRENT_DATE`
+
+**If you try:**
+
+```sql
+SELECT NOW();
+```
+
+- type: `DATE`  
+- changes once per day  
+- ideal for **day-level comparisons**
+
+## Measuring Time Gaps | Date Arithmetic {.smaller}
+
+Dates become analytical only when we **compare them**.
+
+PostgreSQL allows **direct subtraction** between dates.
+
+---
+
+## Example | Days Since Order {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+  CURRENT_DATE - order_date_date AS days_since_order
+FROM sales_analysis
+LIMIT 5;
+```
+
+. . .
+
+$$\downarrow$$
+
+| order_date_date | days_since_order |
+|-----------------|------------------|
+| 2021-02-11      | 1797             |
+| 2022-12-10      | 1130             |
+| 2021-02-22      | 1786             |
+| 2022-07-12      | 1281             |
+| 2021-04-19      | 1730             |
+
+---
+
+::: {.callout-tip}
+  
+- subtraction of two `DATE`s returns an **integer**
+- the unit is **days**
+- ideal for:
+  - recency analysis
+  - churn logic
+  - aging reports
+
+:::
+
+---
+
+## Months Between Dates | Naive Approach {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+  (CURRENT_DATE - order_date_date) / 30 AS months_estimate
+FROM sales_analysis
+LIMIT 5;
+```
+
+---
+
+::: {.callout-warning}
+  
+This introduces **systematic bias**.
+
+Assumes every month has 30 days.
+
+:::
+
+---
+
+## Months Between Dates | Approximation {.smaller}
+
+```sql
+SELECT
+  (CURRENT_DATE - order_date_date) / 30.4375 AS approx_months
+FROM sales_analysis
+LIMIT 5;
+```
+
+. . .
+
+$$
+30.4375 = \frac{365.25}{12}
+$$
+
+---
+
+## Months Between Dates | Calendar-Safe {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+    (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', order_date_date)) * 12
+  + (DATE_PART('month', CURRENT_DATE) - DATE_PART('month', order_date_date))
+  - CASE
+      WHEN DATE_PART('day', CURRENT_DATE)
+        < DATE_PART('day', order_date_date)
+      THEN 1 ELSE 0
+  END AS full_months
+FROM sales_analysis
+ORDER BY order_date_date DESC
+LIMIT 10;
+```
+
+---
+
+## INTERVAL | Expressing Duration {.smaller}
+
+An `INTERVAL` represents a **span of time**, not a point.
+
+---
+
+## Example | Orders in Last 30 Days {.smaller}
+
+```sql
+SELECT
+  COUNT(*) AS recent_orders
+FROM sales_analysis
+WHERE order_date_date >= CURRENT_DATE - INTERVAL '30 days';
+```
+
+---
+
+## Common INTERVAL Units {.smaller}
+
+  
+- `INTERVAL '7 days'`
+- `INTERVAL '1 month'`
+- `INTERVAL '1 year'`
+
+---
+
+## Date + INTERVAL | Shifting Time {.smaller}
+
+```sql
+some_date + INTERVAL '2 days'
+```
+
+```sql
+some_date - INTERVAL '3 months'
+```
+
+```sql
+some_date + INTERVAL '5 years'
+```
+
+---
+
+## Example | Simulated Future Date {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+  order_date_date + INTERVAL '14 days' AS follow_up_date
+FROM sales_analysis
+LIMIT 5;
+```
+
+---
+
+## AGE() | Calendar-Aware Difference {.smaller}
+
+`AGE()` returns an **INTERVAL** representing true calendar distance.
+
+---
+
+## Example | AGE Output {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+  AGE(CURRENT_DATE, order_date_date) AS order_age
+FROM sales_analysis
+LIMIT 5;
+```
+
+. . .
+
+$$\downarrow$$
+
+| order_date_date | order_age               |
+|-----------------|-------------------------|
+| 2021-02-11      | 4 years 11 mons 2 days  |
+| 2022-12-10      | 3 years 1 mon 3 days    |
+| 2021-02-22      | 4 years 10 mons 19 days |
+
+---
+
+## AGE() | Extracting Components {.smaller}
+
+```sql
+SELECT
+  order_date_date,
+  EXTRACT(YEAR FROM AGE(CURRENT_DATE, order_date_date))  AS years,
+  EXTRACT(MONTH FROM AGE(CURRENT_DATE, order_date_date)) AS months,
+  EXTRACT(DAY FROM AGE(CURRENT_DATE, order_date_date))   AS days
+FROM sales_analysis
+LIMIT 5;
+```
+
+---
+
+::: {.callout-warning title="AGE() Interpretation"}
+
+  
+- extracted components are **not independent**
+- months reset after 12
+- days reset after month boundaries
+
+Use `AGE()` for **human interpretation**,  
+numeric arithmetic for **features and modeling**.
+
+:::
