@@ -1,0 +1,755 @@
+---
+title: "Session 07: Data Analysis with SQL | Functions"
+categories: [SQL, Date Functions]
+---
+
+
+
+## Dates as Stories, Not Columns
+
+Up to this point, we have worked with **numbers** and **text**.  
+Now we move to the most important analytical dimension of all: the **Time.**
+
+Almost every real business question is, at its core, a **story over time**.
+
+- What happened **before**?
+- What changed **after**?
+- How fast did something grow?
+- When did behavior shift?
+- How often did something was happenng?
+
+Dates are not just metadata — they define **cause, sequence, and interpretation**.
+
+This session is about learning how to **think with dates**, not just manipulate them.
+
+
+**Imagine this question:**
+
+> *“Did our sales improve after the campaign launch?”*
+
+**You open the data and see:**
+
+- transactions before `March`  
+- transactions after `March`  
+
+**But then you realize:**
+
+- some rows have timestamps  
+- some have only dates  
+- some are stored in UTC  
+- others are local time  
+- some records are missing days  
+
+Suddenly, the question becomes unanswerable.
+
+**The problem is not SQL syntax. The problem is misunderstanding time.**
+
+Date functions exist to restore **order**, **structure**, and **comparability**.
+
+## Dates Create Analytical Structure
+
+**A single timestamp can represent many analytical dimensions:**
+
+- day  
+- week  
+- month  
+- quarter  
+- year  
+- weekday vs weekend  
+
+**Without extracting and structuring these dimensions:**
+
+- trends disappear  
+- seasonality is hidden  
+- comparisons become invalid  
+
+Dates turn **events** into **patterns**.
+
+
+## The Story We Will Follow
+
+Throughout this session, we will use the `sales_analysis` table created earlier.
+
+Each row represents a **transaction**, and each transaction happened at a **specific point in time**.
+
+Our goal is to answer progressively deeper questions:
+
+- *When* did something happen?
+- *How long* did it take?
+- *How many* events happened in a period?
+- *How does time aggregation change interpretation?*
+
+
+::: {.callout-tip title = "`Sales Analysis`"}
+Remember to create/re-create the table using the following [URL](https://hovhannisyan91.github.io/aca/materials/sql/session4.html#creating-sales_analysis-table)
+:::
+
+## Date vs Timestamp | The First Fork in the Road
+
+Before using any date function, let's try to understand what kind of time we have.
+
+**DATE**
+
+- calendar day only  
+- no time of day  
+- example: `2024-05-12`
+
+**TIMESTAMP**
+
+- date + time  
+- sequence-sensitive  
+- example: `2024-05-12 14:37:22`
+
+**This distinction matters because:**
+
+- grouping behaves differently  
+- comparisons behave differently  
+- truncation behaves differently  
+
+Most analytical mistakes start here.
+
+
+::: {.callout-important title = "In our case"}
+
+In sales_analysis
+
+- `order_date_date`: date column
+- `order_date`: timestamp
+:::
+
+
+## `EXTRACT()`
+
+Dates contain **multiple dimensions** inside a single value $\rightarrow$ Pulling Meaning from Dates
+
+- year
+- quarter
+- months
+- date
+- weekday (0 $\rightarrow$ Sunday) 
+
+`EXTRACT()` allows us to isolate these components.
+
+```sql
+EXTRACT(field FROM date)
+```
+
+
+### Example 1 | Extract Year, Month, Day
+
+
+**Query:**
+
+```sql
+SELECT
+  order_date_date,
+  EXTRACT(YEAR FROM order_date_date)  AS year,
+  EXTRACT(MONTH FROM order_date_date) AS month,
+  EXTRACT(DAY FROM order_date_date)   AS day, 
+  EXTRACT(DOW FROM some_date) as weekday
+FROM sales_analysis
+LIMIT 5
+```
+
+$$\downarrow$$
+
+| order_date_date | year | month | day | weekday |
+|-----------------|------|-------|-----|---------|
+| 2021-02-11      | 2021 | 2     | 11  | 4       |
+| 2022-12-10      | 2022 | 12    | 10  | 6       |
+| 2021-02-22      | 2021 | 2     | 22  | 1       |
+| 2022-07-12      | 2022 | 7     | 12  | 2       |
+| 2021-04-19      | 2021 | 4     | 19  | 1       |
+
+
+
+
+::: {.callout-important title = "Extract Time"}
+
+We can also extract time using `EPOCHS`
+
+```sql
+EXTRACT(EPOCHS FROM order_date_date)   AS secconds,
+EXTRACT(EPOCHS FROM order_date_date)/60   AS minutes,
+EXTRACT(EPOCHS FROM order_date_date)/3600   AS minutes
+```
+
+:::
+
+
+### `DATE_PART()` 
+
+
+`DATE_PART()` is functionally equivalent to `EXTRACT()`.
+
+```sql
+DATE_PART('month', order_date_date)
+```
+
+Both return numeric components of a date.
+
+
+### When to Prefer Which
+  
+- `EXTRACT()` → ANSI-standard, portable SQL  
+- `DATE_PART()` → PostgreSQL-native, readable  
+
+In this course, we prefer **`EXTRACT()` for consistency**.
+
+
+## DATE_TRUNC() | Controlling the Grain of Time
+
+In analytics, **grain matters**.
+
+The same data can tell **very different stories** depending on *how time is grouped*.
+
+`DATE_TRUNC()` allows us to **round timestamps down** to a chosen temporal level  
+and therefore **control the analytical grain**.
+
+```sql
+DATE_TRUNC('unit', timestamp)
+```
+
+---
+
+### Example 1 | Monthly Sales Trend
+
+```sql
+SELECT
+  DATE_TRUNC('month', order_date_date) AS month,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('month', order_date_date)
+ORDER BY month;
+```
+
+$$\downarrow$$
+
+| month                     | total_revenue |
+|---------------------------|---------------|
+| 2020-01-01 00:00:00+00    | 38621.59      |
+| 2020-02-01 00:00:00+00    | 30460.16      |
+| 2020-04-01 00:00:00+00    | 18096.39      |
+| 2020-05-01 00:00:00+00    | 23722.28      |
+| 2020-06-01 00:00:00+00    | 42599.07      |
+
+
+### Example 2 | The Most Profitable Months
+
+
+```sql
+SELECT
+  DATE_TRUNC('month', order_date_date) AS month,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('month', order_date_date)
+ORDER BY SUM(total_sales) DESC
+LIMIT 5;
+```
+
+$$\downarrow$$
+
+
+| month                     | total_revenue |
+|---------------------------|---------------|
+| 2022-12-01 00:00:00+00    | 52510.67      |
+| 2022-07-01 00:00:00+00    | 49011.10      |
+| 2023-12-01 00:00:00+00    | 46700.47      |
+| 2021-09-01 00:00:00+00    | 46433.23      |
+| 2020-06-01 00:00:00+00    | 42599.07      |
+
+
+
+
+### Example 3 | Quarterly Sales Trend {.smaller}
+
+**Quarterly aggregation is useful for:**
+  
+- strategic planning  
+- executive reporting  
+- seasonality analysis  
+
+```sql
+SELECT
+  DATE_TRUNC('quarter', order_date_date) AS quarter,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('quarter', order_date_date)
+ORDER BY quarter;
+```
+
+$$\downarrow$$
+
+| quarter                  | total_revenue |
+|--------------------------|---------------|
+| 2020-01-01 00:00:00+00   | 69081.75      |
+| 2020-04-01 00:00:00+00   | 84417.74      |
+| 2020-07-01 00:00:00+00   | 62003.53      |
+| 2020-10-01 00:00:00+00   | 69127.16      |
+| 2021-01-01 00:00:00+00   | 74184.68      |
+| 2021-04-01 00:00:00+00   | 68431.42      |
+| 2021-07-01 00:00:00+00   | 84194.98      |
+| 2021-10-01 00:00:00+00   | 63543.31      |
+
+
+
+
+At the **quarterly grain**:
+ 
+- short-term noise is further reduced  
+- performance becomes comparable across years  
+- seasonality patterns are easier to detect  
+
+This grain is ideal for **high-level trend analysis**.
+
+---
+
+### Example 4 | Yearly Sales Trend {.smaller}
+
+Yearly aggregation answers **long-term performance questions**.
+
+```sql
+SELECT
+  DATE_TRUNC('year', order_date_date) AS year,
+  SUM(total_sales) AS total_revenue
+FROM sales_analysis
+GROUP BY DATE_TRUNC('year', order_date_date)
+ORDER BY year;
+```
+
+$$\downarrow$$
+
+
+| year                     | total_revenue |
+|--------------------------|---------------|
+| 2020-01-01 00:00:00+00   | 284630.18     |
+| 2021-01-01 00:00:00+00   | 290354.39     |
+| 2022-01-01 00:00:00+00   | 345714.03     |
+| 2023-01-01 00:00:00+00   | 350319.25     |
+
+
+
+At the **yearly grain**:
+
+- growth trajectories become clear  
+- outliers disappear  
+- long-term strategy can be evaluated  
+
+Year-level aggregation is **not** for operational decisions —  
+it is for **directional understanding**.
+
+
+### Analytical Best Practice {.smaller}
+
+- always justify your time grain  
+- never mix grains in the same comparison  
+- re-aggregate before drawing conclusions  
+- validate results by switching grains  
+
+`DATE_TRUNC()` does not change the data, it changes **how you see the data**.
+
+That is why it is one of the most important date functions in analytics.
+
+
+
+## `CURRENT_DATE`, `NOW()` | Working With the Present
+
+In analytics, we often need a **reference point** called *now*.
+
+**This allows us to answer questions such as:**
+
+- how recent is this transaction?  
+- how many days ago did something happen?  
+- is this record outdated?  
+
+PostgreSQL provides two core functions for this purpose.
+
+---
+
+### `CURRENT_DATE`
+
+Returns **today’s date** without time.
+
+```sql
+SELECT CURRENT_DATE;
+```
+
+- type: `DATE`  
+- changes once per day  
+- ideal for **day-level comparisons**
+
+---
+
+### `NOW()` / `CURRENT_DATE`
+
+Returns the **current timestamp** (date + time).
+
+```sql
+SELECT NOW();
+```
+
+- type: `TIMESTAMP WITH TIME ZONE`  
+- includes hours, minutes, seconds  
+- ideal for **sequence-sensitive logic**
+
+```sql
+SELECT CURRENT_DATE
+```
+
+::: {.callout-caution title = "Attention"}
+
+- You must use `()` with `NOW` > `NOW()`, `SELECT NOW`
+- You must NOT use `()` `CURRENT_DATE`,  `SELECT CURRENT_DATE`
+:::
+
+
+Using `CURRENT_DATE` vs `NOW()` changes interpretation.
+
+  
+- `CURRENT_DATE` → calendar-based logic  
+- `NOW()` → event-sequence logic  
+
+Always align the function with the **granularity of your question**.
+
+---
+
+## Measuring Time Gaps | Date Arithmetic
+
+Dates become analytical only when we **compare them**.
+
+**PostgreSQL** allows direct subtraction between dates.
+
+### Example 1 | Days Since Order
+
+```sql
+SELECT
+  order_date_date,
+  CURRENT_DATE - order_date_date AS days_since_order
+FROM sales_analysis
+LIMIT 5;
+```
+
+$$\downarrow$$
+
+| order_date_date | days_since_order |
+|-----------------|------------------|
+| 2021-02-11      | 1797             |
+| 2022-12-10      | 1130             |
+| 2021-02-22      | 1786             |
+| 2022-07-12      | 1281             |
+| 2021-04-19      | 1730             |
+
+
+---
+
+
+::: {.callout-tip}
+- subtraction of two `DATE`s returns an **integer**
+- the unit is **days**
+- this is ideal for: 
+  - recency analysis  
+  - churn logic  
+  - aging reports  
+
+:::
+
+
+
+### Example 2 | Get Number of Months
+
+#### Option 1
+
+
+```sql
+SELECT
+  order_date_date,
+  (CURRENT_DATE - order_date_date )/30  AS days_since_order
+FROM sales_analysis
+LIMIT 5;
+```
+
+::: {.callout-warning}
+This is wrong and produces **systematic bias.**
+
+Befor applying this we must be sure that it is accepted within the organization
+:::
+
+#### Option 2
+
+```sql
+SELECT
+  (CURRENT_DATE - order_date_date) / 30.4375 AS approx_months
+FROM orders;
+```
+
+**Why 30.4375 ?**
+
+the average days per months $\rightarrow$  `365.25 / 12`
+
+- Not exact
+- Not calendar-safe
+- Fine for ML features/high level analysis
+
+#### Option 3
+
+
+This produces the number of **fully completed calendar months** between two dates.
+
+```sql
+SELECT
+  order_date_date,
+    (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', order_date_date)) * 12
+  + (DATE_PART('month', CURRENT_DATE) - DATE_PART('month', order_date_date))
+  - CASE
+      WHEN DATE_PART('day', CURRENT_DATE)
+        < DATE_PART('day', order_date_date)
+      THEN 1 ELSE 0
+  END AS full_months
+FROM sales_analysis
+ORDER BY order_date_date DESC
+LIMIT 10
+;
+
+```
+
+**Step-by-step explanation of full months calculation:**
+
+- `DATE_PART('year', CURRENT_DATE) - DATE_PART('year', order_date_date)`  computes the difference in **years** between today and the order date.
+- multiplying by `12` converts the year difference into **months**.
+- `DATE_PART('month', CURRENT_DATE) - DATE_PART('month', order_date_date)`  adds the **month difference** within the current year.
+- the `CASE` statement adjusts for **incomplete months**:
+  - if today’s day-of-month is **earlier** than the order day,
+  - the current month is **not yet fully completed**,
+  - so we subtract `1` month.
+
+
+
+::: {.callout-note title = "DATEDIFF() In SQL Server"}
+In case of SQL server we can use `DATEDIFF()` function 
+
+```sql
+DATEDIFF(MM, Date1, Date2)
+```
+:::
+
+## `INTERVAL` | Expressing Duration Explicitly
+
+An `INTERVAL` represents a **span of time**, not a point.
+
+This allows us to **add or subtract time meaningfully**.
+
+---
+
+### Example | Orders in the Last 30 Days
+
+```sql
+SELECT
+  COUNT(*) AS recent_orders
+FROM sales_analysis
+WHERE order_date_date >= CURRENT_DATE - INTERVAL '30 days';
+```
+
+---
+
+### Common Interval Units
+
+  
+- `INTERVAL '7 days'`  
+- `INTERVAL '1 month'`  
+- `INTERVAL '1 year'`  
+
+Intervals are **human-readable** and analytically expressive.
+
+---
+
+## Date + Interval | Shifting Time
+
+You can shift dates forward or backward using intervals.
+
+```sql
+some_date +/-  INTERVAL "INT unit"
+```
+
+$$\downarrow$$
+
+```sql
+some_date +  INTERVAL "2 days"
+```
+
+--- 
+```sql
+some_date -   INTERVAL "3 months"
+
+```
+--- 
+
+```sql
+some_date +  INTERVAL "5 years"
+```
+
+### Example | Simulated Future Date
+
+```sql
+SELECT
+  order_date_date,
+  order_date_date + INTERVAL '14 days' AS follow_up_date
+FROM sales_analysis
+LIMIT 5;
+```
+
+---
+
+### Analytical Use Cases
+
+
+- follow-up scheduling  
+- grace periods  
+- forecasting reference points  
+
+Intervals preserve **calendar logic**, unlike numeric arithmetic.
+
+
+
+## AGE()
+
+
+`AGE()` calculates the **exact calendar distance** between two dates or timestamps.
+
+Unlike simple subtraction, `AGE()` respects:
+
+- varying month lengths  
+- leap years  
+- real calendar boundaries  
+
+It returns an **INTERVAL**, not a number.
+
+---
+
+### Example | Age Between Order Date and Today
+
+```sql
+SELECT
+  order_date_date,
+  AGE(CURRENT_DATE, order_date_date) AS order_age
+FROM sales_analysis
+LIMIT 5;
+```
+
+$$\downarrow$$
+
+| order_date_date | order_age                 |
+|-----------------|---------------------------|
+| 2021-02-11      | 4 years 11 mons 2 days    |
+| 2022-12-10      | 3 years 1 mon 3 days      |
+| 2021-02-22      | 4 years 10 mons 19 days   |
+| 2022-07-12      | 3 years 6 mons 1 day      |
+| 2021-04-19      | 4 years 8 mons 24 days    |
+
+---
+
+### Extracting Components from AGE()
+
+**You can extract individual components from the interval.**
+
+```sql
+SELECT
+  order_date_date,
+  EXTRACT(YEAR FROM AGE(CURRENT_DATE, order_date_date))  AS years,
+  EXTRACT(MONTH FROM AGE(CURRENT_DATE, order_date_date)) AS months,
+  EXTRACT(DAY FROM AGE(CURRENT_DATE, order_date_date))   AS days
+FROM sales_analysis
+LIMIT 5;
+```
+
+---
+
+::: {.callout-warning title="Analytical Warning | AGE() Extraction"}
+
+- extracted `years`, `months`, `days` are **not independent**
+- months reset after 12
+- days reset after month boundaries
+
+Never treat extracted components as additive totals.
+
+Use `AGE()` for **human interpretation**,  
+use numeric arithmetic for **modeling features**.
+
+:::
+
+## Analytical Best Practices | Dates
+
+Dates are not just values — they encode **ordering and causality**.
+
+  
+- always align time grain with the question  
+- never mix `DATE` and `TIMESTAMP` blindly  
+- use `INTERVAL` instead of hard-coded numbers  
+- validate insights by changing reference dates  
+
+Time-aware analytics is what separates **reporting** from **analysis**.
+
+Dates do not answer questions on their own —  
+they allow **stories to be told correctly**.
+
+
+## In class Task
+
+**Goal:** practice time-grain control and recency logic.
+
+**Task instructions:**
+
+- **aggregate total sales by:**
+  - month
+  - quarter
+- **identify:**
+  - the top 3 months by revenue
+  - the top quarter by revenue
+- **compute:**
+  - days since each transaction
+- **filter:**
+  - transactions from the last 60 days (you should get the empty table)
+
+**Deliverable:**
+
+- run queries in pgAdmin  
+- visually inspect result tables  
+- discuss how changing the time grain changes interpretation  
+
+## Homework 
+
+**Story-driven task:**
+
+You are asked to evaluate **sales performance over time** for management.
+
+**Required steps:**
+
+- build monthly, quarterly, and yearly aggregations
+- compare trends across different grains
+- identify:
+  - strongest growth period
+  - weakest period
+- compute:
+  - days since last transaction per customer
+- use `AGE()` to describe customer recency in calendar terms
+
+**Visualization:**
+
+- use pgAdmin charts to visualize:
+  - monthly revenue trend
+  - quarterly comparison
+- annotate findings with **written interpretation**
+
+**Final deliverable:**
+
+- SQL queries
+- screenshots of pgAdmin charts
+- a short narrative explaining:
+  - what changed over time
+  - why grain choice matters
+  - which conclusions depend on time aggregation
+- Push everything to github
+
+
+::: {.callout-tip}
+You can experiment a lot, as well
+:::
