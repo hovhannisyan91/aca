@@ -5,14 +5,10 @@
 
 
 
+**Example to prview**
 
-```sql
-SELECT 
-    * 
-FROM aca_courses 
-WHERE level = 'advanced';
-```
+Open you terminal and run bellow options, given that the quarto virtual environment is here `~/Envs/quarto/bin/activate`
 
-
-
+-  ./book_preview.sh tableau 1
+-  ./slides_preview.sh tableau 1
 
