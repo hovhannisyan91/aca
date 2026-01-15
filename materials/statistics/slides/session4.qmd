@@ -1,6 +1,6 @@
 ---
-title: "Hypothesis Testing"
-subtitle: "Statistical Thinking"
+title: "Discrete Distributions"
+subtitle: "Probabilistic Distributions"
 author: "Karen Hovhannisyan"
 date: last-modified
 format:
@@ -28,235 +28,585 @@ format:
           </style>
 ---
 
-<!-- TODO Finalize -->
-
-# Sampling
-
-## Population vs Sample
-
-A population is the full group we want to understand.  
-A sample is a smaller, representative subset used to infer population behavior.
-
-Sampling allows us to study *a few* to understand *the many*.
 
 
-## Why Not Measure Everyone?
+## Topics
 
-Measuring every individual is often:
+- Discrete Distributions
+- Poisson Distribution
+- Bernuli Distribution
+- Central Limit Theorem | CLT
 
-- Too expensive  
-- Too slow  
-- Logistically impossible  
-- Sometimes destructive  
-
-A properly selected sample provides reliable insight with far less effort.
-
-## Why Businesses Prefer Sampling
-
-Sampling helps organizations:
-
-- Reduce cost and effort  
-- Make faster decisions  
-- Handle large, continuous data streams  
-- Avoid unnecessary measurements  
-
-Sampling is a **scientific tool**, not a shortcut.
-
-## Risks of Sampling
-
-Sampling introduces uncertainty because sample values rarely match population values.
-
-- Larger samples reduce error  
-- Good design prevents bias  
-- Statistics helps quantify uncertainty  
+# The Properties of Discrete Distributions
 
 
-## Types of Sampling
+## When do we have a Discrete Distributions? {.smaller}
 
-Two major families:
+A distribution is **discrete** if:
 
-- **Probability sampling:** known chance of selection  
-- **Non-probability sampling:** selection probability unknown  
+- The random variable takes **countable values**
+- Probabilities are assigned to **exact outcomes**
+- The total probability is obtained by **summing**, not integrating
 
-We focus mainly on probability-based methods.
+**Examples of Discrete Outcomes**
+
+. . .
+
+- Number of purchases made today  
+- Number of customers who churned this month  
+- Number of defects in a production batch  
+- Whether a user clicked an ad (yes / no)  
 
 
-## Simple Random Sampling
-
-Every population member has an equal chance of selection.
-
-![Simple Random](../../../img/statistics/simple_random_sampling.png)
+## Discrete Random Variables
 
 
+A **discrete random variable** is a numerical description of a countable outcome.
 
-## Systematic Sampling | 1
+**Typical forms:**
 
-Select every **k-th** member of a population list.
+- Binary outcomes: $X \in \{0,1\}$
+- Counts: $X = 0,1,2,3,\dots$
 
-The sampling constant:
+**Examples:**
+
+. . .
+
+- $X = 1$ if a customer churns, $0$ otherwise  
+- $X$ = number of purchases per user  
+- $X$ = number of support tickets per day  
+
+
+## Probability Mass Function {.smaller}
+
+Discrete distributions are described by a **Probability Mass Function (PMF)**.
+
+**The PMF answers the question:**
+
+> What is the **probability** that the random variable equals a specific value?
+
+. . .
+
+**Mathematically:**
 
 $$
-k = \frac{N}{n}
+P(X = x)
 $$
 
-where  
-- **N:** population size  
-- **n:** sample size  
-
-
-![Systematic](../../../img/statistics/systematic_sampling.png)
-
-## Systematic Sampling | 2
-
-Systematic sampling is easier to implement than a pure random sample.
-
-**Risk:**  
-If the population has a repeating pattern aligned with $k$, bias may occur.
-
-**Fix:**  
-Randomize the **starting point** before selecting every k-th observation.
-
-
-
-## Stratified Sampling | 1
-
-Used when population subgroups differ in ways **important to the analysis**.  
-The population is divided into **strata**, and each stratum is sampled proportionally.
-
-This prevents **over- or under-representation**, especially when natural differences exist (e.g., junior vs senior engineers).
-
-![Stratified](../../../img/statistics/stratified_sampling.png)
-
-## Stratified Sampling | 2
-
-Example proportional allocation (sample size 200):
-
-| Stratum | Population | Pop % | Sample | Calculation |
-|--------|------------|--------|--------|-------------|
-| Junior | 1200 | 40% | 80 | $0.40 \times 200$ |
-| Mid-Level | 900 | 30% | 60 | $0.30 \times 200$ |
-| Senior | 450 | 15% | 30 | $0.15 \times 200$ |
-| Management | 450 | 15% | 30 | $0.15 \times 200$ |
-| **Total** | **3000** | **100%** | **200** | — |
-
-
-
-## Cluster Sampling | 1
-
-Cluster sampling divides the population into **heterogeneous groups** called clusters.  
-Instead of sampling individuals from the full list, entire clusters are selected, and data are collected from all units (or a subsample) inside each cluster.
-
-Typical clusters: classrooms, neighborhoods, branch offices, cities.
-
-**Stratified vs Cluster**
-
-- **Strata** are homogeneous (e.g., only juniors).  
-- **Clusters** are mini-populations,
-
-## Cluster Sampling | 2
-
-![Cluser](../../../img/statistics/cluster_sampling.png)
-
-## Bootstrap Resampling
-
-Resampling **with replacement** to estimate:
-
-- Variability  
-- Standard errors  
-- Confidence around model metrics  
-
-Does not require strict distributional assumptions.
-
-## Bootstrap Resampling
-
-![Bootstrap](../../../img/statistics/resampling_sampling.png)
-
-
-## Probability Sampling Comparison
-
-A visual summary comparing simple random, systematic, stratified, and cluster sampling.
-
-![Comparison](../../../img/statistics/comparison_sampling.png)
-
-
-## Non-Probability Sampling
-
-Used when probability-based design is not possible.
-
-- **Convenience sampling:** choose whoever is easiest to reach  
-- **Internet polls:** fast but biased  
-- Not reliable for inference or population estimates
-
-
-## Sampling Error vs Non-Sampling Error
-
-**Sampling Error:**  
-Difference between sample statistic and true parameter:
+**Core Properties of a PMF**
 
 $$
-\text{Sampling Error} = \bar{x} - \mu
+\sum_x P(X = x) = 1
 $$
 
-**Non-Sampling Error:**  
-Survey bias, measurement mistakes, data entry errors, non-response issues.  
-Cannot be fixed by increasing sample size.
+- $0 \le P(X = x) \le 1$
+- Probabilities are assigned to **exact values**
+- The total probability sums to 1:
+
+---
+
+> - Հավանականության խտության ֆունկից ա; 
+> - Հավանականության զանգվածի ֆունկցիա
+
+# Poisson Distribution
+
+Poisson models turn **randomness** into **operational clarity**.
+
+---
+
+**How many times does an event occur within a fixed time (or space) interval?**
+
+## Imagine {.smaller}
+
+Imagine a retail store observing customer foot traffic.
+
+Every **10 minutes**, a random number of customers enter the store.
+
+**Over many days, management notices:**
+
+::: {.incremental}
+-   Some intervals have 1–2 customers\
+-   Some have 5–6 customers\
+-   Occasionally, none
+:::
+
+. . .
+
+Yet the **average** stays roughly the same.
 
 
-## Finite Population Correction
+## Probability Mass Function
 
-When sampling more than 5% of a finite population:
 
 $$
-\sigma_{\bar{x}}
-=
-\frac{\sigma}{\sqrt{n}}
-\sqrt{\frac{N - n}{N - 1}}
+P(X = x) = \frac{\lambda^x e^{-\lambda}}{x!}, \quad x = 0,1,2,\dots
 $$
 
-Accounts for reduced variability when sampling without replacement.
+
+. . .
+
+This formula gives the probability of seeing *exactly* $x$ events
+
+
+## Expected Value and Variance {.smaller}
+
+
+$$
+E[X] = \lambda
+$$
+
+
+
+$$
+Var(X) = \lambda
+$$
+
+-   The **average** number of events equals $\lambda$\
+-   The **uncertainty** (variance) grows at the same rate
+
+. . .
+
+-   Large $\lambda$ → frequent events\
+-   Small $\lambda$ → rare events
   
-# Confidence Intervals
 
-## Introduction
+---
 
-One of the most important roles statistics plays is to:
+-   $\lambda = 2$ → about 2 calls per hour\
+-   $\lambda = 15$ → about 15 website visits per minute\
+-   $\lambda = 0.2$ → a rare failure, once every 5 intervals
+  
 
-- gather information from a sample
-- use that information to make statements about a population
-- quantify uncertainty `with` confidence intervals
+## Business Applications of Poisson Distribution {.smaller}
 
-Confidence intervals help measure how certain we are about population parameters based 1 sample data.
+Poisson models are widely used in practice for:
 
-
-## Point Estimates
-
-A point estimate is a single value used to estimate a population parameter.
-
-Common point estimates:
-
-- sample mean $\bar{x}$
-- sample proportion $\hat{p}$
-
-Point estimates are easy to compute but do not show uncertainty.
-They provide only a single best guess of the true population value.
+-   customer arrivals and foot traffic\
+-   call center volume estimation\
+-   website click and impression counts\
+-   manufacturing defects\
+-   incident and outage reporting
 
 
-## Finite Population Correction
+## Poisson Process
 
-When sampling more than 5% of a finite population:
+-   Exponential distribution models **time between events**
+-   Poisson distribution models **number of events**
+
+They describe the **same process** from different perspectives.
+
+---
+
+[Distributions Spreadsheets](https://docs.google.com/spreadsheets/d/1tJNjOvn8m393UluPVnIAT5W30NrreMnWx3Zhzkj6_WM/edit?usp=sharing)
+
+
+
+## Visualization
+
+-   Left plot → PMF for $\lambda = 3$ and $\lambda = 10$\
+-   Right plot → likelihood as a function of $\lambda$
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from math import factorial, exp
+
+# Observed customer counts
+obs = np.array([3, 5, 2, 4, 6, 3])
+n = len(obs)
+S = np.sum(obs)          # total number of customers
+
+def poisson_pmf(k, lam):
+    return (lam**k * np.exp(-lam)) / factorial(k)
+
+# PMF range for display
+k = np.arange(0, 21)
+
+lam1 = 3
+lam2 = 10
+
+p1 = np.array([poisson_pmf(i, lam1) for i in k])
+p2 = np.array([poisson_pmf(i, lam2) for i in k])
+
+# Likelihood curve for λ
+lam_range = np.linspace(0.1, 15, 500)
+L = (lam_range**S) * np.exp(-n * lam_range)  # ignoring factorial constants
+
+# MLE
+lam_hat = S / n
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 4))
+
+# ---- Left: PMF comparison ----
+axes[0].bar(k, p1, alpha=0.7, label="λ = 3")
+axes[0].bar(k, p2, alpha=0.7, label="λ = 10")
+axes[0].set_title("Poisson PMF for Two Rates")
+axes[0].set_xlabel("k (customer count)")
+axes[0].set_ylabel("Probability")
+axes[0].legend()
+
+# ---- Right: Likelihood curve ----
+axes[1].plot(lam_range, L, linewidth=3) 
+axes[1].set_title("Likelihood of λ Given Retail Count Data")
+axes[1].set_xlabel("λ (average customers per interval)")
+axes[1].set_ylabel("Likelihood")
+
+axes[1].axvline(lam_hat, linestyle="--", linewidth=2)
+axes[1].text(
+    lam_hat, max(L)*0.8,
+    f"MLE λ = {lam_hat:.2f}",
+    ha="left"
+)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+# Bernoulli Distribution
+
+The **Bernoulli Distribution** models the most fundamental probabilistic question in data analytics and business decision-making:
+
+
+## Two Possible Outcomes {.smaller}
+
+> **Did an event happen or not?**
+
+. . .
+
+A Bernoulli random variable has only **two possible outcomes**:
+
+- success  
+- failure  
+
+**These outcomes can be represented in multiple equivalent ways depending on context:**
+
+:::{.incremental}
+- yes / no  
+- 1 / 0  
+- click / no click  
+- purchase / no purchase  
+- tail / head (ղուշ / գիր)  
+:::
+
+
+## Mathematical Definition
+
+A random variable $X$ follows a **Bernoulli distribution** if:
 
 $$
-\sigma_{\bar{x}} =
-\frac{\sigma}{\sqrt{n}}
-\sqrt{\frac{N - n}{N - 1}}
+X \sim \text{Bernoulli}(p)
 $$
 
-This correction adjusts the standard error to reflect reduced variability when sampling without replacement.
+where:
 
-<!-- 
-
-## Sponge Illustration
+- $p \in [0,1]$ is the **probability of success**
 
 
--->
+## What Is a Bernoulli Trial
 
+A **Bernoulli trial** is a single experiment with:
+
+- exactly **one attempt**
+- exactly **two possible outcomes**
+- a **fixed probability** of success  
+
+Each trial is assumed to be **independent**.
+
+## Examples of Bernoulli Trials
+
+Common real-world Bernoulli trials include:
+
+- Did a user click an advertisement?  
+- Did a customer complete a purchase?  
+- Did a transaction fail?  
+- Did a device respond to a health check?  
+
+Each produces a **binary outcome**.
+
+## Real-World Narrative
+
+Consider an online store tracking customer conversions.
+
+For **each user session**:
+
+- Purchase → `1`  
+- No purchase → `0`  
+
+**Across thousands of sessions:**
+
+- Some users convert  
+- Most users do not  
+
+Each session is evaluated **independently**, with the same underlying probability of conversion.
+
+## Business Use Cases
+
+Typical Bernoulli use cases in analytics:
+
+- ad click behavior  
+- conversion events  
+- email engagement  
+- fraud detection flags  
+- churn indicators  
+
+Bernoulli is the **building block** for many advanced models.
+
+## Probability Mass Function (PMF)
+
+Because Bernoulli is a **discrete** distribution, it is described by a **Probability Mass Function (PMF)**:
+
+$$
+P(X = x) = p^x (1-p)^{1-x}, \quad x \in \{0,1\}
+$$
+
+## PMF Interpretation
+
+**This formula yields exactly two probabilities:**
+
+- $P(X = 1) = p$  
+- $P(X = 0) = 1 - p$  
+
+
+
+## Expected Value and Variance
+
+**For a Bernoulli random variable:**
+
+$$
+E[X] = p
+$$
+
+$$
+Var(X) = p(1-p)
+$$
+
+## Interpretation of Moments
+
+- Expected value equals the **probability of success**
+- Variance is largest at $p = 0.5$
+- Variance shrinks as outcomes become more certain
+
+. . .
+
+- Large $p$ → success likely  
+- Small $p$ → success rare  
+
+## Concrete Examples
+
+- $p = 0.02$ → 2% conversion rate  
+- $p = 0.35$ → 35% email open rate  
+- $p = 0.90$ → highly reliable system  
+
+
+
+## Business Context
+
+An e-commerce company records whether each visitor completes a purchase.
+
+Each session is encoded as:
+
+- `1` → purchase  
+- `0` → no purchase  
+
+### Observed Data
+
+{.smaller}
+
+| Session | Purchase |
+|--------:|---------:|
+| 1 | 0 |
+| 2 | 1 |
+| 3 | 0 |
+| 4 | 0 |
+| 5 | 1 |
+| 6 | 0 |
+| 7 | 1 |
+| 8 | 0 |
+| 9 | 0 |
+|10 | 1 |
+
+## Summary Statistics {.smaller}
+
+Let $X$ be the purchase indicator per session.
+
+- Number of sessions: $n = 10$  
+- Total purchases: $S = 4$  
+
+Sample mean:
+
+$$
+\bar{x} = \frac{4}{10} = 0.4
+$$
+
+Estimated probability:
+
+$$
+\hat{p} = 0.4
+$$
+
+## Defining the Random Variable 
+
+$$
+X =
+\begin{cases}
+1 & \text{if a purchase occurs} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+
+. . .
+
+> A Bernoulli model is an appropriate first representation of this process.
+
+
+# So Far ...
+
+
+## Final Intuition Summary
+
+-   Use **Uniform** for “random within limits.”
+-   Use **Exponential** for “time until next event.”
+-   Use **Poisson** for “number of events per interval.”
+-   Use **Bernoulli** for “one yes/no outcome".
+-   
+
+# CLT
+
+ *"Even if you're not normal, the average is normal"* 
+
+
+
+## The Magic of the Normal Distribution
+
+The Normal distribution appears **everywhere in data**.
+
+
+## What the Central Limit Theorem Says
+
+**The Central Limit Theorem states:**
+
+- When we take the **mean of many independent random variables**
+- regardless of the shape of the original distribution
+- provided they have finite mean and variance
+- the distribution of the **sample mean** becomes approximately Normal as the sample size grows
+
+## in other words...
+
+![.](../../../img/statistics/clt.png)
+
+
+## Intuition Behind the CLT
+
+- Real-world data often come from skewed or irregular distributions.
+- But when we **average many small effects**, the result tends toward a bell shape.
+- This “averaging effect” is why the Normal distribution is so common.
+
+## Why This Matters in Analytics
+
+**The CLT allows us to:**
+
+- build **confidence intervals**
+- perform **hypothesis tests**
+- use Normal-based statistical tools
+- approximate distributions of sums and averages
+
+Even when the original data are not Normal.
+
+## Non-Normal Data Example {.smaller}
+
+**Think about:**
+
+. . .
+
+- waiting times (often skewed)
+- revenue per customer (heavy-tailed)
+- customer arrival counts (discrete)
+
+Individually, these can be far from Normal.
+
+
+**When we repeatedly take many samples and compute means:**
+
+- the distribution of the means becomes more symmetric
+- it approaches the characteristic bell curve
+- this happens regardless of the original shape
+
+## Simulation: Visualizing CLT
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+
+population = np.random.exponential(scale=2, size=100000)
+
+sample_sizes = [1, 5, 30, 100]
+fig, axes = plt.subplots(1, 4, figsize=(20, 4))
+
+for i, n in enumerate(sample_sizes):
+    means = [np.mean(np.random.choice(population, n)) for _ in range(2000)]
+    axes[i].hist(means, bins=30, density=True, edgecolor="black")
+    axes[i].set_title(f"n = {n}")
+    axes[i].set_xlabel("Sample mean")
+    axes[i].set_ylabel("Density")
+
+plt.tight_layout()
+plt.show()
+```
+
+## What the Simulation Shows
+
+- For **small n**, the distribution of sample means is skewed.
+- As **n increases**:
+  - the distribution becomes more symmetric
+  - it approaches a bell shape
+  - even though the original data were not Normal
+
+## Conditions for CLT
+
+**Before applying CLT:**
+
+- samples should be **independent**
+- sample size should be **sufficiently large**
+- underlying distribution must have **finite variance**
+
+These ensure the sample mean behaves approximately `Normal`.
+
+## Practical Rules of Thumb (heuristics in analytics)
+
+- If original data are nearly Normal → small n is ok  
+- If data are skewed → larger n is needed  
+- n ≥ 30 often yields good Normal approximation
+
+
+## Applying CLT in Practice
+
+
+- confidence interval construction  
+- hypothesis testing  
+- A/B testing rules  
+- regression inference  
+
+These methods assume approximate Normality of averages.
+
+---
+ 
+
+> *“Even if you're not normal, the average is normal.”*
