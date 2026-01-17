@@ -1,0 +1,1224 @@
+---
+title: "Session 08: Data Analysis with SQL | JOINs"
+categories: [SQL, Normalization, JOINs]
+---
+
+
+## Normalization
+
+Relational databases do not start with `JOIN`s.  
+They start with **structure**.
+
+Normalization explains **why data is split**, and JOINs explain **how it is recombined**.
+
+If this logic is not clear, JOINs feel like a *technical burden instead of a logical necessity.*
+
+### Problem
+
+**The Core Problem: Redundancy and Anomalies**
+
+Imagine storing everything in a single table.
+
+We are saying **Unnormalized Design**:
+
+| order_id | customer_name | city    | product | price | quantity |
+|---------|---------------|---------|---------|-------|----------|
+| 1       | Anna          | Yerevan | Phone   | 500   | 1        |
+| 2       | Anna          | Yerevan | Case    | 20    | 2        |
+| 3       | Arman         | Gyumri  | Phone   | 500   | 1        |
+
+
+- Customer data is duplicated  
+- Product prices are duplicated  
+- Updates are risky  
+- Deletes may remove important information  
+- Inserts may require fake or incomplete values  
+
+This structure is fragile and error-prone.
+
+---
+
+## First Normal Form (1NF)
+
+A table is in **First Normal Form (1NF)** if:
+
+- Each column contains atomic values  
+- There are no repeating groups  
+- Each row is uniquely identifiable  
+
+::: {.callout-important}
+The table above already satisfies **1NF**, but it is still poorly designed because multiple entities are mixed together.
+:::
+
+```{mermaid}
+erDiagram
+    ORDERS {
+        int order_id
+        string customer_name
+        string city
+        string product
+        float price
+        int quantity
+    }
+```
+
+## Second Normal Form (2NF)
+
+A table is in **Second Normal Form (2NF)** if:
+
+- It is already in 1NF  
+- No non-key attribute depends on part of a [composite key](session2.qmd#composite-key)   
+
+To understand this, we must first identify the **logical key** of the original table.
+
+In the **unnormalized table**, the logical key is: `(order_id, product)`
+
+**because:**
+
+- one order can contain multiple products
+- quantity is defined per product per order
+
+### Problem
+
+**Look at the dependencies:**
+
+- `customer_name`, `city` depend only on **order_id**  
+- `price` depends only on **product**  
+- `quantity` depends on **(order_id, product)**  
+
+This means we have **partial dependencies**.
+
+Some columns depend on **only part of the key**, not the whole key.
+
+$$\downarrow$$
+
+**This violates 2NF.**
+
+```{mermaid}
+flowchart LR
+    K[(order_id, product)]
+    K --> Q[quantity]
+    order_id --> C[customer_name, city]
+    product --> P[price]
+```
+### Decomposition to 2NF
+
+To fix this, we separate data so that **each table describes exactly one relationship**.
+
+#### Customers
+
+| customer_id | customer_name | city    |
+|-------------|---------------|---------|
+
+**Meaning:**
+
+- customer attributes depend only on `customer_id`
+
+#### Products
+
+| product_id | product | price |
+|------------|---------|-------|
+
+**Meaning:**
+
+- product attributes depend only on `product_id`
+
+#### Orders
+
+| order_id | customer_id |
+|----------|-------------|
+
+**Meaning:**
+
+- this table describes **who placed the order**
+- `customer_id` depends entirely on `order_id`
+
+There is **no composite key here**, so partial dependency is impossible. 
+
+### Order Items
+
+| order_id | product_id | quantity |
+|----------|------------|----------|
+
+**Meaning:**
+
+- this table describes **what was ordered**
+- the key is `(order_id, product_id)`
+- `quantity` depends on the **entire key**, not just one part
+
+<!-- TODO fix the diagram -->
+```{mermaid}
+erDiagram
+    CUSTOMERS {
+        int customer_id PK
+        string customer_name
+        string city
+    }
+
+    PRODUCTS {
+        int product_id PK
+        string product
+        float price
+    }
+
+    ORDERS {
+        int order_id PK
+        int customer_id FK
+    }
+
+    ORDER_ITEMS {
+        int order_id FK
+        int product_id FK
+        int quantity
+    }
+
+    CUSTOMERS ||--o{ ORDERS : places
+    ORDERS ||--o{ ORDER_ITEMS : contains
+    PRODUCTS ||--o{ ORDER_ITEMS : included_in
+```
+
+
+### Why This Satisfies 2NF
+
+**After decomposition:**
+
+- **Customer attributes depend only on customers:**
+  - customer_name
+  - city
+- **Product attributes depend only on products**  
+  - product_name
+  - price
+- **Order attributes depend only on orders**  
+  - order_id
+  - customer_id
+- **Quantity depends on both order **and** product**  
+  - order_id
+  - product_id
+  - quantity
+
+**As a rusult:**
+
+1. There are **no partial dependencies left**.
+2. Each non-key attribute now depends on the **entire key** of its table.
+
+$$\downarrow$$
+
+This is exactly what **Second Normal Form** requires.
+
+
+## Third Normal Form (3NF)
+
+After reaching **Second Normal Form (2NF)**, we removed **partial dependencies**.  
+However, another type of problem can still exist: **transitive dependencies**.
+
+A table is in **Third Normal Form (3NF)** if:
+
+- It is already in 2NF  
+- No non-key attribute depends on another non-key attribute  
+
+**In other words:**
+
+> Every non-key attribute must depend **only on the primary key and nothing else**.
+
+### Transitive Dependency
+
+A **transitive dependency** occurs when:
+
+- A non-key attribute depends on another non-key attribute  
+- Instead of depending directly on the primary key  
+
+**Formally:**
+
+```{mermaid}
+flowchart LR
+    customer_id --> city
+    city --> country
+    customer_id --> country
+```
+
+This is a transitive dependency.
+
+Consider the `Customers` table after 2NF:
+
+| customer_id | customer_name | city    | country |
+|-------------|---------------|---------|---------|
+
+**Let’s analyze the dependencies:**
+
+- `customer_id → city`  
+- `city → country`  
+
+$$\downarrow$$
+
+`customer_id → country` **indirectly**
+
+So `country` does **not** depend directly on `customer_id`.  
+It depends on `city`.
+
+This violates **Third Normal Form**.
+
+---
+
+### Problems
+
+**This structure creates anomalies:**
+
+- If a city changes its country name, multiple rows must be updated  
+- If the last customer from a city is `deleted`, the `city–country` relationship is lost  
+- If a new city is added, a customer must exist first  
+
+These are **update**, **delete**, and **insert anomalies** caused by transitive dependency.
+
+
+### Decomposition to 3NF
+
+To remove the transitive dependency, we split the table based on **real-world entities**.
+
+---
+
+#### Cities
+
+| city_id | city    | country_id |
+|---------|---------|------------|
+
+**Meaning:**
+
+- city attributes depend only on `city_id`
+- the relationship between city and country is stored once
+
+---
+
+#### Countries
+
+| country_id | country |
+|------------|---------|
+
+>country attributes depend only on `country_id`
+
+---
+
+#### Customers
+
+| customer_id | customer_name | city_id |
+|-------------|---------------|---------|
+
+
+---
+
+> - customer attributes depend only on `customer_id`
+> - city information is referenced, not duplicated
+
+```{mermaid}
+erDiagram
+    CUSTOMERS {
+        int customer_id PK
+        string customer_name
+        int city_id FK
+    }
+
+    CITIES {
+        int city_id PK
+        string city
+        int country_id FK
+    }
+
+    COUNTRIES {
+        int country_id PK
+        string country
+    }
+
+    CUSTOMERS ||--|| CITIES : lives_in
+    CITIES ||--|| COUNTRIES : belongs_to
+```
+
+### Why This Satisfies 3NF
+
+**After decomposition:**
+
+- `customer_name` depends only on `customer_id`  
+- `city_id` depends only on `customer_id`  
+- `country` depends only on `country_id`  
+- There are no indirect dependencies  
+
+Each table now represents **one concept** and **one level of dependency**.
+
+---
+
+## Normalization Summary
+
+
+- First Normal Form removing duplicate rows
+- Second Normal Form removes **partial dependencies**.  
+- Third Normal Form removes **transitive dependencies**.
+
+**At this point:**
+
+- Data redundancy is minimized  
+- Anomalies are eliminated  
+- Relationships are explicit  
+
+```{mermaid}
+flowchart TB
+    A[Unnormalized] --> B[1NF<br/>Atomic Values]
+    B --> C[2NF<br/>No Partial Dependencies]
+    C --> D[3NF<br/>No Transitive Dependencies]
+```
+
+::: {.callout-tip title = "After 3NF..."}
+
+**3NF** commonly considered sufficient in practice for many transactional systems.
+
+- **Boyce-Codd Normal Form (BCNF)** BCNF is a stricter refinement of 3NF A table: 
+  - For every functional dependency (X → Y), X must be a superkey (a unique identifier for the table).
+  - This eliminates certain anomalies that can still exist in 3NF designs.
+- **Fourth Normal Form (4NF):** Removes multi-valued dependencies (if the table is already in BCNF).
+- **Fifth Normal Form (5NF):** Eliminates join dependencies beyond 4NF.
+- **Sixth Normal Form (6NF) and others exist mostly for theoretical completeness.**
+
+For more information you can visit [here](https://www.geeksforgeeks.org/dbms/normal-forms-in-dbms/?utm_source=chatgpt.com)
+
+:::
+
+
+## New Analytical Schema
+
+**This schema is intentionally designed to support:**
+
+- `INNER` / `LEFT` / `RIGHT` / `FULL OUTER` joins  
+- `SELF` joins  
+- `SPATIAL` joins  
+- Window functions  
+- Subqueries  
+- CTEs  
+
+1. Creating a schema and tables
+2. Populate data using **CSV-based loading**
+
+
+### Docker Update
+
+As usal, we are starting from starting our docker containers:
+
+1. the database
+2. pgadmin (viewer)
+
+#### Step 1: Stop and clean existing containers
+
+We first stop the containers and remove volumes  (`-v` ensures that old database data is removed).
+
+```bash
+docker compose down -v
+```
+
+
+#### Step 2: Update the Docker image
+
+In `docker-compose.yaml`, update the database service:
+ 
+- **Before**
+  ```yaml
+  image: postgres:17
+  ```
+- **After**
+  ```yaml
+  image: postgis/postgis:17-3.4
+  ```
+- Add also a new volume 
+  ```yaml
+  - ./data/analytics_schema:/data:ro
+  ```
+
+**This image includes:**
+  
+- PostgreSQL 17  
+- PostGIS 3.4  
+- All required spatial libraries  
+
+#### Step 3: Remove persisted data folders
+
+To ensure a clean initialization, delete the following folders **if they exist**:
+
+- `postgres_data/`  
+- `pgadmin_data/`  
+
+These folders store old volumes and may conflict with the new image.
+
+#### Step 4: Start containers again
+
+**First start normally and verify everything works:**
+
+```bash
+docker compose up
+```
+**Once confirmed, stop and restart in detached mode:**
+
+```bash
+docker compose up -d
+```
+
+### Creating New Schema
+
+We do **not** use the default `public` schema for analytics.  
+Instead, we create a dedicated schema called `analytics`.
+
+
+>if you right click on the schemas
+
+```sql
+CREATE SCHEMA IF NOT EXISTS analytics;
+SET search_path TO analytics; --optional
+```
+
+![](../../img/sql/analytics_sceme.png)
+
+::: {.callout-caution title = "SET search_path TO analytics"}
+PostgreSQL databases can contain multiple schemas.  
+When you write:
+
+```sql
+SELECT * FROM customers;
+```
+
+PostgreSQL must decide **which schema** to search for the `customers` table.
+
+By default, it searches the `public` schema.
+
+By running:
+
+```sql
+SET search_path TO analytics;
+```
+
+we tell PostgreSQL:
+
+> “Look in the `analytics` schema first when resolving table names.”
+
+
+
+```sql
+SELECT *
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id;
+```
+
+**instead of:**
+
+```sql
+SELECT *
+FROM analytics.orders o
+JOIN analytics.customers c ON o.customer_id = c.customer_id;
+```
+
+:::
+
+### Add PostGIS Extention
+
+Once the PostGIS-enabled container is running, we enable the extension **inside the database**.
+
+
+```sql
+CREATE EXTENSION IF NOT EXISTS postgis;
+```
+
+To verify that PostGIS is installed correctly:
+
+```sql
+SELECT PostGIS_Version();
+```
+
+The above code should provide a table with `postgis_version: 3.4 USE_GEOS=1 USE_PROJ=1 USE_STATS=1`
+
+If this returns a version string, PostGIS is ready.
+
+### Sync with GitHub
+
+Remember to push the changes into  **GitHub:**
+1. `git add docker-compose.yam`
+2. `git commit -m "adding postgis extention"`
+3. `git push`
+
+
+## Creating Geographical Tables
+
+Now we define the **analytical data model** that will be used throughout this module.
+
+The schema follows a **normalized (3NF)** design with a **clear geographic hierarchy**:
+
+**Country → Region → City → Customer**
+
+>You can check the newly created `analytics` schema, and refresh it after each new table creation.
+
+### Countires
+
+This table represents sovereign countries and serves as the **top-level geographic entity**.
+
+```sql
+CREATE TABLE analytics.countries (
+    country_id   INT PRIMARY KEY,
+    country_name TEXT NOT NULL
+);
+```
+
+### Regions
+
+```sql
+CREATE TABLE analytics.regions (
+    region_id   INT PRIMARY KEY,
+    region_name TEXT NOT NULL,
+    country_id  INT NOT NULL REFERENCES analytics.countries(country_id)
+);
+```
+
+
+### Cities
+
+```sql
+CREATE TABLE analytics.cities (
+    city_id   INT PRIMARY KEY,
+    city_name TEXT NOT NULL,
+    region_id INT NOT NULL REFERENCES analytics.regions(region_id)
+);
+```
+
+
+## Creating Non Geographical Tables
+
+### Customers
+
+```sql
+CREATE TABLE analytics.customers (
+    customer_id INT PRIMARY KEY,
+    first_name  TEXT NOT NULL,
+    last_name   TEXT NOT NULL,
+    age         INT CHECK (age BETWEEN 16 AND 100),
+    email       TEXT UNIQUE,
+    city_id     INT REFERENCES analytics.cities(city_id),
+    signup_date DATE NOT NULL
+);
+```
+
+### Products
+
+```sql
+CREATE TABLE analytics.products (
+    product_id   INT PRIMARY KEY,
+    product_name TEXT NOT NULL,
+    category     TEXT NOT NULL,
+    price        NUMERIC(10,2) NOT NULL
+);
+```
+
+### Orders
+
+```sql
+CREATE TABLE analytics.orders (
+    order_id    INT PRIMARY KEY,
+    customer_id INT REFERENCES analytics.customers(customer_id),
+    order_date  DATE NOT NULL,
+    status      TEXT NOT NULL
+);
+```
+
+
+### Order Items
+
+```sql
+CREATE TABLE analytics.order_items (
+    order_item_id INT PRIMARY KEY,
+    order_id      INT NOT NULL REFERENCES analytics.orders(order_id),
+    product_id    INT NOT NULL REFERENCES analytics.products(product_id),
+    quantity      INT NOT NULL CHECK (quantity > 0)
+);
+```
+
+
+### Country Boundaries
+
+These tables extend the relational model with **geometries**, enabling spatial joins.
+
+```sql
+CREATE TABLE analytics.country_boundaries (
+    country_id INT PRIMARY KEY REFERENCES analytics.countries(country_id),
+    geom       GEOMETRY(MultiPolygon, 4326)
+);
+```
+
+### Region Boundaries
+
+```sql
+CREATE TABLE analytics.region_boundaries (
+    region_id INT PRIMARY KEY REFERENCES analytics.regions(region_id),
+    geom      GEOMETRY(Polygon, 4326)
+);
+```
+
+### City Boundaries
+
+```sql
+CREATE TABLE analytics.city_boundaries (
+    city_id INT PRIMARY KEY REFERENCES analytics.cities(city_id),
+    geom    GEOMETRY(Polygon, 4326)
+);
+```
+
+
+### Customer Locations
+
+```sql
+CREATE TABLE analytics.customer_locations (
+    customer_id INT PRIMARY KEY REFERENCES analytics.customers(customer_id),
+    geom        GEOMETRY(Point, 4326)
+);
+```
+
+
+## Design Summary
+
+**At this stage, the database contains:**
+  
+- A fully qualified `analytics` schema  
+- Normalized relational tables (3NF)  
+- Hierarchical geographic dimensions  
+- Fact tables for analytical workloads  
+- Spatial tables for PostGIS joins  
+
+Check out the [this repository](https://github.com/hovhannisyan91/sql-analytics-portfolio/tree/main/queries) on my side
+
+### ERD
+
+In order to generate and check the `ERD` you need to:
+
+1. right click on `analytisc schema`
+2. select ERD
+3. you must see below image
+
+
+
+![](../../img/sql/ERD_Analytics_Schema.png)
+
+
+### Sync with GitHub
+
+Save the quiries in proper file similar [this repository](https://github.com/hovhannisyan91/sql-analytics-portfolio/tree/main/queries) and push do **GitHub.**
+
+
+## Populating the Data
+
+In your folder now you need to have the following structure
+
+```bash
+data/
+├── public_schema/
+│   └── ...            # existing dummy data (unchanged)
+└── analytics_schema/
+    ├── countries.csv
+    ├── regions.csv
+    ├── cities.csv
+    ├── customers.csv
+    ├── products.csv
+    ├── orders.csv
+    ├── order_items.csv
+    ├── country_boundaries.csv
+    ├── region_boundaries.csv
+    ├── city_boundaries.csv
+    └── customer_locations.csv
+
+```
+
+### Checking 
+
+**try this:**
+
+```sql
+SELECT pg_ls_dir('/data');
+```
+
+![](../../img/sql/checking_schema.png)
+
+### `analytics.countries`
+
+```sql
+COPY analytics.countries
+FROM '/data/countries.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.countries;
+```
+
+---
+
+### `analytics.regions`
+
+```sql
+COPY analytics.regions
+FROM '/data/regions.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.regions;
+```
+
+---
+
+### `analytics.cities`
+
+```sql
+COPY analytics.cities
+FROM '/data/cities.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.cities;
+```
+
+---
+
+### `analytics.customers`
+
+```sql
+COPY analytics.customers
+FROM '/data/customers.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.customers LIMIT 10;
+```
+
+---
+
+### `analytics.products`
+
+```sql
+COPY analytics.products
+FROM '/data/products.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.products;
+```
+
+---
+
+### `analytics.orders`
+
+```sql
+COPY analytics.orders
+FROM '/data/orders.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.orders LIMIT 10;
+```
+
+---
+
+### `analytics.order_items`
+
+```sql
+COPY analytics.order_items
+FROM '/data/order_items.csv'
+CSV HEADER;
+
+SELECT * FROM analytics.order_items LIMIT 10;
+```
+
+
+### Boundarie Tables
+
+Here we need to do something important transformation, by creating temporary tables
+
+#### Creating `Staging` Tables
+
+```sql
+CREATE TABLE IF NOT EXISTS analytics._stg_country_boundaries (
+    country_id INT,
+    wkt TEXT
+);
+
+
+CREATE TABLE IF NOT EXISTS analytics._stg_region_boundaries (
+    region_id INT,
+    wkt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS analytics._stg_city_boundaries (
+    city_id INT,
+    wkt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS analytics._stg_points (
+    point_id INT,
+    wkt TEXT
+);
+```
+
+
+#### COPY CSVs into staging tables
+
+
+```sql
+COPY analytics._stg_country_boundaries
+FROM '/data/country_boundaries.csv'
+CSV HEADER;
+
+SELECT * FROM analytics._stg_country_boundaries;
+
+COPY analytics._stg_region_boundaries
+FROM '/data/region_boundaries.csv'
+CSV HEADER;
+
+SELECT * FROM analytics._stg_region_boundaries;
+
+COPY analytics._stg_city_boundaries
+FROM '/data/city_boundaries.csv'
+CSV HEADER;
+
+SELECT * FROM analytics._stg_city_boundaries;
+
+
+COPY analytics._stg_points
+FROM '/data/customer_locations.csv'
+CSV HEADER;
+
+SELECT * FROM analytics._stg_points;
+```
+
+
+#### `analytics.country_boundaries`
+
+```sql
+INSERT INTO analytics.country_boundaries (country_id, geom)
+SELECT
+  country_id,
+  ST_GeomFromText(wkt, 4326)
+FROM analytics._stg_country_boundaries;
+```
+
+
+#### `analytics.region_boundaries`
+
+```sql
+INSERT INTO analytics.region_boundaries (region_id, geom)
+SELECT
+  region_id,
+  ST_GeomFromText(wkt, 4326)
+FROM analytics._stg_region_boundaries;
+
+
+```
+
+#### `analytics.customer_`
+
+```sql
+INSERT INTO analytics.city_boundaries (city_id, geom)
+SELECT
+  city_id,
+  ST_GeomFromText(wkt, 4326)
+FROM analytics._stg_city_boundaries;
+
+```
+
+#### `analytics.city_boundaries`
+
+```sql
+INSERT INTO analytics.city_boundaries (city_id, geom)
+SELECT
+  city_id,
+  ST_GeomFromText(wkt, 4326)
+FROM analytics._stg_city_boundaries;
+
+```
+
+#### Geometry checks
+
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE ST_IsValid(geom)) AS valid_geom,
+  COUNT(*) AS total
+FROM analytics.country_boundaries;
+```
+
+
+
+```sql
+SELECT
+  ST_GeometryType(geom),
+  COUNT(*)
+FROM analytics.country_boundaries
+GROUP BY 1;
+```
+
+
+---
+
+### Geometry Validation
+
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE ST_IsValid(geom)) AS valid_geometries,
+  COUNT(*) AS total_geometries
+FROM analytics.city_boundaries;
+```
+
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE ST_SRID(geom) = 4326) AS correct_srid,
+  COUNT(*) AS total_geometries
+FROM analytics.city_boundaries;
+```
+
+---
+
+<!-- ## Spatial Sanity Check
+
+```sql
+SELECT
+  c.city_name,
+  COUNT(*) AS customers_inside_city
+FROM analytics.customer_locations cl
+JOIN analytics.city_boundaries cb
+  ON ST_Contains(cb.geom, cl.geom)
+JOIN analytics.cities c
+  ON c.city_id = cb.city_id
+GROUP BY c.city_name
+ORDER BY c.city_name;
+``` -->
+
+
+## JOINS
+
+**In analytical databases**, information is intentionally **normalized**.  
+This means that meaningful analysis almost always requires **combining multiple tables**.
+
+
+- Customers are stored separately from transactions  
+- Products are stored separately from sales  
+- Geography is stored separately from users  
+
+**Joins** are the mechanism that makes analysis possible.
+
+A `JOIN` combines rows from two tables based on a **logical relationship**.
+
+
+- One table contains a **primary key**  
+- Another table contains a **foreign key**  
+- Matching values define how rows are aligned  
+
+
+Conceptually, joins answer the question:
+
+> **Which rows belong together?**
+
+
+Before writing a `JOIN`, always identify roles.
+ 
+
+- **Base table**: defines the population you care about  
+- **Lookup table**: enriches the base table with attributes  
+
+
+This decision determines whether rows are preserved or dropped.
+
+**In SQL we are differentiating:**
+
+- `INNER JOIN`  
+- `LEFT JOIN`  
+- `RIGHT JOIN`  
+- `FULL JOIN`  
+
+
+Join results depend on **relationship type**.
+
+
+- One-to-one  
+- One-to-many  
+- Many-to-many  
+
+
+Many-to-many joins can **multiply rows** and must be handled carefully.
+
+---
+
+### INNER JOIN | only matching rows
+
+**Question:**  
+Which orders have valid customers?
+
+```sql
+SELECT
+  o.order_id,
+  o.order_date,
+  c.first_name,
+  c.last_name
+FROM analytics.orders AS o
+INNER JOIN analytics.customers AS c
+  ON o.customer_id = c.customer_id;
+```
+
+---
+
+### LEFT JOIN | preserve the base table
+
+**Question:**  
+Show all customers, even those who never placed an order.
+
+```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  o.order_id,
+  o.order_date
+FROM analytics.customers AS c
+LEFT JOIN analytics.orders AS o
+  ON c.customer_id = o.customer_id
+ORDER BY c.customer_id;
+```
+
+---
+
+### LEFT JOIN with filtering
+
+**Question:**  
+Customers with completed orders only.
+
+```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  o.order_id,
+  o.status
+FROM analytics.customers AS c
+LEFT JOIN analytics.orders AS o
+  ON c.customer_id = o.customer_id
+WHERE o.status = 'completed';
+```
+
+This **behaves like an INNER JOIN** because of the `WHERE` clause.
+
+---
+
+### LEFT JOIN with condition in ON clause 
+
+```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  o.order_id,
+  o.status
+FROM analytics.customers AS c
+LEFT JOIN analytics.orders AS o
+  ON c.customer_id = o.customer_id
+ AND o.status = 'completed';
+```
+
+---
+
+### One-to-many join: orders → order_items
+
+**Question:**  
+What products were included in each order?
+
+```sql
+SELECT
+  o.order_id,
+  oi.order_item_id,
+  oi.product_id,
+  oi.quantity
+FROM analytics.orders AS o
+INNER JOIN analytics.order_items AS oi
+  ON o.order_id = oi.order_id
+ORDER BY o.order_id;
+```
+
+---
+
+### Multi-table join: customers → orders → order_items → products
+
+**Question:**  
+Full sales line items with customer and product info.
+
+```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  o.order_id,
+  p.product_name,
+  p.category,
+  oi.quantity,
+  p.price,
+  oi.quantity * p.price AS line_revenue
+FROM analytics.customers AS c
+INNER JOIN analytics.orders AS o
+  ON c.customer_id = o.customer_id
+INNER JOIN analytics.order_items AS oi
+  ON o.order_id = oi.order_id
+INNER JOIN analytics.products AS p
+  ON oi.product_id = p.product_id
+ORDER BY o.order_id;
+```
+
+---
+
+### Aggregation after JOIN
+
+**Question:**  
+Total revenue per customer.
+
+```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  SUM(oi.quantity * p.price) AS total_revenue
+FROM analytics.customers AS c
+INNER JOIN analytics.orders AS o
+  ON c.customer_id = o.customer_id
+INNER JOIN analytics.order_items AS oi
+  ON o.order_id = oi.order_id
+INNER JOIN analytics.products AS p
+  ON oi.product_id = p.product_id
+GROUP BY
+  c.customer_id,
+  c.first_name,
+  c.last_name
+ORDER BY total_revenue DESC;
+```
+
+---
+
+### JOIN with geography (non-spatial)
+
+**Question:**  
+Orders by country.
+
+```sql
+SELECT
+  co.country_name,
+  COUNT(DISTINCT o.order_id) AS orders_cnt
+FROM analytics.orders AS o
+INNER JOIN analytics.customers AS c
+  ON o.customer_id = c.customer_id
+INNER JOIN analytics.cities AS ci
+  ON c.city_id = ci.city_id
+INNER JOIN analytics.regions AS r
+  ON ci.region_id = r.region_id
+INNER JOIN analytics.countries AS co
+  ON r.country_id = co.country_id
+GROUP BY co.country_name;
+```
+
+---
+
+### Spatial JOIN (PostGIS)
+
+**Question:**  
+Validate that customer points fall inside their city boundaries.
+
+```sql
+SELECT
+  c.customer_id,
+  ci.city_name
+FROM analytics.customers AS c
+INNER JOIN analytics.customer_locations AS cl
+  ON c.customer_id = cl.customer_id
+INNER JOIN analytics.city_boundaries AS cb
+  ON c.city_id = cb.city_id
+WHERE ST_Contains(cb.geom, cl.geom);
+```
