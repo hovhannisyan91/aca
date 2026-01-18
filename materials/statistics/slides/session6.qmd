@@ -29,5 +29,411 @@ format:
 ---
 
 
-## Comming Soon
+## Hypothesis Testing | Intuition
 
+
+We Data Analyists/Statisticians like to make an assumptions about the value of a population parameter, and then:
+
+. . .
+
+- collect a sample from that population, 
+- measure the sample, 
+- declare in ascholarly manner, whether the sample supports the original assumption. 
+
+
+## Stating the Hypothesis
+
+A recent Wall Street Journal article titled **“Does the Internet Make You Smarter or
+Dumber?”** posed the possibility that online activities turn us into shallow thinkers. 
+
+The article cited a statistic claiming that the average time an American spends looking at a
+Web page is `56 seconds`.
+
+>A researcher at a local university would like to test this claim using a hypothesis test.
+
+
+## Null Hypothesis
+
+The null hypothesis $H_0$, *represents the status quo* and involves stating the belief that the population parameter is **$\le,=, \ge$** a specific value.
+
+. . .
+
+The null hypothesis is believed to be true unless there is overwhelming evidence to the contrary.
+
+
+## Alternative hypothesis
+
+The alternative hypothesis, $H_1$, represents the opposite of the null hypothesis and is believed to be true if the null hypothesis is found to be false.
+
+. . .
+
+The alternative hypothesis always states that the population parameter is **$\gt,\ne, \lt$**  a specific value.
+
+. . .
+
+You need to be careful how you state the null and alternative hypotheses.
+
+
+## Analyogy with the Legal System | 1
+
+
+*We can either reject it or not reject it (fail to reject it)*
+
+. . . 
+
+The court system assumes a persion is innocent until proven guily, the hypothesis test is formulated as follows:
+
+- $H_0:$ the defendant is innocent (status quo)
+- $H_1:$ the defendant is guilty
+
+
+## Analyogy with the Legal System | 2
+
+**The court system might have two conclusions:**
+
+::: {.incremental}
+1. **Reject the Null Hypothesis** $\rightarrow$ the defendant is guilty
+2. **Fail to reject the Null Hypothesis** $\rightarrow$ the defendant is guilty
+:::
+
+
+## Steps In Hypothesis Testing
+
+1. Identify **the null** and **alternative hypotheses**
+2. Set a value for the **significance level** $\alpha$
+3. Determine the appropriate **critical value**
+4. Calculate the appropriate **test statistic**
+5. Compare the **test statistics** with the **critical score**
+6. State your conclusion
+
+
+## Hypothesis Stamenet 
+
+In this example the Internet users spend an average timeof `56 seconds` on a Web page.
+
+
+**Status Quo**
+
+. . .
+
+$$
+H_0: \mu = 56 \text{ seconds (status quo)}
+$$
+
+**Alternative:**
+
+. . .
+
+$$
+H_1: \mu \ne  56 \text{ seconds}
+$$
+
+
+## All the Combinations
+
+|               | Two-Tailed Test                     | Left-Tailed Test                  | Right-Tailed Test                 |
+|---------------|--------------------------------------|-----------------------------------|-----------------------------------|
+| **Null**      | $$H_0: \mu = 56$$                    | $$H_0: \mu \ge 56$$               | $$H_0: \mu \le 56$$               |
+| **Alternative** | $$H_1: \mu \ne 56$$                | $$H_1: \mu < 56$$                 | $$H_1: \mu > 56$$                 |
+
+
+## Set Significance Level
+
+The level of significance represents the *probability of making a Type I error.*
+A Type I error occurs when we reject the null hypothesis but it is
+actually true. The common Value: $\alpha = 0.05$
+
+. . .
+
+>In the scope the above example `Type I Error` we conclude that the true average time spent on a webpage is not 56 seconds, even though in reality it is 56 seconds.
+
+## In Out Hypothesis Context
+
+- The researcher conducts a sample study.
+- The sample mean differs enough from 56 seconds to fall outside the acceptance region.
+- The test rejects the null hypothesis at the `5% `level.
+- But in truth, Americans do spend exactly `56` seconds on average.
+
+
+- - -
+
+| Alpha (α) | Tail | Critical z-Score | Critical t-Score **(df = 20)** |
+|-----------|------|------------------|-----------------------------|
+| 0.01      | One  | 2.33             | 2.528                       |
+| 0.01      | Two  | 2.575            | 2.845                       |
+| 0.02      | One  | 2.05             | 2.312                       |
+| 0.02      | Two  | 2.33             | 2.528                       |
+| 0.05      | One  | 1.645            | 1.725                       |
+| 0.05      | Two  | 1.96             | 2.086                       |
+| 0.10      | One  | 1.28             | 1.325                       |
+| 0.10      | Two  | 1.645            | 1.725                       |
+
+
+## Type I vs Type II
+
+![](../../../img/statistics/type_I_and_type_II.png)
+
+
+## Determining Critical Values | z-test {.smaller}
+
+**When Variance is known**
+
+- test statistic would be $z_{\bar{x}}$  
+- critical value would be $z_{\alpha}$  
+
+$$
+z_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{\sigma / \sqrt{n}}
+
+$$
+
+.  . .
+
+**Given**
+
+- Claimed mean: $\mu_{H_0} = 56$ seconds  
+- Sample mean: $\bar{x} = 62$ seconds  
+- **Population standard deviation (historical estimate):** $\sigma = 18$ seconds  
+- Sample size: $n = 45$  
+
+$$
+z_{\bar{x}}
+= \frac{\bar{x} - \mu_{H_0}}{\sigma / \sqrt{n}}
+= \frac{62 - 56}{18 / \sqrt{45}}
+= \frac{6}{2.683}
+= 2.24
+$$
+
+
+## Interpretation | z-test
+
+A test statistic of **2.24** lies well into the rejection region (far from 0).
+
+- For a **two-tailed test** at $\alpha = 0.05$, the critical values are $\pm 1.96$.  
+- Since **2.24 > 1.96**, we **reject $H_0$**.
+
+**Interpretation:**  
+There is statistically significant evidence that the true average time spent on a webpage is **different** from 56 seconds.
+
+## Graphical Representation
+
+```{python}
+#| echo: false
+#| fig-width: 5
+#| fig-height: 3
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+# Shared parameters
+mu = 8000
+sigma = 100
+alpha = 0.05
+
+# Domain
+x = np.linspace(mu - 4*sigma, mu + 4*sigma, 500)
+y = norm.pdf(x, mu, sigma)
+
+# Critical values for two-tail
+z_crit_two = norm.ppf(1 - alpha/2)
+crit_right_two = mu + z_crit_two * sigma
+crit_left_two = mu - z_crit_two * sigma
+
+# One-tail critical
+z_crit_one = norm.ppf(1 - alpha)
+crit_right_one = mu + z_crit_one * sigma
+crit_left_one = mu - z_crit_one * sigma
+
+# Create subplots
+fig, axes = plt.subplots(1, 3, figsize=(20, 5))
+
+# ------------------- TWO-TAILED -------------------
+ax = axes[0]
+ax.plot(x, y, linewidth=2)
+
+xr = np.linspace(crit_right_two, mu + 4*sigma, 200)
+xl = np.linspace(mu - 4*sigma, crit_left_two, 200)
+ax.fill_between(xr, norm.pdf(xr, mu, sigma), alpha=0.3)
+ax.fill_between(xl, norm.pdf(xl, mu, sigma), alpha=0.3)
+
+ax.axvline(crit_right_two)
+ax.axvline(crit_left_two)
+
+ax.set_title("Two-Tailed Test (α = 0.05)")
+ax.set_yticks([])
+ax.set_xticks([])
+
+# ------------------- RIGHT-TAILED -------------------
+ax = axes[1]
+ax.plot(x, y, linewidth=2)
+
+xr = np.linspace(crit_right_one, mu + 4*sigma, 200)
+ax.fill_between(xr, norm.pdf(xr, mu, sigma), alpha=0.3)
+
+ax.axvline(crit_right_one)
+
+ax.set_title("Right-Tailed Test (α = 0.05)")
+ax.set_yticks([])
+ax.set_xticks([])
+
+# ------------------- LEFT-TAILED -------------------
+ax = axes[2]
+ax.plot(x, y, linewidth=2)
+
+xl = np.linspace(mu - 4*sigma, crit_left_one, 200)
+ax.fill_between(xl, norm.pdf(xl, mu, sigma), alpha=0.3)
+
+ax.axvline(crit_left_one)
+
+ax.set_title("Left-Tailed Test (α = 0.05)")
+ax.set_yticks([])
+ax.set_xticks([])
+
+plt.tight_layout()
+plt.show()
+
+
+```
+
+
+
+## Z Value {.smaller}
+
+| Test Type      | Hypotheses                                   | Condition                         | Conclusion        |
+|----------------|-----------------------------------------------|------------------------------------|-------------------|
+| **Two-tail**   | $H_0: \mu = \mu_0$                            | $\lvert z_x \rvert > z_{\alpha/2}$ | Reject $H_0$      |
+|                | $H_1: \mu \ne \mu_0$                          | $\lvert z_x \rvert \le z_{\alpha/2}$ | Do not reject $H_0$ |
+| **One-tail** | $H_0: \mu \le \mu_0$                    | $z_x > z_\alpha$                   | Reject $H_0$      |
+|                | $H_1: \mu > \mu_0$                            | $z_x \le z_\alpha$                 | Do not reject $H_0$ |
+| **One-tail** | $H_0: \mu \ge \mu_0$                    | $z_x < -z_\alpha$                  | Reject $H_0$      |
+|                | $H_1: \mu < \mu_0$                            | $z_x \ge -z_\alpha$                | Do not reject $H_0$ |
+
+
+## P Value
+
+It is mor convenient the use `p-value` apporach, as it helps us to rememeber the decission rule easily.
+
+If the `p-value` is less than $\alpha$, there is little chance of observing the sample mean from
+the population on which it is based if the null hypothesis were actually true. We therefore
+reject the null hypothesis under this condition.
+
+| **Condition**        | **Conclusion**        |
+|----------------------|------------------------|
+| $p\text{-Value} \ge \alpha$ | Do not reject $H_0$ |
+| $p\text{-Value} < \alpha$   | Reject $H_0$         |
+
+
+
+## Visuall Representation
+
+
+```{python}
+#| echo: false
+#| fig-width: 5
+#| fig-height: 3
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+# Shared parameters
+mu = 8000
+sigma = 100
+alpha = 0.05
+
+# Domain
+x = np.linspace(mu - 4*sigma, mu + 4*sigma, 500)
+y = norm.pdf(x, mu, sigma)
+
+# Critical values for two-tail
+z_crit_two = norm.ppf(1 - alpha/2)
+crit_right_two = mu + z_crit_two * sigma
+crit_left_two = mu - z_crit_two * sigma
+
+# One-tail critical
+z_crit_one = norm.ppf(1 - alpha)
+crit_right_one = mu + z_crit_one * sigma
+crit_left_one = mu - z_crit_one * sigma
+
+# Create subplots
+fig, axes = plt.subplots(1, 3, figsize=(20, 5))
+
+# ------------------- TWO-TAILED -------------------
+ax = axes[0]
+ax.plot(x, y, linewidth=2)
+
+# Shade rejection regions
+xr = np.linspace(crit_right_two, mu + 4*sigma, 200)
+xl = np.linspace(mu - 4*sigma, crit_left_two, 200)
+ax.fill_between(xr, norm.pdf(xr, mu, sigma), alpha=0.3)
+ax.fill_between(xl, norm.pdf(xl, mu, sigma), alpha=0.3)
+
+ax.axvline(crit_right_two)
+ax.axvline(crit_left_two)
+
+# p-value annotations
+ax.text(mu, max(y)*0.75, "p ≥ α\nFail to Reject $H_0$",
+        ha='center', fontsize=13)
+
+ax.text(crit_right_two + 0.3*sigma, max(y)*0.25,
+        "p < α\nReject $H_0$", fontsize=13, ha='left')
+
+ax.text(crit_left_two - 0.3*sigma, max(y)*0.25,
+        "p < α\nReject $H_0$", fontsize=13, ha='right')
+
+ax.set_title("Two-Tailed Test (α = 0.05)")
+ax.set_yticks([])
+ax.set_xticks([])
+
+# ------------------- RIGHT-TAILED -------------------
+ax = axes[1]
+ax.plot(x, y, linewidth=2)
+
+# Shade rejection region
+xr = np.linspace(crit_right_one, mu + 4*sigma, 200)
+ax.fill_between(xr, norm.pdf(xr, mu, sigma), alpha=0.3)
+
+ax.axvline(crit_right_one)
+
+# p-value annotations
+ax.text(mu - 0.5*sigma, max(y)*0.75,
+        "p ≥ α\nFail to Reject $H_0$", fontsize=13)
+
+ax.text(crit_right_one + 0.3*sigma, max(y)*0.25,
+        "p < α\nReject $H_0$", fontsize=13, ha='left')
+
+ax.set_title("Right-Tailed Test (α = 0.05)")
+ax.set_yticks([])
+ax.set_xticks([])
+
+# ------------------- LEFT-TAILED -------------------
+ax = axes[2]
+ax.plot(x, y, linewidth=2)
+
+# Shade rejection region
+xl = np.linspace(mu - 4*sigma, crit_left_one, 200)
+ax.fill_between(xl, norm.pdf(xl, mu, sigma), alpha=0.3)
+
+ax.axvline(crit_left_one)
+
+# p-value annotations
+ax.text(mu + 0.5*sigma, max(y)*0.75,
+        "p ≥ α\nFail to Reject $H_0$", fontsize=13)
+
+ax.text(crit_left_one - 0.3*sigma, max(y)*0.25,
+        "p < α\nReject $H_0$", fontsize=13, ha='right')
+
+ax.set_title("Left-Tailed Test (α = 0.05)")
+ax.set_yticks([])
+ax.set_xticks([])
+
+plt.tight_layout()
+plt.show()
+
+```
