@@ -146,7 +146,7 @@ There is **no composite key here**, so partial dependency is impossible.
 - the key is `(order_id, product_id)`
 - `quantity` depends on the **entire key**, not just one part
 
-<!-- TODO fix the diagram -->
+
 ```{mermaid}
 erDiagram
     CUSTOMERS {
@@ -485,7 +485,6 @@ Instead, we create a dedicated schema called `analytics`.
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS analytics;
-SET search_path TO analytics; --optional
 ```
 
 ![](../../img/sql/analytics_sceme.png)
@@ -502,20 +501,13 @@ PostgreSQL must decide **which schema** to search for the `customers` table.
 
 By default, it searches the `public` schema.
 
-By running:
-
-```sql
-SET search_path TO analytics;
-```
-
-we tell PostgreSQL:
+**By running:** `SET search_path TO analytics;` we tell PostgreSQL:
 
 > “Look in the `analytics` schema first when resolving table names.”
 
-
-
 ```sql
-SELECT *
+SELECT 
+  *
 FROM orders o
 JOIN customers c ON o.customer_id = c.customer_id;
 ```
@@ -523,12 +515,16 @@ JOIN customers c ON o.customer_id = c.customer_id;
 **instead of:**
 
 ```sql
-SELECT *
+SELECT 
+  *
 FROM analytics.orders o
 JOIN analytics.customers c ON o.customer_id = c.customer_id;
 ```
 
 :::
+
+
+
 
 
 
@@ -698,6 +694,27 @@ In order to generate and check the `ERD` you need to:
 
 ![](../../img/sql/ERD_Analytics_Schema.png)
 
+
+::: {.callout-important}
+In case you are encountering an error please do the following
+
+```bash
+function postgis_typmod_type(integer) does not exist
+LINE 1: SELECT postgis_typmod_type(i) FROM
+^
+HINT: No function matches the given name and argument types. You might need to add explicit type casts.
+```
+
+```sql
+DROP EXTENSION IF EXISTS postgis CASCADE;
+SET search_path TO public;
+CREATE EXTENSION postgis;
+SELECT PostGIS_Version();
+```
+
+It should return: `postgis_version: 3.4 USE_GEOS=1 USE_PROJ=1 USE_STATS=1`
+
+:::
 
 ### Sync with GitHub
 
