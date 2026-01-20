@@ -999,246 +999,523 @@ GROUP BY c.city_name
 ORDER BY c.city_name;
 ``` -->
 
+## Table JOINs
 
-## JOINS
+## INNER JOIN — Only Matching Rows
 
-**In analytical databases**, information is intentionally **normalized**.  
-This means that meaningful analysis almost always requires **combining multiple tables**.
+**Question:** Which customers have placed orders?
 
+```{mermaid}
+flowchart LR
+  C[customers] -->|customer_id| O[orders]
+```
 
-- Customers are stored separately from transactions  
-- Products are stored separately from sales  
-- Geography is stored separately from users  
+Only rows where `customers.customer_id = orders.customer_id` are kept.
 
-**Joins** are the mechanism that makes analysis possible.
+```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  o.order_id,
+  o.order_date
+FROM analytics.customers c
+INNER JOIN analytics.orders o
+  ON c.customer_id = o.customer_id;
+```
 
-A `JOIN` combines rows from two tables based on a **logical relationship**.
-
-
-- One table contains a **primary key**  
-- Another table contains a **foreign key**  
-- Matching values define how rows are aligned  
-
-
-Conceptually, joins answer the question:
-
-> **Which rows belong together?**
-
-
-Before writing a `JOIN`, always identify roles.
- 
-
-- **Base table**: defines the population you care about  
-- **Lookup table**: enriches the base table with attributes  
-
-
-This decision determines whether rows are preserved or dropped.
-
-**In SQL we are differentiating:**
-
-- `INNER JOIN`  
-- `LEFT JOIN`  
-- `RIGHT JOIN`  
-- `FULL JOIN`  
-
-
-Join results depend on **relationship type**.
-
-
-- One-to-one  
-- One-to-many  
-- Many-to-many  
-
-
-Many-to-many joins can **multiply rows** and must be handled carefully.
+  
+- Customers without orders are **excluded**
+- Orders without customers are **excluded**
 
 ---
 
-### INNER JOIN | only matching rows
+### LEFT JOIN | Preserve the Base Table
 
-**Question:**  
-Which orders have valid customers?
+**Question:** Show all customers, even if they never ordered.
+
+```{mermaid}
+flowchart LR
+  C[customers] -->|customer_id| O[orders]
+  C --> R[Result]
+  O --> R
+```
+
+All customers are preserved.  
+Orders are optional.
 
 ```sql
+SELECT
+  c.customer_id,
+  c.first_name,
+  o.order_id
+FROM analytics.customers c
+LEFT JOIN analytics.orders o
+  ON c.customer_id = o.customer_id;
+```
+
+  
+- Customers without orders appear with `NULL` values
+- Base table = `customers`
+
+---
+
+### LEFT JOIN + NULL FILTER | Anti-Join Pattern
+
+**Question:** Which customers have never ordered?
+
+```{mermaid}
+flowchart LR
+  C[customers] -->|customer_id| O[orders]
+  O -. no match .-> N[NULL]
+```
+
+```sql
+SELECT
+  c.customer_id,
+  c.first_name
+FROM analytics.customers c
+LEFT JOIN analytics.orders o
+  ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;
+```
+
+  
+- Very common interview and analytics pattern
+- Identifies **absence of relationships**
+
+---
+
+### One-to-Many JOIN | Orders to Order Items
+
+**Question:** What products were sold in each order?
+
+```mermaid
+flowchart LR
+  O[orders] -->|order_id| OI[order_items] -->|product_id| P[products]
+```
+
+```sql
+SELECT
+  o.order_id,
+  p.product_name,
+  oi.quantity
+FROM analytics.orders o
+JOIN analytics.order_items oi
+  ON o.order_id = oi.order_id
+JOIN analytics.products p
+  ON oi.product_id = p.product_id;
+```
+
+  
+- One order → many order items
+- Rows **multiply** by design
+
+---
+
+### Aggregation After JOIN | Controlling Row Explosion
+
+**Question:** Total revenue per order.
+
+```{mermaid}
+flowchart LR
+  O[orders] --> OI[order_items] --> P[products]
+  P --> SUM[SUM(quantity × price)]
+```
+
+```sql
+SELECT
+  o.order_id,
+  SUM(oi.quantity * p.price) AS order_revenue
+FROM analytics.orders o
+JOIN analytics.order_items oi
+  ON o.order_id = oi.order_id
+JOIN analytics.products p
+  ON oi.product_id = p.product_id
+GROUP BY o.order_id;
+```
+
+  
+- Aggregation collapses multiplied rows
+- Critical in analytical SQL
+
+---
+
+### Hierarchical JOIN | Customer Geography
+
+**Question:** Where is each customer located?
+
+```{mermaid}
+flowchart LR
+  CO[countries] --> R[regions] --> CI[cities] --> C[customers]
+```
+
+```sql
+SELECT
+  c.customer_id,
+  ci.city_name,
+  r.region_name,
+  co.country_name
+FROM analytics.customers c
+JOIN analytics.cities ci
+  ON c.city_id = ci.city_id
+JOIN analytics.regions r
+  ON ci.region_id = r.region_id
+JOIN analytics.countries co
+  ON r.country_id = co.country_id;
+```
+
+  
+- Dimension-style hierarchy
+- Common in BI models
+
+---
+
+### Spatial JOIN | Geometry Meets Business Data
+
+**Question:** Is a customer physically inside their declared city?
+
+```{mermaid}
+flowchart LR
+  CL[customer_locations] -->|ST_Within| CB[city_boundaries]
+```
+
+```sql
+SELECT
+  c.customer_id,
+  ci.city_name,
+  ST_Within(cl.geom, cb.geom) AS inside_city
+FROM analytics.customers c
+JOIN analytics.customer_locations cl
+  ON c.customer_id = cl.customer_id
+JOIN analytics.cities ci
+  ON c.city_id = ci.city_id
+JOIN analytics.city_boundaries cb
+  ON ci.city_id = cb.city_id;
+```
+
+  
+- Combines **relational joins** with **spatial predicates**
+- Typical PostGIS analytical pattern
+
+---
+
+### Many-to-Many Effect | Why Row Counts Explode
+
+```{mermaid}
+flowchart LR
+  O[orders] --> OI[order_items]
+  OI --> P[products]
+```
+
+```sql
+SELECT COUNT(*) AS joined_rows
+FROM analytics.orders o
+JOIN analytics.order_items oi
+  ON o.order_id = oi.order_id;
+```
+
+  
+- Each order may contain multiple products
+- Each product may appear in many orders
+- Analysts must **expect multiplication**
+
+
+
+
+## Final SQL Project — Kickoff
+
+### Project Goal
+
+Design and deliver a **production-grade analytical SQL project** that demonstrates:
+
+  
+- Proper normalization  
+- Relational and spatial modeling  
+- Analytical querying  
+- Documentation and reproducibility  
+
+This project simulates a **real analytics workflow**, from raw data to insights.
+
+---
+
+### Step 1 | Select a Business Domain
+
+Choose **one primary business table** that genuinely interests your team.
+
+**Examples:**
+
+- Customer transactions  
+- Product sales  
+- Service usage events  
+- Location-based activity  
+
+**Mandatory requirement**:
+
+  
+- The domain **must include geography**
+- Geography can be:
+  - Customer locations
+  - Service areas
+  - Store regions
+  - Delivery zones
+
+If unsure, propose your domain and validate it before proceeding.
+
+
+### Step 2 | Normalize the Data Model
+
+Start from a **single wide table** (conceptual or real).
+
+**Example (not final):**
+
+  
+- customer_name  
+- product_name  
+- city  
+- region  
+- country  
+- order_date  
+- price  
+
+Normalize into **logical entities**:
+
+  
+- Countries  
+- Regions  
+- Cities  
+- Customers  
+- Events / Orders / Activities  
+- Products (if applicable)  
+- Spatial boundaries  
+
+**Rules**:
+
+- Remove redundancy  
+- Use surrogate or natural keys consistently  
+- Enforce referential integrity  
+
+---
+
+### Step 3 | Create a New Database and Schema
+
+Create a dedicated database for the project.
+
+```sql
+CREATE DATABASE final_sql_project; -- any meaningful name which goes according to your project
+```
+
+Create a dedicated schema.
+
+```sql
+CREATE SCHEMA analytics;
+SET search_path TO analytics;
+```
+
+  
+- All tables must live under this schema
+- Never use `public`
+
+---
+
+### Step 4 | Create Tables (DDL)
+
+**Define all tables explicitly:**
+  
+- Primary keys  
+- Foreign keys  
+- Constraints  
+- Geometry types with SRID  
+
+```sql
+CREATE TABLE analytics.example_table (
+  id INT PRIMARY KEY,
+  geom GEOMETRY(Point, 4326)
+);
+```
+
+  
+- Spatial tables are **mandatory**
+- Use PostGIS correctly
+
+---
+
+### Step 5 | Populate the Database
+
+Populate tables using **CSV-based loading**.
+
+  
+- Use `COPY` or staging tables
+- Data volume should be realistic: more that 10k rows
+
+```sql
+COPY analytics.table_name
+FROM '/data/table_name.csv'
+CSV HEADER;
+```
+  
+- Validate row counts
+- Validate referential integrity
+- Validate geometries using `ST_IsValid`
+
+---
+
+### Step 6 | Create the ERD
+
+Produce an **Entity Relationship Diagram** that shows:
+
+  
+- Tables  
+- Primary keys  
+- Foreign keys  
+- Cardinality  
+
+
+---
+
+### Step 7 | Push the changes into GitHub
+
+Create a **dedicated GitHub repository**.
+
+Repository structure example:
+
+  
+- `/queries`
+- `/init`
+- `/data`
+- `/erd`
+- `/docs`
+- `README.md`
+- `docker-comose.yaml`
+- `.env`
+
+**Push:**
+
+- DDL scripts  
+- CSV files (or generation scripts)  
+- ERD  
+- Documentation  
+
+::: {.callout-warning}
+**Commit early and often.**
+:::
+
+---
+
+### Step 8 | Define Analytical Questions
+
+Before writing complex SQL, define **business questions**.
+
+**Examples:**
+
+- Revenue by country / region / city  
+- Customer distribution by geography  
+- Top products per region  
+- Customers outside expected boundaries  
+- Growth trends over time  
+
+Each question should map to **specific joins**.
+
+
+## Step 9 | Construct a Denormalized Analytical Table
+
+Create a **flattened analytical table**.
+
+- Join all necessary dimensions
+- One row per analytical grain (e.g., order, customer-day)
+
+```sql
+CREATE TABLE analytics.fact_orders AS
 SELECT
   o.order_id,
   o.order_date,
-  c.first_name,
-  c.last_name
-FROM analytics.orders AS o
-INNER JOIN analytics.customers AS c
-  ON o.customer_id = c.customer_id;
-```
-
----
-
-### LEFT JOIN | preserve the base table
-
-**Question:**  
-Show all customers, even those who never placed an order.
-
-```sql
-SELECT
   c.customer_id,
-  c.first_name,
-  c.last_name,
-  o.order_id,
-  o.order_date
-FROM analytics.customers AS c
-LEFT JOIN analytics.orders AS o
-  ON c.customer_id = o.customer_id
-ORDER BY c.customer_id;
-```
-
----
-
-### LEFT JOIN with filtering
-
-**Question:**  
-Customers with completed orders only.
-
-```sql
-SELECT
-  c.customer_id,
-  c.first_name,
-  o.order_id,
-  o.status
-FROM analytics.customers AS c
-LEFT JOIN analytics.orders AS o
-  ON c.customer_id = o.customer_id
-WHERE o.status = 'completed';
-```
-
-This **behaves like an INNER JOIN** because of the `WHERE` clause.
-
----
-
-### LEFT JOIN with condition in ON clause 
-
-```sql
-SELECT
-  c.customer_id,
-  c.first_name,
-  o.order_id,
-  o.status
-FROM analytics.customers AS c
-LEFT JOIN analytics.orders AS o
-  ON c.customer_id = o.customer_id
- AND o.status = 'completed';
-```
-
----
-
-### One-to-many join: orders → order_items
-
-**Question:**  
-What products were included in each order?
-
-```sql
-SELECT
-  o.order_id,
-  oi.order_item_id,
-  oi.product_id,
-  oi.quantity
-FROM analytics.orders AS o
-INNER JOIN analytics.order_items AS oi
-  ON o.order_id = oi.order_id
-ORDER BY o.order_id;
-```
-
----
-
-### Multi-table join: customers → orders → order_items → products
-
-**Question:**  
-Full sales line items with customer and product info.
-
-```sql
-SELECT
-  c.customer_id,
-  c.first_name,
-  c.last_name,
-  o.order_id,
-  p.product_name,
-  p.category,
-  oi.quantity,
-  p.price,
-  oi.quantity * p.price AS line_revenue
-FROM analytics.customers AS c
-INNER JOIN analytics.orders AS o
-  ON c.customer_id = o.customer_id
-INNER JOIN analytics.order_items AS oi
-  ON o.order_id = oi.order_id
-INNER JOIN analytics.products AS p
-  ON oi.product_id = p.product_id
-ORDER BY o.order_id;
-```
-
----
-
-### Aggregation after JOIN
-
-**Question:**  
-Total revenue per customer.
-
-```sql
-SELECT
-  c.customer_id,
-  c.first_name,
-  c.last_name,
-  SUM(oi.quantity * p.price) AS total_revenue
-FROM analytics.customers AS c
-INNER JOIN analytics.orders AS o
-  ON c.customer_id = o.customer_id
-INNER JOIN analytics.order_items AS oi
-  ON o.order_id = oi.order_id
-INNER JOIN analytics.products AS p
-  ON oi.product_id = p.product_id
-GROUP BY
-  c.customer_id,
-  c.first_name,
-  c.last_name
-ORDER BY total_revenue DESC;
-```
-
----
-
-### JOIN with geography (non-spatial)
-
-**Question:**  
-Orders by country.
-
-```sql
-SELECT
+  ci.city_name,
+  r.region_name,
   co.country_name,
-  COUNT(DISTINCT o.order_id) AS orders_cnt
-FROM analytics.orders AS o
-INNER JOIN analytics.customers AS c
-  ON o.customer_id = c.customer_id
-INNER JOIN analytics.cities AS ci
-  ON c.city_id = ci.city_id
-INNER JOIN analytics.regions AS r
-  ON ci.region_id = r.region_id
-INNER JOIN analytics.countries AS co
-  ON r.country_id = co.country_id
-GROUP BY co.country_name;
+  SUM(oi.quantity * p.price) AS revenue
+FROM analytics.orders o
+JOIN analytics.customers c ON o.customer_id = c.customer_id
+JOIN analytics.cities ci ON c.city_id = ci.city_id
+JOIN analytics.regions r ON ci.region_id = r.region_id
+JOIN analytics.countries co ON r.country_id = co.country_id
+JOIN analytics.order_items oi ON o.order_id = oi.order_id
+JOIN analytics.products p ON oi.product_id = p.product_id
+GROUP BY
+  o.order_id, o.order_date,
+  c.customer_id, ci.city_name,
+  r.region_name, co.country_name;
 ```
+
+  
+- **This table will be reused later for:**
+  - Subqueries
+  - Window functions
+  - Advanced analytics
 
 ---
 
-### Spatial JOIN (PostGIS)
+### Step 10 | Visualization
 
-**Question:**  
-Validate that customer points fall inside their city boundaries.
+**Use any tool**: SQL client charts is recommended
 
-```sql
-SELECT
-  c.customer_id,
-  ci.city_name
-FROM analytics.customers AS c
-INNER JOIN analytics.customer_locations AS cl
-  ON c.customer_id = cl.customer_id
-INNER JOIN analytics.city_boundaries AS cb
-  ON c.city_id = cb.city_id
-WHERE ST_Contains(cb.geom, cl.geom);
-```
+**Focus on:**
+
+- Geography-based insights
+- Trends
+- Comparisons
+
+---
+
+### Step 11 | Create a Data Dictionary
+
+Document every table and column.
+
+**Example:**
+
+  
+- Table name  
+- Column name  
+- Data type  
+- Description  
+- Constraints  
+
+Store as: Markdown (`.md`) 
+
+This is a **professional requirement**, not optional.
+
+---
+
+### Step 12 | Final Review and Presentation
+
+**Deliverables:**
+
+- SQL database  
+- ERD  
+- GitHub repository  
+- Analytical tables  
+- Answered business questions  
+- Visuals  
+- Data dictionary  
+
+Final step:
+
+  
+- Present:
+  - Design decisions
+  - Normalization logic
+  - Join strategy
+  - Analytical findings
+
+### Evaluation Focus
+
+  
+- Correct normalization  
+- Correct joins  
+- Proper use of geography  
+- Clean SQL  
+- Reproducibility  
+- Analytical thinking  
+
+This project simulates real-world analytics work.
+
+
