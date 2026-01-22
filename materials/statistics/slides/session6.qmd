@@ -99,12 +99,16 @@ The court system assumes a person is innocent until proven guily, the hypothesis
 
 ## Steps In Hypothesis Testing
 
+::: {.incremental}
+
 1. Identify **the null** and **alternative hypotheses**
 2. Set a value for the **significance level** $\alpha$
 3. Determine the appropriate **critical value**
 4. Calculate the appropriate **test statistic**
 5. Compare the **test statistics** with the **critical score**
 6. State your conclusion
+
+:::
 
 
 ## Hypothesis Stamenet 
@@ -140,8 +144,9 @@ $$
 ## Set Significance Level
 
 The level of significance represents the *probability of making a Type I error.*
-A Type I error occurs when we reject the null hypothesis but it is
-actually true. The common Value: $\alpha = 0.05$
+A Type I error occurs when we reject the null hypothesis but it is actually true. 
+
+**The common Value:** $\alpha = 0.05$
 
 . . .
 
@@ -150,8 +155,8 @@ actually true. The common Value: $\alpha = 0.05$
 ## In Our Hypothesis Context
 
 - The researcher conducts a sample study.
-- The sample mean differs enough from 56 seconds to fall outside the acceptance region.
-- The test rejects the null hypothesis at the `5% `level.
+- The sample mean differs enough from `56` seconds to fall outside the acceptance region.
+- The test rejects the null hypothesis at the `5%` level.
 - But in truth, Americans do spend exactly `56` seconds on average.
 
 
@@ -211,7 +216,8 @@ A test statistic of **2.24** lies well into the rejection region (far from 0).
 - Since **2.24 > 1.96**, we **reject $H_0$**.
 
 **Interpretation:**  
->There is statistically significant evidence that the true average time spent on a >webpage is **different** from 56 seconds.
+
+>There is statistically significant evidence that the true average time spent on a webpage is **different** from 56 seconds.
 
 ## Graphical Representation
 
@@ -325,7 +331,7 @@ reject the null hypothesis under this condition.
 | $p\text{-value} < \alpha$   | Reject $H_0$         |
 
 
-## Visuall Representation
+## Visual Representation
 
 
 ```{python}
@@ -435,3 +441,508 @@ plt.tight_layout()
 plt.show()
 
 ```
+
+
+## Type II Error
+
+**Type II error**, which occurs when the `null hypothesis is really false and we fail to reject it`. The probability of a Type II error is known as $\beta$.
+
+
+# Case Study
+
+## Average Speed in Yerevan {.smaller}
+
+Urban mobility reports often claim that the average weekday driving speed in **Yereva**n is `15 km/h.` A transportation analyst wants to test this claim using recent `GPS` data from ride-sharing vehicles.
+
+This example is ideal for explaining all three hypothesis-test formulations:
+
+::: {.incremental}
+- **Two-Tailed:** Is the true average speed different from 15 km/h?
+- **Right-Tailed:** Are drivers going faster than 15 km/h?
+- **Left-Tailed:** Are drivers going slower than 15 km/h?
+:::
+
+
+## Two Tailed Hypotheses
+
+Since the population standard deviation is unknown, a **one-sample t-test** is appropriate to use.
+
+- $H_0: \mu = 15$
+- $H_1: \mu \ne 15$
+
+
+## What do we have ? 
+
+
+- **Sample size:** $n = 1000$
+- **Sample mean:** $\bar{x} = 16.2 \text{ km/h}$
+- **Sample standard deviation:** $s = 5.1 \text{ km/h}$
+- **Null hypothesis mean:** $\mu_{H_0} = 15$
+- **Significance level:** $\alpha = 0.05$ 
+- **Degrees of freedom:** $df = 999$
+
+**The test statistic is:**
+
+$$
+t_{\bar{x}} = \frac{\bar{x} - \mu_{H_0}}{s/\sqrt{n}}
+$$
+
+## Visual Representation
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+# Parameters
+n = 1000
+xbar = 16.2
+mu0 = 15
+s = 5.1
+df = n - 1
+alpha = 0.05
+
+# t statistic
+t_stat = (xbar - mu0) / (s / np.sqrt(n))
+
+# domain for plotting
+x = np.linspace(-4, 4, 500)
+y = t.pdf(x, df)
+
+# critical value
+crit = t.ppf(1 - alpha/2, df)
+
+# figure
+plt.plot(x, y, linewidth=2)
+
+# rejection regions
+plt.fill_between(x[x > crit], y[x > crit], alpha=0.30, color="gray")
+plt.fill_between(x[x < -crit], y[x < -crit], alpha=0.30, color="gray")
+
+# p-value shading
+plt.fill_between(x[x > t_stat], y[x > t_stat], alpha=0.50, color="red")
+
+# lines
+plt.axvline(t_stat, color="red")
+plt.axvline(crit, color="black", linestyle="--")
+plt.axvline(-crit, color="black", linestyle="--")
+
+plt.title("Two-Tailed t-Test (α = 0.05): p-Value Shaded")
+plt.xticks([]); plt.yticks([])
+plt.show()
+```
+
+
+## Interpretation of the Two-Tailed Tests {.smaller}
+
+- **The computed test statistic is:** $t_{\bar{x}} = 7.44$
+- For a two-tailed test with $\alpha = 0.05$ and $df = 999$ $\rightarrow$ $t_{\alpha/2, df} = \pm 1.96$ :
+- **p-value:** $p = 2 \cdot P(T > 7.44)\approx 1 \times 10^{-10}$
+
+$$\downarrow$$
+
+$|7.44| > 1.96 \rightarrow$ $p < 0.05$  
+
+. . .
+
+We **reject the null hypothesis**. There is very strong evidence that the true average weekday driving speed in Yerevan is **not equal** to 15 km/h.
+
+
+## Right Tailed Test
+
+We want to test whether the true average weekday driving speed in Yerevan is **greater** than  
+the stated value of **15 km/h**.
+
+
+$$H_0: \mu \le 15$$  
+$$H_1: \mu > 15$$  
+
+
+## What do we have?
+
+- **Sample size:** $n = 1000$
+- **Sample mean:** $\bar{x} = 16.2$ km/h
+- **Sample standard deviation:** $s = 5.1$ km/h
+- **Null hypothesis mean:** $\mu_{H_0}=15$
+- **Significance level:** $\alpha=0.05$
+- **Degrees of freedom:** $df = 999$
+
+
+## Visual Representation
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+n = 1000
+xbar = 16.2
+mu0 = 15
+s = 5.1
+df = n - 1
+alpha = 0.05
+
+t_stat = (xbar - mu0) / (s / np.sqrt(n))
+
+x = np.linspace(-4, 4, 500)
+y = t.pdf(x, df)
+
+crit = t.ppf(1 - alpha, df)
+
+plt.plot(x, y, linewidth=2)
+plt.fill_between(x[x > crit], y[x > crit], alpha=0.3, color="gray")
+plt.fill_between(x[x > t_stat], y[x > t_stat], alpha=0.5, color="red")
+
+plt.axvline(t_stat, color="red")
+plt.axvline(crit, color="black", linestyle="--")
+
+plt.title("Right-Tailed t-Test (α = 0.05): p-Value Shaded")
+plt.xticks([]); plt.yticks([])
+plt.show()
+
+```
+
+## Interpretation
+
+- **Test statistic:** $t_{\bar{x}} = 7.44$
+- **Critical value:** $t_{\alpha, 999} = 1.645$
+- **p-value:** $p \approx 5\times 10^{-11}$
+
+$$\downarrow$$
+
+Since $7.44 > 1.645$ and $p < 0.05$, we **reject $H_0$**.
+
+. . .
+
+**Conclusion:** There is extremely strong evidence that **drivers in Yerevan drive faster than 15 km/h** on average.
+
+## Left-Tailed Test
+
+We want to test whether the true average weekday driving speed in Yerevan is **less** than  
+the stated value of **15 km/h**.
+
+
+$$H_0: \mu \ge 15$$  
+$$H_1: \mu < 15$$  
+
+## What do we have?
+
+- **Sample size:** $n = 1000$
+- **Sample mean:** $\bar{x} = 16.2$ km/h
+- **Sample standard deviation:** $s = 5.1$ km/h
+- **Null hypothesis mean:** $\mu_{H_0} = 15$
+- **Significance level:** $\alpha = 0.05$
+- **Degrees of freedom:** $df = 999$
+
+## Visual Representation
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+n = 1000
+xbar = 16.2
+mu0 = 15
+s = 5.1
+df = n - 1
+alpha = 0.05
+
+t_stat = (xbar - mu0) / (s / np.sqrt(n))
+
+x = np.linspace(-4, 4, 500)
+y = t.pdf(x, df)
+
+crit = t.ppf(alpha, df)  # negative
+
+plt.plot(x, y, linewidth=2)
+plt.fill_between(x[x < crit], y[x < crit], alpha=0.3, color="gray")
+
+# p-value shading (entire left region)
+plt.fill_between(x[x < t_stat], y[x < t_stat], alpha=0.2, color="red")
+
+plt.axvline(t_stat, color="red")
+plt.axvline(crit, color="black", linestyle="--")
+
+plt.title("Left-Tailed t-Test (α = 0.05): p-Value Shaded")
+plt.xticks([]); plt.yticks([])
+plt.show()
+
+```
+
+
+
+## Interpretation
+
+- **Test statistic:** $t_{\bar{x}} = 7.44$  
+- **Critical value:** $t_{\alpha, 999} = -1.645$  
+- **p-value:** $p = P(T < 7.44) \approx 1.00$
+
+$$\downarrow$$
+
+Since $7.44$ is **not less** than $-1.645$ and $p > 0.05$, we **do NOT reject $H_0$**.
+
+. . .
+
+**Conclusion:** There is **no evidence** that drivers in Yerevan are slower than 15 km/h.  In fact, the sample strongly indicates the opposite.
+
+
+# Two Sample t-Test (A/B test)
+
+
+## Case Study {.smaller}
+
+A telecom company is testing **two versions of its mobile self-care app**:
+
+- **Version A (control)** — current user interface  
+- **Version B (treatment)** — redesigned dashboard  
+
+The team wants to know whether **average daily user engagement (minutes/day)** differs
+between the two versions.
+
+. . .
+
+Does Variant B change average daily engagement?
+
+## Hypothesis
+
+Since population SD is unknown for both groups, we use a **two-sample Welch t-test**.
+
+$$H_0: \mu_A = \mu_B$$  
+$$H_1: \mu_A \ne \mu_B$$  
+
+
+## Results
+
+- Version A: $n_A = 800$, $\bar{x}_A = 12.5$, $s_A = 6.2$
+- Version B: $n_B = 850$, $\bar{x}_B = 13.4$, $s_B = 6.8$
+
+
+## Visual Representation
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+# sample values
+nA, xA, sA = 800, 12.5, 6.2
+nB, xB, sB = 850, 13.4, 6.8
+
+# t statistic
+t_stat = (xA - xB)/np.sqrt(sA**2/nA + sB**2/nB)
+
+# df (Welch)
+df = (sA**2/nA + sB**2/nB)**2 / ((sA**2/nA)**2/(nA-1) + (sB**2/nB)**2/(nB-1))
+
+alpha = 0.05
+
+# domain
+x = np.linspace(-4,4,500)
+y = t.pdf(x, df)
+
+crit = t.ppf(1 - alpha/2, df)
+
+plt.plot(x, y, linewidth=2)
+
+# rejection regions
+plt.fill_between(x[x > crit], y[x > crit], alpha=0.3, color="gray")
+plt.fill_between(x[x < -crit], y[x < -crit], alpha=0.3, color="gray")
+
+# p-value shading
+if t_stat > 0:
+    plt.fill_between(x[x > t_stat], y[x > t_stat], alpha=0.5, color="red")
+else:
+    plt.fill_between(x[x < t_stat], y[x < t_stat], alpha=0.5, color="red")
+
+# vertical lines
+plt.axvline(t_stat, color="red")
+plt.axvline(crit, linestyle="--")
+plt.axvline(-crit, linestyle="--")
+
+plt.title("Two-Sample t-Test (Two-Tailed)")
+plt.xticks([]); plt.yticks([])
+plt.show()
+
+```
+
+## Interpretation {.smaller}
+
+- Test statistic: $t = -2.93$
+- Critical values: $t_{\alpha/2, df} \approx \pm 1.96$
+- p-value: $p = 0.0034$
+
+$$\downarrow$$
+
+Because $|t| > 1.96$ and $p < 0.05$, we **reject $H_0$**.
+
+. . .
+
+**Version B** produces a **statistically significant difference** in average daily engagement compared to **Version A.**
+
+
+## Right-Tailed Test
+
+*Does Variant B increase engagement?*
+
+Now the team wants a directional test:
+
+. . .
+
+**Does Version B strictly increase user engagement?**
+
+## Visual Representation
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+nA, xA, sA = 800, 12.5, 6.2
+nB, xB, sB = 850, 13.4, 6.8
+
+t_stat = (xA - xB)/np.sqrt(sA**2/nA + sB**2/nB)
+
+df = (sA**2/nA + sB**2/nB)**2 / ((sA**2/nA)**2/(nA-1) + (sB**2/nB)**2/(nB-1))
+
+alpha = 0.05
+
+x = np.linspace(-4,4,500)
+y = t.pdf(x, df)
+
+crit = t.ppf(1 - alpha, df)
+
+plt.plot(x, y)
+plt.fill_between(x[x > crit], y[x > crit], alpha=0.3, color="gray")
+
+# shade p-value
+plt.fill_between(x[x > t_stat], y[x > t_stat], alpha=0.5, color="red")
+
+plt.axvline(t_stat, color="red")
+plt.axvline(crit, linestyle="--")
+
+plt.title("Right-Tailed Two-Sample t-Test")
+plt.xticks([]); plt.yticks([])
+plt.show()
+
+```
+
+## Interpretation
+
+- Test statistic: $t = -2.93$
+- Critical value: $t_{0.95, df} = 1.645$
+- p-value: $p = 0.998$
+
+$$\downarrow$$
+
+We **fail to reject $H_0$**.
+
+. . .
+
+There is **no evidence** that *Version B increases user engagement*.
+
+
+## Left Tail Test
+
+`Does Variant B reduce app load time?`
+
+Load time is a **negative metric**: smaller = better.
+
+$$H_0: \mu_B \ge \mu_A$$  
+$$H_1: \mu_B < \mu_A$$  
+
+- Version A: $\bar{x}_A = 3.2$ sec, $s_A = 1.4$, $n_A = 600$  
+- Version B: $\bar{x}_B = 2.9$ sec, $s_B = 1.3$, $n_B = 620$
+
+## Visual Representation
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+nA, xA, sA = 600, 3.2, 1.4
+nB, xB, sB = 620, 2.9, 1.3
+
+t_stat = (xA - xB)/np.sqrt(sA**2/nA + sB**2/nB)
+
+df = (sA**2/nA + sB**2/nB)**2 / ((sA**2/nA)**2/(nA-1) + (sB**2/nB)**2/(nB-1))
+
+alpha = 0.05
+
+x = np.linspace(-4,4,500)
+y = t.pdf(x, df)
+
+crit = t.ppf(alpha, df)
+
+plt.plot(x, y)
+plt.fill_between(x[x < crit], y[x < crit], alpha=0.3, color="gray")
+
+plt.fill_between(x[x < t_stat], y[x < t_stat], alpha=0.5, color="red")
+
+plt.axvline(t_stat, color="red")
+plt.axvline(crit, linestyle="--")
+
+plt.title("Left-Tailed Two-Sample t-Test")
+plt.xticks([]); plt.yticks([])
+plt.show()
+```
+
+
+## Interpretation
+
+
+- Test statistic: $t = 4.37$
+- Critical value: $t_{0.05, df} = -1.645$
+- p-value: $p = 1.00$
+
+$$\downarrow$$
+
+. . .
+
+We **fail to reject $H_0$**.
+
+There is no evidence that Version B reduces app load time.
+
+
+##  Summary {.smaller}
+
+
+| Test Type        | Scenario                                         | Hypotheses                                                                 | Test Statistic | Critical Value(s)                 | p-Value            | Decision              | Interpretation                                                                 |
+|------------------|--------------------------------------------------|-----------------------------------------------------------------------------|----------------|-----------------------------------|---------------------|------------------------|-------------------------------------------------------------------------------|
+| **Two-Tailed**   | \ Difference between App A and App B    | $H_0:\mu_A=\mu_B$  <br> $H_1:\mu_A\ne\mu_B$                                 | $t=-2.93$      | $\pm 1.96$                        | $p=0.003$          | Reject           | Engagement is **significantly different** between A and B.                    |
+| **Right-Tailed** | Does B *increase* engagement vs A?               | $H_0:\mu_B\le\mu_A$ <br> $H_1:\mu_B>\mu_A$                                  | $t=-2.93$      | $t_{0.95}=1.645$                  | $p=0.99$           | Fail to reject   | No evidence that Version B **increases** engagement.                          |
+| **Left-Tailed**  | Does B *reduce* app load time vs A?              | $H_0:\mu_B\ge\mu_A$ <br> $H_1:\mu_B<\mu_A$                                  | $t=4.37$       | $t_{0.05}=-1.645$                 | $p=1.00$           | Fail to rejectS   | No evidence that Version B **reduces** load time.                             |
+
+
+
