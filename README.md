@@ -11,4 +11,6 @@ Open you terminal and run bellow options, given that the quarto virtual environm
 
 -  ./book_preview.sh tableau 1
 -  ./slides_preview.sh tableau 1
+-  
+for Maryam
 
