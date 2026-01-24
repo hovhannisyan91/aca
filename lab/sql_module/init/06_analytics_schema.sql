@@ -1,4 +1,5 @@
-
+-- Core dimension tables
+\echo 'Creating core dimension tables'
 CREATE TABLE analytics.countries (
     country_id   INT PRIMARY KEY,
     country_name TEXT NOT NULL
@@ -16,6 +17,8 @@ CREATE TABLE analytics.cities (
     region_id INT NOT NULL REFERENCES analytics.regions(region_id)
 );
 
+-- Core entities tied to geography
+\echo 'Creating customer table'
 CREATE TABLE analytics.customers (
     customer_id INT PRIMARY KEY,
     first_name  TEXT NOT NULL,
@@ -26,6 +29,8 @@ CREATE TABLE analytics.customers (
     signup_date DATE NOT NULL
 );
 
+-- Product catalog
+\echo 'Creating product table'
 CREATE TABLE analytics.products (
     product_id   INT PRIMARY KEY,
     product_name TEXT NOT NULL,
@@ -33,6 +38,8 @@ CREATE TABLE analytics.products (
     price        NUMERIC(10,2) NOT NULL
 );
 
+-- Orders and line items
+\echo 'Creating order tables'
 CREATE TABLE analytics.orders (
     order_id    INT PRIMARY KEY,
     customer_id INT REFERENCES analytics.customers(customer_id),
@@ -47,22 +54,50 @@ CREATE TABLE analytics.order_items (
     quantity      INT NOT NULL CHECK (quantity > 0)
 );
 
+-- Final spatial tables (geometry types in EPSG:4326)
+\echo 'Creating spatial tables'
 CREATE TABLE analytics.country_boundaries (
     country_id INT PRIMARY KEY REFERENCES analytics.countries(country_id),
-    geom       GEOMETRY(MultiPolygon, 4326)
+    geom GEOMETRY(MultiPolygon, 4326)
 );
 
 CREATE TABLE analytics.region_boundaries (
     region_id INT PRIMARY KEY REFERENCES analytics.regions(region_id),
-    geom      GEOMETRY(Polygon, 4326)
+    geom GEOMETRY(Polygon, 4326)
 );
 
 CREATE TABLE analytics.city_boundaries (
     city_id INT PRIMARY KEY REFERENCES analytics.cities(city_id),
-    geom    GEOMETRY(Polygon, 4326)
+    geom GEOMETRY(Polygon, 4326)
 );
 
 CREATE TABLE analytics.customer_locations (
     customer_id INT PRIMARY KEY REFERENCES analytics.customers(customer_id),
-    geom        GEOMETRY(Point, 4326)
+    geom GEOMETRY(Point, 4326)
+);
+
+
+-- Staging tables for raw WKT imports
+\echo 'Creating staging tables'
+
+
+CREATE TABLE IF NOT EXISTS analytics._stg_country_boundaries (
+    country_id INT,
+    wkt TEXT
+);
+
+
+CREATE TABLE IF NOT EXISTS analytics._stg_region_boundaries (
+    region_id INT,
+    wkt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS analytics._stg_city_boundaries (
+    city_id INT,
+    wkt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS analytics._stg_points (
+    point_id INT,
+    wkt TEXT
 );
