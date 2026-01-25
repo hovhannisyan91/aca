@@ -971,12 +971,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import t
 
+# Sample statistics
 nA, xA, sA = 600, 3.2, 1.4
 nB, xB, sB = 620, 2.9, 1.3
 
-t_stat = (xA - xB)/np.sqrt(sA**2/nA + sB**2/nB)
+# Test statistic: B - A (aligned with H1: mu_B < mu_A)
+t_stat = (xB - xA) / np.sqrt(sA**2/nA + sB**2/nB)
 
-df = (sA**2/nA + sB**2/nB)**2 / ((sA**2/nA)**2/(nA-1) + (sB**2/nB)**2/(nB-1))
+# Welch–Satterthwaite degrees of freedom
+#| echo: false
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+nA, xA, sA = 600, 3.2, 1.4
+nB, xB, sB = 620, 2.9, 1.3
+
+# FIX: align statistic with H1: mu_B < mu_A
+t_stat = (xB - xA)/np.sqrt(sA**2/nA + sB**2/nB)
+
+df = (sA**2/nA + sB**2/nB)**2 / (
+    (sA**2/nA)**2/(nA-1) + (sB**2/nB)**2/(nB-1)
+)
 
 alpha = 0.05
 
@@ -987,7 +1007,6 @@ crit = t.ppf(alpha, df)
 
 plt.plot(x, y)
 plt.fill_between(x[x < crit], y[x < crit], alpha=0.3, color="gray")
-
 plt.fill_between(x[x < t_stat], y[x < t_stat], alpha=0.5, color="red")
 
 plt.axvline(t_stat, color="red")
@@ -996,27 +1015,30 @@ plt.axvline(crit, linestyle="--")
 plt.title("Left-Tailed Two-Sample t-Test")
 plt.xticks([]); plt.yticks([])
 plt.show()
+
+
 ```
 
 #### Interpretation (Left-Tailed Test)
 
-- Test statistic: $t = 4.37$
+- Test statistic: $t = -4.37$
 - Critical value: $t_{0.05, df} = -1.645$
-- p-value: $p = 1.00$
+- p-value: $p \approx 0.0000$
 
 #### Decision
 
-We **fail to reject $H_0$**.
+We **reject $H_0$**.
 
 #### Conclusion
 
-There is no evidence that Version B reduces app load time.
+There is **strong evidence** that Version B reduces app load time.
+
+---
 
 ### Combined Summary Table
 
-| Test Type        | Scenario                                         | Hypotheses                                                                 | Test Statistic | Critical Value(s)                 | p-Value            | Decision              | Interpretation                                                                 |
-|------------------|--------------------------------------------------|-----------------------------------------------------------------------------|----------------|-----------------------------------|---------------------|------------------------|-------------------------------------------------------------------------------|
-| **Two-Tailed**   | \ Difference between App A and App B    | $H_0:\mu_A=\mu_B$  <br> $H_1:\mu_A\ne\mu_B$                                 | $t=-2.93$      | $\pm 1.96$                        | $p=0.003$          | Reject           | Engagement is **significantly different** between A and B.                    |
-| **Right-Tailed** | Does B *increase* engagement vs A?               | $H_0:\mu_B\le\mu_A$ <br> $H_1:\mu_B>\mu_A$                                  | $t=-2.93$      | $t_{0.95}=1.645$                  | $p=0.99$           | Fail to reject   | No evidence that Version B **increases** engagement.                          |
-| **Left-Tailed**  | Does B *reduce* app load time vs A?              | $H_0:\mu_B\ge\mu_A$ <br> $H_1:\mu_B<\mu_A$                                  | $t=4.37$       | $t_{0.05}=-1.645$                 | $p=1.00$           | Fail to rejectS   | No evidence that Version B **reduces** load time.                             |
-
+| Test Type        | Scenario                                         | Hypotheses                                                                 | Test Statistic | Critical Value(s)                 | p-Value            | Decision            | Interpretation                                                                 |
+|------------------|--------------------------------------------------|-----------------------------------------------------------------------------|----------------|-----------------------------------|--------------------|---------------------|-------------------------------------------------------------------------------|
+| **Two-Tailed**   | Difference between App A and App B                | $H_0:\mu_A=\mu_B$ <br> $H_1:\mu_A\ne\mu_B$                                  | $t=-2.93$      | $\pm 1.96$                        | $p=0.003$          | Reject              | Engagement is **significantly different** between A and B.                    |
+| **Right-Tailed** | Does B *increase* engagement vs A?               | $H_0:\mu_B\le\mu_A$ <br> $H_1:\mu_B>\mu_A$                                  | $t=-2.93$      | $t_{0.95}=1.645$                  | $p=0.99$           | Fail to reject      | No evidence that Version B **increases** engagement.                          |
+| **Left-Tailed**  | Does B *reduce* app load time vs A?              | $H_0:\mu_B\ge\mu_A$ <br> $H_1:\mu_B<\mu_A$                                  | $t=-4.37$      | $t_{0.05}=-1.645$                 | $p\approx 0.0000$  | Reject              | Version B **significantly reduces** app load time.                            |
