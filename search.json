@@ -9369,7 +9369,7 @@
     "href": "materials/sql/index.html",
     "title": "SQL",
     "section": "",
-    "text": "Session 01: Intro to Relational Databases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 02: Intro to PostgreSQL\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 03: Data Analysis with SQL | Part I\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 04: Data Analysis with SQL | Part II\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 05: Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 06: Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 07: Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 08: Data Analysis with SQL | JOINs\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 09: Data Analysis with SQL | Advanced SQL 3\n\n\n\n\n\n\n\n\n\n\n\nNo matching items",
+    "text": "Session 01: Intro to Relational Databases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 02: Intro to PostgreSQL\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 03: Data Analysis with SQL | Part I\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 04: Data Analysis with SQL | Part II\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 05: Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 06: Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 07: Data Analysis with SQL | Functions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 08: Data Analysis with SQL | JOINs\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSession 09: Data Analysis with SQL | Advanced SQL\n\n\n\n\n\n\n\n\n\n\n\nNo matching items",
     "crumbs": [
       "Syllabus",
       "SQL"
@@ -11252,17 +11252,1053 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session9.html#comming-soon",
-    "href": "materials/sql/slides/session9.html#comming-soon",
-    "title": "Advanced SQL 2",
-    "section": "Comming Soon",
-    "text": "Comming Soon",
+    "objectID": "materials/sql/slides/session9.html#session-objectives",
+    "href": "materials/sql/slides/session9.html#session-objectives",
+    "title": "Advanced SQL",
+    "section": "Session Objectives",
+    "text": "Session Objectives\n\nTemporary Tables\n\nSubqueries and CTEs\n\nWindow Functions",
     "crumbs": [
       "Syllabus",
       "SQL",
       "SQL",
       "Slides",
-      "Advanced SQL 2"
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#why-temporary-tables-exist",
+    "href": "materials/sql/slides/session9.html#why-temporary-tables-exist",
+    "title": "Advanced SQL",
+    "section": "Why Temporary Tables Exist",
+    "text": "Why Temporary Tables Exist\nIn real analytical work, SQL queries are rarely written once and discarded.\n\nJoins are repeated across questions\n\nBusiness logic is reused and refined\n\nIntermediate results must be validated\n\n\nTemporary tables allow us to materialize intermediate results and reuse them cleanly.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#what-is-a-temporary-table",
+    "href": "materials/sql/slides/session9.html#what-is-a-temporary-table",
+    "title": "Advanced SQL",
+    "section": "What Is a Temporary Table?",
+    "text": "What Is a Temporary Table?\nA temporary table is a session-scoped database table used to store intermediate query results.\n\nExists only within the current database session\n\nAutomatically dropped at session end\n\nIsolated per user connection\n\nBehaves like a regular table",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#temporary-tables-in-an-analytical-workflow",
+    "href": "materials/sql/slides/session9.html#temporary-tables-in-an-analytical-workflow",
+    "title": "Advanced SQL",
+    "section": "Temporary Tables in an Analytical Workflow",
+    "text": "Temporary Tables in an Analytical Workflow\nTemporary tables make multi-step analysis explicit and easier to reason about.\n\n\n\n\n\nflowchart LR\n    A[Base Tables] --&gt; B[Joins and Aggregations]\n    B --&gt; C[Temporary Table]\n    C --&gt; D[Further Analysis]\n    C --&gt; E[Validation Queries]\n    C --&gt; F[Final Output]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#creating-a-temporary-table",
+    "href": "materials/sql/slides/session9.html#creating-a-temporary-table",
+    "title": "Advanced SQL",
+    "section": "Creating a Temporary Table",
+    "text": "Creating a Temporary Table\nTemporary tables are created using CREATE TEMP TABLE.\n\nSchema declaration is optional\n\nCan be queried multiple times\n\nSuitable for multi-step analytics",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#example-order-level-revenue",
+    "href": "materials/sql/slides/session9.html#example-order-level-revenue",
+    "title": "Advanced SQL",
+    "section": "Example: Order-Level Revenue",
+    "text": "Example: Order-Level Revenue\nCREATE TEMP TABLE tmp_order_revenue AS\nSELECT\n    o.order_id,\n    o.customer_id,\n    o.order_date,\n    SUM(oi.quantity * p.price) AS order_revenue\nFROM analytics.orders o\nJOIN analytics.order_items oi ON o.order_id = oi.order_id\nJOIN analytics.products p ON oi.product_id = p.product_id\nGROUP BY o.order_id, o.customer_id, o.order_date;\n\ntmp_order_revenue behaves like a normal table.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#inspecting-temporary-tables",
+    "href": "materials/sql/slides/session9.html#inspecting-temporary-tables",
+    "title": "Advanced SQL",
+    "section": "Inspecting Temporary Tables",
+    "text": "Inspecting Temporary Tables\nBefore continuing analysis, intermediate results should be validated.\n\nRow counts\n\nValue ranges\n\nBusiness logic checks\n\nSELECT\n    COUNT(*) AS total_orders,\n    MIN(order_revenue) AS min_revenue,\n    MAX(order_revenue) AS max_revenue,\n    AVG(order_revenue) AS avg_revenue\nFROM tmp_order_revenue;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#reusing-temporary-tables",
+    "href": "materials/sql/slides/session9.html#reusing-temporary-tables",
+    "title": "Advanced SQL",
+    "section": "Reusing Temporary Tables",
+    "text": "Reusing Temporary Tables\nOnce created, the temporary table can be reused without recomputing joins.\nSELECT\n    customer_id,\n    AVG(order_revenue) AS avg_order_revenue\nFROM tmp_order_revenue\nGROUP BY customer_id;\nThis separation clarifies intent:\n\nStep 1: Define revenue\n\nStep 2: Analyze revenue",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#example-city-level-revenue",
+    "href": "materials/sql/slides/session9.html#example-city-level-revenue",
+    "title": "Advanced SQL",
+    "section": "Example: City-Level Revenue",
+    "text": "Example: City-Level Revenue\nTemporary tables scale naturally across business hierarchies.\nCREATE TEMP TABLE tmp_customer_spend AS\nSELECT\n    c.customer_id,\n    c.city_id,\n    SUM(oi.quantity * p.price) AS total_spend\nFROM analytics.customers c\nJOIN analytics.orders o ON c.customer_id = o.customer_id\nJOIN analytics.order_items oi ON o.order_id = oi.order_id\nJOIN analytics.products p ON oi.product_id = p.product_id\nGROUP BY c.customer_id, c.city_id;\n\nSELECT\n    city_id,\n    AVG(total_spend) AS avg_customer_spend,\n    MAX(total_spend) AS max_customer_spend\nFROM tmp_customer_spend\nGROUP BY city_id;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#why-not-repeat-the-query",
+    "href": "materials/sql/slides/session9.html#why-not-repeat-the-query",
+    "title": "Advanced SQL",
+    "section": "Why Not Repeat the Query?",
+    "text": "Why Not Repeat the Query?\nWithout temporary tables, the same logic must be repeated.\n\n\n\n\n\nflowchart TB\n    Q1[Complex Join + Aggregation] --&gt; R1[Result]\n    Q2[Complex Join + Aggregation] --&gt; R2[Result]\n    Q3[Complex Join + Aggregation] --&gt; R3[Result]\n\n\n\n\n\n\n\nWith a temporary table, the logic is defined once.\n\n\n\n\n\nflowchart TB\n    Q[Complex Join + Aggregation] --&gt; T[Temporary Table]\n    T --&gt; R1[Analysis 1]\n    T --&gt; R2[Analysis 2]\n    T --&gt; R3[Analysis 3]\n\n\n\n\n\n\nTemporary tables reduce duplication and cognitive load.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#performance-and-practical-considerations",
+    "href": "materials/sql/slides/session9.html#performance-and-practical-considerations",
+    "title": "Advanced SQL",
+    "section": "Performance and Practical Considerations",
+    "text": "Performance and Practical Considerations\n\nReduce repeated scans of large tables\n\nImprove readability of SQL scripts\n\nIdeal for exploratory and multi-step analysis\n\nLess suitable for single-use logic",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#when-to-use-temporary-tables",
+    "href": "materials/sql/slides/session9.html#when-to-use-temporary-tables",
+    "title": "Advanced SQL",
+    "section": "When to Use Temporary Tables",
+    "text": "When to Use Temporary Tables\n\nMulti-step analysis\n\nReused intermediate results\n\nDebugging complex transformations\n\nTeaching and learning SQL workflows",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#what-is-a-subquery",
+    "href": "materials/sql/slides/session9.html#what-is-a-subquery",
+    "title": "Advanced SQL",
+    "section": "What Is a Subquery?",
+    "text": "What Is a Subquery?\nA subquery is a query nested inside another SQL query.\nUnlike temporary tables, subqueries do not materialize intermediate results as standalone objects.\nInstead, they embed logic directly inside a statement and are evaluated as part of query execution.\n\nConceptually:\n\nTemporary tables → materialized, reusable checkpoints\nSubqueries → inline, scoped expressions\n\nSubqueries are most useful when intermediate results are needed only once and do not justify explicit materialization.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#temporary-tables-vs.-subqueries",
+    "href": "materials/sql/slides/session9.html#temporary-tables-vs.-subqueries",
+    "title": "Advanced SQL",
+    "section": "Temporary Tables vs. Subqueries",
+    "text": "Temporary Tables vs. Subqueries\nTemporary tables externalize intermediate results as named objects. Subqueries take the next step by embedding intermediate logic directly inside a query.\n\nNo explicit table creation\n\nTighter scoping of logic\n\nBetter suited for one-off comparisons",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#types-of-subqueries",
+    "href": "materials/sql/slides/session9.html#types-of-subqueries",
+    "title": "Advanced SQL",
+    "section": "Types of Subqueries",
+    "text": "Types of Subqueries\nWe will study subqueries in the following order:\n\nFilter subqueries (WHERE)\nColumn (scalar) subqueries (SELECT)\nDerived tables (FROM)\nCorrelated subqueries",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#what-are-filter-subqueries",
+    "href": "materials/sql/slides/session9.html#what-are-filter-subqueries",
+    "title": "Advanced SQL",
+    "section": "What Are Filter Subqueries?",
+    "text": "What Are Filter Subqueries?\nFilter subqueries are used to restrict rows in the outer query based on the result of another query.\nMental model\n\nKeep rows that satisfy a condition defined by another query.\n\n\n\n\n\n\nflowchart LR\n    A[Input Table] --&gt; B[Outer Query]\n    C[Subquery Result] --&gt; B\n    B --&gt; D[Filtered Output]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#conceptual-example",
+    "href": "materials/sql/slides/session9.html#conceptual-example",
+    "title": "Advanced SQL",
+    "section": "Conceptual Example",
+    "text": "Conceptual Example\nSelect employees earning above the average salary.\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100\n\n\n\n\nSELECT *\nFROM employees\nWHERE salary &gt; (\n    SELECT \n      AVG(salary)\n    FROM employees\n);\n\n\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#example-from-analytics-schema",
+    "href": "materials/sql/slides/session9.html#example-from-analytics-schema",
+    "title": "Advanced SQL",
+    "section": "Example from Analytics Schema",
+    "text": "Example from Analytics Schema\n\nWhich customers have an average order revenue above the overall average order revenue?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#step-1-subquery-overall-average",
+    "href": "materials/sql/slides/session9.html#step-1-subquery-overall-average",
+    "title": "Advanced SQL",
+    "section": "Step 1: Subquery (Overall Average)",
+    "text": "Step 1: Subquery (Overall Average)\nSELECT\n    AVG(order_revenue)\nFROM tmp_order_revenue;\n\n\n\n\n\n\n\nIn case of errors\n\n\nIf you encounter an error, recreate the temporary table tmp_order_revenue before running this query.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#step-2-filter-query-using-subquery",
+    "href": "materials/sql/slides/session9.html#step-2-filter-query-using-subquery",
+    "title": "Advanced SQL",
+    "section": "Step 2: Filter Query Using Subquery",
+    "text": "Step 2: Filter Query Using Subquery\nSELECT\n    customer_id,\n    AVG(order_revenue) AS avg_customer_revenue\nFROM tmp_order_revenue\nGROUP BY customer_id\nHAVING AVG(order_revenue) &gt;\n       (\n           SELECT AVG(order_revenue)\n           FROM tmp_order_revenue\n       );",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#output",
+    "href": "materials/sql/slides/session9.html#output",
+    "title": "Advanced SQL",
+    "section": "Output",
+    "text": "Output\n\n\n\ncustomer_id\navg_customer_revenue\n\n\n\n\n4\n38.48\n\n\n10\n49.15\n\n\n6\n56.64\n\n\n14\n49.15\n\n\n2\n49.15\n\n\n…\n…",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#filter-subquery-using-another-table-conceptual",
+    "href": "materials/sql/slides/session9.html#filter-subquery-using-another-table-conceptual",
+    "title": "Advanced SQL",
+    "section": "Filter Subquery Using Another Table (Conceptual)",
+    "text": "Filter Subquery Using Another Table (Conceptual)\nInput Tables employees and departments\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n\n\n\n\ndepartment\ntarget_salary\n\n\n\n\nSales\n1000\n\n\nIT\n1300",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#subquery-using-another-table-analytics-schema",
+    "href": "materials/sql/slides/session9.html#subquery-using-another-table-analytics-schema",
+    "title": "Advanced SQL",
+    "section": "Subquery Using Another Table Analytics Schema",
+    "text": "Subquery Using Another Table Analytics Schema\nWhich customers have total spend above the average spend of all customers?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#query",
+    "href": "materials/sql/slides/session9.html#query",
+    "title": "Advanced SQL",
+    "section": "Query",
+    "text": "Query\nSELECT\n    c.customer_id\nFROM analytics.customers c\nWHERE (\n    SELECT SUM(oi.quantity * p.price)\n    FROM analytics.orders o\n    JOIN analytics.order_items oi ON o.order_id = oi.order_id\n    JOIN analytics.products p ON oi.product_id = p.product_id\n    WHERE o.customer_id = c.customer_id\n) &gt;\n(\n    SELECT AVG(customer_total)\n    FROM (\n        SELECT\n            o.customer_id,\n            SUM(oi.quantity * p.price) AS customer_total\n        FROM analytics.orders o\n        JOIN analytics.order_items oi ON o.order_id = oi.order_id\n        JOIN analytics.products p ON oi.product_id = p.product_id\n        GROUP BY o.customer_id\n    ) t\n);\nThis query uses multiple tables inside the filter subquery while still producing a single comparison value.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#when-to-use",
+    "href": "materials/sql/slides/session9.html#when-to-use",
+    "title": "Advanced SQL",
+    "section": "When to Use?",
+    "text": "When to Use?\n\nFiltering based on global or group-level aggregates\n\nOne-off analytical conditions\n\nClear logical separation between condition and",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#what-is-a-column-subquery",
+    "href": "materials/sql/slides/session9.html#what-is-a-column-subquery",
+    "title": "Advanced SQL",
+    "section": "What Is a Column Subquery?",
+    "text": "What Is a Column Subquery?\nA column subquery returns a single value and is evaluated for each row of the outer query.\n\nAppears inside the SELECT clause\nProduces a scalar value\nEnriches each row with contextual information",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#mental-model",
+    "href": "materials/sql/slides/session9.html#mental-model",
+    "title": "Advanced SQL",
+    "section": "Mental Model",
+    "text": "Mental Model\n\nAttach a contextual metric to each row.\n\nThis is often where subqueries feel powerful but heavy.\n\n\n\n\n\n\n\nImportant\n\n\n\nA column subquery may reference\n\nthe same table\nother tables\n\nIf it depends on the current outer row, it is a correlated subquery",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#conceptual-flow",
+    "href": "materials/sql/slides/session9.html#conceptual-flow",
+    "title": "Advanced SQL",
+    "section": "Conceptual Flow",
+    "text": "Conceptual Flow\n\n\n\n\n\nflowchart LR\n    A[Row from Outer Query] --&gt; B[Scalar Subquery]\n    B --&gt; C[Computed Value]\n    A --&gt; D[Enriched Row]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#simple-example-conceptual",
+    "href": "materials/sql/slides/session9.html#simple-example-conceptual",
+    "title": "Advanced SQL",
+    "section": "Simple Example (Conceptual)",
+    "text": "Simple Example (Conceptual)\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n\n\nSELECT\n    emp_id,\n    salary,\n    (SELECT AVG(salary) FROM employees) AS avg_salary\nFROM employees;\n\n\n\n\n\nemp_id\nsalary\navg_salary\n\n\n\n\n1\n1200\n1200\n\n\n2\n900\n1200\n\n\n3\n1500\n1200",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#interpretation",
+    "href": "materials/sql/slides/session9.html#interpretation",
+    "title": "Advanced SQL",
+    "section": "Interpretation",
+    "text": "Interpretation\n\nSubquery computes one global value\nSame value is attached to every row\nSubquery is evaluated once",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#analytics-schema-example",
+    "href": "materials/sql/slides/session9.html#analytics-schema-example",
+    "title": "Advanced SQL",
+    "section": "Analytics Schema Example",
+    "text": "Analytics Schema Example\nQ: For each order, show the order revenue and the overall average order revenue.\n\nSELECT\n    order_id,\n    order_revenue,\n    (\n        SELECT AVG(order_revenue)\n        FROM tmp_order_revenue\n    ) AS avg_order_revenue\nFROM tmp_order_revenue;\n\n\n\n\n\norder_id\norder_revenue\navg_order_revenue\n\n\n\n\n101\n42.50\n47.18\n\n\n102\n55.00\n47.18\n\n\n103\n38.00\n47.18",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#using-another-table-conceptual-smaller",
+    "href": "materials/sql/slides/session9.html#using-another-table-conceptual-smaller",
+    "title": "Advanced SQL",
+    "section": "Using Another Table (Conceptual) {smaller}",
+    "text": "Using Another Table (Conceptual) {smaller}\nemployees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n\ndepartments\n\n\n\ndepartment\ntarget_salary\n\n\n\n\nSales\n1000\n\n\nIT\n1300",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#query-output",
+    "href": "materials/sql/slides/session9.html#query-output",
+    "title": "Advanced SQL",
+    "section": "Query & Output",
+    "text": "Query & Output\nSELECT\n    e.emp_id,\n    e.salary,\n    (\n        SELECT \n            d.target_salary\n        FROM departments d\n        WHERE d.department = e.department\n    ) AS target_salary\nFROM employees e;\n\n\n\nemp_id\nsalary\ntarget_salary\n\n\n\n\n1\n1200\n1000\n\n\n2\n900\n1000\n\n\n3\n1500\n1300",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#key-observation",
+    "href": "materials/sql/slides/session9.html#key-observation",
+    "title": "Advanced SQL",
+    "section": "Key Observation",
+    "text": "Key Observation\nThis is a correlated scalar subquery.\n\nSubquery depends on the outer row\nEvaluated once per row\nMore flexible, but more expensive",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#analytics-schema-correlated-example",
+    "href": "materials/sql/slides/session9.html#analytics-schema-correlated-example",
+    "title": "Advanced SQL",
+    "section": "Analytics Schema | Correlated Example",
+    "text": "Analytics Schema | Correlated Example\nBusiness Question: For each customer, show:\n\nTotal customer spend\nAverage spend of customers in the same city\n\n\nSELECT\n    c.customer_id,\n    (\n        SELECT SUM(oi.quantity * p.price)\n        FROM analytics.orders o\n        JOIN analytics.order_items oi ON o.order_id = oi.order_id\n        JOIN analytics.products p ON oi.product_id = p.product_id\n        WHERE o.customer_id = c.customer_id\n    ) AS customer_spend,\n    (\n        SELECT AVG(oi.quantity * p.price)\n        FROM analytics.orders o\n        JOIN analytics.order_items oi ON o.order_id = oi.order_id\n        JOIN analytics.products p ON oi.product_id = p.product_id\n        JOIN analytics.customers c2 ON o.customer_id = c2.customer_id\n        WHERE c2.city_id = c.city_id\n    ) AS avg_city_spend\nFROM analytics.customers c;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#output-1",
+    "href": "materials/sql/slides/session9.html#output-1",
+    "title": "Advanced SQL",
+    "section": "Output",
+    "text": "Output\n\n\n\ncustomer_id\ncustomer_spend\navg_city_spend\n\n\n\n\n4\n182.50\n154.30\n\n\n6\n240.00\n198.75\n\n\n10\n165.40\n198.75",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#important-rule",
+    "href": "materials/sql/slides/session9.html#important-rule",
+    "title": "Advanced SQL",
+    "section": "Important Rule",
+    "text": "Important Rule\n\n\n\n\n\n\nWarning\n\n\nA column subquery must return exactly one value per outer row.\n\nReturning multiple rows causes an error\nThis constraint is strict",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#when-column-subqueries-are-useful",
+    "href": "materials/sql/slides/session9.html#when-column-subqueries-are-useful",
+    "title": "Advanced SQL",
+    "section": "When Column Subqueries Are Useful",
+    "text": "When Column Subqueries Are Useful\n\nAdding global or contextual metrics\nOne-off analytical enrichment\nLogical stepping stone to window functions",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#why-column-subqueries-become-limiting",
+    "href": "materials/sql/slides/session9.html#why-column-subqueries-become-limiting",
+    "title": "Advanced SQL",
+    "section": "Why Column Subqueries Become Limiting",
+    "text": "Why Column Subqueries Become Limiting\n\nEvaluated per row\nPerformance degrades on large datasets\nHard to express complex partitions",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#what-is-a-derived-table",
+    "href": "materials/sql/slides/session9.html#what-is-a-derived-table",
+    "title": "Advanced SQL",
+    "section": "What Is a Derived Table?",
+    "text": "What Is a Derived Table?\nA derived table is a subquery used inside the FROM clause.\n\nExists only for the duration of the query\n\nBehaves like a temporary, unnamed table\n\nMust always have an alias",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#mental-model-1",
+    "href": "materials/sql/slides/session9.html#mental-model-1",
+    "title": "Advanced SQL",
+    "section": "Mental Model",
+    "text": "Mental Model\n\nCreate an inline dataset, then query it.\n\nDerived tables sit conceptually between column subqueries and CTEs.\n\nMore powerful than column subqueries\n\nMore scoped than temporary tables\n\nA stepping stone toward CTEs",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#conceptual-flow-1",
+    "href": "materials/sql/slides/session9.html#conceptual-flow-1",
+    "title": "Advanced SQL",
+    "section": "Conceptual Flow",
+    "text": "Conceptual Flow\n\n\n\n\n\nflowchart LR\n    A[Base Tables] --&gt; B[Subquery in FROM]\n    B --&gt; C[Derived Table]\n    C --&gt; D[Outer Query]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#simple-example-conceptual-1",
+    "href": "materials/sql/slides/session9.html#simple-example-conceptual-1",
+    "title": "Advanced SQL",
+    "section": "Simple Example (Conceptual)",
+    "text": "Simple Example (Conceptual)\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100\n\n\n\n\nQ: What is the average salary per department, and show only departments with average salary above 1000?\nSELECT\n    department,\n    avg_salary\nFROM (\n    SELECT\n        department,\n        AVG(salary) AS avg_salary\n    FROM employees\n    GROUP BY department\n) t\nWHERE avg_salary &gt; 1000;\n\n\n\n\n\ndepartment\navg_salary\n\n\n\n\nIT\n1300",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#key-observation-1",
+    "href": "materials/sql/slides/session9.html#key-observation-1",
+    "title": "Advanced SQL",
+    "section": "Key Observation",
+    "text": "Key Observation\n\nSubquery produces a table\n\nOuter query analyzes that table\n\nAlias is mandatory",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#analytics-schema-example-1",
+    "href": "materials/sql/slides/session9.html#analytics-schema-example-1",
+    "title": "Advanced SQL",
+    "section": "Analytics Schema Example",
+    "text": "Analytics Schema Example\nQ: What is the average order revenue per customer, and show only customers above the overall average?\n\nSELECT\n    customer_id,\n    avg_order_revenue\nFROM (\n    SELECT\n        customer_id,\n        AVG(order_revenue) AS avg_order_revenue\n    FROM tmp_order_revenue\n    GROUP BY customer_id\n) t\nWHERE avg_order_revenue &gt;\n      (\n          SELECT AVG(order_revenue)\n          FROM tmp_order_revenue\n      );\n\n\n\n\nDerived Table (Intermediate)\n\n\n\ncustomer_id\navg_order_revenu e\n\n\n\n\n4\n38.48\n\n\n6\n56.64\n\n\n10\n49.15\n\n\n\n\nFinal Output\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n6\n56.64\n\n\n10\n49.15",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#multi-table-derived-example",
+    "href": "materials/sql/slides/session9.html#multi-table-derived-example",
+    "title": "Advanced SQL",
+    "section": "Multi-Table Derived Example",
+    "text": "Multi-Table Derived Example\nQ: For each city, show:\n\nAverage customer spend\n\nMaximum customer spend\n\nSELECT\n    city_id,\n    AVG(total_spend) AS avg_city_spend,\n    MAX(total_spend) AS max_city_spend\nFROM (\n    SELECT\n        c.customer_id,\n        c.city_id,\n        SUM(oi.quantity * p.price) AS total_spend\n    FROM analytics.customers c\n    JOIN analytics.orders o ON c.customer_id = o.customer_id\n    JOIN analytics.order_items oi ON o.order_id = oi.order_id\n    JOIN analytics.products p ON oi.product_id = p.product_id\n    GROUP BY c.customer_id, c.city_id\n) t\nGROUP BY city_id;\n\n\n\n\ncity_id\navg_city_spend\nmax_city_spend\n\n\n\n\n2\n198.75\n240.00\n\n\n5\n154.30\n182.50",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#important-rule-1",
+    "href": "materials/sql/slides/session9.html#important-rule-1",
+    "title": "Advanced SQL",
+    "section": "Important Rule",
+    "text": "Important Rule\n\n\n\n\n\n\nWarning\n\n\nEvery derived table must have an alias.\nFROM (\n    SELECT ...\n) t -- 't' is the alias\nWithout an alias, the query will fail.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#when-derived-tables-are-a-good-choice",
+    "href": "materials/sql/slides/session9.html#when-derived-tables-are-a-good-choice",
+    "title": "Advanced SQL",
+    "section": "When Derived Tables Are a Good Choice",
+    "text": "When Derived Tables Are a Good Choice\n\nIntermediate results needed only once\n\nNatural multi-step logic\n\nInline structure without creating objects\n\nPreparing logic for CTE refactoring",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#why-derived-tables-become-limiting",
+    "href": "materials/sql/slides/session9.html#why-derived-tables-become-limiting",
+    "title": "Advanced SQL",
+    "section": "Why Derived Tables Become Limiting",
+    "text": "Why Derived Tables Become Limiting\n\nDeep nesting hurts readability\n\nLogic cannot be reused\n\nDebugging is harder than with CTEs",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#transition-to-common-table-expressions-ctes",
+    "href": "materials/sql/slides/session9.html#transition-to-common-table-expressions-ctes",
+    "title": "Advanced SQL",
+    "section": "Transition to Common Table Expressions (CTEs)",
+    "text": "Transition to Common Table Expressions (CTEs)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#motivation",
+    "href": "materials/sql/slides/session9.html#motivation",
+    "title": "Advanced SQL",
+    "section": "Motivation",
+    "text": "Motivation\n\nDerived tables create inline pipelines.\n\nCTEs turn those pipelines into named, readable workflows.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#why-ctes",
+    "href": "materials/sql/slides/session9.html#why-ctes",
+    "title": "Advanced SQL",
+    "section": "Why CTEs?",
+    "text": "Why CTEs?\nDerived tables create inline pipelines.\nCTEs make those pipelines named, readable, and reusable.\n\nDerived tables hide logic in parentheses\nCTEs expose logic as explicit steps\nBetter for reasoning, debugging, and teaching",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#mental-model-2",
+    "href": "materials/sql/slides/session9.html#mental-model-2",
+    "title": "Advanced SQL",
+    "section": "Mental Model",
+    "text": "Mental Model\n\nBuild a readable data pipeline step by step.\n\n\nEach step has a name\nEach step has a purpose\nSQL reads top → bottom",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#what-is-a-cte",
+    "href": "materials/sql/slides/session9.html#what-is-a-cte",
+    "title": "Advanced SQL",
+    "section": "What Is a CTE?",
+    "text": "What Is a CTE?\nA Common Table Expression (CTE) is a named, temporary result set defined using WITH.\n\nScoped to a single query\nBehaves like a named derived table\nDesigned for multi-step analytics",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#simple-syntax",
+    "href": "materials/sql/slides/session9.html#simple-syntax",
+    "title": "Advanced SQL",
+    "section": "Simple Syntax",
+    "text": "Simple Syntax\nWITH cte_name AS (\n    SELECT ...\n)\nSELECT\n    ...\nFROM cte_name\nWHERE ...;\n\nDefined with WITH\nQueried like a table\nExists only within the statement",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#pipeline-of-ctes",
+    "href": "materials/sql/slides/session9.html#pipeline-of-ctes",
+    "title": "Advanced SQL",
+    "section": "Pipeline of CTEs",
+    "text": "Pipeline of CTEs\nCTEs naturally form pipelines.\nWITH step1 AS (\n    SELECT ...\n),\nstep2 AS (\n    SELECT ...\n    FROM step1\n),\nstep3 AS (\n    SELECT ...\n    FROM step2\n)\nSELECT *\nFROM step3;\nEach step builds on the previous one.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#ctes-in-the-analytical-workflow",
+    "href": "materials/sql/slides/session9.html#ctes-in-the-analytical-workflow",
+    "title": "Advanced SQL",
+    "section": "CTEs in the Analytical Workflow",
+    "text": "CTEs in the Analytical Workflow\n\n\n\n\n\nflowchart LR\n    A[Base Tables] --&gt; B[CTE Step 1]\n    B --&gt; C[CTE Step 2]\n    C --&gt; D[Final Result]\n\n\n\n\n\n\nEach CTE is a logical checkpoint.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#simple-example-conceptual-2",
+    "href": "materials/sql/slides/session9.html#simple-example-conceptual-2",
+    "title": "Advanced SQL",
+    "section": "Simple Example (Conceptual)",
+    "text": "Simple Example (Conceptual)\nInput Table: employees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#business-question",
+    "href": "materials/sql/slides/session9.html#business-question",
+    "title": "Advanced SQL",
+    "section": "Business Question",
+    "text": "Business Question\nCompute average salary per department\nand keep only departments above 1000.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#query-1",
+    "href": "materials/sql/slides/session9.html#query-1",
+    "title": "Advanced SQL",
+    "section": "Query",
+    "text": "Query\nWITH dept_avg AS (\n    SELECT\n        department,\n        AVG(salary) AS avg_salary\n    FROM employees\n    GROUP BY department\n)\nSELECT\n    department,\n    avg_salary\nFROM dept_avg\nWHERE avg_salary &gt; 1000;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#output-2",
+    "href": "materials/sql/slides/session9.html#output-2",
+    "title": "Advanced SQL",
+    "section": "Output",
+    "text": "Output\n\n\n\ndepartment\navg_salary\n\n\n\n\nIT\n1300",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#key-observations",
+    "href": "materials/sql/slides/session9.html#key-observations",
+    "title": "Advanced SQL",
+    "section": "Key Observations",
+    "text": "Key Observations\n\nEach CTE is a named intermediate result\nLogic is linear and readable\nMatches analytical thinking",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#why-ctes-improve-readability",
+    "href": "materials/sql/slides/session9.html#why-ctes-improve-readability",
+    "title": "Advanced SQL",
+    "section": "Why CTEs Improve Readability",
+    "text": "Why CTEs Improve Readability\n\nDerived tables → inside-out reading\nCTEs → step-by-step reading\nEasier to debug and extend",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#business-question-1",
+    "href": "materials/sql/slides/session9.html#business-question-1",
+    "title": "Advanced SQL",
+    "section": "Business Question",
+    "text": "Business Question\nWhat is the average order revenue per customer,\nand which customers are above the overall average?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#query-2",
+    "href": "materials/sql/slides/session9.html#query-2",
+    "title": "Advanced SQL",
+    "section": "Query",
+    "text": "Query\nWITH customer_avg AS (\n    SELECT\n        customer_id,\n        AVG(order_revenue) AS avg_order_revenue\n    FROM tmp_order_revenue\n    GROUP BY customer_id\n)\nSELECT\n    customer_id,\n    avg_order_revenue\nFROM customer_avg\nWHERE avg_order_revenue &gt;\n      (\n          SELECT AVG(order_revenue)\n          FROM tmp_order_revenue\n      );",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#input-output",
+    "href": "materials/sql/slides/session9.html#input-output",
+    "title": "Advanced SQL",
+    "section": "Input → Output",
+    "text": "Input → Output\nInput Tables\n\norders\norder_items\nproducts\n\n(aggregated into tmp_order_revenue)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#cte-customer_avg",
+    "href": "materials/sql/slides/session9.html#cte-customer_avg",
+    "title": "Advanced SQL",
+    "section": "CTE: customer_avg",
+    "text": "CTE: customer_avg\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n4\n38.48\n\n\n6\n56.64\n\n\n10\n49.15",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#final-output",
+    "href": "materials/sql/slides/session9.html#final-output",
+    "title": "Advanced SQL",
+    "section": "Final Output",
+    "text": "Final Output\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n6\n56.64\n\n\n10\n49.15",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#business-question-2",
+    "href": "materials/sql/slides/session9.html#business-question-2",
+    "title": "Advanced SQL",
+    "section": "Business Question",
+    "text": "Business Question\nFor each city, compute:\n\nAverage customer spend\nMaximum customer spend",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#step-by-step-cte-pipeline",
+    "href": "materials/sql/slides/session9.html#step-by-step-cte-pipeline",
+    "title": "Advanced SQL",
+    "section": "Step-by-Step CTE Pipeline",
+    "text": "Step-by-Step CTE Pipeline\nWITH customer_spend AS (\n    SELECT\n        c.customer_id,\n        c.city_id,\n        SUM(oi.quantity * p.price) AS total_spend\n    FROM analytics.customers c\n    JOIN analytics.orders o ON c.customer_id = o.customer_id\n    JOIN analytics.order_items oi ON o.order_id = oi.order_id\n    JOIN analytics.products p ON oi.product_id = p.product_id\n    GROUP BY c.customer_id, c.city_id\n),\ncity_agg AS (\n    SELECT\n        city_id,\n        AVG(total_spend) AS avg_city_spend,\n        MAX(total_spend) AS max_city_spend\n    FROM customer_spend\n    GROUP BY city_id\n)\nSELECT *\nFROM city_agg;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#output-3",
+    "href": "materials/sql/slides/session9.html#output-3",
+    "title": "Advanced SQL",
+    "section": "Output",
+    "text": "Output\n\n\n\ncity_id\navg_city_spend\nmax_city_spend\n\n\n\n\n2\n198.75\n240.00\n\n\n5\n154.30\n182.50",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#ctes-vs-other-constructs",
+    "href": "materials/sql/slides/session9.html#ctes-vs-other-constructs",
+    "title": "Advanced SQL",
+    "section": "CTEs vs Other Constructs",
+    "text": "CTEs vs Other Constructs\n\n\n\nFeature\nDerived Table\nCTE\nTemporary Table\n\n\n\n\nNamed\nNo\nYes\nYes\n\n\nReusable\nNo\nWithin query\nAcross queries\n\n\nLifetime\nSingle query\nSingle query\nSession\n\n\nReadability\nMedium\nHigh\nHigh",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#when-ctes-are-the-right-choice",
+    "href": "materials/sql/slides/session9.html#when-ctes-are-the-right-choice",
+    "title": "Advanced SQL",
+    "section": "When CTEs Are the Right Choice",
+    "text": "When CTEs Are the Right Choice\n\nMulti-step analytical workflows\nComplex transformations\nExplaining and documenting logic\nPreparing for window functions",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#limitations-of-ctes",
+    "href": "materials/sql/slides/session9.html#limitations-of-ctes",
+    "title": "Advanced SQL",
+    "section": "Limitations of CTEs",
+    "text": "Limitations of CTEs\n\nScoped to a single query\nNot persisted\nCan be slower in some engines",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session9.html#transition-to-window-functions",
+    "href": "materials/sql/slides/session9.html#transition-to-window-functions",
+    "title": "Advanced SQL",
+    "section": "Transition to Window Functions",
+    "text": "Transition to Window Functions\nCTEs define what is computed\nand in what order.\nWindow functions define how rows are compared.\nNext: Window Functions.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL"
     ]
   },
   {
@@ -11406,6 +12442,71 @@
       "SQL",
       "SQL",
       "Session 03: Data Analysis with SQL | Part I"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session9.html",
+    "href": "materials/sql/session9.html",
+    "title": "Session 09: Data Analysis with SQL | Advanced SQL",
+    "section": "",
+    "text": "Understand when and why to use temporary tables, subqueries, and CTEs\n\nCompare their readability, reusability, and analytical power\n\nUse these techniques to perform complex data analysis tasks and prepare for window functions\nApply Window Functions for advanced analytical queries",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 09: Data Analysis with SQL | Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session9.html#learning-objectives",
+    "href": "materials/sql/session9.html#learning-objectives",
+    "title": "Session 09: Data Analysis with SQL | Advanced SQL",
+    "section": "",
+    "text": "Understand when and why to use temporary tables, subqueries, and CTEs\n\nCompare their readability, reusability, and analytical power\n\nUse these techniques to perform complex data analysis tasks and prepare for window functions\nApply Window Functions for advanced analytical queries",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 09: Data Analysis with SQL | Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session9.html#temporary-tables",
+    "href": "materials/sql/session9.html#temporary-tables",
+    "title": "Session 09: Data Analysis with SQL | Advanced SQL",
+    "section": "Temporary Tables",
+    "text": "Temporary Tables\n\nWhy Intermediate Results Matter\nIn analytical work, queries are rarely written, executed, and forgotten. Analysts typically work iteratively: they explore data, compute intermediate metrics, validate assumptions, and refine logic before reaching a final result.\n\nMultiple tables are joined repeatedly\n\nThe same business logic is reused across analyses\n\nIntermediate results must be inspected and validated\n\nWhen every step is embedded in a single large query, SQL quickly becomes difficult to read, debug, and extend. Temporary tables address this problem by allowing intermediate results to be materialized and reused.\n\n\nWhat Is a Temporary Table?\nA temporary table is a database table that exists only for the duration of a database session. It stores intermediate query results and behaves like a regular table while the session is active.\n\nExists only within the current session\n\nAutomatically dropped when the session ends\n\nIsolated per user connection\n\nCan be joined, filtered, indexed, and aggregated\n\nConceptually, a temporary table is a named checkpoint in an analytical workflow.\n\n\nTemporary Tables in an Analytical Workflow\nAnalytical SQL is best understood as a sequence of transformations applied to data. Temporary tables make these stages explicit.\n\n\n\n\n\nflowchart LR\n    A[Base Tables] --&gt; B[Joins and Aggregations]\n    B --&gt; C[Temporary Table]\n    C --&gt; D[Further Analysis]\n    C --&gt; E[Validation Queries]\n    C --&gt; F[Final Output]\n\n\n\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nTemporary tables allow analysts to pause, validate results, and continue analysis without recomputing earlier steps.\n\n\n\n\nCreating a Temporary Table\nTemporary tables are created using the CREATE TEMP TABLE statement. Once created, they can be queried multiple times within the same session.\n\nSchema declaration is optional\n\nExplicit cleanup is optional\n\nSuitable for multi-step analytical logic\n\n\n\nExample 1: Order-Level Revenue\nCREATE TEMP TABLE tmp_order_revenue AS\nSELECT\n    o.order_id,\n    o.customer_id,\n    o.order_date,\n    SUM(oi.quantity * p.price) AS order_revenue\nFROM analytics.orders o\nJOIN analytics.order_items oi ON o.order_id = oi.order_id\nJOIN analytics.products p ON oi.product_id = p.product_id\nGROUP BY o.order_id, o.customer_id, o.order_date;\n\nSELECT\n    *\nFROM tmp_order_revenue\nLIMIT 10;\n\n\n\n\n\n\nImportantDialect Note: SQL Server\n\n\n\nSELECT\n    TOP 10 *\nINTO #tmp_order_revenue\nFROM db_name.schema_name.table_name;\n\n\n\nInspecting and Validating Temporary Tables\nIntermediate datasets should always be validated before being reused. Temporary tables make this practice straightforward.\n\nCheck row counts\n\nInspect value ranges\n\nConfirm business logic\n\nSELECT\n    COUNT(*) AS total_orders,\n    MIN(order_revenue) AS min_revenue,\n    MAX(order_revenue) AS max_revenue,\n    AVG(order_revenue) AS avg_revenue\nFROM tmp_order_revenue;\n\n\nAverage Order Revenue per Customer\nSELECT\n    customer_id,\n    AVG(order_revenue) AS avg_order_revenue\nFROM tmp_order_revenue\nGROUP BY customer_id;\nThis separation clarifies intent:\n\nStep 1: Define revenue\n\nStep 2: Analyze revenue\n\n\n\n\nExample 2: City-Level Revenue\nThe same temporary table pattern can be extended naturally from customers to higher-level groupings such as cities.\nTemporary tables are especially useful when analysis follows natural business hierarchies, such as geography.\n\nStep 1: Customer-Level Total Spend\nCREATE TEMP TABLE tmp_customer_spend AS\nSELECT\n    c.customer_id,\n    c.city_id,\n    SUM(oi.quantity * p.price) AS total_spend\nFROM analytics.customers c\nJOIN analytics.orders o ON c.customer_id = o.customer_id\nJOIN analytics.order_items oi ON o.order_id = oi.order_id\nJOIN analytics.products p ON oi.product_id = p.product_id\nGROUP BY c.customer_id, c.city_id;\n\n\nStep 2: City-Level Analysis Using the Temporary Table\nSELECT\n    city_id,\n    AVG(total_spend) AS avg_customer_spend,\n    MAX(total_spend) AS max_customer_spend\nFROM tmp_customer_spend\nGROUP BY city_id;\nThis pattern avoids repeating the same joins while enabling multiple geographic analyses.\n\n\n\n\n\n\nImportantKey Takeaway\n\n\n\nOnce created, a temporary table can serve as the foundation for multiple analyses without repeating expensive joins or aggregations.\n\n\n\n\n\nWhy Temporary Tables Reduce Cognitive Load\nWithout temporary tables, the same complex logic must be repeated for each analytical question.\n\n\n\n\n\nflowchart TB\n    Q1[Complex Join + Aggregation] --&gt; R1[Result]\n    Q2[Complex Join + Aggregation] --&gt; R2[Result]\n    Q3[Complex Join + Aggregation] --&gt; R3[Result]\n\n\n\n\n\n\nWith temporary tables, the logic is defined once and reused.\n\n\n\n\n\nflowchart TB\n    Q[Complex Join + Aggregation] --&gt; T[Temporary Table]\n    T --&gt; R1[Analysis 1]\n    T --&gt; R2[Analysis 2]\n    T --&gt; R3[Analysis 3]\n\n\n\n\n\n\nTemporary tables reduce duplication, improve readability, and make analytical reasoning explicit.\n\n\nPerformance and Practical Considerations\nTemporary tables are most effective when used deliberately.\n\nReduce repeated scans of large tables\n\nImprove readability of long SQL scripts\n\nIdeal for exploratory and multi-step analysis\n\nLess suitable for single-use or highly nested logic",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 09: Data Analysis with SQL | Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session9.html#subqueries",
+    "href": "materials/sql/session9.html#subqueries",
+    "title": "Session 09: Data Analysis with SQL | Advanced SQL",
+    "section": "Subqueries",
+    "text": "Subqueries\nA subquery is a query nested inside another SQL query.\nUnlike temporary tables, subqueries do not materialize intermediate results as standalone objects.\nInstead, they embed logic directly inside a statement and are evaluated as part of query execution.\nConceptually:\n\nTemporary tables → materialized, reusable checkpoints\nSubqueries → inline, scoped expressions\n\nSubqueries are most useful when intermediate results are needed only once and do not justify explicit materialization.\n\n\n\n\n\n\nImportantTemporary Tables vs. Subqueries\n\n\n\nTemporary tables externalize intermediate results as named objects. Subqueries take the next step by embedding intermediate logic directly inside a query.\n\nNo explicit table creation\n\nTighter scoping of logic\n\nBetter suited for one-off comparisons\n\n\n\n\n\nTypes of Subqueries\nWe will study subqueries in the following order:\n\nFilter subqueries (WHERE)\nColumn (scalar) subqueries (SELECT)\nDerived tables (FROM)\nCorrelated subqueries\n\n\nThis order reflects increasing analytical complexity and cognitive load.\n\n\n\nFilter Subqueries (WHERE)\n\nConcept\nFilter subqueries are used to restrict rows in the outer query based on the result of another query.\nMental model:\n\nKeep rows that satisfy a condition defined by another query.\n\n\n\nConceptual Flow\n\n\n\n\n\nflowchart LR\n    A[Input Table] --&gt; B[Outer Query]\n    C[Subquery Result] --&gt; B\n    B --&gt; D[Filtered Output]\n\n\n\n\n\n\n\n\nSimple Example (Conceptual)\nInput Table: employees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100\n\n\n\n\\[\\downarrow\\]\nQ: Select employees earning above the average salary.\n\\[\\downarrow\\]\nSELECT *\nFROM employees\nWHERE salary &gt; (\n    SELECT AVG(salary)\n    FROM employees\n);\n\\[\\downarrow\\]\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100\n\n\n\n\n\nExample\n\nBusiness Question\nWhich customers have an average order revenue above the overall average order revenue?\n\n\nStep 1: Subquery (Overall Average)\nSELECT\n    AVG(order_revenue)\nFROM tmp_order_revenue;\n\n\n\nStep 2: Filter Query Using Subquery\nSELECT\n    customer_id,\n    AVG(order_revenue) AS avg_customer_revenue\nFROM tmp_order_revenue\nGROUP BY customer_id\nHAVING AVG(order_revenue) &gt;\n       (\n           SELECT AVG(order_revenue)\n           FROM tmp_order_revenue\n       );\n\n\nInput Tables\n\norders\norder_items\nproducts\n\n(aggregated into tmp_order_revenue)\n\n\nOutput Table\n\n\n\ncustomer_id\navg_customer_revenue\n\n\n\n\n4\n38.48\n\n\n10\n49.15\n\n\n6\n56.64\n\n\n14\n49.15\n\n\n2\n49.15\n\n\n16\n43.48\n\n\n12\n43.97\n\n\n20\n38.48\n\n\n18\n53.31\n\n\n8\n38.48\n\n\n\n\n\n\n\n\n\n\nWarningIn case of EROR\n\n\n\nrecreate the temporary table tmp_order_revenue before running the above query tmp_order_revenue)\n\n\n\n\n\nFilter Subquery Using Another Table (Conceptual)\nInput Tables employees and departments\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n\n\n\n\n\ndepartment\ntarget_salary\n\n\n\n\nSales\n1000\n\n\nIT\n1300\n\n\n\n\\[\\downarrow\\]\nQ: Select employees earning above their department’s target salary.\n\\[\\downarrow\\]\nSELECT *\nFROM employees e\nWHERE salary &gt; (\n    SELECT d.target_salary\n    FROM departments d\n    WHERE d.department = e.department\n);\n\\[\\downarrow\\]\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n3\nIT\n1500\n\n\n\n\n\nExample Using Another Table (Analytics Schema)\n\nBusiness Question\nWhich customers have an average order revenue above the overall average order revenue?\n\n\n\nStep 1: Subquery (Overall Average)\nSELECT\n    AVG(order_revenue)\nFROM tmp_order_revenue;\n\n\n\nStep 2: Filter Query Using Subquery\nSELECT\n    customer_id,\n    AVG(order_revenue) AS avg_customer_revenue\nFROM tmp_order_revenue\nGROUP BY customer_id\nHAVING AVG(order_revenue) &gt;\n       (\n           SELECT AVG(order_revenue)\n           FROM tmp_order_revenue\n       );\n\n\n\n\nExample Using Other Tables (Analytics Schema)\n\nBusiness Question\nWhich customers have total spend above the average spend of all customers?\n\n\n\nQuery\nSELECT\n    c.customer_id\nFROM analytics.customers c\nWHERE (\n    SELECT SUM(oi.quantity * p.price)\n    FROM analytics.orders o\n    JOIN analytics.order_items oi ON o.order_id = oi.order_id\n    JOIN analytics.products p ON oi.product_id = p.product_id\n    WHERE o.customer_id = c.customer_id\n) &gt;\n(\n    SELECT AVG(customer_total)\n    FROM (\n        SELECT\n            o.customer_id,\n            SUM(oi.quantity * p.price) AS customer_total\n        FROM analytics.orders o\n        JOIN analytics.order_items oi ON o.order_id = oi.order_id\n        JOIN analytics.products p ON oi.product_id = p.product_id\n        GROUP BY o.customer_id\n    ) t\n);\nThis query uses multiple tables inside the filter subquery while still producing a single comparison value.\n\n\n\nInput Tables\n\ncustomers\norders\norder_items\nproducts\n\n\n\nOutput Table\n\n\n\ncustomer_id\n\n\n\n\n4\n\n\n6\n\n\n10\n\n\n18\n\n\n\n\n\n\n\n\n\n\nWarningCommon Issue\n\n\n\nEnsure that filter subqueries return a value compatible with the comparison operator\n(e.g., a single scalar value for &gt;, &lt;, =).\n\n\n\n\n\nWhen Filter Subqueries Are a Good Choice\n\nFiltering based on global or group-level aggregates\nOne-off analytical conditions\nClear logical separation between condition and data\n\n\n\n\nColumn Subqueries (SELECT)\n\nConcept\nColumn subqueries return a single value and are evaluated for each row in the outer query.\nMental model:\n\nAttach a contextual metric to each row.\n\nThis is often the first time subqueries feel powerful but heavy.\n\n\n\n\n\n\nImportantImportant Note\n\n\n\nA column subquery can reference the same table or other tables.\nIf it depends on the current row of the outer query, it becomes a correlated subquery.\n\n\n\n\nConceptual Flow\n\n\n\n\n\nflowchart LR\n    A[Row from Outer Query] --&gt; B[Scalar Subquery]\n    B --&gt; C[Computed Value]\n    A --&gt; D[Enriched Row]\n\n\n\n\n\n\n\n\nSimple Example (Conceptual)\nInput Table: employees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n\n\\[\\downarrow\\]\nSELECT\n    emp_id,\n    salary,\n    (SELECT AVG(salary) FROM employees) AS avg_salary\nFROM employees;\n\\[\\downarrow\\]\n\n\n\nemp_id\nsalary\navg_salary\n\n\n\n\n1\n1200\n1200\n\n\n2\n900\n1200\n\n\n3\n1500\n1200\n\n\n\n\n\nApplying the Same Logic to the Analytics Schema\n\nBusiness Question\nFor each order, show the order revenue and the overall average order revenue.\n\n\nQuery\nSELECT\n    order_id,\n    order_revenue,\n    (\n        SELECT AVG(order_revenue)\n        FROM tmp_order_revenue\n    ) AS avg_order_revenue\nFROM tmp_order_revenue;\n\n\nOutput Table\n\n\n\norder_id\norder_revenue\navg_order_revenue\n\n\n\n\n501\n180.00\n210.45\n\n\n502\n240.00\n210.45\n\n\n503\n190.00\n210.45\n\n\n\n\n\n\nSimple Example Using Another Table (Conceptual)\nInput Tables\nemployees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n\ndepartments\n\n\n\ndepartment\ntarget_salary\n\n\n\n\nSales\n1000\n\n\nIT\n1300\n\n\n\n\\[\\downarrow\\]\nQuestion: Show each employee’s salary and their department’s target salary.\n\\[\\downarrow\\]\nSELECT\n    e.emp_id,\n    e.salary,\n    (\n        SELECT d.target_salary\n        FROM departments d\n        WHERE d.department = e.department\n    ) AS target_salary\nFROM employees e;\n\\[\\downarrow\\]\n\n\n\nemp_id\nsalary\ntarget_salary\n\n\n\n\n1\n1200\n1000\n\n\n2\n900\n1000\n\n\n3\n1500\n1300\n\n\n\nThis is a correlated scalar subquery, evaluated once per outer row.\n\n\nExample Using Other Tables (Analytics Schema)\n\nBusiness Question\nFor each customer, show their total spend and the average spend of customers in the same city.\n\n\nQuery\nSELECT\n    c.customer_id,\n    (\n        SELECT SUM(oi.quantity * p.price)\n        FROM analytics.orders o\n        JOIN analytics.order_items oi ON o.order_id = oi.order_id\n        JOIN analytics.products p ON oi.product_id = p.product_id\n        WHERE o.customer_id = c.customer_id\n    ) AS customer_spend,\n    (\n        SELECT AVG(oi.quantity * p.price)\n        FROM analytics.orders o\n        JOIN analytics.order_items oi ON o.order_id = oi.order_id\n        JOIN analytics.products p ON oi.product_id = p.product_id\n        JOIN analytics.customers c2 ON o.customer_id = c2.customer_id\n        WHERE c2.city_id = c.city_id\n    ) AS avg_city_spend\nFROM analytics.customers c;\n\n\nInput Tables\n\ncustomers\norders\norder_items\nproducts\n\n\n\nOutput Table\n\n\n\ncustomer_id\ncustomer_spend\navg_city_spend\n\n\n\n\n4\n182.50\n154.30\n\n\n6\n240.00\n198.75\n\n\n10\n165.40\n198.75\n\n\n\n\n\n\n\n\n\nWarningImportant Rule\n\n\n\nA column subquery must return exactly one value per outer row.\nIf it returns more than one row, the query will fail.\n\n\n\n\n\nWhen Column Subqueries Are a Good Choice\n\nAdding global or contextual metrics to rows\nSimple, one-off enrichment\nAnalytical comparisons before learning window functions\nWhen materializing intermediate results is unnecessary\n\n\n\nWhy Column Subqueries Become Limiting\n\nEvaluated once per row\nDifficult to scale to group-level logic\nOften replaced later by window functions\n\nThis limitation is intentional and prepares the ground for more advanced SQL constructs.\n\n\n\nDerived Tables (FROM)\n\nConcept\nA derived table is a subquery used inside the FROM clause.\nIt behaves like a temporary, unnamed table that exists only for the duration of the query.\nMental model:\n\nCreate an inline dataset, then query it.\n\nDerived tables sit conceptually between column subqueries and CTEs.\n\nMore powerful than column subqueries\n\nMore scoped than temporary tables\n\nOften a stepping stone toward CTEs\n\n\n\nConceptual Flow\n\n\n\n\n\nflowchart LR\n    A[Base Tables] --&gt; B[Subquery in FROM]\n    B --&gt; C[Derived Table]\n    C --&gt; D[Outer Query]\n\n\n\n\n\n\n\n\nSimple Example (Conceptual)\nInput Table: employees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100\n\n\n\n\\[\\downarrow\\]\nQ: What is the average salary per department, and show only departments with average salary above 1000?\n\\[\\downarrow\\]\nSELECT\n    department,\n    avg_salary\nFROM (\n    SELECT\n        department,\n        AVG(salary) AS avg_salary\n    FROM employees\n    GROUP BY department\n) t\nWHERE avg_salary &gt; 1000;\n\\[\\downarrow\\]\n\n\n\ndepartment\navg_salary\n\n\n\n\nIT\n1300\n\n\n\n\n\n\nKey Observation\n\nThe subquery produces a table\nThe outer query filters or analyzes it\nThe derived table must have an alias\n\n\n\nApplying the Same Logic to the Analytics Schema\nQ: What is the average order revenue per customer, and show only customers whose average order revenue is above the overall average?\n\nStep 1: Derived Table (Customer-Level Metrics)\nSELECT\n    customer_id,\n    avg_order_revenue\nFROM (\n    SELECT\n        customer_id,\n        AVG(order_revenue) AS avg_order_revenue\n    FROM tmp_order_revenue\n    GROUP BY customer_id\n) t\nWHERE avg_order_revenue &gt;\n      (\n          SELECT AVG(order_revenue)\n          FROM tmp_order_revenue\n      );\n\n\n\nInput → Output Perspective\nInput Tables\n\norders\norder_items\nproducts\n\n(aggregated into tmp_order_revenue)\nDerived Table (Intermediate)\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n4\n38.48\n\n\n6\n56.64\n\n\n10\n49.15\n\n\n\nOutput Table\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n6\n56.64\n\n\n10\n49.15\n\n\n\n\n\n\nExample Using Multiple Tables (Analytics Schema)\nQ: for each city, show:\n\nAverage customer spend\n\nMaximum customer spend\n\n\nStep 1: Customer-Level Spend (Derived Table)\nSELECT\n    city_id,\n    AVG(total_spend) AS avg_city_spend,\n    MAX(total_spend) AS max_city_spend\nFROM (\n    SELECT\n        c.customer_id,\n        c.city_id,\n        SUM(oi.quantity * p.price) AS total_spend\n    FROM analytics.customers c\n    JOIN analytics.orders o ON c.customer_id = o.customer_id\n    JOIN analytics.order_items oi ON o.order_id = oi.order_id\n    JOIN analytics.products p ON oi.product_id = p.product_id\n    GROUP BY c.customer_id, c.city_id\n) t\nGROUP BY city_id;\n\n\n\nInput Tables\n\ncustomers\norders\norder_items\nproducts\n\n\n\nOutput Table\n\n\n\ncity_id\navg_city_spend\nmax_city_spend\n\n\n\n\n2\n198.75\n240.00\n\n\n5\n154.30\n182.50\n\n\n\n\n\n\n\n\n\n\nWarningImportant Rule\n\n\n\nEvery derived table must have an alias.\nWithout an alias, the query will fail.\nSELECT\n    department,\n    avg_salary\nFROM (\n    SELECT\n        department,\n        AVG(salary) AS avg_salary\n    FROM employees\n    GROUP BY department\n) t  -- Derived table must have an alias\nWHERE avg_salary &gt; 1000;\n\n\n\n\n\nWhen Derived Tables Are a Good Choice\n\nWhen intermediate results are needed only once\nWhen logic naturally separates into stages\nWhen you want inline structure without creating objects\nWhen preparing logic for a future CTE refactor\n\n\n\nWhy Derived Tables Can Become Limiting\n\nLogic becomes deeply nested\nHarder to read as complexity grows\nCannot be reused elsewhere in the query\nDebugging is more difficult than with CTEs",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 09: Data Analysis with SQL | Advanced SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session9.html#common-table-expressions-ctes",
+    "href": "materials/sql/session9.html#common-table-expressions-ctes",
+    "title": "Session 09: Data Analysis with SQL | Advanced SQL",
+    "section": "Common Table Expressions (CTEs)",
+    "text": "Common Table Expressions (CTEs)\nThe above limitations naturally motivates the next construct.\n\nDerived tables create inline pipelines.\n\nCTEs make those pipelines named, readable, and reusable.\n\n\nConcept\nA Common Table Expression (CTE) is a named, temporary result set defined using the WITH clause and referenced within a single SQL statement.\nA CTE behaves like a named derived table that improves readability, structure, and analytical reasoning.\nMental model:\n\nBuild a readable data pipeline step by step.\n\nCTEs generalize the idea of derived tables by giving each intermediate step a name.\n\nSame expressive power as derived tables\n\nScoped to a single query\n\nDesigned for multi-step analytical workflows\n\n\n\nSymple Syntax\nWITH cte_name AS (\n    -- CTE definition (subquery)\n    SELECT ...\n)\nSELECT\n    ...\nFROM cte_name\nWHERE ...;\n\n\nPipeline of CTEs\nWITH step1 AS (\n    -- First transformation\n    SELECT ...\n),\nstep2 AS (\n    -- Second transformation using step1\n    SELECT ...\n    FROM step1\n),\nstep3 AS (\n    -- Third transformation using step2\n    SELECT ...\n    FROM step2 or step1\n\n\nCTEs in the Analytical Workflow\nAnalytical SQL often consists of multiple logical stages. CTEs make these stages explicit and readable.\n\n\n\n\n\nflowchart LR\n    A[Base Tables] --&gt; B[CTE Step 1]\n    B --&gt; C[CTE Step 2]\n    C --&gt; D[Final Result]\n\n\n\n\n\n\nEach CTE represents a logical checkpoint in the analysis.\n\n\nSimple Example (Conceptual)\nInput Table: employees\n\n\n\nemp_id\ndepartment\nsalary\n\n\n\n\n1\nSales\n1200\n\n\n2\nSales\n900\n\n\n3\nIT\n1500\n\n\n4\nIT\n1100\n\n\n\n\\[\\downarrow\\]\nQ: Compute average salary per department, then show only departments with average salary above 1000.\n\\[\\downarrow\\]\nWITH dept_avg AS (\n    SELECT\n        department,\n        AVG(salary) AS avg_salary\n    FROM employees\n    GROUP BY department\n)\nSELECT\n    department,\n    avg_salary\nFROM dept_avg\nWHERE avg_salary &gt; 1000;\n\\[\\downarrow\\]\n\n\n\ndepartment\navg_salary\n\n\n\n\nIT\n1300\n\n\n\n\n\nKey Observations\n\nEach CTE defines a named intermediate result\n\nCTEs are referenced like regular tables\n\nSQL is read top to bottom, mirroring analytical reasoning\n\n\n\nWhy CTEs Improve Readability\nCompare the cognitive flow:\n\nDerived tables require inside-out reading\n\nCTEs allow linear, step-by-step reading\n\nThis makes CTEs especially suitable for teaching, debugging, and collaborative analytics.\n\n\nApplying CTEs to the Analytics Schema\n\nBusiness Question:\n\n\nWhat is the average order revenue per customer, and which customers perform above the overall average?\n\n\n\nStep 1: Customer-Level Metrics\nAssume tmp_order_revenue already exists.\nWITH customer_avg AS (\n    SELECT\n        customer_id,\n        AVG(order_revenue) AS avg_order_revenue\n    FROM tmp_order_revenue\n    GROUP BY customer_id\n)\nSELECT\n    customer_id,\n    avg_order_revenue\nFROM customer_avg\nWHERE avg_order_revenue &gt;\n      (\n          SELECT AVG(order_revenue)\n          FROM tmp_order_revenue\n      );\n\n\n\nInput → Output Perspective\nInput Tables\n\norders\norder_items\nproducts\n\n(aggregated into tmp_order_revenue)\nCTE: customer_avg\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n4\n38.48\n\n\n6\n56.64\n\n\n10\n49.15\n\n\n\nOutput Table\n\n\n\ncustomer_id\navg_order_revenue\n\n\n\n\n6\n56.64\n\n\n10\n49.15\n\n\n\n\n\n\nNested CTEs: Building a Pipeline\nCTEs shine when analysis naturally breaks into multiple stages.\n\n\n\n\n\n\nNoteAnalytical Pipeline\n\n\n\nFor each city, compute:\n\nAverage customer spend\n\nMaximum customer spend\n\n\n\n\nStep-by-Step CTE Pipeline\nWITH customer_spend AS (\n    SELECT\n        c.customer_id,\n        c.city_id,\n        SUM(oi.quantity * p.price) AS total_spend\n    FROM analytics.customers c\n    JOIN analytics.orders o ON c.customer_id = o.customer_id\n    JOIN analytics.order_items oi ON o.order_id = oi.order_id\n    JOIN analytics.products p ON oi.product_id = p.product_id\n    GROUP BY c.customer_id, c.city_id\n),\ncity_agg AS (\n    SELECT\n        city_id,\n        AVG(total_spend) AS avg_city_spend,\n        MAX(total_spend) AS max_city_spend\n    FROM customer_spend\n    GROUP BY city_id\n)\nSELECT\n    *\nFROM city_agg;\n\n\n\nOutput Table\n\n\n\ncity_id\navg_city_spend\nmax_city_spend\n\n\n\n\n2\n198.75\n240.00\n\n\n5\n154.30\n182.50\n\n\n\n\n\n\nCTEs vs Derived Tables vs Temporary Tables\n\n\n\nFeature\nDerived Table\nCTE\nTemporary Table\n\n\n\n\nNamed\nNo\nYes\nYes\n\n\nReusable\nNo\nWithin query\nAcross queries\n\n\nLifetime\nSingle query\nSingle query\nSession\n\n\nReadability\nMedium\nHigh\nHigh\n\n\nBest use case\nInline logic\nPipelines\nMulti-step reuse\n\n\n\n\n\nWhen CTEs Are the Right Choice\n\nMulti-step analytical workflows\n\nComplex transformations\n\nExplaining and documenting logic\n\nPreparing data for window functions\n\n\n\nLimitations of CTEs\n\nScoped to a single query\n\nNot persisted across statements\n\nCan be less performant in some engines if overused",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 09: Data Analysis with SQL | Advanced SQL"
     ]
   },
   {
