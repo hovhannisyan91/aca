@@ -1,6 +1,1171 @@
 ---
-title: "Session 09: Data Analysis with SQL | Advanced SQL 3"
-categories: [SQL, Subqueries, CTE, Window Functions]
+title: "Session 09: Data Analysis with SQL | Advanced SQL"
+categories: [Temporary Tables, Subqueries, CTE]
 ---
 
-## Comming Soon
+## Learning Objectives
+
+- Understand when and why to use temporary tables, subqueries, and CTEs  
+- Compare their readability, reusability, and analytical power  
+- Use these techniques to perform complex data analysis tasks and prepare for window functions
+- Apply Window Functions for advanced analytical queries  
+
+## Temporary Tables
+
+### Why Intermediate Results Matter
+
+In analytical work, queries are rarely written, executed, and forgotten. Analysts typically work iteratively: they explore data, compute intermediate metrics, validate assumptions, and refine logic before reaching a final result.
+
+- Multiple tables are joined repeatedly  
+- The same business logic is reused across analyses  
+- Intermediate results must be inspected and validated  
+
+When every step is embedded in a single large query, SQL quickly becomes difficult to read, debug, and extend. Temporary tables address this problem by allowing intermediate results to be **materialized** and reused.
+
+### What Is a Temporary Table?
+
+A temporary table is a database table that exists only for the duration of a database session. It stores intermediate query results and behaves like a regular table while the session is active.
+
+- Exists only within the current session  
+- Automatically dropped when the session ends  
+- Isolated per user connection  
+- Can be joined, filtered, indexed, and aggregated  
+
+Conceptually, a temporary table is a **named checkpoint** in an analytical workflow.
+
+### Temporary Tables in an Analytical Workflow
+
+Analytical SQL is best understood as a sequence of transformations applied to data. Temporary tables make these stages explicit.
+
+```{mermaid}
+flowchart LR
+    A[Base Tables] --> B[Joins and Aggregations]
+    B --> C[Temporary Table]
+    C --> D[Further Analysis]
+    C --> E[Validation Queries]
+    C --> F[Final Output]
+```
+
+::: {.callout-tip}
+Temporary tables allow analysts to pause, validate results, and continue analysis without recomputing earlier steps.
+:::
+
+### Creating a Temporary Table
+
+Temporary tables are created using the `CREATE TEMP TABLE` statement. Once created, they can be queried multiple times within the same session.
+
+- Schema declaration is optional  
+- Explicit cleanup is optional  
+- Suitable for multi-step analytical logic  
+
+### Example 1: Order-Level Revenue
+
+```sql
+CREATE TEMP TABLE tmp_order_revenue AS
+SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    SUM(oi.quantity * p.price) AS order_revenue
+FROM analytics.orders o
+JOIN analytics.order_items oi ON o.order_id = oi.order_id
+JOIN analytics.products p ON oi.product_id = p.product_id
+GROUP BY o.order_id, o.customer_id, o.order_date;
+
+SELECT
+    *
+FROM tmp_order_revenue
+LIMIT 10;
+```
+
+::: {.callout-important title="Dialect Note: SQL Server"}
+```sql
+SELECT
+    TOP 10 *
+INTO #tmp_order_revenue
+FROM db_name.schema_name.table_name;
+```
+:::
+
+#### Inspecting and Validating Temporary Tables
+
+Intermediate datasets should always be validated before being reused. Temporary tables make this practice straightforward.
+
+- Check row counts  
+- Inspect value ranges  
+- Confirm business logic  
+
+```sql
+SELECT
+    COUNT(*) AS total_orders,
+    MIN(order_revenue) AS min_revenue,
+    MAX(order_revenue) AS max_revenue,
+    AVG(order_revenue) AS avg_revenue
+FROM tmp_order_revenue;
+```
+
+
+
+#### Average Order Revenue per Customer
+
+```sql
+SELECT
+    customer_id,
+    AVG(order_revenue) AS avg_order_revenue
+FROM tmp_order_revenue
+GROUP BY customer_id;
+```
+
+**This separation clarifies intent:**
+
+- Step 1: Define revenue  
+- Step 2: Analyze revenue  
+
+### Example 2: City-Level Revenue
+
+The same temporary table pattern can be extended naturally from customers to higher-level groupings such as cities.
+
+Temporary tables are especially useful when analysis follows natural business hierarchies, such as geography.
+
+#### Step 1: Customer-Level Total Spend
+
+```sql
+CREATE TEMP TABLE tmp_customer_spend AS
+SELECT
+    c.customer_id,
+    c.city_id,
+    SUM(oi.quantity * p.price) AS total_spend
+FROM analytics.customers c
+JOIN analytics.orders o ON c.customer_id = o.customer_id
+JOIN analytics.order_items oi ON o.order_id = oi.order_id
+JOIN analytics.products p ON oi.product_id = p.product_id
+GROUP BY c.customer_id, c.city_id;
+```
+
+#### Step 2: City-Level Analysis Using the Temporary Table
+
+```sql
+SELECT
+    city_id,
+    AVG(total_spend) AS avg_customer_spend,
+    MAX(total_spend) AS max_customer_spend
+FROM tmp_customer_spend
+GROUP BY city_id;
+```
+
+This pattern avoids repeating the same joins while enabling multiple geographic analyses.
+
+
+::: {.callout-important title ="Key Takeaway"}
+
+Once created, a temporary table can serve as the foundation for multiple analyses without repeating expensive joins or aggregations.
+
+:::
+
+
+### Why Temporary Tables Reduce Cognitive Load
+
+Without temporary tables, the same complex logic must be repeated for each analytical question.
+
+```{mermaid}
+flowchart TB
+    Q1[Complex Join + Aggregation] --> R1[Result]
+    Q2[Complex Join + Aggregation] --> R2[Result]
+    Q3[Complex Join + Aggregation] --> R3[Result]
+```
+
+With temporary tables, the logic is defined once and reused.
+
+```{mermaid}
+flowchart TB
+    Q[Complex Join + Aggregation] --> T[Temporary Table]
+    T --> R1[Analysis 1]
+    T --> R2[Analysis 2]
+    T --> R3[Analysis 3]
+```
+
+Temporary tables reduce duplication, improve readability, and make analytical reasoning explicit.
+
+### Performance and Practical Considerations
+
+Temporary tables are most effective when used deliberately.
+
+- Reduce repeated scans of large tables  
+- Improve readability of long SQL scripts  
+- Ideal for exploratory and multi-step analysis  
+- Less suitable for single-use or highly nested logic  
+
+## Subqueries
+
+**A subquery is a query nested inside another SQL query.**
+
+Unlike temporary tables, subqueries do **not** materialize intermediate results as standalone objects.  
+Instead, they embed logic directly inside a statement and are evaluated as part of query execution.
+
+**Conceptually**:
+
+- Temporary tables → **materialized, reusable checkpoints**
+- Subqueries → **inline, scoped expressions**
+
+Subqueries are most useful when intermediate results are needed only once and do not justify explicit materialization.
+
+
+::: {.callout-important title ="Temporary Tables vs. Subqueries"}
+**Temporary tables** externalize intermediate results as named objects. Subqueries take the next step by embedding intermediate logic directly inside a query.
+
+- No explicit table creation  
+- Tighter scoping of logic  
+- Better suited for **one-off** comparisons  
+:::
+
+
+### Types of Subqueries
+
+**We will study subqueries in the following order:**
+
+- Filter subqueries (`WHERE`)
+- Column (scalar) subqueries (`SELECT`)
+- Derived tables (`FROM`)
+- Correlated subqueries
+
+>This order reflects increasing analytical complexity and cognitive load.
+
+
+### Filter Subqueries (`WHERE`)
+
+#### Concept
+
+Filter subqueries are used to **restrict rows** in the outer query based on the result of another query.
+
+**Mental model:**
+
+> Keep rows that satisfy a condition defined by another query.
+
+#### Conceptual Flow
+
+```{mermaid}
+flowchart LR
+    A[Input Table] --> B[Outer Query]
+    C[Subquery Result] --> B
+    B --> D[Filtered Output]
+```
+
+
+#### Simple Example (Conceptual)
+
+**Input Table: `employees`**
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 2 | Sales | 900 |
+| 3 | IT | 1500 |
+| 4 | IT | 1100 |
+
+$$\downarrow$$
+
+**Q:** Select employees earning **above the average salary**.
+
+$$\downarrow$$
+
+```sql
+SELECT *
+FROM employees
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM employees
+);
+```
+
+$$\downarrow$$
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 3 | IT | 1500 |
+| 4 | IT | 1100 |
+
+
+#### Example
+
+##### Business Question
+
+Which customers have an **average order revenue above the overall average order revenue**?
+
+
+##### Step 1: Subquery (Overall Average)
+
+```sql
+SELECT
+    AVG(order_revenue)
+FROM tmp_order_revenue;
+```
+
+---
+
+##### Step 2: Filter Query Using Subquery
+
+```sql
+SELECT
+    customer_id,
+    AVG(order_revenue) AS avg_customer_revenue
+FROM tmp_order_revenue
+GROUP BY customer_id
+HAVING AVG(order_revenue) >
+       (
+           SELECT AVG(order_revenue)
+           FROM tmp_order_revenue
+       );
+```
+
+##### Input Tables
+
+- `orders`
+- `order_items`
+- `products`
+
+(aggregated into `tmp_order_revenue`)
+
+##### Output Table
+
+| customer_id | avg_customer_revenue |
+| ----------: | -------------------: |
+|           4 |                38.48 |
+|          10 |                49.15 |
+|           6 |                56.64 |
+|          14 |                49.15 |
+|           2 |                49.15 |
+|          16 |                43.48 |
+|          12 |                43.97 |
+|          20 |                38.48 |
+|          18 |                53.31 |
+|           8 |                38.48 |
+
+
+<!-- todo fix the URL -->
+::: {.callout-warning title="In case of EROR"}
+recreate the temporary table `tmp_order_revenue` before running the above query
+[tmp_order_revenue](#example-1-order-level-revenue))
+:::
+
+
+#### Filter Subquery Using Another Table (Conceptual)
+
+**Input Tables** `employees` and `departments`
+
+
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 2 | Sales | 900 |
+| 3 | IT | 1500 |
+
+
+---
+
+
+| department | target_salary |
+|-----------:|--------------:|
+| Sales | 1000 |
+| IT | 1300 |
+
+$$\downarrow$$
+
+**Q:** Select employees earning **above their department’s target salary**.
+
+$$\downarrow$$
+
+```sql
+SELECT *
+FROM employees e
+WHERE salary > (
+    SELECT d.target_salary
+    FROM departments d
+    WHERE d.department = e.department
+);
+```
+
+$$\downarrow$$
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 3 | IT | 1500 |
+
+
+
+#### Example Using Another Table (Analytics Schema)
+
+##### Business Question
+
+Which customers have an **average order revenue above the overall average order revenue**?
+
+---
+
+##### Step 1: Subquery (Overall Average)
+
+```sql
+SELECT
+    AVG(order_revenue)
+FROM tmp_order_revenue;
+```
+
+---
+
+##### Step 2: Filter Query Using Subquery
+
+```sql
+SELECT
+    customer_id,
+    AVG(order_revenue) AS avg_customer_revenue
+FROM tmp_order_revenue
+GROUP BY customer_id
+HAVING AVG(order_revenue) >
+       (
+           SELECT AVG(order_revenue)
+           FROM tmp_order_revenue
+       );
+```
+
+---
+
+#### Example Using Other Tables (Analytics Schema)
+
+##### Business Question
+
+Which customers have **total spend above the average spend of all customers**?
+
+---
+
+##### Query
+
+```sql
+SELECT
+    c.customer_id
+FROM analytics.customers c
+WHERE (
+    SELECT SUM(oi.quantity * p.price)
+    FROM analytics.orders o
+    JOIN analytics.order_items oi ON o.order_id = oi.order_id
+    JOIN analytics.products p ON oi.product_id = p.product_id
+    WHERE o.customer_id = c.customer_id
+) >
+(
+    SELECT AVG(customer_total)
+    FROM (
+        SELECT
+            o.customer_id,
+            SUM(oi.quantity * p.price) AS customer_total
+        FROM analytics.orders o
+        JOIN analytics.order_items oi ON o.order_id = oi.order_id
+        JOIN analytics.products p ON oi.product_id = p.product_id
+        GROUP BY o.customer_id
+    ) t
+);
+```
+
+This query uses **multiple tables inside the filter subquery** while still producing a single comparison value.
+
+---
+
+
+##### Input Tables
+
+- `customers`
+- `orders`
+- `order_items`
+- `products`
+
+##### Output Table
+
+| customer_id |
+|------------:|
+| 4 |
+| 6 |
+| 10 |
+| 18 |
+
+---
+
+::: {.callout-warning title="Common Issue"}
+Ensure that filter subqueries return a value compatible with the comparison operator  
+(e.g., a single scalar value for `>`, `<`, `=`).
+:::
+
+
+#### When Filter Subqueries Are a Good Choice
+
+- Filtering based on **global** or **group-level aggregates**
+- One-off analytical conditions
+- Clear logical separation between condition and data
+
+
+
+### Column Subqueries (`SELECT`)
+
+#### Concept
+
+Column subqueries return a **single value** and are evaluated for each row in the outer query.
+
+**Mental model:**
+
+> Attach a contextual metric to each row.
+
+This is often the first time subqueries feel **powerful but heavy**.
+
+::: {.callout-important title="Important Note"}
+A column subquery can reference **the same table or other tables**.  
+If it depends on the current row of the outer query, it becomes a **correlated subquery**.
+:::
+
+#### Conceptual Flow
+
+```{mermaid}
+flowchart LR
+    A[Row from Outer Query] --> B[Scalar Subquery]
+    B --> C[Computed Value]
+    A --> D[Enriched Row]
+```
+
+#### Simple Example (Conceptual)
+
+**Input Table: `employees`**
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 2 | Sales | 900 |
+| 3 | IT | 1500 |
+
+$$\downarrow$$
+
+```sql
+SELECT
+    emp_id,
+    salary,
+    (SELECT AVG(salary) FROM employees) AS avg_salary
+FROM employees;
+```
+
+$$\downarrow$$
+
+| emp_id | salary | avg_salary |
+|------:|-------:|-----------:|
+| 1 | 1200 | 1200 |
+| 2 | 900 | 1200 |
+| 3 | 1500 | 1200 |
+
+#### Applying the Same Logic to the Analytics Schema
+
+##### Business Question
+
+For each order, show the **order revenue** and the **overall average order revenue**.
+
+##### Query
+
+```sql
+SELECT
+    order_id,
+    order_revenue,
+    (
+        SELECT AVG(order_revenue)
+        FROM tmp_order_revenue
+    ) AS avg_order_revenue
+FROM tmp_order_revenue;
+```
+
+##### Output Table
+
+| order_id | order_revenue | avg_order_revenue |
+|---------:|--------------:|------------------:|
+| 501 | 180.00 | 210.45 |
+| 502 | 240.00 | 210.45 |
+| 503 | 190.00 | 210.45 |
+
+#### Simple Example Using Another Table (Conceptual)
+
+**Input Tables**
+
+`employees`
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 2 | Sales | 900 |
+| 3 | IT | 1500 |
+
+`departments`
+
+| department | target_salary |
+|-----------:|--------------:|
+| Sales | 1000 |
+| IT | 1300 |
+
+$$\downarrow$$
+
+**Question:** Show each employee’s salary and their department’s target salary.
+
+$$\downarrow$$
+
+```sql
+SELECT
+    e.emp_id,
+    e.salary,
+    (
+        SELECT d.target_salary
+        FROM departments d
+        WHERE d.department = e.department
+    ) AS target_salary
+FROM employees e;
+```
+
+$$\downarrow$$
+
+| emp_id | salary | target_salary |
+|------:|-------:|--------------:|
+| 1 | 1200 | 1000 |
+| 2 | 900 | 1000 |
+| 3 | 1500 | 1300 |
+
+This is a **correlated scalar subquery**, evaluated once per outer row.
+
+#### Example Using Other Tables (Analytics Schema)
+
+##### Business Question
+
+For each customer, show their **total spend** and the **average spend of customers in the same city**.
+
+##### Query
+
+```sql
+SELECT
+    c.customer_id,
+    (
+        SELECT SUM(oi.quantity * p.price)
+        FROM analytics.orders o
+        JOIN analytics.order_items oi ON o.order_id = oi.order_id
+        JOIN analytics.products p ON oi.product_id = p.product_id
+        WHERE o.customer_id = c.customer_id
+    ) AS customer_spend,
+    (
+        SELECT AVG(oi.quantity * p.price)
+        FROM analytics.orders o
+        JOIN analytics.order_items oi ON o.order_id = oi.order_id
+        JOIN analytics.products p ON oi.product_id = p.product_id
+        JOIN analytics.customers c2 ON o.customer_id = c2.customer_id
+        WHERE c2.city_id = c.city_id
+    ) AS avg_city_spend
+FROM analytics.customers c;
+```
+
+##### Input Tables
+
+- `customers`
+- `orders`
+- `order_items`
+- `products`
+
+##### Output Table
+
+| customer_id | customer_spend | avg_city_spend |
+|------------:|---------------:|---------------:|
+| 4 | 182.50 | 154.30 |
+| 6 | 240.00 | 198.75 |
+| 10 | 165.40 | 198.75 |
+
+::: {.callout-warning title="Important Rule"}
+A column subquery **must return exactly one value per outer row**.  
+If it returns more than one row, the query will fail.
+:::
+
+#### When Column Subqueries Are a Good Choice
+
+- Adding **global or contextual metrics** to rows
+- Simple, one-off enrichment
+- Analytical comparisons before learning **window functions**
+- When materializing intermediate results is unnecessary
+
+#### Why Column Subqueries Become Limiting
+
+- Evaluated once per row
+- Difficult to scale to group-level logic
+- Often replaced later by **window functions**
+
+This limitation is intentional and prepares the ground for more advanced SQL constructs.
+
+
+
+### Derived Tables (`FROM`)
+
+#### Concept
+
+A **derived table** is a subquery used inside the `FROM` clause.  
+It behaves like a **temporary, unnamed table** that exists only for the duration of the query.
+
+**Mental model:**
+
+> Create an inline dataset, then query it.
+
+Derived tables sit conceptually **between** column subqueries and CTEs.
+
+- More powerful than column subqueries  
+- More scoped than temporary tables  
+- Often a stepping stone toward CTEs  
+
+#### Conceptual Flow
+
+```{mermaid}
+flowchart LR
+    A[Base Tables] --> B[Subquery in FROM]
+    B --> C[Derived Table]
+    C --> D[Outer Query]
+```
+
+
+#### Simple Example (Conceptual)
+
+**Input Table: `employees`**
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 2 | Sales | 900 |
+| 3 | IT | 1500 |
+| 4 | IT | 1100 |
+
+$$\downarrow$$
+
+**Q:** What is the **average salary per department**, and show only departments with average salary above 1000?
+
+$$\downarrow$$
+
+```sql
+SELECT
+    department,
+    avg_salary
+FROM (
+    SELECT
+        department,
+        AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department
+) t
+WHERE avg_salary > 1000;
+```
+
+$$\downarrow$$
+
+| department | avg_salary |
+|-----------:|-----------:|
+| IT | 1300 |
+
+---
+
+#### Key Observation
+
+- The subquery **produces a table**
+- The outer query **filters or analyzes** it
+- The derived table must have an **alias**
+
+
+#### Applying the Same Logic to the Analytics Schema
+
+**Q:**  What is the **average order revenue per customer**, and show only customers whose average order revenue is above the overall average?
+
+##### Step 1: Derived Table (Customer-Level Metrics)
+
+```sql
+SELECT
+    customer_id,
+    avg_order_revenue
+FROM (
+    SELECT
+        customer_id,
+        AVG(order_revenue) AS avg_order_revenue
+    FROM tmp_order_revenue
+    GROUP BY customer_id
+) t
+WHERE avg_order_revenue >
+      (
+          SELECT AVG(order_revenue)
+          FROM tmp_order_revenue
+      );
+```
+
+---
+
+##### Input → Output Perspective
+
+**Input Tables**
+
+- `orders`
+- `order_items`
+- `products`
+
+(aggregated into `tmp_order_revenue`)
+
+**Derived Table (Intermediate)**
+
+| customer_id | avg_order_revenue |
+|------------:|------------------:|
+| 4 | 38.48 |
+| 6 | 56.64 |
+| 10 | 49.15 |
+
+**Output Table**
+
+| customer_id | avg_order_revenue |
+|------------:|------------------:|
+| 6 | 56.64 |
+| 10 | 49.15 |
+
+
+
+#### Example Using Multiple Tables (Analytics Schema)
+
+**Q:** *for each city, show:*
+
+- Average customer spend  
+- Maximum customer spend  
+
+
+
+##### Step 1: Customer-Level Spend (Derived Table)
+
+```sql
+SELECT
+    city_id,
+    AVG(total_spend) AS avg_city_spend,
+    MAX(total_spend) AS max_city_spend
+FROM (
+    SELECT
+        c.customer_id,
+        c.city_id,
+        SUM(oi.quantity * p.price) AS total_spend
+    FROM analytics.customers c
+    JOIN analytics.orders o ON c.customer_id = o.customer_id
+    JOIN analytics.order_items oi ON o.order_id = oi.order_id
+    JOIN analytics.products p ON oi.product_id = p.product_id
+    GROUP BY c.customer_id, c.city_id
+) t
+GROUP BY city_id;
+```
+
+---
+
+##### Input Tables
+
+- `customers`
+- `orders`
+- `order_items`
+- `products`
+
+##### Output Table
+
+| city_id | avg_city_spend | max_city_spend |
+|-------:|---------------:|---------------:|
+| 2 | 198.75 | 240.00 |
+| 5 | 154.30 | 182.50 |
+
+---
+
+::: {.callout-warning title="Important Rule"}
+Every derived table **must have an alias**.  
+Without an alias, the query will fail.
+
+```sql
+SELECT
+    department,
+    avg_salary
+FROM (
+    SELECT
+        department,
+        AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department
+) t  -- Derived table must have an alias
+WHERE avg_salary > 1000;
+```
+:::
+
+
+#### When Derived Tables Are a Good Choice
+
+- When intermediate results are needed **only once**
+- When logic naturally separates into stages
+- When you want **inline structure** without creating objects
+- When preparing logic for a future CTE refactor
+
+
+#### Why Derived Tables Can Become Limiting
+
+- Logic becomes deeply nested
+- Harder to read as complexity grows
+- Cannot be reused elsewhere in the query
+- Debugging is more difficult than with CTEs
+
+
+## Common Table Expressions (CTEs)
+
+The above limitations **naturally motivates** the next construct.
+
+- Derived tables create **inline pipelines**.  
+- CTEs make those pipelines **named, readable, and reusable**.
+
+### Concept
+
+A **Common Table Expression (CTE)** is a named, temporary result set defined using the `WITH` clause and referenced within a single SQL statement.
+
+A CTE behaves like a **named derived table** that improves readability, structure, and analytical reasoning.
+
+**Mental model:**
+
+> Build a readable data pipeline step by step.
+
+CTEs generalize the idea of derived tables by giving each intermediate step a **name**.
+
+- Same expressive power as derived tables  
+- Scoped to a single query  
+- Designed for multi-step analytical workflows  
+
+### Symple Syntax
+
+
+```sql
+WITH cte_name AS (
+    -- CTE definition (subquery)
+    SELECT ...
+)
+SELECT
+    ...
+FROM cte_name
+WHERE ...;
+```
+
+
+### Pipeline of CTEs
+
+```sql
+WITH step1 AS (
+    -- First transformation
+    SELECT ...
+),
+step2 AS (
+    -- Second transformation using step1
+    SELECT ...
+    FROM step1
+),
+step3 AS (
+    -- Third transformation using step2
+    SELECT ...
+    FROM step2 or step1
+```
+
+### CTEs in the Analytical Workflow
+
+Analytical SQL often consists of multiple logical stages. CTEs make these stages explicit and readable.
+
+```{mermaid}
+flowchart LR
+    A[Base Tables] --> B[CTE Step 1]
+    B --> C[CTE Step 2]
+    C --> D[Final Result]
+```
+
+Each CTE represents a **logical checkpoint** in the analysis.
+
+### Simple Example (Conceptual)
+
+**Input Table: `employees`**
+
+| emp_id | department | salary |
+|------:|-----------:|-------:|
+| 1 | Sales | 1200 |
+| 2 | Sales | 900 |
+| 3 | IT | 1500 |
+| 4 | IT | 1100 |
+
+$$\downarrow$$
+
+**Q:** Compute average salary per department, then show only departments with average salary above 1000.
+
+$$\downarrow$$
+
+```sql
+WITH dept_avg AS (
+    SELECT
+        department,
+        AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department
+)
+SELECT
+    department,
+    avg_salary
+FROM dept_avg
+WHERE avg_salary > 1000;
+```
+
+$$\downarrow$$
+
+| department | avg_salary |
+|-----------:|-----------:|
+| IT | 1300 |
+
+### Key Observations
+
+- Each CTE defines a **named intermediate result**  
+- CTEs are referenced like regular tables  
+- SQL is read **top to bottom**, mirroring analytical reasoning  
+
+### Why CTEs Improve Readability
+
+**Compare the cognitive flow:**
+
+- **Derived tables** require inside-out reading  
+- **CTEs** allow linear, step-by-step reading  
+
+This makes CTEs especially suitable for **teaching**, **debugging**, and **collaborative analytics**.
+
+### Applying CTEs to the `Analytics Schema`
+
+>**Business Question:**
+
+>What is the **average order revenue per customer**, and which customers perform above the overall average?
+
+---
+
+#### Step 1: Customer-Level Metrics
+
+Assume `tmp_order_revenue` already exists.
+
+```sql
+WITH customer_avg AS (
+    SELECT
+        customer_id,
+        AVG(order_revenue) AS avg_order_revenue
+    FROM tmp_order_revenue
+    GROUP BY customer_id
+)
+SELECT
+    customer_id,
+    avg_order_revenue
+FROM customer_avg
+WHERE avg_order_revenue >
+      (
+          SELECT AVG(order_revenue)
+          FROM tmp_order_revenue
+      );
+```
+
+---
+
+#### Input → Output Perspective
+
+**Input Tables**
+
+- `orders`
+- `order_items`
+- `products`
+
+(aggregated into `tmp_order_revenue`)
+
+**CTE: `customer_avg`**
+
+| customer_id | avg_order_revenue |
+|------------:|------------------:|
+| 4 | 38.48 |
+| 6 | 56.64 |
+| 10 | 49.15 |
+
+**Output Table**
+
+| customer_id | avg_order_revenue |
+|------------:|------------------:|
+| 6 | 56.64 |
+| 10 | 49.15 |
+
+### Nested CTEs: Building a Pipeline
+
+CTEs shine when analysis naturally breaks into **multiple stages**.
+
+::: {.callout-note title="Analytical Pipeline"}
+**For each city, compute:**
+
+- Average customer spend  
+- Maximum customer spend  
+
+:::
+
+
+#### Step-by-Step CTE Pipeline
+
+```sql
+WITH customer_spend AS (
+    SELECT
+        c.customer_id,
+        c.city_id,
+        SUM(oi.quantity * p.price) AS total_spend
+    FROM analytics.customers c
+    JOIN analytics.orders o ON c.customer_id = o.customer_id
+    JOIN analytics.order_items oi ON o.order_id = oi.order_id
+    JOIN analytics.products p ON oi.product_id = p.product_id
+    GROUP BY c.customer_id, c.city_id
+),
+city_agg AS (
+    SELECT
+        city_id,
+        AVG(total_spend) AS avg_city_spend,
+        MAX(total_spend) AS max_city_spend
+    FROM customer_spend
+    GROUP BY city_id
+)
+SELECT
+    *
+FROM city_agg;
+```
+
+---
+
+#### Output Table
+
+| city_id | avg_city_spend | max_city_spend |
+|-------:|---------------:|---------------:|
+| 2 | 198.75 | 240.00 |
+| 5 | 154.30 | 182.50 |
+
+### CTEs vs Derived Tables vs Temporary Tables
+
+| Feature | Derived Table | CTE | Temporary Table |
+|-------|---------------|-----|-----------------|
+| Named | No | Yes | Yes |
+| Reusable | No | Within query | Across queries |
+| Lifetime | Single query | Single query | Session |
+| Readability | Medium | High | High |
+| Best use case | Inline logic | Pipelines | Multi-step reuse |
+
+### When CTEs Are the Right Choice
+
+- Multi-step analytical workflows  
+- Complex transformations  
+- Explaining and documenting logic  
+- Preparing data for window functions  
+
+### Limitations of CTEs
+
+- Scoped to a single query  
+- Not persisted across statements  
+- Can be less performant in some engines if overused  
+
+
+
+
+<!-- CTEs define **what** is computed and **in what order**.  
+Window functions define **how rows are compared within those results**.
+
+The next section builds directly on this foundation.
+
+
+
+ -->
