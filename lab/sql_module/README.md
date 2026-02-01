@@ -7,6 +7,23 @@
 docker rm -f $(docker ps -aq)
 ```
 
+```bash
+git pull
+```
+
+
+```python
+for i in range(5):
+    print()
+```
+
+
+```sql
+SELECT 
+    * 
+FROM TEST_TABLE
+```
+
 ## Քայլ
 
 **sjdfkjskf:**
