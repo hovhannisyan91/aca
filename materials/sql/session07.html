@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Session 07: Data Analysis with SQL | Functions – Data Analytics Bootcamp</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-b6871152dc33c25e97e10f79624f84be.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo light-content">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data Analytics Bootcamp</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../materials/syllabus.html" aria-current="page"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/statistics/index.html"> 
+<span class="menu-text">Statistical Thinking</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/sql/index.html"> 
+<span class="menu-text">SQL</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/python/index.html"> 
+<span class="menu-text">Python</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/tableau/index.html"> 
+<span class="menu-text">Tableau</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/lab/index.html"> 
+<span class="menu-text">Lab</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/hovhannisyan91"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session07.html">Session 07: Data Analysis with SQL | Functions</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Thinking</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 01: Data Layers and Bias in Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 02: Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 03: Probabilistic Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 04: Probabilistic Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 05: Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 06: Inferential Statistics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Course Intro</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descriptive Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Continuous Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discrete Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 01: Intro to Relational Databases</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 02: Intro to PostgreSQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 03: Data Analysis with SQL | Part I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 04: Data Analysis with SQL | Part II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 05: Data Analysis with SQL | Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 06: Data Analysis with SQL | Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session07.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Session 07: Data Analysis with SQL | Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 08: Data Analysis with SQL | JOINs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 09: Data Analysis with SQL | Advanced SQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 10: Data Analysis with SQL | Advanced SQL Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intro to Relational Databases</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intro to PostgreSQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Basic Queries: DDL DLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Filtering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Numeric Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">String Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Date Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced SQL 1</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced SQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced SQL Functions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python Session 01: Coming Soon</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 01: Introduction to Tableau</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 02:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 03:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 04: Dashboard Design &amp; Performance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#dates-as-stories-not-columns" id="toc-dates-as-stories-not-columns" class="nav-link active" data-scroll-target="#dates-as-stories-not-columns">Dates as Stories, Not Columns</a></li>
+  <li><a href="#dates-create-analytical-structure" id="toc-dates-create-analytical-structure" class="nav-link" data-scroll-target="#dates-create-analytical-structure">Dates Create Analytical Structure</a></li>
+  <li><a href="#the-story-we-will-follow" id="toc-the-story-we-will-follow" class="nav-link" data-scroll-target="#the-story-we-will-follow">The Story We Will Follow</a></li>
+  <li><a href="#date-vs-timestamp-the-first-fork-in-the-road" id="toc-date-vs-timestamp-the-first-fork-in-the-road" class="nav-link" data-scroll-target="#date-vs-timestamp-the-first-fork-in-the-road">Date vs Timestamp | The First Fork in the Road</a></li>
+  <li><a href="#extract" id="toc-extract" class="nav-link" data-scroll-target="#extract"><code>EXTRACT()</code></a>
+  <ul class="collapse">
+  <li><a href="#example-1-extract-year-month-day" id="toc-example-1-extract-year-month-day" class="nav-link" data-scroll-target="#example-1-extract-year-month-day">Example 1 | Extract Year, Month, Day</a></li>
+  <li><a href="#date_part" id="toc-date_part" class="nav-link" data-scroll-target="#date_part"><code>DATE_PART()</code></a></li>
+  <li><a href="#when-to-prefer-which" id="toc-when-to-prefer-which" class="nav-link" data-scroll-target="#when-to-prefer-which">When to Prefer Which</a></li>
+  </ul></li>
+  <li><a href="#date_trunc-controlling-the-grain-of-time" id="toc-date_trunc-controlling-the-grain-of-time" class="nav-link" data-scroll-target="#date_trunc-controlling-the-grain-of-time">DATE_TRUNC() | Controlling the Grain of Time</a>
+  <ul class="collapse">
+  <li><a href="#example-1-monthly-sales-trend" id="toc-example-1-monthly-sales-trend" class="nav-link" data-scroll-target="#example-1-monthly-sales-trend">Example 1 | Monthly Sales Trend</a></li>
+  <li><a href="#example-2-the-most-profitable-months" id="toc-example-2-the-most-profitable-months" class="nav-link" data-scroll-target="#example-2-the-most-profitable-months">Example 2 | The Most Profitable Months</a></li>
+  <li><a href="#example-3-quarterly-sales-trend" id="toc-example-3-quarterly-sales-trend" class="nav-link" data-scroll-target="#example-3-quarterly-sales-trend">Example 3 | Quarterly Sales Trend</a></li>
+  <li><a href="#example-4-yearly-sales-trend" id="toc-example-4-yearly-sales-trend" class="nav-link" data-scroll-target="#example-4-yearly-sales-trend">Example 4 | Yearly Sales Trend</a></li>
+  <li><a href="#analytical-best-practice" id="toc-analytical-best-practice" class="nav-link" data-scroll-target="#analytical-best-practice">Analytical Best Practice</a></li>
+  </ul></li>
+  <li><a href="#current_date-now-working-with-the-present" id="toc-current_date-now-working-with-the-present" class="nav-link" data-scroll-target="#current_date-now-working-with-the-present"><code>CURRENT_DATE</code>, <code>NOW()</code> | Working With the Present</a>
+  <ul class="collapse">
+  <li><a href="#current_date" id="toc-current_date" class="nav-link" data-scroll-target="#current_date"><code>CURRENT_DATE</code></a></li>
+  <li><a href="#now-current_date" id="toc-now-current_date" class="nav-link" data-scroll-target="#now-current_date"><code>NOW()</code> / <code>CURRENT_DATE</code></a></li>
+  </ul></li>
+  <li><a href="#measuring-time-gaps-date-arithmetic" id="toc-measuring-time-gaps-date-arithmetic" class="nav-link" data-scroll-target="#measuring-time-gaps-date-arithmetic">Measuring Time Gaps | Date Arithmetic</a>
+  <ul class="collapse">
+  <li><a href="#example-1-days-since-order" id="toc-example-1-days-since-order" class="nav-link" data-scroll-target="#example-1-days-since-order">Example 1 | Days Since Order</a></li>
+  <li><a href="#example-2-get-number-of-months" id="toc-example-2-get-number-of-months" class="nav-link" data-scroll-target="#example-2-get-number-of-months">Example 2 | Get Number of Months</a></li>
+  </ul></li>
+  <li><a href="#interval-expressing-duration-explicitly" id="toc-interval-expressing-duration-explicitly" class="nav-link" data-scroll-target="#interval-expressing-duration-explicitly"><code>INTERVAL</code> | Expressing Duration Explicitly</a>
+  <ul class="collapse">
+  <li><a href="#example-orders-in-the-last-30-days" id="toc-example-orders-in-the-last-30-days" class="nav-link" data-scroll-target="#example-orders-in-the-last-30-days">Example | Orders in the Last 30 Days</a></li>
+  <li><a href="#common-interval-units" id="toc-common-interval-units" class="nav-link" data-scroll-target="#common-interval-units">Common Interval Units</a></li>
+  </ul></li>
+  <li><a href="#date-interval-shifting-time" id="toc-date-interval-shifting-time" class="nav-link" data-scroll-target="#date-interval-shifting-time">Date + Interval | Shifting Time</a>
+  <ul class="collapse">
+  <li><a href="#example-simulated-future-date" id="toc-example-simulated-future-date" class="nav-link" data-scroll-target="#example-simulated-future-date">Example | Simulated Future Date</a></li>
+  <li><a href="#analytical-use-cases" id="toc-analytical-use-cases" class="nav-link" data-scroll-target="#analytical-use-cases">Analytical Use Cases</a></li>
+  </ul></li>
+  <li><a href="#age" id="toc-age" class="nav-link" data-scroll-target="#age">AGE()</a>
+  <ul class="collapse">
+  <li><a href="#example-age-between-order-date-and-today" id="toc-example-age-between-order-date-and-today" class="nav-link" data-scroll-target="#example-age-between-order-date-and-today">Example | Age Between Order Date and Today</a></li>
+  <li><a href="#extracting-components-from-age" id="toc-extracting-components-from-age" class="nav-link" data-scroll-target="#extracting-components-from-age">Extracting Components from AGE()</a></li>
+  </ul></li>
+  <li><a href="#analytical-best-practices-dates" id="toc-analytical-best-practices-dates" class="nav-link" data-scroll-target="#analytical-best-practices-dates">Analytical Best Practices | Dates</a></li>
+  <li><a href="#in-class-task" id="toc-in-class-task" class="nav-link" data-scroll-target="#in-class-task">In class Task</a></li>
+  <li><a href="#homework" id="toc-homework" class="nav-link" data-scroll-target="#homework">Homework</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session07.html">Session 07: Data Analysis with SQL | Functions</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Session 07: Data Analysis with SQL | Functions</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">SQL</div>
+    <div class="quarto-category">Date Functions</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="dates-as-stories-not-columns" class="level2">
+<h2 class="anchored" data-anchor-id="dates-as-stories-not-columns">Dates as Stories, Not Columns</h2>
+<p>Up to this point, we have worked with <strong>numbers</strong> and <strong>text</strong>.<br>
+Now we move to the most important analytical dimension of all: the <strong>Time.</strong></p>
+<p>Almost every real business question is, at its core, a <strong>story over time</strong>.</p>
+<ul>
+<li>What happened <strong>before</strong>?</li>
+<li>What changed <strong>after</strong>?</li>
+<li>How fast did something grow?</li>
+<li>When did behavior shift?</li>
+<li>How often did something was happenng?</li>
+</ul>
+<p>Dates are not just metadata — they define <strong>cause, sequence, and interpretation</strong>.</p>
+<p>This session is about learning how to <strong>think with dates</strong>, not just manipulate them.</p>
+<p><strong>Imagine this question:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Did our sales improve after the campaign launch?”</em></p>
+</blockquote>
+<p><strong>You open the data and see:</strong></p>
+<ul>
+<li>transactions before <code>March</code><br>
+</li>
+<li>transactions after <code>March</code></li>
+</ul>
+<p><strong>But then you realize:</strong></p>
+<ul>
+<li>some rows have timestamps<br>
+</li>
+<li>some have only dates<br>
+</li>
+<li>some are stored in UTC<br>
+</li>
+<li>others are local time<br>
+</li>
+<li>some records are missing days</li>
+</ul>
+<p>Suddenly, the question becomes unanswerable.</p>
+<p><strong>The problem is not SQL syntax. The problem is misunderstanding time.</strong></p>
+<p>Date functions exist to restore <strong>order</strong>, <strong>structure</strong>, and <strong>comparability</strong>.</p>
+</section>
+<section id="dates-create-analytical-structure" class="level2">
+<h2 class="anchored" data-anchor-id="dates-create-analytical-structure">Dates Create Analytical Structure</h2>
+<p><strong>A single timestamp can represent many analytical dimensions:</strong></p>
+<ul>
+<li>day<br>
+</li>
+<li>week<br>
+</li>
+<li>month<br>
+</li>
+<li>quarter<br>
+</li>
+<li>year<br>
+</li>
+<li>weekday vs weekend</li>
+</ul>
+<p><strong>Without extracting and structuring these dimensions:</strong></p>
+<ul>
+<li>trends disappear<br>
+</li>
+<li>seasonality is hidden<br>
+</li>
+<li>comparisons become invalid</li>
+</ul>
+<p>Dates turn <strong>events</strong> into <strong>patterns</strong>.</p>
+</section>
+<section id="the-story-we-will-follow" class="level2">
+<h2 class="anchored" data-anchor-id="the-story-we-will-follow">The Story We Will Follow</h2>
+<p>Throughout this session, we will use the <code>sales_analysis</code> table created earlier.</p>
+<p>Each row represents a <strong>transaction</strong>, and each transaction happened at a <strong>specific point in time</strong>.</p>
+<p>Our goal is to answer progressively deeper questions:</p>
+<ul>
+<li><em>When</em> did something happen?</li>
+<li><em>How long</em> did it take?</li>
+<li><em>How many</em> events happened in a period?</li>
+<li><em>How does time aggregation change interpretation?</em></li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="`Sales Analysis`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span><code>Sales Analysis</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Remember to create/re-create the table using the following <a href="https://hovhannisyan91.github.io/aca/materials/sql/session4.html#creating-sales_analysis-table">URL</a></p>
+</div>
+</div>
+</section>
+<section id="date-vs-timestamp-the-first-fork-in-the-road" class="level2">
+<h2 class="anchored" data-anchor-id="date-vs-timestamp-the-first-fork-in-the-road">Date vs Timestamp | The First Fork in the Road</h2>
+<p>Before using any date function, let’s try to understand what kind of time we have.</p>
+<p><strong>DATE</strong></p>
+<ul>
+<li>calendar day only<br>
+</li>
+<li>no time of day<br>
+</li>
+<li>example: <code>2024-05-12</code></li>
+</ul>
+<p><strong>TIMESTAMP</strong></p>
+<ul>
+<li>date + time<br>
+</li>
+<li>sequence-sensitive<br>
+</li>
+<li>example: <code>2024-05-12 14:37:22</code></li>
+</ul>
+<p><strong>This distinction matters because:</strong></p>
+<ul>
+<li>grouping behaves differently<br>
+</li>
+<li>comparisons behave differently<br>
+</li>
+<li>truncation behaves differently</li>
+</ul>
+<p>Most analytical mistakes start here.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="In our case">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>In our case
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In sales_analysis</p>
+<ul>
+<li><code>order_date_date</code>: date column</li>
+<li><code>order_date</code>: timestamp</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="extract" class="level2">
+<h2 class="anchored" data-anchor-id="extract"><code>EXTRACT()</code></h2>
+<p>Dates contain <strong>multiple dimensions</strong> inside a single value <span class="math inline">\(\rightarrow\)</span> Pulling Meaning from Dates</p>
+<ul>
+<li>year</li>
+<li>quarter</li>
+<li>months</li>
+<li>date</li>
+<li>weekday (0 <span class="math inline">\(\rightarrow\)</span> Sunday)</li>
+</ul>
+<p><code>EXTRACT()</code> allows us to isolate these components.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">EXTRACT</span>(field <span class="kw">FROM</span> <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="example-1-extract-year-month-day" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-extract-year-month-day">Example 1 | Extract Year, Month, Day</h3>
+<p><strong>Query:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(<span class="dt">YEAR</span> <span class="kw">FROM</span> order_date_date)  <span class="kw">AS</span> <span class="dt">year</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(<span class="dt">MONTH</span> <span class="kw">FROM</span> order_date_date) <span class="kw">AS</span> <span class="dt">month</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(<span class="dt">DAY</span> <span class="kw">FROM</span> order_date_date)   <span class="kw">AS</span> <span class="dt">day</span>, </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(DOW <span class="kw">FROM</span> some_date) <span class="kw">as</span> weekday</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_date_date</th>
+<th>year</th>
+<th>month</th>
+<th>day</th>
+<th>weekday</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-02-11</td>
+<td>2021</td>
+<td>2</td>
+<td>11</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td>2022-12-10</td>
+<td>2022</td>
+<td>12</td>
+<td>10</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>2021-02-22</td>
+<td>2021</td>
+<td>2</td>
+<td>22</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2022-07-12</td>
+<td>2022</td>
+<td>7</td>
+<td>12</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>2021-04-19</td>
+<td>2021</td>
+<td>4</td>
+<td>19</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-important callout-titled" title="Extract Time">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Extract Time
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We can also extract time using <code>EPOCHS</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">EXTRACT</span>(EPOCHS <span class="kw">FROM</span> order_date_date)   <span class="kw">AS</span> secconds,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">EXTRACT</span>(EPOCHS <span class="kw">FROM</span> order_date_date)<span class="op">/</span><span class="dv">60</span>   <span class="kw">AS</span> minutes,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">EXTRACT</span>(EPOCHS <span class="kw">FROM</span> order_date_date)<span class="op">/</span><span class="dv">3600</span>   <span class="kw">AS</span> minutes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</section>
+<section id="date_part" class="level3">
+<h3 class="anchored" data-anchor-id="date_part"><code>DATE_PART()</code></h3>
+<p><code>DATE_PART()</code> is functionally equivalent to <code>EXTRACT()</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>DATE_PART(<span class="st">'month'</span>, order_date_date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Both return numeric components of a date.</p>
+</section>
+<section id="when-to-prefer-which" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-prefer-which">When to Prefer Which</h3>
+<ul>
+<li><code>EXTRACT()</code> → ANSI-standard, portable SQL<br>
+</li>
+<li><code>DATE_PART()</code> → PostgreSQL-native, readable</li>
+</ul>
+<p>In this course, we prefer <strong><code>EXTRACT()</code> for consistency</strong>.</p>
+</section>
+</section>
+<section id="date_trunc-controlling-the-grain-of-time" class="level2">
+<h2 class="anchored" data-anchor-id="date_trunc-controlling-the-grain-of-time">DATE_TRUNC() | Controlling the Grain of Time</h2>
+<p>In analytics, <strong>grain matters</strong>.</p>
+<p>The same data can tell <strong>very different stories</strong> depending on <em>how time is grouped</em>.</p>
+<p><code>DATE_TRUNC()</code> allows us to <strong>round timestamps down</strong> to a chosen temporal level<br>
+and therefore <strong>control the analytical grain</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>DATE_TRUNC(<span class="st">'unit'</span>, <span class="dt">timestamp</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<section id="example-1-monthly-sales-trend" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-monthly-sales-trend">Example 1 | Monthly Sales Trend</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  DATE_TRUNC(<span class="st">'month'</span>, order_date_date) <span class="kw">AS</span> <span class="dt">month</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> DATE_TRUNC(<span class="st">'month'</span>, order_date_date)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dt">month</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>month</th>
+<th>total_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2020-01-01 00:00:00+00</td>
+<td>38621.59</td>
+</tr>
+<tr class="even">
+<td>2020-02-01 00:00:00+00</td>
+<td>30460.16</td>
+</tr>
+<tr class="odd">
+<td>2020-04-01 00:00:00+00</td>
+<td>18096.39</td>
+</tr>
+<tr class="even">
+<td>2020-05-01 00:00:00+00</td>
+<td>23722.28</td>
+</tr>
+<tr class="odd">
+<td>2020-06-01 00:00:00+00</td>
+<td>42599.07</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-2-the-most-profitable-months" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-the-most-profitable-months">Example 2 | The Most Profitable Months</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  DATE_TRUNC(<span class="st">'month'</span>, order_date_date) <span class="kw">AS</span> <span class="dt">month</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> DATE_TRUNC(<span class="st">'month'</span>, order_date_date)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">SUM</span>(total_sales) <span class="kw">DESC</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>month</th>
+<th>total_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2022-12-01 00:00:00+00</td>
+<td>52510.67</td>
+</tr>
+<tr class="even">
+<td>2022-07-01 00:00:00+00</td>
+<td>49011.10</td>
+</tr>
+<tr class="odd">
+<td>2023-12-01 00:00:00+00</td>
+<td>46700.47</td>
+</tr>
+<tr class="even">
+<td>2021-09-01 00:00:00+00</td>
+<td>46433.23</td>
+</tr>
+<tr class="odd">
+<td>2020-06-01 00:00:00+00</td>
+<td>42599.07</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-3-quarterly-sales-trend" class="level3 smaller">
+<h3 class="smaller anchored" data-anchor-id="example-3-quarterly-sales-trend">Example 3 | Quarterly Sales Trend</h3>
+<p><strong>Quarterly aggregation is useful for:</strong></p>
+<ul>
+<li>strategic planning<br>
+</li>
+<li>executive reporting<br>
+</li>
+<li>seasonality analysis</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  DATE_TRUNC(<span class="st">'quarter'</span>, order_date_date) <span class="kw">AS</span> quarter,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> DATE_TRUNC(<span class="st">'quarter'</span>, order_date_date)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> quarter</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">8</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>quarter</th>
+<th>total_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2020-01-01 00:00:00+00</td>
+<td>69081.75</td>
+</tr>
+<tr class="even">
+<td>2020-04-01 00:00:00+00</td>
+<td>84417.74</td>
+</tr>
+<tr class="odd">
+<td>2020-07-01 00:00:00+00</td>
+<td>62003.53</td>
+</tr>
+<tr class="even">
+<td>2020-10-01 00:00:00+00</td>
+<td>69127.16</td>
+</tr>
+<tr class="odd">
+<td>2021-01-01 00:00:00+00</td>
+<td>74184.68</td>
+</tr>
+<tr class="even">
+<td>2021-04-01 00:00:00+00</td>
+<td>68431.42</td>
+</tr>
+<tr class="odd">
+<td>2021-07-01 00:00:00+00</td>
+<td>84194.98</td>
+</tr>
+<tr class="even">
+<td>2021-10-01 00:00:00+00</td>
+<td>63543.31</td>
+</tr>
+</tbody>
+</table>
+<p>At the <strong>quarterly grain</strong>:</p>
+<ul>
+<li>short-term noise is further reduced<br>
+</li>
+<li>performance becomes comparable across years<br>
+</li>
+<li>seasonality patterns are easier to detect</li>
+</ul>
+<p>This grain is ideal for <strong>high-level trend analysis</strong>.</p>
+<hr>
+</section>
+<section id="example-4-yearly-sales-trend" class="level3 smaller">
+<h3 class="smaller anchored" data-anchor-id="example-4-yearly-sales-trend">Example 4 | Yearly Sales Trend</h3>
+<p>Yearly aggregation answers <strong>long-term performance questions</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  DATE_TRUNC(<span class="st">'year'</span>, order_date_date) <span class="kw">AS</span> <span class="dt">year</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(total_sales) <span class="kw">AS</span> total_revenue</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> DATE_TRUNC(<span class="st">'year'</span>, order_date_date)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dt">year</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>year</th>
+<th>total_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2020-01-01 00:00:00+00</td>
+<td>284630.18</td>
+</tr>
+<tr class="even">
+<td>2021-01-01 00:00:00+00</td>
+<td>290354.39</td>
+</tr>
+<tr class="odd">
+<td>2022-01-01 00:00:00+00</td>
+<td>345714.03</td>
+</tr>
+<tr class="even">
+<td>2023-01-01 00:00:00+00</td>
+<td>350319.25</td>
+</tr>
+</tbody>
+</table>
+<p>At the <strong>yearly grain</strong>:</p>
+<ul>
+<li>growth trajectories become clear<br>
+</li>
+<li>outliers disappear<br>
+</li>
+<li>long-term strategy can be evaluated</li>
+</ul>
+<p>Year-level aggregation is <strong>not</strong> for operational decisions as it is for <strong>directional understanding</strong>.</p>
+</section>
+<section id="analytical-best-practice" class="level3 smaller">
+<h3 class="smaller anchored" data-anchor-id="analytical-best-practice">Analytical Best Practice</h3>
+<ul>
+<li>always justify your time grain<br>
+</li>
+<li>never mix grains in the same comparison<br>
+</li>
+<li>re-aggregate before drawing conclusions<br>
+</li>
+<li>validate results by switching grains</li>
+</ul>
+<p><code>DATE_TRUNC()</code> does not change the data, it changes <strong>how you see the data</strong>.</p>
+<p>That is why it is one of the most important date functions in analytics.</p>
+</section>
+</section>
+<section id="current_date-now-working-with-the-present" class="level2">
+<h2 class="anchored" data-anchor-id="current_date-now-working-with-the-present"><code>CURRENT_DATE</code>, <code>NOW()</code> | Working With the Present</h2>
+<p>In analytics, we often need a <strong>reference point</strong> called <em>now</em>.</p>
+<p><strong>This allows us to answer questions such as:</strong></p>
+<ul>
+<li>how recent is this transaction?<br>
+</li>
+<li>how many days ago did something happen?<br>
+</li>
+<li>is this record outdated?</li>
+</ul>
+<p>PostgreSQL provides two core functions for this purpose.</p>
+<hr>
+<section id="current_date" class="level3">
+<h3 class="anchored" data-anchor-id="current_date"><code>CURRENT_DATE</code></h3>
+<p>Returns <strong>today’s date</strong> without time.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="fu">CURRENT_DATE</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>type: <code>DATE</code><br>
+</li>
+<li>changes once per day<br>
+</li>
+<li>ideal for <strong>day-level comparisons</strong></li>
+</ul>
+<hr>
+</section>
+<section id="now-current_date" class="level3">
+<h3 class="anchored" data-anchor-id="now-current_date"><code>NOW()</code> / <code>CURRENT_DATE</code></h3>
+<p>Returns the <strong>current timestamp</strong> (date + time).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> NOW();</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>type: <code>TIMESTAMP WITH TIME ZONE</code><br>
+</li>
+<li>includes hours, minutes, seconds<br>
+</li>
+<li>ideal for <strong>sequence-sensitive logic</strong></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="fu">CURRENT_DATE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-caution callout-titled" title="Attention">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Attention
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>You must use <code>()</code> with <code>NOW</code> &gt; <code>NOW()</code>, <code>SELECT NOW</code></li>
+<li>You must NOT use <code>()</code> <code>CURRENT_DATE</code>, <code>SELECT CURRENT_DATE</code></li>
+</ul>
+</div>
+</div>
+<p>Using <code>CURRENT_DATE</code> vs <code>NOW()</code> changes interpretation.</p>
+<ul>
+<li><code>CURRENT_DATE</code> → calendar-based logic<br>
+</li>
+<li><code>NOW()</code> → event-sequence logic</li>
+</ul>
+<p>Always align the function with the <strong>granularity of your question</strong>.</p>
+<hr>
+</section>
+</section>
+<section id="measuring-time-gaps-date-arithmetic" class="level2">
+<h2 class="anchored" data-anchor-id="measuring-time-gaps-date-arithmetic">Measuring Time Gaps | Date Arithmetic</h2>
+<p>Dates become analytical only when we <strong>compare them</strong>.</p>
+<p><strong>PostgreSQL</strong> allows direct subtraction between dates.</p>
+<section id="example-1-days-since-order" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-days-since-order">Example 1 | Days Since Order</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">CURRENT_DATE</span> <span class="op">-</span> order_date_date <span class="kw">AS</span> days_since_order</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_date_date</th>
+<th>days_since_order</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-02-11</td>
+<td>1797</td>
+</tr>
+<tr class="even">
+<td>2022-12-10</td>
+<td>1130</td>
+</tr>
+<tr class="odd">
+<td>2021-02-22</td>
+<td>1786</td>
+</tr>
+<tr class="even">
+<td>2022-07-12</td>
+<td>1281</td>
+</tr>
+<tr class="odd">
+<td>2021-04-19</td>
+<td>1730</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>subtraction of two <code>DATE</code>s returns an <strong>integer</strong></li>
+<li>the unit is <strong>days</strong></li>
+<li>this is ideal for:
+<ul>
+<li>recency analysis<br>
+</li>
+<li>churn logic<br>
+</li>
+<li>aging reports</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="example-2-get-number-of-months" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-get-number-of-months">Example 2 | Get Number of Months</h3>
+<section id="option-1" class="level4">
+<h4 class="anchored" data-anchor-id="option-1">Option 1</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">CURRENT_DATE</span> <span class="op">-</span> order_date_date )<span class="op">/</span><span class="dv">30</span>  <span class="kw">AS</span> days_since_order</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is wrong and produces <strong>systematic bias.</strong></p>
+<p>Befor applying this we must be sure that it is accepted within the organization</p>
+</div>
+</div>
+</section>
+<section id="option-2" class="level4">
+<h4 class="anchored" data-anchor-id="option-2">Option 2</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">CURRENT_DATE</span> <span class="op">-</span> order_date_date) <span class="op">/</span> <span class="fl">30.4375</span> <span class="kw">AS</span> approx_months</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> orders;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Why 30.4375 ?</strong></p>
+<p>the average days per months <span class="math inline">\(\rightarrow\)</span> <code>365.25 / 12</code></p>
+<ul>
+<li>Not exact</li>
+<li>Not calendar-safe</li>
+<li>Fine for ML features/high level analysis</li>
+</ul>
+</section>
+<section id="option-3" class="level4">
+<h4 class="anchored" data-anchor-id="option-3">Option 3</h4>
+<p>This produces the number of <strong>fully completed calendar months</strong> between two dates.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    (DATE_PART(<span class="st">'year'</span>, <span class="fu">CURRENT_DATE</span>) <span class="op">-</span> DATE_PART(<span class="st">'year'</span>, order_date_date)) <span class="op">*</span> <span class="dv">12</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">+</span> (DATE_PART(<span class="st">'month'</span>, <span class="fu">CURRENT_DATE</span>) <span class="op">-</span> DATE_PART(<span class="st">'month'</span>, order_date_date))</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">-</span> <span class="cf">CASE</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">WHEN</span> DATE_PART(<span class="st">'day'</span>, <span class="fu">CURRENT_DATE</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span> DATE_PART(<span class="st">'day'</span>, order_date_date)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">THEN</span> <span class="dv">1</span> <span class="cf">ELSE</span> <span class="dv">0</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">END</span> <span class="kw">AS</span> full_months</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> order_date_date <span class="kw">DESC</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Step-by-step explanation of full months calculation:</strong></p>
+<ul>
+<li><code>DATE_PART('year', CURRENT_DATE) - DATE_PART('year', order_date_date)</code> computes the difference in <strong>years</strong> between today and the order date.</li>
+<li>multiplying by <code>12</code> converts the year difference into <strong>months</strong>.</li>
+<li><code>DATE_PART('month', CURRENT_DATE) - DATE_PART('month', order_date_date)</code> adds the <strong>month difference</strong> within the current year.</li>
+<li>the <code>CASE</code> statement adjusts for <strong>incomplete months</strong>:
+<ul>
+<li>if today’s day-of-month is <strong>earlier</strong> than the order day,</li>
+<li>the current month is <strong>not yet fully completed</strong>,</li>
+<li>so we subtract <code>1</code> month.</li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="DATEDIFF() In SQL Server">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>DATEDIFF() In SQL Server
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In case of SQL server we can use <code>DATEDIFF()</code> function</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(MM, Date1, Date2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="interval-expressing-duration-explicitly" class="level2">
+<h2 class="anchored" data-anchor-id="interval-expressing-duration-explicitly"><code>INTERVAL</code> | Expressing Duration Explicitly</h2>
+<p>An <code>INTERVAL</code> represents a <strong>span of time</strong>, not a point.</p>
+<p>This allows us to <strong>add or subtract time meaningfully</strong>.</p>
+<hr>
+<section id="example-orders-in-the-last-30-days" class="level3">
+<h3 class="anchored" data-anchor-id="example-orders-in-the-last-30-days">Example | Orders in the Last 30 Days</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> recent_orders</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> order_date_date <span class="op">&gt;=</span> <span class="fu">CURRENT_DATE</span> <span class="op">-</span> <span class="dt">INTERVAL</span> <span class="st">'30 days'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="common-interval-units" class="level3">
+<h3 class="anchored" data-anchor-id="common-interval-units">Common Interval Units</h3>
+<ul>
+<li><code>INTERVAL '7 days'</code><br>
+</li>
+<li><code>INTERVAL '1 month'</code><br>
+</li>
+<li><code>INTERVAL '1 year'</code></li>
+</ul>
+<p>Intervals are <strong>human-readable</strong> and analytically expressive.</p>
+<hr>
+</section>
+</section>
+<section id="date-interval-shifting-time" class="level2">
+<h2 class="anchored" data-anchor-id="date-interval-shifting-time">Date + Interval | Shifting Time</h2>
+<p>You can shift dates forward or backward using intervals.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>some_date <span class="op">+/-</span>  <span class="dt">INTERVAL</span> <span class="ot">"INT unit"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>some_date <span class="op">+</span>  <span class="dt">INTERVAL</span> <span class="ot">"2 days"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>some_date <span class="op">-</span>   <span class="dt">INTERVAL</span> <span class="ot">"3 months"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>some_date <span class="op">+</span>  <span class="dt">INTERVAL</span> <span class="ot">"5 years"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="example-simulated-future-date" class="level3">
+<h3 class="anchored" data-anchor-id="example-simulated-future-date">Example | Simulated Future Date</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  order_date_date <span class="op">+</span> <span class="dt">INTERVAL</span> <span class="st">'14 days'</span> <span class="kw">AS</span> follow_up_date</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="analytical-use-cases" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-use-cases">Analytical Use Cases</h3>
+<ul>
+<li>follow-up scheduling<br>
+</li>
+<li>grace periods<br>
+</li>
+<li>forecasting reference points</li>
+</ul>
+<p>Intervals preserve <strong>calendar logic</strong>, unlike numeric arithmetic.</p>
+</section>
+</section>
+<section id="age" class="level2">
+<h2 class="anchored" data-anchor-id="age">AGE()</h2>
+<p><code>AGE()</code> calculates the <strong>exact calendar distance</strong> between two dates or timestamps.</p>
+<p>Unlike simple subtraction, <code>AGE()</code> respects:</p>
+<ul>
+<li>varying month lengths<br>
+</li>
+<li>leap years<br>
+</li>
+<li>real calendar boundaries</li>
+</ul>
+<p>It returns an <strong>INTERVAL</strong>, not a number.</p>
+<hr>
+<section id="example-age-between-order-date-and-today" class="level3">
+<h3 class="anchored" data-anchor-id="example-age-between-order-date-and-today">Example | Age Between Order Date and Today</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  AGE(<span class="fu">CURRENT_DATE</span>, order_date_date) <span class="kw">AS</span> order_age</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_date_date</th>
+<th>order_age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-02-11</td>
+<td>4 years 11 mons 2 days</td>
+</tr>
+<tr class="even">
+<td>2022-12-10</td>
+<td>3 years 1 mon 3 days</td>
+</tr>
+<tr class="odd">
+<td>2021-02-22</td>
+<td>4 years 10 mons 19 days</td>
+</tr>
+<tr class="even">
+<td>2022-07-12</td>
+<td>3 years 6 mons 1 day</td>
+</tr>
+<tr class="odd">
+<td>2021-04-19</td>
+<td>4 years 8 mons 24 days</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="extracting-components-from-age" class="level3">
+<h3 class="anchored" data-anchor-id="extracting-components-from-age">Extracting Components from AGE()</h3>
+<p><strong>You can extract individual components from the interval.</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  order_date_date,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(<span class="dt">YEAR</span> <span class="kw">FROM</span> AGE(<span class="fu">CURRENT_DATE</span>, order_date_date))  <span class="kw">AS</span> years,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(<span class="dt">MONTH</span> <span class="kw">FROM</span> AGE(<span class="fu">CURRENT_DATE</span>, order_date_date)) <span class="kw">AS</span> months,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">EXTRACT</span>(<span class="dt">DAY</span> <span class="kw">FROM</span> AGE(<span class="fu">CURRENT_DATE</span>, order_date_date))   <span class="kw">AS</span> days</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sales_analysis</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">5</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<div class="callout callout-style-default callout-warning callout-titled" title="Analytical Warning | AGE() Extraction">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Analytical Warning | AGE() Extraction
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>extracted <code>years</code>, <code>months</code>, <code>days</code> are <strong>not independent</strong></li>
+<li>months reset after 12</li>
+<li>days reset after month boundaries</li>
+</ul>
+<p>Never treat extracted components as additive totals.</p>
+<p>Use <code>AGE()</code> for <strong>human interpretation</strong>,<br>
+use numeric arithmetic for <strong>modeling features</strong>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="analytical-best-practices-dates" class="level2">
+<h2 class="anchored" data-anchor-id="analytical-best-practices-dates">Analytical Best Practices | Dates</h2>
+<p>Dates are not just values — they encode <strong>ordering and causality</strong>.</p>
+<ul>
+<li>always align time grain with the question<br>
+</li>
+<li>never mix <code>DATE</code> and <code>TIMESTAMP</code> blindly<br>
+</li>
+<li>use <code>INTERVAL</code> instead of hard-coded numbers<br>
+</li>
+<li>validate insights by changing reference dates</li>
+</ul>
+<p>Time-aware analytics is what separates <strong>reporting</strong> from <strong>analysis</strong>.</p>
+<p>Dates do not answer questions on their own as they allow <strong>stories to be told correctly</strong>.</p>
+</section>
+<section id="in-class-task" class="level2">
+<h2 class="anchored" data-anchor-id="in-class-task">In class Task</h2>
+<p><strong>Goal:</strong> practice time-grain control and recency logic.</p>
+<p><strong>Task instructions:</strong></p>
+<ul>
+<li><strong>aggregate total sales by:</strong>
+<ul>
+<li>month</li>
+<li>quarter</li>
+</ul></li>
+<li><strong>identify:</strong>
+<ul>
+<li>the top 3 months by revenue</li>
+<li>the top quarter by revenue</li>
+</ul></li>
+<li><strong>compute:</strong>
+<ul>
+<li>days since each transaction</li>
+</ul></li>
+<li><strong>filter:</strong>
+<ul>
+<li>transactions from the last 60 days (you should get the empty table)</li>
+</ul></li>
+</ul>
+<p><strong>Deliverable:</strong></p>
+<ul>
+<li>run queries in pgAdmin<br>
+</li>
+<li>visually inspect result tables<br>
+</li>
+<li>discuss how changing the time grain changes interpretation</li>
+</ul>
+<div class="callout callout-style-simple callout-none no-icon callout-empty-content">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+
+</div>
+</div>
+</div>
+</section>
+<section id="homework" class="level2">
+<h2 class="anchored" data-anchor-id="homework">Homework</h2>
+<p><strong>Story-driven task:</strong></p>
+<p>You are asked to evaluate <strong>sales performance over time</strong> for management.</p>
+<p><strong>Required steps:</strong></p>
+<ul>
+<li>build monthly, quarterly, and yearly aggregations</li>
+<li>compare trends across different grains</li>
+<li>identify:
+<ul>
+<li>strongest growth period</li>
+<li>weakest period</li>
+</ul></li>
+<li>compute:
+<ul>
+<li>days since last transaction per customer</li>
+</ul></li>
+<li>use <code>AGE()</code> to describe customer recency in calendar terms</li>
+</ul>
+<p><strong>Visualization:</strong></p>
+<ul>
+<li>use pgAdmin charts to visualize:
+<ul>
+<li>monthly revenue trend</li>
+<li>quarterly comparison</li>
+</ul></li>
+<li>annotate findings with <strong>written interpretation</strong></li>
+</ul>
+<p><strong>Final deliverable:</strong></p>
+<ul>
+<li>SQL queries</li>
+<li>screenshots of pgAdmin charts</li>
+<li>a short narrative explaining:
+<ul>
+<li>what changed over time</li>
+<li>why grain choice matters</li>
+<li>which conclusions depend on time aggregation</li>
+</ul></li>
+<li>Push everything to github</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You can experiment a lot, as well</p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/hovhannisyan91\.github\.io\/aca");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

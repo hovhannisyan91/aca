@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<link href="../../../img/favicon.png" rel="icon" type="image/png">
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.25">
+
+  <meta name="author" content="Karen Hovhannisyan">
+  <meta name="dcterms.date" content="2026-02-03">
+  <title>Data Analytics Bootcamp – Intro to PostgreSQL</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-534cd8e3a96973385dffff3f4709048d.css">
+  <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .icon-xxl { font-size: 84px; }
+    .icon-xl  { font-size: 64px; }
+    .icon-lg  { font-size: 48px; }
+    .muted { opacity: .8 }
+    .pill { border-radius: 10px; }
+    .circle { border-radius: 50%; }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Intro to PostgreSQL</h1>
+  <p class="subtitle">Data Types, Schemas, Keys, Indexes</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Karen Hovhannisyan 
+</div>
+</div>
+</div>
+
+  <p class="date">2026-02-03</p>
+</section>
+<section>
+<section id="for-today" class="title-slide slide level1 center">
+<h1>For Today…</h1>
+
+</section>
+<section id="learning-goals" class="slide level2">
+<h2>Learning Goals</h2>
+<p>By the end of this session, you will be able to:</p>
+<ul>
+<li>understand how data is structured in PostgreSQL</li>
+<li>identify tables, rows, and columns</li>
+<li>explain different types of keys and relationships</li>
+<li>understand how indexes affect performance</li>
+<li>recognize common PostgreSQL data types</li>
+<li>get familiarized with basic SQL syntax</li>
+</ul>
+</section>
+<section id="erd-simple" class="slide level2">
+<h2>ERD Simple</h2>
+
+<img data-src="../../../img/sql/erd_simple.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section>
+<section id="sales-analytics-database" class="slide level2">
+<h2>Sales Analytics Database</h2>
+<p><strong>The database captures information about:</strong></p>
+<ul>
+<li>customers who place orders</li>
+<li>products that are sold</li>
+<li>employees involved in the sales process</li>
+<li>orders placed over time</li>
+<li>individual sales transactions</li>
+</ul>
+</section>
+<section id="questions-to-data-analyst" class="slide level2">
+<h2>Questions to Data Analyst</h2>
+<p>Your role as an analyst is to <strong>query this data</strong> to answer business questions related to:</p>
+<ul>
+<li>revenue and sales performance</li>
+<li>product popularity</li>
+<li>customer behavior</li>
+<li>employee contribution</li>
+<li>time-based trends</li>
+</ul>
+</section>
+<section id="erd-complete" class="slide level2">
+<h2>ERD Complete</h2>
+
+<img data-src="../../../img/sql/erd_extanded.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section></section>
+<section>
+<section id="keys-and-indexes" class="title-slide slide level1 center">
+<h1>Keys and Indexes</h1>
+<p>To store data efficiently and enable relationships between tables, relational databases rely on <strong>keys</strong> and <strong>indexes</strong>.</p>
+</section>
+<section id="keys" class="slide level2">
+<h2>Keys</h2>
+<div class="columns">
+<div class="column">
+<ul>
+<li>Primary Key</li>
+<li>Candidate Key</li>
+<li>Composite Key</li>
+<li>Surrogate Key</li>
+<li>Foreign key</li>
+</ul>
+</div><div class="column">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../../../img/sql/pk_sales.png"></p>
+<figcaption>!</figcaption>
+</figure>
+</div>
+</div></div>
+<!-- end columns -->
+</section>
+<section id="primary-key" class="slide level2">
+<h2>Primary Key</h2>
+<p>A <strong>primary key</strong> uniquely identifies each record in a table.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>transaction_id</strong></th>
+<th>order_id</th>
+<th>product_id</th>
+<th>customer_id</th>
+<th>total_sales</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1001</strong></td>
+<td>501</td>
+<td>12</td>
+<td>3001</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1002</strong></td>
+<td>501</td>
+<td>18</td>
+<td>3001</td>
+<td>19.99</td>
+</tr>
+<tr class="odd">
+<td><strong>1003</strong></td>
+<td>502</td>
+<td>12</td>
+<td>3005</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1004</strong></td>
+<td>503</td>
+<td>25</td>
+<td>3008</td>
+<td>89.99</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="candidate-key" class="slide level2">
+<h2>Candidate Key</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 30%">
+<col style="width: 37%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>customer_id</strong></th>
+<th>customer_name</th>
+<th><strong>email</strong></th>
+<th>city</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>3001</strong></td>
+<td>Alice Johnson</td>
+<td><strong>alice.johnson@email.com</strong></td>
+<td>Berlin</td>
+</tr>
+<tr class="even">
+<td><strong>3002</strong></td>
+<td>Mark Thompson</td>
+<td><strong>mark.thompson@email.com </strong></td>
+<td>Paris</td>
+</tr>
+<tr class="odd">
+<td><strong>3003</strong></td>
+<td>Elena Petrova</td>
+<td><strong>elena.p@email.com </strong></td>
+<td>Madrid</td>
+</tr>
+<tr class="even">
+<td><strong>3004</strong></td>
+<td>David Chen</td>
+<td><strong>david.chen@email.com </strong></td>
+<td>London</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="composite-key" class="slide level2">
+<h2>Composite Key</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th><strong>order_id</strong></th>
+<th><strong>product_id</strong></th>
+<th>product_name</th>
+<th>quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>501</strong></td>
+<td><strong>12</strong></td>
+<td>Wireless Mouse</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>501</strong></td>
+<td><strong>18</strong></td>
+<td>USB-C Cable</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><strong>502</strong></td>
+<td><strong>12</strong></td>
+<td>Wireless Mouse</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>503</strong></td>
+<td><strong>25</strong></td>
+<td>Mechanical Keyboard</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<div title="Composite Key">
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Composite Key</strong></p>
+</div>
+<div class="callout-content">
+<p><code>(order_id, product_id)</code> could uniquely identify rows in some transactional systems.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="surrogate-key" class="slide level2">
+<h2>Surrogate Key</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th><strong>transaction_id</strong></th>
+<th>order_id</th>
+<th>product_id</th>
+<th>quantity</th>
+<th>total_sales</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1001</strong></td>
+<td>501</td>
+<td>12</td>
+<td>1</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1002</strong></td>
+<td>501</td>
+<td>18</td>
+<td>2</td>
+<td>19.99</td>
+</tr>
+<tr class="odd">
+<td><strong>1003</strong></td>
+<td>502</td>
+<td>12</td>
+<td>1</td>
+<td>49.99</td>
+</tr>
+<tr class="even">
+<td><strong>1004</strong></td>
+<td>503</td>
+<td>25</td>
+<td>1</td>
+<td>89.99</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Surrogate Key helps:</strong></p>
+<ul>
+<li>simplify joins</li>
+<li>reduce index size</li>
+<li>improve query readability</li>
+</ul>
+</section>
+<section id="foreign-key" class="slide level2">
+<h2>Foreign Key</h2>
+
+<img data-src="../../../img/sql/fk_sales_vs_products.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section>
+<section id="indexes" class="slide level2">
+<h2>Indexes</h2>
+
+<img data-src="../../../img/sql/index.png" class="r-stretch quarto-figure-center"><p class="caption">!</p></section>
+<section id="trade-off" class="slide level2">
+<h2>Trade-Off</h2>
+<div title="Full Table Scan">
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Full Table Scan</strong></p>
+</div>
+<div class="callout-content">
+<p>When a query checks <strong>every row</strong> instead of using an index, this is called a <strong>full scan</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<p>Indexes improve read performance but come with trade-offs:</p>
+<ul>
+<li>extra storage</li>
+<li>slower inserts and updates</li>
+<li>maintenance overhead</li>
+</ul>
+</section>
+<section id="when-not-to-create" class="slide level2">
+<h2>When not to Create!</h2>
+<ul>
+<li>Very small tables</li>
+<li>Frequently updated columns</li>
+<li>Columns with many NULL values</li>
+<li>Columns with very low cardinality</li>
+</ul>
+</section>
+<section id="single-column-index" class="slide level2">
+<h2>Single-Column Index</h2>
+<p>A <strong>single-column index</strong> is built on one column.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Employee ID</th>
+<th>Name</th>
+<th>Contact Number</th>
+<th>Age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Max</td>
+<td><strong>800692692</strong></td>
+<td>24</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Jessica</td>
+<td><strong>800123456</strong></td>
+<td>35</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Mikeal</td>
+<td><strong>800745547</strong></td>
+<td>49</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="composite-index" class="slide level2 smaller">
+<h2>Composite Index</h2>
+<p>Consider <code>employees table</code>, but now imagine that queries often filter by both <code>name</code> and <code>age</code> at the same time.</p>
+<div class="columns">
+<div class="column">
+<p><span class="math display">\[\rightarrow\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>employee_id</th>
+<th>name</th>
+<th>age</th>
+<th>department</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><strong>Max</strong></td>
+<td><strong>24</strong></td>
+<td>Sales</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>Jessica</strong></td>
+<td><strong>35</strong></td>
+<td>Marketing</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>Max</strong></td>
+<td><strong>35</strong></td>
+<td>Finance</td>
+</tr>
+</tbody>
+</table>
+</div><div class="column">
+<p><strong>When to use:</strong></p>
+<ul>
+<li>Efficient for queries filtering on <code>name</code></li>
+<li>Efficient for queries filtering on <code>name</code> <strong>and</strong> <code>age</code></li>
+<li><strong>Not efficient</strong> for queries filtering on <code>age</code> only</li>
+</ul>
+</div></div>
+<!-- end columns -->
+</section>
+<section id="unique-index" class="slide level2 smaller">
+<h2>Unique Index</h2>
+<p>Basically all the candidate keys :)</p>
+<div class="columns">
+<div class="column">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>customer_name</th>
+<th>email</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3001</td>
+<td>Alice Johnson</td>
+<td><strong>alice@email.com</strong></td>
+</tr>
+<tr class="even">
+<td>3002</td>
+<td>Mark Thompson</td>
+<td><strong>mark@email.com</strong></td>
+</tr>
+<tr class="odd">
+<td>3003</td>
+<td>Elena Petrova</td>
+<td><strong>elena@email.com</strong></td>
+</tr>
+</tbody>
+</table>
+</div><div class="column">
+<p><strong>Use a unique index when:</strong></p>
+<ul>
+<li>values must be unique across rows</li>
+<li>the column is frequently used for lookup</li>
+<li><strong>uniqueness is part of business logic</strong></li>
+</ul>
+</div></div>
+<p><!-- end columns --></p>
+</section></section>
+<section>
+<section id="question" class="title-slide slide level1 center">
+<h1>Question</h1>
+<p><strong>Are Keys Also Indexes?</strong></p>
+</section>
+<section id="answer" class="slide level2">
+<h2>Answer</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 31%">
+<col style="width: 32%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Enforces Uniqueness</th>
+<th>Improves Query Speed</th>
+<th>Stored as Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Primary Key</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes (unique index)</td>
+</tr>
+<tr class="even">
+<td>Unique Constraint</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes (unique index)</td>
+</tr>
+<tr class="odd">
+<td>Foreign Key</td>
+<td>No</td>
+<td>Sometimes</td>
+<td>No (by default)</td>
+</tr>
+<tr class="even">
+<td>Regular Index</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+</section></section>
+<section>
+<section id="data-types" class="title-slide slide level1 center">
+<h1>Data Types</h1>
+<p><strong>PostgreSQL data types are commonly grouped into:</strong></p>
+<ul>
+<li>Numeric</li>
+<li>Character (Text)</li>
+<li>Date &amp; Time</li>
+<li>Boolean &amp; Categorical</li>
+<li>Special &amp; Advanced</li>
+</ul>
+</section>
+<section id="data-types-in-postgresql" class="slide level2">
+<h2>Data Types in PostgreSQL</h2>
+<p>Data types define:</p>
+<ul>
+<li>what kind of data a column can store</li>
+<li>how data is validated</li>
+<li>how much storage is used</li>
+<li>how fast queries can run</li>
+</ul>
+</section>
+<section id="why-data-types-matter" class="slide level2">
+<h2>Why Data Types Matter?</h2>
+<p>Choosing the wrong data type can:</p>
+<ul>
+<li>break calculations</li>
+<li>reduce performance</li>
+<li>waste storage</li>
+<li>introduce subtle errors</li>
+</ul>
+</section>
+<section id="numeric-data-types" class="slide level2 smaller">
+<h2>Numeric Data Types</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>INTEGER</code></td>
+<td>Whole numbers</td>
+<td><code>2500</code></td>
+<td>Counts</td>
+</tr>
+<tr class="even">
+<td><code>BIGINT</code></td>
+<td>Large integers</td>
+<td><code>9876543210</code></td>
+<td>IDs</td>
+</tr>
+<tr class="odd">
+<td><code>NUMERIC(p,s)</code></td>
+<td>Exact decimals</td>
+<td><code>15432.75</code></td>
+<td>Revenue</td>
+</tr>
+<tr class="even">
+<td><code>DOUBLE PRECISION</code></td>
+<td>Approximate</td>
+<td><code>0.123456</code></td>
+<td>KPIs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The Rule of Thumb:</strong></p>
+<ul>
+<li>Use INTEGER for counts</li>
+<li>Use NUMERIC for money</li>
+<li>Use DOUBLE PRECISION for ratios</li>
+</ul>
+<p><strong>Index performance depends on data type size:</strong></p>
+<ul>
+<li>smaller types <span class="math inline">\(\rightarrow\)</span> faster indexes</li>
+<li>larger types <span class="math inline">\(\rightarrow\)</span> more storage</li>
+</ul>
+</section>
+<section id="main-character-data-types" class="slide level2 smaller">
+<h2>Main Character Data Types</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CHAR(n)</td>
+<td>Fixed-length character string</td>
+<td>CHAR(5) → ‘US’</td>
+<td>Country codes, fixed formats</td>
+</tr>
+<tr class="even">
+<td>VARCHAR(n)</td>
+<td>Variable-length string with limit</td>
+<td>VARCHAR(50) → ‘Karen Hovhannisyan’</td>
+<td>Names, emails</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>Variable-length string, no limit</td>
+<td>‘This product has been discontinued.’</td>
+<td>Descriptions, comments</td>
+</tr>
+<tr class="even">
+<td>CHARACTER VARYING(n)</td>
+<td>SQL-standard name for VARCHAR</td>
+<td>CHARACTER VARYING(20) → ‘A123XZ’</td>
+<td>Codes, identifiers</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="main-date-and-time-data-types" class="slide level2 smaller">
+<h2>Main Date and Time Data Types</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DATE</td>
+<td>Calendar date (no time)</td>
+<td>2025-03-15</td>
+<td>Birth dates, order dates</td>
+</tr>
+<tr class="even">
+<td>TIME</td>
+<td>Time of day (no date)</td>
+<td>14:30:00</td>
+<td>Opening hours</td>
+</tr>
+<tr class="odd">
+<td>TIME WITH TIME ZONE</td>
+<td>Time with time zone info</td>
+<td>14:30:00+04</td>
+<td>Cross-region schedules</td>
+</tr>
+<tr class="even">
+<td>TIMESTAMP</td>
+<td>Date and time (no timezone)</td>
+<td>2025-03-15 14:30:00</td>
+<td>Local event logs</td>
+</tr>
+<tr class="odd">
+<td>TIMESTAMP WITH TIME ZONE (TIMESTAMPTZ)</td>
+<td>Date and time with timezone handling</td>
+<td>2025-03-15 10:30:00+00</td>
+<td>Auditing, analytics</td>
+</tr>
+<tr class="even">
+<td>INTERVAL</td>
+<td>Time duration</td>
+<td>3 days 4 hours</td>
+<td>Session length, SLA</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="boolean-categorical-data-types" class="slide level2 smaller">
+<h2>Boolean &amp; Categorical Data Types</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 26%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BOOLEAN</td>
+<td>Logical true / false value</td>
+<td>TRUE, FALSE</td>
+<td>Active flags, eligibility</td>
+</tr>
+<tr class="even">
+<td>CHAR(n)</td>
+<td>Fixed-length category code</td>
+<td>CHAR(1) → ‘Y’</td>
+<td>Yes/No indicators</td>
+</tr>
+<tr class="odd">
+<td>VARCHAR(n)</td>
+<td>Short categorical label</td>
+<td>‘premium’</td>
+<td>Customer segments</td>
+</tr>
+<tr class="even">
+<td>TEXT</td>
+<td>Free-form category label</td>
+<td>‘high_value_customer’</td>
+<td>Tags, labels</td>
+</tr>
+<tr class="odd">
+<td>ENUM</td>
+<td>Predefined set of values</td>
+<td>(‘low’,‘medium’,‘high’)</td>
+<td>Controlled categories</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="special-data-types-optional" class="slide level2 smaller">
+<h2>Special Data Types | OPTIONAL</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data Type / Extension</th>
+<th>Description</th>
+<th>Example Value</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>JSON / JSONB</td>
+<td>Semi-structured JSON data</td>
+<td>{“plan”:“premium”,“usage”:120}</td>
+<td>Logs, APIs, configs</td>
+</tr>
+<tr class="even">
+<td>ARRAY</td>
+<td>Array of values</td>
+<td>{1,2,3}</td>
+<td>Tags, multi-valued attributes</td>
+</tr>
+<tr class="odd">
+<td>UUID</td>
+<td>Universally unique identifier</td>
+<td>550e8400-e29b-41d4-a716-446655440000</td>
+<td>Distributed IDs</td>
+</tr>
+<tr class="even">
+<td>INET</td>
+<td>IP address</td>
+<td>192.168.1.1</td>
+<td>Network traffic</td>
+</tr>
+<tr class="odd">
+<td>CIDR</td>
+<td>Network block</td>
+<td>192.168.0.0/24</td>
+<td>Subnet modeling</td>
+</tr>
+<tr class="even">
+<td><strong>GEOMETRY (PostGIS)</strong></td>
+<td><strong>Geometric objects</strong></td>
+<td><strong>POINT(40.18 44.51)</strong></td>
+<td><strong>Maps, locations</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>GEOGRAPHY (PostGIS)</strong></td>
+<td><strong>Earth-based coordinates</strong></td>
+<td><strong>POINT(44.51 40.18)</strong></td>
+<td><strong>Distance calculations</strong></td>
+</tr>
+<tr class="even">
+<td>ltree</td>
+<td>Hierarchical tree paths</td>
+<td>region.city.store</td>
+<td>Organizational trees</td>
+</tr>
+<tr class="odd">
+<td>pgRouting</td>
+<td>Graph/network extension</td>
+<td>N/A</td>
+<td>Network routing, telecom</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="postgis-geospatial-extension" class="slide level2">
+<h2>PostGIS (Geospatial Extension)</h2>
+<p>PostGIS adds <strong>geospatial intelligence</strong> to PostgreSQL.</p>
+<p>Common capabilities:</p>
+<ul>
+<li>Distance calculations</li>
+<li>Spatial joins</li>
+<li>Radius searches</li>
+<li>Area coverage</li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>As a data analyst you are <strong>not expected</strong> to design <strong>PostGIS</strong> schemas or routing graphs, but you <em>will</em> query them.</p>
+<p>Documentation you can find <a href="https://postgis.net/workshops/postgis-intro/">here</a></p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="relational-database-schema" class="title-slide slide level1 center">
+<h1>Relational Database Schema</h1>
+
+</section>
+<section id="what-is-a-schema" class="slide level2">
+<h2>What Is a Schema?</h2>
+<p>A <strong>schema</strong> describes the structure of a database: tables, columns, keys, and relationships.</p>
+</section>
+<section id="star-schema" class="slide level2">
+<h2>Star Schema</h2>
+<p>A <strong>star schema</strong> consists of:</p>
+<ul>
+<li>one central <strong>fact table</strong></li>
+<li>multiple surrounding <strong>dimension tables</strong></li>
+</ul>
+
+<img data-src="../../../img/sql/star_schema.png" class="r-stretch"><div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>Although our database is transactional, its structure closely resembles a star schema, making it well-suited for analytics.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="snowflake-schema" class="slide level2">
+<h2>Snowflake Schema</h2>
+<p>A <strong>snowflake schema</strong> extends the star schema by normalizing dimension tables into sub-dimensions.</p>
+
+<img data-src="../../../img/sql/snowflake_schema.png" class="r-stretch"></section>
+<section id="entity-relationship-diagram-erd" class="slide level2">
+<h2>Entity Relationship Diagram (ERD)</h2>
+<p>Try to generate the ERD for the sales database using your SQL client.<br>
+Identify primary keys, foreign keys, and relationships.</p>
+
+<img data-src="../../../img/sql/generate_erd.png" class="r-stretch"></section></section>
+<section>
+<section id="ddl-data-definition-language" class="title-slide slide level1 center">
+<h1>DDL | Data Definition Language</h1>
+
+</section>
+<section id="what-is-ddl" class="slide level2">
+<h2>What Is DDL?</h2>
+<p>DDL (Data Definition Language) is used to <strong>define and manage database structure</strong>.</p>
+<ul>
+<li>operates on database objects, not rows</li>
+<li>describes how data is stored</li>
+<li>forms the foundation for all queries and analysis</li>
+</ul>
+</section>
+<section id="ddl-scope" class="slide level2">
+<h2>DDL Scope</h2>
+<p>DDL affects:</p>
+<ul>
+<li>tables</li>
+<li>columns</li>
+<li>constraints</li>
+<li>indexes</li>
+</ul>
+<p>DDL decisions directly impact:</p>
+<ul>
+<li>data quality</li>
+<li>query performance</li>
+<li>scalability</li>
+</ul>
+</section>
+<section id="common-ddl-statements" class="slide level2">
+<h2>Common DDL Statements</h2>
+<p>The most common DDL commands are:</p>
+<ul>
+<li><code>CREATE</code></li>
+<li><code>ALTER</code></li>
+<li><code>DROP</code></li>
+<li><code>TRUNCATE</code></li>
+</ul>
+<p>Each command changes the database <strong>schema or metadata</strong>.</p>
+</section>
+<section id="create-ddl-context" class="slide level2">
+<h2>CREATE (DDL Context)</h2>
+<p>In DDL, <code>CREATE</code> is used to define <strong>new database objects</strong>.</p>
+<p>Typical use cases:</p>
+<ul>
+<li>creating tables</li>
+<li>creating indexes</li>
+<li>creating schemas</li>
+</ul>
+</section>
+<section id="create-example-index" class="slide level2">
+<h2>CREATE Example | Index</h2>
+<p>Example: create an index to improve analytical queries.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_sales_product_id</span>
+<span id="cb1-2"><a></a><span class="kw">ON</span> sales (product_id);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command:</p>
+<ul>
+<li>does not change data</li>
+<li>improves data access performance</li>
+</ul>
+</section>
+<section id="alter" class="slide level2">
+<h2>ALTER</h2>
+<p><code>ALTER</code> modifies the structure of an <strong>existing object</strong>.</p>
+<p>It allows schema evolution without recreating tables.</p>
+</section>
+<section id="alter-example-constraint" class="slide level2">
+<h2>ALTER Example | Constraint</h2>
+<p>Example: enforce a business rule on existing data.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> products</span>
+<span id="cb2-2"><a></a><span class="kw">ADD</span> <span class="kw">CONSTRAINT</span> chk_products_price</span>
+<span id="cb2-3"><a></a><span class="kw">CHECK</span> (price <span class="op">&gt;=</span> <span class="dv">0</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="drop" class="slide level2">
+<h2>DROP</h2>
+<p><code>DROP</code> permanently removes a database object.</p>
+<ul>
+<li>structure is deleted</li>
+<li>data is lost</li>
+<li>operation is irreversible</li>
+</ul>
+</section>
+<section id="drop-example" class="slide level2">
+<h2>DROP Example</h2>
+<p>Example: remove an unused index.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a></a><span class="kw">DROP</span> <span class="kw">INDEX</span> idx_sales_product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="truncate" class="slide level2">
+<h2>TRUNCATE</h2>
+<p><code>TRUNCATE</code> removes <strong>all rows</strong> from a table while keeping its structure.</p>
+<p>Compared to <code>DELETE</code>:</p>
+<ul>
+<li>much faster</li>
+<li>no <code>WHERE</code> clause</li>
+<li>limited rollback support</li>
+</ul>
+</section>
+<section id="truncate-example" class="slide level2">
+<h2>TRUNCATE Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a></a><span class="kw">TRUNCATE</span> <span class="kw">TABLE</span> sales_staging;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="crud-data-manipulation" class="title-slide slide level1 center">
+<h1>CRUD | Data Manipulation</h1>
+
+</section>
+<section id="what-is-crud" class="slide level2">
+<h2>What Is CRUD?</h2>
+<p>CRUD represents operations used to <strong>work with data inside tables</strong>.</p>
+<p>CRUD stands for:</p>
+<ul>
+<li>CREATE</li>
+<li>READ</li>
+<li>UPDATE</li>
+<li>DELETE</li>
+</ul>
+</section>
+<section id="critical-terminology-clarification" class="slide level2">
+<h2>Critical Terminology Clarification</h2>
+<p>The word <strong>CREATE</strong> means different things depending on context.</p>
+<ul>
+<li><strong>DDL CREATE <span class="math inline">\(\rightarrow\)</span> defines structure</strong></li>
+<li><strong>CRUD CREATE <span class="math inline">\(\rightarrow\)</span> inserts data</strong></li>
+</ul>
+<p>Confusing these is a common beginner mistake.</p>
+</section>
+<section id="ddl-vs-crud-mental-model" class="slide level2">
+<h2>DDL vs CRUD | Mental Model</h2>
+<ul>
+<li><strong>DDL <span class="math inline">\(\rightarrow\)</span> defines the rules</strong></li>
+<li><strong>CRUD <span class="math inline">\(\rightarrow\)</span> follows the rules</strong></li>
+<li><strong>DDL <span class="math inline">\(\rightarrow\)</span> structure</strong></li>
+<li><strong>CRUD <span class="math inline">\(\rightarrow\)</span> data</strong></li>
+</ul>
+</section>
+<section id="create-crud-rightarrow-insert" class="slide level2">
+<h2>CREATE (CRUD <span class="math inline">\(\rightarrow\)</span> INSERT)</h2>
+<p>In CRUD, CREATE means <strong>adding new rows</strong>.</p>
+<p>This is done using <code>INSERT</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a></a><span class="kw">INSERT</span> <span class="kw">INTO</span> products (product_id, product_name, price, <span class="kw">category</span>)</span>
+<span id="cb5-2"><a></a><span class="kw">VALUES</span> (<span class="dv">101</span>, <span class="st">'Wireless Mouse'</span>, <span class="fl">24.99</span>, <span class="st">'Accessories'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="read-select" class="slide level2">
+<h2>READ (SELECT)</h2>
+<p>READ retrieves data and is implemented using <code>SELECT</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb6-2"><a></a>  product_id,</span>
+<span id="cb6-3"><a></a>  product_name</span>
+<span id="cb6-4"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="read-with-filtering" class="slide level2">
+<h2>READ with Filtering</h2>
+<p>Filtering rows is done using <code>WHERE</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a></a>  <span class="op">*</span></span>
+<span id="cb7-3"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb7-4"><a></a><span class="kw">WHERE</span> total_sales <span class="op">&lt;</span> <span class="dv">50</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="update" class="slide level2">
+<h2>UPDATE</h2>
+<p><code>UPDATE</code> modifies existing records.</p>
+<p>Always use <code>WHERE</code> to target specific rows.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">UPDATE</span> products</span>
+<span id="cb8-2"><a></a><span class="kw">SET</span> price <span class="op">=</span> <span class="fl">49.99</span></span>
+<span id="cb8-3"><a></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">12</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="delete" class="slide level2">
+<h2>DELETE</h2>
+<p><code>DELETE</code> removes records from a table.</p>
+<p>Deletions are irreversible and must be used with caution.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">DELETE</span> <span class="kw">FROM</span> sales</span>
+<span id="cb9-2"><a></a><span class="kw">WHERE</span> transaction_id <span class="op">=</span> <span class="dv">1004</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="constraints" class="title-slide slide level1 center">
+<h1>Constraints</h1>
+
+</section>
+<section id="why-constraints-matter" class="slide level2">
+<h2>Why Constraints Matter</h2>
+<p>Constraints play a crucial role in keeping your data <strong>organized, consistent, and reliable</strong>.</p>
+<p>They define what type of data a table or column can accept and are typically applied when tables are created or later via <code>ALTER TABLE</code>.</p>
+<p>When defined correctly, constraints:</p>
+<div class="line-block">enforce data integrity<br>
+prevent invalid or inconsistent data<br>
+act as built-in data quality checks</div>
+</section>
+<section id="types-of-constraints" class="slide level2">
+<h2>Types of Constraints</h2>
+<p>The most common constraints you will encounter are:</p>
+<div class="line-block">UNIQUE<br>
+NOT NULL<br>
+PRIMARY KEY<br>
+FOREIGN KEY<br>
+CHECK</div>
+<p>Each constraint enforces a specific business or technical rule.</p>
+</section>
+<section id="unique-constraint" class="slide level2">
+<h2>UNIQUE Constraint</h2>
+<p>The <code>UNIQUE</code> constraint ensures that <strong>all values in a column are distinct</strong>.</p>
+<p>It is commonly used for attributes that must be unique across entities.</p>
+<p>Typical use cases include:</p>
+<div class="line-block">email addresses<br>
+usernames<br>
+national identification numbers</div>
+</section>
+<section id="unique-constraint-example" class="slide level2">
+<h2>UNIQUE Constraint | Example</h2>
+<p>Ensure each customer email is unique.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers (</span>
+<span id="cb10-2"><a></a>  customer_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb10-3"><a></a>  email TEXT <span class="kw">UNIQUE</span>,</span>
+<span id="cb10-4"><a></a>  phone_number TEXT</span>
+<span id="cb10-5"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>With this constraint in place, PostgreSQL will reject any attempt to insert a duplicate email address.</p>
+</section>
+<section id="not-null-constraint" class="slide level2">
+<h2>NOT NULL Constraint</h2>
+<p>The <code>NOT NULL</code> constraint ensures that a column <strong>cannot contain NULL values</strong>.</p>
+<p>Use this constraint for fields that are mandatory and must always be provided.</p>
+<p>Typical use cases include:</p>
+<div class="line-block">primary identifiers<br>
+contact information<br>
+transaction timestamps</div>
+</section>
+<section id="not-null-constraint-example" class="slide level2">
+<h2>NOT NULL Constraint | Example</h2>
+<p>Ensure every customer has a phone number.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customers (</span>
+<span id="cb11-2"><a></a>  customer_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb11-3"><a></a>  phone_number TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb11-4"><a></a>  email TEXT</span>
+<span id="cb11-5"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If an insert is attempted without a phone number, PostgreSQL will return an error.</p>
+</section>
+<section id="primary-key-constraint" class="slide level2">
+<h2>PRIMARY KEY Constraint</h2>
+<p>A <code>PRIMARY KEY</code> uniquely identifies each row in a table.</p>
+<p>A primary key:</p>
+<div class="line-block">must be unique<br>
+cannot contain NULL values<br>
+exists only once per table</div>
+</section>
+<section id="primary-key-constraint-example" class="slide level2">
+<h2>PRIMARY KEY Constraint | Example</h2>
+<p>Define a primary key for a products table.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> products (</span>
+<span id="cb12-2"><a></a>  product_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb12-3"><a></a>  product_name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-4"><a></a>  price <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>)</span>
+<span id="cb12-5"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>PRIMARY KEY</code> constraint automatically enforces both <code>UNIQUE</code> and <code>NOT NULL</code>.</p>
+</section>
+<section id="foreign-key-constraint" class="slide level2">
+<h2>FOREIGN KEY Constraint</h2>
+<p>A <code>FOREIGN KEY</code> creates a relationship between two tables.</p>
+<p>It ensures <strong>referential integrity</strong>, meaning referenced values must exist in the parent table.</p>
+</section>
+<section id="foreign-key-constraint-example" class="slide level2">
+<h2>FOREIGN KEY Constraint | Example</h2>
+<p>Link sales records to customers.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales (</span>
+<span id="cb13-2"><a></a>  transaction_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb13-3"><a></a>  customer_id <span class="dt">INTEGER</span>,</span>
+<span id="cb13-4"><a></a>  total_sales <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>),</span>
+<span id="cb13-5"><a></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (customer_id)</span>
+<span id="cb13-6"><a></a>    <span class="kw">REFERENCES</span> customers (customer_id)</span>
+<span id="cb13-7"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>With this constraint, you cannot insert a sale for a customer that does not exist.</p>
+</section>
+<section id="check-constraint" class="slide level2">
+<h2>CHECK Constraint</h2>
+<p>The <code>CHECK</code> constraint restricts the range or condition of values that can be inserted into a column.</p>
+<p>It validates data using logical expressions.</p>
+<p>Typical use cases include:</p>
+<div class="line-block">value ranges<br>
+minimum or maximum limits<br>
+domain rules</div>
+</section>
+<section id="check-constraint-example" class="slide level2">
+<h2>CHECK Constraint | Example</h2>
+<p>Ensure total sales values are non-negative.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales (</span>
+<span id="cb14-2"><a></a>  transaction_id <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb14-3"><a></a>  total_sales <span class="dt">NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>) <span class="kw">CHECK</span> (total_sales <span class="op">&gt;=</span> <span class="dv">0</span>)</span>
+<span id="cb14-4"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If a value violates the condition, the insert or update will fail.</p>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="sql-rules-and-best-practices" class="title-slide slide level1 center">
+<h1>SQL Rules and Best Practices</h1>
+
+</section>
+<section id="why-best-practices-matter" class="slide level2">
+<h2>Why Best Practices Matter</h2>
+<p>Writing SQL that works is not enough.</p>
+<p>Good SQL should be:</p>
+<div class="line-block">readable<br>
+consistent<br>
+maintainable<br>
+easy to debug</div>
+<p>These rules help teams collaborate and reduce errors.</p>
+</section>
+<section id="numbers-and-underscores" class="slide level2">
+<h2>Numbers and Underscores</h2>
+<p>In relational databases:</p>
+<div class="line-block">table names cannot start with a number<br>
+column names cannot contain spaces<br>
+underscores should be used to separate words</div>
+<p>This improves compatibility and readability.</p>
+</section>
+<section id="naming-examples" class="slide level2">
+<h2>Naming | Examples</h2>
+<p><strong>Recommended:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer_lifecycle;</span>
+<span id="cb15-2"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Not recommended:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer lifecycle;</span>
+<span id="cb16-2"><a></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="dv">3</span>customer;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="capitalization" class="slide level2">
+<h2>Capitalization</h2>
+<p>A widely accepted convention is:</p>
+<div class="line-block">SQL keywords <span class="math inline">\(\rightarrow\)</span> UPPERCASE<br>
+table names <span class="math inline">\(\rightarrow\)</span> lowercase<br>
+column names <span class="math inline">\(\rightarrow\)</span> lowercase</div>
+<p>This improves readability and consistency.</p>
+</section>
+<section id="capitalization-examples" class="slide level2">
+<h2>Capitalization | Examples</h2>
+<p><strong>Recommended:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a></a><span class="kw">SELECT</span> product_id, product_name</span>
+<span id="cb17-2"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a></a><span class="kw">SELECT</span> transaction_id, total_sales</span>
+<span id="cb18-2"><a></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Not recommended:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a></a><span class="kw">Select</span> PRODUCT_ID, PRODUCT_NAME <span class="kw">From</span> PRODUCTS;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a></a><span class="kw">SELECT</span> TRANSACTION_ID, TOTAL_SALES <span class="kw">FROM</span> SALES;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="commenting-sql-code" class="slide level2">
+<h2>Commenting SQL Code</h2>
+<p>Commenting helps others (and your future self) understand your logic.</p>
+<p><strong>Comments:</strong></p>
+<div class="line-block">do not affect execution<br>
+improve documentation<br>
+help during debugging</div>
+</section>
+<section id="commenting-examples" class="slide level2">
+<h2>Commenting | Examples</h2>
+<p>Single-line comments:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="co">-- select and display the first 10 rows from the sales table</span></span>
+<span id="cb21-2"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb21-3"><a></a><span class="kw">FROM</span> sales</span>
+<span id="cb21-4"><a></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Multi-line comments:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="co">/*</span></span>
+<span id="cb22-2"><a></a><span class="co">SELECT</span></span>
+<span id="cb22-3"><a></a><span class="co">  s.transaction_id,</span></span>
+<span id="cb22-4"><a></a><span class="co">  p.product_name,</span></span>
+<span id="cb22-5"><a></a><span class="co">  s.total_sales</span></span>
+<span id="cb22-6"><a></a><span class="co">FROM sales s</span></span>
+<span id="cb22-7"><a></a><span class="co">JOIN products p</span></span>
+<span id="cb22-8"><a></a><span class="co">  ON s.product_id = p.product_id</span></span>
+<span id="cb22-9"><a></a><span class="co">WHERE s.total_sales &gt; 100;</span></span>
+<span id="cb22-10"><a></a><span class="co">*/</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="aliasing" class="slide level2">
+<h2>Aliasing</h2>
+<p>Aliases assign <strong>temporary names</strong> to tables or columns.</p>
+<p>They are useful for:</p>
+<div class="line-block">improving readability<br>
+shortening long names<br>
+resolving ambiguity in joins</div>
+</section>
+<section id="aliasing-examples" class="slide level2">
+<h2>Aliasing | Examples</h2>
+<p>Column aliases:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a></a>  product_name <span class="kw">AS</span> item_name,</span>
+<span id="cb23-3"><a></a>  price <span class="kw">AS</span> unit_price</span>
+<span id="cb23-4"><a></a><span class="kw">FROM</span> products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Table aliases in joins:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a></a>  s.transaction_id,</span>
+<span id="cb24-3"><a></a>  p.product_name,</span>
+<span id="cb24-4"><a></a>  s.total_sales</span>
+<span id="cb24-5"><a></a><span class="kw">FROM</span> sales <span class="kw">AS</span> s</span>
+<span id="cb24-6"><a></a><span class="kw">JOIN</span> products <span class="kw">AS</span> p</span>
+<span id="cb24-7"><a></a>  <span class="kw">ON</span> s.product_id <span class="op">=</span> p.product_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="key-takeaways" class="slide level2">
+<h2>Key Takeaways</h2>
+<div class="line-block">constraints protect data quality<br>
+best practices improve readability<br>
+consistent SQL scales better in teams<br>
+clean SQL enables better optimization</div>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<p><img src="../../../img/favicon.png" class="slide-logo"></p>
+<div class="footer footer-default">
+<p><a href="../../../materials/sql/session02.html" target="_blank">Back to chapter target</a></p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': true,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1500,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp("https:\/\/hovhannisyan91\.github\.io\/aca");
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
