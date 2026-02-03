@@ -1132,3 +1132,132 @@ FROM tmp_sales;
 - Any time correctness depends on **row visibility**  
 
 This layer gives you **full control over window behavior**, completing the mental model of advanced analytical SQL.
+
+
+## In-Class Assignment: Window Functions on the Analytics Schema
+
+### Context
+
+You are working with the **analytics schema** of a transactional system that includes customers, orders, products, geography, and time.
+
+Your task is to answer analytical questions using **window functions**, without collapsing rows unless explicitly stated.
+
+You are expected to rely on:
+
+- `PARTITION BY`
+- `ORDER BY`
+- Appropriate window functions from the layers discussed in class
+
+Do **not** use subqueries or CTEs unless explicitly requested.
+
+---
+
+### Task 1: Simple Aggregate Window Functions
+
+For each order, compute the **average order value of the customer** across all their orders.
+
+- Use `AVG()` as a window function
+- Preserve one row per order
+
+**Expected concepts:**
+
+- `AVG() OVER (PARTITION BY customer_id)`
+- Row-level enrichment with group context
+
+---
+
+### Task 2: Statistical Window Functions
+
+For each customer, determine the **percent rank of each order** based on order revenue.
+
+Steps:
+
+1. Compute order revenue as  
+   $$\text{order\_revenue} = \sum (\text{quantity} \times \text{price})$$
+2. Apply `PERCENT_RANK()` within each customer
+
+**Expected concepts:**
+
+- Distribution within partitions
+- Relative positioning of rows
+
+---
+
+### Task 3: Value-from-Another-Row Functions
+
+For each customer, compute the **difference between the current order and the previous order** in time.
+
+- Orders must be compared chronologically
+- The first order per customer should return `NULL` for the difference
+
+**Expected concepts:**
+
+- `LAG()`
+- Time-aware ordering
+- Change detection
+
+---
+
+### Task 4: Ranking Functions
+
+Within each **city**, rank customers by their **total lifetime spend**.
+
+Requirements:
+
+- Customers with the same spend must receive the same rank
+- No gaps should appear in ranking
+
+**Expected concepts:**
+
+- `DENSE_RANK()`
+- Partitioning by geography
+- Ranking based on aggregated metrics
+
+---
+
+### Task 5: String Aggregation Window Functions
+
+For each customer, construct a **chronological history of product categories** they have purchased.
+
+Requirements:
+
+- Categories must be ordered by order date
+- The full history must appear on every row for that customer
+
+**Expected concepts:**
+
+- `STRING_AGG()` with window framing
+- Ordered categorical sequencing
+- Behavioral traceability
+
+---
+
+### Task 6: Channel Behavior Pattern (Advanced)
+
+Create a result showing:
+
+- A **channel usage pattern** (e.g. `online, store`)
+- The **number of customers** exhibiting that pattern
+
+Rules:
+
+- Do **not** sort channels alphabetically
+- Let the order emerge naturally from purchase behavior
+- Customers using only one channel must appear as well
+
+**Expected concepts:**
+
+- String aggregation
+- Grouping by derived behavioral signatures
+- Sensitivity to ordering
+
+---
+
+### Submission Guidelines
+
+- Write **one query per task**
+- Each query must be executable independently
+- Focus on correctness, not formatting
+- Prefer clarity over cleverness
+
+This assignment evaluates your ability to reason **across rows**, not just aggregate them.

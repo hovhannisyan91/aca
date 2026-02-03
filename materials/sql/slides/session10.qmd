@@ -34,3 +34,718 @@ format:
 . . .
 
 `Window Functions` define **how rows are compared**.
+
+
+# Window Functions
+
+## Core Idea (Syntax Skeleton)
+
+```sql
+function_name(expression)
+OVER (
+    PARTITION BY ...
+    ORDER BY ...
+    ROWS | RANGE ...
+)
+```
+
+
+## Window Functions vs Aggregations
+
+| Feature | GROUP BY | Window Function |
+|-------|----------|-----------------|
+| Rows preserved | No | Yes |
+| Aggregation scope | Entire group | Sliding / contextual |
+| Output rows | Fewer | Same as input |
+| Analytical use | Summaries | Comparisons, trends |
+
+
+## Simple Conceptual Example {.smaller}
+
+**Input Table: `sales`**
+
+| order_id | customer_id | order_date | revenue |
+|---------:|------------:|-----------:|--------:|
+| 1 | 10 | 2024-01-01 | 100 |
+| 2 | 10 | 2024-01-05 | 150 |
+| 3 | 20 | 2024-01-03 | 200 |
+
+. . .
+
+**Question:**  Show each order **and** the total revenue per customer.
+
+```sql
+SELECT
+    order_id,
+    customer_id,
+    revenue,
+    SUM(revenue) OVER (PARTITION BY customer_id) AS total_customer_revenue
+FROM sales;
+```
+
+. . .
+
+| order_id | customer_id | revenue | total_customer_revenue |
+|---------:|------------:|--------:|-----------------------:|
+| 1 | 10 | 100 | 250 |
+| 2 | 10 | 150 | 250 |
+| 3 | 20 | 200 | 200 |
+
+
+## Analytical Value of Window Functions
+
+
+::: {.incremental}
+
+- Comparing rows to group averages  
+- Ranking and ordering observations  
+- Measuring change over time  
+- Calculating running totals  
+- Detecting trends and anomalies  
+
+:::
+
+
+
+## Window Functions in Dataa Aalytics
+
+
+::: {.incremental}
+
+- Customer lifetime analysis  
+- Time-series trend comparison  
+- Cohort analysis  
+- Funnel progression  
+- Ranking and segmentation  
+
+:::
+
+. . .
+
+They are a cornerstone of **modern analytical SQL**.
+
+
+---
+
+| Construct | Purpose |
+|---------|--------|
+| Temporary Tables | Reuse intermediate results |
+| Subqueries | Inline conditions and metrics |
+| Derived Tables | Inline datasets |
+| CTEs | Named pipelines |
+| **Window Functions** | Context-aware row analytics |
+
+
+##  Temporary Table {.smaller}
+
+
+```sql
+CREATE TEMP TABLE tmp_sales AS
+SELECT *
+FROM (
+    VALUES
+        
+        (1,  'A', DATE '2024-01-01', 100, 'online'),
+        (2,  'A', DATE '2024-01-02', 120, 'store'),
+        (3,  'A', DATE '2024-01-03', 90,  'online'),
+        (4,  'A', DATE '2024-01-04', 130, 'store'),
+
+        
+        (5,  'B', DATE '2024-01-01', 180, 'store'),
+        (6,  'B', DATE '2024-01-02', 200, 'online'),
+        (7,  'B', DATE '2024-01-03', 220, 'online'),
+        (8,  'B', DATE '2024-01-04', 200, 'store'),
+
+        
+        (9,  'C', DATE '2024-01-01', 150, 'online'),
+        (10, 'C', DATE '2024-01-02', 150, 'online'),
+        (11, 'C', DATE '2024-01-03', 170, 'online'),
+
+        
+        (12, 'D', DATE '2024-01-01', 90,  'store'),
+        (13, 'D', DATE '2024-01-02', 110, 'store'),
+
+        
+        (14, 'E', DATE '2024-01-01', 140, 'store'),
+        (15, 'E', DATE '2024-01-02', 160, 'online'),
+        (16, 'E', DATE '2024-01-03', 155, 'store')
+) AS t(
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    channel
+);
+```
+
+##  Window Function Layers {.smaller}
+
+
+::: {.incremental}
+
+1. Aggregate over a window (e.g., `SUM()`, `AVG()`, `COUNT()`)  
+2. Value from another row (e.g., `LAG()`, `LEAD()`)  
+3. Ranking functions (e.g., `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`)  
+4. Cumulative distributions (e.g., `CUME_DIST()`, `PERCENT_RANK()`)  
+5. String aggregation (e.g., `STRING_AGG()`)
+6. Navigational functions (e.g., `FIRST_VALUE()`, `LAST_VALUE()`)
+7. Framing & Advanced Window Control (Advanced)
+   
+:::
+
+
+# Simple Aggregate Window Functions
+
+
+##  Concept {.smaller}
+
+Simple aggregate window functions apply **classical aggregation logic** (such as `SUM`, `AVG`, `COUNT`, `MIN`, `MAX`) **without collapsing rows**.
+
+**They answer the question:**
+
+> How does this row relate to an aggregate of its group/partition?
+
+
+## Common Functions in This Layer  {.smaller}
+  
+```sql
+AGGREGATE_FUNCTION(column)
+OVER (
+    PARTITION BY grouping_column
+)
+```
+
+- `SUM()`  
+- `AVG()`  
+- `COUNT()`  
+- `MIN()`  
+- `MAX()`  
+
+All of them become window functions when combined with `OVER(...)`.
+
+
+##  Example: Average Amount per Customer {.smaller}
+
+**Business intuition:** “How much does this sale differ from the customer’s typical behavior?”
+
+. . .
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+    ) AS avg_customer_amount
+FROM tmp_sales;
+```
+
+. . .
+
+| sale_id | customer_id | amount | avg_customer_amount |
+|--------:|-------------|-------:|--------------------:|
+| 1 | A | 100 | 110.00 |
+| 2 | A | 120 | 110.00 |
+| 5 | B | 200 | 200.00 |
+| 6 | B | 180 | 200.00 |
+| 7 | B | 220 | 200.00 |
+| 8 | B | 200 | 200.00 |
+|10 | C | 150 | 156.67 |
+|11 | C | 170 | 156.67 |
+
+
+# Statistical Window Functions
+
+
+##  Concept {.smaller}
+
+Statistical window functions extend simple aggregates by answering **distributional questions** instead of basic totals or averages.
+
+**They answer the question:**
+
+> Where does this row stand within the distribution of its group?
+
+
+## Common Functions in This Layer
+
+  
+- `PERCENTILE_CONT()`  
+- `PERCENTILE_DISC()`  
+- `MEDIAN()`  
+- `PERCENT_RANK()`  
+- `CUME_DIST()`  
+
+
+## Generic Pattern
+
+```sql
+STAT_FUNCTION(...)
+OVER (
+    PARTITION BY grouping_column
+    ORDER BY ordering_column
+)
+```
+
+
+## Example 1: Percentile Rank of Sale Amount {.smaller}
+
+**Business intuition:** “What is the typical (middle) transaction size for this customer?”
+
+. . .
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (
+        ORDER BY amount
+    ) OVER (
+        PARTITION BY customer_id
+    ) AS median_amount
+FROM tmp_sales;
+```
+
+## Example 2: Percent Rank of Each Transaction {.smaller}
+
+`PERCENT_RANK()` shows **relative position** between 0 and 1.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    PERCENT_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount
+    ) AS percent_rank
+FROM tmp_sales;
+```
+
+. . .
+
+**Interpretation:**
+
+- `0.0` → lowest value in group  
+- `1.0` → highest value in group 
+
+
+## Example 3: Cumulative Distribution {.smaller}
+
+
+## Example 3: Cumulative Distribution
+
+`CUME_DIST()` shows the **share of rows less than or equal to the current row**.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    CUME_DIST() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount
+    ) AS cumulative_distribution
+FROM tmp_sales;
+```
+
+
+## Important 
+
+- Statistical window functions are **order-sensitive**
+- They expose **distribution shape**
+- Results are **relative**, not absolute
+- They are critical for:
+  - Outlier detection  
+  - Segmentation  
+  - Threshold-based decisions  
+
+
+# Value-from-Another-Row Functions
+
+
+## Concept {.smaller}
+
+> How does this row relate to previous or next rows in sequence?
+
+. . .
+
+Value-from-another-row functions enable **row-to-row comparisons** within a defined order, facilitating trend analysis and change detection.
+
+
+. . .
+
+::: {.callout-tip}
+These functions are inherently **time-aware** and **sequence-aware**.
+:::
+
+
+## Generic Pattern
+
+```sql
+VALUE_FUNCTION(column [, offset])
+OVER (
+    PARTITION BY grouping_column
+    ORDER BY ordering_column
+)
+```
+
+
+- `offset` (optional) defines how many rows forward/backward to look
+- Default offset is `1`
+
+
+### Example 1: Previous Transaction Amount (`LAG`)
+
+**Business intuition:**  
+“How did this transaction change compared to the previous one?”
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    LAG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS previous_amount
+FROM tmp_sales;
+```
+
+
+
+
+## Example 2: Next Transaction Amount (`LEAD`)
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    LEAD(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS next_amount
+FROM tmp_sales;
+```
+
+
+## Example 3: First Transaction Amount per Customer
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    FIRST_VALUE(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS first_amount
+FROM tmp_sales;
+```
+
+# Ranking Functions
+
+## Concept {.smaller}
+
+**They answer the question:**
+
+> How does this row rank relative to other rows in its group?
+
+. . .
+
+**Unlike statistical functions:**
+
+- They produce **discrete ranks**, not continuous measures
+- They are sensitive to **ties**
+- They are commonly used for **top-N analysis** and **leaderboards**
+
+. . .
+
+Ranking functions do **not aggregate values**, instead they organize rows.
+
+
+
+## Generic Pattern
+
+```sql
+RANKING_FUNCTION()
+OVER (
+    PARTITION BY grouping_column
+    ORDER BY ordering_column [ASC | DESC]
+)
+```
+
+
+## Function Semantics
+
+
+::: {.callout-important title ="Ranking Function Comparison | Interview Question"}
+| Function | Handles Ties | Gaps in Ranking | Typical Use |
+|--------|--------------|-----------------|-------------|
+| `ROW_NUMBER()` | No | Yes | Unique ordering |
+| `RANK()` | Yes | Yes | Competition ranking |
+| `DENSE_RANK()` | Yes | No | Tier-based ranking |
+
+:::
+
+
+## Example 1: Sequential Ordering (`ROW_NUMBER`)
+
+**Business intuition:**  
+“What is the chronological position of each transaction?”
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS row_number
+FROM tmp_sales;
+```
+
+
+## Example 3: Dense Ranking by Amount (`DENSE_RANK`)
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS dense_rank_amount
+FROM tmp_sales;
+```
+
+## Example 2: Ranking by Amount with Gaps (`RANK`)
+
+**Business intuition:**  
+“What is the spending rank of each transaction?”
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS rank_amount
+FROM tmp_sales;
+```
+
+# String Aggregation Window Functions
+
+
+## Concept {.smaller}
+
+**They answer the question:**
+
+> What sequence or collection of categorical values is associated with this row’s group?
+
+Unlike classic `GROUP BY STRING_AGG`:
+
+- Rows are **not reduced**
+- The aggregated string is **attached to each row**
+- Ordering controls **how the string is built**
+
+This makes string aggregation window functions especially useful for **behavioral tracing**, **auditability**, and **sequence analysis**.
+
+
+## Generic Pattern
+
+```sql
+STRING_AGG(column, delimiter)
+OVER (
+    PARTITION BY grouping_column
+    ORDER BY ordering_column
+)
+```
+
+
+- `delimiter` defines how values are separated
+- `ORDER BY` defines the **sequence of concatenation**
+- The result grows as the window progresses
+
+
+## Example 1: Channels Used by Each Customer (Cumulative)
+
+**Business intuition:**  
+“What interaction channels has this customer used up to this point?”
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    channel,
+    STRING_AGG(channel, ', ') OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS channels_used_so_far
+FROM tmp_sales;
+```
+
+
+## Example 2: Full Channel History per Customer
+
+To attach the **complete history** to every row, use an explicit frame.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    channel,
+    STRING_AGG(channel, ', ') OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS full_channel_history
+FROM tmp_sales;
+```
+
+
+## Example 3: Channel Combination Pattern (Customer Behavior Signature)
+
+```sql
+WITH customer_channels AS (
+    SELECT
+        customer_id,
+        STRING_AGG(DISTINCT channel, ', ' ORDER BY channel) AS channel_pattern
+    FROM tmp_sales
+    GROUP BY customer_id
+)
+SELECT
+    channel_pattern,
+    COUNT(*) AS customer_count
+FROM customer_channels
+GROUP BY channel_pattern;
+```
+
+::: {.callout-important}
+try without ORDER BY in STRING_AGG to see different results
+:::
+
+
+# Window Framing & Advanced Window Control
+
+
+## Concept {.smaller}
+
+**They answer the question:**
+
+> Exactly *which subset of rows* should be used when computing the window value for this row?
+
+
+. . .
+
+- `PARTITION BY` defines **who belongs together**
+- `ORDER BY` defines **sequence**
+
+. . .
+
+
+The **frame** defines **how far backward and forward the window can see**.
+
+Without an explicit frame, SQL engines apply **default framing rules**, which can lead to **unexpected results**, especially for cumulative and navigational functions.
+
+
+## Frame Dimensions {.smaller}
+
+A frame is defined using:
+
+- **Frame type**
+- **Frame boundaries**
+
+```sql
+ROWS | RANGE BETWEEN <start> AND <end>
+```
+
+. . .
+
+**`ROWS`**
+
+- Frame is defined by **physical row positions**
+- Deterministic and predictable
+- Preferred for analytics
+
+**`RANGE`**
+
+- Frame is defined by **logical value ranges**
+- Can include multiple rows with the same ordering value
+- More subtle and engine-dependent
+
+
+## Common Frame Boundaries
+
+| Boundary | Meaning |
+|-------|--------|
+| `UNBOUNDED PRECEDING` | From the first row in the partition |
+| `CURRENT ROW` | The current row |
+| `UNBOUNDED FOLLOWING` | Until the last row in the partition |
+| `n PRECEDING` | n rows before |
+| `n FOLLOWING` | n rows after |
+
+
+
+## Example 1: Running Total (Explicit Frame)
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    SUM(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM tmp_sales;
+```
+
+
+## Example 2: Full-Partition Aggregate (Stable Value)
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS full_partition_avg
+FROM tmp_sales;
+```
+
+---
+
+## Example 3: Moving Window (Last 2 Transactions)
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+        ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_2
+FROM tmp_sales;
+```
+
+
+
