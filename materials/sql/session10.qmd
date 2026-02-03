@@ -3,4 +3,487 @@ title: "Session 10: Data Analysis with SQL | Advanced SQL Functions"
 categories: [Window Functions, LAG, LEAD, ROW_NUMBER, RANK, DENSE_RANK]
 ---
 
-## Window FunctionsWindow Functions
+## Window Functions 
+
+
+A **window function** is a SQL function that performs a calculation over a **set of rows related to the current row**, called a *window*, **without collapsing rows**.
+
+This is the defining property:
+
+> A window function adds information to each row by looking at other rows.
+
+Formally, a window function:
+
+- Operates over a *window* of rows defined by `OVER(...)`
+- Preserves the original number of rows
+- Attaches the computed value back to each row
+
+This distinguishes window functions from:
+
+- `GROUP BY` aggregates (which reduce rows)
+- Subqueries and CTEs (which restructure data)
+
+**Mental model:**
+
+> Each row keeps its identity, but gains context.
+
+---
+
+### Why Window Functions Matter in Analytics
+
+Analytical questions often require **comparison**, not just aggregation.
+
+**Examples:**
+
+  
+- How does this order compare to the customer’s average?  
+- What changed since the previous transaction?  
+- What is the rank of this event within a group?  
+- How does this value evolve over time?  
+
+Window functions are designed precisely for these tasks.
+
+---
+
+### Conceptual Flow
+
+```{mermaid}
+flowchart LR
+    A[Original Rows] --> B[Define Window]
+    B --> C[Compute Over Window]
+    C --> D[Same Rows + New Metric]
+```
+
+
+Before applying window functions to the `analytics` schema, we start with a **controlled temporary table**.  
+This allows us to observe window function behavior clearly, row by row, with explicit inputs and outputs.
+
+The goal of this section is **mechanical understanding**, not business complexity.
+
+---
+
+## Step 0: Create a Dummy Temporary Table
+
+This table represents transactional data over time for multiple entities.
+
+```sql
+CREATE TEMP TABLE tmp_sales AS
+SELECT *
+FROM (
+    VALUES
+        (1, 'A', DATE '2024-01-01', 100),
+        (2, 'A', DATE '2024-01-02', 120),
+        (3, 'A', DATE '2024-01-03', 90),
+        (4, 'B', DATE '2024-01-01', 200),
+        (5, 'B', DATE '2024-01-02', 180),
+        (6, 'B', DATE '2024-01-03', 220)
+) AS t (
+    sale_id,
+    customer_id,
+    sale_date,
+    amount
+);
+```
+
+---
+
+### Base Input Table
+
+| sale_id | customer_id | sale_date  | amount |
+|--------:|-------------|------------|-------:|
+| 1 | A | 2024-01-01 | 100 |
+| 2 | A | 2024-01-02 | 120 |
+| 3 | A | 2024-01-03 | 90 |
+| 4 | B | 2024-01-01 | 200 |
+| 5 | B | 2024-01-02 | 180 |
+| 6 | B | 2024-01-03 | 220 |
+
+-
+## Conceptual Flow
+
+```{mermaid}
+flowchart LR
+    A[Original Rows] --> B[Window Definition]
+    B --> C[Calculation Over Window]
+    C --> D[Same Rows + New Column]
+```
+
+---
+
+## Window Syntax (Generic)
+
+```sql
+function_name(...) OVER (
+    PARTITION BY ...
+    ORDER BY ...
+)
+```
+
+---
+
+## Window Function 1: Basic Aggregation over a Window
+
+### Example: Average Amount per Customer
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (PARTITION BY customer_id) AS avg_customer_amount
+FROM tmp_sales;
+```
+
+### Output
+
+| sale_id | customer_id | sale_date | amount | avg_customer_amount |
+|--------:|-------------|-----------|-------:|--------------------:|
+| 1 | A | 2024-01-01 | 100 | 103.33 |
+| 2 | A | 2024-01-02 | 120 | 103.33 |
+| 3 | A | 2024-01-03 | 90 | 103.33 |
+| 4 | B | 2024-01-01 | 200 | 200.00 |
+| 5 | B | 2024-01-02 | 180 | 200.00 |
+| 6 | B | 2024-01-03 | 220 | 200.00 |
+
+---
+
+## Key Observation
+
+- Same number of rows in input and output  
+- Aggregation is **contextual**, not collapsing  
+- Each row keeps its identity  
+
+---
+
+## Window Function 2: `ROW_NUMBER()`
+
+Assigns a **unique sequential number** within each partition.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS row_num
+FROM tmp_sales;
+```
+
+### Output
+
+| sale_id | customer_id | sale_date | amount | row_num |
+|--------:|-------------|-----------|-------:|--------:|
+| 1 | A | 2024-01-01 | 100 | 1 |
+| 2 | A | 2024-01-02 | 120 | 2 |
+| 3 | A | 2024-01-03 | 90 | 3 |
+| 4 | B | 2024-01-01 | 200 | 1 |
+| 5 | B | 2024-01-02 | 180 | 2 |
+| 6 | B | 2024-01-03 | 220 | 3 |
+
+---
+
+## Window Function 3: `LAG()`
+
+Accesses the **previous row’s value** within the window.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    LAG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS prev_amount
+FROM tmp_sales;
+```
+
+### Output
+
+| sale_id | customer_id | sale_date | amount | prev_amount |
+|--------:|-------------|-----------|-------:|------------:|
+| 1 | A | 2024-01-01 | 100 | NULL |
+| 2 | A | 2024-01-02 | 120 | 100 |
+| 3 | A | 2024-01-03 | 90 | 120 |
+| 4 | B | 2024-01-01 | 200 | NULL |
+| 5 | B | 2024-01-02 | 180 | 200 |
+| 6 | B | 2024-01-03 | 220 | 180 |
+
+---
+
+## Window Function 4: `LEAD()`
+
+Accesses the **next row’s value** within the window.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    LEAD(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS next_amount
+FROM tmp_sales;
+```
+
+---
+
+## Window Function 5: `RANK()` and `DENSE_RANK()`
+
+Ranking rows based on a metric **with ties**.
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS rank_amount,
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS dense_rank_amount
+FROM tmp_sales;
+```
+
+---
+
+## Window Functions vs Earlier Constructs
+
+| Feature | GROUP BY | Subquery | CTE | Window Function |
+|-------|----------|----------|-----|-----------------|
+| Keeps rows | No | Yes | Yes | Yes |
+| Cross-row context | Limited | Limited | Limited | Yes |
+| Best for | Aggregation | Filtering | Pipelines | Analytics |
+
+---
+
+## Transition to Real Analytics Tables
+
+The exact same logic applies to:
+
+- `tmp_order_revenue`
+- Customer-level metrics
+- Time-based order analysis
+- Ranking customers, orders, cities
+
+Only the **data scale** changes — not the reasoning.
+
+The next section applies each window function to the `analytics` schema step by step.
+
+
+
+## Step 0: Create an Extended Dummy Temporary Table
+
+Before applying window functions to the `analytics` schema, we use a **controlled temporary table** with:
+
+- Multiple entities  
+- Time ordering  
+- Repeated values (for ranking)  
+- A categorical column (for `STRING_AGG`)  
+
+```sql
+CREATE TEMP TABLE tmp_sales AS
+SELECT *
+FROM (
+    VALUES
+        (1,  'A', DATE '2024-01-01', 100, 'online'),
+        (2,  'A', DATE '2024-01-02', 120, 'store'),
+        (3,  'A', DATE '2024-01-03', 90,  'online'),
+        (4,  'A', DATE '2024-01-04', 130, 'store'),
+        (5,  'B', DATE '2024-01-01', 200, 'online'),
+        (6,  'B', DATE '2024-01-02', 180, 'store'),
+        (7,  'B', DATE '2024-01-03', 220, 'online'),
+        (8,  'B', DATE '2024-01-04', 200, 'store'),
+        (9,  'C', DATE '2024-01-01', 150, 'store'),
+        (10, 'C', DATE '2024-01-02', 150, 'online'),
+        (11, 'C', DATE '2024-01-03', 170, 'online')
+) AS t(
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    channel
+);
+```
+
+---
+
+## Base Input Table
+
+| sale_id | customer_id | sale_date  | amount | channel |
+|--------:|-------------|------------|-------:|---------|
+| 1 | A | 2024-01-01 | 100 | online |
+| 2 | A | 2024-01-02 | 120 | store |
+| 3 | A | 2024-01-03 | 90 | online |
+| 4 | A | 2024-01-04 | 130 | store |
+| 5 | B | 2024-01-01 | 200 | online |
+| 6 | B | 2024-01-02 | 180 | store |
+| 7 | B | 2024-01-03 | 220 | online |
+| 8 | B | 2024-01-04 | 200 | store |
+| 9 | C | 2024-01-01 | 150 | store |
+|10 | C | 2024-01-02 | 150 | online |
+|11 | C | 2024-01-03 | 170 | online |
+
+---
+
+## Window Syntax (Generic)
+
+```sql
+function_name(expression)
+OVER (
+    PARTITION BY ...
+    ORDER BY ...
+)
+```
+
+- `PARTITION BY` defines **who is compared with whom**
+- `ORDER BY` defines **sequence inside the window**
+- The window determines **which rows are visible**
+
+---
+
+## Window Function 1: Aggregate Over a Window
+
+### Example: Average Amount per Customer
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (PARTITION BY customer_id) AS avg_customer_amount
+FROM tmp_sales;
+```
+
+### Output
+
+| sale_id | customer_id | amount | avg_customer_amount |
+|--------:|-------------|-------:|--------------------:|
+| 1 | A | 100 | 110.00 |
+| 2 | A | 120 | 110.00 |
+| 3 | A | 90 | 110.00 |
+| 4 | A | 130 | 110.00 |
+| 5 | B | 200 | 200.00 |
+| 6 | B | 180 | 200.00 |
+| 7 | B | 220 | 200.00 |
+| 8 | B | 200 | 200.00 |
+| 9 | C | 150 | 156.67 |
+|10 | C | 150 | 156.67 |
+|11 | C | 170 | 156.67 |
+
+---
+
+## Window Function 2: `ROW_NUMBER()`
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS row_num
+FROM tmp_sales;
+```
+
+---
+
+## Window Function 3: `LAG()`
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    LAG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS prev_amount
+FROM tmp_sales;
+```
+
+---
+
+## Window Function 4: `LEAD()`
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    LEAD(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS next_amount
+FROM tmp_sales;
+```
+
+---
+
+## Window Function 5: `RANK()` and `DENSE_RANK()`
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS rank_amount,
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS dense_rank_amount
+FROM tmp_sales;
+```
+
+---
+
+## Window Function 6: `STRING_AGG()` as a Window Function
+
+### Example: Channels Used by Each Customer
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    channel,
+    STRING_AGG(channel, ', ') OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+    ) AS channels_used
+FROM tmp_sales;
+```
+
+### Output (Conceptual)
+
+| sale_id | customer_id | channel | channels_used |
+|--------:|-------------|---------|---------------|
+| 1 | A | online | online |
+| 2 | A | store | online, store |
+| 3 | A | online | online, store, online |
+| 4 | A | store | online, store, online, store |
+
+---
+
+## Key Observations
+
+- Window functions **never reduce rows**
+- Context is defined explicitly via `OVER(...)`
+- Ordering matters for time-based logic
+- String aggregation can also be contextual
