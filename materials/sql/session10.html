@@ -108,10 +108,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
-<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
-<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -811,49 +837,107 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#window-functions" id="toc-window-functions" class="nav-link active" data-scroll-target="#window-functions">Window Functions</a>
   <ul class="collapse">
   <li><a href="#why-window-functions-matter-in-analytics" id="toc-why-window-functions-matter-in-analytics" class="nav-link" data-scroll-target="#why-window-functions-matter-in-analytics">Why Window Functions Matter in Analytics</a></li>
-  <li><a href="#conceptual-flow" id="toc-conceptual-flow" class="nav-link" data-scroll-target="#conceptual-flow">Conceptual Flow</a></li>
+  <li><a href="#window-function-types-layers" id="toc-window-function-types-layers" class="nav-link" data-scroll-target="#window-function-types-layers">Window Function Types Layers</a></li>
+  <li><a href="#window-syntax-generic" id="toc-window-syntax-generic" class="nav-link" data-scroll-target="#window-syntax-generic">Window Syntax (Generic)</a></li>
   </ul></li>
-  <li><a href="#step-0-create-a-dummy-temporary-table" id="toc-step-0-create-a-dummy-temporary-table" class="nav-link" data-scroll-target="#step-0-create-a-dummy-temporary-table">Step 0: Create a Dummy Temporary Table</a>
+  <li><a href="#step-0-create-an-extended-dummy-temporary-table" id="toc-step-0-create-an-extended-dummy-temporary-table" class="nav-link" data-scroll-target="#step-0-create-an-extended-dummy-temporary-table">Step 0: Create an Extended Dummy Temporary Table</a>
   <ul class="collapse">
   <li><a href="#base-input-table" id="toc-base-input-table" class="nav-link" data-scroll-target="#base-input-table">Base Input Table</a></li>
   </ul></li>
-  <li><a href="#window-syntax-generic" id="toc-window-syntax-generic" class="nav-link" data-scroll-target="#window-syntax-generic">Window Syntax (Generic)</a></li>
-  <li><a href="#window-function-1-basic-aggregation-over-a-window" id="toc-window-function-1-basic-aggregation-over-a-window" class="nav-link" data-scroll-target="#window-function-1-basic-aggregation-over-a-window">Window Function 1: Basic Aggregation over a Window</a>
+  <li><a href="#window-function-1-aggregate-over-a-window" id="toc-window-function-1-aggregate-over-a-window" class="nav-link" data-scroll-target="#window-function-1-aggregate-over-a-window">Window Function 1: Aggregate Over a Window</a>
   <ul class="collapse">
   <li><a href="#example-average-amount-per-customer" id="toc-example-average-amount-per-customer" class="nav-link" data-scroll-target="#example-average-amount-per-customer">Example: Average Amount per Customer</a></li>
   <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a></li>
   </ul></li>
-  <li><a href="#key-observation" id="toc-key-observation" class="nav-link" data-scroll-target="#key-observation">Key Observation</a></li>
-  <li><a href="#window-function-2-row_number" id="toc-window-function-2-row_number" class="nav-link" data-scroll-target="#window-function-2-row_number">Window Function 2: <code>ROW_NUMBER()</code></a>
+  <li><a href="#creating-an-extended-dummy-temporary-table" id="toc-creating-an-extended-dummy-temporary-table" class="nav-link" data-scroll-target="#creating-an-extended-dummy-temporary-table">Creating an Extended Dummy Temporary Table</a></li>
+  <li><a href="#window-function-layer-1-simple-aggregate-window-functions" id="toc-window-function-layer-1-simple-aggregate-window-functions" class="nav-link" data-scroll-target="#window-function-layer-1-simple-aggregate-window-functions">Window Function Layer 1: Simple Aggregate Window Functions</a>
   <ul class="collapse">
+  <li><a href="#concept" id="toc-concept" class="nav-link" data-scroll-target="#concept">Concept</a></li>
+  <li><a href="#common-functions-in-this-layer" id="toc-common-functions-in-this-layer" class="nav-link" data-scroll-target="#common-functions-in-this-layer">Common Functions in This Layer</a></li>
+  <li><a href="#generic-pattern" id="toc-generic-pattern" class="nav-link" data-scroll-target="#generic-pattern">Generic Pattern</a></li>
+  <li><a href="#example-1-average-amount-per-customer" id="toc-example-1-average-amount-per-customer" class="nav-link" data-scroll-target="#example-1-average-amount-per-customer">Example 1: Average Amount per Customer</a></li>
   <li><a href="#output-1" id="toc-output-1" class="nav-link" data-scroll-target="#output-1">Output</a></li>
+  <li><a href="#example-2-total-spend-per-customer" id="toc-example-2-total-spend-per-customer" class="nav-link" data-scroll-target="#example-2-total-spend-per-customer">Example 2: Total Spend per Customer</a></li>
+  <li><a href="#example-3-number-of-transactions-per-customer" id="toc-example-3-number-of-transactions-per-customer" class="nav-link" data-scroll-target="#example-3-number-of-transactions-per-customer">Example 3: Number of Transactions per Customer</a></li>
+  <li><a href="#example-4-minimum-and-maximum-amount-per-customer" id="toc-example-4-minimum-and-maximum-amount-per-customer" class="nav-link" data-scroll-target="#example-4-minimum-and-maximum-amount-per-customer">Example 4: Minimum and Maximum Amount per Customer</a></li>
+  <li><a href="#summary-of-simple-aggregate-window-functions" id="toc-summary-of-simple-aggregate-window-functions" class="nav-link" data-scroll-target="#summary-of-simple-aggregate-window-functions">Summary of Simple Aggregate Window Functions</a></li>
+  <li><a href="#when-to-use-simple-aggregate-window-functions" id="toc-when-to-use-simple-aggregate-window-functions" class="nav-link" data-scroll-target="#when-to-use-simple-aggregate-window-functions">When to Use Simple Aggregate Window Functions</a></li>
   </ul></li>
-  <li><a href="#window-function-3-lag" id="toc-window-function-3-lag" class="nav-link" data-scroll-target="#window-function-3-lag">Window Function 3: <code>LAG()</code></a>
+  <li><a href="#window-function-layer-2-statistical-window-functions" id="toc-window-function-layer-2-statistical-window-functions" class="nav-link" data-scroll-target="#window-function-layer-2-statistical-window-functions">Window Function Layer 2: Statistical Window Functions</a>
   <ul class="collapse">
-  <li><a href="#output-2" id="toc-output-2" class="nav-link" data-scroll-target="#output-2">Output</a></li>
-  </ul></li>
-  <li><a href="#window-function-4-lead" id="toc-window-function-4-lead" class="nav-link" data-scroll-target="#window-function-4-lead">Window Function 4: <code>LEAD()</code></a></li>
-  <li><a href="#window-function-5-rank-and-dense_rank" id="toc-window-function-5-rank-and-dense_rank" class="nav-link" data-scroll-target="#window-function-5-rank-and-dense_rank">Window Function 5: <code>RANK()</code> and <code>DENSE_RANK()</code></a></li>
-  <li><a href="#window-functions-vs-earlier-constructs" id="toc-window-functions-vs-earlier-constructs" class="nav-link" data-scroll-target="#window-functions-vs-earlier-constructs">Window Functions vs Earlier Constructs</a></li>
-  <li><a href="#transition-to-real-analytics-tables" id="toc-transition-to-real-analytics-tables" class="nav-link" data-scroll-target="#transition-to-real-analytics-tables">Transition to Real Analytics Tables</a></li>
-  <li><a href="#step-0-create-an-extended-dummy-temporary-table" id="toc-step-0-create-an-extended-dummy-temporary-table" class="nav-link" data-scroll-target="#step-0-create-an-extended-dummy-temporary-table">Step 0: Create an Extended Dummy Temporary Table</a></li>
-  <li><a href="#base-input-table-1" id="toc-base-input-table-1" class="nav-link" data-scroll-target="#base-input-table-1">Base Input Table</a></li>
-  <li><a href="#window-syntax-generic-1" id="toc-window-syntax-generic-1" class="nav-link" data-scroll-target="#window-syntax-generic-1">Window Syntax (Generic)</a></li>
-  <li><a href="#window-function-1-aggregate-over-a-window" id="toc-window-function-1-aggregate-over-a-window" class="nav-link" data-scroll-target="#window-function-1-aggregate-over-a-window">Window Function 1: Aggregate Over a Window</a>
-  <ul class="collapse">
-  <li><a href="#example-average-amount-per-customer-1" id="toc-example-average-amount-per-customer-1" class="nav-link" data-scroll-target="#example-average-amount-per-customer-1">Example: Average Amount per Customer</a></li>
-  <li><a href="#output-3" id="toc-output-3" class="nav-link" data-scroll-target="#output-3">Output</a></li>
-  </ul></li>
-  <li><a href="#window-function-2-row_number-1" id="toc-window-function-2-row_number-1" class="nav-link" data-scroll-target="#window-function-2-row_number-1">Window Function 2: <code>ROW_NUMBER()</code></a></li>
-  <li><a href="#window-function-3-lag-1" id="toc-window-function-3-lag-1" class="nav-link" data-scroll-target="#window-function-3-lag-1">Window Function 3: <code>LAG()</code></a></li>
-  <li><a href="#window-function-4-lead-1" id="toc-window-function-4-lead-1" class="nav-link" data-scroll-target="#window-function-4-lead-1">Window Function 4: <code>LEAD()</code></a></li>
-  <li><a href="#window-function-5-rank-and-dense_rank-1" id="toc-window-function-5-rank-and-dense_rank-1" class="nav-link" data-scroll-target="#window-function-5-rank-and-dense_rank-1">Window Function 5: <code>RANK()</code> and <code>DENSE_RANK()</code></a></li>
-  <li><a href="#window-function-6-string_agg-as-a-window-function" id="toc-window-function-6-string_agg-as-a-window-function" class="nav-link" data-scroll-target="#window-function-6-string_agg-as-a-window-function">Window Function 6: <code>STRING_AGG()</code> as a Window Function</a>
-  <ul class="collapse">
-  <li><a href="#example-channels-used-by-each-customer" id="toc-example-channels-used-by-each-customer" class="nav-link" data-scroll-target="#example-channels-used-by-each-customer">Example: Channels Used by Each Customer</a></li>
-  <li><a href="#output-conceptual" id="toc-output-conceptual" class="nav-link" data-scroll-target="#output-conceptual">Output (Conceptual)</a></li>
-  </ul></li>
+  <li><a href="#concept-1" id="toc-concept-1" class="nav-link" data-scroll-target="#concept-1">Concept</a></li>
+  <li><a href="#common-functions-in-this-layer-1" id="toc-common-functions-in-this-layer-1" class="nav-link" data-scroll-target="#common-functions-in-this-layer-1">Common Functions in This Layer</a></li>
+  <li><a href="#generic-pattern-1" id="toc-generic-pattern-1" class="nav-link" data-scroll-target="#generic-pattern-1">Generic Pattern</a></li>
+  <li><a href="#example-1-median-amount-per-customer" id="toc-example-1-median-amount-per-customer" class="nav-link" data-scroll-target="#example-1-median-amount-per-customer">Example 1: Median Amount per Customer</a></li>
+  <li><a href="#example-2-percent-rank-of-each-transaction" id="toc-example-2-percent-rank-of-each-transaction" class="nav-link" data-scroll-target="#example-2-percent-rank-of-each-transaction">Example 2: Percent Rank of Each Transaction</a></li>
+  <li><a href="#example-3-cumulative-distribution" id="toc-example-3-cumulative-distribution" class="nav-link" data-scroll-target="#example-3-cumulative-distribution">Example 3: Cumulative Distribution</a></li>
+  <li><a href="#example-4-quartile-assignment" id="toc-example-4-quartile-assignment" class="nav-link" data-scroll-target="#example-4-quartile-assignment">Example 4: Quartile Assignment</a></li>
   <li><a href="#key-observations" id="toc-key-observations" class="nav-link" data-scroll-target="#key-observations">Key Observations</a></li>
+  <li><a href="#when-to-use-statistical-window-functions" id="toc-when-to-use-statistical-window-functions" class="nav-link" data-scroll-target="#when-to-use-statistical-window-functions">When to Use Statistical Window Functions</a></li>
+  </ul></li>
+  <li><a href="#window-function-layer-3-value-from-another-row-functions" id="toc-window-function-layer-3-value-from-another-row-functions" class="nav-link" data-scroll-target="#window-function-layer-3-value-from-another-row-functions">Window Function Layer 3: Value-from-Another-Row Functions</a>
+  <ul class="collapse">
+  <li><a href="#concept-2" id="toc-concept-2" class="nav-link" data-scroll-target="#concept-2">Concept</a></li>
+  <li><a href="#common-functions-in-this-layer-2" id="toc-common-functions-in-this-layer-2" class="nav-link" data-scroll-target="#common-functions-in-this-layer-2">Common Functions in This Layer</a></li>
+  <li><a href="#generic-pattern-2" id="toc-generic-pattern-2" class="nav-link" data-scroll-target="#generic-pattern-2">Generic Pattern</a></li>
+  <li><a href="#example-1-previous-transaction-amount-lag" id="toc-example-1-previous-transaction-amount-lag" class="nav-link" data-scroll-target="#example-1-previous-transaction-amount-lag">Example 1: Previous Transaction Amount (<code>LAG</code>)</a></li>
+  <li><a href="#example-2-next-transaction-amount-lead" id="toc-example-2-next-transaction-amount-lead" class="nav-link" data-scroll-target="#example-2-next-transaction-amount-lead">Example 2: Next Transaction Amount (<code>LEAD</code>)</a></li>
+  <li><a href="#example-3-change-since-previous-transaction" id="toc-example-3-change-since-previous-transaction" class="nav-link" data-scroll-target="#example-3-change-since-previous-transaction">Example 3: Change Since Previous Transaction</a></li>
+  <li><a href="#example-4-first-transaction-amount-per-customer" id="toc-example-4-first-transaction-amount-per-customer" class="nav-link" data-scroll-target="#example-4-first-transaction-amount-per-customer">Example 4: First Transaction Amount per Customer</a></li>
+  <li><a href="#example-5-last-transaction-amount-per-customer" id="toc-example-5-last-transaction-amount-per-customer" class="nav-link" data-scroll-target="#example-5-last-transaction-amount-per-customer">Example 5: Last Transaction Amount per Customer</a></li>
+  <li><a href="#when-to-use-value-from-another-row-functions" id="toc-when-to-use-value-from-another-row-functions" class="nav-link" data-scroll-target="#when-to-use-value-from-another-row-functions">When to Use Value-from-Another-Row Functions</a></li>
+  </ul></li>
+  <li><a href="#window-function-layer-4-ranking-functions" id="toc-window-function-layer-4-ranking-functions" class="nav-link" data-scroll-target="#window-function-layer-4-ranking-functions">Window Function Layer 4: Ranking Functions</a>
+  <ul class="collapse">
+  <li><a href="#concept-3" id="toc-concept-3" class="nav-link" data-scroll-target="#concept-3">Concept</a></li>
+  <li><a href="#common-functions-in-this-layer-3" id="toc-common-functions-in-this-layer-3" class="nav-link" data-scroll-target="#common-functions-in-this-layer-3">Common Functions in This Layer</a></li>
+  <li><a href="#generic-pattern-3" id="toc-generic-pattern-3" class="nav-link" data-scroll-target="#generic-pattern-3">Generic Pattern</a></li>
+  <li><a href="#function-semantics" id="toc-function-semantics" class="nav-link" data-scroll-target="#function-semantics">Function Semantics</a></li>
+  <li><a href="#example-1-sequential-ordering-row_number" id="toc-example-1-sequential-ordering-row_number" class="nav-link" data-scroll-target="#example-1-sequential-ordering-row_number">Example 1: Sequential Ordering (<code>ROW_NUMBER</code>)</a></li>
+  <li><a href="#example-2-ranking-by-amount-with-gaps-rank" id="toc-example-2-ranking-by-amount-with-gaps-rank" class="nav-link" data-scroll-target="#example-2-ranking-by-amount-with-gaps-rank">Example 2: Ranking by Amount with Gaps (<code>RANK</code>)</a></li>
+  <li><a href="#example-3-dense-ranking-by-amount-dense_rank" id="toc-example-3-dense-ranking-by-amount-dense_rank" class="nav-link" data-scroll-target="#example-3-dense-ranking-by-amount-dense_rank">Example 3: Dense Ranking by Amount (<code>DENSE_RANK</code>)</a></li>
+  <li><a href="#summary-of-ranking-functions" id="toc-summary-of-ranking-functions" class="nav-link" data-scroll-target="#summary-of-ranking-functions">Summary of Ranking Functions</a></li>
+  <li><a href="#practical-analytics-use-cases" id="toc-practical-analytics-use-cases" class="nav-link" data-scroll-target="#practical-analytics-use-cases">Practical Analytics Use Cases</a></li>
+  <li><a href="#when-to-use-ranking-functions" id="toc-when-to-use-ranking-functions" class="nav-link" data-scroll-target="#when-to-use-ranking-functions">When to Use Ranking Functions</a></li>
+  </ul></li>
+  <li><a href="#window-function-layer-5-string-aggregation-window-functions" id="toc-window-function-layer-5-string-aggregation-window-functions" class="nav-link" data-scroll-target="#window-function-layer-5-string-aggregation-window-functions">Window Function Layer 5: String Aggregation Window Functions</a>
+  <ul class="collapse">
+  <li><a href="#concept-4" id="toc-concept-4" class="nav-link" data-scroll-target="#concept-4">Concept</a></li>
+  <li><a href="#common-functions-in-this-layer-4" id="toc-common-functions-in-this-layer-4" class="nav-link" data-scroll-target="#common-functions-in-this-layer-4">Common Functions in This Layer</a></li>
+  <li><a href="#generic-pattern-4" id="toc-generic-pattern-4" class="nav-link" data-scroll-target="#generic-pattern-4">Generic Pattern</a></li>
+  <li><a href="#example-1-channels-used-by-each-customer-cumulative" id="toc-example-1-channels-used-by-each-customer-cumulative" class="nav-link" data-scroll-target="#example-1-channels-used-by-each-customer-cumulative">Example 1: Channels Used by Each Customer (Cumulative)</a></li>
+  <li><a href="#output-conceptual" id="toc-output-conceptual" class="nav-link" data-scroll-target="#output-conceptual">Output (Conceptual)</a></li>
+  <li><a href="#example-2-full-channel-history-per-customer" id="toc-example-2-full-channel-history-per-customer" class="nav-link" data-scroll-target="#example-2-full-channel-history-per-customer">Example 2: Full Channel History per Customer</a></li>
+  <li><a href="#example-3-channel-combination-pattern-customer-behavior-signature" id="toc-example-3-channel-combination-pattern-customer-behavior-signature" class="nav-link" data-scroll-target="#example-3-channel-combination-pattern-customer-behavior-signature">Example 3: Channel Combination Pattern (Customer Behavior Signature)</a></li>
+  <li><a href="#summary-of-string-aggregation-window-functions" id="toc-summary-of-string-aggregation-window-functions" class="nav-link" data-scroll-target="#summary-of-string-aggregation-window-functions">Summary of String Aggregation Window Functions</a></li>
+  <li><a href="#practical-analytics-use-cases-1" id="toc-practical-analytics-use-cases-1" class="nav-link" data-scroll-target="#practical-analytics-use-cases-1">Practical Analytics Use Cases</a></li>
+  <li><a href="#when-to-use-string-aggregation-window-functions" id="toc-when-to-use-string-aggregation-window-functions" class="nav-link" data-scroll-target="#when-to-use-string-aggregation-window-functions">When to Use String Aggregation Window Functions</a></li>
+  </ul></li>
+  <li><a href="#window-function-layer-6-window-framing-advanced-window-control" id="toc-window-function-layer-6-window-framing-advanced-window-control" class="nav-link" data-scroll-target="#window-function-layer-6-window-framing-advanced-window-control">Window Function Layer 6: Window Framing &amp; Advanced Window Control</a>
+  <ul class="collapse">
+  <li><a href="#concept-5" id="toc-concept-5" class="nav-link" data-scroll-target="#concept-5">Concept</a></li>
+  <li><a href="#frame-dimensions" id="toc-frame-dimensions" class="nav-link" data-scroll-target="#frame-dimensions">Frame Dimensions</a></li>
+  <li><a href="#frame-types" id="toc-frame-types" class="nav-link" data-scroll-target="#frame-types">Frame Types</a></li>
+  <li><a href="#common-frame-boundaries" id="toc-common-frame-boundaries" class="nav-link" data-scroll-target="#common-frame-boundaries">Common Frame Boundaries</a></li>
+  <li><a href="#default-frame-important" id="toc-default-frame-important" class="nav-link" data-scroll-target="#default-frame-important">Default Frame (Important)</a></li>
+  <li><a href="#example-1-running-total-explicit-frame" id="toc-example-1-running-total-explicit-frame" class="nav-link" data-scroll-target="#example-1-running-total-explicit-frame">Example 1: Running Total (Explicit Frame)</a></li>
+  <li><a href="#example-2-full-partition-aggregate-stable-value" id="toc-example-2-full-partition-aggregate-stable-value" class="nav-link" data-scroll-target="#example-2-full-partition-aggregate-stable-value">Example 2: Full-Partition Aggregate (Stable Value)</a></li>
+  <li><a href="#example-3-moving-window-last-2-transactions" id="toc-example-3-moving-window-last-2-transactions" class="nav-link" data-scroll-target="#example-3-moving-window-last-2-transactions">Example 3: Moving Window (Last 2 Transactions)</a></li>
+  <li><a href="#example-4-correct-last_value-usage" id="toc-example-4-correct-last_value-usage" class="nav-link" data-scroll-target="#example-4-correct-last_value-usage">Example 4: Correct <code>LAST_VALUE()</code> Usage</a></li>
+  <li><a href="#key-observations-1" id="toc-key-observations-1" class="nav-link" data-scroll-target="#key-observations-1">Key Observations</a></li>
+  <li><a href="#when-to-use-explicit-window-frames" id="toc-when-to-use-explicit-window-frames" class="nav-link" data-scroll-target="#when-to-use-explicit-window-frames">When to Use Explicit Window Frames</a></li>
+  </ul></li>
+  <li><a href="#in-class-assignment-window-functions-on-the-analytics-schema" id="toc-in-class-assignment-window-functions-on-the-analytics-schema" class="nav-link" data-scroll-target="#in-class-assignment-window-functions-on-the-analytics-schema">In-Class Assignment: Window Functions on the Analytics Schema</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context">Context</a></li>
+  <li><a href="#task-1-simple-aggregate-window-functions" id="toc-task-1-simple-aggregate-window-functions" class="nav-link" data-scroll-target="#task-1-simple-aggregate-window-functions">Task 1: Simple Aggregate Window Functions</a></li>
+  <li><a href="#task-2-statistical-window-functions" id="toc-task-2-statistical-window-functions" class="nav-link" data-scroll-target="#task-2-statistical-window-functions">Task 2: Statistical Window Functions</a></li>
+  <li><a href="#task-3-value-from-another-row-functions" id="toc-task-3-value-from-another-row-functions" class="nav-link" data-scroll-target="#task-3-value-from-another-row-functions">Task 3: Value-from-Another-Row Functions</a></li>
+  <li><a href="#task-4-ranking-functions" id="toc-task-4-ranking-functions" class="nav-link" data-scroll-target="#task-4-ranking-functions">Task 4: Ranking Functions</a></li>
+  <li><a href="#task-5-string-aggregation-window-functions" id="toc-task-5-string-aggregation-window-functions" class="nav-link" data-scroll-target="#task-5-string-aggregation-window-functions">Task 5: String Aggregation Window Functions</a></li>
+  <li><a href="#task-6-channel-behavior-pattern-advanced" id="toc-task-6-channel-behavior-pattern-advanced" class="nav-link" data-scroll-target="#task-6-channel-behavior-pattern-advanced">Task 6: Channel Behavior Pattern (Advanced)</a></li>
+  <li><a href="#submission-guidelines" id="toc-submission-guidelines" class="nav-link" data-scroll-target="#submission-guidelines">Submission Guidelines</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -891,17 +975,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="window-functions" class="level2">
 <h2 class="anchored" data-anchor-id="window-functions">Window Functions</h2>
 <p>A <strong>window function</strong> is a SQL function that performs a calculation over a <strong>set of rows related to the current row</strong>, called a <em>window</em>, <strong>without collapsing rows</strong>.</p>
-<p>This is the defining property:</p>
+<p><strong>This is the defining property:</strong></p>
 <blockquote class="blockquote">
 <p>A window function adds information to each row by looking at other rows.</p>
 </blockquote>
-<p>Formally, a window function:</p>
+<p><strong>Formally, a window function:</strong></p>
 <ul>
 <li>Operates over a <em>window</em> of rows defined by <code>OVER(...)</code></li>
 <li>Preserves the original number of rows</li>
 <li>Attaches the computed value back to each row</li>
 </ul>
-<p>This distinguishes window functions from:</p>
+<p><strong>This distinguishes window functions from:</strong></p>
 <ul>
 <li><code>GROUP BY</code> aggregates (which reduce rows)</li>
 <li>Subqueries and CTEs (which restructure data)</li>
@@ -910,7 +994,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <blockquote class="blockquote">
 <p>Each row keeps its identity, but gains context.</p>
 </blockquote>
-<hr>
 <section id="why-window-functions-matter-in-analytics" class="level3">
 <h3 class="anchored" data-anchor-id="why-window-functions-matter-in-analytics">Why Window Functions Matter in Analytics</h3>
 <p>Analytical questions often require <strong>comparison</strong>, not just aggregation.</p>
@@ -925,53 +1008,88 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>How does this value evolve over time?</li>
 </ul>
 <p>Window functions are designed precisely for these tasks.</p>
-<hr>
 </section>
-<section id="conceptual-flow" class="level3">
-<h3 class="anchored" data-anchor-id="conceptual-flow">Conceptual Flow</h3>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    A[Original Rows] --&gt; B[Define Window]
-    B --&gt; C[Compute Over Window]
-    C --&gt; D[Same Rows + New Metric]
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-<p>Before applying window functions to the <code>analytics</code> schema, we start with a <strong>controlled temporary table</strong>.<br>
-This allows us to observe window function behavior clearly, row by row, with explicit inputs and outputs.</p>
-<p>The goal of this section is <strong>mechanical understanding</strong>, not business complexity.</p>
-<hr>
+<section id="window-function-types-layers" class="level3">
+<h3 class="anchored" data-anchor-id="window-function-types-layers">Window Function Types Layers</h3>
+<ol type="1">
+<li>Aggregate over a window (e.g., <code>SUM()</code>, <code>AVG()</code>, <code>COUNT()</code>)<br>
+</li>
+<li>Value from another row (e.g., <code>LAG()</code>, <code>LEAD()</code>)<br>
+</li>
+<li>Ranking functions (e.g., <code>ROW_NUMBER()</code>, <code>RANK()</code>, <code>DENSE_RANK()</code>)<br>
+</li>
+<li>Cumulative distributions (e.g., <code>CUME_DIST()</code>, <code>PERCENT_RANK()</code>)<br>
+</li>
+<li>String aggregation (e.g., <code>STRING_AGG()</code>)</li>
+<li>Navigational functions (e.g., <code>FIRST_VALUE()</code>, <code>LAST_VALUE()</code>)</li>
+<li>Framing &amp; Advanced Window Control (Advanced)</li>
+</ol>
+</section>
+<section id="window-syntax-generic" class="level3">
+<h3 class="anchored" data-anchor-id="window-syntax-generic">Window Syntax (Generic)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>function_name(expression)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>PARTITION BY</code> defines <strong>who is compared with whom</strong></li>
+<li><code>ORDER BY</code> defines <strong>sequence inside the window</strong></li>
+<li>The window determines <strong>which rows are visible</strong></li>
+</ul>
 </section>
 </section>
-<section id="step-0-create-a-dummy-temporary-table" class="level2">
-<h2 class="anchored" data-anchor-id="step-0-create-a-dummy-temporary-table">Step 0: Create a Dummy Temporary Table</h2>
-<p>This table represents transactional data over time for multiple entities.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> TEMP <span class="kw">TABLE</span> tmp_sales <span class="kw">AS</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> (</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">VALUES</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>, <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">100</span>),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">2</span>, <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">120</span>),</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>, <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">90</span>),</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">4</span>, <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">200</span>),</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">5</span>, <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">180</span>),</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>, <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">220</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>) <span class="kw">AS</span> t (</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    amount</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="step-0-create-an-extended-dummy-temporary-table" class="level2">
+<h2 class="anchored" data-anchor-id="step-0-create-an-extended-dummy-temporary-table">Step 0: Create an Extended Dummy Temporary Table</h2>
+<p>Before applying window functions to the <code>analytics</code> schema, we use a <strong>controlled temporary table</strong> with:</p>
+<ul>
+<li>Multiple entities<br>
+</li>
+<li>Time ordering<br>
+</li>
+<li>Repeated values (for ranking)<br>
+</li>
+<li>A categorical column (for <code>STRING_AGG</code>)</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> TEMP <span class="kw">TABLE</span> tmp_sales <span class="kw">AS</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> (</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">VALUES</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">100</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">2</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">120</span>, <span class="st">'store'</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">90</span>,  <span class="st">'online'</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">4</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">130</span>, <span class="st">'store'</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">5</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">180</span>, <span class="st">'store'</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">200</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">7</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">220</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">8</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">200</span>, <span class="st">'store'</span>),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">9</span>,  <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">150</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">10</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">150</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">11</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">170</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">12</span>, <span class="st">'D'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">90</span>,  <span class="st">'store'</span>),</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">13</span>, <span class="st">'D'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">110</span>, <span class="st">'store'</span>),</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">14</span>, <span class="st">'E'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">140</span>, <span class="st">'store'</span>),</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">15</span>, <span class="st">'E'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">160</span>, <span class="st">'online'</span>),</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">16</span>, <span class="st">'E'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">155</span>, <span class="st">'store'</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>) <span class="kw">AS</span> t(</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    channel</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 <section id="base-input-table" class="level3">
-<h3 class="anchored">Base Input Table</h3>
+<h3 class="anchored" data-anchor-id="base-input-table">Base Input Table</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -979,6 +1097,7 @@ This allows us to observe window function behavior clearly, row by row, with exp
 <th>customer_id</th>
 <th>sale_date</th>
 <th style="text-align: right;">amount</th>
+<th>channel</th>
 </tr>
 </thead>
 <tbody>
@@ -987,70 +1106,85 @@ This allows us to observe window function behavior clearly, row by row, with exp
 <td>A</td>
 <td>2024-01-01</td>
 <td style="text-align: right;">100</td>
+<td>online</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td>A</td>
 <td>2024-01-02</td>
 <td style="text-align: right;">120</td>
+<td>store</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
 <td>A</td>
 <td>2024-01-03</td>
 <td style="text-align: right;">90</td>
+<td>online</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td>B</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">200</td>
+<td>A</td>
+<td>2024-01-04</td>
+<td style="text-align: right;">130</td>
+<td>store</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
 <td>B</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">180</td>
+<td>2024-01-01</td>
+<td style="text-align: right;">200</td>
+<td>online</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">6</td>
 <td>B</td>
+<td>2024-01-02</td>
+<td style="text-align: right;">180</td>
+<td>store</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td>B</td>
 <td>2024-01-03</td>
 <td style="text-align: right;">220</td>
+<td>online</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td>B</td>
+<td>2024-01-04</td>
+<td style="text-align: right;">200</td>
+<td>store</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">9</td>
+<td>C</td>
+<td>2024-01-01</td>
+<td style="text-align: right;">150</td>
+<td>store</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td>C</td>
+<td>2024-01-02</td>
+<td style="text-align: right;">150</td>
+<td>online</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td>C</td>
+<td>2024-01-03</td>
+<td style="text-align: right;">170</td>
+<td>online</td>
 </tr>
 </tbody>
 </table>
-<ul>
-<li><h2 id="conceptual-flow-1" class="anchored" data-anchor-id="base-input-table">Conceptual Flow</h2></li>
-</ul>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    A[Original Rows] --&gt; B[Window Definition]
-    B --&gt; C[Calculation Over Window]
-    C --&gt; D[Same Rows + New Column]
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
 <hr>
 </section>
 </section>
-<section id="window-syntax-generic" class="level2">
-<h2 class="anchored" data-anchor-id="window-syntax-generic">Window Syntax (Generic)</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>function_name(<span class="op">..</span>.) <span class="kw">OVER</span> (</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="window-function-1-basic-aggregation-over-a-window" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-1-basic-aggregation-over-a-window">Window Function 1: Basic Aggregation over a Window</h2>
+<section id="window-function-1-aggregate-over-a-window" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-1-aggregate-over-a-window">Window Function 1: Aggregate Over a Window</h2>
 <section id="example-average-amount-per-customer" class="level3">
 <h3 class="anchored" data-anchor-id="example-average-amount-per-customer">Example: Average Amount per Customer</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
@@ -1068,7 +1202,6 @@ This allows us to observe window function behavior clearly, row by row, with exp
 <tr class="header">
 <th style="text-align: right;">sale_id</th>
 <th>customer_id</th>
-<th>sale_date</th>
 <th style="text-align: right;">amount</th>
 <th style="text-align: right;">avg_customer_amount</th>
 </tr>
@@ -1077,292 +1210,76 @@ This allows us to observe window function behavior clearly, row by row, with exp
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td>A</td>
-<td>2024-01-01</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">103.33</td>
+<td style="text-align: right;">110.00</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td>A</td>
-<td>2024-01-02</td>
 <td style="text-align: right;">120</td>
-<td style="text-align: right;">103.33</td>
+<td style="text-align: right;">110.00</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
 <td>A</td>
-<td>2024-01-03</td>
 <td style="text-align: right;">90</td>
-<td style="text-align: right;">103.33</td>
+<td style="text-align: right;">110.00</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td>B</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">200</td>
-<td style="text-align: right;">200.00</td>
+<td>A</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">110.00</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
 <td>B</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">180</td>
+<td style="text-align: right;">200</td>
 <td style="text-align: right;">200.00</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">6</td>
 <td>B</td>
-<td>2024-01-03</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">200.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td>B</td>
 <td style="text-align: right;">220</td>
 <td style="text-align: right;">200.00</td>
 </tr>
-</tbody>
-</table>
-<hr>
-</section>
-</section>
-<section id="key-observation" class="level2">
-<h2 class="anchored" data-anchor-id="key-observation">Key Observation</h2>
-<ul>
-<li>Same number of rows in input and output<br>
-</li>
-<li>Aggregation is <strong>contextual</strong>, not collapsing<br>
-</li>
-<li>Each row keeps its identity</li>
-</ul>
-<hr>
-</section>
-<section id="window-function-2-row_number" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-2-row_number">Window Function 2: <code>ROW_NUMBER()</code></h2>
-<p>Assigns a <strong>unique sequential number</strong> within each partition.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ROW_NUMBER</span>() <span class="kw">OVER</span> (</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> row_num</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="output-1" class="level3">
-<h3 class="anchored" data-anchor-id="output-1">Output</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: right;">sale_id</th>
-<th>customer_id</th>
-<th>sale_date</th>
-<th style="text-align: right;">amount</th>
-<th style="text-align: right;">row_num</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">1</td>
-<td>A</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">100</td>
-<td style="text-align: right;">1</td>
-</tr>
 <tr class="even">
-<td style="text-align: right;">2</td>
-<td>A</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">120</td>
-<td style="text-align: right;">2</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">3</td>
-<td>A</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">90</td>
-<td style="text-align: right;">3</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">8</td>
 <td>B</td>
-<td>2024-01-01</td>
 <td style="text-align: right;">200</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">200.00</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">5</td>
-<td>B</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">180</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">9</td>
+<td>C</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">156.67</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">6</td>
-<td>B</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">220</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td>C</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">156.67</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td>C</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">156.67</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </section>
 </section>
-<section id="window-function-3-lag" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-3-lag">Window Function 3: <code>LAG()</code></h2>
-<p>Accesses the <strong>previous row’s value</strong> within the window.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LAG</span>(amount) <span class="kw">OVER</span> (</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> prev_amount</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="output-2" class="level3">
-<h3 class="anchored" data-anchor-id="output-2">Output</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: right;">sale_id</th>
-<th>customer_id</th>
-<th>sale_date</th>
-<th style="text-align: right;">amount</th>
-<th style="text-align: right;">prev_amount</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">1</td>
-<td>A</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">100</td>
-<td style="text-align: right;">NULL</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">2</td>
-<td>A</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">120</td>
-<td style="text-align: right;">100</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">3</td>
-<td>A</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">90</td>
-<td style="text-align: right;">120</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">4</td>
-<td>B</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">200</td>
-<td style="text-align: right;">NULL</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">5</td>
-<td>B</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">180</td>
-<td style="text-align: right;">200</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">6</td>
-<td>B</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">220</td>
-<td style="text-align: right;">180</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-</section>
-<section id="window-function-4-lead" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-4-lead">Window Function 4: <code>LEAD()</code></h2>
-<p>Accesses the <strong>next row’s value</strong> within the window.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LEAD</span>(amount) <span class="kw">OVER</span> (</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> next_amount</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="window-function-5-rank-and-dense_rank" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-5-rank-and-dense_rank">Window Function 5: <code>RANK()</code> and <code>DENSE_RANK()</code></h2>
-<p>Ranking rows based on a metric <strong>with ties</strong>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">RANK</span>() <span class="kw">OVER</span> (</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> rank_amount,</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">DENSE_RANK</span>() <span class="kw">OVER</span> (</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> dense_rank_amount</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="window-functions-vs-earlier-constructs" class="level2">
-<h2 class="anchored" data-anchor-id="window-functions-vs-earlier-constructs">Window Functions vs Earlier Constructs</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Feature</th>
-<th>GROUP BY</th>
-<th>Subquery</th>
-<th>CTE</th>
-<th>Window Function</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Keeps rows</td>
-<td>No</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-<tr class="even">
-<td>Cross-row context</td>
-<td>Limited</td>
-<td>Limited</td>
-<td>Limited</td>
-<td>Yes</td>
-</tr>
-<tr class="odd">
-<td>Best for</td>
-<td>Aggregation</td>
-<td>Filtering</td>
-<td>Pipelines</td>
-<td>Analytics</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="transition-to-real-analytics-tables" class="level2">
-<h2 class="anchored" data-anchor-id="transition-to-real-analytics-tables">Transition to Real Analytics Tables</h2>
-<p>The exact same logic applies to:</p>
-<ul>
-<li><code>tmp_order_revenue</code></li>
-<li>Customer-level metrics</li>
-<li>Time-based order analysis</li>
-<li>Ranking customers, orders, cities</li>
-</ul>
-<p>Only the <strong>data scale</strong> changes — not the reasoning.</p>
-<p>The next section applies each window function to the <code>analytics</code> schema step by step.</p>
-</section>
-<section id="step-0-create-an-extended-dummy-temporary-table" class="level2">
-<h2 class="anchored" data-anchor-id="step-0-create-an-extended-dummy-temporary-table">Step 0: Create an Extended Dummy Temporary Table</h2>
+<section id="creating-an-extended-dummy-temporary-table" class="level2">
+<h2 class="anchored" data-anchor-id="creating-an-extended-dummy-temporary-table">Creating an Extended Dummy Temporary Table</h2>
+<p>Before applying window functions to the <code>analytics</code> schema, we use a <strong>controlled temporary table</strong> with:</p>
 <p>Before applying window functions to the <code>analytics</code> schema, we use a <strong>controlled temporary table</strong> with:</p>
 <ul>
 <li>Multiple entities<br>
@@ -1373,152 +1290,91 @@ This allows us to observe window function behavior clearly, row by row, with exp
 </li>
 <li>A categorical column (for <code>STRING_AGG</code>)</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> TEMP <span class="kw">TABLE</span> tmp_sales <span class="kw">AS</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> (</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">VALUES</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">100</span>, <span class="st">'online'</span>),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">2</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">120</span>, <span class="st">'store'</span>),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">90</span>,  <span class="st">'online'</span>),</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">4</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">130</span>, <span class="st">'store'</span>),</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">5</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">200</span>, <span class="st">'online'</span>),</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">180</span>, <span class="st">'store'</span>),</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">7</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">220</span>, <span class="st">'online'</span>),</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">8</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">200</span>, <span class="st">'store'</span>),</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">9</span>,  <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">150</span>, <span class="st">'store'</span>),</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">10</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">150</span>, <span class="st">'online'</span>),</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">11</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">170</span>, <span class="st">'online'</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>) <span class="kw">AS</span> t(</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    channel</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> TEMP <span class="kw">TABLE</span> tmp_sales <span class="kw">AS</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> (</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">VALUES</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">100</span>, <span class="st">'online'</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">2</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">120</span>, <span class="st">'store'</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">90</span>,  <span class="st">'online'</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">4</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">130</span>, <span class="st">'store'</span>),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">5</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">200</span>, <span class="st">'online'</span>),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">180</span>, <span class="st">'store'</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">7</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">220</span>, <span class="st">'online'</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">8</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">200</span>, <span class="st">'store'</span>),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">9</span>,  <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">150</span>, <span class="st">'store'</span>),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">10</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">150</span>, <span class="st">'online'</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">11</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">170</span>, <span class="st">'online'</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>) <span class="kw">AS</span> t(</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    channel</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="base-input-table-1" class="level2">
-<h2 class="anchored" data-anchor-id="base-input-table-1">Base Input Table</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: right;">sale_id</th>
-<th>customer_id</th>
-<th>sale_date</th>
-<th style="text-align: right;">amount</th>
-<th>channel</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">1</td>
-<td>A</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">100</td>
-<td>online</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">2</td>
-<td>A</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">120</td>
-<td>store</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">3</td>
-<td>A</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">90</td>
-<td>online</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">4</td>
-<td>A</td>
-<td>2024-01-04</td>
-<td style="text-align: right;">130</td>
-<td>store</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">5</td>
-<td>B</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">200</td>
-<td>online</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">6</td>
-<td>B</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">180</td>
-<td>store</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">7</td>
-<td>B</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">220</td>
-<td>online</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">8</td>
-<td>B</td>
-<td>2024-01-04</td>
-<td style="text-align: right;">200</td>
-<td>store</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">9</td>
-<td>C</td>
-<td>2024-01-01</td>
-<td style="text-align: right;">150</td>
-<td>store</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">10</td>
-<td>C</td>
-<td>2024-01-02</td>
-<td style="text-align: right;">150</td>
-<td>online</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">11</td>
-<td>C</td>
-<td>2024-01-03</td>
-<td style="text-align: right;">170</td>
-<td>online</td>
-</tr>
-</tbody>
-</table>
+<section id="window-function-layer-1-simple-aggregate-window-functions" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-layer-1-simple-aggregate-window-functions">Window Function Layer 1: Simple Aggregate Window Functions</h2>
+<p>Simple aggregate window functions apply <strong>classical aggregation logic</strong> (such as <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>) <strong>without collapsing rows</strong>.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote class="blockquote">
+<p>How does this row relate to an aggregate of its group/partition?</p>
+</blockquote>
 <hr>
-</section>
-<section id="window-syntax-generic-1" class="level2">
-<h2 class="anchored" data-anchor-id="window-syntax-generic-1">Window Syntax (Generic)</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>function_name(expression)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="concept" class="level3">
+<h3 class="anchored" data-anchor-id="concept">Concept</h3>
+<p>A <strong>simple aggregate window function</strong> computes an aggregate value <strong>over a partition of rows</strong> and attaches that value to <strong>every row in the partition</strong>.</p>
+<p>Unlike <code>GROUP BY</code>:</p>
 <ul>
-<li><code>PARTITION BY</code> defines <strong>who is compared with whom</strong></li>
-<li><code>ORDER BY</code> defines <strong>sequence inside the window</strong></li>
-<li>The window determines <strong>which rows are visible</strong></li>
+<li>Rows are <strong>not reduced</strong></li>
+<li>Each row keeps its original granularity</li>
+<li>Aggregates become <strong>contextual attributes</strong></li>
 </ul>
+<blockquote class="blockquote">
+<p>Compute a group-level metric, then stamp it onto every row in the group.</p>
+</blockquote>
+</section>
+<section id="common-functions-in-this-layer" class="level3">
+<h3 class="anchored" data-anchor-id="common-functions-in-this-layer">Common Functions in This Layer</h3>
+<ul>
+<li><code>SUM()</code><br>
+</li>
+<li><code>AVG()</code><br>
+</li>
+<li><code>COUNT()</code><br>
+</li>
+<li><code>MIN()</code><br>
+</li>
+<li><code>MAX()</code></li>
+</ul>
+<p>All of them become window functions when combined with <code>OVER(...)</code>.</p>
 <hr>
 </section>
-<section id="window-function-1-aggregate-over-a-window" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-1-aggregate-over-a-window">Window Function 1: Aggregate Over a Window</h2>
-<section id="example-average-amount-per-customer-1" class="level3">
-<h3 class="anchored" data-anchor-id="example-average-amount-per-customer-1">Example: Average Amount per Customer</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (<span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id) <span class="kw">AS</span> avg_customer_amount</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="generic-pattern" class="level3">
+<h3 class="anchored" data-anchor-id="generic-pattern">Generic Pattern</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>AGGREGATE_FUNCTION(<span class="kw">column</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
 </section>
-<section id="output-3" class="level3">
-<h3 class="anchored" data-anchor-id="output-3">Output</h3>
+<section id="example-1-average-amount-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-average-amount-per-customer">Example 1: Average Amount per Customer</h3>
+<p><strong>Business intuition:</strong><br>
+“How much does this sale differ from the customer’s typical behavior?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> avg_customer_amount</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="output-1" class="level3">
+<h3 class="anchored" data-anchor-id="output-1">Output</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -1599,78 +1455,593 @@ This allows us to observe window function behavior clearly, row by row, with exp
 </table>
 <hr>
 </section>
+<section id="example-2-total-spend-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-total-spend-per-customer">Example 2: Total Spend per Customer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> total_customer_spend</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
 </section>
-<section id="window-function-2-row_number-1" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-2-row_number-1">Window Function 2: <code>ROW_NUMBER()</code></h2>
+<section id="example-3-number-of-transactions-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-number-of-transactions-per-customer">Example 3: Number of Transactions per Customer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">OVER</span> (</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> transaction_count</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-4-minimum-and-maximum-amount-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-minimum-and-maximum-amount-per-customer">Example 4: Minimum and Maximum Amount per Customer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">MIN</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> min_amount,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">MAX</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> max_amount</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="summary-of-simple-aggregate-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="summary-of-simple-aggregate-window-functions">Summary of Simple Aggregate Window Functions</h3>
+<ul>
+<li>Aggregation logic is <strong>identical to <code>GROUP BY</code></strong></li>
+<li>The difference is <strong>row preservation</strong></li>
+<li>These functions create <strong>reference baselines</strong></li>
+<li>They are often the foundation for:
+<ul>
+<li>Variance analysis<br>
+</li>
+<li>Normalization<br>
+</li>
+<li>Z-scores<br>
+</li>
+<li>Behavioral comparisons</li>
+</ul></li>
+</ul>
+</section>
+<section id="when-to-use-simple-aggregate-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-simple-aggregate-window-functions">When to Use Simple Aggregate Window Functions</h3>
+<ul>
+<li>Comparing a row to its group average<br>
+</li>
+<li>Attaching group-level metrics to granular data<br>
+</li>
+<li>Preparing features for modeling<br>
+</li>
+<li>Avoiding joins or subqueries for simple enrichments</li>
+</ul>
+<p>This layer forms the <strong>foundation</strong> for all advanced window logic.</p>
+</section>
+</section>
+<section id="window-function-layer-2-statistical-window-functions" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-layer-2-statistical-window-functions">Window Function Layer 2: Statistical Window Functions</h2>
+<p>Statistical window functions extend simple aggregates by answering <strong>distributional questions</strong> instead of basic totals or averages.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote class="blockquote">
+<p>Where does this row stand within the distribution of its group?</p>
+</blockquote>
+<hr>
+<section id="concept-1" class="level3">
+<h3 class="anchored" data-anchor-id="concept-1">Concept</h3>
+<p>A <strong>statistical window function</strong> computes <strong>position, spread, or relative standing</strong> of a row within a partition.</p>
+<p>Unlike simple aggregates:</p>
+<ul>
+<li>They focus on <strong>ordering and distribution</strong></li>
+<li>They often require <code>ORDER BY</code></li>
+<li>Results depend on <strong>relative position</strong>, not just totals</li>
+</ul>
+<p>These functions are essential for <strong>exploratory data analysis</strong>, <strong>outlier detection</strong>, and <strong>ranking-based insights</strong>.</p>
+<hr>
+</section>
+<section id="common-functions-in-this-layer-1" class="level3">
+<h3 class="anchored" data-anchor-id="common-functions-in-this-layer-1">Common Functions in This Layer</h3>
+<ul>
+<li><code>PERCENTILE_CONT()</code><br>
+</li>
+<li><code>PERCENTILE_DISC()</code><br>
+</li>
+<li><code>MEDIAN()</code><br>
+</li>
+<li><code>PERCENT_RANK()</code><br>
+</li>
+<li><code>CUME_DIST()</code></li>
+</ul>
+<hr>
+</section>
+<section id="generic-pattern-1" class="level3">
+<h3 class="anchored" data-anchor-id="generic-pattern-1">Generic Pattern</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>STAT_FUNCTION(<span class="op">..</span>.)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-1-median-amount-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-median-amount-per-customer">Example 1: Median Amount per Customer</h3>
+<p><strong>Business intuition:</strong><br>
+“What is the typical (middle) transaction size for this customer?”</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ROW_NUMBER</span>() <span class="kw">OVER</span> (</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> row_num</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">PERCENTILE_CONT</span>(<span class="fl">0.5</span>) WITHIN <span class="kw">GROUP</span> (</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">OVER</span> (</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> median_amount</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
-<section id="window-function-3-lag-1" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-3-lag-1">Window Function 3: <code>LAG()</code></h2>
+<section id="example-2-percent-rank-of-each-transaction" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-percent-rank-of-each-transaction">Example 2: Percent Rank of Each Transaction</h3>
+<p><code>PERCENT_RANK()</code> shows <strong>relative position</strong> between 0 and 1.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LAG</span>(amount) <span class="kw">OVER</span> (</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> prev_amount</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">PERCENT_RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> <span class="fu">percent_rank</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Interpretation:</strong></p>
+<ul>
+<li><code>0.0</code> → lowest value in group<br>
+</li>
+<li><code>1.0</code> → highest value in group</li>
+</ul>
 <hr>
 </section>
-<section id="window-function-4-lead-1" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-4-lead-1">Window Function 4: <code>LEAD()</code></h2>
+<section id="example-3-cumulative-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-cumulative-distribution">Example 3: Cumulative Distribution</h3>
+<p><code>CUME_DIST()</code> shows the <strong>share of rows less than or equal to the current row</strong>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LEAD</span>(amount) <span class="kw">OVER</span> (</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> next_amount</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">CUME_DIST</span>() <span class="kw">OVER</span> (</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> cumulative_distribution</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
-<section id="window-function-5-rank-and-dense_rank-1" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-5-rank-and-dense_rank-1">Window Function 5: <code>RANK()</code> and <code>DENSE_RANK()</code></h2>
+<section id="example-4-quartile-assignment" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-quartile-assignment">Example 4: Quartile Assignment</h3>
+<p>Assign each transaction to a quartile using percentiles.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">NTILE</span>(<span class="dv">4</span>) <span class="kw">OVER</span> (</span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> rank_amount,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">DENSE_RANK</span>() <span class="kw">OVER</span> (</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> dense_rank_amount</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> quartile</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
-<section id="window-function-6-string_agg-as-a-window-function" class="level2">
-<h2 class="anchored" data-anchor-id="window-function-6-string_agg-as-a-window-function">Window Function 6: <code>STRING_AGG()</code> as a Window Function</h2>
-<section id="example-channels-used-by-each-customer" class="level3">
-<h3 class="anchored" data-anchor-id="example-channels-used-by-each-customer">Example: Channels Used by Each Customer</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    channel,</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    STRING_AGG(channel, <span class="st">', '</span>) <span class="kw">OVER</span> (</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> channels_used</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="key-observations" class="level3">
+<h3 class="anchored" data-anchor-id="key-observations">Key Observations</h3>
+<ul>
+<li>Statistical window functions are <strong>order-sensitive</strong></li>
+<li>They expose <strong>distribution shape</strong></li>
+<li>Results are <strong>relative</strong>, not absolute</li>
+<li>They are critical for:
+<ul>
+<li>Outlier detection<br>
+</li>
+<li>Segmentation<br>
+</li>
+<li>Threshold-based decisions</li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="when-to-use-statistical-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-statistical-window-functions">When to Use Statistical Window Functions</h3>
+<ul>
+<li>Understanding customer behavior distributions<br>
+</li>
+<li>Identifying top/bottom performers<br>
+</li>
+<li>Creating quantile-based segments<br>
+</li>
+<li>Normalizing values for comparison</li>
+</ul>
+<p>This layer bridges <strong>descriptive statistics</strong> and <strong>analytical SQL</strong>, preparing the ground for ranking and time-aware functions.</p>
+</section>
+</section>
+<section id="window-function-layer-3-value-from-another-row-functions" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-layer-3-value-from-another-row-functions">Window Function Layer 3: Value-from-Another-Row Functions</h2>
+<p>Value-from-another-row window functions allow a row to <strong>access values from neighboring rows</strong> within the same partition.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote class="blockquote">
+<p>How does this row relate to previous or next rows in sequence?</p>
+</blockquote>
+<hr>
+<section id="concept-2" class="level3">
+<h3 class="anchored" data-anchor-id="concept-2">Concept</h3>
+<p>A <strong>value-from-another-row window function</strong> retrieves a value from a <strong>different row in the same window</strong>, based on ordering.</p>
+<p>These functions are inherently <strong>time-aware</strong> and <strong>sequence-aware</strong>.</p>
+<p>Unlike aggregate or statistical functions:</p>
+<ul>
+<li>They do <strong>not summarize</strong> a group</li>
+<li>They compare a row to <strong>specific neighboring rows</strong></li>
+<li>Ordering is <strong>mandatory</strong></li>
+</ul>
+<hr>
+</section>
+<section id="common-functions-in-this-layer-2" class="level3">
+<h3 class="anchored" data-anchor-id="common-functions-in-this-layer-2">Common Functions in This Layer</h3>
+<ul>
+<li><code>LAG()</code><br>
+</li>
+<li><code>LEAD()</code><br>
+</li>
+<li><code>FIRST_VALUE()</code><br>
+</li>
+<li><code>LAST_VALUE()</code></li>
+</ul>
+</section>
+<section id="generic-pattern-2" class="level3">
+<h3 class="anchored" data-anchor-id="generic-pattern-2">Generic Pattern</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>VALUE_FUNCTION(<span class="kw">column</span> [, offset])</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>offset</code> (optional) defines how many rows forward/backward to look</li>
+<li>Default offset is <code>1</code></li>
+</ul>
+<hr>
+</section>
+<section id="example-1-previous-transaction-amount-lag" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-previous-transaction-amount-lag">Example 1: Previous Transaction Amount (<code>LAG</code>)</h3>
+<p><strong>Business intuition:</strong><br>
+“How did this transaction change compared to the previous one?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LAG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> previous_amount</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-2-next-transaction-amount-lead" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-next-transaction-amount-lead">Example 2: Next Transaction Amount (<code>LEAD</code>)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LEAD</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> next_amount</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-3-change-since-previous-transaction" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-change-since-previous-transaction">Example 3: Change Since Previous Transaction</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    amount</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">-</span> <span class="fu">LAG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        ) <span class="kw">AS</span> amount_change</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-4-first-transaction-amount-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-first-transaction-amount-per-customer">Example 4: First Transaction Amount per Customer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">FIRST_VALUE</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> first_amount</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-5-last-transaction-amount-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-5-last-transaction-amount-per-customer">Example 5: Last Transaction Amount per Customer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LAST_VALUE</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">UNBOUNDED</span> <span class="kw">FOLLOWING</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> last_amount</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Ordering is <strong>mandatory</strong></li>
+<li>These functions are <strong>directional</strong></li>
+<li>They enable:
+<ul>
+<li>Trend analysis<br>
+</li>
+<li>Change detection<br>
+</li>
+<li>Time-series feature engineering</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+<section id="when-to-use-value-from-another-row-functions" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-value-from-another-row-functions">When to Use Value-from-Another-Row Functions</h3>
+<ul>
+<li>Measuring growth or decline<br>
+</li>
+<li>Detecting behavioral changes<br>
+</li>
+<li>Comparing events over time<br>
+</li>
+<li>Preparing lagged features for models</li>
+</ul>
+<p>This layer introduces <strong>temporal reasoning</strong>, which is fundamental for advanced analytics and forecasting.</p>
+</section>
+</section>
+<section id="window-function-layer-4-ranking-functions" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-layer-4-ranking-functions">Window Function Layer 4: Ranking Functions</h2>
+<p>Ranking window functions assign <strong>ordinal positions</strong> to rows within a partition based on a specified ordering.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote class="blockquote">
+<p>How does this row rank relative to other rows in its group?</p>
+</blockquote>
+<hr>
+<section id="concept-3" class="level3">
+<h3 class="anchored" data-anchor-id="concept-3">Concept</h3>
+<p>A <strong>ranking window function</strong> assigns a numeric rank to each row according to an <code>ORDER BY</code> rule inside a partition.</p>
+<p>Unlike statistical functions:</p>
+<ul>
+<li>They produce <strong>discrete ranks</strong>, not continuous measures</li>
+<li>They are sensitive to <strong>ties</strong></li>
+<li>They are commonly used for <strong>top-N analysis</strong> and <strong>leaderboards</strong></li>
+</ul>
+</section>
+<section id="common-functions-in-this-layer-3" class="level3">
+<h3 class="anchored" data-anchor-id="common-functions-in-this-layer-3">Common Functions in This Layer</h3>
+<ul>
+<li><code>ROW_NUMBER()</code><br>
+</li>
+<li><code>RANK()</code><br>
+</li>
+<li><code>DENSE_RANK()</code></li>
+</ul>
+<p>Each function handles <strong>ties differently</strong>.</p>
+<hr>
+</section>
+<section id="generic-pattern-3" class="level3">
+<h3 class="anchored" data-anchor-id="generic-pattern-3">Generic Pattern</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>RANKING_FUNCTION()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column [<span class="kw">ASC</span> | <span class="kw">DESC</span>]</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-semantics" class="level3">
+<h3 class="anchored" data-anchor-id="function-semantics">Function Semantics</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Handles Ties</th>
+<th>Gaps in Ranking</th>
+<th>Typical Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ROW_NUMBER()</code></td>
+<td>No</td>
+<td>Yes</td>
+<td>Unique ordering</td>
+</tr>
+<tr class="even">
+<td><code>RANK()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Competition ranking</td>
+</tr>
+<tr class="odd">
+<td><code>DENSE_RANK()</code></td>
+<td>Yes</td>
+<td>No</td>
+<td>Tier-based ranking</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="example-1-sequential-ordering-row_number" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-sequential-ordering-row_number">Example 1: Sequential Ordering (<code>ROW_NUMBER</code>)</h3>
+<p><strong>Business intuition:</strong><br>
+“What is the chronological position of each transaction?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ROW_NUMBER</span>() <span class="kw">OVER</span> (</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> <span class="fu">row_number</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-2-ranking-by-amount-with-gaps-rank" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-ranking-by-amount-with-gaps-rank">Example 2: Ranking by Amount with Gaps (<code>RANK</code>)</h3>
+<p><strong>Business intuition:</strong><br>
+“What is the spending rank of each transaction?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> rank_amount</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-3-dense-ranking-by-amount-dense_rank" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-dense-ranking-by-amount-dense_rank">Example 3: Dense Ranking by Amount (<code>DENSE_RANK</code>)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">DENSE_RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> dense_rank_amount</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="summary-of-ranking-functions" class="level3">
+<h3 class="anchored" data-anchor-id="summary-of-ranking-functions">Summary of Ranking Functions</h3>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Ranking always requires <code>ORDER BY</code></li>
+<li><code>ROW_NUMBER()</code> enforces uniqueness</li>
+<li><code>RANK()</code> leaves gaps after ties</li>
+<li><code>DENSE_RANK()</code> preserves continuity</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="practical-analytics-use-cases" class="level3">
+<h3 class="anchored" data-anchor-id="practical-analytics-use-cases">Practical Analytics Use Cases</h3>
+<ul>
+<li><strong>Top-N</strong> customers or transactions<br>
+</li>
+<li>Identifying <strong>best/worst</strong> performers<br>
+</li>
+<li><strong>De-duplication</strong> with deterministic ordering<br>
+</li>
+<li>Feature engineering for modeling</li>
+</ul>
+<hr>
+</section>
+<section id="when-to-use-ranking-functions" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-ranking-functions">When to Use Ranking Functions</h3>
+<ul>
+<li>Creating leaderboards<br>
+</li>
+<li>Selecting first / top records per group<br>
+</li>
+<li>Resolving duplicates deterministically<br>
+</li>
+<li>Segmenting by relative performance</li>
+</ul>
+<p>Ranking functions introduce <strong>comparative structure</strong>, preparing the ground for cumulative and navigational window logic.</p>
+</section>
+</section>
+<section id="window-function-layer-5-string-aggregation-window-functions" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-layer-5-string-aggregation-window-functions">Window Function Layer 5: String Aggregation Window Functions</h2>
+<p>String aggregation window functions allow rows to <strong>accumulate textual values</strong> from related rows <strong>without collapsing the dataset</strong>.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote class="blockquote">
+<p>What sequence or collection of categorical values is associated with this row’s group?</p>
+</blockquote>
+<hr>
+<section id="concept-4" class="level3">
+<h3 class="anchored" data-anchor-id="concept-4">Concept</h3>
+<p>A <strong>string aggregation window function</strong> concatenates values from multiple rows within a partition into a <strong>single textual representation</strong>, while preserving row-level granularity.</p>
+<p>Unlike classic <code>GROUP BY STRING_AGG</code>:</p>
+<ul>
+<li>Rows are <strong>not reduced</strong></li>
+<li>The aggregated string is <strong>attached to each row</strong></li>
+<li>Ordering controls <strong>how the string is built</strong></li>
+</ul>
+<p>This makes string aggregation window functions especially useful for <strong>behavioral tracing</strong>, <strong>auditability</strong>, and <strong>sequence analysis</strong>.</p>
+<hr>
+</section>
+<section id="common-functions-in-this-layer-4" class="level3">
+<h3 class="anchored" data-anchor-id="common-functions-in-this-layer-4">Common Functions in This Layer</h3>
+<ul>
+<li><code>STRING_AGG()</code></li>
+</ul>
+<p>When combined with <code>OVER(...)</code>, <code>STRING_AGG()</code> becomes a <strong>contextual, row-preserving</strong> operation.</p>
+<hr>
+</section>
+<section id="generic-pattern-4" class="level3">
+<h3 class="anchored" data-anchor-id="generic-pattern-4">Generic Pattern</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>STRING_AGG(<span class="kw">column</span>, delimiter)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">OVER</span> (</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>delimiter</code> defines how values are separated</li>
+<li><code>ORDER BY</code> defines the <strong>sequence of concatenation</strong></li>
+<li>The result grows as the window progresses</li>
+</ul>
+<hr>
+</section>
+<section id="example-1-channels-used-by-each-customer-cumulative" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-channels-used-by-each-customer-cumulative">Example 1: Channels Used by Each Customer (Cumulative)</h3>
+<p><strong>Business intuition:</strong><br>
+“What interaction channels has this customer used up to this point?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    channel,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    STRING_AGG(channel, <span class="st">', '</span>) <span class="kw">OVER</span> (</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> channels_used_so_far</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
 </section>
 <section id="output-conceptual" class="level3">
 <h3 class="anchored" data-anchor-id="output-conceptual">Output (Conceptual)</h3>
@@ -1679,32 +2050,37 @@ This allows us to observe window function behavior clearly, row by row, with exp
 <tr class="header">
 <th style="text-align: right;">sale_id</th>
 <th>customer_id</th>
+<th>sale_date</th>
 <th>channel</th>
-<th>channels_used</th>
+<th>channels_used_so_far</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td>A</td>
+<td>2024-01-01</td>
 <td>online</td>
 <td>online</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td>A</td>
+<td>2024-01-02</td>
 <td>store</td>
 <td>online, store</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
 <td>A</td>
+<td>2024-01-03</td>
 <td>online</td>
 <td>online, store, online</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
 <td>A</td>
+<td>2024-01-04</td>
 <td>store</td>
 <td>online, store, online, store</td>
 </tr>
@@ -1712,17 +2088,391 @@ This allows us to observe window function behavior clearly, row by row, with exp
 </table>
 <hr>
 </section>
+<section id="example-2-full-channel-history-per-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-full-channel-history-per-customer">Example 2: Full Channel History per Customer</h3>
+<p>To attach the <strong>complete history</strong> to every row, use an explicit frame.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    channel,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    STRING_AGG(channel, <span class="st">', '</span>) <span class="kw">OVER</span> (</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">UNBOUNDED</span> <span class="kw">FOLLOWING</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> full_channel_history</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="key-observations" class="level2">
-<h2 class="anchored" data-anchor-id="key-observations">Key Observations</h2>
+<section id="example-3-channel-combination-pattern-customer-behavior-signature" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-channel-combination-pattern-customer-behavior-signature">Example 3: Channel Combination Pattern (Customer Behavior Signature)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">WITH</span> customer_channels <span class="kw">AS</span> (</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        customer_id,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        STRING_AGG(<span class="kw">DISTINCT</span> channel, <span class="st">', '</span> <span class="kw">ORDER</span> <span class="kw">BY</span> channel) <span class="kw">AS</span> channel_pattern</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> tmp_sales</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    channel_pattern,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> customer_count</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> customer_channels</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> channel_pattern;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>try without ORDER BY in STRING_AGG to see different results</p>
+</div>
+</div>
+</section>
+<section id="summary-of-string-aggregation-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="summary-of-string-aggregation-window-functions">Summary of String Aggregation Window Functions</h3>
 <ul>
-<li>Window functions <strong>never reduce rows</strong></li>
-<li>Context is defined explicitly via <code>OVER(...)</code></li>
-<li>Ordering matters for time-based logic</li>
-<li>String aggregation can also be contextual</li>
+<li>Ordering determines <strong>string growth</strong></li>
+<li>Without a frame, aggregation is <strong>cumulative</strong></li>
+<li>With a full frame, aggregation is <strong>static per group</strong></li>
+<li>Strings become <strong>contextual descriptors</strong>, not summaries</li>
 </ul>
+<hr>
+</section>
+<section id="practical-analytics-use-cases-1" class="level3">
+<h3 class="anchored" data-anchor-id="practical-analytics-use-cases-1">Practical Analytics Use Cases</h3>
+<ul>
+<li>Customer journey reconstruction<br>
+</li>
+<li>Channel or event sequence analysis<br>
+</li>
+<li>Audit trails and explainability<br>
+</li>
+<li>Feature generation for downstream models</li>
+</ul>
+<hr>
+</section>
+<section id="when-to-use-string-aggregation-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-string-aggregation-window-functions">When to Use String Aggregation Window Functions</h3>
+<ul>
+<li>When order matters in categorical data<br>
+</li>
+<li>When you need <strong>traceability</strong>, not just counts<br>
+</li>
+<li>When building interpretable analytical features<br>
+</li>
+<li>When collapsing rows would lose information</li>
+</ul>
+<p>This layer completes the transition from <strong>numeric comparison</strong> to <strong>behavioral sequencing</strong>, setting the stage for advanced window framing and analytics patterns.</p>
+</section>
+</section>
+<section id="window-function-layer-6-window-framing-advanced-window-control" class="level2">
+<h2 class="anchored" data-anchor-id="window-function-layer-6-window-framing-advanced-window-control">Window Function Layer 6: Window Framing &amp; Advanced Window Control</h2>
+<p>Window framing controls <strong>which rows inside the partition are visible to the window function</strong> for each row.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote class="blockquote">
+<p>Exactly <em>which subset of rows</em> should be used when computing the window value for this row?</p>
+</blockquote>
+<section id="concept-5" class="level3">
+<h3 class="anchored" data-anchor-id="concept-5">Concept</h3>
+<p>A <strong>window frame</strong> defines a <strong>moving or fixed subset of rows</strong> relative to the current row.</p>
+<p>While:</p>
+<ul>
+<li><code>PARTITION BY</code> defines <strong>who belongs together</strong></li>
+<li><code>ORDER BY</code> defines <strong>sequence</strong></li>
+</ul>
+<p>The <strong>frame</strong> defines <strong>how far backward and forward the window can see</strong>.</p>
+<p>Without an explicit frame, SQL engines apply <strong>default framing rules</strong>, which can lead to <strong>unexpected results</strong>, especially for cumulative and navigational functions.</p>
+<hr>
+</section>
+<section id="frame-dimensions" class="level3">
+<h3 class="anchored" data-anchor-id="frame-dimensions">Frame Dimensions</h3>
+<p>A frame is defined using:</p>
+<ul>
+<li><strong>Frame type</strong></li>
+<li><strong>Frame boundaries</strong></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ROWS</span> | <span class="kw">RANGE</span> <span class="kw">BETWEEN</span> <span class="op">&lt;</span><span class="kw">start</span><span class="op">&gt;</span> <span class="kw">AND</span> <span class="op">&lt;</span><span class="cf">end</span><span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="frame-types" class="level3">
+<h3 class="anchored" data-anchor-id="frame-types">Frame Types</h3>
+<section id="rows" class="level4">
+<h4 class="anchored" data-anchor-id="rows"><code>ROWS</code></h4>
+<ul>
+<li>Frame is defined by <strong>physical row positions</strong></li>
+<li>Deterministic and predictable</li>
+<li>Preferred for analytics</li>
+</ul>
+</section>
+<section id="range" class="level4">
+<h4 class="anchored" data-anchor-id="range"><code>RANGE</code></h4>
+<ul>
+<li>Frame is defined by <strong>logical value ranges</strong></li>
+<li>Can include multiple rows with the same ordering value</li>
+<li>More subtle and engine-dependent</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="common-frame-boundaries" class="level3">
+<h3 class="anchored" data-anchor-id="common-frame-boundaries">Common Frame Boundaries</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Boundary</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>UNBOUNDED PRECEDING</code></td>
+<td>From the first row in the partition</td>
+</tr>
+<tr class="even">
+<td><code>CURRENT ROW</code></td>
+<td>The current row</td>
+</tr>
+<tr class="odd">
+<td><code>UNBOUNDED FOLLOWING</code></td>
+<td>Until the last row in the partition</td>
+</tr>
+<tr class="even">
+<td><code>n PRECEDING</code></td>
+<td>n rows before</td>
+</tr>
+<tr class="odd">
+<td><code>n FOLLOWING</code></td>
+<td>n rows after</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="default-frame-important" class="level3">
+<h3 class="anchored" data-anchor-id="default-frame-important">Default Frame (Important)</h3>
+<p><strong>For most databases:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="kw">column</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>implicitly means:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">RANGE</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">CURRENT</span> <span class="kw">ROW</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is <strong>not always what you want</strong>.</p>
+<hr>
+</section>
+<section id="example-1-running-total-explicit-frame" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-running-total-explicit-frame">Example 1: Running Total (Explicit Frame)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">CURRENT</span> <span class="kw">ROW</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> running_total</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-2-full-partition-aggregate-stable-value" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-full-partition-aggregate-stable-value">Example 2: Full-Partition Aggregate (Stable Value)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">UNBOUNDED</span> <span class="kw">FOLLOWING</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> full_partition_avg</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-3-moving-window-last-2-transactions" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-moving-window-last-2-transactions">Example 3: Moving Window (Last 2 Transactions)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="dv">1</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">CURRENT</span> <span class="kw">ROW</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> moving_avg_2</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="example-4-correct-last_value-usage" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-correct-last_value-usage">Example 4: Correct <code>LAST_VALUE()</code> Usage</h3>
+<p>Without a full frame, <code>LAST_VALUE()</code> often returns the <strong>current row</strong>, not the true last value.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    sale_id,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    sale_date,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    amount,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">LAST_VALUE</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">UNBOUNDED</span> <span class="kw">FOLLOWING</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="kw">AS</span> true_last_amount</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="key-observations-1" class="level3">
+<h3 class="anchored" data-anchor-id="key-observations-1">Key Observations</h3>
+<ul>
+<li>Framing determines <strong>visibility</strong>, not grouping</li>
+<li>Many subtle bugs come from <strong>implicit frames</strong></li>
+<li>Explicit frames improve:
+<ul>
+<li>Correctness<br>
+</li>
+<li>Readability<br>
+</li>
+<li>Portability</li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="when-to-use-explicit-window-frames" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-explicit-window-frames">When to Use Explicit Window Frames</h3>
+<ul>
+<li>Running totals and cumulative metrics<br>
+</li>
+<li>Moving averages and rolling windows<br>
+</li>
+<li>Navigational functions (<code>FIRST_VALUE</code>, <code>LAST_VALUE</code>)<br>
+</li>
+<li>Any time correctness depends on <strong>row visibility</strong></li>
+</ul>
+<p>This layer gives you <strong>full control over window behavior</strong>, completing the mental model of advanced analytical SQL.</p>
+</section>
+</section>
+<section id="in-class-assignment-window-functions-on-the-analytics-schema" class="level2">
+<h2 class="anchored" data-anchor-id="in-class-assignment-window-functions-on-the-analytics-schema">In-Class Assignment: Window Functions on the Analytics Schema</h2>
+<section id="context" class="level3">
+<h3 class="anchored" data-anchor-id="context">Context</h3>
+<p>You are working with the <strong>analytics schema</strong> of a transactional system that includes customers, orders, products, geography, and time.</p>
+<p>Your task is to answer analytical questions using <strong>window functions</strong>, without collapsing rows unless explicitly stated.</p>
+<p>You are expected to rely on:</p>
+<ul>
+<li><code>PARTITION BY</code></li>
+<li><code>ORDER BY</code></li>
+<li>Appropriate window functions from the layers discussed in class</li>
+</ul>
+<p>Do <strong>not</strong> use subqueries or CTEs unless explicitly requested.</p>
+<hr>
+</section>
+<section id="task-1-simple-aggregate-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="task-1-simple-aggregate-window-functions">Task 1: Simple Aggregate Window Functions</h3>
+<p>For each order, compute the <strong>average order value of the customer</strong> across all their orders.</p>
+<ul>
+<li>Use <code>AVG()</code> as a window function</li>
+<li>Preserve one row per order</li>
+</ul>
+<p><strong>Expected concepts:</strong></p>
+<ul>
+<li><code>AVG() OVER (PARTITION BY customer_id)</code></li>
+<li>Row-level enrichment with group context</li>
+</ul>
+<hr>
+</section>
+<section id="task-2-statistical-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="task-2-statistical-window-functions">Task 2: Statistical Window Functions</h3>
+<p>For each customer, determine the <strong>percent rank of each order</strong> based on order revenue.</p>
+<p>Steps:</p>
+<ol type="1">
+<li>Compute order revenue as<br>
+<span class="math display">\[\text{order\_revenue} = \sum (\text{quantity} \times \text{price})\]</span></li>
+<li>Apply <code>PERCENT_RANK()</code> within each customer</li>
+</ol>
+<p><strong>Expected concepts:</strong></p>
+<ul>
+<li>Distribution within partitions</li>
+<li>Relative positioning of rows</li>
+</ul>
+<hr>
+</section>
+<section id="task-3-value-from-another-row-functions" class="level3">
+<h3 class="anchored" data-anchor-id="task-3-value-from-another-row-functions">Task 3: Value-from-Another-Row Functions</h3>
+<p>For each customer, compute the <strong>difference between the current order and the previous order</strong> in time.</p>
+<ul>
+<li>Orders must be compared chronologically</li>
+<li>The first order per customer should return <code>NULL</code> for the difference</li>
+</ul>
+<p><strong>Expected concepts:</strong></p>
+<ul>
+<li><code>LAG()</code></li>
+<li>Time-aware ordering</li>
+<li>Change detection</li>
+</ul>
+<hr>
+</section>
+<section id="task-4-ranking-functions" class="level3">
+<h3 class="anchored" data-anchor-id="task-4-ranking-functions">Task 4: Ranking Functions</h3>
+<p>Within each <strong>city</strong>, rank customers by their <strong>total lifetime spend</strong>.</p>
+<p>Requirements:</p>
+<ul>
+<li>Customers with the same spend must receive the same rank</li>
+<li>No gaps should appear in ranking</li>
+</ul>
+<p><strong>Expected concepts:</strong></p>
+<ul>
+<li><code>DENSE_RANK()</code></li>
+<li>Partitioning by geography</li>
+<li>Ranking based on aggregated metrics</li>
+</ul>
+<hr>
+</section>
+<section id="task-5-string-aggregation-window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="task-5-string-aggregation-window-functions">Task 5: String Aggregation Window Functions</h3>
+<p>For each customer, construct a <strong>chronological history of product categories</strong> they have purchased.</p>
+<p>Requirements:</p>
+<ul>
+<li>Categories must be ordered by order date</li>
+<li>The full history must appear on every row for that customer</li>
+</ul>
+<p><strong>Expected concepts:</strong></p>
+<ul>
+<li><code>STRING_AGG()</code> with window framing</li>
+<li>Ordered categorical sequencing</li>
+<li>Behavioral traceability</li>
+</ul>
+<hr>
+</section>
+<section id="task-6-channel-behavior-pattern-advanced" class="level3">
+<h3 class="anchored" data-anchor-id="task-6-channel-behavior-pattern-advanced">Task 6: Channel Behavior Pattern (Advanced)</h3>
+<p>Create a result showing:</p>
+<ul>
+<li>A <strong>channel usage pattern</strong> (e.g.&nbsp;<code>online, store</code>)</li>
+<li>The <strong>number of customers</strong> exhibiting that pattern</li>
+</ul>
+<p>Rules:</p>
+<ul>
+<li>Do <strong>not</strong> sort channels alphabetically</li>
+<li>Let the order emerge naturally from purchase behavior</li>
+<li>Customers using only one channel must appear as well</li>
+</ul>
+<p><strong>Expected concepts:</strong></p>
+<ul>
+<li>String aggregation</li>
+<li>Grouping by derived behavioral signatures</li>
+<li>Sensitivity to ordering</li>
+</ul>
+<hr>
+</section>
+<section id="submission-guidelines" class="level3">
+<h3 class="anchored" data-anchor-id="submission-guidelines">Submission Guidelines</h3>
+<ul>
+<li>Write <strong>one query per task</strong></li>
+<li>Each query must be executable independently</li>
+<li>Focus on correctness, not formatting</li>
+<li>Prefer clarity over cleverness</li>
+</ul>
+<p>This assignment evaluates your ability to reason <strong>across rows</strong>, not just aggregate them.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

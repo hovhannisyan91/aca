@@ -775,7 +775,7 @@
     "href": "materials/sql/session10.html",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
     "section": "",
-    "text": "A window function is a SQL function that performs a calculation over a set of rows related to the current row, called a window, without collapsing rows.\nThis is the defining property:\n\nA window function adds information to each row by looking at other rows.\n\nFormally, a window function:\n\nOperates over a window of rows defined by OVER(...)\nPreserves the original number of rows\nAttaches the computed value back to each row\n\nThis distinguishes window functions from:\n\nGROUP BY aggregates (which reduce rows)\nSubqueries and CTEs (which restructure data)\n\nMental model:\n\nEach row keeps its identity, but gains context.\n\n\n\n\nAnalytical questions often require comparison, not just aggregation.\nExamples:\n\nHow does this order compare to the customer’s average?\n\nWhat changed since the previous transaction?\n\nWhat is the rank of this event within a group?\n\nHow does this value evolve over time?\n\nWindow functions are designed precisely for these tasks.\n\n\n\n\n\n\n\n\n\nflowchart LR\n    A[Original Rows] --&gt; B[Define Window]\n    B --&gt; C[Compute Over Window]\n    C --&gt; D[Same Rows + New Metric]\n\n\n\n\n\n\nBefore applying window functions to the analytics schema, we start with a controlled temporary table.\nThis allows us to observe window function behavior clearly, row by row, with explicit inputs and outputs.\nThe goal of this section is mechanical understanding, not business complexity.",
+    "text": "A window function is a SQL function that performs a calculation over a set of rows related to the current row, called a window, without collapsing rows.\nThis is the defining property:\n\nA window function adds information to each row by looking at other rows.\n\nFormally, a window function:\n\nOperates over a window of rows defined by OVER(...)\nPreserves the original number of rows\nAttaches the computed value back to each row\n\nThis distinguishes window functions from:\n\nGROUP BY aggregates (which reduce rows)\nSubqueries and CTEs (which restructure data)\n\nMental model:\n\nEach row keeps its identity, but gains context.\n\n\n\nAnalytical questions often require comparison, not just aggregation.\nExamples:\n\nHow does this order compare to the customer’s average?\n\nWhat changed since the previous transaction?\n\nWhat is the rank of this event within a group?\n\nHow does this value evolve over time?\n\nWindow functions are designed precisely for these tasks.\n\n\n\n\nAggregate over a window (e.g., SUM(), AVG(), COUNT())\n\nValue from another row (e.g., LAG(), LEAD())\n\nRanking functions (e.g., ROW_NUMBER(), RANK(), DENSE_RANK())\n\nCumulative distributions (e.g., CUME_DIST(), PERCENT_RANK())\n\nString aggregation (e.g., STRING_AGG())\nNavigational functions (e.g., FIRST_VALUE(), LAST_VALUE())\nFraming & Advanced Window Control (Advanced)\n\n\n\n\nfunction_name(expression)\nOVER (\n    PARTITION BY ...\n    ORDER BY ...\n)\n\nPARTITION BY defines who is compared with whom\nORDER BY defines sequence inside the window\nThe window determines which rows are visible",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -788,137 +788,7 @@
     "href": "materials/sql/session10.html#window-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
     "section": "",
-    "text": "A window function is a SQL function that performs a calculation over a set of rows related to the current row, called a window, without collapsing rows.\nThis is the defining property:\n\nA window function adds information to each row by looking at other rows.\n\nFormally, a window function:\n\nOperates over a window of rows defined by OVER(...)\nPreserves the original number of rows\nAttaches the computed value back to each row\n\nThis distinguishes window functions from:\n\nGROUP BY aggregates (which reduce rows)\nSubqueries and CTEs (which restructure data)\n\nMental model:\n\nEach row keeps its identity, but gains context.\n\n\n\n\nAnalytical questions often require comparison, not just aggregation.\nExamples:\n\nHow does this order compare to the customer’s average?\n\nWhat changed since the previous transaction?\n\nWhat is the rank of this event within a group?\n\nHow does this value evolve over time?\n\nWindow functions are designed precisely for these tasks.\n\n\n\n\n\n\n\n\n\nflowchart LR\n    A[Original Rows] --&gt; B[Define Window]\n    B --&gt; C[Compute Over Window]\n    C --&gt; D[Same Rows + New Metric]\n\n\n\n\n\n\nBefore applying window functions to the analytics schema, we start with a controlled temporary table.\nThis allows us to observe window function behavior clearly, row by row, with explicit inputs and outputs.\nThe goal of this section is mechanical understanding, not business complexity.",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#step-0-create-a-dummy-temporary-table",
-    "href": "materials/sql/session10.html#step-0-create-a-dummy-temporary-table",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Step 0: Create a Dummy Temporary Table",
-    "text": "Step 0: Create a Dummy Temporary Table\nThis table represents transactional data over time for multiple entities.\nCREATE TEMP TABLE tmp_sales AS\nSELECT *\nFROM (\n    VALUES\n        (1, 'A', DATE '2024-01-01', 100),\n        (2, 'A', DATE '2024-01-02', 120),\n        (3, 'A', DATE '2024-01-03', 90),\n        (4, 'B', DATE '2024-01-01', 200),\n        (5, 'B', DATE '2024-01-02', 180),\n        (6, 'B', DATE '2024-01-03', 220)\n) AS t (\n    sale_id,\n    customer_id,\n    sale_date,\n    amount\n);\n\n\nBase Input Table\n\n\n\nsale_id\ncustomer_id\nsale_date\namount\n\n\n\n\n1\nA\n2024-01-01\n100\n\n\n2\nA\n2024-01-02\n120\n\n\n3\nA\n2024-01-03\n90\n\n\n4\nB\n2024-01-01\n200\n\n\n5\nB\n2024-01-02\n180\n\n\n6\nB\n2024-01-03\n220\n\n\n\n\nConceptual Flow\n\n\n\n\n\n\nflowchart LR\n    A[Original Rows] --&gt; B[Window Definition]\n    B --&gt; C[Calculation Over Window]\n    C --&gt; D[Same Rows + New Column]",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-syntax-generic",
-    "href": "materials/sql/session10.html#window-syntax-generic",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Syntax (Generic)",
-    "text": "Window Syntax (Generic)\nfunction_name(...) OVER (\n    PARTITION BY ...\n    ORDER BY ...\n)",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-function-1-basic-aggregation-over-a-window",
-    "href": "materials/sql/session10.html#window-function-1-basic-aggregation-over-a-window",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 1: Basic Aggregation over a Window",
-    "text": "Window Function 1: Basic Aggregation over a Window\n\nExample: Average Amount per Customer\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    AVG(amount) OVER (PARTITION BY customer_id) AS avg_customer_amount\nFROM tmp_sales;\n\n\nOutput\n\n\n\nsale_id\ncustomer_id\nsale_date\namount\navg_customer_amount\n\n\n\n\n1\nA\n2024-01-01\n100\n103.33\n\n\n2\nA\n2024-01-02\n120\n103.33\n\n\n3\nA\n2024-01-03\n90\n103.33\n\n\n4\nB\n2024-01-01\n200\n200.00\n\n\n5\nB\n2024-01-02\n180\n200.00\n\n\n6\nB\n2024-01-03\n220\n200.00",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#key-observation",
-    "href": "materials/sql/session10.html#key-observation",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Key Observation",
-    "text": "Key Observation\n\nSame number of rows in input and output\n\nAggregation is contextual, not collapsing\n\nEach row keeps its identity",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-function-2-row_number",
-    "href": "materials/sql/session10.html#window-function-2-row_number",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 2: ROW_NUMBER()",
-    "text": "Window Function 2: ROW_NUMBER()\nAssigns a unique sequential number within each partition.\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    ROW_NUMBER() OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS row_num\nFROM tmp_sales;\n\nOutput\n\n\n\nsale_id\ncustomer_id\nsale_date\namount\nrow_num\n\n\n\n\n1\nA\n2024-01-01\n100\n1\n\n\n2\nA\n2024-01-02\n120\n2\n\n\n3\nA\n2024-01-03\n90\n3\n\n\n4\nB\n2024-01-01\n200\n1\n\n\n5\nB\n2024-01-02\n180\n2\n\n\n6\nB\n2024-01-03\n220\n3",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-function-3-lag",
-    "href": "materials/sql/session10.html#window-function-3-lag",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 3: LAG()",
-    "text": "Window Function 3: LAG()\nAccesses the previous row’s value within the window.\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS prev_amount\nFROM tmp_sales;\n\nOutput\n\n\n\nsale_id\ncustomer_id\nsale_date\namount\nprev_amount\n\n\n\n\n1\nA\n2024-01-01\n100\nNULL\n\n\n2\nA\n2024-01-02\n120\n100\n\n\n3\nA\n2024-01-03\n90\n120\n\n\n4\nB\n2024-01-01\n200\nNULL\n\n\n5\nB\n2024-01-02\n180\n200\n\n\n6\nB\n2024-01-03\n220\n180",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-function-4-lead",
-    "href": "materials/sql/session10.html#window-function-4-lead",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 4: LEAD()",
-    "text": "Window Function 4: LEAD()\nAccesses the next row’s value within the window.\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LEAD(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS next_amount\nFROM tmp_sales;",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-function-5-rank-and-dense_rank",
-    "href": "materials/sql/session10.html#window-function-5-rank-and-dense_rank",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 5: RANK() and DENSE_RANK()",
-    "text": "Window Function 5: RANK() and DENSE_RANK()\nRanking rows based on a metric with ties.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS rank_amount,\n    DENSE_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS dense_rank_amount\nFROM tmp_sales;",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-functions-vs-earlier-constructs",
-    "href": "materials/sql/session10.html#window-functions-vs-earlier-constructs",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Functions vs Earlier Constructs",
-    "text": "Window Functions vs Earlier Constructs\n\n\n\nFeature\nGROUP BY\nSubquery\nCTE\nWindow Function\n\n\n\n\nKeeps rows\nNo\nYes\nYes\nYes\n\n\nCross-row context\nLimited\nLimited\nLimited\nYes\n\n\nBest for\nAggregation\nFiltering\nPipelines\nAnalytics",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#transition-to-real-analytics-tables",
-    "href": "materials/sql/session10.html#transition-to-real-analytics-tables",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Transition to Real Analytics Tables",
-    "text": "Transition to Real Analytics Tables\nThe exact same logic applies to:\n\ntmp_order_revenue\nCustomer-level metrics\nTime-based order analysis\nRanking customers, orders, cities\n\nOnly the data scale changes — not the reasoning.\nThe next section applies each window function to the analytics schema step by step.",
+    "text": "A window function is a SQL function that performs a calculation over a set of rows related to the current row, called a window, without collapsing rows.\nThis is the defining property:\n\nA window function adds information to each row by looking at other rows.\n\nFormally, a window function:\n\nOperates over a window of rows defined by OVER(...)\nPreserves the original number of rows\nAttaches the computed value back to each row\n\nThis distinguishes window functions from:\n\nGROUP BY aggregates (which reduce rows)\nSubqueries and CTEs (which restructure data)\n\nMental model:\n\nEach row keeps its identity, but gains context.\n\n\n\nAnalytical questions often require comparison, not just aggregation.\nExamples:\n\nHow does this order compare to the customer’s average?\n\nWhat changed since the previous transaction?\n\nWhat is the rank of this event within a group?\n\nHow does this value evolve over time?\n\nWindow functions are designed precisely for these tasks.\n\n\n\n\nAggregate over a window (e.g., SUM(), AVG(), COUNT())\n\nValue from another row (e.g., LAG(), LEAD())\n\nRanking functions (e.g., ROW_NUMBER(), RANK(), DENSE_RANK())\n\nCumulative distributions (e.g., CUME_DIST(), PERCENT_RANK())\n\nString aggregation (e.g., STRING_AGG())\nNavigational functions (e.g., FIRST_VALUE(), LAST_VALUE())\nFraming & Advanced Window Control (Advanced)\n\n\n\n\nfunction_name(expression)\nOVER (\n    PARTITION BY ...\n    ORDER BY ...\n)\n\nPARTITION BY defines who is compared with whom\nORDER BY defines sequence inside the window\nThe window determines which rows are visible",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -931,33 +801,7 @@
     "href": "materials/sql/session10.html#step-0-create-an-extended-dummy-temporary-table",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
     "section": "Step 0: Create an Extended Dummy Temporary Table",
-    "text": "Step 0: Create an Extended Dummy Temporary Table\nBefore applying window functions to the analytics schema, we use a controlled temporary table with:\n\nMultiple entities\n\nTime ordering\n\nRepeated values (for ranking)\n\nA categorical column (for STRING_AGG)\n\nCREATE TEMP TABLE tmp_sales AS\nSELECT *\nFROM (\n    VALUES\n        (1,  'A', DATE '2024-01-01', 100, 'online'),\n        (2,  'A', DATE '2024-01-02', 120, 'store'),\n        (3,  'A', DATE '2024-01-03', 90,  'online'),\n        (4,  'A', DATE '2024-01-04', 130, 'store'),\n        (5,  'B', DATE '2024-01-01', 200, 'online'),\n        (6,  'B', DATE '2024-01-02', 180, 'store'),\n        (7,  'B', DATE '2024-01-03', 220, 'online'),\n        (8,  'B', DATE '2024-01-04', 200, 'store'),\n        (9,  'C', DATE '2024-01-01', 150, 'store'),\n        (10, 'C', DATE '2024-01-02', 150, 'online'),\n        (11, 'C', DATE '2024-01-03', 170, 'online')\n) AS t(\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    channel\n);",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#base-input-table-1",
-    "href": "materials/sql/session10.html#base-input-table-1",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Base Input Table",
-    "text": "Base Input Table\n\n\n\nsale_id\ncustomer_id\nsale_date\namount\nchannel\n\n\n\n\n1\nA\n2024-01-01\n100\nonline\n\n\n2\nA\n2024-01-02\n120\nstore\n\n\n3\nA\n2024-01-03\n90\nonline\n\n\n4\nA\n2024-01-04\n130\nstore\n\n\n5\nB\n2024-01-01\n200\nonline\n\n\n6\nB\n2024-01-02\n180\nstore\n\n\n7\nB\n2024-01-03\n220\nonline\n\n\n8\nB\n2024-01-04\n200\nstore\n\n\n9\nC\n2024-01-01\n150\nstore\n\n\n10\nC\n2024-01-02\n150\nonline\n\n\n11\nC\n2024-01-03\n170\nonline",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/session10.html#window-syntax-generic-1",
-    "href": "materials/sql/session10.html#window-syntax-generic-1",
-    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Syntax (Generic)",
-    "text": "Window Syntax (Generic)\nfunction_name(expression)\nOVER (\n    PARTITION BY ...\n    ORDER BY ...\n)\n\nPARTITION BY defines who is compared with whom\nORDER BY defines sequence inside the window\nThe window determines which rows are visible",
+    "text": "Step 0: Create an Extended Dummy Temporary Table\nBefore applying window functions to the analytics schema, we use a controlled temporary table with:\n\nMultiple entities\n\nTime ordering\n\nRepeated values (for ranking)\n\nA categorical column (for STRING_AGG)\n\nCREATE TEMP TABLE tmp_sales AS\nSELECT *\nFROM (\n    VALUES\n        \n        (1,  'A', DATE '2024-01-01', 100, 'online'),\n        (2,  'A', DATE '2024-01-02', 120, 'store'),\n        (3,  'A', DATE '2024-01-03', 90,  'online'),\n        (4,  'A', DATE '2024-01-04', 130, 'store'),\n\n        \n        (5,  'B', DATE '2024-01-01', 180, 'store'),\n        (6,  'B', DATE '2024-01-02', 200, 'online'),\n        (7,  'B', DATE '2024-01-03', 220, 'online'),\n        (8,  'B', DATE '2024-01-04', 200, 'store'),\n\n        \n        (9,  'C', DATE '2024-01-01', 150, 'online'),\n        (10, 'C', DATE '2024-01-02', 150, 'online'),\n        (11, 'C', DATE '2024-01-03', 170, 'online'),\n\n        \n        (12, 'D', DATE '2024-01-01', 90,  'store'),\n        (13, 'D', DATE '2024-01-02', 110, 'store'),\n\n        \n        (14, 'E', DATE '2024-01-01', 140, 'store'),\n        (15, 'E', DATE '2024-01-02', 160, 'online'),\n        (16, 'E', DATE '2024-01-03', 155, 'store')\n) AS t(\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    channel\n);\n\n\nBase Input Table\n\n\n\nsale_id\ncustomer_id\nsale_date\namount\nchannel\n\n\n\n\n1\nA\n2024-01-01\n100\nonline\n\n\n2\nA\n2024-01-02\n120\nstore\n\n\n3\nA\n2024-01-03\n90\nonline\n\n\n4\nA\n2024-01-04\n130\nstore\n\n\n5\nB\n2024-01-01\n200\nonline\n\n\n6\nB\n2024-01-02\n180\nstore\n\n\n7\nB\n2024-01-03\n220\nonline\n\n\n8\nB\n2024-01-04\n200\nstore\n\n\n9\nC\n2024-01-01\n150\nstore\n\n\n10\nC\n2024-01-02\n150\nonline\n\n\n11\nC\n2024-01-03\n170\nonline",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -979,11 +823,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session10.html#window-function-2-row_number-1",
-    "href": "materials/sql/session10.html#window-function-2-row_number-1",
+    "objectID": "materials/sql/session10.html#creating-an-extended-dummy-temporary-table",
+    "href": "materials/sql/session10.html#creating-an-extended-dummy-temporary-table",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 2: ROW_NUMBER()",
-    "text": "Window Function 2: ROW_NUMBER()\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    ROW_NUMBER() OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS row_num\nFROM tmp_sales;",
+    "section": "Creating an Extended Dummy Temporary Table",
+    "text": "Creating an Extended Dummy Temporary Table\nBefore applying window functions to the analytics schema, we use a controlled temporary table with:\nBefore applying window functions to the analytics schema, we use a controlled temporary table with:\n\nMultiple entities\n\nTime ordering\n\nRepeated values (for ranking)\n\nA categorical column (for STRING_AGG)\n\nCREATE TEMP TABLE tmp_sales AS\nSELECT *\nFROM (\n    VALUES\n        (1,  'A', DATE '2024-01-01', 100, 'online'),\n        (2,  'A', DATE '2024-01-02', 120, 'store'),\n        (3,  'A', DATE '2024-01-03', 90,  'online'),\n        (4,  'A', DATE '2024-01-04', 130, 'store'),\n        (5,  'B', DATE '2024-01-01', 200, 'online'),\n        (6,  'B', DATE '2024-01-02', 180, 'store'),\n        (7,  'B', DATE '2024-01-03', 220, 'online'),\n        (8,  'B', DATE '2024-01-04', 200, 'store'),\n        (9,  'C', DATE '2024-01-01', 150, 'store'),\n        (10, 'C', DATE '2024-01-02', 150, 'online'),\n        (11, 'C', DATE '2024-01-03', 170, 'online')\n) AS t(\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    channel\n);",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -992,11 +836,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session10.html#window-function-3-lag-1",
-    "href": "materials/sql/session10.html#window-function-3-lag-1",
+    "objectID": "materials/sql/session10.html#window-function-layer-1-simple-aggregate-window-functions",
+    "href": "materials/sql/session10.html#window-function-layer-1-simple-aggregate-window-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 3: LAG()",
-    "text": "Window Function 3: LAG()\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS prev_amount\nFROM tmp_sales;",
+    "section": "Window Function Layer 1: Simple Aggregate Window Functions",
+    "text": "Window Function Layer 1: Simple Aggregate Window Functions\nSimple aggregate window functions apply classical aggregation logic (such as SUM, AVG, COUNT, MIN, MAX) without collapsing rows.\nThey answer the question:\n\nHow does this row relate to an aggregate of its group/partition?\n\n\n\nConcept\nA simple aggregate window function computes an aggregate value over a partition of rows and attaches that value to every row in the partition.\nUnlike GROUP BY:\n\nRows are not reduced\nEach row keeps its original granularity\nAggregates become contextual attributes\n\n\nCompute a group-level metric, then stamp it onto every row in the group.\n\n\n\nCommon Functions in This Layer\n\nSUM()\n\nAVG()\n\nCOUNT()\n\nMIN()\n\nMAX()\n\nAll of them become window functions when combined with OVER(...).\n\n\n\nGeneric Pattern\nAGGREGATE_FUNCTION(column)\nOVER (\n    PARTITION BY grouping_column\n)\n\n\n\nExample 1: Average Amount per Customer\nBusiness intuition:\n“How much does this sale differ from the customer’s typical behavior?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    AVG(amount) OVER (\n        PARTITION BY customer_id\n    ) AS avg_customer_amount\nFROM tmp_sales;\n\n\n\nOutput\n\n\n\nsale_id\ncustomer_id\namount\navg_customer_amount\n\n\n\n\n1\nA\n100\n110.00\n\n\n2\nA\n120\n110.00\n\n\n3\nA\n90\n110.00\n\n\n4\nA\n130\n110.00\n\n\n5\nB\n200\n200.00\n\n\n6\nB\n180\n200.00\n\n\n7\nB\n220\n200.00\n\n\n8\nB\n200\n200.00\n\n\n9\nC\n150\n156.67\n\n\n10\nC\n150\n156.67\n\n\n11\nC\n170\n156.67\n\n\n\n\n\n\nExample 2: Total Spend per Customer\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    SUM(amount) OVER (\n        PARTITION BY customer_id\n    ) AS total_customer_spend\nFROM tmp_sales;\n\n\n\nExample 3: Number of Transactions per Customer\nSELECT\n    sale_id,\n    customer_id,\n    COUNT(*) OVER (\n        PARTITION BY customer_id\n    ) AS transaction_count\nFROM tmp_sales;\n\n\n\nExample 4: Minimum and Maximum Amount per Customer\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    MIN(amount) OVER (\n        PARTITION BY customer_id\n    ) AS min_amount,\n    MAX(amount) OVER (\n        PARTITION BY customer_id\n    ) AS max_amount\nFROM tmp_sales;\n\n\n\nSummary of Simple Aggregate Window Functions\n\nAggregation logic is identical to GROUP BY\nThe difference is row preservation\nThese functions create reference baselines\nThey are often the foundation for:\n\nVariance analysis\n\nNormalization\n\nZ-scores\n\nBehavioral comparisons\n\n\n\n\nWhen to Use Simple Aggregate Window Functions\n\nComparing a row to its group average\n\nAttaching group-level metrics to granular data\n\nPreparing features for modeling\n\nAvoiding joins or subqueries for simple enrichments\n\nThis layer forms the foundation for all advanced window logic.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -1005,11 +849,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session10.html#window-function-4-lead-1",
-    "href": "materials/sql/session10.html#window-function-4-lead-1",
+    "objectID": "materials/sql/session10.html#window-function-layer-2-statistical-window-functions",
+    "href": "materials/sql/session10.html#window-function-layer-2-statistical-window-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 4: LEAD()",
-    "text": "Window Function 4: LEAD()\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LEAD(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS next_amount\nFROM tmp_sales;",
+    "section": "Window Function Layer 2: Statistical Window Functions",
+    "text": "Window Function Layer 2: Statistical Window Functions\nStatistical window functions extend simple aggregates by answering distributional questions instead of basic totals or averages.\nThey answer the question:\n\nWhere does this row stand within the distribution of its group?\n\n\n\nConcept\nA statistical window function computes position, spread, or relative standing of a row within a partition.\nUnlike simple aggregates:\n\nThey focus on ordering and distribution\nThey often require ORDER BY\nResults depend on relative position, not just totals\n\nThese functions are essential for exploratory data analysis, outlier detection, and ranking-based insights.\n\n\n\nCommon Functions in This Layer\n\nPERCENTILE_CONT()\n\nPERCENTILE_DISC()\n\nMEDIAN()\n\nPERCENT_RANK()\n\nCUME_DIST()\n\n\n\n\nGeneric Pattern\nSTAT_FUNCTION(...)\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\n\n\nExample 1: Median Amount per Customer\nBusiness intuition:\n“What is the typical (middle) transaction size for this customer?”\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENTILE_CONT(0.5) WITHIN GROUP (\n        ORDER BY amount\n    ) OVER (\n        PARTITION BY customer_id\n    ) AS median_amount\nFROM tmp_sales;\n\n\n\nExample 2: Percent Rank of Each Transaction\nPERCENT_RANK() shows relative position between 0 and 1.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENT_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS percent_rank\nFROM tmp_sales;\nInterpretation:\n\n0.0 → lowest value in group\n\n1.0 → highest value in group\n\n\n\n\nExample 3: Cumulative Distribution\nCUME_DIST() shows the share of rows less than or equal to the current row.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    CUME_DIST() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS cumulative_distribution\nFROM tmp_sales;\n\n\n\nExample 4: Quartile Assignment\nAssign each transaction to a quartile using percentiles.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    NTILE(4) OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS quartile\nFROM tmp_sales;\n\n\n\nKey Observations\n\nStatistical window functions are order-sensitive\nThey expose distribution shape\nResults are relative, not absolute\nThey are critical for:\n\nOutlier detection\n\nSegmentation\n\nThreshold-based decisions\n\n\n\n\n\nWhen to Use Statistical Window Functions\n\nUnderstanding customer behavior distributions\n\nIdentifying top/bottom performers\n\nCreating quantile-based segments\n\nNormalizing values for comparison\n\nThis layer bridges descriptive statistics and analytical SQL, preparing the ground for ranking and time-aware functions.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -1018,11 +862,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session10.html#window-function-5-rank-and-dense_rank-1",
-    "href": "materials/sql/session10.html#window-function-5-rank-and-dense_rank-1",
+    "objectID": "materials/sql/session10.html#window-function-layer-3-value-from-another-row-functions",
+    "href": "materials/sql/session10.html#window-function-layer-3-value-from-another-row-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 5: RANK() and DENSE_RANK()",
-    "text": "Window Function 5: RANK() and DENSE_RANK()\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS rank_amount,\n    DENSE_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS dense_rank_amount\nFROM tmp_sales;",
+    "section": "Window Function Layer 3: Value-from-Another-Row Functions",
+    "text": "Window Function Layer 3: Value-from-Another-Row Functions\nValue-from-another-row window functions allow a row to access values from neighboring rows within the same partition.\nThey answer the question:\n\nHow does this row relate to previous or next rows in sequence?\n\n\n\nConcept\nA value-from-another-row window function retrieves a value from a different row in the same window, based on ordering.\nThese functions are inherently time-aware and sequence-aware.\nUnlike aggregate or statistical functions:\n\nThey do not summarize a group\nThey compare a row to specific neighboring rows\nOrdering is mandatory\n\n\n\n\nCommon Functions in This Layer\n\nLAG()\n\nLEAD()\n\nFIRST_VALUE()\n\nLAST_VALUE()\n\n\n\nGeneric Pattern\nVALUE_FUNCTION(column [, offset])\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\noffset (optional) defines how many rows forward/backward to look\nDefault offset is 1\n\n\n\n\nExample 1: Previous Transaction Amount (LAG)\nBusiness intuition:\n“How did this transaction change compared to the previous one?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS previous_amount\nFROM tmp_sales;\n\n\n\nExample 2: Next Transaction Amount (LEAD)\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LEAD(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS next_amount\nFROM tmp_sales;\n\n\n\nExample 3: Change Since Previous Transaction\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    amount\n      - LAG(amount) OVER (\n            PARTITION BY customer_id\n            ORDER BY sale_date\n        ) AS amount_change\nFROM tmp_sales;\n\n\n\nExample 4: First Transaction Amount per Customer\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    FIRST_VALUE(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS first_amount\nFROM tmp_sales;\n\n\n\nExample 5: Last Transaction Amount per Customer\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAST_VALUE(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n    ) AS last_amount\nFROM tmp_sales;\n\n\n\n\n\n\n\nImportant\n\n\n\n\nOrdering is mandatory\nThese functions are directional\nThey enable:\n\nTrend analysis\n\nChange detection\n\nTime-series feature engineering\n\n\n\n\n\n\n\nWhen to Use Value-from-Another-Row Functions\n\nMeasuring growth or decline\n\nDetecting behavioral changes\n\nComparing events over time\n\nPreparing lagged features for models\n\nThis layer introduces temporal reasoning, which is fundamental for advanced analytics and forecasting.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -1031,11 +875,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/session10.html#window-function-6-string_agg-as-a-window-function",
-    "href": "materials/sql/session10.html#window-function-6-string_agg-as-a-window-function",
+    "objectID": "materials/sql/session10.html#window-function-layer-4-ranking-functions",
+    "href": "materials/sql/session10.html#window-function-layer-4-ranking-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Window Function 6: STRING_AGG() as a Window Function",
-    "text": "Window Function 6: STRING_AGG() as a Window Function\n\nExample: Channels Used by Each Customer\nSELECT\n    sale_id,\n    customer_id,\n    channel,\n    STRING_AGG(channel, ', ') OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS channels_used\nFROM tmp_sales;\n\n\nOutput (Conceptual)\n\n\n\nsale_id\ncustomer_id\nchannel\nchannels_used\n\n\n\n\n1\nA\nonline\nonline\n\n\n2\nA\nstore\nonline, store\n\n\n3\nA\nonline\nonline, store, online\n\n\n4\nA\nstore\nonline, store, online, store",
+    "section": "Window Function Layer 4: Ranking Functions",
+    "text": "Window Function Layer 4: Ranking Functions\nRanking window functions assign ordinal positions to rows within a partition based on a specified ordering.\nThey answer the question:\n\nHow does this row rank relative to other rows in its group?\n\n\n\nConcept\nA ranking window function assigns a numeric rank to each row according to an ORDER BY rule inside a partition.\nUnlike statistical functions:\n\nThey produce discrete ranks, not continuous measures\nThey are sensitive to ties\nThey are commonly used for top-N analysis and leaderboards\n\n\n\nCommon Functions in This Layer\n\nROW_NUMBER()\n\nRANK()\n\nDENSE_RANK()\n\nEach function handles ties differently.\n\n\n\nGeneric Pattern\nRANKING_FUNCTION()\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column [ASC | DESC]\n)\n\n\n\nFunction Semantics\n\n\n\nFunction\nHandles Ties\nGaps in Ranking\nTypical Use\n\n\n\n\nROW_NUMBER()\nNo\nYes\nUnique ordering\n\n\nRANK()\nYes\nYes\nCompetition ranking\n\n\nDENSE_RANK()\nYes\nNo\nTier-based ranking\n\n\n\n\n\n\nExample 1: Sequential Ordering (ROW_NUMBER)\nBusiness intuition:\n“What is the chronological position of each transaction?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    ROW_NUMBER() OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS row_number\nFROM tmp_sales;\n\n\n\nExample 2: Ranking by Amount with Gaps (RANK)\nBusiness intuition:\n“What is the spending rank of each transaction?”\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS rank_amount\nFROM tmp_sales;\n\n\n\nExample 3: Dense Ranking by Amount (DENSE_RANK)\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    DENSE_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS dense_rank_amount\nFROM tmp_sales;\n\n\nSummary of Ranking Functions\n\n\n\n\n\n\nImportant\n\n\n\n\nRanking always requires ORDER BY\nROW_NUMBER() enforces uniqueness\nRANK() leaves gaps after ties\nDENSE_RANK() preserves continuity\n\n\n\n\n\nPractical Analytics Use Cases\n\nTop-N customers or transactions\n\nIdentifying best/worst performers\n\nDe-duplication with deterministic ordering\n\nFeature engineering for modeling\n\n\n\n\nWhen to Use Ranking Functions\n\nCreating leaderboards\n\nSelecting first / top records per group\n\nResolving duplicates deterministically\n\nSegmenting by relative performance\n\nRanking functions introduce comparative structure, preparing the ground for cumulative and navigational window logic.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -1044,11 +888,37 @@
     ]
   },
   {
-    "objectID": "materials/sql/session10.html#key-observations",
-    "href": "materials/sql/session10.html#key-observations",
+    "objectID": "materials/sql/session10.html#window-function-layer-5-string-aggregation-window-functions",
+    "href": "materials/sql/session10.html#window-function-layer-5-string-aggregation-window-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
-    "section": "Key Observations",
-    "text": "Key Observations\n\nWindow functions never reduce rows\nContext is defined explicitly via OVER(...)\nOrdering matters for time-based logic\nString aggregation can also be contextual",
+    "section": "Window Function Layer 5: String Aggregation Window Functions",
+    "text": "Window Function Layer 5: String Aggregation Window Functions\nString aggregation window functions allow rows to accumulate textual values from related rows without collapsing the dataset.\nThey answer the question:\n\nWhat sequence or collection of categorical values is associated with this row’s group?\n\n\n\nConcept\nA string aggregation window function concatenates values from multiple rows within a partition into a single textual representation, while preserving row-level granularity.\nUnlike classic GROUP BY STRING_AGG:\n\nRows are not reduced\nThe aggregated string is attached to each row\nOrdering controls how the string is built\n\nThis makes string aggregation window functions especially useful for behavioral tracing, auditability, and sequence analysis.\n\n\n\nCommon Functions in This Layer\n\nSTRING_AGG()\n\nWhen combined with OVER(...), STRING_AGG() becomes a contextual, row-preserving operation.\n\n\n\nGeneric Pattern\nSTRING_AGG(column, delimiter)\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\ndelimiter defines how values are separated\nORDER BY defines the sequence of concatenation\nThe result grows as the window progresses\n\n\n\n\nExample 1: Channels Used by Each Customer (Cumulative)\nBusiness intuition:\n“What interaction channels has this customer used up to this point?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    channel,\n    STRING_AGG(channel, ', ') OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS channels_used_so_far\nFROM tmp_sales;\n\n\n\nOutput (Conceptual)\n\n\n\nsale_id\ncustomer_id\nsale_date\nchannel\nchannels_used_so_far\n\n\n\n\n1\nA\n2024-01-01\nonline\nonline\n\n\n2\nA\n2024-01-02\nstore\nonline, store\n\n\n3\nA\n2024-01-03\nonline\nonline, store, online\n\n\n4\nA\n2024-01-04\nstore\nonline, store, online, store\n\n\n\n\n\n\nExample 2: Full Channel History per Customer\nTo attach the complete history to every row, use an explicit frame.\nSELECT\n    sale_id,\n    customer_id,\n    channel,\n    STRING_AGG(channel, ', ') OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n    ) AS full_channel_history\nFROM tmp_sales;\n\n\nExample 3: Channel Combination Pattern (Customer Behavior Signature)\nWITH customer_channels AS (\n    SELECT\n        customer_id,\n        STRING_AGG(DISTINCT channel, ', ' ORDER BY channel) AS channel_pattern\n    FROM tmp_sales\n    GROUP BY customer_id\n)\nSELECT\n    channel_pattern,\n    COUNT(*) AS customer_count\nFROM customer_channels\nGROUP BY channel_pattern;\n\n\n\n\n\n\nImportant\n\n\n\ntry without ORDER BY in STRING_AGG to see different results\n\n\n\n\nSummary of String Aggregation Window Functions\n\nOrdering determines string growth\nWithout a frame, aggregation is cumulative\nWith a full frame, aggregation is static per group\nStrings become contextual descriptors, not summaries\n\n\n\n\nPractical Analytics Use Cases\n\nCustomer journey reconstruction\n\nChannel or event sequence analysis\n\nAudit trails and explainability\n\nFeature generation for downstream models\n\n\n\n\nWhen to Use String Aggregation Window Functions\n\nWhen order matters in categorical data\n\nWhen you need traceability, not just counts\n\nWhen building interpretable analytical features\n\nWhen collapsing rows would lose information\n\nThis layer completes the transition from numeric comparison to behavioral sequencing, setting the stage for advanced window framing and analytics patterns.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session10.html#window-function-layer-6-window-framing-advanced-window-control",
+    "href": "materials/sql/session10.html#window-function-layer-6-window-framing-advanced-window-control",
+    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
+    "section": "Window Function Layer 6: Window Framing & Advanced Window Control",
+    "text": "Window Function Layer 6: Window Framing & Advanced Window Control\nWindow framing controls which rows inside the partition are visible to the window function for each row.\nThey answer the question:\n\nExactly which subset of rows should be used when computing the window value for this row?\n\n\nConcept\nA window frame defines a moving or fixed subset of rows relative to the current row.\nWhile:\n\nPARTITION BY defines who belongs together\nORDER BY defines sequence\n\nThe frame defines how far backward and forward the window can see.\nWithout an explicit frame, SQL engines apply default framing rules, which can lead to unexpected results, especially for cumulative and navigational functions.\n\n\n\nFrame Dimensions\nA frame is defined using:\n\nFrame type\nFrame boundaries\n\nROWS | RANGE BETWEEN &lt;start&gt; AND &lt;end&gt;\n\n\n\nFrame Types\n\nROWS\n\nFrame is defined by physical row positions\nDeterministic and predictable\nPreferred for analytics\n\n\n\nRANGE\n\nFrame is defined by logical value ranges\nCan include multiple rows with the same ordering value\nMore subtle and engine-dependent\n\n\n\n\n\nCommon Frame Boundaries\n\n\n\nBoundary\nMeaning\n\n\n\n\nUNBOUNDED PRECEDING\nFrom the first row in the partition\n\n\nCURRENT ROW\nThe current row\n\n\nUNBOUNDED FOLLOWING\nUntil the last row in the partition\n\n\nn PRECEDING\nn rows before\n\n\nn FOLLOWING\nn rows after\n\n\n\n\n\n\nDefault Frame (Important)\nFor most databases:\nORDER BY column\nimplicitly means:\nRANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\nThis is not always what you want.\n\n\n\nExample 1: Running Total (Explicit Frame)\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    SUM(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS running_total\nFROM tmp_sales;\n\n\n\nExample 2: Full-Partition Aggregate (Stable Value)\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    AVG(amount) OVER (\n        PARTITION BY customer_id\n        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n    ) AS full_partition_avg\nFROM tmp_sales;\n\n\n\nExample 3: Moving Window (Last 2 Transactions)\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    AVG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN 1 PRECEDING AND CURRENT ROW\n    ) AS moving_avg_2\nFROM tmp_sales;\n\n\n\nExample 4: Correct LAST_VALUE() Usage\nWithout a full frame, LAST_VALUE() often returns the current row, not the true last value.\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAST_VALUE(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n    ) AS true_last_amount\nFROM tmp_sales;\n\n\n\nKey Observations\n\nFraming determines visibility, not grouping\nMany subtle bugs come from implicit frames\nExplicit frames improve:\n\nCorrectness\n\nReadability\n\nPortability\n\n\n\n\n\nWhen to Use Explicit Window Frames\n\nRunning totals and cumulative metrics\n\nMoving averages and rolling windows\n\nNavigational functions (FIRST_VALUE, LAST_VALUE)\n\nAny time correctness depends on row visibility\n\nThis layer gives you full control over window behavior, completing the mental model of advanced analytical SQL.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Session 10: Data Analysis with SQL | Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/session10.html#in-class-assignment-window-functions-on-the-analytics-schema",
+    "href": "materials/sql/session10.html#in-class-assignment-window-functions-on-the-analytics-schema",
+    "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
+    "section": "In-Class Assignment: Window Functions on the Analytics Schema",
+    "text": "In-Class Assignment: Window Functions on the Analytics Schema\n\nContext\nYou are working with the analytics schema of a transactional system that includes customers, orders, products, geography, and time.\nYour task is to answer analytical questions using window functions, without collapsing rows unless explicitly stated.\nYou are expected to rely on:\n\nPARTITION BY\nORDER BY\nAppropriate window functions from the layers discussed in class\n\nDo not use subqueries or CTEs unless explicitly requested.\n\n\n\nTask 1: Simple Aggregate Window Functions\nFor each order, compute the average order value of the customer across all their orders.\n\nUse AVG() as a window function\nPreserve one row per order\n\nExpected concepts:\n\nAVG() OVER (PARTITION BY customer_id)\nRow-level enrichment with group context\n\n\n\n\nTask 2: Statistical Window Functions\nFor each customer, determine the percent rank of each order based on order revenue.\nSteps:\n\nCompute order revenue as\n\\[\\text{order\\_revenue} = \\sum (\\text{quantity} \\times \\text{price})\\]\nApply PERCENT_RANK() within each customer\n\nExpected concepts:\n\nDistribution within partitions\nRelative positioning of rows\n\n\n\n\nTask 3: Value-from-Another-Row Functions\nFor each customer, compute the difference between the current order and the previous order in time.\n\nOrders must be compared chronologically\nThe first order per customer should return NULL for the difference\n\nExpected concepts:\n\nLAG()\nTime-aware ordering\nChange detection\n\n\n\n\nTask 4: Ranking Functions\nWithin each city, rank customers by their total lifetime spend.\nRequirements:\n\nCustomers with the same spend must receive the same rank\nNo gaps should appear in ranking\n\nExpected concepts:\n\nDENSE_RANK()\nPartitioning by geography\nRanking based on aggregated metrics\n\n\n\n\nTask 5: String Aggregation Window Functions\nFor each customer, construct a chronological history of product categories they have purchased.\nRequirements:\n\nCategories must be ordered by order date\nThe full history must appear on every row for that customer\n\nExpected concepts:\n\nSTRING_AGG() with window framing\nOrdered categorical sequencing\nBehavioral traceability\n\n\n\n\nTask 6: Channel Behavior Pattern (Advanced)\nCreate a result showing:\n\nA channel usage pattern (e.g. online, store)\nThe number of customers exhibiting that pattern\n\nRules:\n\nDo not sort channels alphabetically\nLet the order emerge naturally from purchase behavior\nCustomers using only one channel must appear as well\n\nExpected concepts:\n\nString aggregation\nGrouping by derived behavioral signatures\nSensitivity to ordering\n\n\n\n\nSubmission Guidelines\n\nWrite one query per task\nEach query must be executable independently\nFocus on correctness, not formatting\nPrefer clarity over cleverness\n\nThis assignment evaluates your ability to reason across rows, not just aggregate them.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -11338,6 +11208,552 @@
     "title": "Advanced SQL Functions",
     "section": "Transition to Window Functions",
     "text": "Transition to Window Functions\nCTEs define what is computed and in what order.\n\nWindow Functions define how rows are compared.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#core-idea-syntax-skeleton",
+    "href": "materials/sql/slides/session10.html#core-idea-syntax-skeleton",
+    "title": "Advanced SQL Functions",
+    "section": "Core Idea (Syntax Skeleton)",
+    "text": "Core Idea (Syntax Skeleton)\nfunction_name(expression)\nOVER (\n    PARTITION BY ...\n    ORDER BY ...\n    ROWS | RANGE ...\n)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#window-functions-vs-aggregations",
+    "href": "materials/sql/slides/session10.html#window-functions-vs-aggregations",
+    "title": "Advanced SQL Functions",
+    "section": "Window Functions vs Aggregations",
+    "text": "Window Functions vs Aggregations\n\n\n\nFeature\nGROUP BY\nWindow Function\n\n\n\n\nRows preserved\nNo\nYes\n\n\nAggregation scope\nEntire group\nSliding / contextual\n\n\nOutput rows\nFewer\nSame as input\n\n\nAnalytical use\nSummaries\nComparisons, trends",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#simple-conceptual-example",
+    "href": "materials/sql/slides/session10.html#simple-conceptual-example",
+    "title": "Advanced SQL Functions",
+    "section": "Simple Conceptual Example",
+    "text": "Simple Conceptual Example\nInput Table: sales\n\n\n\norder_id\ncustomer_id\norder_date\nrevenue\n\n\n\n\n1\n10\n2024-01-01\n100\n\n\n2\n10\n2024-01-05\n150\n\n\n3\n20\n2024-01-03\n200\n\n\n\n\nQuestion: Show each order and the total revenue per customer.\nSELECT\n    order_id,\n    customer_id,\n    revenue,\n    SUM(revenue) OVER (PARTITION BY customer_id) AS total_customer_revenue\nFROM sales;\n\n\n\n\n\norder_id\ncustomer_id\nrevenue\ntotal_customer_revenue\n\n\n\n\n1\n10\n100\n250\n\n\n2\n10\n150\n250\n\n\n3\n20\n200\n200",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#analytical-value-of-window-functions",
+    "href": "materials/sql/slides/session10.html#analytical-value-of-window-functions",
+    "title": "Advanced SQL Functions",
+    "section": "Analytical Value of Window Functions",
+    "text": "Analytical Value of Window Functions\n\nComparing rows to group averages\n\nRanking and ordering observations\n\nMeasuring change over time\n\nCalculating running totals\n\nDetecting trends and anomalies",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#window-functions-in-dataa-aalytics",
+    "href": "materials/sql/slides/session10.html#window-functions-in-dataa-aalytics",
+    "title": "Advanced SQL Functions",
+    "section": "Window Functions in Dataa Aalytics",
+    "text": "Window Functions in Dataa Aalytics\n\nCustomer lifetime analysis\n\nTime-series trend comparison\n\nCohort analysis\n\nFunnel progression\n\nRanking and segmentation\n\n\nThey are a cornerstone of modern analytical SQL.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#temporary-table",
+    "href": "materials/sql/slides/session10.html#temporary-table",
+    "title": "Advanced SQL Functions",
+    "section": "Temporary Table",
+    "text": "Temporary Table\nCREATE TEMP TABLE tmp_sales AS\nSELECT *\nFROM (\n    VALUES\n        \n        (1,  'A', DATE '2024-01-01', 100, 'online'),\n        (2,  'A', DATE '2024-01-02', 120, 'store'),\n        (3,  'A', DATE '2024-01-03', 90,  'online'),\n        (4,  'A', DATE '2024-01-04', 130, 'store'),\n\n        \n        (5,  'B', DATE '2024-01-01', 180, 'store'),\n        (6,  'B', DATE '2024-01-02', 200, 'online'),\n        (7,  'B', DATE '2024-01-03', 220, 'online'),\n        (8,  'B', DATE '2024-01-04', 200, 'store'),\n\n        \n        (9,  'C', DATE '2024-01-01', 150, 'online'),\n        (10, 'C', DATE '2024-01-02', 150, 'online'),\n        (11, 'C', DATE '2024-01-03', 170, 'online'),\n\n        \n        (12, 'D', DATE '2024-01-01', 90,  'store'),\n        (13, 'D', DATE '2024-01-02', 110, 'store'),\n\n        \n        (14, 'E', DATE '2024-01-01', 140, 'store'),\n        (15, 'E', DATE '2024-01-02', 160, 'online'),\n        (16, 'E', DATE '2024-01-03', 155, 'store')\n) AS t(\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    channel\n);",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#window-function-layers",
+    "href": "materials/sql/slides/session10.html#window-function-layers",
+    "title": "Advanced SQL Functions",
+    "section": "Window Function Layers",
+    "text": "Window Function Layers\n\nAggregate over a window (e.g., SUM(), AVG(), COUNT())\n\nValue from another row (e.g., LAG(), LEAD())\n\nRanking functions (e.g., ROW_NUMBER(), RANK(), DENSE_RANK())\n\nCumulative distributions (e.g., CUME_DIST(), PERCENT_RANK())\n\nString aggregation (e.g., STRING_AGG())\nNavigational functions (e.g., FIRST_VALUE(), LAST_VALUE())\nFraming & Advanced Window Control (Advanced)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#concept",
+    "href": "materials/sql/slides/session10.html#concept",
+    "title": "Advanced SQL Functions",
+    "section": "Concept",
+    "text": "Concept\nSimple aggregate window functions apply classical aggregation logic (such as SUM, AVG, COUNT, MIN, MAX) without collapsing rows.\nThey answer the question:\n\nHow does this row relate to an aggregate of its group/partition?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#common-functions-in-this-layer",
+    "href": "materials/sql/slides/session10.html#common-functions-in-this-layer",
+    "title": "Advanced SQL Functions",
+    "section": "Common Functions in This Layer",
+    "text": "Common Functions in This Layer\nAGGREGATE_FUNCTION(column)\nOVER (\n    PARTITION BY grouping_column\n)\n\nSUM()\n\nAVG()\n\nCOUNT()\n\nMIN()\n\nMAX()\n\nAll of them become window functions when combined with OVER(...).",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-average-amount-per-customer",
+    "href": "materials/sql/slides/session10.html#example-average-amount-per-customer",
+    "title": "Advanced SQL Functions",
+    "section": "Example: Average Amount per Customer",
+    "text": "Example: Average Amount per Customer\nBusiness intuition: “How much does this sale differ from the customer’s typical behavior?”\n\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    AVG(amount) OVER (\n        PARTITION BY customer_id\n    ) AS avg_customer_amount\nFROM tmp_sales;\n\n\n\n\n\nsale_id\ncustomer_id\namount\navg_customer_amount\n\n\n\n\n1\nA\n100\n110.00\n\n\n2\nA\n120\n110.00\n\n\n5\nB\n200\n200.00\n\n\n6\nB\n180\n200.00\n\n\n7\nB\n220\n200.00\n\n\n8\nB\n200\n200.00\n\n\n10\nC\n150\n156.67\n\n\n11\nC\n170\n156.67",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#concept-1",
+    "href": "materials/sql/slides/session10.html#concept-1",
+    "title": "Advanced SQL Functions",
+    "section": "Concept",
+    "text": "Concept\nStatistical window functions extend simple aggregates by answering distributional questions instead of basic totals or averages.\nThey answer the question:\n\nWhere does this row stand within the distribution of its group?",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#common-functions-in-this-layer-1",
+    "href": "materials/sql/slides/session10.html#common-functions-in-this-layer-1",
+    "title": "Advanced SQL Functions",
+    "section": "Common Functions in This Layer",
+    "text": "Common Functions in This Layer\n\nPERCENTILE_CONT()\n\nPERCENTILE_DISC()\n\nMEDIAN()\n\nPERCENT_RANK()\n\nCUME_DIST()",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#generic-pattern",
+    "href": "materials/sql/slides/session10.html#generic-pattern",
+    "title": "Advanced SQL Functions",
+    "section": "Generic Pattern",
+    "text": "Generic Pattern\nSTAT_FUNCTION(...)\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-1-percentile-rank-of-sale-amount",
+    "href": "materials/sql/slides/session10.html#example-1-percentile-rank-of-sale-amount",
+    "title": "Advanced SQL Functions",
+    "section": "Example 1: Percentile Rank of Sale Amount",
+    "text": "Example 1: Percentile Rank of Sale Amount\nBusiness intuition: “What is the typical (middle) transaction size for this customer?”\n\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENTILE_CONT(0.5) WITHIN GROUP (\n        ORDER BY amount\n    ) OVER (\n        PARTITION BY customer_id\n    ) AS median_amount\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-2-percent-rank-of-each-transaction",
+    "href": "materials/sql/slides/session10.html#example-2-percent-rank-of-each-transaction",
+    "title": "Advanced SQL Functions",
+    "section": "Example 2: Percent Rank of Each Transaction",
+    "text": "Example 2: Percent Rank of Each Transaction\nPERCENT_RANK() shows relative position between 0 and 1.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENT_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS percent_rank\nFROM tmp_sales;\n\nInterpretation:\n\n0.0 → lowest value in group\n\n1.0 → highest value in group",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-3-cumulative-distribution",
+    "href": "materials/sql/slides/session10.html#example-3-cumulative-distribution",
+    "title": "Advanced SQL Functions",
+    "section": "Example 3: Cumulative Distribution",
+    "text": "Example 3: Cumulative Distribution",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-3-cumulative-distribution-1",
+    "href": "materials/sql/slides/session10.html#example-3-cumulative-distribution-1",
+    "title": "Advanced SQL Functions",
+    "section": "Example 3: Cumulative Distribution",
+    "text": "Example 3: Cumulative Distribution\nCUME_DIST() shows the share of rows less than or equal to the current row.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    CUME_DIST() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS cumulative_distribution\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#important",
+    "href": "materials/sql/slides/session10.html#important",
+    "title": "Advanced SQL Functions",
+    "section": "Important",
+    "text": "Important\n\nStatistical window functions are order-sensitive\nThey expose distribution shape\nResults are relative, not absolute\nThey are critical for:\n\nOutlier detection\n\nSegmentation\n\nThreshold-based decisions",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#concept-2",
+    "href": "materials/sql/slides/session10.html#concept-2",
+    "title": "Advanced SQL Functions",
+    "section": "Concept",
+    "text": "Concept\n\nHow does this row relate to previous or next rows in sequence?\n\n\nValue-from-another-row functions enable row-to-row comparisons within a defined order, facilitating trend analysis and change detection.\n\n\n\n\n\n\n\n\nTip\n\n\nThese functions are inherently time-aware and sequence-aware.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#generic-pattern-1",
+    "href": "materials/sql/slides/session10.html#generic-pattern-1",
+    "title": "Advanced SQL Functions",
+    "section": "Generic Pattern",
+    "text": "Generic Pattern\nVALUE_FUNCTION(column [, offset])\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\noffset (optional) defines how many rows forward/backward to look\nDefault offset is 1\n\nExample 1: Previous Transaction Amount (LAG)\nBusiness intuition:\n“How did this transaction change compared to the previous one?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS previous_amount\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-2-next-transaction-amount-lead",
+    "href": "materials/sql/slides/session10.html#example-2-next-transaction-amount-lead",
+    "title": "Advanced SQL Functions",
+    "section": "Example 2: Next Transaction Amount (LEAD)",
+    "text": "Example 2: Next Transaction Amount (LEAD)\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LEAD(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS next_amount\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-3-first-transaction-amount-per-customer",
+    "href": "materials/sql/slides/session10.html#example-3-first-transaction-amount-per-customer",
+    "title": "Advanced SQL Functions",
+    "section": "Example 3: First Transaction Amount per Customer",
+    "text": "Example 3: First Transaction Amount per Customer\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    FIRST_VALUE(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS first_amount\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#concept-3",
+    "href": "materials/sql/slides/session10.html#concept-3",
+    "title": "Advanced SQL Functions",
+    "section": "Concept",
+    "text": "Concept\nThey answer the question:\n\nHow does this row rank relative to other rows in its group?\n\n\nUnlike statistical functions:\n\nThey produce discrete ranks, not continuous measures\nThey are sensitive to ties\nThey are commonly used for top-N analysis and leaderboards\n\n\n\nRanking functions do not aggregate values, instead they organize rows.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#generic-pattern-2",
+    "href": "materials/sql/slides/session10.html#generic-pattern-2",
+    "title": "Advanced SQL Functions",
+    "section": "Generic Pattern",
+    "text": "Generic Pattern\nRANKING_FUNCTION()\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column [ASC | DESC]\n)",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#function-semantics",
+    "href": "materials/sql/slides/session10.html#function-semantics",
+    "title": "Advanced SQL Functions",
+    "section": "Function Semantics",
+    "text": "Function Semantics\n\n\n\n\n\n\n\nRanking Function Comparison | Interview Question\n\n\n\n\n\nFunction\nHandles Ties\nGaps in Ranking\nTypical Use\n\n\n\n\nROW_NUMBER()\nNo\nYes\nUnique ordering\n\n\nRANK()\nYes\nYes\nCompetition ranking\n\n\nDENSE_RANK()\nYes\nNo\nTier-based ranking",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-1-sequential-ordering-row_number",
+    "href": "materials/sql/slides/session10.html#example-1-sequential-ordering-row_number",
+    "title": "Advanced SQL Functions",
+    "section": "Example 1: Sequential Ordering (ROW_NUMBER)",
+    "text": "Example 1: Sequential Ordering (ROW_NUMBER)\nBusiness intuition:\n“What is the chronological position of each transaction?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    ROW_NUMBER() OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS row_number\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-3-dense-ranking-by-amount-dense_rank",
+    "href": "materials/sql/slides/session10.html#example-3-dense-ranking-by-amount-dense_rank",
+    "title": "Advanced SQL Functions",
+    "section": "Example 3: Dense Ranking by Amount (DENSE_RANK)",
+    "text": "Example 3: Dense Ranking by Amount (DENSE_RANK)\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    DENSE_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS dense_rank_amount\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-2-ranking-by-amount-with-gaps-rank",
+    "href": "materials/sql/slides/session10.html#example-2-ranking-by-amount-with-gaps-rank",
+    "title": "Advanced SQL Functions",
+    "section": "Example 2: Ranking by Amount with Gaps (RANK)",
+    "text": "Example 2: Ranking by Amount with Gaps (RANK)\nBusiness intuition:\n“What is the spending rank of each transaction?”\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS rank_amount\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#concept-4",
+    "href": "materials/sql/slides/session10.html#concept-4",
+    "title": "Advanced SQL Functions",
+    "section": "Concept",
+    "text": "Concept\nThey answer the question:\n\nWhat sequence or collection of categorical values is associated with this row’s group?\n\nUnlike classic GROUP BY STRING_AGG:\n\nRows are not reduced\nThe aggregated string is attached to each row\nOrdering controls how the string is built\n\nThis makes string aggregation window functions especially useful for behavioral tracing, auditability, and sequence analysis.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#generic-pattern-3",
+    "href": "materials/sql/slides/session10.html#generic-pattern-3",
+    "title": "Advanced SQL Functions",
+    "section": "Generic Pattern",
+    "text": "Generic Pattern\nSTRING_AGG(column, delimiter)\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\ndelimiter defines how values are separated\nORDER BY defines the sequence of concatenation\nThe result grows as the window progresses",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-1-channels-used-by-each-customer-cumulative",
+    "href": "materials/sql/slides/session10.html#example-1-channels-used-by-each-customer-cumulative",
+    "title": "Advanced SQL Functions",
+    "section": "Example 1: Channels Used by Each Customer (Cumulative)",
+    "text": "Example 1: Channels Used by Each Customer (Cumulative)\nBusiness intuition:\n“What interaction channels has this customer used up to this point?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    channel,\n    STRING_AGG(channel, ', ') OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS channels_used_so_far\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-2-full-channel-history-per-customer",
+    "href": "materials/sql/slides/session10.html#example-2-full-channel-history-per-customer",
+    "title": "Advanced SQL Functions",
+    "section": "Example 2: Full Channel History per Customer",
+    "text": "Example 2: Full Channel History per Customer\nTo attach the complete history to every row, use an explicit frame.\nSELECT\n    sale_id,\n    customer_id,\n    channel,\n    STRING_AGG(channel, ', ') OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n    ) AS full_channel_history\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-3-channel-combination-pattern-customer-behavior-signature",
+    "href": "materials/sql/slides/session10.html#example-3-channel-combination-pattern-customer-behavior-signature",
+    "title": "Advanced SQL Functions",
+    "section": "Example 3: Channel Combination Pattern (Customer Behavior Signature)",
+    "text": "Example 3: Channel Combination Pattern (Customer Behavior Signature)\nWITH customer_channels AS (\n    SELECT\n        customer_id,\n        STRING_AGG(DISTINCT channel, ', ' ORDER BY channel) AS channel_pattern\n    FROM tmp_sales\n    GROUP BY customer_id\n)\nSELECT\n    channel_pattern,\n    COUNT(*) AS customer_count\nFROM customer_channels\nGROUP BY channel_pattern;\n\n\n\n\n\n\nImportant\n\n\ntry without ORDER BY in STRING_AGG to see different results",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#concept-5",
+    "href": "materials/sql/slides/session10.html#concept-5",
+    "title": "Advanced SQL Functions",
+    "section": "Concept",
+    "text": "Concept\nThey answer the question:\n\nExactly which subset of rows should be used when computing the window value for this row?\n\n\n\nPARTITION BY defines who belongs together\nORDER BY defines sequence\n\n\n\nThe frame defines how far backward and forward the window can see.\nWithout an explicit frame, SQL engines apply default framing rules, which can lead to unexpected results, especially for cumulative and navigational functions.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#frame-dimensions",
+    "href": "materials/sql/slides/session10.html#frame-dimensions",
+    "title": "Advanced SQL Functions",
+    "section": "Frame Dimensions",
+    "text": "Frame Dimensions\nA frame is defined using:\n\nFrame type\nFrame boundaries\n\nROWS | RANGE BETWEEN &lt;start&gt; AND &lt;end&gt;\n\nROWS\n\nFrame is defined by physical row positions\nDeterministic and predictable\nPreferred for analytics\n\nRANGE\n\nFrame is defined by logical value ranges\nCan include multiple rows with the same ordering value\nMore subtle and engine-dependent",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#common-frame-boundaries",
+    "href": "materials/sql/slides/session10.html#common-frame-boundaries",
+    "title": "Advanced SQL Functions",
+    "section": "Common Frame Boundaries",
+    "text": "Common Frame Boundaries\n\n\n\nBoundary\nMeaning\n\n\n\n\nUNBOUNDED PRECEDING\nFrom the first row in the partition\n\n\nCURRENT ROW\nThe current row\n\n\nUNBOUNDED FOLLOWING\nUntil the last row in the partition\n\n\nn PRECEDING\nn rows before\n\n\nn FOLLOWING\nn rows after",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-1-running-total-explicit-frame",
+    "href": "materials/sql/slides/session10.html#example-1-running-total-explicit-frame",
+    "title": "Advanced SQL Functions",
+    "section": "Example 1: Running Total (Explicit Frame)",
+    "text": "Example 1: Running Total (Explicit Frame)\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    SUM(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS running_total\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-2-full-partition-aggregate-stable-value",
+    "href": "materials/sql/slides/session10.html#example-2-full-partition-aggregate-stable-value",
+    "title": "Advanced SQL Functions",
+    "section": "Example 2: Full-Partition Aggregate (Stable Value)",
+    "text": "Example 2: Full-Partition Aggregate (Stable Value)\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    AVG(amount) OVER (\n        PARTITION BY customer_id\n        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n    ) AS full_partition_avg\nFROM tmp_sales;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-3-moving-window-last-2-transactions",
+    "href": "materials/sql/slides/session10.html#example-3-moving-window-last-2-transactions",
+    "title": "Advanced SQL Functions",
+    "section": "Example 3: Moving Window (Last 2 Transactions)",
+    "text": "Example 3: Moving Window (Last 2 Transactions)\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    AVG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n        ROWS BETWEEN 1 PRECEDING AND CURRENT ROW\n    ) AS moving_avg_2\nFROM tmp_sales;",
     "crumbs": [
       "Syllabus",
       "SQL",

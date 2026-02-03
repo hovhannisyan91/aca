@@ -30,6 +30,72 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-534cd8e3a96973385dffff3f4709048d.css">
   <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
@@ -158,10 +224,870 @@ Karen Hovhannisyan
 <p><strong>CTEs</strong> define <strong>what</strong> is computed and <strong>in what order</strong>.</p>
 <div class="fragment">
 <p><code>Window Functions</code> define <strong>how rows are compared</strong>.</p>
-
-
 </div>
 </section>
+<section>
+<section id="window-functions" class="title-slide slide level1 center">
+<h1>Window Functions</h1>
+
+</section>
+<section id="core-idea-syntax-skeleton" class="slide level2">
+<h2>Core Idea (Syntax Skeleton)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a></a>function_name(expression)</span>
+<span id="cb1-2"><a></a><span class="kw">OVER</span> (</span>
+<span id="cb1-3"><a></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
+<span id="cb1-4"><a></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="op">..</span>.</span>
+<span id="cb1-5"><a></a>    <span class="kw">ROWS</span> | <span class="kw">RANGE</span> <span class="op">..</span>.</span>
+<span id="cb1-6"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="window-functions-vs-aggregations" class="slide level2">
+<h2>Window Functions vs Aggregations</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>GROUP BY</th>
+<th>Window Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Rows preserved</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Aggregation scope</td>
+<td>Entire group</td>
+<td>Sliding / contextual</td>
+</tr>
+<tr class="odd">
+<td>Output rows</td>
+<td>Fewer</td>
+<td>Same as input</td>
+</tr>
+<tr class="even">
+<td>Analytical use</td>
+<td>Summaries</td>
+<td>Comparisons, trends</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="simple-conceptual-example" class="slide level2 smaller">
+<h2>Simple Conceptual Example</h2>
+<p><strong>Input Table: <code>sales</code></strong></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">order_id</th>
+<th style="text-align: right;">customer_id</th>
+<th style="text-align: right;">order_date</th>
+<th style="text-align: right;">revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2024-01-01</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2024-01-05</td>
+<td style="text-align: right;">150</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">2024-01-03</td>
+<td style="text-align: right;">200</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p><strong>Question:</strong> Show each order <strong>and</strong> the total revenue per customer.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb2-2"><a></a>    order_id,</span>
+<span id="cb2-3"><a></a>    customer_id,</span>
+<span id="cb2-4"><a></a>    revenue,</span>
+<span id="cb2-5"><a></a>    <span class="fu">SUM</span>(revenue) <span class="kw">OVER</span> (<span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id) <span class="kw">AS</span> total_customer_revenue</span>
+<span id="cb2-6"><a></a><span class="kw">FROM</span> sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">order_id</th>
+<th style="text-align: right;">customer_id</th>
+<th style="text-align: right;">revenue</th>
+<th style="text-align: right;">total_customer_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">250</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">250</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">200</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="analytical-value-of-window-functions" class="slide level2">
+<h2>Analytical Value of Window Functions</h2>
+<ul>
+<li class="fragment">Comparing rows to group averages<br>
+</li>
+<li class="fragment">Ranking and ordering observations<br>
+</li>
+<li class="fragment">Measuring change over time<br>
+</li>
+<li class="fragment">Calculating running totals<br>
+</li>
+<li class="fragment">Detecting trends and anomalies</li>
+</ul>
+</section>
+<section id="window-functions-in-dataa-aalytics" class="slide level2">
+<h2>Window Functions in Dataa Aalytics</h2>
+<ul>
+<li class="fragment">Customer lifetime analysis<br>
+</li>
+<li class="fragment">Time-series trend comparison<br>
+</li>
+<li class="fragment">Cohort analysis<br>
+</li>
+<li class="fragment">Funnel progression<br>
+</li>
+<li class="fragment">Ranking and segmentation</li>
+</ul>
+<div class="fragment">
+<p>They are a cornerstone of <strong>modern analytical SQL</strong>.</p>
+</div>
+</section>
+<section class="slide level2">
+
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Temporary Tables</td>
+<td>Reuse intermediate results</td>
+</tr>
+<tr class="even">
+<td>Subqueries</td>
+<td>Inline conditions and metrics</td>
+</tr>
+<tr class="odd">
+<td>Derived Tables</td>
+<td>Inline datasets</td>
+</tr>
+<tr class="even">
+<td>CTEs</td>
+<td>Named pipelines</td>
+</tr>
+<tr class="odd">
+<td><strong>Window Functions</strong></td>
+<td>Context-aware row analytics</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="temporary-table" class="slide level2 smaller">
+<h2>Temporary Table</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a></a><span class="kw">CREATE</span> TEMP <span class="kw">TABLE</span> tmp_sales <span class="kw">AS</span></span>
+<span id="cb3-2"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb3-3"><a></a><span class="kw">FROM</span> (</span>
+<span id="cb3-4"><a></a>    <span class="kw">VALUES</span></span>
+<span id="cb3-5"><a></a>        </span>
+<span id="cb3-6"><a></a>        (<span class="dv">1</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">100</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-7"><a></a>        (<span class="dv">2</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">120</span>, <span class="st">'store'</span>),</span>
+<span id="cb3-8"><a></a>        (<span class="dv">3</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">90</span>,  <span class="st">'online'</span>),</span>
+<span id="cb3-9"><a></a>        (<span class="dv">4</span>,  <span class="st">'A'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">130</span>, <span class="st">'store'</span>),</span>
+<span id="cb3-10"><a></a></span>
+<span id="cb3-11"><a></a>        </span>
+<span id="cb3-12"><a></a>        (<span class="dv">5</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">180</span>, <span class="st">'store'</span>),</span>
+<span id="cb3-13"><a></a>        (<span class="dv">6</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">200</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-14"><a></a>        (<span class="dv">7</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">220</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-15"><a></a>        (<span class="dv">8</span>,  <span class="st">'B'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-04'</span>, <span class="dv">200</span>, <span class="st">'store'</span>),</span>
+<span id="cb3-16"><a></a></span>
+<span id="cb3-17"><a></a>        </span>
+<span id="cb3-18"><a></a>        (<span class="dv">9</span>,  <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">150</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-19"><a></a>        (<span class="dv">10</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">150</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-20"><a></a>        (<span class="dv">11</span>, <span class="st">'C'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">170</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-21"><a></a></span>
+<span id="cb3-22"><a></a>        </span>
+<span id="cb3-23"><a></a>        (<span class="dv">12</span>, <span class="st">'D'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">90</span>,  <span class="st">'store'</span>),</span>
+<span id="cb3-24"><a></a>        (<span class="dv">13</span>, <span class="st">'D'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">110</span>, <span class="st">'store'</span>),</span>
+<span id="cb3-25"><a></a></span>
+<span id="cb3-26"><a></a>        </span>
+<span id="cb3-27"><a></a>        (<span class="dv">14</span>, <span class="st">'E'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-01'</span>, <span class="dv">140</span>, <span class="st">'store'</span>),</span>
+<span id="cb3-28"><a></a>        (<span class="dv">15</span>, <span class="st">'E'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-02'</span>, <span class="dv">160</span>, <span class="st">'online'</span>),</span>
+<span id="cb3-29"><a></a>        (<span class="dv">16</span>, <span class="st">'E'</span>, <span class="dt">DATE</span> <span class="st">'2024-01-03'</span>, <span class="dv">155</span>, <span class="st">'store'</span>)</span>
+<span id="cb3-30"><a></a>) <span class="kw">AS</span> t(</span>
+<span id="cb3-31"><a></a>    sale_id,</span>
+<span id="cb3-32"><a></a>    customer_id,</span>
+<span id="cb3-33"><a></a>    sale_date,</span>
+<span id="cb3-34"><a></a>    amount,</span>
+<span id="cb3-35"><a></a>    channel</span>
+<span id="cb3-36"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="window-function-layers" class="slide level2 smaller">
+<h2>Window Function Layers</h2>
+<ol type="1">
+<li class="fragment">Aggregate over a window (e.g., <code>SUM()</code>, <code>AVG()</code>, <code>COUNT()</code>)<br>
+</li>
+<li class="fragment">Value from another row (e.g., <code>LAG()</code>, <code>LEAD()</code>)<br>
+</li>
+<li class="fragment">Ranking functions (e.g., <code>ROW_NUMBER()</code>, <code>RANK()</code>, <code>DENSE_RANK()</code>)<br>
+</li>
+<li class="fragment">Cumulative distributions (e.g., <code>CUME_DIST()</code>, <code>PERCENT_RANK()</code>)<br>
+</li>
+<li class="fragment">String aggregation (e.g., <code>STRING_AGG()</code>)</li>
+<li class="fragment">Navigational functions (e.g., <code>FIRST_VALUE()</code>, <code>LAST_VALUE()</code>)</li>
+<li class="fragment">Framing &amp; Advanced Window Control (Advanced)</li>
+</ol>
+</section></section>
+<section>
+<section id="simple-aggregate-window-functions" class="title-slide slide level1 center">
+<h1>Simple Aggregate Window Functions</h1>
+
+</section>
+<section id="concept" class="slide level2 smaller">
+<h2>Concept</h2>
+<p>Simple aggregate window functions apply <strong>classical aggregation logic</strong> (such as <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>) <strong>without collapsing rows</strong>.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote>
+<p>How does this row relate to an aggregate of its group/partition?</p>
+</blockquote>
+</section>
+<section id="common-functions-in-this-layer" class="slide level2 smaller">
+<h2>Common Functions in This Layer</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a></a>AGGREGATE_FUNCTION(<span class="kw">column</span>)</span>
+<span id="cb4-2"><a></a><span class="kw">OVER</span> (</span>
+<span id="cb4-3"><a></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb4-4"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>SUM()</code><br>
+</li>
+<li><code>AVG()</code><br>
+</li>
+<li><code>COUNT()</code><br>
+</li>
+<li><code>MIN()</code><br>
+</li>
+<li><code>MAX()</code></li>
+</ul>
+<p>All of them become window functions when combined with <code>OVER(...)</code>.</p>
+</section>
+<section id="example-average-amount-per-customer" class="slide level2 smaller">
+<h2>Example: Average Amount per Customer</h2>
+<p><strong>Business intuition:</strong> “How much does this sale differ from the customer’s typical behavior?”</p>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb5-2"><a></a>    sale_id,</span>
+<span id="cb5-3"><a></a>    customer_id,</span>
+<span id="cb5-4"><a></a>    sale_date,</span>
+<span id="cb5-5"><a></a>    amount,</span>
+<span id="cb5-6"><a></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb5-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb5-8"><a></a>    ) <span class="kw">AS</span> avg_customer_amount</span>
+<span id="cb5-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">sale_id</th>
+<th>customer_id</th>
+<th style="text-align: right;">amount</th>
+<th style="text-align: right;">avg_customer_amount</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td>A</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">110.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td>A</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">110.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td>B</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">200.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td>B</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">200.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td>B</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">200.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td>B</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">200.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td>C</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">156.67</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">11</td>
+<td>C</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">156.67</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section></section>
+<section>
+<section id="statistical-window-functions" class="title-slide slide level1 center">
+<h1>Statistical Window Functions</h1>
+
+</section>
+<section id="concept-1" class="slide level2 smaller">
+<h2>Concept</h2>
+<p>Statistical window functions extend simple aggregates by answering <strong>distributional questions</strong> instead of basic totals or averages.</p>
+<p><strong>They answer the question:</strong></p>
+<blockquote>
+<p>Where does this row stand within the distribution of its group?</p>
+</blockquote>
+</section>
+<section id="common-functions-in-this-layer-1" class="slide level2">
+<h2>Common Functions in This Layer</h2>
+<ul>
+<li><code>PERCENTILE_CONT()</code><br>
+</li>
+<li><code>PERCENTILE_DISC()</code><br>
+</li>
+<li><code>MEDIAN()</code><br>
+</li>
+<li><code>PERCENT_RANK()</code><br>
+</li>
+<li><code>CUME_DIST()</code></li>
+</ul>
+</section>
+<section id="generic-pattern" class="slide level2">
+<h2>Generic Pattern</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a></a>STAT_FUNCTION(<span class="op">..</span>.)</span>
+<span id="cb6-2"><a></a><span class="kw">OVER</span> (</span>
+<span id="cb6-3"><a></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb6-4"><a></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column</span>
+<span id="cb6-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-1-percentile-rank-of-sale-amount" class="slide level2 smaller">
+<h2>Example 1: Percentile Rank of Sale Amount</h2>
+<p><strong>Business intuition:</strong> “What is the typical (middle) transaction size for this customer?”</p>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a></a>    sale_id,</span>
+<span id="cb7-3"><a></a>    customer_id,</span>
+<span id="cb7-4"><a></a>    amount,</span>
+<span id="cb7-5"><a></a>    <span class="fu">PERCENTILE_CONT</span>(<span class="fl">0.5</span>) WITHIN <span class="kw">GROUP</span> (</span>
+<span id="cb7-6"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb7-7"><a></a>    ) <span class="kw">OVER</span> (</span>
+<span id="cb7-8"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb7-9"><a></a>    ) <span class="kw">AS</span> median_amount</span>
+<span id="cb7-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="example-2-percent-rank-of-each-transaction" class="slide level2 smaller">
+<h2>Example 2: Percent Rank of Each Transaction</h2>
+<p><code>PERCENT_RANK()</code> shows <strong>relative position</strong> between 0 and 1.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb8-2"><a></a>    sale_id,</span>
+<span id="cb8-3"><a></a>    customer_id,</span>
+<span id="cb8-4"><a></a>    amount,</span>
+<span id="cb8-5"><a></a>    <span class="fu">PERCENT_RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb8-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb8-7"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb8-8"><a></a>    ) <span class="kw">AS</span> <span class="fu">percent_rank</span></span>
+<span id="cb8-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><strong>Interpretation:</strong></p>
+<ul>
+<li><code>0.0</code> → lowest value in group<br>
+</li>
+<li><code>1.0</code> → highest value in group</li>
+</ul>
+</div>
+</section>
+<section id="example-3-cumulative-distribution" class="slide level2 smaller">
+<h2>Example 3: Cumulative Distribution</h2>
+</section>
+<section id="example-3-cumulative-distribution-1" class="slide level2">
+<h2>Example 3: Cumulative Distribution</h2>
+<p><code>CUME_DIST()</code> shows the <strong>share of rows less than or equal to the current row</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a></a>    sale_id,</span>
+<span id="cb9-3"><a></a>    customer_id,</span>
+<span id="cb9-4"><a></a>    amount,</span>
+<span id="cb9-5"><a></a>    <span class="fu">CUME_DIST</span>() <span class="kw">OVER</span> (</span>
+<span id="cb9-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb9-7"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
+<span id="cb9-8"><a></a>    ) <span class="kw">AS</span> cumulative_distribution</span>
+<span id="cb9-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="important" class="slide level2">
+<h2>Important</h2>
+<ul>
+<li>Statistical window functions are <strong>order-sensitive</strong></li>
+<li>They expose <strong>distribution shape</strong></li>
+<li>Results are <strong>relative</strong>, not absolute</li>
+<li>They are critical for:
+<ul>
+<li>Outlier detection<br>
+</li>
+<li>Segmentation<br>
+</li>
+<li>Threshold-based decisions</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
+<section id="value-from-another-row-functions" class="title-slide slide level1 center">
+<h1>Value-from-Another-Row Functions</h1>
+
+</section>
+<section id="concept-2" class="slide level2 smaller">
+<h2>Concept</h2>
+<blockquote>
+<p>How does this row relate to previous or next rows in sequence?</p>
+</blockquote>
+<div class="fragment">
+<p>Value-from-another-row functions enable <strong>row-to-row comparisons</strong> within a defined order, facilitating trend analysis and change detection.</p>
+</div>
+<div class="fragment">
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>These functions are inherently <strong>time-aware</strong> and <strong>sequence-aware</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="generic-pattern-1" class="slide level2">
+<h2>Generic Pattern</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a>VALUE_FUNCTION(<span class="kw">column</span> [, offset])</span>
+<span id="cb10-2"><a></a><span class="kw">OVER</span> (</span>
+<span id="cb10-3"><a></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb10-4"><a></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column</span>
+<span id="cb10-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>offset</code> (optional) defines how many rows forward/backward to look</li>
+<li>Default offset is <code>1</code></li>
+</ul>
+<h3 id="example-1-previous-transaction-amount-lag">Example 1: Previous Transaction Amount (<code>LAG</code>)</h3>
+<p><strong>Business intuition:</strong><br>
+“How did this transaction change compared to the previous one?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb11-2"><a></a>    sale_id,</span>
+<span id="cb11-3"><a></a>    customer_id,</span>
+<span id="cb11-4"><a></a>    sale_date,</span>
+<span id="cb11-5"><a></a>    amount,</span>
+<span id="cb11-6"><a></a>    <span class="fu">LAG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb11-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb11-8"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb11-9"><a></a>    ) <span class="kw">AS</span> previous_amount</span>
+<span id="cb11-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-2-next-transaction-amount-lead" class="slide level2">
+<h2>Example 2: Next Transaction Amount (<code>LEAD</code>)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb12-2"><a></a>    sale_id,</span>
+<span id="cb12-3"><a></a>    customer_id,</span>
+<span id="cb12-4"><a></a>    sale_date,</span>
+<span id="cb12-5"><a></a>    amount,</span>
+<span id="cb12-6"><a></a>    <span class="fu">LEAD</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb12-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb12-8"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb12-9"><a></a>    ) <span class="kw">AS</span> next_amount</span>
+<span id="cb12-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-3-first-transaction-amount-per-customer" class="slide level2">
+<h2>Example 3: First Transaction Amount per Customer</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb13-2"><a></a>    sale_id,</span>
+<span id="cb13-3"><a></a>    customer_id,</span>
+<span id="cb13-4"><a></a>    sale_date,</span>
+<span id="cb13-5"><a></a>    amount,</span>
+<span id="cb13-6"><a></a>    <span class="fu">FIRST_VALUE</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb13-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb13-8"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb13-9"><a></a>    ) <span class="kw">AS</span> first_amount</span>
+<span id="cb13-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="ranking-functions" class="title-slide slide level1 center">
+<h1>Ranking Functions</h1>
+
+</section>
+<section id="concept-3" class="slide level2 smaller">
+<h2>Concept</h2>
+<p><strong>They answer the question:</strong></p>
+<blockquote>
+<p>How does this row rank relative to other rows in its group?</p>
+</blockquote>
+<div class="fragment">
+<p><strong>Unlike statistical functions:</strong></p>
+<ul>
+<li>They produce <strong>discrete ranks</strong>, not continuous measures</li>
+<li>They are sensitive to <strong>ties</strong></li>
+<li>They are commonly used for <strong>top-N analysis</strong> and <strong>leaderboards</strong></li>
+</ul>
+</div>
+<div class="fragment">
+<p>Ranking functions do <strong>not aggregate values</strong>, instead they organize rows.</p>
+</div>
+</section>
+<section id="generic-pattern-2" class="slide level2">
+<h2>Generic Pattern</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a></a>RANKING_FUNCTION()</span>
+<span id="cb14-2"><a></a><span class="kw">OVER</span> (</span>
+<span id="cb14-3"><a></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb14-4"><a></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column [<span class="kw">ASC</span> | <span class="kw">DESC</span>]</span>
+<span id="cb14-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="function-semantics" class="slide level2">
+<h2>Function Semantics</h2>
+<div title="Ranking Function Comparison | Interview Question">
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Ranking Function Comparison | Interview Question</strong></p>
+</div>
+<div class="callout-content">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Handles Ties</th>
+<th>Gaps in Ranking</th>
+<th>Typical Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ROW_NUMBER()</code></td>
+<td>No</td>
+<td>Yes</td>
+<td>Unique ordering</td>
+</tr>
+<tr class="even">
+<td><code>RANK()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Competition ranking</td>
+</tr>
+<tr class="odd">
+<td><code>DENSE_RANK()</code></td>
+<td>Yes</td>
+<td>No</td>
+<td>Tier-based ranking</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="example-1-sequential-ordering-row_number" class="slide level2">
+<h2>Example 1: Sequential Ordering (<code>ROW_NUMBER</code>)</h2>
+<p><strong>Business intuition:</strong><br>
+“What is the chronological position of each transaction?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb15-2"><a></a>    sale_id,</span>
+<span id="cb15-3"><a></a>    customer_id,</span>
+<span id="cb15-4"><a></a>    sale_date,</span>
+<span id="cb15-5"><a></a>    <span class="fu">ROW_NUMBER</span>() <span class="kw">OVER</span> (</span>
+<span id="cb15-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb15-7"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb15-8"><a></a>    ) <span class="kw">AS</span> <span class="fu">row_number</span></span>
+<span id="cb15-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-3-dense-ranking-by-amount-dense_rank" class="slide level2">
+<h2>Example 3: Dense Ranking by Amount (<code>DENSE_RANK</code>)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb16-2"><a></a>    sale_id,</span>
+<span id="cb16-3"><a></a>    customer_id,</span>
+<span id="cb16-4"><a></a>    amount,</span>
+<span id="cb16-5"><a></a>    <span class="fu">DENSE_RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb16-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb16-7"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
+<span id="cb16-8"><a></a>    ) <span class="kw">AS</span> dense_rank_amount</span>
+<span id="cb16-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-2-ranking-by-amount-with-gaps-rank" class="slide level2">
+<h2>Example 2: Ranking by Amount with Gaps (<code>RANK</code>)</h2>
+<p><strong>Business intuition:</strong><br>
+“What is the spending rank of each transaction?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb17-2"><a></a>    sale_id,</span>
+<span id="cb17-3"><a></a>    customer_id,</span>
+<span id="cb17-4"><a></a>    amount,</span>
+<span id="cb17-5"><a></a>    <span class="fu">RANK</span>() <span class="kw">OVER</span> (</span>
+<span id="cb17-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb17-7"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount <span class="kw">DESC</span></span>
+<span id="cb17-8"><a></a>    ) <span class="kw">AS</span> rank_amount</span>
+<span id="cb17-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="string-aggregation-window-functions" class="title-slide slide level1 center">
+<h1>String Aggregation Window Functions</h1>
+
+</section>
+<section id="concept-4" class="slide level2 smaller">
+<h2>Concept</h2>
+<p><strong>They answer the question:</strong></p>
+<blockquote>
+<p>What sequence or collection of categorical values is associated with this row’s group?</p>
+</blockquote>
+<p>Unlike classic <code>GROUP BY STRING_AGG</code>:</p>
+<ul>
+<li>Rows are <strong>not reduced</strong></li>
+<li>The aggregated string is <strong>attached to each row</strong></li>
+<li>Ordering controls <strong>how the string is built</strong></li>
+</ul>
+<p>This makes string aggregation window functions especially useful for <strong>behavioral tracing</strong>, <strong>auditability</strong>, and <strong>sequence analysis</strong>.</p>
+</section>
+<section id="generic-pattern-3" class="slide level2">
+<h2>Generic Pattern</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a></a>STRING_AGG(<span class="kw">column</span>, delimiter)</span>
+<span id="cb18-2"><a></a><span class="kw">OVER</span> (</span>
+<span id="cb18-3"><a></a>    <span class="kw">PARTITION</span> <span class="kw">BY</span> grouping_column</span>
+<span id="cb18-4"><a></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> ordering_column</span>
+<span id="cb18-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>delimiter</code> defines how values are separated</li>
+<li><code>ORDER BY</code> defines the <strong>sequence of concatenation</strong></li>
+<li>The result grows as the window progresses</li>
+</ul>
+</section>
+<section id="example-1-channels-used-by-each-customer-cumulative" class="slide level2">
+<h2>Example 1: Channels Used by Each Customer (Cumulative)</h2>
+<p><strong>Business intuition:</strong><br>
+“What interaction channels has this customer used up to this point?”</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb19-2"><a></a>    sale_id,</span>
+<span id="cb19-3"><a></a>    customer_id,</span>
+<span id="cb19-4"><a></a>    sale_date,</span>
+<span id="cb19-5"><a></a>    channel,</span>
+<span id="cb19-6"><a></a>    STRING_AGG(channel, <span class="st">', '</span>) <span class="kw">OVER</span> (</span>
+<span id="cb19-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb19-8"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb19-9"><a></a>    ) <span class="kw">AS</span> channels_used_so_far</span>
+<span id="cb19-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-2-full-channel-history-per-customer" class="slide level2">
+<h2>Example 2: Full Channel History per Customer</h2>
+<p>To attach the <strong>complete history</strong> to every row, use an explicit frame.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb20-2"><a></a>    sale_id,</span>
+<span id="cb20-3"><a></a>    customer_id,</span>
+<span id="cb20-4"><a></a>    channel,</span>
+<span id="cb20-5"><a></a>    STRING_AGG(channel, <span class="st">', '</span>) <span class="kw">OVER</span> (</span>
+<span id="cb20-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb20-7"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb20-8"><a></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">UNBOUNDED</span> <span class="kw">FOLLOWING</span></span>
+<span id="cb20-9"><a></a>    ) <span class="kw">AS</span> full_channel_history</span>
+<span id="cb20-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-3-channel-combination-pattern-customer-behavior-signature" class="slide level2">
+<h2>Example 3: Channel Combination Pattern (Customer Behavior Signature)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="kw">WITH</span> customer_channels <span class="kw">AS</span> (</span>
+<span id="cb21-2"><a></a>    <span class="kw">SELECT</span></span>
+<span id="cb21-3"><a></a>        customer_id,</span>
+<span id="cb21-4"><a></a>        STRING_AGG(<span class="kw">DISTINCT</span> channel, <span class="st">', '</span> <span class="kw">ORDER</span> <span class="kw">BY</span> channel) <span class="kw">AS</span> channel_pattern</span>
+<span id="cb21-5"><a></a>    <span class="kw">FROM</span> tmp_sales</span>
+<span id="cb21-6"><a></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb21-7"><a></a>)</span>
+<span id="cb21-8"><a></a><span class="kw">SELECT</span></span>
+<span id="cb21-9"><a></a>    channel_pattern,</span>
+<span id="cb21-10"><a></a>    <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> customer_count</span>
+<span id="cb21-11"><a></a><span class="kw">FROM</span> customer_channels</span>
+<span id="cb21-12"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> channel_pattern;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>try without ORDER BY in STRING_AGG to see different results</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="window-framing-advanced-window-control" class="title-slide slide level1 center">
+<h1>Window Framing &amp; Advanced Window Control</h1>
+
+</section>
+<section id="concept-5" class="slide level2 smaller">
+<h2>Concept</h2>
+<p><strong>They answer the question:</strong></p>
+<blockquote>
+<p>Exactly <em>which subset of rows</em> should be used when computing the window value for this row?</p>
+</blockquote>
+<div class="fragment">
+<ul>
+<li><code>PARTITION BY</code> defines <strong>who belongs together</strong></li>
+<li><code>ORDER BY</code> defines <strong>sequence</strong></li>
+</ul>
+</div>
+<div class="fragment">
+<p>The <strong>frame</strong> defines <strong>how far backward and forward the window can see</strong>.</p>
+<p>Without an explicit frame, SQL engines apply <strong>default framing rules</strong>, which can lead to <strong>unexpected results</strong>, especially for cumulative and navigational functions.</p>
+</div>
+</section>
+<section id="frame-dimensions" class="slide level2 smaller">
+<h2>Frame Dimensions</h2>
+<p>A frame is defined using:</p>
+<ul>
+<li><strong>Frame type</strong></li>
+<li><strong>Frame boundaries</strong></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="kw">ROWS</span> | <span class="kw">RANGE</span> <span class="kw">BETWEEN</span> <span class="op">&lt;</span><span class="kw">start</span><span class="op">&gt;</span> <span class="kw">AND</span> <span class="op">&lt;</span><span class="cf">end</span><span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><strong><code>ROWS</code></strong></p>
+<ul>
+<li>Frame is defined by <strong>physical row positions</strong></li>
+<li>Deterministic and predictable</li>
+<li>Preferred for analytics</li>
+</ul>
+<p><strong><code>RANGE</code></strong></p>
+<ul>
+<li>Frame is defined by <strong>logical value ranges</strong></li>
+<li>Can include multiple rows with the same ordering value</li>
+<li>More subtle and engine-dependent</li>
+</ul>
+</div>
+</section>
+<section id="common-frame-boundaries" class="slide level2">
+<h2>Common Frame Boundaries</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Boundary</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>UNBOUNDED PRECEDING</code></td>
+<td>From the first row in the partition</td>
+</tr>
+<tr class="even">
+<td><code>CURRENT ROW</code></td>
+<td>The current row</td>
+</tr>
+<tr class="odd">
+<td><code>UNBOUNDED FOLLOWING</code></td>
+<td>Until the last row in the partition</td>
+</tr>
+<tr class="even">
+<td><code>n PRECEDING</code></td>
+<td>n rows before</td>
+</tr>
+<tr class="odd">
+<td><code>n FOLLOWING</code></td>
+<td>n rows after</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-1-running-total-explicit-frame" class="slide level2">
+<h2>Example 1: Running Total (Explicit Frame)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb23-2"><a></a>    sale_id,</span>
+<span id="cb23-3"><a></a>    customer_id,</span>
+<span id="cb23-4"><a></a>    sale_date,</span>
+<span id="cb23-5"><a></a>    amount,</span>
+<span id="cb23-6"><a></a>    <span class="fu">SUM</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb23-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb23-8"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb23-9"><a></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">CURRENT</span> <span class="kw">ROW</span></span>
+<span id="cb23-10"><a></a>    ) <span class="kw">AS</span> running_total</span>
+<span id="cb23-11"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-2-full-partition-aggregate-stable-value" class="slide level2">
+<h2>Example 2: Full-Partition Aggregate (Stable Value)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb24-2"><a></a>    sale_id,</span>
+<span id="cb24-3"><a></a>    customer_id,</span>
+<span id="cb24-4"><a></a>    amount,</span>
+<span id="cb24-5"><a></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb24-6"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb24-7"><a></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="kw">UNBOUNDED</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">UNBOUNDED</span> <span class="kw">FOLLOWING</span></span>
+<span id="cb24-8"><a></a>    ) <span class="kw">AS</span> full_partition_avg</span>
+<span id="cb24-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-3-moving-window-last-2-transactions" class="slide level2">
+<h2>Example 3: Moving Window (Last 2 Transactions)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a></a><span class="kw">SELECT</span></span>
+<span id="cb25-2"><a></a>    sale_id,</span>
+<span id="cb25-3"><a></a>    customer_id,</span>
+<span id="cb25-4"><a></a>    sale_date,</span>
+<span id="cb25-5"><a></a>    amount,</span>
+<span id="cb25-6"><a></a>    <span class="fu">AVG</span>(amount) <span class="kw">OVER</span> (</span>
+<span id="cb25-7"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
+<span id="cb25-8"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> sale_date</span>
+<span id="cb25-9"><a></a>        <span class="kw">ROWS</span> <span class="kw">BETWEEN</span> <span class="dv">1</span> <span class="kw">PRECEDING</span> <span class="kw">AND</span> <span class="kw">CURRENT</span> <span class="kw">ROW</span></span>
+<span id="cb25-10"><a></a>    ) <span class="kw">AS</span> moving_avg_2</span>
+<span id="cb25-11"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="../../../img/favicon.png" class="slide-logo"></p>
