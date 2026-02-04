@@ -853,7 +853,7 @@
     "href": "materials/sql/session10.html#window-function-layer-2-statistical-window-functions",
     "title": "Session 10: Data Analysis with SQL | Advanced SQL Functions",
     "section": "Window Function Layer 2: Statistical Window Functions",
-    "text": "Window Function Layer 2: Statistical Window Functions\nStatistical window functions extend simple aggregates by answering distributional questions instead of basic totals or averages.\nThey answer the question:\n\nWhere does this row stand within the distribution of its group?\n\n\n\nConcept\nA statistical window function computes position, spread, or relative standing of a row within a partition.\nUnlike simple aggregates:\n\nThey focus on ordering and distribution\nThey often require ORDER BY\nResults depend on relative position, not just totals\n\nThese functions are essential for exploratory data analysis, outlier detection, and ranking-based insights.\n\n\n\nCommon Functions in This Layer\n\nPERCENTILE_CONT()\n\nPERCENTILE_DISC()\n\nMEDIAN()\n\nPERCENT_RANK()\n\nCUME_DIST()\n\n\n\n\nGeneric Pattern\nSTAT_FUNCTION(...)\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\n\n\nExample 1: Median Amount per Customer\nBusiness intuition:\n“What is the typical (middle) transaction size for this customer?”\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENTILE_CONT(0.5) WITHIN GROUP (\n        ORDER BY amount\n    ) OVER (\n        PARTITION BY customer_id\n    ) AS median_amount\nFROM tmp_sales;\n\n\n\nExample 2: Percent Rank of Each Transaction\nPERCENT_RANK() shows relative position between 0 and 1.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENT_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS percent_rank\nFROM tmp_sales;\nInterpretation:\n\n0.0 → lowest value in group\n\n1.0 → highest value in group\n\n\n\n\nExample 3: Cumulative Distribution\nCUME_DIST() shows the share of rows less than or equal to the current row.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    CUME_DIST() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS cumulative_distribution\nFROM tmp_sales;\n\n\n\nExample 4: Quartile Assignment\nAssign each transaction to a quartile using percentiles.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    NTILE(4) OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS quartile\nFROM tmp_sales;\n\n\n\nKey Observations\n\nStatistical window functions are order-sensitive\nThey expose distribution shape\nResults are relative, not absolute\nThey are critical for:\n\nOutlier detection\n\nSegmentation\n\nThreshold-based decisions\n\n\n\n\n\nWhen to Use Statistical Window Functions\n\nUnderstanding customer behavior distributions\n\nIdentifying top/bottom performers\n\nCreating quantile-based segments\n\nNormalizing values for comparison\n\nThis layer bridges descriptive statistics and analytical SQL, preparing the ground for ranking and time-aware functions.",
+    "text": "Window Function Layer 2: Statistical Window Functions\nStatistical window functions extend simple aggregates by answering distributional questions instead of basic totals or averages.\nThey answer the question:\n\nWhere does this row stand within the distribution of its group?\n\n\n\nConcept\nA statistical window function computes position, spread, or relative standing of a row within a partition.\nUnlike simple aggregates:\n\nThey focus on ordering and distribution\nThey often require ORDER BY\nResults depend on relative position, not just totals\n\nThese functions are essential for exploratory data analysis, outlier detection, and ranking-based insights.\n\n\n\nCommon Functions in This Layer\n\nPERCENTILE_CONT()\n\nPERCENTILE_DISC()\n\nMEDIAN()\n\nPERCENT_RANK()\n\nCUME_DIST()\n\n\n\n\nGeneric Pattern\nSTAT_FUNCTION(...)\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\n\n\nExample 1: Median Amount per Customer\nBusiness intuition:\n“What is the typical (middle) transaction size for this customer?”\nSELECT\n    customer_id,\n    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amount)  AS median_amount\nFROM tmp_sales\nGROUP BY customer_id;\n\n\n\nExample 2: Percent Rank of Each Transaction\nPERCENT_RANK() shows relative position between 0 and 1.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENT_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS percent_rank\nFROM tmp_sales;\nInterpretation:\n\n0.0 → lowest value in group\n\n1.0 → highest value in group\n\n\n\n\nExample 3: Cumulative Distribution\nCUME_DIST() shows the share of rows less than or equal to the current row.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    CUME_DIST() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS cumulative_distribution\nFROM tmp_sales;\n\n\n\nExample 4: Quartile Assignment\nAssign each transaction to a quartile using percentiles.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    NTILE(4) OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS quartile\nFROM tmp_sales;\n\n\n\nKey Observations\n\nStatistical window functions are order-sensitive\nThey expose distribution shape\nResults are relative, not absolute\nThey are critical for:\n\nOutlier detection\n\nSegmentation\n\nThreshold-based decisions\n\n\n\n\n\nWhen to Use Statistical Window Functions\n\nUnderstanding customer behavior distributions\n\nIdentifying top/bottom performers\n\nCreating quantile-based segments\n\nNormalizing values for comparison\n\nThis layer bridges descriptive statistics and analytical SQL, preparing the ground for ranking and time-aware functions.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -11375,7 +11375,7 @@
     "href": "materials/sql/slides/session10.html#common-functions-in-this-layer-1",
     "title": "Advanced SQL Functions",
     "section": "Common Functions in This Layer",
-    "text": "Common Functions in This Layer\n\nPERCENTILE_CONT()\n\nPERCENTILE_DISC()\n\nMEDIAN()\n\nPERCENT_RANK()\n\nCUME_DIST()",
+    "text": "Common Functions in This Layer\n\nPERCENTILE_CONT()\n\nPERCENTILE_DISC()\n\nPERCENT_RANK()\n\nCUME_DIST()",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -11403,7 +11403,7 @@
     "href": "materials/sql/slides/session10.html#example-1-percentile-rank-of-sale-amount",
     "title": "Advanced SQL Functions",
     "section": "Example 1: Percentile Rank of Sale Amount",
-    "text": "Example 1: Percentile Rank of Sale Amount\nBusiness intuition: “What is the typical (middle) transaction size for this customer?”\n\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    PERCENTILE_CONT(0.5) WITHIN GROUP (\n        ORDER BY amount\n    ) OVER (\n        PARTITION BY customer_id\n    ) AS median_amount\nFROM tmp_sales;",
+    "text": "Example 1: Percentile Rank of Sale Amount\nBusiness intuition: “What is the typical (middle) transaction size for this customer?”\n\nSELECT\n    customer_id,\n    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amount)  AS median_amount\nFROM tmp_sales\nGROUP BY customer_id;",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -11429,20 +11429,6 @@
   {
     "objectID": "materials/sql/slides/session10.html#example-3-cumulative-distribution",
     "href": "materials/sql/slides/session10.html#example-3-cumulative-distribution",
-    "title": "Advanced SQL Functions",
-    "section": "Example 3: Cumulative Distribution",
-    "text": "Example 3: Cumulative Distribution",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "Advanced SQL Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session10.html#example-3-cumulative-distribution-1",
-    "href": "materials/sql/slides/session10.html#example-3-cumulative-distribution-1",
     "title": "Advanced SQL Functions",
     "section": "Example 3: Cumulative Distribution",
     "text": "Example 3: Cumulative Distribution\nCUME_DIST() shows the share of rows less than or equal to the current row.\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    CUME_DIST() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount\n    ) AS cumulative_distribution\nFROM tmp_sales;",
@@ -11487,7 +11473,21 @@
     "href": "materials/sql/slides/session10.html#generic-pattern-1",
     "title": "Advanced SQL Functions",
     "section": "Generic Pattern",
-    "text": "Generic Pattern\nVALUE_FUNCTION(column [, offset])\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\noffset (optional) defines how many rows forward/backward to look\nDefault offset is 1\n\nExample 1: Previous Transaction Amount (LAG)\nBusiness intuition:\n“How did this transaction change compared to the previous one?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS previous_amount\nFROM tmp_sales;",
+    "text": "Generic Pattern\nVALUE_FUNCTION(column [, offset])\nOVER (\n    PARTITION BY grouping_column\n    ORDER BY ordering_column\n)\n\noffset (optional) defines how many rows forward/backward to look\nDefault offset is 1",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Advanced SQL Functions"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session10.html#example-1-previous-transaction-amount-lag",
+    "href": "materials/sql/slides/session10.html#example-1-previous-transaction-amount-lag",
+    "title": "Advanced SQL Functions",
+    "section": "Example 1: Previous Transaction Amount (LAG)",
+    "text": "Example 1: Previous Transaction Amount (LAG)\nBusiness intuition:\n“How did this transaction change compared to the previous one?”\nSELECT\n    sale_id,\n    customer_id,\n    sale_date,\n    amount,\n    LAG(amount) OVER (\n        PARTITION BY customer_id\n        ORDER BY sale_date\n    ) AS previous_amount\nFROM tmp_sales;",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -11581,11 +11581,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session10.html#example-3-dense-ranking-by-amount-dense_rank",
-    "href": "materials/sql/slides/session10.html#example-3-dense-ranking-by-amount-dense_rank",
+    "objectID": "materials/sql/slides/session10.html#example-2-dense-ranking-by-amount-dense_rank",
+    "href": "materials/sql/slides/session10.html#example-2-dense-ranking-by-amount-dense_rank",
     "title": "Advanced SQL Functions",
-    "section": "Example 3: Dense Ranking by Amount (DENSE_RANK)",
-    "text": "Example 3: Dense Ranking by Amount (DENSE_RANK)\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    DENSE_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS dense_rank_amount\nFROM tmp_sales;",
+    "section": "Example 2: Dense Ranking by Amount (DENSE_RANK)",
+    "text": "Example 2: Dense Ranking by Amount (DENSE_RANK)\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    DENSE_RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS dense_rank_amount\nFROM tmp_sales;",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -11595,11 +11595,11 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session10.html#example-2-ranking-by-amount-with-gaps-rank",
-    "href": "materials/sql/slides/session10.html#example-2-ranking-by-amount-with-gaps-rank",
+    "objectID": "materials/sql/slides/session10.html#example-3-ranking-by-amount-with-gaps-rank",
+    "href": "materials/sql/slides/session10.html#example-3-ranking-by-amount-with-gaps-rank",
     "title": "Advanced SQL Functions",
-    "section": "Example 2: Ranking by Amount with Gaps (RANK)",
-    "text": "Example 2: Ranking by Amount with Gaps (RANK)\nBusiness intuition:\n“What is the spending rank of each transaction?”\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS rank_amount\nFROM tmp_sales;",
+    "section": "Example 3: Ranking by Amount with Gaps (RANK)",
+    "text": "Example 3: Ranking by Amount with Gaps (RANK)\nBusiness intuition:\n“What is the spending rank of each transaction?”\nSELECT\n    sale_id,\n    customer_id,\n    amount,\n    RANK() OVER (\n        PARTITION BY customer_id\n        ORDER BY amount DESC\n    ) AS rank_amount\nFROM tmp_sales;",
     "crumbs": [
       "Syllabus",
       "SQL",

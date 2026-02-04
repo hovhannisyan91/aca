@@ -597,8 +597,6 @@ Karen Hovhannisyan
 </li>
 <li><code>PERCENTILE_DISC()</code><br>
 </li>
-<li><code>MEDIAN()</code><br>
-</li>
 <li><code>PERCENT_RANK()</code><br>
 </li>
 <li><code>CUME_DIST()</code></li>
@@ -617,15 +615,10 @@ Karen Hovhannisyan
 <p><strong>Business intuition:</strong> “What is the typical (middle) transaction size for this customer?”</p>
 <div class="fragment">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="kw">SELECT</span></span>
-<span id="cb7-2"><a></a>    sale_id,</span>
-<span id="cb7-3"><a></a>    customer_id,</span>
-<span id="cb7-4"><a></a>    amount,</span>
-<span id="cb7-5"><a></a>    <span class="fu">PERCENTILE_CONT</span>(<span class="fl">0.5</span>) WITHIN <span class="kw">GROUP</span> (</span>
-<span id="cb7-6"><a></a>        <span class="kw">ORDER</span> <span class="kw">BY</span> amount</span>
-<span id="cb7-7"><a></a>    ) <span class="kw">OVER</span> (</span>
-<span id="cb7-8"><a></a>        <span class="kw">PARTITION</span> <span class="kw">BY</span> customer_id</span>
-<span id="cb7-9"><a></a>    ) <span class="kw">AS</span> median_amount</span>
-<span id="cb7-10"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-2"><a></a>    customer_id,</span>
+<span id="cb7-3"><a></a>    <span class="fu">PERCENTILE_CONT</span>(<span class="fl">0.5</span>) WITHIN <span class="kw">GROUP</span> (<span class="kw">ORDER</span> <span class="kw">BY</span> amount)  <span class="kw">AS</span> median_amount</span>
+<span id="cb7-4"><a></a><span class="kw">FROM</span> tmp_sales</span>
+<span id="cb7-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> customer_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="example-2-percent-rank-of-each-transaction" class="slide level2 smaller">
@@ -649,10 +642,7 @@ Karen Hovhannisyan
 </ul>
 </div>
 </section>
-<section id="example-3-cumulative-distribution" class="slide level2 smaller">
-<h2>Example 3: Cumulative Distribution</h2>
-</section>
-<section id="example-3-cumulative-distribution-1" class="slide level2">
+<section id="example-3-cumulative-distribution" class="slide level2">
 <h2>Example 3: Cumulative Distribution</h2>
 <p><code>CUME_DIST()</code> shows the <strong>share of rows less than or equal to the current row</strong>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">SELECT</span></span>
@@ -721,7 +711,9 @@ Karen Hovhannisyan
 <li><code>offset</code> (optional) defines how many rows forward/backward to look</li>
 <li>Default offset is <code>1</code></li>
 </ul>
-<h3 id="example-1-previous-transaction-amount-lag">Example 1: Previous Transaction Amount (<code>LAG</code>)</h3>
+</section>
+<section id="example-1-previous-transaction-amount-lag" class="slide level2">
+<h2>Example 1: Previous Transaction Amount (<code>LAG</code>)</h2>
 <p><strong>Business intuition:</strong><br>
 “How did this transaction change compared to the previous one?”</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a></a><span class="kw">SELECT</span></span>
@@ -853,8 +845,8 @@ Karen Hovhannisyan
 <span id="cb15-8"><a></a>    ) <span class="kw">AS</span> <span class="fu">row_number</span></span>
 <span id="cb15-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="example-3-dense-ranking-by-amount-dense_rank" class="slide level2">
-<h2>Example 3: Dense Ranking by Amount (<code>DENSE_RANK</code>)</h2>
+<section id="example-2-dense-ranking-by-amount-dense_rank" class="slide level2">
+<h2>Example 2: Dense Ranking by Amount (<code>DENSE_RANK</code>)</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a></a><span class="kw">SELECT</span></span>
 <span id="cb16-2"><a></a>    sale_id,</span>
 <span id="cb16-3"><a></a>    customer_id,</span>
@@ -865,8 +857,8 @@ Karen Hovhannisyan
 <span id="cb16-8"><a></a>    ) <span class="kw">AS</span> dense_rank_amount</span>
 <span id="cb16-9"><a></a><span class="kw">FROM</span> tmp_sales;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="example-2-ranking-by-amount-with-gaps-rank" class="slide level2">
-<h2>Example 2: Ranking by Amount with Gaps (<code>RANK</code>)</h2>
+<section id="example-3-ranking-by-amount-with-gaps-rank" class="slide level2">
+<h2>Example 3: Ranking by Amount with Gaps (<code>RANK</code>)</h2>
 <p><strong>Business intuition:</strong><br>
 “What is the spending rank of each transaction?”</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a></a><span class="kw">SELECT</span></span>
