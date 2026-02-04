@@ -194,7 +194,8 @@ FROM (
 :::
 
 
-# Simple Aggregate Window Functions
+
+# Simple Aggregate Window Functions {.r-fit-text}
 
 
 ##  Concept {.smaller}
@@ -273,7 +274,6 @@ Statistical window functions extend simple aggregates by answering **distributio
   
 - `PERCENTILE_CONT()`  
 - `PERCENTILE_DISC()`  
-- `MEDIAN()`  
 - `PERCENT_RANK()`  
 - `CUME_DIST()`  
 
@@ -297,15 +297,10 @@ OVER (
 
 ```sql
 SELECT
-    sale_id,
     customer_id,
-    amount,
-    PERCENTILE_CONT(0.5) WITHIN GROUP (
-        ORDER BY amount
-    ) OVER (
-        PARTITION BY customer_id
-    ) AS median_amount
-FROM tmp_sales;
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amount)  AS median_amount
+FROM tmp_sales
+GROUP BY customer_id;
 ```
 
 ## Example 2: Percent Rank of Each Transaction {.smaller}
@@ -330,9 +325,6 @@ FROM tmp_sales;
 
 - `0.0` → lowest value in group  
 - `1.0` → highest value in group 
-
-
-## Example 3: Cumulative Distribution {.smaller}
 
 
 ## Example 3: Cumulative Distribution
@@ -397,7 +389,7 @@ OVER (
 - Default offset is `1`
 
 
-### Example 1: Previous Transaction Amount (`LAG`)
+## Example 1: Previous Transaction Amount (`LAG`)
 
 **Business intuition:**  
 “How did this transaction change compared to the previous one?”
@@ -513,7 +505,7 @@ FROM tmp_sales;
 ```
 
 
-## Example 3: Dense Ranking by Amount (`DENSE_RANK`)
+## Example 2: Dense Ranking by Amount (`DENSE_RANK`)
 
 ```sql
 SELECT
@@ -527,7 +519,7 @@ SELECT
 FROM tmp_sales;
 ```
 
-## Example 2: Ranking by Amount with Gaps (`RANK`)
+## Example 3: Ranking by Amount with Gaps (`RANK`)
 
 **Business intuition:**  
 “What is the spending rank of each transaction?”
@@ -746,6 +738,4 @@ SELECT
     ) AS moving_avg_2
 FROM tmp_sales;
 ```
-
-
 
