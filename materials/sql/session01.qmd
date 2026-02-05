@@ -12,9 +12,9 @@ categories: [SQL, Query Plan, Queries, ORDER BY, GROUP BY, DISTINCT]
 
 ## Introduction
 
-Now, you’ve reached the stage in the Program where you need to learn how to manage your data in an institutional way. 
+Now, you have reached the stage in the Program where you need to learn how to manage your data in an institutional way. 
 
-To do so, you’ll need to know **structured query language (SQL)**, the first language of:
+To do so, you will need to know **structured query language (SQL)**, the first language of:
 
 - Data analysts
 - Analytics Engineers
@@ -23,18 +23,19 @@ To do so, you’ll need to know **structured query language (SQL)**, the first l
 
 ::: {.callout-tip title='About the importance of SQL'}
 
-**You can’t call yourself a data analyst until you know the basics of SQL**
+**You cannott call yourself a data analyst until you know the basics of SQL**
 
 ---
 
 **SQL is the language of Tables!**
 :::
 
-Besides SQL, you’ll explore various types of databases and what makes them different from Excel. 
+Besides SQL, you will explore various types of databases and what makes them different from `Excel`. 
 During the rest of the session, you will get in-depth look at *current, everyday practices* in the field. 
 
-**Since the best way to learn SQL is to use it,** you’ll get hands-on tasks at the end of every Exercise. 
-<!-- By the time you finish this Achievement, you’ll have used SQL to query data, answered complex business questions, and presented your findings with visualizations. Excited? We sure are! -->
+**Since the best way to learn SQL is to use it,** you will get hands-on tasks at the end of every Exercise. 
+
+<!-- By the time you finish this Achievement, you will have used SQL to query data, answered complex business questions, and presented your findings with visualizations. Excited? We sure are! -->
 
 
 ### What is a Database
@@ -84,7 +85,7 @@ Databases differ from spreadsheets (*excel-like tools*) in several important way
 
 
 
-#### Spreadsheet vs. Database Workflow
+### Spreadsheet vs. Database Workflow
 
 Let’s say you have a dataset of actors, and you want to count how many actors have the first name **"Ed"**.
 
@@ -126,7 +127,7 @@ When performing tasks such as counting how many actors have the first name **"Ed
 Overall, spreadsheets may be adequate for small, single-user datasets, but databases provide far superior performance, scalability, and efficiency when working with larger datasets or multiple users.
 :::
 
-#### Spreadsheets vs. Databases
+### Spreadsheets vs. Databases Summary
 
 | **SPREADSHEET**                                                                 | **DATABASE**                                                                     |
 |----------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
@@ -457,6 +458,133 @@ CREATE (u)-[:LEADS]->(p);
 
 
 
+### **OLAP Systems (Online Analytical Processing)**
+
+![](../../img/sql/OLAP.png){width="80%"}
+
+
+OLAP systems are optimized for **READ-heavy analytical workloads**. They store large volumes of historical data and support complex queries, aggregations, and trend analysis.
+
+**Key Features:**
+
+- Designed primarily for **reading and analyzing** data.
+- Not optimized for frequent inserts/updates/deletes.
+- Stores historical and summarized information.
+- Supports advanced analytics: dashboards, reports, trends, forecasting.
+- Typically powered by data warehouses or data marts.
+
+**Example:** An e-commerce analyst retrieves **last year’s order data** from a data warehouse and analyzes trends across months, categories, or customer segments.
+
+**Common Technologies:**  `Amazon Redshift`, `Snowflake`,` BigQuery`, `Apache Hive`, `Microsoft SQL Server Analysis Services`.
+
+---
+
+### **OLTP Systems (Online Transaction Processing)**
+
+![](../../img/sql/OLTP.png){width="80%"}
+
+
+OLTP systems are optimized for **fast inserts, updates, and deletes**.  They handle high-volume transactional operations in real time.
+
+**Key Features:**
+
+- Processes large numbers of small, atomic transactions.
+- Ensures consistency using ACID properties.
+- Optimized for real-time operations.
+- Used by operational systems rather than analytics.
+
+**Example:** A bank’s ATM network continuously **inserts, updates, or deletes** records as customers make withdrawals, deposits, or transfers.
+
+**Common Technologies:** `PostgreSQL`, `MySQL`, `Oracle`, `SQL Server`, `MongoDB` (as transactional store).
+
+
+::: {.callout-important title="About ACID, BASE, and the CAP Theorem"}
+
+### ACID Transactions
+
+In computer science, **ACID** (**A**tomicity, **C**onsistency, **I**solation, **D**urability) is a set of properties that guarantee the correctness of **database transactions**.
+
+A transaction is treated as a single unit of work:
+- Either **all operations succeed**, or **none do**
+- The database remains in a valid state even in the presence of errors, crashes, or power failures
+
+**Example:**  
+A bank transfer that debits one account and credits another must either complete fully or not happen at all.
+
+ACID properties are commonly associated with **relational databases** and **OLTP systems**.
+
+---
+
+### BASE Systems
+
+**BASE** (**B**asically **A**vailable, **S**oft state, **E**ventually consistent) is an alternative design philosophy used mainly in **distributed systems**.
+
+BASE systems:
+- Prioritize **availability** over immediate consistency
+- Allow temporary inconsistencies
+- Guarantee that data will become consistent **eventually**
+
+This approach is common in large-scale, distributed NoSQL systems where uptime and scalability are more critical than strict transactional guarantees.
+
+---
+
+### The CAP Theorem
+
+The **CAP theorem** states that a **distributed system** cannot simultaneously guarantee all three of the following properties:
+
+- **Consistency (C):** every read returns the most recent write  
+- **Availability (A):** every request receives a response  
+- **Partition Tolerance (P):** the system continues operating despite network failures  
+
+In the presence of a network partition (which is unavoidable in distributed systems), a database must **choose between Consistency and Availability**.
+
+As a result:
+
+- Some systems favor **strong consistency** and may reject requests during failures
+- Others favor **high availability** and may return temporarily inconsistent data
+
+---
+
+### Important Clarification
+
+The CAP theorem **does NOT state** that a system must be either **ACID or BASE**.
+
+- **CAP** describes trade-offs in **distributed systems**
+- **ACID and BASE** describe **transactional and consistency models**
+
+Modern databases often implement **hybrid approaches**, providing:
+
+- ACID guarantees within limited scopes (e.g., single node, single partition)
+- Relaxed consistency across distributed components
+
+Trade-offs always exist, but real-world systems rarely fit into pure categories.
+
+:::
+
+
+---
+
+
+#### **OLAP vs OLTP: Summary**
+
+| Feature | OLAP | OLTP |
+|--------|------|------|
+| Primary purpose | Analytics, reporting | Real-time transactions |
+| Query type | Read-heavy, complex | Write-heavy, simple |
+| Data volume | Historical, large datasets | Current transactional data |
+| Performance optimized for | Aggregations, scans | Fast inserts/updates/deletes |
+| Common use cases | Dashboards, BI, trend analysis | Banking, retail transactions, booking systems |
+| Users | Analysts, data scientists | End-users, applications, machines |
+
+
+![](../../img/sql/OLAPvsOLTP.png)
+
+
+::: {.callout-note title="Reading"}
+[OLTPvsOLAP]([link](https://medium.com/@HalderNilimesh/comprehensive-comparison-of-oltp-and-olap-key-differences-use-cases-and-choosing-the-right-565e74be4670))
+:::
+
+
 ::: {.callout title = "Reading"}
 [SQL vs NoSQL]([link](https://www.ibm.com/think/topics/sql-vs-nosql))
 :::
@@ -525,86 +653,7 @@ To handle *constantly growing data*, *high query loads*, *global users*, and *re
 | Cost | Expensive to scale | More cost-efficient |
 
 
-##### **OLAP Systems (Online Analytical Processing)**
 
-![](../../img/sql/OLAP.png){width="80%"}
-
-
-OLAP systems are optimized for **READ-heavy analytical workloads**. They store large volumes of historical data and support complex queries, aggregations, and trend analysis.
-
-**Key Features:**
-
-- Designed primarily for **reading and analyzing** data.
-- Not optimized for frequent inserts/updates/deletes.
-- Stores historical and summarized information.
-- Supports advanced analytics: dashboards, reports, trends, forecasting.
-- Typically powered by data warehouses or data marts.
-
-**Example:** An e-commerce analyst retrieves **last year’s order data** from a data warehouse and analyzes trends across months, categories, or customer segments.
-
-**Common Technologies:**  `Amazon Redshift`, `Snowflake`,` BigQuery`, `Apache Hive`, `Microsoft SQL Server Analysis Services`.
-
----
-
-#### **OLTP Systems (Online Transaction Processing)**
-
-![](../../img/sql/OLTP.png){width="80%"}
-
-
-OLTP systems are optimized for **fast inserts, updates, and deletes**.  They handle high-volume transactional operations in real time.
-
-**Key Features:**
-
-- Processes large numbers of small, atomic transactions.
-- Ensures consistency using ACID properties.
-- Optimized for real-time operations.
-- Used by operational systems rather than analytics.
-
-**Example:** A bank’s ATM network continuously **inserts, updates, or deletes** records as customers make withdrawals, deposits, or transfers.
-
-**Common Technologies:** `PostgreSQL`, `MySQL`, `Oracle`, `SQL Server`, `MongoDB` (as transactional store).
-
-
-::: {.callout-important title = "About ACID, BASE and CAP Theorem"}
-
-In computer science, **ACID** (**a**tomicity, **c**onsistency, **i**solation, **d**urability)** is a set of properties of database transactions intended to guarantee data validity despite errors, power failures, and other mishaps. For example, a transfer of funds from one bank account to another, even involving multiple changes such as debiting one account and crediting another, is a single transaction.
-
----
-
-The opposite of ACID is **BASE** (**b**asically **a**vailable, **s**oft state, and **e**ventually consistent). 
-
-In ACID the whole transaction fails if an error occurs in any step within the transaction; in contrast, BASE databases prioritize availability over consistency: instead of failing the transaction, users can access inconsistent data temporarily: data consistency is achieved, but not immediately. 
-
-In distributed systems, trade-offs described by the CAP theorem mean that databases often **lean toward ACID or BASE characteristics**, depending on design and workload.  
-Modern systems may implement hybrid approaches, but trade-offs always exist. But it cannot be both according to [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). 
-
-For example, SQL databases (like MySQL, PostgreSQL, AWS RedShift) are structured over the ACID model, while NoSQL databases (like DynamoDB[4] or MongoDB) use the BASE architecture. However, some NoSQL databases might exhibit certain ACID traits
-
-
-
-:::
-
----
-
-
-#### **OLAP vs OLTP: Summary**
-
-| Feature | OLAP | OLTP |
-|--------|------|------|
-| Primary purpose | Analytics, reporting | Real-time transactions |
-| Query type | Read-heavy, complex | Write-heavy, simple |
-| Data volume | Historical, large datasets | Current transactional data |
-| Performance optimized for | Aggregations, scans | Fast inserts/updates/deletes |
-| Common use cases | Dashboards, BI, trend analysis | Banking, retail transactions, booking systems |
-| Users | Analysts, data scientists | End-users, applications, machines |
-
-
-![](../../img/sql/OLAPvsOLTP.png)
-
-
-::: {.callout-note title="Reading"}
-[OLTPvsOLAP]([link](https://medium.com/@HalderNilimesh/comprehensive-comparison-of-oltp-and-olap-key-differences-use-cases-and-choosing-the-right-565e74be4670))
-:::
 
 ## Data Management Architectures
 
@@ -871,14 +920,14 @@ It merges the strengths of Data Warehouses and Data Lakes into a single system.
 - DLH may replace DW in modern architectures.
 
 
-<!-- #### **Database Layers**
+#### **Database Layers
 
 - **Operational Database (OLTP):** Primary system of record for real-time transactions; normalized schema, ACID guarantees.
 - **Data Warehouse:** Curated, structured, and historical store optimized for analytics; fed via ETL/ELT pipelines and supports dimensional models (star/snowflake).
 - **Data Lake:** Low-cost storage for raw, semi-structured, and unstructured data at scale; schema-on-read enables flexible exploration.
 - **Data Lakehouse:** Combines lake storage with warehouse-like governance and performance (ACID tables, time travel, unified catalog).
 - **Data Mart:** Focused slice of the warehouse or lakehouse tailored for a specific team/domain to simplify access and controls.
-- **Staging/Raw Layer:** Landing zone for ingested data before cleansing and modeling; keeps reproducible snapshots of source data. -->
+- **Staging/Raw Layer:** Landing zone for ingested data before cleansing and modeling; keeps reproducible snapshots of source data.
 
 
 
