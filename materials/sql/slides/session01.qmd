@@ -28,193 +28,98 @@ format:
           </style>
 ---
 
+## Learning Goals {.smaller}
+
+- Understand what a database is and why it is essential for analytics
+- Distinguish between relational and non-relational databases
+- Understand the role of OLAP systems and RDBMS in analytics workflows
+- Explain differences between Data Warehouse, Data Mart, Data Lake, and Data Lakehouse
+- Build and run a local PostgreSQL database using **Docker**
 
 
-## What is a Database
+## Where SQL Fits in Data Analytics {.smaller}
 
-A **database** is a collection of stored data, organized in tables of *rows* and *columns*, and managed by a **database management system (DBMS)**.
+SQL sits at the **core of the analytics stack**
 
-**Analysts use `“database”` to refer collectively to:**
+- **Used to interact with:**
+  - operational databases
+  - data warehouses
+  - data lakes and lakehouses
 
-::: {.incremental} 
-- The stored data  
-- The DBMS  
-- The related tools used to access and manipulate that data
-:::
+. . .
 
----
+- **Almost every analytics tool relies on SQL:**
+  - BI tools (Tableau, Power BI)
+  - Machine learning feature pipelines
+  - Python/R analytics workflows
 
-## Tables, Rows, Columns
+. . .
 
-**A table consists of:**
-
-- **Rows**: represent entities  
-- **Columns**: represent attributes  
-- **Cells**: intersection of row × column containing a single data element  
-
-**A data element may be:**
-
-- Numeric  
-- Text  
-- Or any other data type supported by the DBMS  
-
----
-
-## Example Table
-
-<!-- ```{.smaller .scrollable} -->
-|       | Col A | Col B        | Col C |
-|-------|-------|--------------|-------|
-| Row 1 | A1    | B1           | C1    |
-| Row 2 | A2    | **B2 (Cell) **   | C2    |
-| Row 3 | A3    | B3           | C3    |
-<!-- ``` -->
+- **Mastering SQL enables you to:**
+  - ask better questions
+  - access data independently
+  - scale your analytical work
 
 
-## Why This Structure Matters
-
-- Predictable `row–column` structure  
-- Each column has a **predefined data type**  
-- Ensures data quality and consistency  
-- Enables efficient search, filtering, and querying  
-- Forms the foundation of SQL  
+## What Is a Database? {.smaller}
 
 
+- A database is a **structured collection of data** stored electronically
 
-## Spreadsheets vs Databases {.smaller}
+- **Data is organized into:**
+  - tables
+  - rows
+  - columns
 
-| Feature                          | Spreadsheet                           | Database                                         |
-|----------------------------------|----------------------------------------|--------------------------------------------------|
-| User Access                     | Single-user                            | Multi-user, concurrent access                    |
-| Data Capacity                   | Limited (thousands to ~1M rows)        | Massive (millions to billions of records)        |
-| Performance                     | Loads entire file into memory          | Retrieves only required data                     |
-| Data Operations                 | Basic to moderate                      | Basic to highly complex (joins, aggregations)    |
-| Querying                        | Manual filtering/sorting               | SQL queries, fast and optimized                  |
-| Scalability                     | Low                                    | High (vertical & horizontal scaling)             |
-| Reliability                     | Prone to errors and file corruption    | ACID-compliant, transaction-safe                 |
-| Collaboration                   | Difficult; conflicts possible          | Seamless concurrent usage                        |
-| Automation                      | Limited                                | High; integrates with scripts and applications   |
-| Data Integrity                  | Minimal enforcement                    | Strong data types, constraints, relationships    |
+- A database is managed by a **Database Management System (DBMS)**
 
+- **The DBMS is responsible for:**
+  - storing data
+  - retrieving data efficiently
+  - enforcing rules and constraints
+  - supporting multiple users concurrently
 
----
+## Why Databases Are Not Excel {.smaller}
 
-## Example Actor Table {.smaller}
+- Spreadsheets are designed for **individual, ad-hoc analysis**
+- Databases are designed for **shared, institutional data use**
 
-| actor_id | first_name | last_name    | last_update            |
-|----------|------------|--------------|------------------------|
-| 1        | Penelope   | Guiness      | 2013-05-26 14:47:57.62 |
-| 2        | Nick       | Wahlberg     | 2013-05-26 14:47:57.62 |
-| 3        | Ed         | Chase        | 2013-05-26 14:47:57.62 |
-| 4        | Jennifer   | Davis        | 2013-05-26 14:47:57.62 |
-| 5        | Johnny     | Lollobrigida | 2013-05-26 14:47:57.62 |
+. . .
 
-- Filter `first_name = 'Ed'` manually  
-- Count filtered rows manually  
-- Slow and memory-heavy with large data  
-- Only one query at a time  
+- **Key limitations of spreadsheets:**
+  - entire dataset loaded into memory
+  - poor performance at scale
+  - weak support for concurrent users
 
-$$\downarrow$$
+. . .
 
-```sql
-SELECT 
-  COUNT(*)
-FROM actor
-WHERE first_name = 'Ed';
-```
+- **Databases provide:**
+  - efficient data access
+  - concurrency control
+  - reliability and consistency at scale
 
 
-## Structured vs Unstructured vs Semi-Structured Data
+## Types of Data {.smaller}
 
-To understand database types, we must first distinguish how data can be organized.
-There are **three** major categories:
+In analytics, data is categorized by **how it is structured**
+
+- **The structure determines:**
+  - how data is stored
+  - how it is queried
+  - which tools can process it efficiently
+
+- **Three major categories:**
+  - structured data
+  - unstructured data
+  - semi-structured data
+
+>Databases and analytics systems are designed differently for each type
 
 
-::: {.incremental}
-
-- Structured data  
-- Unstructured data  
-- Semi-structured data  
-
-:::
-
-
-
-## Structured Data {.smaller}
-
-Highly organized and stored in a tabular format.
-
-**Characteristics:**
-
-- Rows represent entities  
-- Columns represent attributes  
-- Every cell contains a **single value**  
-- Each column has a **predefined data type** (TEXT, INTEGER, NUMERIC, etc.)
-
-**Example:**
-
-::: {.smaller .scrollable}
-| actor_id | first_name | last_name    | last_update              |
-|----------|------------|--------------|---------------------------|
-| 1        | Penelope   | Guiness      | 2013-05-26 14:47:57.62   |
-| 2        | Nick       | Wahlberg     | 2013-05-26 14:47:57.62   |
-| 3        | Ed         | Chase        | 2013-05-26 14:47:57.62   |
-| 4        | Jennifer   | Davis        | 2013-05-26 14:47:57.62   |
-| 5        | Johnny     | Lollobrigida | 2013-05-26 14:47:57.62   |
-:::
-
----
-
-## Unstructured Data {.smaller}
-
-Data with **no fixed model**, no rows, no columns.
-
-**Examples:**
-
-- Emails  
-- PDFs  
-- Text documents  
-- Images, graphics  
-- Videos, audio  
-- Social media posts  
-
-**Properties:**
-
-- Harder to search and process  
-- Requires specialized tools  
-- Often free-form and unpredictable  
-
----
-
-## Semi-Structured Data {.smaller}
-
-Data that is *not tabular*, yet still contains **organizational markers**.
-
-**Examples:**
-
-HTML, JSON, XML, Log files, Key–value records  
-
-**Properties:**
-
-- More flexible than structured  
-- More organized than unstructured  
-- Structure is embedded through tags, nesting, or key–value rules  
-
-**Example (JSON):**
-
-```json
-{
-  "user_id": 1001,
-  "name": "Maria",
-  "roles": ["admin", "manager"]
-}
-```
-
----
+## Types of Data: Visual Overview {.smaller}
 
 ::: {.columns}
 ::: {.column width="33%"}
-**Structured**
 
 <svg viewBox="0 0 220 140" width="100%" aria-label="Structured data grid">
   <rect x="10" y="10" width="200" height="120" rx="8" fill="#f7f9fc" stroke="#1f4b99" stroke-width="3"/>
@@ -235,7 +140,7 @@ HTML, JSON, XML, Log files, Key–value records
 </svg>
 :::
 ::: {.column width="33%"}
-**Unstructured**
+
 
 <svg viewBox="0 0 220 140" width="100%" aria-label="Unstructured data notes">
   <rect x="15" y="10" width="190" height="120" rx="10" fill="#fff7ed" stroke="#c05c2d" stroke-width="3"/>
@@ -247,8 +152,6 @@ HTML, JSON, XML, Log files, Key–value records
 </svg>
 :::
 ::: {.column width="34%"}
-**Semi-Structured**
-
 <svg viewBox="0 0 220 140" width="100%" aria-label="Semi-structured data tags">
   <rect x="10" y="12" width="200" height="116" rx="10" fill="#eef8f2" stroke="#2d814d" stroke-width="3"/>
   <rect x="22" y="26" width="176" height="30" rx="6" fill="#d6f1df" stroke="#2d814d" stroke-width="2"/>
@@ -261,20 +164,166 @@ HTML, JSON, XML, Log files, Key–value records
 :::
 :::
 
+# Types of Databases {.smaller}
 
-## Centralized VS Distributed
+## Types of Databases {.smaller}
 
-::: {.figure fig-align="center"}
-![Centralized vs distributed database diagram](../../../img/sql/centralized_vs_distributed.png){width="90%"}
-:::
+- **Relational Databases**
+  - Table-based, fixed schema
+  - Queried using SQL
+
+. . .
+
+- **NoSQL Databases**
+  - Flexible schema
+  - Designed for scalability and distributed systems
+
+. . .
+
+- **Graph Databases**
+  - Nodes and relationships
+  - Optimized for connected data
 
 
-## Data Management Architectures
+## Relational Databases {.smaller}
 
-<!-- TODO Provide only the images SLIDE BY SLIDE /Users/karen/Desktop/aca/materials/sql/session1.qmd-->
+![](../../../img/sql/rdbms.png){width="85%"}
 
 
-# Building our first Database 
+## NoSQL Databases {.smaller}
 
-[Step by Step DB Set Up Using Docker](https://hovhannisyan91.github.io/aca/materials/sql/session1.html#step-1-create-new-github-repository)
-<!--TODO add each step as one slide, in case of codes make it scroollable. /Users/karen/Desktop/aca/materials/sql/session1.qmd  --> 
+![](../../../img/sql/document.png){width="85%"}
+
+## OLAP Systems {.smaller}
+
+- Optimized for **analytics and reporting**
+- Read-heavy workloads
+- Large historical datasets
+- Complex queries and aggregations
+
+![](../../../img/sql/OLAP.png){width="80%"}
+
+
+## Graph Databases {.smaller}
+
+![](../../../img/sql/graphdb.png){width="85%"}
+
+
+## OLTP Systems {.smaller}
+
+- Optimized for **real-time transactions**
+- Write-heavy workloads
+- Many small, fast operations
+- Strong consistency (ACID)
+
+![](../../../img/sql/OLTP.png){width="80%"}
+
+
+## ACID Transactions {.smaller}
+
+
+- **Atomicity:** all operations succeed or none do  
+- **Consistency:** database moves from one valid state to another  
+- **Isolation:** concurrent transactions do not interfere  
+- **Durability:** committed data is not lost  
+
+
+
+## BASE Systems {.smaller}
+
+
+- **Basically Available**
+- **Soft state**
+- **Eventually consistent**
+
+- Used mainly in **distributed NoSQL systems**
+- Favors **availability** over immediate consistency
+- Temporary inconsistencies are acceptable
+- Data becomes consistent **eventually**
+
+
+## The CAP Theorem {.smaller}
+
+
+- Applies to **distributed systems**
+- A system cannot guarantee all three at the same time:
+  - **Consistency**
+  - **Availability**
+  - **Partition Tolerance**
+- During a network partition: the system must choose between **Consistency** and **Availability**
+- Explains trade-offs in large-scale distributed databases
+
+## OLAP vs OLTP Summary {.smaller}
+
+![](../../../img/sql/OLAPvsOLTP.png){width="85%"}
+
+
+## Centralized Databases {.smaller}
+
+![](../../../img/sql/centralized_vs_distributed.png){width="85%"}
+
+
+## Distributed Databases {.smaller}
+
+![](../../../img/sql/centralized_vs_distributed.png){width="85%"}
+
+# Data Management Architectures
+
+## Data Management Architectures {.smaller}
+
+
+- Data Warehouse (DW)
+- Data Mart (DM)
+- Data Lake (DL)
+- Data Lakehouse (DLH)
+
+
+
+## Data Warehouse (DW) {.smaller}
+
+![](../../../img/sql/dw.png){width="85%"}
+
+
+
+## Data Mart (DM) {.smaller}
+
+![](../../../img/sql/dm.png){width="85%"}
+
+
+
+## Data Lake (DL) {.smaller}
+
+![](../../../img/sql/dl.png){width="85%"}
+
+
+
+## Data Lakehouse (DLH) {.smaller}
+
+![](../../../img/sql/dlh.png){width="85%"}
+
+
+
+## Data Management Architectures — Summary {.smaller}
+
+
+- **DW:** governed, structured, BI-focused
+- **DM:** domain-specific slice of DW
+- **DL:** raw, flexible, ML-oriented storage
+- **DLH:** unified DW + DL with ACID guarantees
+
+
+# Intro to SQL {.smaller}
+
+- **SQL (Structured Query Language)**  
+  - Developed by **IBM** (1970s)  
+  - Public release: **1979**  
+  - Standardized by **ANSI**
+
+- Primary language for **relational databases**
+
+- Used for:
+  - manipulating data
+  - querying data
+  - defining database structures
+```
+
