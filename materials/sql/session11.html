@@ -1,0 +1,3332 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Session 11: DA with SQL | UDFs, Stored Procedures – Data Analytics Bootcamp</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-b6871152dc33c25e97e10f79624f84be.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo light-content">
+    <img src="../../img/favicon.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data Analytics Bootcamp</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../materials/syllabus.html" aria-current="page"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/statistics/index.html"> 
+<span class="menu-text">Statistical Thinking</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/sql/index.html"> 
+<span class="menu-text">SQL</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/python/index.html"> 
+<span class="menu-text">Python</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/tableau/index.html"> 
+<span class="menu-text">Tableau</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../materials/lab/index.html"> 
+<span class="menu-text">Lab</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/hovhannisyan91"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session11.html">Session 11: DA with SQL | UDFs, Stored Procedures</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Thinking</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/statistics/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 01: Data Layers and Bias in Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 02: Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 03: Probabilistic Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 04: Probabilistic Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 05: Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistics Session 06: Inferential Statistics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Course Intro</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descriptive Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Continuous Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Discrete Distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/statistics/slides/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/sql/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 01: Intro to Relational Databases</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 02: Intro to PostgreSQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 03: DA with SQL | Data Types &amp; Constraints</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 04: DA with SQL | Filtering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 05: DA with SQL | Numeric Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 06: DA with SQL | String Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 07: DA with SQL | Date Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 08: DA with SQL | JOINs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 09: DA with SQL | Advanced SQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 10: DA with SQL | Advanced SQL Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session11.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Session 11: DA with SQL | UDFs, Stored Procedures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intro to Relational Databases</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intro to PostgreSQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Basic Queries: DDL DLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Filtering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Numeric Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">String Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Date Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced SQL 1</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced SQL</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/slides/session10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced SQL Functions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/python/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python Session 01: Coming Soon</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/python/slides/session7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../materials/tableau/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 01: Introduction to Tableau</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 02: Intermediate Visual Analytics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 03:</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tableau Session 04: Dashboard Design &amp; Performance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Slides</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth3 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/tableau/slides/session4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Analyst</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#goals" id="toc-goals" class="nav-link active" data-scroll-target="#goals">Goals</a></li>
+  <li><a href="#user-defined-functions-udfs-in-theoretical-context" id="toc-user-defined-functions-udfs-in-theoretical-context" class="nav-link" data-scroll-target="#user-defined-functions-udfs-in-theoretical-context">User Defined Functions (UDFs) in Theoretical Context</a>
+  <ul class="collapse">
+  <li><a href="#function-as-a-black-box" id="toc-function-as-a-black-box" class="nav-link" data-scroll-target="#function-as-a-black-box">Function as a Black Box</a></li>
+  <li><a href="#function-execution-states-in-sql" id="toc-function-execution-states-in-sql" class="nav-link" data-scroll-target="#function-execution-states-in-sql">Function Execution States in SQL</a></li>
+  <li><a href="#logical-position-of-functions-in-sql-processing" id="toc-logical-position-of-functions-in-sql-processing" class="nav-link" data-scroll-target="#logical-position-of-functions-in-sql-processing">Logical Position of Functions in SQL Processing</a></li>
+  <li><a href="#function-usage-journey-in-analytics" id="toc-function-usage-journey-in-analytics" class="nav-link" data-scroll-target="#function-usage-journey-in-analytics">Function Usage Journey in Analytics</a></li>
+  <li><a href="#why-sql-introduces-user-defined-functions" id="toc-why-sql-introduces-user-defined-functions" class="nav-link" data-scroll-target="#why-sql-introduces-user-defined-functions">Why SQL Introduces User Defined Functions</a></li>
+  <li><a href="#scalar-functions-conceptual-model" id="toc-scalar-functions-conceptual-model" class="nav-link" data-scroll-target="#scalar-functions-conceptual-model">Scalar Functions: Conceptual Model</a></li>
+  <li><a href="#table-valued-functions-conceptual-model" id="toc-table-valued-functions-conceptual-model" class="nav-link" data-scroll-target="#table-valued-functions-conceptual-model">Table-Valued Functions: Conceptual Model</a></li>
+  <li><a href="#what-functions-cannot-do" id="toc-what-functions-cannot-do" class="nav-link" data-scroll-target="#what-functions-cannot-do">What Functions Cannot Do</a></li>
+  </ul></li>
+  <li><a href="#scalar-values-user-defined-functions-in-practice" id="toc-scalar-values-user-defined-functions-in-practice" class="nav-link" data-scroll-target="#scalar-values-user-defined-functions-in-practice">Scalar Values User Defined Functions in Practice</a>
+  <ul class="collapse">
+  <li><a href="#general-syntax-of-a-user-defined-function" id="toc-general-syntax-of-a-user-defined-function" class="nav-link" data-scroll-target="#general-syntax-of-a-user-defined-function">General Syntax of a User Defined Function</a></li>
+  <li><a href="#scalar-function-syntax" id="toc-scalar-function-syntax" class="nav-link" data-scroll-target="#scalar-function-syntax">Scalar Function Syntax</a></li>
+  <li><a href="#analytical-perspective-on-udf-design" id="toc-analytical-perspective-on-udf-design" class="nav-link" data-scroll-target="#analytical-perspective-on-udf-design">Analytical Perspective on UDF Design</a></li>
+  <li><a href="#example-1-age-categorization-function" id="toc-example-1-age-categorization-function" class="nav-link" data-scroll-target="#example-1-age-categorization-function">Example 1: Age Categorization Function</a></li>
+  <li><a href="#example-2-customer-tenure-classification" id="toc-example-2-customer-tenure-classification" class="nav-link" data-scroll-target="#example-2-customer-tenure-classification">Example 2: Customer Tenure Classification</a></li>
+  <li><a href="#example-3-product-price-tier-classification" id="toc-example-3-product-price-tier-classification" class="nav-link" data-scroll-target="#example-3-product-price-tier-classification">Example 3: Product Price Tier Classification</a></li>
+  <li><a href="#example-4-order-size-classification" id="toc-example-4-order-size-classification" class="nav-link" data-scroll-target="#example-4-order-size-classification">Example 4: Order Size Classification</a></li>
+  <li><a href="#example-5-order-activity-status-normalization" id="toc-example-5-order-activity-status-normalization" class="nav-link" data-scroll-target="#example-5-order-activity-status-normalization">Example 5: Order Activity Status Normalization</a></li>
+  </ul></li>
+  <li><a href="#table-valued-user-defined-functions-in-practice" id="toc-table-valued-user-defined-functions-in-practice" class="nav-link" data-scroll-target="#table-valued-user-defined-functions-in-practice">Table-Valued User Defined Functions in Practice</a>
+  <ul class="collapse">
+  <li><a href="#general-syntax-of-a-table-valued-function" id="toc-general-syntax-of-a-table-valued-function" class="nav-link" data-scroll-target="#general-syntax-of-a-table-valued-function">General Syntax of a Table-Valued Function</a></li>
+  <li><a href="#analytical-perspective-on-tvf-design" id="toc-analytical-perspective-on-tvf-design" class="nav-link" data-scroll-target="#analytical-perspective-on-tvf-design">Analytical Perspective on TVF Design</a></li>
+  <li><a href="#example-1-recent-orders-for-a-customer" id="toc-example-1-recent-orders-for-a-customer" class="nav-link" data-scroll-target="#example-1-recent-orders-for-a-customer">Example 1: Recent Orders for a Customer</a></li>
+  <li><a href="#example-2-top-products-by-revenue" id="toc-example-2-top-products-by-revenue" class="nav-link" data-scroll-target="#example-2-top-products-by-revenue">Example 2: Top Products by Revenue</a></li>
+  <li><a href="#example-3-customers-by-city" id="toc-example-3-customers-by-city" class="nav-link" data-scroll-target="#example-3-customers-by-city">Example 3: Customers by City</a></li>
+  <li><a href="#example-4-order-items-with-product-context" id="toc-example-4-order-items-with-product-context" class="nav-link" data-scroll-target="#example-4-order-items-with-product-context">Example 4: Order Items with Product Context</a></li>
+  <li><a href="#analytical-takeaways" id="toc-analytical-takeaways" class="nav-link" data-scroll-target="#analytical-takeaways">Analytical Takeaways</a></li>
+  </ul></li>
+  <li><a href="#scalar-vs-table-valued-function" id="toc-scalar-vs-table-valued-function" class="nav-link" data-scroll-target="#scalar-vs-table-valued-function">Scalar vs Table Valued Function</a></li>
+  <li><a href="#stored-procedures" id="toc-stored-procedures" class="nav-link" data-scroll-target="#stored-procedures">Stored Procedures</a>
+  <ul class="collapse">
+  <li><a href="#procedure-as-an-execution-unit" id="toc-procedure-as-an-execution-unit" class="nav-link" data-scroll-target="#procedure-as-an-execution-unit">Procedure as an Execution Unit</a></li>
+  <li><a href="#stored-procedure-execution-states" id="toc-stored-procedure-execution-states" class="nav-link" data-scroll-target="#stored-procedure-execution-states">Stored Procedure Execution States</a></li>
+  <li><a href="#logical-position-of-stored-procedures" id="toc-logical-position-of-stored-procedures" class="nav-link" data-scroll-target="#logical-position-of-stored-procedures">Logical Position of Stored Procedures</a></li>
+  <li><a href="#why-sql-introduces-stored-procedures" id="toc-why-sql-introduces-stored-procedures" class="nav-link" data-scroll-target="#why-sql-introduces-stored-procedures">Why SQL Introduces Stored Procedures</a></li>
+  <li><a href="#general-syntax-of-a-stored-procedure" id="toc-general-syntax-of-a-stored-procedure" class="nav-link" data-scroll-target="#general-syntax-of-a-stored-procedure">General Syntax of a Stored Procedure</a></li>
+  <li><a href="#analytical-perspective-on-procedure-design" id="toc-analytical-perspective-on-procedure-design" class="nav-link" data-scroll-target="#analytical-perspective-on-procedure-design">Analytical Perspective on Procedure Design</a></li>
+  <li><a href="#example-1-upsert-product" id="toc-example-1-upsert-product" class="nav-link" data-scroll-target="#example-1-upsert-product">Example 1: Upsert Product</a></li>
+  <li><a href="#example-2-update-order-status" id="toc-example-2-update-order-status" class="nav-link" data-scroll-target="#example-2-update-order-status">Example 2: Update Order Status</a></li>
+  <li><a href="#example-3-delete-customer-with-safety-check" id="toc-example-3-delete-customer-with-safety-check" class="nav-link" data-scroll-target="#example-3-delete-customer-with-safety-check">Example 3: Delete Customer with Safety Check</a></li>
+  <li><a href="#example-4-refresh-derived-order-totals" id="toc-example-4-refresh-derived-order-totals" class="nav-link" data-scroll-target="#example-4-refresh-derived-order-totals">Example 4: Refresh Derived Order Totals</a></li>
+  </ul></li>
+  <li><a href="#functions-vs-stored-procedures" id="toc-functions-vs-stored-procedures" class="nav-link" data-scroll-target="#functions-vs-stored-procedures">Functions vs Stored Procedures</a></li>
+  <li><a href="#views-in-practice" id="toc-views-in-practice" class="nav-link" data-scroll-target="#views-in-practice">Views in Practice</a>
+  <ul class="collapse">
+  <li><a href="#view-as-a-logical-abstraction" id="toc-view-as-a-logical-abstraction" class="nav-link" data-scroll-target="#view-as-a-logical-abstraction">View as a Logical Abstraction</a></li>
+  <li><a href="#logical-position-of-views-in-sql-processing" id="toc-logical-position-of-views-in-sql-processing" class="nav-link" data-scroll-target="#logical-position-of-views-in-sql-processing">Logical Position of Views in SQL Processing</a></li>
+  <li><a href="#why-sql-introduces-views" id="toc-why-sql-introduces-views" class="nav-link" data-scroll-target="#why-sql-introduces-views">Why SQL Introduces Views</a></li>
+  <li><a href="#general-syntax-of-a-view" id="toc-general-syntax-of-a-view" class="nav-link" data-scroll-target="#general-syntax-of-a-view">General Syntax of a View</a></li>
+  <li><a href="#analytical-perspective-on-view-design" id="toc-analytical-perspective-on-view-design" class="nav-link" data-scroll-target="#analytical-perspective-on-view-design">Analytical Perspective on View Design</a></li>
+  <li><a href="#example-1-customer-dimension-view" id="toc-example-1-customer-dimension-view" class="nav-link" data-scroll-target="#example-1-customer-dimension-view">Example 1: Customer Dimension View</a></li>
+  <li><a href="#example-2-orders-with-order-size-classification" id="toc-example-2-orders-with-order-size-classification" class="nav-link" data-scroll-target="#example-2-orders-with-order-size-classification">Example 2: Orders with Order Size Classification</a></li>
+  <li><a href="#example-3-product-revenue-summary-view" id="toc-example-3-product-revenue-summary-view" class="nav-link" data-scroll-target="#example-3-product-revenue-summary-view">Example 3: Product Revenue Summary View</a></li>
+  <li><a href="#example-3-product-revenue-summary-view-1" id="toc-example-3-product-revenue-summary-view-1" class="nav-link" data-scroll-target="#example-3-product-revenue-summary-view-1">Example 3: Product Revenue Summary View</a></li>
+  <li><a href="#example-4-active-orders-view" id="toc-example-4-active-orders-view" class="nav-link" data-scroll-target="#example-4-active-orders-view">Example 4: Active Orders View</a></li>
+  </ul></li>
+  <li><a href="#views-vs-functions-vs-stored-procedures" id="toc-views-vs-functions-vs-stored-procedures" class="nav-link" data-scroll-target="#views-vs-functions-vs-stored-procedures">Views vs Functions vs Stored Procedures</a></li>
+  <li><a href="#try-youself" id="toc-try-youself" class="nav-link" data-scroll-target="#try-youself">Try Youself</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/index.html">SQL</a></li><li class="breadcrumb-item"><a href="../../materials/sql/session11.html">Session 11: DA with SQL | UDFs, Stored Procedures</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Session 11: DA with SQL | UDFs, Stored Procedures</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">UDFs</div>
+    <div class="quarto-category">SPs</div>
+    <div class="quarto-category">UPSERT</div>
+    <div class="quarto-category">UPDATE</div>
+    <div class="quarto-category">DELETE</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="goals" class="level2">
+<h2 class="anchored" data-anchor-id="goals">Goals</h2>
+</section>
+<section id="user-defined-functions-udfs-in-theoretical-context" class="level2">
+<h2 class="anchored" data-anchor-id="user-defined-functions-udfs-in-theoretical-context">User Defined Functions (UDFs) in Theoretical Context</h2>
+<p>In its most abstract form, a <strong>function</strong> represents a mapping between <code>inputs</code> and <code>outputs</code>.</p>
+<p>Given an input vector <span class="math inline">\(X\)</span>, a function produces an output <span class="math inline">\(Y\)</span>:</p>
+<p><span class="math display">\[
+f(X) \rightarrow Y
+\]</span></p>
+<p><strong>The defining characteristics of a function are:</strong></p>
+<ul>
+<li>Inputs are explicitly defined<br>
+</li>
+<li>Internal logic is encapsulated<br>
+</li>
+<li>Output is predictable for a given input<br>
+</li>
+<li>Execution has no memory of previous calls</li>
+</ul>
+<p>In SQL analytics, a function is <strong>not a process</strong>, <strong>not a workflow</strong>, and <strong>not a transaction</strong>.</p>
+<p>It is a <strong>calculation unit</strong>.</p>
+<section id="function-as-a-black-box" class="level3">
+<h3 class="anchored" data-anchor-id="function-as-a-black-box">Function as a Black Box</h3>
+<p><strong>A function hides internal complexity and exposes only:</strong></p>
+<ul>
+<li>Input parameters<br>
+</li>
+<li>Output value or structure</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+    direction LR
+
+    [*] --&gt; Input
+    Input --&gt; InternalLogic
+    InternalLogic --&gt; Output
+    Output --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>The caller neither knows nor controls <em>how</em> the function works internally.</p>
+</section>
+<section id="function-execution-states-in-sql" class="level3">
+<h3 class="anchored" data-anchor-id="function-execution-states-in-sql">Function Execution States in SQL</h3>
+<p>From the database engine’s perspective, a function moves through well-defined states.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+    direction LR
+    [*] --&gt; Invocation
+    Invocation --&gt; ParameterBinding
+    ParameterBinding --&gt; Evaluation
+    Evaluation --&gt; ResultMaterialization
+    ResultMaterialization --&gt; Return
+    Return --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<!-- todo ad some explanation -->
+<hr>
+</section>
+<section id="logical-position-of-functions-in-sql-processing" class="level3">
+<h3 class="anchored" data-anchor-id="logical-position-of-functions-in-sql-processing">Logical Position of Functions in SQL Processing</h3>
+<p>SQL queries are not executed top-to-bottom. They follow a <strong>logical evaluation order</strong>.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; FROM
+    FROM --&gt; WHERE
+    WHERE --&gt; GROUP_BY
+    GROUP_BY --&gt; HAVING
+    HAVING --&gt; SELECT
+    SELECT --&gt; ORDER_BY
+    ORDER_BY --&gt; [*]
+
+    note right of SELECT
+        Scalar functions
+        are evaluated here
+    end note
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>Functions participate <strong>inside</strong> these phases, never outside them.</p>
+</section>
+<section id="function-usage-journey-in-analytics" class="level3">
+<h3 class="anchored" data-anchor-id="function-usage-journey-in-analytics">Function Usage Journey in Analytics</h3>
+<p>From an analyst’s perspective, functions are part of a larger analytical journey.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">journey
+    title Analytical Function Usage Journey
+    section Problem Framing
+      Identify metric: 5: Analyst
+      Define inputs: 4: Analyst
+    section Query Construction
+      Select function: 4: Analyst
+      Embed in query: 3: Analyst
+    section Execution
+      Bind parameters: 3: Database
+      Evaluate logic: 2: Database
+      Return result: 4: Database
+    section Interpretation
+      Validate output: 5: Analyst
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="why-sql-introduces-user-defined-functions" class="level3">
+<h3 class="anchored" data-anchor-id="why-sql-introduces-user-defined-functions">Why SQL Introduces User Defined Functions</h3>
+<p>Built-in functions solve <strong>generic</strong> problems.<br>
+Analytics often requires <strong>domain-specific logic</strong>.</p>
+<p><strong>UDFs exist to:</strong></p>
+<ul>
+<li>Encode business definitions<br>
+</li>
+<li>Standardize calculations<br>
+</li>
+<li>Avoid copy-paste logic<br>
+</li>
+<li>Improve semantic clarity</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TD
+    A[SQL Functions] --&gt; B[Built-in Functions]
+    A --&gt; C[User Defined Functions]
+
+    C --&gt; D[Scalar Functions]
+    C --&gt; E[Table-Valued Functions]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="scalar-functions-conceptual-model" class="level3">
+<h3 class="anchored" data-anchor-id="scalar-functions-conceptual-model">Scalar Functions: Conceptual Model</h3>
+<p>Scalar functions transform a <strong>single input</strong> row into a <strong>single output</strong> value.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; RowInput
+    RowInput --&gt; ScalarComputation
+    ScalarComputation --&gt; SingleValue
+    SingleValue --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p><strong>Key properties:</strong></p>
+<ul>
+<li>One output per row<br>
+</li>
+<li>Can be used in expressions<br>
+</li>
+<li>Do not change row counts</li>
+</ul>
+<hr>
+</section>
+<section id="table-valued-functions-conceptual-model" class="level3">
+<h3 class="anchored" data-anchor-id="table-valued-functions-conceptual-model">Table-Valued Functions: Conceptual Model</h3>
+<p>Table-valued functions generate a <strong>relation</strong>.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; ParameterSet
+    ParameterSet --&gt; RowGeneration
+    RowGeneration --&gt; VirtualTable
+    VirtualTable --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p><strong>Key properties:</strong></p>
+<ul>
+<li>Return multiple rows<br>
+</li>
+<li>Behave like derived tables<br>
+</li>
+<li>Participate in joins</li>
+</ul>
+</section>
+<section id="what-functions-cannot-do" class="level3">
+<h3 class="anchored" data-anchor-id="what-functions-cannot-do">What Functions Cannot Do</h3>
+<p><strong>Functions are intentionally restricted.</strong></p>
+<ul>
+<li>Cannot manage transactions<br>
+</li>
+<li>Cannot perform commits or rollbacks<br>
+</li>
+<li>Cannot control execution flow<br>
+</li>
+<li>Cannot modify schema</li>
+</ul>
+<p>These constraints preserve <strong>query safety</strong> and <strong>optimizer guarantees</strong>.</p>
+</section>
+</section>
+<section id="scalar-values-user-defined-functions-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="scalar-values-user-defined-functions-in-practice">Scalar Values User Defined Functions in Practice</h2>
+<p>Now that we understand the theoretical aspects, we can explore how to create and use <strong>UDFs</strong> in SQL.</p>
+<section id="general-syntax-of-a-user-defined-function" class="level3">
+<h3 class="anchored" data-anchor-id="general-syntax-of-a-user-defined-function">General Syntax of a User Defined Function</h3>
+<p>A <strong>User Defined Function (UDF)</strong> formalizes a reusable analytical calculation.</p>
+</section>
+<section id="scalar-function-syntax" class="level3">
+<h3 class="anchored" data-anchor-id="scalar-function-syntax">Scalar Function Syntax</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> function_name (</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    parameter_name data_type,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">..</span>.</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>RETURNS return_data_type</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> expression;</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" data-convertion="sql">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Is advised to use <code>CREATE OR REPLACE</code> to allow iterative development and updates without dropping the function.</li>
+<li>It is advised to name functions with a clear prefix (e.g., <code>fn_</code>) to distinguish them from tables and views.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="analytical-perspective-on-udf-design" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-perspective-on-udf-design">Analytical Perspective on UDF Design</h3>
+<p><strong>A well-designed analytical UDF:</strong></p>
+<ul>
+<li>Encapsulates a <strong>business definition</strong></li>
+<li>Accepts <strong>clean, minimal inputs</strong></li>
+<li>Produces a <strong>single, interpretable output</strong></li>
+<li>Can be reused <strong>consistently</strong> across reports and queries</li>
+</ul>
+</section>
+<section id="example-1-age-categorization-function" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-age-categorization-function">Example 1: Age Categorization Function</h3>
+<p>Analysts frequently segment customers into <strong>age groups</strong> for reporting and targeting.<br>
+Embedding this logic directly in queries leads to duplication and inconsistency.</p>
+<p>A scalar UDF ensures <strong>one authoritative definition</strong>.</p>
+<p><strong>Age segmentation is a foundational dimension for:</strong></p>
+<ul>
+<li>Customer profiling<br>
+</li>
+<li>Targeting strategies<br>
+</li>
+<li>Cohort analysis</li>
+</ul>
+<section id="function-definition" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> fn_age_group (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    p_age <span class="dt">INT</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>RETURNS TEXT</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">CASE</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_age <span class="op">&lt;</span> <span class="dv">25</span> <span class="cf">THEN</span> <span class="st">'Under 25'</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_age <span class="kw">BETWEEN</span> <span class="dv">25</span> <span class="kw">AND</span> <span class="dv">39</span> <span class="cf">THEN</span> <span class="st">'25–39'</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_age <span class="kw">BETWEEN</span> <span class="dv">40</span> <span class="kw">AND</span> <span class="dv">59</span> <span class="cf">THEN</span> <span class="st">'40–59'</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">ELSE</span> <span class="st">'60+'</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">END</span>;</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="function-aplication" class="level4">
+<h4 class="anchored" data-anchor-id="function-aplication">Function Aplication</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    age,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    fn_age_group(age) <span class="kw">AS</span> age_group</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.customers;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="function-output" class="level4">
+<h4 class="anchored" data-anchor-id="function-output">Function Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>age</th>
+<th>age_group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>28</td>
+<td>25–39</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>35</td>
+<td>25–39</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>24</td>
+<td>Under 25</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>41</td>
+<td>40–59</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="example-2-customer-tenure-classification" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-customer-tenure-classification">Example 2: Customer Tenure Classification</h3>
+<p><strong>Customer tenure is frequently used in:</strong></p>
+<ul>
+<li>Retention analysis<br>
+</li>
+<li>Lifecycle modeling<br>
+</li>
+<li>CRM segmentation</li>
+</ul>
+<hr>
+<section id="function-definition-1" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-1">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_customer_tenure (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    p_signup_date <span class="dt">DATE</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>RETURNS TEXT</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">CASE</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> <span class="fu">CURRENT_DATE</span> <span class="op">-</span> p_signup_date <span class="op">&lt;</span> <span class="dv">180</span> <span class="cf">THEN</span> <span class="st">'New'</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> <span class="fu">CURRENT_DATE</span> <span class="op">-</span> p_signup_date <span class="op">&lt;</span> <span class="dv">365</span> <span class="cf">THEN</span> <span class="st">'Established'</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">ELSE</span> <span class="st">'Loyal'</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">END</span>;</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-usage" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-usage">Analytical Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    signup_date,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    analytics.fn_customer_tenure(signup_date) <span class="kw">AS</span> tenure_group</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.customers;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-output" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-output">Analytical Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>signup_date</th>
+<th>tenure_group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>2025-11-01</td>
+<td>New</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td>2025-03-10</td>
+<td>Established</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>2023-08-15</td>
+<td>Loyal</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="example-3-product-price-tier-classification" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-product-price-tier-classification">Example 3: Product Price Tier Classification</h3>
+<p><strong>Product price tiers are frequently used in:</strong></p>
+<ul>
+<li>Category benchmarking<br>
+</li>
+<li>Demand elasticity analysis<br>
+</li>
+<li>Product mix optimization</li>
+</ul>
+<hr>
+<section id="function-definition-2" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-2">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_price_tier (</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    p_price <span class="dt">NUMERIC</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>RETURNS TEXT</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">CASE</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_price <span class="op">&lt;</span> <span class="dv">20</span> <span class="cf">THEN</span> <span class="st">'Low'</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_price <span class="kw">BETWEEN</span> <span class="dv">20</span> <span class="kw">AND</span> <span class="fl">99.99</span> <span class="cf">THEN</span> <span class="st">'Mid'</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">ELSE</span> <span class="st">'Premium'</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">END</span>;</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-usage-1" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-usage-1">Analytical Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    product_id,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    product_name,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    price,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    analytics.fn_price_tier(price) <span class="kw">AS</span> price_tier</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.products;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-output-1" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-output-1">Analytical Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>product_id</th>
+<th>product_name</th>
+<th>price</th>
+<th>price_tier</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>101</td>
+<td>Item A</td>
+<td>12.50</td>
+<td>Low</td>
+</tr>
+<tr class="even">
+<td>102</td>
+<td>Item B</td>
+<td>55.00</td>
+<td>Mid</td>
+</tr>
+<tr class="odd">
+<td>103</td>
+<td>Item C</td>
+<td>240.00</td>
+<td>Premium</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-4-order-size-classification" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-order-size-classification">Example 4: Order Size Classification</h3>
+<p><strong>Order size is commonly used in:</strong></p>
+<ul>
+<li>Basket analysis<br>
+</li>
+<li>Customer purchase behavior<br>
+</li>
+<li>Operational load estimation</li>
+</ul>
+<hr>
+<section id="function-definition-3" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-3">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_order_size (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    p_quantity <span class="dt">INT</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>RETURNS TEXT</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">CASE</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_quantity <span class="op">=</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="st">'Single Item'</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_quantity <span class="kw">BETWEEN</span> <span class="dv">2</span> <span class="kw">AND</span> <span class="dv">4</span> <span class="cf">THEN</span> <span class="st">'Small Basket'</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">ELSE</span> <span class="st">'Large Basket'</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">END</span>;</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-usage-2" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-usage-2">Analytical Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    oi.order_id,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    oi.quantity,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    analytics.fn_order_size(oi.quantity) <span class="kw">AS</span> order_size</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.order_items oi;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-output-2" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-output-2">Analytical Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>quantity</th>
+<th>order_size</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5001</td>
+<td>1</td>
+<td>Single Item</td>
+</tr>
+<tr class="even">
+<td>5002</td>
+<td>3</td>
+<td>Small Basket</td>
+</tr>
+<tr class="odd">
+<td>5003</td>
+<td>8</td>
+<td>Large Basket</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-5-order-activity-status-normalization" class="level3">
+<h3 class="anchored" data-anchor-id="example-5-order-activity-status-normalization">Example 5: Order Activity Status Normalization</h3>
+<p><strong>Order activity status is used in:</strong></p>
+<ul>
+<li>Operational reporting<br>
+</li>
+<li>KPI standardization<br>
+</li>
+<li>Funnel and drop-off analysis</li>
+</ul>
+<hr>
+<section id="function-definition-4" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-4">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_order_activity (</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    p_status TEXT</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>RETURNS TEXT</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">CASE</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">WHEN</span> p_status <span class="kw">IN</span> (<span class="st">'cancelled'</span>, <span class="st">'returned'</span>) <span class="cf">THEN</span> <span class="st">'Inactive'</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">ELSE</span> <span class="st">'Active'</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">END</span>;</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-usage-3" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-usage-3">Analytical Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    order_id,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    status,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    analytics.fn_order_activity(status) <span class="kw">AS</span> activity_state</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.orders;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="analytical-output-3" class="level4">
+<h4 class="anchored" data-anchor-id="analytical-output-3">Analytical Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>status</th>
+<th>activity_state</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7001</td>
+<td>completed</td>
+<td>Active</td>
+</tr>
+<tr class="even">
+<td>7002</td>
+<td>cancelled</td>
+<td>Inactive</td>
+</tr>
+<tr class="odd">
+<td>7003</td>
+<td>shipped</td>
+<td>Active</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="table-valued-user-defined-functions-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="table-valued-user-defined-functions-in-practice">Table-Valued User Defined Functions in Practice</h2>
+<p>Scalar UDFs return <strong>one value</strong> per invocation.<br>
+<strong>Table-Valued Functions (TVFs)</strong> return a <strong>set of rows</strong> and behave like virtual tables inside SQL queries.</p>
+<p><strong>They are especially useful in analytics when:</strong></p>
+<ul>
+<li>Logic naturally produces <strong>multiple rows</strong></li>
+<li>Queries need reusable <strong>derived datasets</strong></li>
+<li>Complex joins and aggregations must be standardized</li>
+</ul>
+<section id="general-syntax-of-a-table-valued-function" class="level3">
+<h3 class="anchored" data-anchor-id="general-syntax-of-a-table-valued-function">General Syntax of a Table-Valued Function</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> function_name (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    parameter_name data_type,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">..</span>.</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>RETURNS <span class="kw">TABLE</span> (</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    column_name data_type,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">..</span>.</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> <span class="op">..</span>.</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" data-convertion="sql">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>TVFs can be used in the <code>FROM</code> clause like regular tables.</li>
+<li>Prefer <code>RETURNS TABLE</code> for analytical readability.</li>
+<li>TVFs are ideal for encapsulating joins + aggregations.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="analytical-perspective-on-tvf-design" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-perspective-on-tvf-design">Analytical Perspective on TVF Design</h3>
+<p><strong>A well-designed analytical TVF:</strong></p>
+<ul>
+<li>Represents a <strong>logical dataset</strong>, not a single metric<br>
+</li>
+<li>Encapsulates joins and aggregations<br>
+</li>
+<li>Produces schema-stable output<br>
+</li>
+<li>Can be safely reused in dashboards and pipelines</li>
+</ul>
+<hr>
+</section>
+<section id="example-1-recent-orders-for-a-customer" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-recent-orders-for-a-customer">Example 1: Recent Orders for a Customer</h3>
+<p>Analysts often need to inspect a customer’s <strong>most recent orders</strong> together with their monetary impact.</p>
+<p><strong>Recent order analysis is frequently used in:</strong></p>
+<ul>
+<li>Customer profiling<br>
+</li>
+<li>Support and case investigation<br>
+</li>
+<li>Purchase behavior analysis</li>
+</ul>
+<section id="function-definition-5" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-5">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_recent_orders (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    p_customer_id <span class="dt">INT</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    p_limit       <span class="dt">INT</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>RETURNS <span class="kw">TABLE</span> (</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    order_id    <span class="dt">INT</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    order_date  <span class="dt">DATE</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    status      TEXT,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    order_total <span class="dt">NUMERIC</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>STABLE</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        o.order_id,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        o.order_date,</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        o.status,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">COALESCE</span>(<span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price), <span class="dv">0</span>) <span class="kw">AS</span> order_total</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> analytics.orders o</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">JOIN</span> analytics.order_items oi <span class="kw">ON</span> oi.order_id <span class="op">=</span> o.order_id</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">JOIN</span> analytics.products p     <span class="kw">ON</span> p.product_id <span class="op">=</span> oi.product_id</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> o.customer_id <span class="op">=</span> p_customer_id</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> o.order_id, o.order_date, o.status</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> o.order_date <span class="kw">DESC</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">LIMIT</span> <span class="fu">GREATEST</span>(p_limit, <span class="dv">0</span>);</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-application" class="level4">
+<h4 class="anchored" data-anchor-id="function-application">Function Application</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.fn_recent_orders(<span class="dv">1</span>, <span class="dv">4</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-output-1" class="level4">
+<h4 class="anchored" data-anchor-id="function-output-1">Function Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>order_date</th>
+<th>status</th>
+<th>order_total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>9005</td>
+<td>2025-01-20</td>
+<td>completed</td>
+<td>320.00</td>
+</tr>
+<tr class="even">
+<td>9003</td>
+<td>2025-01-12</td>
+<td>shipped</td>
+<td>145.50</td>
+</tr>
+<tr class="odd">
+<td>9001</td>
+<td>2024-12-28</td>
+<td>completed</td>
+<td>89.99</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-2-top-products-by-revenue" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-top-products-by-revenue">Example 2: Top Products by Revenue</h3>
+<p>Revenue ranking is a core analytical task for understanding <strong>product performance</strong>.</p>
+<p><strong>Top-product analysis is used in:</strong></p>
+<ul>
+<li>Product portfolio reviews<br>
+</li>
+<li>Revenue concentration analysis<br>
+</li>
+<li>Pricing and promotion strategy</li>
+</ul>
+<hr>
+<section id="function-definition-6" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-6">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_top_products_by_revenue (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    p_limit <span class="dt">INT</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>RETURNS <span class="kw">TABLE</span> (</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    product_id   <span class="dt">INT</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    product_name TEXT,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    revenue      <span class="dt">NUMERIC</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    total_qty    BIGINT</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>STABLE</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        p.product_id,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        p.product_name,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">COALESCE</span>(<span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price), <span class="dv">0</span>) <span class="kw">AS</span> revenue,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">COALESCE</span>(<span class="fu">SUM</span>(oi.quantity), <span class="dv">0</span>)           <span class="kw">AS</span> total_qty</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> analytics.products p</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.order_items oi</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ON</span> oi.product_id <span class="op">=</span> p.product_id</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">GROUP</span> <span class="kw">BY</span> p.product_id, p.product_name</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ORDER</span> <span class="kw">BY</span> revenue <span class="kw">DESC</span>, total_qty <span class="kw">DESC</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">LIMIT</span> <span class="fu">GREATEST</span>(p_limit, <span class="dv">0</span>);</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-application-1" class="level4">
+<h4 class="anchored" data-anchor-id="function-application-1">Function Application</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.fn_top_products_by_revenue(<span class="dv">10</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-output-2" class="level4">
+<h4 class="anchored" data-anchor-id="function-output-2">Function Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>product_id</th>
+<th>product_name</th>
+<th>revenue</th>
+<th>total_qty</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>301</td>
+<td>Laptop Pro</td>
+<td>15400</td>
+<td>22</td>
+</tr>
+<tr class="even">
+<td>214</td>
+<td>Headphones</td>
+<td>8200</td>
+<td>95</td>
+</tr>
+<tr class="odd">
+<td>187</td>
+<td>Keyboard</td>
+<td>6100</td>
+<td>120</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-3-customers-by-city" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-customers-by-city">Example 3: Customers by City</h3>
+<p>Geographic aggregation is a recurring requirement in analytics.</p>
+<p><strong>Customer geography analysis supports:</strong></p>
+<ul>
+<li>Regional performance tracking<br>
+</li>
+<li>Geo-based segmentation<br>
+</li>
+<li>Spatial analytics pipelines</li>
+</ul>
+<hr>
+<section id="function-definition-7" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-7">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_customers_by_city (</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    p_city_id <span class="dt">INT</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>RETURNS <span class="kw">TABLE</span> (</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    customer_id <span class="dt">INT</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    first_name  TEXT,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    last_name   TEXT,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    signup_date <span class="dt">DATE</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>STABLE</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        c.customer_id,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        c.first_name,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        c.last_name,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        c.signup_date</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> analytics.customers c</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> c.city_id <span class="op">=</span> p_city_id;</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-application-2" class="level4">
+<h4 class="anchored" data-anchor-id="function-application-2">Function Application</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.fn_customers_by_city(<span class="dv">1</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="function-output-3" class="level4">
+<h4 class="anchored" data-anchor-id="function-output-3">Function Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>first_name</th>
+<th>last_name</th>
+<th>signup_date</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>501</td>
+<td>Anna</td>
+<td>Petrosyan</td>
+<td>2024-02-01</td>
+</tr>
+<tr class="even">
+<td>514</td>
+<td>Arman</td>
+<td>Hakobyan</td>
+<td>2023-09-18</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-4-order-items-with-product-context" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-order-items-with-product-context">Example 4: Order Items with Product Context</h3>
+<p>Analytical queries often require <strong>denormalized views</strong> of order line items.</p>
+<p><strong>Line-item enrichment is used in:</strong></p>
+<ul>
+<li>Order audits<br>
+</li>
+<li>Revenue reconciliation<br>
+</li>
+<li>BI semantic layers</li>
+</ul>
+<section id="function-definition-8" class="level4">
+<h4 class="anchored" data-anchor-id="function-definition-8">Function Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> analytics.fn_order_items_detailed (</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    p_order_id <span class="dt">INT</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>RETURNS <span class="kw">TABLE</span> (</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    product_id   <span class="dt">INT</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    product_name TEXT,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">category</span>     TEXT,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    quantity     <span class="dt">INT</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    unit_price  <span class="dt">NUMERIC</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    line_total  <span class="dt">NUMERIC</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>LANGUAGE sql</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>STABLE</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        p.product_id,</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        p.product_name,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>        p.<span class="kw">category</span>,</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>        oi.quantity,</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>        p.price <span class="kw">AS</span> unit_price,</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>        oi.quantity <span class="op">*</span> p.price <span class="kw">AS</span> line_total</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> analytics.order_items oi</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">JOIN</span> analytics.products p</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">ON</span> p.product_id <span class="op">=</span> oi.product_id</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> oi.order_id <span class="op">=</span> p_order_id;</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-application-3" class="level4">
+<h4 class="anchored" data-anchor-id="function-application-3">Function Application</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.fn_order_items_detailed(<span class="dv">10</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="function-output-4" class="level4">
+<h4 class="anchored" data-anchor-id="function-output-4">Function Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 19%">
+<col style="width: 18%">
+<col style="width: 13%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>product_id</th>
+<th>product_name</th>
+<th>category</th>
+<th>quantity</th>
+<th>unit_price</th>
+<th>line_total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>301</td>
+<td>Laptop Pro</td>
+<td>Electronics</td>
+<td>1</td>
+<td>1200.00</td>
+<td>1200.00</td>
+</tr>
+<tr class="even">
+<td>214</td>
+<td>Mouse</td>
+<td>Accessories</td>
+<td>2</td>
+<td>25.00</td>
+<td>50.00</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="analytical-takeaways" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-takeaways">Analytical Takeaways</h3>
+<ul>
+<li>TVFs represent <strong>datasets</strong>, not values<br>
+</li>
+<li>They centralize joins and aggregations<br>
+</li>
+<li>They simplify downstream SQL and BI layers<br>
+</li>
+<li>TVFs are natural building blocks for Stored Procedures</li>
+</ul>
+</section>
+</section>
+<section id="scalar-vs-table-valued-function" class="level2">
+<h2 class="anchored" data-anchor-id="scalar-vs-table-valued-function">Scalar vs Table Valued Function</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 44%">
+<col style="width: 46%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>Scalar User Defined Function</th>
+<th>User Defined Aggregate (UDA)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Purpose</td>
+<td>Computes a value for <strong>each input row</strong></td>
+<td>Computes a value over <strong>a set of rows</strong></td>
+</tr>
+<tr class="even">
+<td>Input</td>
+<td>One row at a time</td>
+<td>Multiple rows (group context)</td>
+</tr>
+<tr class="odd">
+<td>Output</td>
+<td>Single value per row</td>
+<td>Single aggregated value per group</td>
+</tr>
+<tr class="even">
+<td>Typical Usage</td>
+<td>Classification, transformation, enrichment</td>
+<td>Summarization, accumulation, aggregation</td>
+</tr>
+<tr class="odd">
+<td>Invocation Context</td>
+<td><code>SELECT</code>, <code>WHERE</code>, <code>ORDER BY</code>, expressions</td>
+<td><code>SELECT</code> with <code>GROUP BY</code></td>
+</tr>
+<tr class="even">
+<td>State Handling</td>
+<td>Stateless</td>
+<td>Stateful (maintains aggregation state)</td>
+</tr>
+<tr class="odd">
+<td>Complexity</td>
+<td>Simple logic, CASE expressions</td>
+<td>Requires state transition and finalization</td>
+</tr>
+<tr class="even">
+<td>SQL Syntax</td>
+<td><code>CREATE FUNCTION ... RETURNS &lt;type&gt;</code></td>
+<td><code>CREATE FUNCTION</code> + <code>CREATE AGGREGATE</code></td>
+</tr>
+<tr class="odd">
+<td>Parallelization</td>
+<td>Easily parallelizable</td>
+<td>Parallel-safe only if explicitly defined</td>
+</tr>
+<tr class="even">
+<td>Determinism</td>
+<td>Usually deterministic</td>
+<td>Depends on state logic</td>
+</tr>
+<tr class="odd">
+<td>Performance Cost</td>
+<td>Low (row-level execution)</td>
+<td>Higher (state accumulation)</td>
+</tr>
+<tr class="even">
+<td>Example Use Case</td>
+<td>Age group, price tier, tenure</td>
+<td>Sum, product, custom weighted metrics</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="stored-procedures" class="level2">
+<h2 class="anchored" data-anchor-id="stored-procedures">Stored Procedures</h2>
+<p>Unlike functions, <strong>stored procedures represent executable workflows</strong>.<br>
+They are designed to <strong>orchestrate logic</strong>, <strong>modify data</strong>, and <strong>control execution flow</strong>.</p>
+<p>A <strong>stored procedure</strong> represents a controlled sequence of operations executed as a unit.</p>
+<p>Given an input vector <span class="math inline">\(X\)</span>, a procedure performs actions <span class="math inline">\(A\)</span> and may optionally produce outputs <span class="math inline">\(O\)</span>:</p>
+<p><span class="math display">\[
+P(X) \rightarrow A \; [\rightarrow O]
+\]</span></p>
+<p><strong>The defining characteristics of a stored procedure are:</strong></p>
+<ul>
+<li>Can modify data (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>)<br>
+</li>
+<li>Can control execution flow (<code>IF</code>, <code>LOOP</code>, <code>RAISE</code>)<br>
+</li>
+<li>Can manage transactions<br>
+</li>
+<li>May or may not return results</li>
+</ul>
+<hr>
+<section id="procedure-as-an-execution-unit" class="level3">
+<h3 class="anchored" data-anchor-id="procedure-as-an-execution-unit">Procedure as an Execution Unit</h3>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; Input
+    Input --&gt; Validation
+    Validation --&gt; BusinessLogic
+    BusinessLogic --&gt; DataMutation
+    DataMutation --&gt; Completion
+    Completion --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="stored-procedure-execution-states" class="level3">
+<h3 class="anchored" data-anchor-id="stored-procedure-execution-states">Stored Procedure Execution States</h3>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; Call
+    Call --&gt; ParameterBinding
+    ParameterBinding --&gt; Execution
+    Execution --&gt; TransactionControl
+    TransactionControl --&gt; End
+    End --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="logical-position-of-stored-procedures" class="level3">
+<h3 class="anchored" data-anchor-id="logical-position-of-stored-procedures">Logical Position of Stored Procedures</h3>
+<p>Stored procedures exist <strong>outside</strong> the logical SQL query evaluation pipeline.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    Client --&gt; SP[Stored Procedure]
+    SP --&gt; SQL[SQL Statements]
+    SQL --&gt; Tables
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>They are <strong>invoked</strong>, not embedded.</p>
+<hr>
+</section>
+<section id="why-sql-introduces-stored-procedures" class="level3">
+<h3 class="anchored" data-anchor-id="why-sql-introduces-stored-procedures">Why SQL Introduces Stored Procedures</h3>
+<p><strong>Stored procedures exist to:</strong></p>
+<ul>
+<li>Encapsulate multi-step business workflows<br>
+</li>
+<li>Enforce data integrity rules<br>
+</li>
+<li>Centralize write logic<br>
+</li>
+<li>Reduce application-side complexity</li>
+</ul>
+<hr>
+</section>
+<section id="general-syntax-of-a-stored-procedure" class="level3">
+<h3 class="anchored" data-anchor-id="general-syntax-of-a-stored-procedure">General Syntax of a Stored Procedure</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> procedure_name (</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    parameter_name data_type,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">..</span>.</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE plpgsql</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- procedural logic</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="convention">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>convention
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>stored procedure naming starts with <code>sp_</code></li>
+<li>Procedures are invoked using <code>CALL</code>, not <code>SELECT</code>.</li>
+<li>Procedures may perform commits and rollbacks.</li>
+<li>Prefer procedures for write-heavy logic.</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+<section id="analytical-perspective-on-procedure-design" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-perspective-on-procedure-design">Analytical Perspective on Procedure Design</h3>
+<p><strong>A well-designed analytical stored procedure:</strong></p>
+<ul>
+<li>Performs one clear business operation<br>
+</li>
+<li>Uses UDFs for calculations<br>
+</li>
+<li>Validates inputs explicitly<br>
+</li>
+<li>Produces deterministic side effects</li>
+</ul>
+<hr>
+</section>
+<section id="example-1-upsert-product" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-upsert-product">Example 1: Upsert Product</h3>
+<p>Maintaining product catalogs often requires <strong>insert-or-update logic</strong>.</p>
+<p><strong>Product upsert is frequently used in:</strong></p>
+<ul>
+<li>ETL pipelines<br>
+</li>
+<li>Data synchronization<br>
+</li>
+<li>Master data management</li>
+</ul>
+<hr>
+<section id="procedure-definition" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-definition">Procedure Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_upsert_product (</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    p_product_id   <span class="dt">INT</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    p_product_name TEXT,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    p_category     TEXT,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    p_price        <span class="dt">NUMERIC</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>LANGUAGE plpgsql</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> p_product_id <span class="kw">IS</span> <span class="kw">NULL</span> <span class="cf">THEN</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        RAISE <span class="kw">EXCEPTION</span> <span class="st">'product_id cannot be NULL'</span>;</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">INSERT</span> <span class="kw">INTO</span> analytics.products (product_id, product_name, <span class="kw">category</span>, price)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">VALUES</span> (p_product_id, p_product_name, p_category, p_price)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> CONFLICT (product_id) DO <span class="kw">UPDATE</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">SET</span> product_name <span class="op">=</span> EXCLUDED.product_name,</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">category</span>     <span class="op">=</span> EXCLUDED.<span class="kw">category</span>,</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>            price        <span class="op">=</span> EXCLUDED.price;</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="procedure-execution" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-execution">Procedure Execution</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CALL</span> analytics.sp_upsert_product(<span class="dv">101</span>, <span class="st">'USB Cable'</span>, <span class="st">'Accessories'</span>, <span class="fl">9.99</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="viewing-the-results" class="level4">
+<h4 class="anchored" data-anchor-id="viewing-the-results">Viewing the results</h4>
+<p><strong>Inserting new one</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.products</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">101</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Updating the existing one</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.products</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="example-2-update-order-status" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-update-order-status">Example 2: Update Order Status</h3>
+<p>Order lifecycle management requires <strong>controlled state transitions</strong>.</p>
+<p><strong>Order status updates are used in:</strong></p>
+<ul>
+<li>Fulfillment workflows<br>
+</li>
+<li>Exception handling<br>
+</li>
+<li>Operational monitoring</li>
+</ul>
+<hr>
+<section id="procedure-definition-1" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-definition-1">Procedure Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_update_order_status (</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    p_order_id <span class="dt">INT</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    p_status   TEXT</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>LANGUAGE plpgsql</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">UPDATE</span> analytics.orders</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SET</span> status <span class="op">=</span> p_status</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> order_id <span class="op">=</span> p_order_id;</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> <span class="kw">NOT</span> FOUND <span class="cf">THEN</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        RAISE <span class="kw">EXCEPTION</span> <span class="st">'Order % not found'</span>, p_order_id;</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="procedure-execution-1" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-execution-1">Procedure Execution</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CALL</span> analytics.sp_update_order_status(<span class="dv">10</span>, <span class="st">'shipped'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="viewing-the-results-1" class="level4">
+<h4 class="anchored" data-anchor-id="viewing-the-results-1">Viewing the results</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span> </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.orders </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span> order_id <span class="op">=</span><span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="example-3-delete-customer-with-safety-check" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-delete-customer-with-safety-check">Example 3: Delete Customer with Safety Check</h3>
+<p>Destructive operations must be <strong>explicit and guarded</strong>.</p>
+<p><strong>Customer deletion is used in:</strong></p>
+<ul>
+<li>GDPR compliance<br>
+</li>
+<li>Data cleanup<br>
+</li>
+<li>Account lifecycle management</li>
+</ul>
+<section id="procedure-definition-2" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-definition-2">Procedure Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_delete_customer (</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    p_customer_id <span class="dt">INT</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>LANGUAGE plpgsql</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> <span class="kw">EXISTS</span> (</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">SELECT</span> <span class="dv">1</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">FROM</span> analytics.orders</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">WHERE</span> customer_id <span class="op">=</span> p_customer_id</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    ) <span class="cf">THEN</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>        RAISE <span class="kw">EXCEPTION</span> <span class="st">'Cannot delete customer % with existing orders'</span>, p_customer_id;</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">DELETE</span> <span class="kw">FROM</span> analytics.customers</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> customer_id <span class="op">=</span> p_customer_id;</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="procedure-invocation" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-invocation">Procedure Invocation</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CALL</span> analytics.sp_delete_customer(<span class="dv">19</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="example-4-refresh-derived-order-totals" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-refresh-derived-order-totals">Example 4: Refresh Derived Order Totals</h3>
+<p>Procedures are ideal for <strong>batch recalculations</strong>.</p>
+<p><strong>Derived metric refresh is used in:</strong></p>
+<ul>
+<li>Nightly batch jobs<br>
+</li>
+<li>KPI recalculation<br>
+</li>
+<li>Data warehouse maintenance</li>
+</ul>
+<hr>
+<section id="procedure-definition-3" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-definition-3">Procedure Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_refresh_order_totals ()</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>LANGUAGE plpgsql</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="kw">AS</span> $$</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">UPDATE</span> analytics.orders o</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SET</span> status <span class="op">=</span> <span class="st">'recalculated'</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> <span class="kw">EXISTS</span> (</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">SELECT</span> <span class="dv">1</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">FROM</span> analytics.order_items oi</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">WHERE</span> oi.order_id <span class="op">=</span> o.order_id</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="procedure-execution-2" class="level4">
+<h4 class="anchored" data-anchor-id="procedure-execution-2">Procedure Execution</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CALL</span> analytics.sp_refresh_order_totals();</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="checki-the-results" class="level4">
+<h4 class="anchored" data-anchor-id="checki-the-results">Checki the Results</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.orders </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+</section>
+</section>
+<section id="functions-vs-stored-procedures" class="level2">
+<h2 class="anchored" data-anchor-id="functions-vs-stored-procedures">Functions vs Stored Procedures</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>User Defined Function</th>
+<th>Stored Procedure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Primary Role</td>
+<td>Calculation</td>
+<td>Workflow execution</td>
+</tr>
+<tr class="even">
+<td>Data Modification</td>
+<td>Not allowed</td>
+<td>Allowed</td>
+</tr>
+<tr class="odd">
+<td>Transaction Control</td>
+<td>Not allowed</td>
+<td>Allowed</td>
+</tr>
+<tr class="even">
+<td>Invocation</td>
+<td><code>SELECT</code></td>
+<td><code>CALL</code></td>
+</tr>
+<tr class="odd">
+<td>Return Value</td>
+<td>Required</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td>Use in Queries</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Typical Usage</td>
+<td>Metrics, enrichment</td>
+<td>ETL, updates, orchestration</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>UDFs handle <strong>what to compute</strong></li>
+<li>Stored Procedures handle <strong>what to do</strong></li>
+<li>UDFs feed procedures, not the opposite<br>
+</li>
+</ul>
+</div>
+</div>
+<!-- Next step: **advanced procedures**, transaction management, and error-handling patterns. -->
+</section>
+<section id="views-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="views-in-practice">Views in Practice</h2>
+<p>Views provide a <strong>logical abstraction layer</strong> over base tables.<br>
+They encapsulate complex queries into <strong>reusable, queryable objects</strong> without storing data physically.</p>
+<p>A <strong>view</strong> represents a named, stored SQL query.</p>
+<p>Given base tables <span class="math inline">\(T\)</span>, a view defines a virtual relation <span class="math inline">\(V\)</span>:</p>
+<p><span class="math display">\[
+V = g(T)
+\]</span></p>
+<p><strong>The defining characteristics of a view are:</strong></p>
+<ul>
+<li>Does not store data (logical layer only)<br>
+</li>
+<li>Always reflects the latest underlying data<br>
+</li>
+<li>Cannot accept parameters<br>
+</li>
+<li>Can be queried like a table</li>
+</ul>
+<hr>
+<section id="view-as-a-logical-abstraction" class="level3">
+<h3 class="anchored" data-anchor-id="view-as-a-logical-abstraction">View as a Logical Abstraction</h3>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; BaseTables
+    BaseTables --&gt; ViewDefinition
+    ViewDefinition --&gt; ResultSet
+    ResultSet --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="logical-position-of-views-in-sql-processing" class="level3">
+<h3 class="anchored" data-anchor-id="logical-position-of-views-in-sql-processing">Logical Position of Views in SQL Processing</h3>
+<p>Views are <strong>expanded</strong> by the query planner before execution.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; FROM
+    FROM --&gt; ViewExpansion
+    ViewExpansion --&gt; WHERE
+    WHERE --&gt; GROUP_BY
+    GROUP_BY --&gt; SELECT
+    SELECT --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>A view is <strong>not executed independently</strong> — it is inlined into the calling query.</p>
+<hr>
+</section>
+<section id="why-sql-introduces-views" class="level3">
+<h3 class="anchored" data-anchor-id="why-sql-introduces-views">Why SQL Introduces Views</h3>
+<p><strong>Views exist to:</strong></p>
+<ul>
+<li>Simplify complex queries<br>
+</li>
+<li>Enforce semantic consistency<br>
+</li>
+<li>Provide controlled data access<br>
+</li>
+<li>Separate analytical logic from raw tables</li>
+</ul>
+<hr>
+</section>
+<section id="general-syntax-of-a-view" class="level3">
+<h3 class="anchored" data-anchor-id="general-syntax-of-a-view">General Syntax of a View</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> view_name <span class="kw">AS</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">..</span>.</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> <span class="op">..</span>.</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="op">..</span>.;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="conventions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>conventions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Use <code>CREATE OR REPLACE VIEW</code> during iterative development.</li>
+<li>Views cannot contain procedural logic.</li>
+<li>Treat views as reusable query building blocks.</li>
+<li><code>v_</code>, test</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+<section id="analytical-perspective-on-view-design" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-perspective-on-view-design">Analytical Perspective on View Design</h3>
+<p><strong>A well-designed analytical view:</strong></p>
+<ul>
+<li>Represents a clear business concept<br>
+</li>
+<li>Hides joins and technical complexity<br>
+</li>
+<li>Produces stable column semantics<br>
+</li>
+<li>Is safe to reuse across dashboards and notebooks</li>
+</ul>
+</section>
+<section id="example-1-customer-dimension-view" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-customer-dimension-view">Example 1: Customer Dimension View</h3>
+<p>Analysts frequently need customer data enriched with <strong>geographic context</strong>.</p>
+<p><strong>Customer dimension views are used in:</strong></p>
+<ul>
+<li>Segmentation analysis<br>
+</li>
+<li>CRM reporting<br>
+</li>
+<li>Geographic rollups</li>
+</ul>
+<hr>
+<section id="view-definition" class="level4">
+<h4 class="anchored" data-anchor-id="view-definition">View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_customers_enriched <span class="kw">AS</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    c.customer_id,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    c.first_name,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    c.last_name,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    c.age,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    c.email,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    c.signup_date,</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    ci.city_name,</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    r.region_name,</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    co.country_name</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.customers c</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.cities   ci <span class="kw">ON</span> ci.city_id   <span class="op">=</span> c.city_id</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.regions  r  <span class="kw">ON</span> r.region_id  <span class="op">=</span> ci.region_id</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.countries co <span class="kw">ON</span> co.country_id <span class="op">=</span> r.country_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-usage" class="level4">
+<h4 class="anchored" data-anchor-id="view-usage">View Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.v_customers_enriched;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-output" class="level4">
+<h4 class="anchored" data-anchor-id="view-output">View Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>first_name</th>
+<th>city_name</th>
+<th>region_name</th>
+<th>country_name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Anna</td>
+<td>Yerevan</td>
+<td>Yerevan</td>
+<td>Armenia</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Arman</td>
+<td>Gyumri</td>
+<td>Shirak</td>
+<td>Armenia</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-2-orders-with-order-size-classification" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-orders-with-order-size-classification">Example 2: Orders with Order Size Classification</h3>
+<p>Analytical reporting often requires <strong>semantic order attributes</strong>.</p>
+<p><strong>Order views are used in:</strong></p>
+<ul>
+<li>Operational dashboards<br>
+</li>
+<li>Funnel analysis<br>
+</li>
+<li>KPI standardization</li>
+</ul>
+<hr>
+<section id="view-definition-1" class="level4">
+<h4 class="anchored" data-anchor-id="view-definition-1">View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_orders_with_size <span class="kw">AS</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    o.order_id,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    o.customer_id,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    o.order_date,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    o.status,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(oi.quantity) <span class="kw">AS</span> total_items,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    analytics.fn_order_size(<span class="fu">SUM</span>(oi.quantity):<span class="ch">:INT</span>) <span class="kw">AS</span> order_size</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.orders o</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="kw">JOIN</span> analytics.order_items oi <span class="kw">ON</span> oi.order_id <span class="op">=</span> o.order_id</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> o.order_id, o.customer_id, o.order_date, o.status;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-usage-1" class="level4">
+<h4 class="anchored" data-anchor-id="view-usage-1">View Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.v_orders_with_size;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-output-1" class="level4">
+<h4 class="anchored" data-anchor-id="view-output-1">View Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>total_items</th>
+<th>order_size</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1001</td>
+<td>1</td>
+<td>Single Item</td>
+</tr>
+<tr class="even">
+<td>1002</td>
+<td>5</td>
+<td>Small Basket</td>
+</tr>
+<tr class="odd">
+<td>1003</td>
+<td>12</td>
+<td>Large Basket</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-3-product-revenue-summary-view" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-product-revenue-summary-view">Example 3: Product Revenue Summary View</h3>
+<p>Revenue aggregation is a core analytica</p>
+</section>
+<section id="example-3-product-revenue-summary-view-1" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-product-revenue-summary-view-1">Example 3: Product Revenue Summary View</h3>
+<p>Revenue aggregation is a core analytical requirement.</p>
+<p><strong>Revenue summary views support:</strong></p>
+<ul>
+<li>Product performance analysis<br>
+</li>
+<li>Executive dashboards<br>
+</li>
+<li>Revenue concentration studies</li>
+</ul>
+<hr>
+<section id="view-definition-2" class="level4">
+<h4 class="anchored" data-anchor-id="view-definition-2">View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_product_revenue <span class="kw">AS</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    p.product_id,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    p.product_name,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    p.<span class="kw">category</span>,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(oi.quantity)                   <span class="kw">AS</span> total_qty,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price)         <span class="kw">AS</span> revenue,</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    analytics.fn_price_tier(p.price)   <span class="kw">AS</span> price_tier</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.products p</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.order_items oi</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> oi.product_id <span class="op">=</span> p.product_id</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> p.product_id, p.product_name, p.<span class="kw">category</span>, p.price;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-usage-2" class="level4">
+<h4 class="anchored" data-anchor-id="view-usage-2">View Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.v_product_revenue</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> revenue <span class="kw">DESC</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-output-2" class="level4">
+<h4 class="anchored" data-anchor-id="view-output-2">View Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>product_id</th>
+<th>product_name</th>
+<th>revenue</th>
+<th>price_tier</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>301</td>
+<td>Laptop Pro</td>
+<td>15400</td>
+<td>Premium</td>
+</tr>
+<tr class="even">
+<td>214</td>
+<td>Headphones</td>
+<td>8200</td>
+<td>Mid</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="example-4-active-orders-view" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-active-orders-view">Example 4: Active Orders View</h3>
+<p>Views are often used to <strong>standardize filtering rules</strong>.</p>
+<p><strong>Active order views are used in:</strong></p>
+<ul>
+<li>Operational monitoring<br>
+</li>
+<li>SLA tracking<br>
+</li>
+<li>BI semantic layers</li>
+</ul>
+<hr>
+<section id="view-definition-3" class="level4">
+<h4 class="anchored" data-anchor-id="view-definition-3">View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_active_orders <span class="kw">AS</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    o.order_id,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    o.customer_id,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    o.order_date,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    o.status</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.orders o</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> analytics.fn_order_activity(o.status) <span class="op">=</span> <span class="st">'Active'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="view-usage-3" class="level4">
+<h4 class="anchored" data-anchor-id="view-usage-3">View Usage</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.v_active_orders;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="view-output-3" class="level4">
+<h4 class="anchored" data-anchor-id="view-output-3">View Output</h4>
+<p><code>hypothetical</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7001</td>
+<td>completed</td>
+</tr>
+<tr class="even">
+<td>7003</td>
+<td>shipped</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="views-vs-functions-vs-stored-procedures" class="level2">
+<h2 class="anchored" data-anchor-id="views-vs-functions-vs-stored-procedures">Views vs Functions vs Stored Procedures</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>View</th>
+<th>Function</th>
+<th>Stored Procedure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Purpose</td>
+<td>Query abstraction</td>
+<td>Calculation</td>
+<td>Workflow execution</td>
+</tr>
+<tr class="even">
+<td>Data Storage</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Accept Parameters</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Modify Data</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Use in SELECT</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Control Flow</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Typical Use</td>
+<td>BI layer, semantics</td>
+<td>Metrics, logic</td>
+<td>ETL, updates</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Views define <strong>what data looks like</strong></li>
+<li>Functions define <strong>how values are computed</strong></li>
+<li>Stored Procedures define <strong>what actions are taken</strong></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="try-youself" class="level2">
+<h2 class="anchored" data-anchor-id="try-youself">Try Youself</h2>
+<p>Try to :</p>
+<p><strong>combining Views + UDFs + Stored Procedures into analytical pipelines</strong>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/hovhannisyan91\.github\.io\/aca");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
