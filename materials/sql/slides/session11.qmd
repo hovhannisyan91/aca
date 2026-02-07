@@ -1,0 +1,897 @@
+---
+# project: false
+title: "Reporting and Analysis with SQL"
+subtitle: "UDFs, SPs, Views"
+author: "Karen Hovhannisyan"
+date: last-modified
+format:
+  revealjs: 
+    touch: true
+    slide-number: false
+    chalkboard: true
+    preview-links: auto
+    width: 1500
+    transition: slide
+    logo: ../../../img/favicon.png
+    footer: "<a href=\"../session10.qmd\" target=_blank>Back to Session 11</a>"
+    include-in-header:
+      - text: |
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+          <style>
+            .icon-xxl { font-size: 84px; }
+            .icon-xl  { font-size: 64px; }
+            .icon-lg  { font-size: 48px; }
+            .muted { opacity: .8 }
+            .pill { border-radius: 10px; }
+            .circle { border-radius: 50%; }
+          </style>
+---
+
+
+## Goals
+
+::: {.incremental}
+
+- User Defined Functions (UDF)
+- Stored Procedures (SP)
+- Views
+
+:::
+
+
+# User Defined Functions
+
+
+##  Core Idea {.smaller}
+
+A **User Defined Function (UDF)** represents a mapping between inputs and outputs.
+
+$$
+f(X) \rightarrow Y
+$$
+
+>In SQL analytics, a function is a **calculation unit**, not a workflow or process.
+
+. . .
+
+**What Makes a Function a Function**
+
+::: {.incremental}
+
+- Inputs are explicitly defined
+- Internal logic is encapsulated
+- Output is predictable for a given input
+- Execution has no memory of previous calls
+
+:::
+
+
+---
+
+## Function as a Black Box {.smaller}
+
+**A function hides internal complexity and exposes only its interface.
+**
+
+::: {.center}
+    ```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> Input
+    Input --> InternalLogic
+    InternalLogic --> Output
+    Output --> [*]
+```
+::: 
+
+
+---
+
+## Function Execution States {.smaller}
+
+**From the database engine’s perspective, a function moves through fixed stages.**
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> Invocation
+    Invocation --> ParameterBinding
+    ParameterBinding --> Evaluation
+    Evaluation --> ResultMaterialization
+    ResultMaterialization --> Return
+    Return --> [*]
+```
+
+---
+
+## Where Functions Live in SQL Processing {.smaller}
+
+SQL queries follow a **logical evaluation order**, not textual order.
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> FROM
+    FROM --> WHERE
+    WHERE --> GROUP_BY
+    GROUP_BY --> HAVING
+    HAVING --> SELECT
+    SELECT --> ORDER_BY
+    ORDER_BY --> [*]
+
+    note right of SELECT
+        Scalar functions
+        are evaluated here
+    end note
+```
+
+
+## Function Usage Journey
+
+**From an analyst’s perspective, functions are part of a larger analytical journey.
+**
+```{mermaid}
+journey
+    title Analytical Function Usage Journey
+    section Problem Framing
+      Identify metric: 5: Analyst
+      Define inputs: 4: Analyst
+    section Query Construction
+      Select function: 4: Analyst
+      Embed in query: 3: Analyst
+    section Execution
+      Bind parameters: 3: Database
+      Evaluate logic: 2: Database
+      Return result: 4: Database
+    section Interpretation
+      Validate output: 5: Analyst
+```
+
+
+# Scalar UDFs in Practice
+
+## Scalar User Defined Functions in Practice {.smaller}
+
+Now that we understand the theory, we move to **practical usage of scalar UDFs**.
+
+**Scalar UDFs allow us to:**
+
+- Encode business rules once
+- Reuse them consistently across queries
+- Improve readability and maintainability of analytical SQL
+
+
+
+## General Syntax of a Scalar UDF {.smaller}
+
+A scalar UDF formalizes a **row-level analytical calculation**.
+
+```sql
+
+CREATE OR REPLACE FUNCTION function_name (
+    parameter_name data_type,
+    ...
+)
+RETURNS return_data_type
+LANGUAGE sql
+AS $$
+    SELECT expression;
+$$;
+```
+
+
+## Analytical Perspective on Scalar UDF Design {.smaller}
+
+**A well-designed analytical scalar UDF:**
+
+- Encapsulates a **single business definition**
+- Accepts **clean, minimal inputs**
+- Produces **one interpretable value**
+- Can be reused across queries, views, and dashboards
+
+
+
+## Example 1: Age Categorization {.smaller}
+
+Age segmentation is a foundational analytical dimension.
+
+**It is widely used in:**
+
+- Customer profiling
+- Targeting strategies
+- Cohort analysis
+
+---
+
+## Function Definition and Application {.smaller}
+
+```{sql}
+CREATE OR REPLACE FUNCTION fn_age_group (
+    p_age INT
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_age < 25 THEN 'Under 25'
+            WHEN p_age BETWEEN 25 AND 39 THEN '25–39'
+            WHEN p_age BETWEEN 40 AND 59 THEN '40–59'
+            ELSE '60+'
+        END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT
+    customer_id,
+    age,
+    fn_age_group(age) AS age_group
+FROM analytics.customers;
+```
+
+---
+
+## Example 2: Customer Tenure Classification {.smaller}
+
+**Customer tenure supports:**
+
+- Retention analysis
+- Lifecycle modeling
+- CRM segmentation
+
+---
+
+### Example 2: Function Definition & Application{.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_customer_tenure (
+    p_signup_date DATE
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN CURRENT_DATE - p_signup_date < 180 THEN 'New'
+            WHEN CURRENT_DATE - p_signup_date < 365 THEN 'Established'
+            ELSE 'Loyal'
+        END;
+$$;
+```
+
+$$\downarrow$$
+
+
+```sql
+SELECT
+    customer_id,
+    signup_date,
+    analytics.fn_customer_tenure(signup_date) AS tenure_group
+FROM analytics.customers;
+```
+
+---
+
+## Example 3: Product Price Tier {.smaller}
+
+**Price tiering is commonly used in:**
+
+- Category benchmarking
+- Demand elasticity analysis
+- Product mix optimization
+
+---
+
+### Example 3: Function Definition {.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_price_tier (
+    p_price NUMERIC
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_price < 20 THEN 'Low'
+            WHEN p_price BETWEEN 20 AND 99.99 THEN 'Mid'
+            ELSE 'Premium'
+        END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT
+    product_id,
+    product_name,
+    price,
+    analytics.fn_price_tier(price) AS price_tier
+FROM analytics.products;
+```
+
+---
+
+## Example 4: Order Size Classification {.smaller}
+
+Order size classification supports:
+
+- Basket analysis
+- Purchase behavior analysis
+- Operational load estimation
+
+---
+
+## Example 4: Function Definition & Application {.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_order_size (
+    p_quantity INT
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_quantity = 1 THEN 'Single Item'
+            WHEN p_quantity BETWEEN 2 AND 4 THEN 'Small Basket'
+            ELSE 'Large Basket'
+        END;
+$$;
+```
+
+$$\downarrow$$
+
+
+```sql
+SELECT
+    oi.order_id,
+    oi.quantity,
+    analytics.fn_order_size(oi.quantity) AS order_size
+FROM analytics.order_items oi;
+```
+
+---
+
+## Example 5: Order Activity Normalization {.smaller}
+
+**Order activity status is used in:**
+
+- Operational reporting
+- KPI standardization
+- Funnel analysis
+
+
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_order_activity (
+    p_status TEXT
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_status IN ('cancelled', 'returned') THEN 'Inactive'
+            ELSE 'Active'
+        END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT
+    order_id,
+    status,
+    analytics.fn_order_activity(status) AS activity_state
+FROM analytics.orders;
+```
+
+
+## Summary Scalar UDFs {.smaller}
+
+- Scalar UDFs operate at **row level**
+- They encode **business semantics**
+- They improve **consistency and readability**
+- They are building blocks for **views and stored procedures**
+
+# Table-Valued UDFs in Practice
+
+## Table-Valued User Defined Functions in Practice {.smaller}
+
+Scalar UDFs return **one value** per invocation.  
+**Table-Valued Functions (TVFs)** return a **set of rows** and behave like virtual tables.
+
+Table-Valued Functions are especially useful in analytics when:
+
+- Logic naturally produces **multiple rows**
+- Queries require reusable **derived datasets**
+- Complex joins and aggregations must be standardized
+
+---
+
+## General Syntax of a Table-Valued Function {.smaller}
+
+A TVF formalizes a **reusable analytical dataset**.
+
+```sql
+CREATE OR REPLACE FUNCTION function_name (
+    parameter_name data_type,
+    ...
+)
+RETURNS TABLE (
+    column_name data_type,
+    ...
+)
+LANGUAGE sql
+AS $$
+    SELECT ...
+$$;
+```
+
+---
+
+## Analytical Perspective on TVF Design {.smaller}
+
+A well-designed analytical TVF:
+
+- Represents a **logical dataset**, not a single metric
+- Encapsulates joins and aggregations
+- Produces a schema-stable output
+- Can be reused safely across dashboards and pipelines
+
+---
+
+## Example 1: Recent Orders for a Customer {.smaller}
+
+Analysts often need to inspect a customer’s **most recent orders** together with monetary impact.
+
+Recent order analysis is frequently used in:
+
+- Customer profiling
+- Support and case investigation
+- Purchase behavior analysis
+
+---
+
+## Example 1: Function Definition & Application {.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_recent_orders (
+    p_customer_id INT,
+    p_limit       INT
+)
+RETURNS TABLE (
+    order_id    INT,
+    order_date  DATE,
+    status      TEXT,
+    order_total NUMERIC
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        o.order_id,
+        o.order_date,
+        o.status,
+        COALESCE(SUM(oi.quantity * p.price), 0) AS order_total
+    FROM analytics.orders o
+    JOIN analytics.order_items oi ON oi.order_id = o.order_id
+    JOIN analytics.products p     ON p.product_id = oi.product_id
+    WHERE o.customer_id = p_customer_id
+    GROUP BY o.order_id, o.order_date, o.status
+    ORDER BY o.order_date DESC
+    LIMIT GREATEST(p_limit, 0);
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT *
+FROM analytics.fn_recent_orders(1, 4);
+```
+
+---
+
+## Example 2: Top Products by Revenue {.smaller}
+
+Revenue ranking is a core analytical task for understanding **product performance**.
+
+Top-product analysis is used in:
+
+- Product portfolio reviews
+- Revenue concentration analysis
+- Pricing and promotion strategy
+
+---
+
+## Example 2: Function Definition & Application {.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_top_products_by_revenue (
+    p_limit INT
+)
+RETURNS TABLE (
+    product_id   INT,
+    product_name TEXT,
+    revenue      NUMERIC,
+    total_qty    BIGINT
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        p.product_id,
+        p.product_name,
+        COALESCE(SUM(oi.quantity * p.price), 0) AS revenue,
+        COALESCE(SUM(oi.quantity), 0)           AS total_qty
+    FROM analytics.products p
+    LEFT JOIN analytics.order_items oi
+        ON oi.product_id = p.product_id
+    GROUP BY p.product_id, p.product_name
+    ORDER BY revenue DESC, total_qty DESC
+    LIMIT GREATEST(p_limit, 0);
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT *
+FROM analytics.fn_top_products_by_revenue(10);
+```
+
+---
+
+## Example 3: Customers by City {.smaller}
+
+Geographic aggregation is a recurring requirement in analytics.
+
+Customer geography analysis supports:
+
+- Regional performance tracking
+- Geo-based segmentation
+- Spatial analytics pipelines
+
+---
+
+## Example 3: Function Definition & Application {.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_customers_by_city (
+    p_city_id INT
+)
+RETURNS TABLE (
+    customer_id INT,
+    first_name  TEXT,
+    last_name   TEXT,
+    signup_date DATE
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.signup_date
+    FROM analytics.customers c
+    WHERE c.city_id = p_city_id;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT *
+FROM analytics.fn_customers_by_city(1);
+```
+
+---
+
+## Example 4: Order Items with Product Context {.smaller}
+
+Analytical queries often require **denormalized line-item datasets**.
+
+Line-item enrichment is used in:
+
+- Order audits
+- Revenue reconciliation
+- BI semantic layers
+
+---
+
+## Example 4: Function Definition & Application {.smaller}
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_order_items_detailed (
+    p_order_id INT
+)
+RETURNS TABLE (
+    product_id   INT,
+    product_name TEXT,
+    category     TEXT,
+    quantity     INT,
+    unit_price   NUMERIC,
+    line_total   NUMERIC
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        p.product_id,
+        p.product_name,
+        p.category,
+        oi.quantity,
+        p.price AS unit_price,
+        oi.quantity * p.price AS line_total
+    FROM analytics.order_items oi
+    JOIN analytics.products p
+        ON p.product_id = oi.product_id
+    WHERE oi.order_id = p_order_id;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+SELECT *
+FROM analytics.fn_order_items_detailed(10);
+```
+
+
+
+## Summary — Table-Valued UDFs {.smaller}
+
+- TVFs represent **datasets**, not single values
+- They centralize joins and aggregations
+- They simplify downstream SQL and BI layers
+- TVFs are natural building blocks for **views and stored procedures**
+
+
+
+# Views in Practice
+
+## Analytical Views in Practice {.smaller}
+
+Views provide a **logical abstraction layer** over base tables.  
+They simplify analytical queries by exposing **ready-to-use datasets** with consistent business semantics.
+
+**Views allow analysts to:**
+
+- Hide join complexity
+- Standardize business logic
+- Improve query readability
+- Reuse analytical datasets safely
+
+
+
+## What Is a View? {.smaller}
+
+A **view** is a stored SQL query that behaves like a virtual table.
+
+It does **not store data** itself — it stores **logic**.
+
+$$
+V \rightarrow \text{SELECT logic over base tables}
+$$
+
+
+
+## Why Views Matter in Analytics {.smaller}
+
+In analytics, views are often used as:
+
+- Semantic layers
+- Reporting tables
+- BI-friendly abstractions
+- Stable inputs for dashboards and notebooks
+
+
+
+## General Syntax of a View {.smaller}
+
+```sql
+CREATE OR REPLACE VIEW view_name AS
+SELECT
+    column_list
+FROM base_tables
+WHERE conditions;
+```
+
+
+
+## Analytical Perspective on View Design {.smaller}
+
+**A well-designed analytical view:**
+
+- Represents a clear business concept
+- Is read-only by design
+- Encapsulates joins and filters
+- Has a stable schema
+- Is safe for BI and reporting tools
+
+
+
+## Example 1: Customer Dimension View {.smaller}
+
+Customer dimensions are frequently reused across analytics.
+
+**Customer dimension views support:**
+
+- Segmentation analysis
+- KPI reporting
+- Downstream joins in BI tools
+
+---
+
+## View Definition {.smaller}
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_customers_dim AS
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.age,
+    c.email,
+    c.signup_date,
+    ci.city_name,
+    r.region_name,
+    co.country_name
+FROM analytics.customers c
+LEFT JOIN analytics.cities ci
+    ON c.city_id = ci.city_id
+LEFT JOIN analytics.regions r
+    ON ci.region_id = r.region_id
+LEFT JOIN analytics.countries co
+    ON r.country_id = co.country_id;
+```
+
+
+
+## Example 2: Orders Fact View {.smaller}
+
+Fact views expose transactional data enriched with dimensions.
+
+**Order fact views are used in:**
+
+- Revenue analysis
+- Operational reporting
+- Funnel analysis
+
+---
+
+## View Definition {.smaller}
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_orders_fact AS
+SELECT
+    o.order_id,
+    o.order_date,
+    o.status,
+    o.customer_id,
+    SUM(oi.quantity * p.price) AS order_total,
+    SUM(oi.quantity)           AS total_items
+FROM analytics.orders o
+JOIN analytics.order_items oi
+    ON o.order_id = oi.order_id
+JOIN analytics.products p
+    ON p.product_id = oi.product_id
+GROUP BY
+    o.order_id,
+    o.order_date,
+    o.status,
+    o.customer_id;
+```
+
+
+
+## Example 3: Product Performance View {.smaller}
+
+Product performance views centralize revenue logic.
+
+**They support:**
+
+- Product benchmarking
+- Revenue concentration analysis
+- Portfolio reviews
+
+---
+
+## View Definition {.smaller}
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_product_performance AS
+SELECT
+    p.product_id,
+    p.product_name,
+    p.category,
+    SUM(oi.quantity)                   AS total_qty,
+    SUM(oi.quantity * p.price)         AS total_revenue
+FROM analytics.products p
+LEFT JOIN analytics.order_items oi
+    ON p.product_id = oi.product_id
+GROUP BY
+    p.product_id,
+    p.product_name,
+    p.category;
+```
+
+
+
+## Example 4: Active Orders View {.smaller}
+
+Filtering logic is commonly centralized in views.
+
+**Active-order views are used in:**
+
+- Operational dashboards
+- Monitoring pipelines
+- Support tooling
+
+---
+
+## View Definition {.smaller}
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_active_orders AS
+SELECT
+    order_id,
+    order_date,
+    status,
+    customer_id
+FROM analytics.orders
+WHERE status NOT IN ('cancelled', 'returned');
+```
+
+
+
+## Views vs Functions vs Stored Procedures {.smaller}
+
+| Aspect | View | User Defined Function | Stored Procedure |
+|------|------|-----------------------|------------------|
+| Primary Role | Dataset abstraction | Calculation | Workflow execution |
+| Returns | Table (rows) | Scalar or table | Optional |
+| Data Modification | Not allowed | Not allowed | Allowed |
+| Invocation | `SELECT` | `SELECT` | `CALL` |
+| Use in Joins | Yes | TVF only | No |
+| Transaction Control | No | No | Yes |
+| Typical Usage | BI, reporting | Metrics, enrichment | ETL, orchestration |
+
+
+
+## Summary: Views {.smaller}
+
+- Views expose **clean analytical datasets**
+- They centralize joins and filters
+- They improve SQL readability
+- They form the semantic layer for BI tools
+- Views sit **between raw tables and analytics consumers**
+
+
+## Views vs Functions vs Stored Procedures
+
+| Aspect | View | Function | Stored Procedure |
+|------|------|----------|------------------|
+| Purpose | Query abstraction | Calculation | Workflow execution |
+| Data Storage | No | No | No |
+| Accept Parameters | No | Yes | Yes |
+| Modify Data | No | No | Yes |
+| Use in SELECT | Yes | Yes | No |
+| Control Flow | No | No | Yes |
+| Typical Use | BI layer, semantics | Metrics, logic | ETL, updates |
+
+
+
+# Try Youself
+
+**Try to :**
+
+**combining Views + UDFs + Stored Procedures into analytical pipelines**.
