@@ -654,6 +654,331 @@ FROM analytics.fn_order_items_detailed(10);
 - They simplify downstream SQL and BI layers
 - TVFs are natural building blocks for **views and stored procedures**
 
+<!-- procedures -->
+
+# Stored Procedures
+
+## Stored Procedures {.smaller}
+
+Unlike functions, **stored procedures represent executable workflows**.  
+They are designed to **orchestrate logic**, **modify data**, and **control execution flow**.
+
+A **stored procedure** represents a controlled sequence of operations executed as a unit.
+
+Given an input vector $X$, a procedure performs actions $A$ and may optionally produce outputs $O$:
+
+$$
+P(X) \rightarrow A \; [\rightarrow O]
+$$
+
+**The defining characteristics of a stored procedure are:**
+
+- Can modify data (`INSERT`, `UPDATE`, `DELETE`)
+- Can control execution flow (`IF`, `LOOP`, `RAISE`)
+- Can manage transactions
+- May or may not return results
+
+---
+
+## Procedure as an Execution Unit {.smaller}
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> Input
+    Input --> Validation
+    Validation --> BusinessLogic
+    BusinessLogic --> DataMutation
+    DataMutation --> Completion
+    Completion --> [*]
+```
+
+---
+
+## Stored Procedure Execution States {.smaller}
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> Call
+    Call --> ParameterBinding
+    ParameterBinding --> Execution
+    Execution --> TransactionControl
+    TransactionControl --> End
+    End --> [*]
+```
+
+---
+
+## Logical Position of Stored Procedures {.smaller}
+
+Stored procedures exist **outside** the logical SQL query evaluation pipeline.
+
+```{mermaid}
+flowchart LR
+    Client --> SP[Stored Procedure]
+    SP --> SQL[SQL Statements]
+    SQL --> Tables
+```
+
+They are **invoked**, not embedded.
+
+---
+
+## Why SQL Introduces Stored Procedures {.smaller}
+
+**Stored procedures exist to:**
+
+- Encapsulate multi-step business workflows
+- Enforce data integrity rules
+- Centralize write logic
+- Reduce application-side complexity
+
+---
+
+## General Syntax of a Stored Procedure {.smaller}
+
+```sql
+CREATE OR REPLACE PROCEDURE procedure_name (
+    parameter_name data_type,
+    ...
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- procedural logic
+END;
+$$;
+```
+
+::: {.callout-important title="convention"}
+- Stored procedure naming starts with `sp_`
+- Procedures are invoked using `CALL`, not `SELECT`
+- Procedures may perform commits and rollbacks
+- Prefer procedures for write-heavy logic
+:::
+
+---
+
+## Analytical Perspective on Procedure Design {.smaller}
+
+**A well-designed analytical stored procedure:**
+
+- Performs one clear business operation
+- Uses UDFs for calculations
+- Validates inputs explicitly
+- Produces deterministic side effects
+
+---
+
+## Example 1: Upsert Product {.smaller}
+
+Maintaining product catalogs often requires **insert-or-update logic**.
+
+**Product upsert is frequently used in:**
+
+- ETL pipelines
+- Data synchronization
+- Master data management
+
+---
+
+## Example 1: Procedure Definition {.smaller}
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_upsert_product (
+    p_product_id   INT,
+    p_product_name TEXT,
+    p_category     TEXT,
+    p_price        NUMERIC
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF p_product_id IS NULL THEN
+        RAISE EXCEPTION 'product_id cannot be NULL';
+    END IF;
+
+    INSERT INTO analytics.products (product_id, product_name, category, price)
+    VALUES (p_product_id, p_product_name, p_category, p_price)
+    ON CONFLICT (product_id) DO UPDATE
+        SET product_name = EXCLUDED.product_name,
+            category     = EXCLUDED.category,
+            price        = EXCLUDED.price;
+END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+CALL analytics.sp_upsert_product(101, 'USB Cable', 'Accessories', 9.99);
+```
+
+```sql
+SELECT *
+FROM analytics.products
+WHERE product_id = 101;
+```
+
+---
+
+## Example 2: Update Order Status {.smaller}
+
+Order lifecycle management requires **controlled state transitions**.
+
+**Order status updates are used in:**
+
+- Fulfillment workflows
+- Exception handling
+- Operational monitoring
+
+---
+
+## Example 2: Procedure Definition {.smaller}
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_update_order_status (
+    p_order_id INT,
+    p_status   TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE analytics.orders
+    SET status = p_status
+    WHERE order_id = p_order_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Order % not found', p_order_id;
+    END IF;
+END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+CALL analytics.sp_update_order_status(10, 'shipped');
+```
+
+```sql
+SELECT *
+FROM analytics.orders
+WHERE order_id = 10;
+```
+
+---
+
+## Example 3: Delete Customer with Safety Check {.smaller}
+
+Destructive operations must be **explicit and guarded**.
+
+**Customer deletion is used in:**
+
+- GDPR compliance
+- Data cleanup
+- Account lifecycle management
+
+---
+
+## Example 3: Procedure Definition {.smaller}
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_delete_customer (
+    p_customer_id INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM analytics.orders
+        WHERE customer_id = p_customer_id
+    ) THEN
+        RAISE EXCEPTION 'Cannot delete customer % with existing orders', p_customer_id;
+    END IF;
+
+    DELETE FROM analytics.customers
+    WHERE customer_id = p_customer_id;
+END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+CALL analytics.sp_delete_customer(19);
+```
+
+---
+
+## Example 4: Refresh Derived Order Totals {.smaller}
+
+Procedures are ideal for **batch recalculations**.
+
+**Derived metric refresh is used in:**
+
+- Nightly batch jobs
+- KPI recalculation
+- Data warehouse maintenance
+
+---
+
+## Example 4: Procedure Definition {.smaller}
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_refresh_order_totals ()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE analytics.orders o
+    SET status = 'recalculated'
+    WHERE EXISTS (
+        SELECT 1
+        FROM analytics.order_items oi
+        WHERE oi.order_id = o.order_id
+    );
+END;
+$$;
+```
+
+$$\downarrow$$
+
+```sql
+CALL analytics.sp_refresh_order_totals();
+```
+
+$$\downarrow$$
+
+```sql
+SELECT 
+    *
+FROM analytics.orders
+LIMIT 10;
+```
+
+---
+
+## Functions vs Stored Procedures {.smaller}
+
+| Aspect | User Defined Function | Stored Procedure |
+|------|----------------------|------------------|
+| Primary Role | Calculation | Workflow execution |
+| Data Modification | Not allowed | Allowed |
+| Transaction Control | Not allowed | Allowed |
+| Invocation | `SELECT` | `CALL` |
+| Return Value | Required | Optional |
+| Use in Queries | Yes | No |
+| Typical Usage | Metrics, enrichment | ETL, updates, orchestration |
+
+---
+
+::: {.callout-important}
+- UDFs handle **what to compute**
+- Stored Procedures handle **what to do**
+- UDFs feed procedures, not the opposite
+:::
 
 
 # Views in Practice
