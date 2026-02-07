@@ -772,6 +772,354 @@ direction LR
 <li>They simplify downstream SQL and BI layers</li>
 <li>TVFs are natural building blocks for <strong>views and stored procedures</strong></li>
 </ul>
+<!-- procedures -->
+</section></section>
+<section>
+<section id="stored-procedures" class="title-slide slide level1 center">
+<h1>Stored Procedures</h1>
+
+</section>
+<section id="stored-procedures-1" class="slide level2 smaller">
+<h2>Stored Procedures</h2>
+<p>Unlike functions, <strong>stored procedures represent executable workflows</strong>.<br>
+They are designed to <strong>orchestrate logic</strong>, <strong>modify data</strong>, and <strong>control execution flow</strong>.</p>
+<p>A <strong>stored procedure</strong> represents a controlled sequence of operations executed as a unit.</p>
+<p>Given an input vector <span class="math inline">\(X\)</span>, a procedure performs actions <span class="math inline">\(A\)</span> and may optionally produce outputs <span class="math inline">\(O\)</span>:</p>
+<p><span class="math display">\[
+P(X) \rightarrow A \; [\rightarrow O]
+\]</span></p>
+<p><strong>The defining characteristics of a stored procedure are:</strong></p>
+<ul>
+<li>Can modify data (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>)</li>
+<li>Can control execution flow (<code>IF</code>, <code>LOOP</code>, <code>RAISE</code>)</li>
+<li>Can manage transactions</li>
+<li>May or may not return results</li>
+</ul>
+</section>
+<section id="procedure-as-an-execution-unit" class="slide level2 smaller">
+<h2>Procedure as an Execution Unit</h2>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; Input
+    Input --&gt; Validation
+    Validation --&gt; BusinessLogic
+    BusinessLogic --&gt; DataMutation
+    DataMutation --&gt; Completion
+    Completion --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="stored-procedure-execution-states" class="slide level2 smaller">
+<h2>Stored Procedure Execution States</h2>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; Call
+    Call --&gt; ParameterBinding
+    ParameterBinding --&gt; Execution
+    Execution --&gt; TransactionControl
+    TransactionControl --&gt; End
+    End --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="logical-position-of-stored-procedures" class="slide level2 smaller">
+<h2>Logical Position of Stored Procedures</h2>
+<p>Stored procedures exist <strong>outside</strong> the logical SQL query evaluation pipeline.</p>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    Client --&gt; SP[Stored Procedure]
+    SP --&gt; SQL[SQL Statements]
+    SQL --&gt; Tables
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>They are <strong>invoked</strong>, not embedded.</p>
+</section>
+<section id="why-sql-introduces-stored-procedures" class="slide level2 smaller">
+<h2>Why SQL Introduces Stored Procedures</h2>
+<p><strong>Stored procedures exist to:</strong></p>
+<ul>
+<li>Encapsulate multi-step business workflows</li>
+<li>Enforce data integrity rules</li>
+<li>Centralize write logic</li>
+<li>Reduce application-side complexity</li>
+</ul>
+</section>
+<section id="general-syntax-of-a-stored-procedure" class="slide level2 smaller">
+<h2>General Syntax of a Stored Procedure</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> procedure_name (</span>
+<span id="cb21-2"><a></a>    parameter_name data_type,</span>
+<span id="cb21-3"><a></a>    <span class="op">..</span>.</span>
+<span id="cb21-4"><a></a>)</span>
+<span id="cb21-5"><a></a>LANGUAGE plpgsql</span>
+<span id="cb21-6"><a></a><span class="kw">AS</span> $$</span>
+<span id="cb21-7"><a></a><span class="cf">BEGIN</span></span>
+<span id="cb21-8"><a></a>    <span class="co">-- procedural logic</span></span>
+<span id="cb21-9"><a></a><span class="cf">END</span>;</span>
+<span id="cb21-10"><a></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div title="convention">
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>convention</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li>Stored procedure naming starts with <code>sp_</code></li>
+<li>Procedures are invoked using <code>CALL</code>, not <code>SELECT</code></li>
+<li>Procedures may perform commits and rollbacks</li>
+<li>Prefer procedures for write-heavy logic</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="analytical-perspective-on-procedure-design" class="slide level2 smaller">
+<h2>Analytical Perspective on Procedure Design</h2>
+<p><strong>A well-designed analytical stored procedure:</strong></p>
+<ul>
+<li>Performs one clear business operation</li>
+<li>Uses UDFs for calculations</li>
+<li>Validates inputs explicitly</li>
+<li>Produces deterministic side effects</li>
+</ul>
+</section>
+<section id="example-1-upsert-product" class="slide level2 smaller">
+<h2>Example 1: Upsert Product</h2>
+<p>Maintaining product catalogs often requires <strong>insert-or-update logic</strong>.</p>
+<p><strong>Product upsert is frequently used in:</strong></p>
+<ul>
+<li>ETL pipelines</li>
+<li>Data synchronization</li>
+<li>Master data management</li>
+</ul>
+</section>
+<section id="example-1-procedure-definition" class="slide level2 smaller">
+<h2>Example 1: Procedure Definition</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_upsert_product (</span>
+<span id="cb22-2"><a></a>    p_product_id   <span class="dt">INT</span>,</span>
+<span id="cb22-3"><a></a>    p_product_name TEXT,</span>
+<span id="cb22-4"><a></a>    p_category     TEXT,</span>
+<span id="cb22-5"><a></a>    p_price        <span class="dt">NUMERIC</span></span>
+<span id="cb22-6"><a></a>)</span>
+<span id="cb22-7"><a></a>LANGUAGE plpgsql</span>
+<span id="cb22-8"><a></a><span class="kw">AS</span> $$</span>
+<span id="cb22-9"><a></a><span class="cf">BEGIN</span></span>
+<span id="cb22-10"><a></a>    <span class="cf">IF</span> p_product_id <span class="kw">IS</span> <span class="kw">NULL</span> <span class="cf">THEN</span></span>
+<span id="cb22-11"><a></a>        RAISE <span class="kw">EXCEPTION</span> <span class="st">'product_id cannot be NULL'</span>;</span>
+<span id="cb22-12"><a></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb22-13"><a></a></span>
+<span id="cb22-14"><a></a>    <span class="kw">INSERT</span> <span class="kw">INTO</span> analytics.products (product_id, product_name, <span class="kw">category</span>, price)</span>
+<span id="cb22-15"><a></a>    <span class="kw">VALUES</span> (p_product_id, p_product_name, p_category, p_price)</span>
+<span id="cb22-16"><a></a>    <span class="kw">ON</span> CONFLICT (product_id) DO <span class="kw">UPDATE</span></span>
+<span id="cb22-17"><a></a>        <span class="kw">SET</span> product_name <span class="op">=</span> EXCLUDED.product_name,</span>
+<span id="cb22-18"><a></a>            <span class="kw">category</span>     <span class="op">=</span> EXCLUDED.<span class="kw">category</span>,</span>
+<span id="cb22-19"><a></a>            price        <span class="op">=</span> EXCLUDED.price;</span>
+<span id="cb22-20"><a></a><span class="cf">END</span>;</span>
+<span id="cb22-21"><a></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">CALL</span> analytics.sp_upsert_product(<span class="dv">101</span>, <span class="st">'USB Cable'</span>, <span class="st">'Accessories'</span>, <span class="fl">9.99</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb24-2"><a></a><span class="kw">FROM</span> analytics.products</span>
+<span id="cb24-3"><a></a><span class="kw">WHERE</span> product_id <span class="op">=</span> <span class="dv">101</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-2-update-order-status" class="slide level2 smaller">
+<h2>Example 2: Update Order Status</h2>
+<p>Order lifecycle management requires <strong>controlled state transitions</strong>.</p>
+<p><strong>Order status updates are used in:</strong></p>
+<ul>
+<li>Fulfillment workflows</li>
+<li>Exception handling</li>
+<li>Operational monitoring</li>
+</ul>
+</section>
+<section id="example-2-procedure-definition" class="slide level2 smaller">
+<h2>Example 2: Procedure Definition</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_update_order_status (</span>
+<span id="cb25-2"><a></a>    p_order_id <span class="dt">INT</span>,</span>
+<span id="cb25-3"><a></a>    p_status   TEXT</span>
+<span id="cb25-4"><a></a>)</span>
+<span id="cb25-5"><a></a>LANGUAGE plpgsql</span>
+<span id="cb25-6"><a></a><span class="kw">AS</span> $$</span>
+<span id="cb25-7"><a></a><span class="cf">BEGIN</span></span>
+<span id="cb25-8"><a></a>    <span class="kw">UPDATE</span> analytics.orders</span>
+<span id="cb25-9"><a></a>    <span class="kw">SET</span> status <span class="op">=</span> p_status</span>
+<span id="cb25-10"><a></a>    <span class="kw">WHERE</span> order_id <span class="op">=</span> p_order_id;</span>
+<span id="cb25-11"><a></a></span>
+<span id="cb25-12"><a></a>    <span class="cf">IF</span> <span class="kw">NOT</span> FOUND <span class="cf">THEN</span></span>
+<span id="cb25-13"><a></a>        RAISE <span class="kw">EXCEPTION</span> <span class="st">'Order % not found'</span>, p_order_id;</span>
+<span id="cb25-14"><a></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb25-15"><a></a><span class="cf">END</span>;</span>
+<span id="cb25-16"><a></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a></a><span class="kw">CALL</span> analytics.sp_update_order_status(<span class="dv">10</span>, <span class="st">'shipped'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
+<span id="cb27-2"><a></a><span class="kw">FROM</span> analytics.orders</span>
+<span id="cb27-3"><a></a><span class="kw">WHERE</span> order_id <span class="op">=</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-3-delete-customer-with-safety-check" class="slide level2 smaller">
+<h2>Example 3: Delete Customer with Safety Check</h2>
+<p>Destructive operations must be <strong>explicit and guarded</strong>.</p>
+<p><strong>Customer deletion is used in:</strong></p>
+<ul>
+<li>GDPR compliance</li>
+<li>Data cleanup</li>
+<li>Account lifecycle management</li>
+</ul>
+</section>
+<section id="example-3-procedure-definition" class="slide level2 smaller">
+<h2>Example 3: Procedure Definition</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_delete_customer (</span>
+<span id="cb28-2"><a></a>    p_customer_id <span class="dt">INT</span></span>
+<span id="cb28-3"><a></a>)</span>
+<span id="cb28-4"><a></a>LANGUAGE plpgsql</span>
+<span id="cb28-5"><a></a><span class="kw">AS</span> $$</span>
+<span id="cb28-6"><a></a><span class="cf">BEGIN</span></span>
+<span id="cb28-7"><a></a>    <span class="cf">IF</span> <span class="kw">EXISTS</span> (</span>
+<span id="cb28-8"><a></a>        <span class="kw">SELECT</span> <span class="dv">1</span></span>
+<span id="cb28-9"><a></a>        <span class="kw">FROM</span> analytics.orders</span>
+<span id="cb28-10"><a></a>        <span class="kw">WHERE</span> customer_id <span class="op">=</span> p_customer_id</span>
+<span id="cb28-11"><a></a>    ) <span class="cf">THEN</span></span>
+<span id="cb28-12"><a></a>        RAISE <span class="kw">EXCEPTION</span> <span class="st">'Cannot delete customer % with existing orders'</span>, p_customer_id;</span>
+<span id="cb28-13"><a></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb28-14"><a></a></span>
+<span id="cb28-15"><a></a>    <span class="kw">DELETE</span> <span class="kw">FROM</span> analytics.customers</span>
+<span id="cb28-16"><a></a>    <span class="kw">WHERE</span> customer_id <span class="op">=</span> p_customer_id;</span>
+<span id="cb28-17"><a></a><span class="cf">END</span>;</span>
+<span id="cb28-18"><a></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a></a><span class="kw">CALL</span> analytics.sp_delete_customer(<span class="dv">19</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-4-refresh-derived-order-totals" class="slide level2 smaller">
+<h2>Example 4: Refresh Derived Order Totals</h2>
+<p>Procedures are ideal for <strong>batch recalculations</strong>.</p>
+<p><strong>Derived metric refresh is used in:</strong></p>
+<ul>
+<li>Nightly batch jobs</li>
+<li>KPI recalculation</li>
+<li>Data warehouse maintenance</li>
+</ul>
+</section>
+<section id="example-4-procedure-definition" class="slide level2 smaller">
+<h2>Example 4: Procedure Definition</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">PROCEDURE</span> analytics.sp_refresh_order_totals ()</span>
+<span id="cb30-2"><a></a>LANGUAGE plpgsql</span>
+<span id="cb30-3"><a></a><span class="kw">AS</span> $$</span>
+<span id="cb30-4"><a></a><span class="cf">BEGIN</span></span>
+<span id="cb30-5"><a></a>    <span class="kw">UPDATE</span> analytics.orders o</span>
+<span id="cb30-6"><a></a>    <span class="kw">SET</span> status <span class="op">=</span> <span class="st">'recalculated'</span></span>
+<span id="cb30-7"><a></a>    <span class="kw">WHERE</span> <span class="kw">EXISTS</span> (</span>
+<span id="cb30-8"><a></a>        <span class="kw">SELECT</span> <span class="dv">1</span></span>
+<span id="cb30-9"><a></a>        <span class="kw">FROM</span> analytics.order_items oi</span>
+<span id="cb30-10"><a></a>        <span class="kw">WHERE</span> oi.order_id <span class="op">=</span> o.order_id</span>
+<span id="cb30-11"><a></a>    );</span>
+<span id="cb30-12"><a></a><span class="cf">END</span>;</span>
+<span id="cb30-13"><a></a>$$;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a></a><span class="kw">CALL</span> analytics.sp_refresh_order_totals();</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">\[\downarrow\]</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a></a><span class="kw">SELECT</span> </span>
+<span id="cb32-2"><a></a>    <span class="op">*</span></span>
+<span id="cb32-3"><a></a><span class="kw">FROM</span> analytics.orders</span>
+<span id="cb32-4"><a></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="functions-vs-stored-procedures" class="slide level2 smaller">
+<h2>Functions vs Stored Procedures</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>User Defined Function</th>
+<th>Stored Procedure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Primary Role</td>
+<td>Calculation</td>
+<td>Workflow execution</td>
+</tr>
+<tr class="even">
+<td>Data Modification</td>
+<td>Not allowed</td>
+<td>Allowed</td>
+</tr>
+<tr class="odd">
+<td>Transaction Control</td>
+<td>Not allowed</td>
+<td>Allowed</td>
+</tr>
+<tr class="even">
+<td>Invocation</td>
+<td><code>SELECT</code></td>
+<td><code>CALL</code></td>
+</tr>
+<tr class="odd">
+<td>Return Value</td>
+<td>Required</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td>Use in Queries</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Typical Usage</td>
+<td>Metrics, enrichment</td>
+<td>ETL, updates, orchestration</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level2">
+
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li>UDFs handle <strong>what to compute</strong></li>
+<li>Stored Procedures handle <strong>what to do</strong></li>
+<li>UDFs feed procedures, not the opposite</li>
+</ul>
+</div>
+</div>
+</div>
 </section></section>
 <section>
 <section id="views-in-practice" class="title-slide slide level1 center">
@@ -810,11 +1158,11 @@ V \rightarrow \text{SELECT logic over base tables}
 </section>
 <section id="general-syntax-of-a-view" class="slide level2 smaller">
 <h2>General Syntax of a View</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> view_name <span class="kw">AS</span></span>
-<span id="cb21-2"><a></a><span class="kw">SELECT</span></span>
-<span id="cb21-3"><a></a>    column_list</span>
-<span id="cb21-4"><a></a><span class="kw">FROM</span> base_tables</span>
-<span id="cb21-5"><a></a><span class="kw">WHERE</span> conditions;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> view_name <span class="kw">AS</span></span>
+<span id="cb33-2"><a></a><span class="kw">SELECT</span></span>
+<span id="cb33-3"><a></a>    column_list</span>
+<span id="cb33-4"><a></a><span class="kw">FROM</span> base_tables</span>
+<span id="cb33-5"><a></a><span class="kw">WHERE</span> conditions;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="analytical-perspective-on-view-design" class="slide level2 smaller">
 <h2>Analytical Perspective on View Design</h2>
@@ -839,24 +1187,24 @@ V \rightarrow \text{SELECT logic over base tables}
 </section>
 <section id="view-definition" class="slide level2 smaller">
 <h2>View Definition</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_customers_dim <span class="kw">AS</span></span>
-<span id="cb22-2"><a></a><span class="kw">SELECT</span></span>
-<span id="cb22-3"><a></a>    c.customer_id,</span>
-<span id="cb22-4"><a></a>    c.first_name,</span>
-<span id="cb22-5"><a></a>    c.last_name,</span>
-<span id="cb22-6"><a></a>    c.age,</span>
-<span id="cb22-7"><a></a>    c.email,</span>
-<span id="cb22-8"><a></a>    c.signup_date,</span>
-<span id="cb22-9"><a></a>    ci.city_name,</span>
-<span id="cb22-10"><a></a>    r.region_name,</span>
-<span id="cb22-11"><a></a>    co.country_name</span>
-<span id="cb22-12"><a></a><span class="kw">FROM</span> analytics.customers c</span>
-<span id="cb22-13"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.cities ci</span>
-<span id="cb22-14"><a></a>    <span class="kw">ON</span> c.city_id <span class="op">=</span> ci.city_id</span>
-<span id="cb22-15"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.regions r</span>
-<span id="cb22-16"><a></a>    <span class="kw">ON</span> ci.region_id <span class="op">=</span> r.region_id</span>
-<span id="cb22-17"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.countries co</span>
-<span id="cb22-18"><a></a>    <span class="kw">ON</span> r.country_id <span class="op">=</span> co.country_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_customers_dim <span class="kw">AS</span></span>
+<span id="cb34-2"><a></a><span class="kw">SELECT</span></span>
+<span id="cb34-3"><a></a>    c.customer_id,</span>
+<span id="cb34-4"><a></a>    c.first_name,</span>
+<span id="cb34-5"><a></a>    c.last_name,</span>
+<span id="cb34-6"><a></a>    c.age,</span>
+<span id="cb34-7"><a></a>    c.email,</span>
+<span id="cb34-8"><a></a>    c.signup_date,</span>
+<span id="cb34-9"><a></a>    ci.city_name,</span>
+<span id="cb34-10"><a></a>    r.region_name,</span>
+<span id="cb34-11"><a></a>    co.country_name</span>
+<span id="cb34-12"><a></a><span class="kw">FROM</span> analytics.customers c</span>
+<span id="cb34-13"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.cities ci</span>
+<span id="cb34-14"><a></a>    <span class="kw">ON</span> c.city_id <span class="op">=</span> ci.city_id</span>
+<span id="cb34-15"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.regions r</span>
+<span id="cb34-16"><a></a>    <span class="kw">ON</span> ci.region_id <span class="op">=</span> r.region_id</span>
+<span id="cb34-17"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.countries co</span>
+<span id="cb34-18"><a></a>    <span class="kw">ON</span> r.country_id <span class="op">=</span> co.country_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="example-2-orders-fact-view" class="slide level2 smaller">
 <h2>Example 2: Orders Fact View</h2>
@@ -870,24 +1218,24 @@ V \rightarrow \text{SELECT logic over base tables}
 </section>
 <section id="view-definition-1" class="slide level2 smaller">
 <h2>View Definition</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_orders_fact <span class="kw">AS</span></span>
-<span id="cb23-2"><a></a><span class="kw">SELECT</span></span>
-<span id="cb23-3"><a></a>    o.order_id,</span>
-<span id="cb23-4"><a></a>    o.order_date,</span>
-<span id="cb23-5"><a></a>    o.status,</span>
-<span id="cb23-6"><a></a>    o.customer_id,</span>
-<span id="cb23-7"><a></a>    <span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price) <span class="kw">AS</span> order_total,</span>
-<span id="cb23-8"><a></a>    <span class="fu">SUM</span>(oi.quantity)           <span class="kw">AS</span> total_items</span>
-<span id="cb23-9"><a></a><span class="kw">FROM</span> analytics.orders o</span>
-<span id="cb23-10"><a></a><span class="kw">JOIN</span> analytics.order_items oi</span>
-<span id="cb23-11"><a></a>    <span class="kw">ON</span> o.order_id <span class="op">=</span> oi.order_id</span>
-<span id="cb23-12"><a></a><span class="kw">JOIN</span> analytics.products p</span>
-<span id="cb23-13"><a></a>    <span class="kw">ON</span> p.product_id <span class="op">=</span> oi.product_id</span>
-<span id="cb23-14"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span></span>
-<span id="cb23-15"><a></a>    o.order_id,</span>
-<span id="cb23-16"><a></a>    o.order_date,</span>
-<span id="cb23-17"><a></a>    o.status,</span>
-<span id="cb23-18"><a></a>    o.customer_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_orders_fact <span class="kw">AS</span></span>
+<span id="cb35-2"><a></a><span class="kw">SELECT</span></span>
+<span id="cb35-3"><a></a>    o.order_id,</span>
+<span id="cb35-4"><a></a>    o.order_date,</span>
+<span id="cb35-5"><a></a>    o.status,</span>
+<span id="cb35-6"><a></a>    o.customer_id,</span>
+<span id="cb35-7"><a></a>    <span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price) <span class="kw">AS</span> order_total,</span>
+<span id="cb35-8"><a></a>    <span class="fu">SUM</span>(oi.quantity)           <span class="kw">AS</span> total_items</span>
+<span id="cb35-9"><a></a><span class="kw">FROM</span> analytics.orders o</span>
+<span id="cb35-10"><a></a><span class="kw">JOIN</span> analytics.order_items oi</span>
+<span id="cb35-11"><a></a>    <span class="kw">ON</span> o.order_id <span class="op">=</span> oi.order_id</span>
+<span id="cb35-12"><a></a><span class="kw">JOIN</span> analytics.products p</span>
+<span id="cb35-13"><a></a>    <span class="kw">ON</span> p.product_id <span class="op">=</span> oi.product_id</span>
+<span id="cb35-14"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span></span>
+<span id="cb35-15"><a></a>    o.order_id,</span>
+<span id="cb35-16"><a></a>    o.order_date,</span>
+<span id="cb35-17"><a></a>    o.status,</span>
+<span id="cb35-18"><a></a>    o.customer_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="example-3-product-performance-view" class="slide level2 smaller">
 <h2>Example 3: Product Performance View</h2>
@@ -901,20 +1249,20 @@ V \rightarrow \text{SELECT logic over base tables}
 </section>
 <section id="view-definition-2" class="slide level2 smaller">
 <h2>View Definition</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_product_performance <span class="kw">AS</span></span>
-<span id="cb24-2"><a></a><span class="kw">SELECT</span></span>
-<span id="cb24-3"><a></a>    p.product_id,</span>
-<span id="cb24-4"><a></a>    p.product_name,</span>
-<span id="cb24-5"><a></a>    p.<span class="kw">category</span>,</span>
-<span id="cb24-6"><a></a>    <span class="fu">SUM</span>(oi.quantity)                   <span class="kw">AS</span> total_qty,</span>
-<span id="cb24-7"><a></a>    <span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price)         <span class="kw">AS</span> total_revenue</span>
-<span id="cb24-8"><a></a><span class="kw">FROM</span> analytics.products p</span>
-<span id="cb24-9"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.order_items oi</span>
-<span id="cb24-10"><a></a>    <span class="kw">ON</span> p.product_id <span class="op">=</span> oi.product_id</span>
-<span id="cb24-11"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span></span>
-<span id="cb24-12"><a></a>    p.product_id,</span>
-<span id="cb24-13"><a></a>    p.product_name,</span>
-<span id="cb24-14"><a></a>    p.<span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_product_performance <span class="kw">AS</span></span>
+<span id="cb36-2"><a></a><span class="kw">SELECT</span></span>
+<span id="cb36-3"><a></a>    p.product_id,</span>
+<span id="cb36-4"><a></a>    p.product_name,</span>
+<span id="cb36-5"><a></a>    p.<span class="kw">category</span>,</span>
+<span id="cb36-6"><a></a>    <span class="fu">SUM</span>(oi.quantity)                   <span class="kw">AS</span> total_qty,</span>
+<span id="cb36-7"><a></a>    <span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price)         <span class="kw">AS</span> total_revenue</span>
+<span id="cb36-8"><a></a><span class="kw">FROM</span> analytics.products p</span>
+<span id="cb36-9"><a></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.order_items oi</span>
+<span id="cb36-10"><a></a>    <span class="kw">ON</span> p.product_id <span class="op">=</span> oi.product_id</span>
+<span id="cb36-11"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span></span>
+<span id="cb36-12"><a></a>    p.product_id,</span>
+<span id="cb36-13"><a></a>    p.product_name,</span>
+<span id="cb36-14"><a></a>    p.<span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="example-4-active-orders-view" class="slide level2 smaller">
 <h2>Example 4: Active Orders View</h2>
@@ -928,14 +1276,14 @@ V \rightarrow \text{SELECT logic over base tables}
 </section>
 <section id="view-definition-3" class="slide level2 smaller">
 <h2>View Definition</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_active_orders <span class="kw">AS</span></span>
-<span id="cb25-2"><a></a><span class="kw">SELECT</span></span>
-<span id="cb25-3"><a></a>    order_id,</span>
-<span id="cb25-4"><a></a>    order_date,</span>
-<span id="cb25-5"><a></a>    status,</span>
-<span id="cb25-6"><a></a>    customer_id</span>
-<span id="cb25-7"><a></a><span class="kw">FROM</span> analytics.orders</span>
-<span id="cb25-8"><a></a><span class="kw">WHERE</span> status <span class="kw">NOT</span> <span class="kw">IN</span> (<span class="st">'cancelled'</span>, <span class="st">'returned'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">VIEW</span> analytics.v_active_orders <span class="kw">AS</span></span>
+<span id="cb37-2"><a></a><span class="kw">SELECT</span></span>
+<span id="cb37-3"><a></a>    order_id,</span>
+<span id="cb37-4"><a></a>    order_date,</span>
+<span id="cb37-5"><a></a>    status,</span>
+<span id="cb37-6"><a></a>    customer_id</span>
+<span id="cb37-7"><a></a><span class="kw">FROM</span> analytics.orders</span>
+<span id="cb37-8"><a></a><span class="kw">WHERE</span> status <span class="kw">NOT</span> <span class="kw">IN</span> (<span class="st">'cancelled'</span>, <span class="st">'returned'</span>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="views-vs-functions-vs-stored-procedures" class="slide level2 smaller">
 <h2>Views vs Functions vs Stored Procedures</h2>

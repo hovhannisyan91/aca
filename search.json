@@ -11973,6 +11973,230 @@
     ]
   },
   {
+    "objectID": "materials/sql/slides/session11.html#stored-procedures-1",
+    "href": "materials/sql/slides/session11.html#stored-procedures-1",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Stored Procedures",
+    "text": "Stored Procedures\nUnlike functions, stored procedures represent executable workflows.\nThey are designed to orchestrate logic, modify data, and control execution flow.\nA stored procedure represents a controlled sequence of operations executed as a unit.\nGiven an input vector \\(X\\), a procedure performs actions \\(A\\) and may optionally produce outputs \\(O\\):\n\\[\nP(X) \\rightarrow A \\; [\\rightarrow O]\n\\]\nThe defining characteristics of a stored procedure are:\n\nCan modify data (INSERT, UPDATE, DELETE)\nCan control execution flow (IF, LOOP, RAISE)\nCan manage transactions\nMay or may not return results",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#procedure-as-an-execution-unit",
+    "href": "materials/sql/slides/session11.html#procedure-as-an-execution-unit",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Procedure as an Execution Unit",
+    "text": "Procedure as an Execution Unit\n\n\n\n\n\nstateDiagram-v2\ndirection LR\n    [*] --&gt; Input\n    Input --&gt; Validation\n    Validation --&gt; BusinessLogic\n    BusinessLogic --&gt; DataMutation\n    DataMutation --&gt; Completion\n    Completion --&gt; [*]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#stored-procedure-execution-states",
+    "href": "materials/sql/slides/session11.html#stored-procedure-execution-states",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Stored Procedure Execution States",
+    "text": "Stored Procedure Execution States\n\n\n\n\n\nstateDiagram-v2\ndirection LR\n    [*] --&gt; Call\n    Call --&gt; ParameterBinding\n    ParameterBinding --&gt; Execution\n    Execution --&gt; TransactionControl\n    TransactionControl --&gt; End\n    End --&gt; [*]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#logical-position-of-stored-procedures",
+    "href": "materials/sql/slides/session11.html#logical-position-of-stored-procedures",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Logical Position of Stored Procedures",
+    "text": "Logical Position of Stored Procedures\nStored procedures exist outside the logical SQL query evaluation pipeline.\n\n\n\n\n\nflowchart LR\n    Client --&gt; SP[Stored Procedure]\n    SP --&gt; SQL[SQL Statements]\n    SQL --&gt; Tables\n\n\n\n\n\n\nThey are invoked, not embedded.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#why-sql-introduces-stored-procedures",
+    "href": "materials/sql/slides/session11.html#why-sql-introduces-stored-procedures",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Why SQL Introduces Stored Procedures",
+    "text": "Why SQL Introduces Stored Procedures\nStored procedures exist to:\n\nEncapsulate multi-step business workflows\nEnforce data integrity rules\nCentralize write logic\nReduce application-side complexity",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#general-syntax-of-a-stored-procedure",
+    "href": "materials/sql/slides/session11.html#general-syntax-of-a-stored-procedure",
+    "title": "Reporting and Analysis with SQL",
+    "section": "General Syntax of a Stored Procedure",
+    "text": "General Syntax of a Stored Procedure\nCREATE OR REPLACE PROCEDURE procedure_name (\n    parameter_name data_type,\n    ...\n)\nLANGUAGE plpgsql\nAS $$\nBEGIN\n    -- procedural logic\nEND;\n$$;\n\n\n\n\n\n\n\nconvention\n\n\n\nStored procedure naming starts with sp_\nProcedures are invoked using CALL, not SELECT\nProcedures may perform commits and rollbacks\nPrefer procedures for write-heavy logic",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#analytical-perspective-on-procedure-design",
+    "href": "materials/sql/slides/session11.html#analytical-perspective-on-procedure-design",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Analytical Perspective on Procedure Design",
+    "text": "Analytical Perspective on Procedure Design\nA well-designed analytical stored procedure:\n\nPerforms one clear business operation\nUses UDFs for calculations\nValidates inputs explicitly\nProduces deterministic side effects",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-1-upsert-product",
+    "href": "materials/sql/slides/session11.html#example-1-upsert-product",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 1: Upsert Product",
+    "text": "Example 1: Upsert Product\nMaintaining product catalogs often requires insert-or-update logic.\nProduct upsert is frequently used in:\n\nETL pipelines\nData synchronization\nMaster data management",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-1-procedure-definition",
+    "href": "materials/sql/slides/session11.html#example-1-procedure-definition",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 1: Procedure Definition",
+    "text": "Example 1: Procedure Definition\nCREATE OR REPLACE PROCEDURE analytics.sp_upsert_product (\n    p_product_id   INT,\n    p_product_name TEXT,\n    p_category     TEXT,\n    p_price        NUMERIC\n)\nLANGUAGE plpgsql\nAS $$\nBEGIN\n    IF p_product_id IS NULL THEN\n        RAISE EXCEPTION 'product_id cannot be NULL';\n    END IF;\n\n    INSERT INTO analytics.products (product_id, product_name, category, price)\n    VALUES (p_product_id, p_product_name, p_category, p_price)\n    ON CONFLICT (product_id) DO UPDATE\n        SET product_name = EXCLUDED.product_name,\n            category     = EXCLUDED.category,\n            price        = EXCLUDED.price;\nEND;\n$$;\n\\[\\downarrow\\]\nCALL analytics.sp_upsert_product(101, 'USB Cable', 'Accessories', 9.99);\nSELECT *\nFROM analytics.products\nWHERE product_id = 101;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-2-update-order-status",
+    "href": "materials/sql/slides/session11.html#example-2-update-order-status",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 2: Update Order Status",
+    "text": "Example 2: Update Order Status\nOrder lifecycle management requires controlled state transitions.\nOrder status updates are used in:\n\nFulfillment workflows\nException handling\nOperational monitoring",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-2-procedure-definition",
+    "href": "materials/sql/slides/session11.html#example-2-procedure-definition",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 2: Procedure Definition",
+    "text": "Example 2: Procedure Definition\nCREATE OR REPLACE PROCEDURE analytics.sp_update_order_status (\n    p_order_id INT,\n    p_status   TEXT\n)\nLANGUAGE plpgsql\nAS $$\nBEGIN\n    UPDATE analytics.orders\n    SET status = p_status\n    WHERE order_id = p_order_id;\n\n    IF NOT FOUND THEN\n        RAISE EXCEPTION 'Order % not found', p_order_id;\n    END IF;\nEND;\n$$;\n\\[\\downarrow\\]\nCALL analytics.sp_update_order_status(10, 'shipped');\nSELECT *\nFROM analytics.orders\nWHERE order_id = 10;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-3-delete-customer-with-safety-check",
+    "href": "materials/sql/slides/session11.html#example-3-delete-customer-with-safety-check",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 3: Delete Customer with Safety Check",
+    "text": "Example 3: Delete Customer with Safety Check\nDestructive operations must be explicit and guarded.\nCustomer deletion is used in:\n\nGDPR compliance\nData cleanup\nAccount lifecycle management",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-3-procedure-definition",
+    "href": "materials/sql/slides/session11.html#example-3-procedure-definition",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 3: Procedure Definition",
+    "text": "Example 3: Procedure Definition\nCREATE OR REPLACE PROCEDURE analytics.sp_delete_customer (\n    p_customer_id INT\n)\nLANGUAGE plpgsql\nAS $$\nBEGIN\n    IF EXISTS (\n        SELECT 1\n        FROM analytics.orders\n        WHERE customer_id = p_customer_id\n    ) THEN\n        RAISE EXCEPTION 'Cannot delete customer % with existing orders', p_customer_id;\n    END IF;\n\n    DELETE FROM analytics.customers\n    WHERE customer_id = p_customer_id;\nEND;\n$$;\n\\[\\downarrow\\]\nCALL analytics.sp_delete_customer(19);",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-4-refresh-derived-order-totals",
+    "href": "materials/sql/slides/session11.html#example-4-refresh-derived-order-totals",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 4: Refresh Derived Order Totals",
+    "text": "Example 4: Refresh Derived Order Totals\nProcedures are ideal for batch recalculations.\nDerived metric refresh is used in:\n\nNightly batch jobs\nKPI recalculation\nData warehouse maintenance",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#example-4-procedure-definition",
+    "href": "materials/sql/slides/session11.html#example-4-procedure-definition",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Example 4: Procedure Definition",
+    "text": "Example 4: Procedure Definition\nCREATE OR REPLACE PROCEDURE analytics.sp_refresh_order_totals ()\nLANGUAGE plpgsql\nAS $$\nBEGIN\n    UPDATE analytics.orders o\n    SET status = 'recalculated'\n    WHERE EXISTS (\n        SELECT 1\n        FROM analytics.order_items oi\n        WHERE oi.order_id = o.order_id\n    );\nEND;\n$$;\n\\[\\downarrow\\]\nCALL analytics.sp_refresh_order_totals();\n\\[\\downarrow\\]\nSELECT \n    *\nFROM analytics.orders\nLIMIT 10;",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session11.html#functions-vs-stored-procedures",
+    "href": "materials/sql/slides/session11.html#functions-vs-stored-procedures",
+    "title": "Reporting and Analysis with SQL",
+    "section": "Functions vs Stored Procedures",
+    "text": "Functions vs Stored Procedures\n\n\n\nAspect\nUser Defined Function\nStored Procedure\n\n\n\n\nPrimary Role\nCalculation\nWorkflow execution\n\n\nData Modification\nNot allowed\nAllowed\n\n\nTransaction Control\nNot allowed\nAllowed\n\n\nInvocation\nSELECT\nCALL\n\n\nReturn Value\nRequired\nOptional\n\n\nUse in Queries\nYes\nNo\n\n\nTypical Usage\nMetrics, enrichment\nETL, updates, orchestration",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Reporting and Analysis with SQL"
+    ]
+  },
+  {
     "objectID": "materials/sql/slides/session11.html#analytical-views-in-practice",
     "href": "materials/sql/slides/session11.html#analytical-views-in-practice",
     "title": "Reporting and Analysis with SQL",
