@@ -1,0 +1,1507 @@
+---
+title: "Session 11: DA with SQL | UDFs, Stored Procedures"
+categories: [UDFs, SPs, UPSERT, UPDATE, DELETE]
+---
+
+## Goals
+
+
+## User Defined Functions (UDFs) in Theoretical Context
+
+In its most abstract form, a **function** represents a mapping between `inputs` and `outputs`.
+
+Given an input vector $X$, a function produces an output $Y$:
+
+$$
+f(X) \rightarrow Y
+$$
+
+**The defining characteristics of a function are:**
+  
+- Inputs are explicitly defined  
+- Internal logic is encapsulated  
+- Output is predictable for a given input  
+- Execution has no memory of previous calls  
+
+In SQL analytics, a function is **not a process**, **not a workflow**, and **not a transaction**.  
+
+It is a **calculation unit**.
+
+### Function as a Black Box
+
+**A function hides internal complexity and exposes only:**
+  
+- Input parameters  
+- Output value or structure  
+ 
+```{mermaid}
+stateDiagram-v2
+    direction LR
+
+    [*] --> Input
+    Input --> InternalLogic
+    InternalLogic --> Output
+    Output --> [*]
+```
+
+
+The caller neither knows nor controls *how* the function works internally.
+
+
+### Function Execution States in SQL
+
+From the database engine’s perspective, a function moves through well-defined states.
+
+```{mermaid}
+stateDiagram-v2
+    direction LR
+    [*] --> Invocation
+    Invocation --> ParameterBinding
+    ParameterBinding --> Evaluation
+    Evaluation --> ResultMaterialization
+    ResultMaterialization --> Return
+    Return --> [*]
+```
+
+<!-- todo ad some explanation -->
+
+---
+
+### Logical Position of Functions in SQL Processing
+
+SQL queries are not executed top-to-bottom.  They follow a **logical evaluation order**.
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> FROM
+    FROM --> WHERE
+    WHERE --> GROUP_BY
+    GROUP_BY --> HAVING
+    HAVING --> SELECT
+    SELECT --> ORDER_BY
+    ORDER_BY --> [*]
+
+    note right of SELECT
+        Scalar functions
+        are evaluated here
+    end note
+```
+
+Functions participate **inside** these phases, never outside them.
+
+
+
+### Function Usage Journey in Analytics
+
+From an analyst’s perspective, functions are part of a larger analytical journey.
+
+```{mermaid}
+journey
+    title Analytical Function Usage Journey
+    section Problem Framing
+      Identify metric: 5: Analyst
+      Define inputs: 4: Analyst
+    section Query Construction
+      Select function: 4: Analyst
+      Embed in query: 3: Analyst
+    section Execution
+      Bind parameters: 3: Database
+      Evaluate logic: 2: Database
+      Return result: 4: Database
+    section Interpretation
+      Validate output: 5: Analyst
+```
+
+
+
+### Why SQL Introduces User Defined Functions
+
+Built-in functions solve **generic** problems.  
+Analytics often requires **domain-specific logic**.
+
+**UDFs exist to:**
+
+- Encode business definitions  
+- Standardize calculations  
+- Avoid copy-paste logic  
+- Improve semantic clarity  
+
+```{mermaid}
+graph TD
+    A[SQL Functions] --> B[Built-in Functions]
+    A --> C[User Defined Functions]
+
+    C --> D[Scalar Functions]
+    C --> E[Table-Valued Functions]
+```
+
+---
+
+### Scalar Functions: Conceptual Model
+
+Scalar functions transform a **single input** row into a **single output** value.
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> RowInput
+    RowInput --> ScalarComputation
+    ScalarComputation --> SingleValue
+    SingleValue --> [*]
+```
+
+**Key properties:**
+  
+- One output per row  
+- Can be used in expressions  
+- Do not change row counts  
+
+---
+
+### Table-Valued Functions: Conceptual Model
+
+Table-valued functions generate a **relation**.
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> ParameterSet
+    ParameterSet --> RowGeneration
+    RowGeneration --> VirtualTable
+    VirtualTable --> [*]
+```
+
+**Key properties:**
+
+- Return multiple rows  
+- Behave like derived tables  
+- Participate in joins  
+
+
+### What Functions Cannot Do
+
+**Functions are intentionally restricted.**
+
+- Cannot manage transactions  
+- Cannot perform commits or rollbacks  
+- Cannot control execution flow  
+- Cannot modify schema  
+
+These constraints preserve **query safety** and **optimizer guarantees**.
+
+
+## Scalar Values User Defined Functions in Practice
+
+Now that we understand the theoretical aspects, we can explore how to create and use **UDFs** in SQL.
+
+### General Syntax of a User Defined Function
+
+A **User Defined Function (UDF)** formalizes a reusable analytical calculation.
+
+### Scalar Function Syntax
+
+```sql
+CREATE OR REPLACE FUNCTION function_name (
+    parameter_name data_type,
+    ...
+)
+RETURNS return_data_type
+LANGUAGE sql
+AS $$
+    SELECT expression;
+$$;
+```
+
+::: {.callout-important convertion="sql"}
+- Is advised to use `CREATE OR REPLACE` to allow iterative development and updates without dropping the function.
+- It is advised to name functions with a clear prefix (e.g., `fn_`) to distinguish them from tables and views.
+:::
+
+
+### Analytical Perspective on UDF Design
+
+**A well-designed analytical UDF:**
+
+- Encapsulates a **business definition**
+- Accepts **clean, minimal inputs**
+- Produces a **single, interpretable output**
+- Can be reused **consistently** across reports and queries  
+
+
+### Example 1: Age Categorization Function
+
+Analysts frequently segment customers into **age groups** for reporting and targeting.  
+Embedding this logic directly in queries leads to duplication and inconsistency.
+
+A scalar UDF ensures **one authoritative definition**.
+
+
+**Age segmentation is a foundational dimension for:**
+  
+- Customer profiling  
+- Targeting strategies  
+- Cohort analysis  
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION fn_age_group (
+    p_age INT
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_age < 25 THEN 'Under 25'
+            WHEN p_age BETWEEN 25 AND 39 THEN '25–39'
+            WHEN p_age BETWEEN 40 AND 59 THEN '40–59'
+            ELSE '60+'
+        END;
+$$;
+```
+
+
+#### Function Aplication
+
+```sql
+SELECT
+    customer_id,
+    age,
+    fn_age_group(age) AS age_group
+FROM analytics.customers;
+```
+
+#### Function Output
+
+| customer_id | age | age_group |
+|------------|-----|-----------|
+| 1  | 28 | 25–39    |
+| 2  | 35 | 25–39    |
+| 3  | 24 | Under 25 |
+| 4  | 41 | 40–59    |
+
+
+### Example 2: Customer Tenure Classification
+
+
+**Customer tenure is frequently used in:**
+  
+- Retention analysis  
+- Lifecycle modeling  
+- CRM segmentation  
+
+---
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_customer_tenure (
+    p_signup_date DATE
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN CURRENT_DATE - p_signup_date < 180 THEN 'New'
+            WHEN CURRENT_DATE - p_signup_date < 365 THEN 'Established'
+            ELSE 'Loyal'
+        END;
+$$;
+```
+
+---
+
+#### Analytical Usage
+
+```sql
+SELECT
+    customer_id,
+    signup_date,
+    analytics.fn_customer_tenure(signup_date) AS tenure_group
+FROM analytics.customers;
+```
+
+---
+
+#### Analytical Output
+
+`hypothetical`
+
+| customer_id | signup_date | tenure_group |
+|------------|-------------|--------------|
+| 10         | 2025-11-01  | New          |
+| 11         | 2025-03-10  | Established  |
+| 12         | 2023-08-15  | Loyal        |
+
+
+### Example 3: Product Price Tier Classification
+
+**Product price tiers are frequently used in:**
+  
+- Category benchmarking  
+- Demand elasticity analysis  
+- Product mix optimization  
+
+---
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_price_tier (
+    p_price NUMERIC
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_price < 20 THEN 'Low'
+            WHEN p_price BETWEEN 20 AND 99.99 THEN 'Mid'
+            ELSE 'Premium'
+        END;
+$$;
+```
+
+---
+
+#### Analytical Usage
+
+```sql
+SELECT
+    product_id,
+    product_name,
+    price,
+    analytics.fn_price_tier(price) AS price_tier
+FROM analytics.products;
+```
+
+---
+
+#### Analytical Output
+
+`hypothetical`
+
+| product_id | product_name | price  | price_tier |
+|-----------|--------------|--------|------------|
+| 101       | Item A       | 12.50  | Low        |
+| 102       | Item B       | 55.00  | Mid        |
+| 103       | Item C       | 240.00 | Premium    |
+
+---
+
+### Example 4: Order Size Classification
+
+**Order size is commonly used in:**
+  
+- Basket analysis  
+- Customer purchase behavior  
+- Operational load estimation  
+
+---
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_order_size (
+    p_quantity INT
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_quantity = 1 THEN 'Single Item'
+            WHEN p_quantity BETWEEN 2 AND 4 THEN 'Small Basket'
+            ELSE 'Large Basket'
+        END;
+$$;
+```
+
+---
+
+#### Analytical Usage
+
+```sql
+SELECT
+    oi.order_id,
+    oi.quantity,
+    analytics.fn_order_size(oi.quantity) AS order_size
+FROM analytics.order_items oi;
+```
+
+---
+
+#### Analytical Output
+
+`hypothetical`
+
+| order_id | quantity | order_size   |
+|---------|----------|--------------|
+| 5001    | 1        | Single Item  |
+| 5002    | 3        | Small Basket |
+| 5003    | 8        | Large Basket |
+
+---
+
+### Example 5: Order Activity Status Normalization
+
+**Order activity status is used in:**
+  
+- Operational reporting  
+- KPI standardization  
+- Funnel and drop-off analysis  
+
+---
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_order_activity (
+    p_status TEXT
+)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+    SELECT
+        CASE
+            WHEN p_status IN ('cancelled', 'returned') THEN 'Inactive'
+            ELSE 'Active'
+        END;
+$$;
+```
+
+---
+
+#### Analytical Usage
+
+```sql
+SELECT
+    order_id,
+    status,
+    analytics.fn_order_activity(status) AS activity_state
+FROM analytics.orders;
+```
+
+---
+
+#### Analytical Output
+
+`hypothetical`
+
+| order_id | status     | activity_state |
+|---------|------------|----------------|
+| 7001    | completed  | Active         |
+| 7002    | cancelled  | Inactive       |
+| 7003    | shipped    | Active         |
+
+
+## Table-Valued User Defined Functions in Practice
+
+
+Scalar UDFs return **one value** per invocation.  
+**Table-Valued Functions (TVFs)** return a **set of rows** and behave like virtual tables inside SQL queries.
+
+**They are especially useful in analytics when:**
+
+- Logic naturally produces **multiple rows**
+- Queries need reusable **derived datasets**
+- Complex joins and aggregations must be standardized  
+
+
+### General Syntax of a Table-Valued Function
+
+
+```sql
+CREATE OR REPLACE FUNCTION function_name (
+    parameter_name data_type,
+    ...
+)
+RETURNS TABLE (
+    column_name data_type,
+    ...
+)
+LANGUAGE sql
+AS $$
+    SELECT ...
+$$;
+```
+
+::: {.callout-important convertion="sql"}
+- TVFs can be used in the `FROM` clause like regular tables.
+- Prefer `RETURNS TABLE` for analytical readability.
+- TVFs are ideal for encapsulating joins + aggregations.
+:::
+
+
+### Analytical Perspective on TVF Design
+
+**A well-designed analytical TVF:**
+
+- Represents a **logical dataset**, not a single metric  
+- Encapsulates joins and aggregations  
+- Produces schema-stable output  
+- Can be safely reused in dashboards and pipelines  
+
+---
+
+### Example 1: Recent Orders for a Customer
+
+Analysts often need to inspect a customer’s **most recent orders** together with their monetary impact.
+
+**Recent order analysis is frequently used in:**
+  
+- Customer profiling  
+- Support and case investigation  
+- Purchase behavior analysis  
+
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_recent_orders (
+    p_customer_id INT,
+    p_limit       INT
+)
+RETURNS TABLE (
+    order_id    INT,
+    order_date  DATE,
+    status      TEXT,
+    order_total NUMERIC
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        o.order_id,
+        o.order_date,
+        o.status,
+        COALESCE(SUM(oi.quantity * p.price), 0) AS order_total
+    FROM analytics.orders o
+    JOIN analytics.order_items oi ON oi.order_id = o.order_id
+    JOIN analytics.products p     ON p.product_id = oi.product_id
+    WHERE o.customer_id = p_customer_id
+    GROUP BY o.order_id, o.order_date, o.status
+    ORDER BY o.order_date DESC
+    LIMIT GREATEST(p_limit, 0);
+$$;
+```
+
+---
+
+#### Function Application
+
+```sql
+SELECT *
+FROM analytics.fn_recent_orders(1, 4);
+```
+
+---
+
+#### Function Output
+
+`hypothetical`
+
+| order_id | order_date | status     | order_total |
+|---------|------------|------------|-------------|
+| 9005    | 2025-01-20 | completed  | 320.00      |
+| 9003    | 2025-01-12 | shipped    | 145.50      |
+| 9001    | 2024-12-28 | completed  | 89.99       |
+
+---
+
+### Example 2: Top Products by Revenue
+
+Revenue ranking is a core analytical task for understanding **product performance**.
+
+**Top-product analysis is used in:**
+  
+- Product portfolio reviews  
+- Revenue concentration analysis  
+- Pricing and promotion strategy  
+
+---
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_top_products_by_revenue (
+    p_limit INT
+)
+RETURNS TABLE (
+    product_id   INT,
+    product_name TEXT,
+    revenue      NUMERIC,
+    total_qty    BIGINT
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        p.product_id,
+        p.product_name,
+        COALESCE(SUM(oi.quantity * p.price), 0) AS revenue,
+        COALESCE(SUM(oi.quantity), 0)           AS total_qty
+    FROM analytics.products p
+    LEFT JOIN analytics.order_items oi
+        ON oi.product_id = p.product_id
+    GROUP BY p.product_id, p.product_name
+    ORDER BY revenue DESC, total_qty DESC
+    LIMIT GREATEST(p_limit, 0);
+$$;
+```
+
+---
+
+#### Function Application
+
+```sql
+SELECT 
+    *
+FROM analytics.fn_top_products_by_revenue(10);
+```
+
+---
+
+#### Function Output
+
+`hypothetical`
+
+| product_id | product_name | revenue | total_qty |
+|-----------|--------------|---------|-----------|
+| 301       | Laptop Pro   | 15400   | 22        |
+| 214       | Headphones   | 8200    | 95        |
+| 187       | Keyboard     | 6100    | 120       |
+
+---
+
+### Example 3: Customers by City
+
+Geographic aggregation is a recurring requirement in analytics.
+
+**Customer geography analysis supports:**
+  
+- Regional performance tracking  
+- Geo-based segmentation  
+- Spatial analytics pipelines  
+
+---
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_customers_by_city (
+    p_city_id INT
+)
+RETURNS TABLE (
+    customer_id INT,
+    first_name  TEXT,
+    last_name   TEXT,
+    signup_date DATE
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.signup_date
+    FROM analytics.customers c
+    WHERE c.city_id = p_city_id;
+$$;
+```
+
+---
+
+#### Function Application
+
+```sql
+SELECT 
+    *
+FROM analytics.fn_customers_by_city(1);
+```
+
+#### Function Output
+
+`hypothetical`
+
+| customer_id | first_name | last_name | signup_date |
+|------------|------------|-----------|-------------|
+| 501        | Anna       | Petrosyan | 2024-02-01  |
+| 514        | Arman      | Hakobyan  | 2023-09-18  |
+
+---
+
+### Example 4: Order Items with Product Context
+
+Analytical queries often require **denormalized views** of order line items.
+
+**Line-item enrichment is used in:**
+  
+- Order audits  
+- Revenue reconciliation  
+- BI semantic layers  
+
+
+#### Function Definition
+
+```sql
+CREATE OR REPLACE FUNCTION analytics.fn_order_items_detailed (
+    p_order_id INT
+)
+RETURNS TABLE (
+    product_id   INT,
+    product_name TEXT,
+    category     TEXT,
+    quantity     INT,
+    unit_price  NUMERIC,
+    line_total  NUMERIC
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        p.product_id,
+        p.product_name,
+        p.category,
+        oi.quantity,
+        p.price AS unit_price,
+        oi.quantity * p.price AS line_total
+    FROM analytics.order_items oi
+    JOIN analytics.products p
+        ON p.product_id = oi.product_id
+    WHERE oi.order_id = p_order_id;
+$$;
+```
+
+---
+
+#### Function Application
+
+```sql
+SELECT 
+    *
+FROM analytics.fn_order_items_detailed(10);
+```
+
+---
+
+#### Function Output
+
+`hypothetical`
+
+| product_id | product_name | category    | quantity | unit_price | line_total |
+|-----------|--------------|-------------|----------|------------|------------|
+| 301       | Laptop Pro   | Electronics | 1        | 1200.00    | 1200.00   |
+| 214       | Mouse        | Accessories | 2        | 25.00      | 50.00     |
+
+---
+
+### Analytical Takeaways
+
+  
+- TVFs represent **datasets**, not values  
+- They centralize joins and aggregations  
+- They simplify downstream SQL and BI layers  
+- TVFs are natural building blocks for Stored Procedures  
+
+## Scalar vs Table Valued Function
+
+| Aspect | Scalar User Defined Function | User Defined Aggregate (UDA) |
+|------|-----------------------------|------------------------------|
+| Purpose | Computes a value for **each input row** | Computes a value over **a set of rows** |
+| Input | One row at a time | Multiple rows (group context) |
+| Output | Single value per row | Single aggregated value per group |
+| Typical Usage | Classification, transformation, enrichment | Summarization, accumulation, aggregation |
+| Invocation Context | `SELECT`, `WHERE`, `ORDER BY`, expressions | `SELECT` with `GROUP BY` |
+| State Handling | Stateless | Stateful (maintains aggregation state) |
+| Complexity | Simple logic, CASE expressions | Requires state transition and finalization |
+| SQL Syntax | `CREATE FUNCTION ... RETURNS <type>` | `CREATE FUNCTION` + `CREATE AGGREGATE` |
+| Parallelization | Easily parallelizable | Parallel-safe only if explicitly defined |
+| Determinism | Usually deterministic | Depends on state logic |
+| Performance Cost | Low (row-level execution) | Higher (state accumulation) |
+| Example Use Case | Age group, price tier, tenure | Sum, product, custom weighted metrics |
+
+
+## Stored Procedures
+
+Unlike functions, **stored procedures represent executable workflows**.  
+They are designed to **orchestrate logic**, **modify data**, and **control execution flow**.
+
+
+A **stored procedure** represents a controlled sequence of operations executed as a unit.
+
+Given an input vector $X$, a procedure performs actions $A$ and may optionally produce outputs $O$:
+
+$$
+P(X) \rightarrow A \; [\rightarrow O]
+$$
+
+**The defining characteristics of a stored procedure are:**
+  
+- Can modify data (`INSERT`, `UPDATE`, `DELETE`)  
+- Can control execution flow (`IF`, `LOOP`, `RAISE`)  
+- Can manage transactions  
+- May or may not return results  
+
+---
+
+### Procedure as an Execution Unit
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> Input
+    Input --> Validation
+    Validation --> BusinessLogic
+    BusinessLogic --> DataMutation
+    DataMutation --> Completion
+    Completion --> [*]
+```
+
+---
+
+### Stored Procedure Execution States
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> Call
+    Call --> ParameterBinding
+    ParameterBinding --> Execution
+    Execution --> TransactionControl
+    TransactionControl --> End
+    End --> [*]
+```
+
+---
+
+### Logical Position of Stored Procedures
+
+Stored procedures exist **outside** the logical SQL query evaluation pipeline.
+
+```{mermaid}
+flowchart LR
+    Client --> SP[Stored Procedure]
+    SP --> SQL[SQL Statements]
+    SQL --> Tables
+```
+
+They are **invoked**, not embedded.
+
+---
+
+### Why SQL Introduces Stored Procedures
+
+**Stored procedures exist to:**
+
+- Encapsulate multi-step business workflows  
+- Enforce data integrity rules  
+- Centralize write logic  
+- Reduce application-side complexity  
+
+---
+
+### General Syntax of a Stored Procedure
+
+```sql
+CREATE OR REPLACE PROCEDURE procedure_name (
+    parameter_name data_type,
+    ...
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- procedural logic
+END;
+$$;
+```
+
+::: {.callout-important title = "convention"}
+
+- stored procedure naming starts with `sp_`
+- Procedures are invoked using `CALL`, not `SELECT`.
+- Procedures may perform commits and rollbacks.
+- Prefer procedures for write-heavy logic.
+:::
+
+---
+
+### Analytical Perspective on Procedure Design
+
+**A well-designed analytical stored procedure:**
+
+  
+- Performs one clear business operation  
+- Uses UDFs for calculations  
+- Validates inputs explicitly  
+- Produces deterministic side effects  
+
+---
+
+### Example 1: Upsert Product
+
+Maintaining product catalogs often requires **insert-or-update logic**.
+
+**Product upsert is frequently used in:**
+  
+- ETL pipelines  
+- Data synchronization  
+- Master data management  
+
+---
+
+#### Procedure Definition
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_upsert_product (
+    p_product_id   INT,
+    p_product_name TEXT,
+    p_category     TEXT,
+    p_price        NUMERIC
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF p_product_id IS NULL THEN
+        RAISE EXCEPTION 'product_id cannot be NULL';
+    END IF;
+
+    INSERT INTO analytics.products (product_id, product_name, category, price)
+    VALUES (p_product_id, p_product_name, p_category, p_price)
+    ON CONFLICT (product_id) DO UPDATE
+        SET product_name = EXCLUDED.product_name,
+            category     = EXCLUDED.category,
+            price        = EXCLUDED.price;
+END;
+$$;
+```
+
+---
+
+#### Procedure Execution
+
+```sql
+CALL analytics.sp_upsert_product(101, 'USB Cable', 'Accessories', 9.99);
+```
+#### Viewing the results
+
+**Inserting new one**
+
+```sql
+SELECT 
+	* 
+FROM analytics.products
+WHERE product_id = 101
+```
+
+**Updating the existing one**
+
+```sql
+SELECT 
+	* 
+FROM analytics.products
+WHERE product_id = 1
+```
+
+### Example 2: Update Order Status
+
+Order lifecycle management requires **controlled state transitions**.
+
+**Order status updates are used in:**
+  
+- Fulfillment workflows  
+- Exception handling  
+- Operational monitoring  
+
+---
+
+#### Procedure Definition
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_update_order_status (
+    p_order_id INT,
+    p_status   TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE analytics.orders
+    SET status = p_status
+    WHERE order_id = p_order_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Order % not found', p_order_id;
+    END IF;
+END;
+$$;
+```
+
+---
+
+#### Procedure Execution
+
+```sql
+CALL analytics.sp_update_order_status(10, 'shipped');
+```
+
+
+#### Viewing the results
+
+```sql
+SELECT 
+    * 
+FROM analytics.orders 
+where order_id =10;
+```
+
+### Example 3: Delete Customer with Safety Check
+
+Destructive operations must be **explicit and guarded**.
+
+**Customer deletion is used in:**
+  
+- GDPR compliance  
+- Data cleanup  
+- Account lifecycle management  
+
+#### Procedure Definition
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_delete_customer (
+    p_customer_id INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM analytics.orders
+        WHERE customer_id = p_customer_id
+    ) THEN
+        RAISE EXCEPTION 'Cannot delete customer % with existing orders', p_customer_id;
+    END IF;
+
+    DELETE FROM analytics.customers
+    WHERE customer_id = p_customer_id;
+END;
+$$;
+```
+
+---
+
+#### Procedure Invocation
+
+```sql
+CALL analytics.sp_delete_customer(19);
+```
+
+### Example 4: Refresh Derived Order Totals
+
+Procedures are ideal for **batch recalculations**.
+
+**Derived metric refresh is used in:**
+  
+- Nightly batch jobs  
+- KPI recalculation  
+- Data warehouse maintenance  
+
+---
+
+#### Procedure Definition
+
+```sql
+CREATE OR REPLACE PROCEDURE analytics.sp_refresh_order_totals ()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE analytics.orders o
+    SET status = 'recalculated'
+    WHERE EXISTS (
+        SELECT 1
+        FROM analytics.order_items oi
+        WHERE oi.order_id = o.order_id
+    );
+END;
+$$;
+```
+
+---
+
+#### Procedure Execution
+
+```sql
+CALL analytics.sp_refresh_order_totals();
+```
+
+#### Checki the Results
+
+```sql
+SELECT 
+	* 
+FROM analytics.orders 
+LIMIT 10
+```
+
+---
+
+## Functions vs Stored Procedures
+
+| Aspect | User Defined Function | Stored Procedure |
+|------|----------------------|------------------|
+| Primary Role | Calculation | Workflow execution |
+| Data Modification | Not allowed | Allowed |
+| Transaction Control | Not allowed | Allowed |
+| Invocation | `SELECT` | `CALL` |
+| Return Value | Required | Optional |
+| Use in Queries | Yes | No |
+| Typical Usage | Metrics, enrichment | ETL, updates, orchestration |
+
+---
+
+
+::: {.callout-important}
+- UDFs handle **what to compute**
+- Stored Procedures handle **what to do**
+- UDFs feed procedures, not the opposite  
+:::
+  
+
+
+
+<!-- Next step: **advanced procedures**, transaction management, and error-handling patterns. -->
+
+
+
+## Views in Practice
+
+Views provide a **logical abstraction layer** over base tables.  
+They encapsulate complex queries into **reusable, queryable objects** without storing data physically.
+
+
+A **view** represents a named, stored SQL query.
+
+Given base tables $T$, a view defines a virtual relation $V$:
+
+$$
+V = g(T)
+$$
+
+**The defining characteristics of a view are:**
+  
+- Does not store data (logical layer only)  
+- Always reflects the latest underlying data  
+- Cannot accept parameters  
+- Can be queried like a table  
+
+---
+
+### View as a Logical Abstraction
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> BaseTables
+    BaseTables --> ViewDefinition
+    ViewDefinition --> ResultSet
+    ResultSet --> [*]
+```
+
+---
+
+### Logical Position of Views in SQL Processing
+
+Views are **expanded** by the query planner before execution.
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> FROM
+    FROM --> ViewExpansion
+    ViewExpansion --> WHERE
+    WHERE --> GROUP_BY
+    GROUP_BY --> SELECT
+    SELECT --> [*]
+```
+
+A view is **not executed independently** — it is inlined into the calling query.
+
+---
+
+### Why SQL Introduces Views
+
+**Views exist to:**
+
+- Simplify complex queries  
+- Enforce semantic consistency  
+- Provide controlled data access  
+- Separate analytical logic from raw tables  
+
+---
+
+### General Syntax of a View
+
+```sql
+CREATE OR REPLACE VIEW view_name AS
+SELECT
+    ...
+FROM ...
+WHERE ...;
+```
+
+::: {.callout-important title="conventions"}
+- Use `CREATE OR REPLACE VIEW` during iterative development.
+- Views cannot contain procedural logic.
+- Treat views as reusable query building blocks.
+- `v_`, test
+:::
+
+---
+
+### Analytical Perspective on View Design
+
+**A well-designed analytical view:**
+
+- Represents a clear business concept  
+- Hides joins and technical complexity  
+- Produces stable column semantics  
+- Is safe to reuse across dashboards and notebooks  
+
+
+### Example 1: Customer Dimension View
+
+Analysts frequently need customer data enriched with **geographic context**.
+
+**Customer dimension views are used in:**
+  
+- Segmentation analysis  
+- CRM reporting  
+- Geographic rollups  
+
+---
+
+#### View Definition
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_customers_enriched AS
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.age,
+    c.email,
+    c.signup_date,
+    ci.city_name,
+    r.region_name,
+    co.country_name
+FROM analytics.customers c
+LEFT JOIN analytics.cities   ci ON ci.city_id   = c.city_id
+LEFT JOIN analytics.regions  r  ON r.region_id  = ci.region_id
+LEFT JOIN analytics.countries co ON co.country_id = r.country_id;
+```
+
+---
+
+#### View Usage
+
+```sql
+SELECT *
+FROM analytics.v_customers_enriched;
+```
+
+---
+
+#### View Output
+
+`hypothetical`
+
+| customer_id | first_name | city_name | region_name | country_name |
+|------------|------------|-----------|-------------|--------------|
+| 1          | Anna       | Yerevan   | Yerevan     | Armenia      |
+| 2          | Arman      | Gyumri    | Shirak      | Armenia      |
+
+---
+
+### Example 2: Orders with Order Size Classification
+
+Analytical reporting often requires **semantic order attributes**.
+
+**Order views are used in:**
+  
+- Operational dashboards  
+- Funnel analysis  
+- KPI standardization  
+
+---
+
+#### View Definition
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_orders_with_size AS
+SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    o.status,
+    SUM(oi.quantity) AS total_items,
+    analytics.fn_order_size(SUM(oi.quantity)::INT) AS order_size
+FROM analytics.orders o
+JOIN analytics.order_items oi ON oi.order_id = o.order_id
+GROUP BY o.order_id, o.customer_id, o.order_date, o.status;
+```
+
+---
+
+#### View Usage
+
+```sql
+SELECT *
+FROM analytics.v_orders_with_size;
+```
+
+---
+
+#### View Output
+
+`hypothetical`
+
+| order_id | total_items | order_size   |
+|---------|-------------|--------------|
+| 1001    | 1           | Single Item  |
+| 1002    | 5           | Small Basket |
+| 1003    | 12          | Large Basket |
+
+---
+
+### Example 3: Product Revenue Summary View
+
+Revenue aggregation is a core analytica
+
+
+### Example 3: Product Revenue Summary View
+
+Revenue aggregation is a core analytical requirement.
+
+**Revenue summary views support:**
+  
+- Product performance analysis  
+- Executive dashboards  
+- Revenue concentration studies  
+
+---
+
+#### View Definition
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_product_revenue AS
+SELECT
+    p.product_id,
+    p.product_name,
+    p.category,
+    SUM(oi.quantity)                   AS total_qty,
+    SUM(oi.quantity * p.price)         AS revenue,
+    analytics.fn_price_tier(p.price)   AS price_tier
+FROM analytics.products p
+LEFT JOIN analytics.order_items oi
+    ON oi.product_id = p.product_id
+GROUP BY p.product_id, p.product_name, p.category, p.price;
+```
+
+---
+
+#### View Usage
+
+```sql
+SELECT *
+FROM analytics.v_product_revenue
+ORDER BY revenue DESC;
+```
+
+---
+
+#### View Output
+
+`hypothetical`
+
+| product_id | product_name | revenue | price_tier |
+|-----------|--------------|---------|------------|
+| 301       | Laptop Pro   | 15400   | Premium    |
+| 214       | Headphones   | 8200    | Mid        |
+
+---
+
+### Example 4: Active Orders View
+
+Views are often used to **standardize filtering rules**.
+
+**Active order views are used in:**
+  
+- Operational monitoring  
+- SLA tracking  
+- BI semantic layers  
+
+---
+
+#### View Definition
+
+```sql
+CREATE OR REPLACE VIEW analytics.v_active_orders AS
+SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    o.status
+FROM analytics.orders o
+WHERE analytics.fn_order_activity(o.status) = 'Active';
+```
+
+---
+
+#### View Usage
+
+```sql
+SELECT *
+FROM analytics.v_active_orders;
+```
+
+
+#### View Output
+
+`hypothetical`
+
+| order_id | status    |
+|---------|-----------|
+| 7001    | completed |
+| 7003    | shipped   |
+
+
+
+## Views vs Functions vs Stored Procedures
+
+| Aspect | View | Function | Stored Procedure |
+|------|------|----------|------------------|
+| Purpose | Query abstraction | Calculation | Workflow execution |
+| Data Storage | No | No | No |
+| Accept Parameters | No | Yes | Yes |
+| Modify Data | No | No | Yes |
+| Use in SELECT | Yes | Yes | No |
+| Control Flow | No | No | Yes |
+| Typical Use | BI layer, semantics | Metrics, logic | ETL, updates |
+
+
+::: {.callout-important}
+
+- Views define **what data looks like**
+- Functions define **how values are computed**
+- Stored Procedures define **what actions are taken**
+:::
+
+
+## Try Youself
+
+Try to :
+
+**combining Views + UDFs + Stored Procedures into analytical pipelines**.
