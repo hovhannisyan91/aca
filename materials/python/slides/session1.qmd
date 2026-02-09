@@ -74,29 +74,16 @@ Launch the installer.
 
 ---
 
-### macOS Installation (Intel – rare in 2026)
-
-Intel Macs are no longer actively supported (last packages ~mid-2025).  
-If you have an older Intel Mac:
-
-* Use archived installer: [https://repo.anaconda.com/miniconda/](https://repo.anaconda.com/miniconda/)  
-  → look for `Miniconda3-latest-MacOSX-x86_64.pkg`
-* Or consider Miniforge (conda-forge default): [https://github.com/conda-forge/miniforge](https://github.com/conda-forge/miniforge)
-
-Install the same way as shown above.
----
-
 ## Why Use Isolated Environments?
 
 Python environments allow you to separate projects and avoid conflicts.
 
 They help you:
-
-Avoid version conflicts between libraries
-Keep your base environment clean
-Reproduce analyses on other machines
-Safely test new libraries or versions
-Share identical setups with teammates
+* Avoid version conflicts between libraries
+* Keep your base environment clean
+* Reproduce analyses on other machines
+* Safely test new libraries or versions
+* Share identical setups with teammates
 
 Think of environments as “self-contained toolboxes” for each project.
 
@@ -109,7 +96,7 @@ Open **Anaconda Prompt** (Windows) or **Terminal** (macOS/Linux)
 ```bash
 # Basic syntax
 conda create --name my-env python=3.11
-
+```
 ---
 
 ## Activating the Environment
@@ -117,10 +104,12 @@ conda create --name my-env python=3.11
 ```bash
 # Basic syntax
 conda activate my-env
+```
 
 Your terminal prompt should change to show the environment name.
 
-```(base) user@machine ~ % conda activate data-analysis
+```bash
+(base) user@machine ~ % conda activate data-analysis
 (data-analysis) user@machine ~ %
 ```
 **Important rule**
@@ -130,9 +119,14 @@ Always activate the correct environment before installing packages or running co
 
 ## Installing packages
 
-```
+Rule #1: Never install packages into the (base) environment. Always create & activate a new one first.
+
+```bash
 # Preferred: use conda for scientific packages (better dependency handling)
 conda install jupyter pandas numpy matplotlib seaborn scikit-learn
+
+#Alternatively, create an environment with packages at once
+conda create -n data-analysis python=3.11 jupyter pandas numpy matplotlib seaborn psycopg2 -c conda-forge
 
 # Or install JupyterLab + extras
 conda install jupyterlab plotly sqlalchemy psycopg2
@@ -144,7 +138,7 @@ pip install pandas-profiling great-tables
 
 ## Essential Management Commands
 
-```
+```bash
 # List all environments
 conda env list
 
@@ -181,14 +175,13 @@ conda clean --all
 
 Using `conda`
 
-```
+```bash
 conda install pandas numpy matplotlib seaborn psycopg2
 ```
 ---
 ### Installing and launching Jupyter Notebook
 
-Jupyter Notebooks allow you to mix
-
+Jupyter Notebooks allow you to mix:
 * Code
 * Text explanations
 * Visualizations
@@ -197,7 +190,6 @@ Jupyter Notebooks allow you to mix
 They are widely used in data analytics for exploration and teaching.
 
 Why Jupyter?
-
 * Immediate feedback
 * Step-by-step execution
 * Inline plots and tables
@@ -207,7 +199,7 @@ Why Jupyter?
 
 Using `conda`
 
-```
+```bash
 conda install notebook
 
 jupyter notebook
@@ -452,3 +444,26 @@ Now exit the psql.
 ```
 exit
 ```
+----
+Postgres connection example (after installing psycopg2)
+```python
+import psycopg2
+import pandas as pd
+
+try:
+    conn = psycopg2.connect(
+        dbname="suppliers",
+        user="postgres",
+        password="your_password_here",   # ← never commit this!
+        host="localhost",
+        port="5432"
+    )
+    print("Connected!")
+
+    df = pd.read_sql("SELECT * FROM your_table LIMIT 5;", conn)
+    display(df)
+
+    conn.close()
+except Exception as e:
+    print("Connection failed:", e)
+  ```
