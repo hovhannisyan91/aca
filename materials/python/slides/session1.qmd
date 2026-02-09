@@ -31,12 +31,12 @@ format:
 
 By the end of this week, students will be able to:
 
-- Install and configure a Python development environment using Miniconda
-- Create and manage isolated Python environments
-- Install common data analysis libraries
-- Run Python scripts and Jupyter notebooks
-- Understand Python fundamentals (syntax, data types, loops, functions)
-- Connect Python to a PostgreSQL database
+* Install and configure a Python development environment using Miniconda
+* Create and manage isolated Python environments
+* Install common data analysis libraries
+* Run Python scripts and Jupyter notebooks
+* Understand Python fundamentals (syntax, data types, loops, functions)
+* Connect Python to a PostgreSQL database
 
 ## 1. Installing Miniconda
 
@@ -79,22 +79,26 @@ Launch the installer.
 Intel Macs are no longer actively supported (last packages ~mid-2025).  
 If you have an older Intel Mac:
 
-- Use archived installer: [https://repo.anaconda.com/miniconda/](https://repo.anaconda.com/miniconda/)  
+* Use archived installer: [https://repo.anaconda.com/miniconda/](https://repo.anaconda.com/miniconda/)  
   → look for `Miniconda3-latest-MacOSX-x86_64.pkg`
-- Or consider Miniforge (conda-forge default): [https://github.com/conda-forge/miniforge](https://github.com/conda-forge/miniforge)
+* Or consider Miniforge (conda-forge default): [https://github.com/conda-forge/miniforge](https://github.com/conda-forge/miniforge)
 
 Install the same way as shown above.
 ---
 
 ## Why Use Isolated Environments?
 
-Isolated Python environments help you:
+Python environments allow you to separate projects and avoid conflicts.
 
-- Prevent version conflicts between projects
-- Keep your **base** environment clean and minimal
-- Reproduce setups easily on other machines
-- Test different package/library versions safely
-- Share exact project setups with teammates
+They help you:
+
+Avoid version conflicts between libraries
+Keep your base environment clean
+Reproduce analyses on other machines
+Safely test new libraries or versions
+Share identical setups with teammates
+
+Think of environments as “self-contained toolboxes” for each project.
 
 ---
 
@@ -114,13 +118,13 @@ conda create --name my-env python=3.11
 # Basic syntax
 conda activate my-env
 
-Your terminal prompt should change to show the environment name:
+Your terminal prompt should change to show the environment name.
 
 ```(base) user@machine ~ % conda activate data-analysis
 (data-analysis) user@machine ~ %
 ```
-
-*Tip*: Always activate before installing packages or running code!
+**Important rule**
+Always activate the correct environment before installing packages or running code.
 
 ---
 
@@ -159,4 +163,292 @@ conda update --all
 # Clean up unused packages & cache (frees disk space)
 conda clean --all
 ```
+---
 
+## Installing libraries
+
+| Library    | Purpose                        |
+| ---------- | ------------------------------ |
+| pandas     | Data manipulation & analysis   |
+| numpy      | Numerical computing            |
+| matplotlib | Low-level plotting             |
+| seaborn    | Statistical data visualization |
+| psycopg2   | PostgreSQL database adapter    |
+
+---
+
+### How to install core libraries
+
+Using `conda`
+
+```
+conda install pandas numpy matplotlib seaborn psycopg2
+```
+---
+### Installing and launching Jupyter Notebook
+
+Jupyter Notebooks allow you to mix
+
+* Code
+* Text explanations
+* Visualizations
+* Results
+
+They are widely used in data analytics for exploration and teaching.
+
+Why Jupyter?
+
+* Immediate feedback
+* Step-by-step execution
+* Inline plots and tables
+* Great for experimentation and learning
+
+---
+
+Using `conda`
+
+```
+conda install notebook
+
+jupyter notebook
+```
+---
+### Verifying installation
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import psycopg2
+```
+
+If no errors appear, your setup is correct.
+### pandas
+
+- DataFrame and Series data structures
+- Handles tabular, time-series, and relational data
+- SQL-like operations (join, groupby, filter)
+
+---
+
+### numpy
+
+- N-dimensional arrays (ndarray)
+- Vectorized operations
+- Fast numerical computation
+
+---
+
+### Visualisation libraries
+
+**matplotlib**
+
+- Low-level plotting library
+- Full control over figures, axes, styles
+- Base library for seaborn
+
+---
+
+**seaborn**
+
+- High-level interface for statistical graphics
+- Built on top of matplotlib
+- Works directly with pandas DataFrames
+
+---
+
+## Python Fundamentals (Overview)
+
+Python is a general-purpose language with a strong focus on readability.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](img/pythonlogo.png)
+:::
+
+::: {.column width="50%"}
+![](img/pythonsnake.webp)
+:::
+
+::::
+
+---
+### Examples of common data types
+
+Python variables can store different kinds of values — and each kind of value has a type that determines what you can do with it.
+
+--- 
+
+[Text Type: `str` (Strings)]{.mark}
+
+```python
+name = "Alice"
+greeting = 'Hello everyone!'
+```
+
+Strings are sequences of characters, and you can:
+* Join them
+* Slice them
+* Format them into output
+
+---
+#### Numeric Types
+
+Integers (int)
+
+Whole numbers, no decimal point:
+
+```python
+age = 30
+year = 2026
+```
+
+Floating-Point (float)
+
+Numbers with decimal points:
+
+```python
+pi = 3.14159
+temperature = -5.2
+```
+
+Complex Numbers (complex)
+
+Used for advanced math:
+
+```python
+z = 2 + 3j
+```
+
+Numeric types can be added, multiplied, compared, and used in math expressions.
+
+---
+#### Sequence Types
+
+List — `list`
+
+Lists store multiple values:
+```python
+fruits = ["apple", 3.14, True]
+```
+
+Lists are:
+* Ordered
+* Mutable (you can change them)
+* Indexable with [0], [1], etc.
+
+---
+Tuple — `tuple`
+
+Tuples look like lists but cannot be changed after creation:
+
+```python
+coords = (10, 20)
+```
+---
+Range — `range`
+
+Often used in loops:
+
+```python
+nums = range(5)   # produces 0,1,2,3,4
+```
+Great for iterating a fixed number of times.
+---
+
+Mapping Type — `dict` (Dictionaries)
+
+Associates keys with values:
+
+```python
+person = {"name": "Alice", "age": 30}
+```
+Dictionaries are:
+* Unordered (in older Python versions)
+* Fast for lookup by key
+* Very common in data work (JSON-like)
+
+---
+
+Set Types — `set` and `frozenset`
+
+Set Types — `set`: stores unique values
+
+```python
+colors = {"red", "green", "blue"}
+```
+If you add `"red"` again, it won’t duplicate.
+
+Frozen Set `frozenset`
+
+Like a set, but immutable — once created it can’t change.
+---
+
+Boolean Type — `bool` 
+
+There are only two possible values:
+
+```python
+True
+False
+```
+Booleans are essential for:
+* Filtering data
+* Writing conditions
+* Validating assumptions in analysis
+---
+Bonus: Comparison Operators (Return Booleans)
+
+These operators always return `True` or `False`:
+```python
+x == y   # equal
+x != y   # not equal
+x > y    # greater than
+x < y    # less than
+x >= y   # greater or equal
+x <= y   # less or equal
+```
+---
+Boolean Logic Operators
+
+Combine multiple conditions using:
+```python
+and   # both conditions must be True
+or    # at least one condition must be True
+not   # reverses the value
+```
+Example:
+```python
+age = 22
+has_ticket = True
+
+can_enter = age >= 18 and has_ticket
+
+```
+---
+
+## Connecting PostreSQL to Python
+
+1. Create a virtual environment and activate it. (You already know how to do this!)
+2. Install the psyopg2 package. (you also know how to do this!) Create the requirements.txt file.
+
+```
+conda install -c conda-forge psycopg2
+pip freeze > requirements.txt
+```
+---
+### 3. Creating a new database
+
+Connect to PostgreSQL servier using psql tool and create a new database called suppliers.
+
+```
+psql -U postgres
+
+CREATE DATABASE suppliers;
+```
+Now exit the psql.
+```
+exit
+```
