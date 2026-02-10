@@ -215,7 +215,8 @@ import seaborn as sns
 import psycopg2
 ```
 
-If no errors appear, your setup is correct.
+--- 
+
 ### pandas
 
 - DataFrame and Series data structures
@@ -249,22 +250,14 @@ If no errors appear, your setup is correct.
 - Works directly with pandas DataFrames
 
 ---
-
 ## Python Fundamentals (Overview)
 
 Python is a general-purpose language with a strong focus on readability.
 
-:::: {.columns}
+![Python](img/python/session1/pythonlogo.png)
 
-::: {.column width="50%"}
-![](img/pythonlogo.png)
-:::
+![Also Python!](img/python/session1/pythonsnake.png)
 
-::: {.column width="50%"}
-![](img/pythonsnake.webp)
-:::
-
-::::
 
 ---
 ### Examples of common data types
@@ -272,8 +265,7 @@ Python is a general-purpose language with a strong focus on readability.
 Python variables can store different kinds of values — and each kind of value has a type that determines what you can do with it.
 
 --- 
-
-[Text Type: `str` (Strings)]{.mark}
+####Text Type: `str` (Strings)
 
 ```python
 name = "Alice"
@@ -332,7 +324,7 @@ Lists are:
 * Indexable with [0], [1], etc.
 
 ---
-Tuple — `tuple`
+#### Tuple — `tuple`
 
 Tuples look like lists but cannot be changed after creation:
 
@@ -349,8 +341,7 @@ nums = range(5)   # produces 0,1,2,3,4
 ```
 Great for iterating a fixed number of times.
 ---
-
-Mapping Type — `dict` (Dictionaries)
+#### Mapping Type — `dict` (Dictionaries)
 
 Associates keys with values:
 
@@ -363,8 +354,7 @@ Dictionaries are:
 * Very common in data work (JSON-like)
 
 ---
-
-Set Types — `set` and `frozenset`
+#### Set Types — `set` and `frozenset`
 
 Set Types — `set`: stores unique values
 
@@ -377,8 +367,7 @@ Frozen Set `frozenset`
 
 Like a set, but immutable — once created it can’t change.
 ---
-
-Boolean Type — `bool` 
+#### Boolean Type — `bool` 
 
 There are only two possible values:
 
@@ -391,7 +380,7 @@ Booleans are essential for:
 * Writing conditions
 * Validating assumptions in analysis
 ---
-Bonus: Comparison Operators (Return Booleans)
+#### Bonus: Comparison Operators (Return Booleans)
 
 These operators always return `True` or `False`:
 ```python
@@ -403,67 +392,439 @@ x >= y   # greater or equal
 x <= y   # less or equal
 ```
 ---
-Boolean Logic Operators
+#### Boolean Logic Operators
 
 Combine multiple conditions using:
 ```python
 and   # both conditions must be True
 or    # at least one condition must be True
 not   # reverses the value
-```
-Example:
-```python
+
+# Example:
 age = 22
 has_ticket = True
 
 can_enter = age >= 18 and has_ticket
+```
+---
+### Control Flow in Python
 
+Why Control Flow Matters in Data Analytics
+
+In data analytics, control flow is used to:
+* Filter data
+* Handle missing or invalid values
+* Apply rules and conditions
+* Repeat operations across rows or files
+
+Almost every real analysis uses if, for, or both.
+---
+#### Conditional Statements: `if`
+
+The `if` statement runs code only when a condition is true.
+
+```python
+if condition:
+    do_something
+```
+
+```python
+score = 75
+
+if score >= 60:
+    print("Passed")
+```
+If the condition is true, the message is printed.
+If not, nothing happens.
+---
+`if`/`else`
+
+Use `else` when you want an alternative action.
+
+```python
+score = 45
+
+if score >= 60:
+    print("Passed")
+else:
+    print("Failed")
+```
+---
+`if`/`elif`/`else`
+
+Use `elif` (else-if) to check multiple conditions.
+
+```python
+score = 82
+
+if score >= 90:
+    grade = "A"
+elif score >= 75:
+    grade = "B"
+else:
+    grade = "C"
+```
+Conditions are checked top to bottom.
+---
+Booleans in `if` statements
+
+```python
+if passed:
+    print("You passed the exam")
+else:
+    print("You did not pass")
 ```
 ---
 
-## Connecting PostreSQL to Python
+Important Rule: Indentation
 
-1. Create a virtual environment and activate it. (You already know how to do this!)
-2. Install the psyopg2 package. (you also know how to do this!) Create the requirements.txt file.
-
+Correct:
+```python
+if x > 0:
+    print("Positive")
 ```
+Incorrect:
+```python
+if x > 0:
+print("Positive")
+```
+---
+Logical Operators
+
+```python
+and   both must be true
+or    at least one true
+not   reverse the result
+```
+
+Example:
+```python
+age = 20
+has_id = True
+
+if age >= 18 and has_id:
+    print("Access granted")
+```
+---
+#### Loops (Repeating Actions Automatically)
+
+Loops allow you to run the same code multiple times.
+
+Two main types:
+
+`for` and `while`
+---
+##### `for` Loop
+
+Iterates over a sequence.
+
+```python
+for item in sequence:
+    do_something
+
+
+```python
+fruits = ["apple", "banana", "cherry"]
+
+for fruit in fruits:
+    print(fruit)
+```
+The loop runs once for each element.
+---
+##### `for` Loop with `range()`
+
+Used when you want to repeat somehting a fixed number of times.
+
+```python
+for i in range(5):
+    print(i)
+```
+
+Output:
+```markdown
+0
+1
+2
+3
+4
+```
+Did you notice how the output went from 0 to 4 and not 1 to 5? 
+---
+##### `while` Loop
+
+Repeats as long as a conditon is true.
+
+```python
+while condition:
+    do_something
+```
+
+Example:
+
+```python
+count = 0
+
+while count < 5:
+    print(count)
+    count += 1
+```
+The loop stops when the condition becomes false.
+---
+**Warning!** Infinite loops!!!!
+
+If the condition never becomes false, the loop never ends.
+
+Examples:
+
+```python
+while x > 0:
+    print(x)
+```
+```python
+zombies = 5
+
+while zombies > 0:
+    print("Still fighting zombies...")
+```
+Fixed zombie apocalypse🧟‍♀️: 
+
+```python
+zombies = 5
+
+while zombies > 0:
+    print("Zombie defeated!")
+    zombies -= 1
+```
+---
+##### `break` and `continue`
+
+`break` stops the loop completely.
+
+```python
+for i in range(10):
+    if i == 5:
+        break
+    print(i)
+```
+`continue` skips the current iteration.
+
+```python
+for i in range(5):
+    if i == 2:
+        continue
+    print(i)
+```
+---
+##### Loops with Conditions
+
+You can combine loops and `if` statements.
+
+```python
+numbers = [10, -3, 5, -1, 0]
+
+for n in numbers:
+    if n > 0:
+        print(n)
+```
+This pattern is extremely common in data cleaning.
+---
+##### Nested Loops (Use Carefully)
+Loops inside loops:
+
+```python
+for row in data:
+    for value in row:
+        print(value)
+```
+Useful, but can be slow on large datasets.
+
+In analytics, prefer pandas(coming soon!) or SQL when possible.
+---
+A fun little example.
+
+```python
+height = 5
+
+for i in range(1, height + 1):
+    spaces = " " * (height - i)
+    stars = "*" * (2 * i - 1)
+    print(spaces + stars)
+```
+
+Output:
+
+```markdown
+    *
+   ***
+  *****
+ *******
+*********
+```
+
+**Mini challenge:** create the loop for this output.
+```
+1
+22
+333
+4444
+55555
+```
+---
+#### Control Flow Mindset for Analysts
+
+Ask yourself:
+* When do I need a decision? → `if`
+* When do I need repetition? → `for` or `while`
+* Can pandas or SQL do this faster?
+
+Control flow is a tool, not always the best solution.
+---
+#### Common Beginner Mistakes
+
+* Forgetting indentation
+* Using = instead of ==
+* Infinite while loops
+* Overusing loops instead of pandas
+
+Mistakes are normal — debugging is part of learning.
+---
+### Some exercises for you:
+
+1. Identify the Data Type
+
+```python
+x = 10
+y = 3.14
+z = "Data Analytics"
+w = True
+```
+
+2. Convert data types
+
+You are given a string. Convert it into 1. an integer 2. a float.
+
+```python
+value = "42"
+```
+
+3. Lists and indexing
+
+Given the list:
+
+```python
+numbers = [5, 10, 15, 20]
+```
+
+Print 1. the first element, 2. the last element, 3. change the value `15` to `18`.
+---
+### Some more exercises for you:
+4. Dictionaries
+
+Given the dictionary:
+
+```python
+student = {
+    "name": "Alice",
+    "age": 21,
+    "grade": "B"
+}
+```
+Print 1. the student's age, 2. Update the grade to `"A"`, 3. Add a new key called `"passed"` with value `True`.
+
+5. Boolean Logic
+
+Given:
+
+```python
+age = 17
+has_permission = True
+```
+Write a condition that checks whether the person can enter an event.
+
+Entry is allowed if:
+* Age is at least 18 OR
+* The person has permission
+---
+### MORE EXERCISES!!!
+6. Simple if Statement
+
+Write an `if` statement that prints:
+
+`"Positive number"`
+
+only if a variable x is greater than 0.
+
+7. `break` and `continue`
+
+Write a loop from 1 to 10 that:
+
+* Skips the number 5
+* Stops completely when the number reaches 8
+
+---
+
+---
+## Connecting PostgreSQL to Python
+
+Now that you have Miniconda, environments, and core libraries set up, let’s connect Python to a **PostgreSQL** database using `psycopg2`.
+
+### Step 1: Create and activate your environment
+
+(You already know how to do this!)
+
+```bash
+conda create -n data-project python=3.11
+conda activate data-project
+```
+---
+
+### Step 2: Install the PostgreSQL driver
+```bash
 conda install -c conda-forge psycopg2
+```
+After installation, save your environment’s packages:
+```bash
 pip freeze > requirements.txt
+# or (recommended for conda environments)
+conda env export --from-history > environment.yml
 ```
+
 ---
-### 3. Creating a new database
 
-Connect to PostgreSQL servier using psql tool and create a new database called suppliers.
+### Step 3: Create a PostgreSQL database
 
-```
+Open your terminal and connect to PostgreSQL using `psql` (make sure PostgreSQL is installed and running).
+
+```bash
+# Connect as the default postgres user
 psql -U postgres
+```
 
+Inside the psql prompt, create the database:
+```SQL
 CREATE DATABASE suppliers;
 ```
-Now exit the psql.
+
+Exit psql.
+```bash
+\q
 ```
-exit
-```
-----
-Postgres connection example (after installing psycopg2)
+
+---
+
+### Step 4: Connection to PostgreSQL with Python
+
 ```python
 import psycopg2
-import pandas as pd
 
-try:
-    conn = psycopg2.connect(
-        dbname="suppliers",
-        user="postgres",
-        password="your_password_here",   # ← never commit this!
-        host="localhost",
-        port="5432"
-    )
-    print("Connected!")
+conn = psycopg2.connect(
+    dbname="suppliers",
+    user="postgres",
+    password="your_password_here",
+    host="localhost",
+    port="5432"
+)
 
-    df = pd.read_sql("SELECT * FROM your_table LIMIT 5;", conn)
-    display(df)
-
-    conn.close()
-except Exception as e:
-    print("Connection failed:", e)
-  ```
+print("Connection successful!")
+conn.close()
+```
