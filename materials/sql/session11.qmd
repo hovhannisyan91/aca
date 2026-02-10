@@ -1508,9 +1508,257 @@ FROM analytics.v_active_orders;
 :::
 
 
+## Materialized Views in Practice
+
+Materialized views provide a **physical abstraction layer** over base tables.  
+They store query results on disk and must be **explicitly refreshed**.
+
+A **materialized view** represents a persisted query result.
+
+Given base tables $T$, a materialized view defines a stored relation $M$:
+
+$$
+M = g(T)
+$$
+
+**The defining characteristics of a materialized view are:**
+
+- Stores data physically  
+- Does not automatically reflect underlying changes  
+- Requires manual or scheduled refresh  
+- Can be indexed for performance  
+
+---
+
+### Materialized View as a Physical Abstraction
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> BaseTables
+    BaseTables --> QueryExecution
+    QueryExecution --> StoredResult
+    StoredResult --> [*]
+```
+
+---
+
+### Logical Position of Materialized Views
+
+Materialized views are **queried directly**, not expanded.
+
+```{mermaid}
+stateDiagram-v2
+direction LR
+    [*] --> FROM
+    FROM --> MaterializedView
+    MaterializedView --> WHERE
+    WHERE --> SELECT
+    SELECT --> [*]
+```
+
+---
+
+### Why SQL Introduces Materialized Views
+
+**Materialized views exist to:**
+
+- Improve query performance  
+- Cache expensive joins and aggregations  
+- Support BI dashboards and reporting  
+- Reduce load on base tables  
+
+---
+
+### General Syntax of a Materialized View
+
+```sql
+CREATE MATERIALIZED VIEW view_name AS
+SELECT
+    ...
+FROM ...
+WHERE ...;
+```
+
+```sql
+REFRESH MATERIALIZED VIEW view_name;
+```
+
+::: {.callout-important title="conventions"}
+
+- Use materialized views for heavy aggregations.
+- Always define a refresh strategy.
+- Index materialized views when used in BI tools.
+- Prefix naming with `mv_`.
+
+:::
+
+---
+
+### Analytical Perspective on Materialized View Design
+
+**A well-designed analytical materialized view:**
+
+- Represents a stable analytical dataset  
+- Encapsulates expensive logic  
+- Trades freshness for performance  
+- Serves downstream dashboards and APIs  
+
+---
+
+### Example 1: Customer Geography Snapshot
+
+Customer geography joins are frequently reused and expensive.
+
+**Customer geography snapshots are used in:**
+
+- Executive dashboards  
+- Regional KPIs  
+- Geo-based reporting  
+
+---
+
+#### Materialized View Definition
+
+```sql
+CREATE MATERIALIZED VIEW analytics.mv_customers_geography AS
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    ci.city_name,
+    r.region_name,
+    co.country_name
+FROM analytics.customers c
+LEFT JOIN analytics.cities   ci ON ci.city_id   = c.city_id
+LEFT JOIN analytics.regions  r  ON r.region_id  = ci.region_id
+LEFT JOIN analytics.countries co ON co.country_id = r.country_id;
+```
+
+---
+
+#### Refreshing the View
+
+```sql
+REFRESH MATERIALIZED VIEW analytics.mv_customers_geography;
+```
+
+---
+
+### Example 2: Product Revenue Snapshot
+
+Revenue aggregation is computationally expensive.
+
+**Revenue snapshots support:**
+
+- High-performance dashboards  
+- Revenue trend monitoring  
+- Executive reporting  
+
+---
+
+#### Materialized View Definition
+
+```sql
+CREATE MATERIALIZED VIEW analytics.mv_product_revenue AS
+SELECT
+    p.product_id,
+    p.product_name,
+    p.category,
+    SUM(oi.quantity)           AS total_qty,
+    SUM(oi.quantity * p.price) AS revenue
+FROM analytics.products p
+LEFT JOIN analytics.order_items oi
+    ON oi.product_id = p.product_id
+GROUP BY p.product_id, p.product_name, p.category;
+```
+
+---
+
+#### Refreshing the View
+
+```sql
+REFRESH MATERIALIZED VIEW analytics.mv_product_revenue;
+```
+
+---
+
+### Example 3: Active Orders Snapshot
+
+Operational dashboards often require fast access to active orders.
+
+**Active order snapshots are used in:**
+
+- SLA monitoring  
+- Live operational dashboards  
+- Alerting systems  
+
+---
+
+#### Materialized View Definition
+
+```sql
+CREATE MATERIALIZED VIEW analytics.mv_active_orders AS
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    status
+FROM analytics.orders
+WHERE analytics.fn_order_activity(status) = 'Active';
+```
+
+---
+
+#### Refreshing the View
+
+```sql
+REFRESH MATERIALIZED VIEW analytics.mv_active_orders;
+```
+
+---
+
+## Views vs Materialized Views {.smaller}
+
+| Aspect | View | Materialized View |
+|------|------|-------------------|
+| Data Storage | No | Yes |
+| Data Freshness | Always current | Stale until refreshed |
+| Performance | Depends on base tables | Fast (precomputed) |
+| Refresh Required | No | Yes |
+| Can Be Indexed | No | Yes |
+| Typical Usage | Semantic layer | BI, dashboards, caching |
+
+---
+
+## Views vs Materialized Views vs Functions vs Stored Procedures {.smaller}
+
+| Aspect | View | Materialized View | Function | Stored Procedure |
+|------|------|------------------|----------|------------------|
+| Purpose | Query abstraction | Cached dataset | Calculation | Workflow |
+| Stores Data | No | Yes | No | No |
+| Accept Parameters | No | No | Yes | Yes |
+| Modify Data | No | No | No | Yes |
+| Use in SELECT | Yes | Yes | Yes | No |
+| Control Flow | No | No | No | Yes |
+| Performance Role | Readability | Speed | Logic reuse | Orchestration |
+
+---
+
+::: {.callout-important}
+
+- Views define **logical semantics**
+- Materialized views define **physical snapshots**
+- Functions define **value-level logic**
+- Stored procedures define **actions and workflows**
+
+:::
+
+
+
 ## Try Youself
 
-Try to :
+**Try to :**
 
 **combining Views + UDFs + Stored Procedures into analytical pipelines**.
 

@@ -1,0 +1,688 @@
+---
+title: "Session 12: DA with SQL | Advanced Aggregations"
+categories: [UNION,ROLLUP, CUBE,GROUPING SETS]
+---
+
+## Session Goals
+
+This **final** session demonstrates **why advanced aggregations exist** by first solving an analytical problem using **classic `GROUP BY` + `UNION ALL`**, and then solving the **same problem** using advanced aggregation operators.
+
+- Understand the limitations of `GROUP BY`  
+- Solve a real analytical problem using `UNION ALL`  
+- Replace the solution with `ROLLUP` and `GROUPING SETS`  
+- Compare clarity, correctness, and scalability  
+
+
+## Analytical Base
+
+In **real analytical systems**, aggregations are rarely performed on a single flat table.  
+Instead, they are computed from **joined fact and dimension tables**.
+
+**In this session, we use the following analytical structure:**
+  
+- **Geography hierarchy**: Country → Region → City  
+- Customers tied to cities  
+- Orders and order items representing transactions  
+- Products providing category and price information  
+
+The analytical grain is **order item**.
+
+All examples use the following analytical materialized view.
+
+```sql
+CREATE MATERIALIZED VIEW analytics.mv_order_revenue AS
+SELECT
+    c.country_name,
+    r.region_name,
+    ci.city_name,
+    p.category,
+    oi.quantity * p.price AS revenue
+FROM analytics.order_items oi
+JOIN analytics.orders o
+    ON oi.order_id = o.order_id
+JOIN analytics.products p
+    ON oi.product_id = p.product_id
+JOIN analytics.customers cu
+    ON o.customer_id = cu.customer_id
+JOIN analytics.cities ci
+    ON cu.city_id = ci.city_id
+JOIN analytics.regions r
+    ON ci.region_id = r.region_id
+JOIN analytics.countries c
+    ON r.country_id = c.country_id;
+```
+
+
+## `UNION`
+
+`UNION` is a set operator used to **combine the results of multiple `SELECT` statements into a single result set**.
+
+- Result sets are stacked vertically  
+- Each `SELECT` must return the same number of columns  
+- Corresponding columns must have compatible data types  
+
+**Types of UNION:**
+
+- `UNION`  
+- `UNION ALL`  
+
+| Operator | Description |
+|--------|-------------|
+| UNION | Combines results and removes duplicates |
+| UNION ALL | Combines results and keeps all rows |
+
+Suppose we have the following tables (A and B)
+
+::: {.columns}
+::: {.column}
+
+**Table A**
+
+| id | value |
+|----|-------|
+| 1  | A     |
+| 2  | B     |
+| 3  | C     |
+
+:::
+::: {.column}
+
+**Table B**
+
+| id | value |
+|----|-------|
+| 3  | C     |
+| 4  | D     |
+| 5  | E     |
+:::
+:::
+
+
+
+### `UNION`
+
+```sql
+SELECT id, value FROM table_a
+UNION
+SELECT id, value FROM table_b;
+```
+
+$$\Downarrow$$
+
+| id | value |
+|----|-------|
+| 1  | A     |
+| 2  | B     |
+| **3**  | **C**     |
+| 4  | D     |
+| 5  | E     |
+
+
+### `UNION ALL`
+
+```sql
+SELECT id, value FROM table_a
+UNION ALL
+SELECT id, value FROM table_b;
+```
+
+$$\Downarrow$$
+
+| id | value |
+|----|-------|
+| 1  | A     |
+| 2  | B     |
+| 3  | C     |
+| 3  | C     |
+| 4  | D     |
+| 5  | E     |
+
+::: {.callout-important}
+For analytical queries, `UNION ALL` is preferred due to performance and correctness.
+:::
+
+### Problem 1
+
+**We are assigend to provide:**
+
+- Revenue by **city**  
+- Revenue by **region**  
+- Revenue by **country**  
+- A **grand total**  
+
+::: {.callout-important}
+All results must appear in **one result set**.
+:::
+
+
+### Solution 1
+
+The traditional way to solve the problem without **advanced aggregations.**
+
+```sql
+SELECT
+    country_name,
+    region_name,
+    city_name,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY
+    country_name,
+    region_name,
+    city_name
+
+UNION ALL
+
+SELECT
+    country_name,
+    region_name,
+    NULL AS city_name,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY
+    country_name,
+    region_name
+
+UNION ALL
+
+SELECT
+    country_name,
+    NULL AS region_name,
+    NULL AS city_name,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY
+    country_name
+
+UNION ALL
+
+SELECT
+    NULL AS country_name,
+    NULL AS region_name,
+    NULL AS city_name,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue;
+```
+
+---
+
+### Problems with `UNION` Based Solution
+
+- Multiple queries scan the same data repeatedly  
+- High risk of inconsistency when logic changes  
+- Hard to maintain and extend  
+- Difficult to interpret NULL values  
+
+
+### Problem 2
+
+Let's expand the problem with the new **New requirement**
+
+- City-level revenue  
+- Region-level revenue  
+- Product category totals  
+- Grand total  
+
+
+### Solution 2
+
+```sql
+SELECT
+    country_name,
+    region_name,
+    city_name,
+    category,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY
+    country_name,
+    region_name,
+    city_name,
+    category
+
+UNION ALL
+
+SELECT
+    country_name,
+    region_name,
+    NULL,
+    category,
+    SUM(revenue)
+FROM analytics.mv_order_revenue
+GROUP BY
+    country_name,
+    region_name,
+    category
+
+UNION ALL
+
+SELECT
+    NULL,
+    NULL,
+    NULL,
+    category,
+    SUM(revenue)
+FROM analytics.mv_order_revenue
+GROUP BY
+    category
+
+UNION ALL
+
+SELECT
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    SUM(revenue)
+FROM analytics.mv_order_revenue;
+```
+
+
+## Beyond Simple `GROUP BY`
+
+Traditional `GROUP BY` generates **one aggregation level at a time**.
+
+- Multiple aggregation levels require multiple queries  
+- UNION-based solutions are verbose and error-prone  
+- Analytical reporting often needs subtotals and totals together  
+
+Advanced aggregations solve this by computing **multiple grouping levels in a single query**.
+
+
+## ROLLUP
+
+`ROLLUP` is an advanced aggregation operator designed to generate **hierarchical subtotals automatically**.
+
+Instead of manually writing multiple `GROUP BY` queries and stitching them together with `UNION ALL`, `ROLLUP` expresses the **hierarchy directly in SQL**.
+
+`ROLLUP` extends `GROUP BY` by computing **progressively higher-level aggregates** along a defined column order.
+
+$$
+ROLLUP(A, B, C) \Rightarrow (A,B,C), (A,B), (A), ()
+$$
+
+  
+- Columns are aggregated **from right to left**  
+- Each step removes one level of detail  
+- A final row represents the **grand total**  
+
+---
+
+### When ROLLUP Makes Sense
+
+`ROLLUP` is best suited when:
+
+- Dimensions form a **natural hierarchy**  
+- Reporting requires **subtotals at each level**  
+- The hierarchy order is fixed and meaningful  
+
+**Typical examples include:**
+  
+- **Geography:** Country → Region → City  
+- **Time:** Year → Quarter → Month  
+
+---
+
+### Problem 1: Re-solving with `ROLLUP`
+
+Recall **Problem 1**:
+
+- Revenue by **city**  
+- Revenue by **region**  
+- Revenue by **country**  
+- A **grand total**  
+- One result set  
+
+This hierarchy exactly matches our geography structure.
+
+### `ROLLUP` Solution
+
+```sql
+SELECT
+    country_name,
+    region_name,
+    city_name,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY ROLLUP (
+    country_name,
+    region_name,
+    city_name
+)
+ORDER BY
+    country_name,
+    region_name,
+    city_name;
+```
+
+
+### What ROLLUP Produces
+
+Conceptually, the query generates the following aggregation levels:
+
+  
+- `(country, region, city)` → city-level totals  
+- `(country, region, NULL)` → region subtotals  
+- `(country, NULL, NULL)` → country subtotals  
+- `(NULL, NULL, NULL)` → grand total  
+
+All results are produced in **one scan** of the data.
+
+
+
+### Comparing UNION vs ROLLUP
+
+| Aspect | GROUP BY + UNION ALL | ROLLUP |
+|------|----------------------|--------|
+| Number of queries | Many | One |
+| Logic duplication | High | None |
+| Hierarchy clarity | Implicit | Explicit |
+| Maintenance | Difficult | Easy |
+| Scalability | Poor | Good |
+
+---
+
+### Interpreting NULLs in ROLLUP Results
+
+In `ROLLUP` output:
+
+- `NULL` does **not** mean missing data  
+- `NULL` means the column was **aggregated away**  
+
+This distinction becomes important when labeling subtotal rows, which will be addressed using `GROUPING()` later in this session.
+
+---
+
+### Limitation of ROLLUP
+
+While powerful, `ROLLUP` has constraints:
+
+- Only supports **one fixed hierarchy**  
+- Cannot skip hierarchy levels  
+- Cannot express unrelated aggregation combinations
+
+
+## CUBE
+
+`CUBE` is an advanced aggregation operator that generates **all possible combinations** of the specified grouping columns.
+
+Unlike `ROLLUP`, which follows a **single hierarchy**, `CUBE` performs **cross-dimensional aggregation**.
+
+`CUBE` computes aggregates for **every subset** of the grouping columns.
+
+**For two dimensions:**
+
+$$
+CUBE(A, B) \Rightarrow (A,B), (A), (B), ()
+$$
+
+**For three dimensions:**
+
+$$
+CUBE(A, B, C) \Rightarrow 2^3 = 8 \text{ grouping levels}
+$$
+
+  
+- No hierarchy is assumed  
+- Every combination is treated equally  
+- Results grow exponentially with the number of columns  
+
+
+### When CUBE Makes Sense
+
+**`CUBE` is appropriate when:**
+
+- Dimensions are **independent**, not hierarchical  
+- The goal is **exploration**, not structured reporting  
+- Analysts want to examine all cross-sections  
+
+**Typical use cases:**
+
+- Geography × Product  
+- Channel × Product  
+- Segment × Campaign  
+
+---
+
+### From Hierarchy to Cross-Dimensions
+
+In **ROLLUP**, geography formed a strict hierarchy: **Country → Region → City  **
+
+With `CUBE`, we now explore **independent dimensions**, such as:
+
+- Country  
+- Product category  
+
+---
+
+### Problem 2: Re-solving a New Analytical Question
+
+**Business question**
+
+- Revenue by **country and category**  
+- Revenue by **country only**  
+- Revenue by **category only**  
+- **Grand total**  
+
+All results must appear in **one result set**.
+
+---
+
+### `CUBE` Solution
+
+```sql
+SELECT
+    country_name,
+    category,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY CUBE (
+    country_name,
+    category
+)
+ORDER BY
+    country_name,
+    category;
+```
+
+---
+
+### What CUBE Produces
+
+**The query generates the following aggregation levels:**
+
+- `(country, category)` → detailed cross-sections  
+- `(country, NULL)` → country totals  
+- `(NULL, category)` → category totals  
+- `(NULL, NULL)` → grand total  
+
+*Each level is produced automatically.*
+
+
+### Comparing ROLLUP and CUBE
+
+| Aspect | ROLLUP | CUBE |
+|------|-------|------|
+| Assumes hierarchy | Yes | No |
+| Aggregation pattern | Linear | Combinatorial |
+| Result size | Moderate | Large |
+| Use case | Reporting | Exploration |
+
+---
+
+### Practical Limitation of CUBE
+
+While powerful, `CUBE` has important drawbacks:
+
+- Result size **grows exponentially**  
+- Many aggregation levels may be **unnecessary**  
+- Often unsuitable for dashboards and production queries  
+
+These limitations lead to the most flexible operator.
+
+## GROUPING SETS
+
+`GROUPING SETS` is the **most flexible and precise** advanced aggregation operator in SQL.
+
+It allows you to **explicitly define which aggregation levels you want**, without generating unnecessary subtotals.
+
+`GROUPING SETS` lets you specify a **list of grouping combinations** to compute in a single query.
+
+**Formally:**
+
+$$
+GROUPING\ SETS((A,B),(A),(B),())
+$$
+
+Each `tuple` represents **one `GROUP BY` clause**.
+
+- No hierarchy is assumed  
+- No automatic combinations are added  
+- Only requested aggregation levels are produced  
+
+### Why GROUPING SETS Exists
+
+**`GROUPING SETS` generalizes both:**
+  
+- `ROLLUP`  
+- `CUBE`  
+
+$$\downarrow$$
+
+  
+- `ROLLUP` is a special case of `GROUPING SETS`  
+- `CUBE` is a special case of `GROUPING SETS`  
+
+`GROUPING SETS` is the **endgame** of SQL aggregation.
+
+---
+
+### Re-solving Problem 2 with GROUPING SETS
+
+Recall **Problem 2**:
+
+- City-level revenue  
+- Region-level revenue  
+- Product category totals  
+- Grand total  
+
+This problem cannot be expressed cleanly with `ROLLUP` or `CUBE`.
+
+
+### `GROUPING SETS` Solution
+
+```sql
+SELECT
+    country_name,
+    region_name,
+    city_name,
+    category,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY GROUPING SETS (
+    (country_name, region_name, city_name, category),
+    (country_name, region_name),
+    (category),
+    ()
+)
+ORDER BY
+    country_name,
+    region_name,
+    city_name,
+    category;
+```
+
+
+
+### What GROUPING SETS Produces
+
+The query returns **exactly four aggregation levels**:
+
+  
+- `(country, region, city, category)` → detailed level  
+- `(country, region)` → region subtotals  
+- `(category)` → category totals  
+- `()` → grand total  
+
+No additional combinations are generated.
+
+---
+
+### GROUPING SETS vs UNION ALL
+
+| Aspect | UNION ALL | GROUPING SETS |
+|------|-----------|---------------|
+| Number of queries | Many | One |
+| Intent clarity | Low | High |
+| Maintenance | Difficult | Easy |
+| Performance | Poor | Better |
+| Error risk | High | Low |
+
+`GROUPING SETS` is a **declarative replacement** for complex `UNION ALL` logic.
+
+
+### Handling NULLs with GROUPING()
+
+When using advanced aggregations, `NULL` values often represent **aggregated dimensions**, not missing data.
+
+The `GROUPING()` function identifies such cases.
+
+```sql
+SELECT
+    country_name,
+    region_name,
+    city_name,
+    category,
+    GROUPING(city_name) AS g_city,
+    GROUPING(category) AS g_category,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY GROUPING SETS (
+    (country_name, region_name, city_name, category),
+    (country_name, region_name),
+    (category),
+    ()
+);
+```
+
+  
+- `GROUPING(col) = 1` → column aggregated away  
+- `GROUPING(col) = 0` → actual value  
+
+---
+
+### When to Use GROUPING SETS
+
+- When reporting requirements are **specific and selective**  
+- When building **dashboards** or production reports  
+- When replacing complex `UNION ALL` queries  
+
+::: {.callout-tip}
+If you know exactly what you want, then use `GROUPING SETS`.
+:::
+
+---
+
+## ROLLUP vs CUBE vs GROUPING SET
+
+| Operator | Best For | Risk |
+|--------|----------|------|
+| ROLLUP | Hierarchies | Rigid |
+| CUBE | Exploration | Explosion |
+| GROUPING SETS | Production | None |
+
+
+
+::: {.callout-important}
+Advanced aggregations exist to replace **procedural SQL patterns** with **declarative intent**.
+  
+- `ROLLUP` expresses hierarchy  
+- `CUBE` explores dimensions  
+- `GROUPING SETS` delivers precision  
+
+:::
+
+
+>This concludes the **SQL aggregation journey**.
+
+
