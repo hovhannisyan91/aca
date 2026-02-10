@@ -1,0 +1,303 @@
+---
+title: "Session 13: DA with SQL | Final Project"
+categories: [Project]
+---
+
+
+## Final SQL Project | Kickoff
+
+### Project Goal
+
+Design and deliver a **production-grade analytical SQL project** that demonstrates:
+
+  
+- Proper normalization  
+- Relational and spatial modeling  
+- Analytical querying  
+- Documentation and reproducibility  
+
+This project simulates a **real analytics workflow**, from raw data to insights.
+
+---
+
+### Step 1 | Select a Business Domain
+
+Choose **one primary business table** that genuinely interests your team.
+
+**Examples:**
+
+- Customer transactions  
+- Product sales  
+- Service usage events  
+- Location-based activity  
+
+**Mandatory requirement**:
+
+  
+- The domain **must include geography**
+- Geography can be:
+  - Customer locations
+  - Service areas
+  - Store regions
+  - Delivery zones
+
+If unsure, propose your domain and validate it before proceeding.
+
+
+### Step 2 | Normalize the Data Model
+
+Start from a **single wide table** (conceptual or real).
+
+**Example (not final):**
+
+  
+- customer_name  
+- product_name  
+- city  
+- region  
+- country  
+- order_date  
+- price  
+
+Normalize into **logical entities**:
+
+  
+- Countries  
+- Regions  
+- Cities  
+- Customers  
+- Events / Orders / Activities  
+- Products (if applicable)  
+- Spatial boundaries  
+
+**Rules**:
+
+- Remove redundancy  
+- Use surrogate or natural keys consistently  
+- Enforce referential integrity  
+
+---
+
+### Step 3 | Create a New Database and Schema
+
+Create a dedicated database for the project.
+
+```sql
+CREATE DATABASE final_sql_project; -- any meaningful name which goes according to your project
+```
+
+Create a dedicated schema.
+
+```sql
+CREATE SCHEMA analytics;
+SET search_path TO analytics;
+```
+
+  
+- All tables must live under this schema
+- Never use `public`
+
+---
+
+### Step 4 | Create Tables (DDL)
+
+**Define all tables explicitly:**
+  
+- Primary keys  
+- Foreign keys  
+- Constraints  
+- Geometry types with SRID  
+
+```sql
+CREATE TABLE analytics.example_table (
+  id INT PRIMARY KEY,
+  geom GEOMETRY(Point, 4326)
+);
+```
+
+  
+- Spatial tables are **mandatory**
+- Use PostGIS correctly
+
+---
+
+### Step 5 | Populate the Database
+
+Populate tables using **CSV-based loading**.
+
+  
+- Use `COPY` or staging tables
+- Data volume should be realistic: more that 10k rows
+
+```sql
+COPY analytics.table_name
+FROM '/data/table_name.csv'
+CSV HEADER;
+```
+  
+- Validate row counts
+- Validate referential integrity
+- Validate geometries using `ST_IsValid`
+
+---
+
+### Step 6 | Create the ERD
+
+Produce an **Entity Relationship Diagram** that shows:
+
+  
+- Tables  
+- Primary keys  
+- Foreign keys  
+- Cardinality  
+
+
+---
+
+### Step 7 | Push the changes into GitHub
+
+Create a **dedicated GitHub repository**.
+
+Repository structure example:
+
+  
+- `/queries`
+- `/init`
+- `/data`
+- `/erd`
+- `/docs`
+- `README.md`
+- `docker-comose.yaml`
+- `.env`
+
+**Push:**
+
+- DDL scripts  
+- CSV files (or generation scripts)  
+- ERD  
+- Documentation  
+
+::: {.callout-warning}
+**Commit early and often.**
+:::
+
+---
+
+### Step 8 | Define Analytical Questions
+
+Before writing complex SQL, define **business questions**.
+
+**Examples:**
+
+- Revenue by country / region / city  
+- Customer distribution by geography  
+- Top products per region  
+- Customers outside expected boundaries  
+- Growth trends over time  
+
+Each question should map to **specific joins**.
+
+
+### Step 9 | Construct a Denormalized Analytical Table
+
+Create a **flattened analytical table**.
+
+- Join all necessary dimensions
+- One row per analytical grain (e.g., order, customer-day)
+
+```sql
+CREATE TABLE analytics.fact_orders AS
+SELECT
+  o.order_id,
+  o.order_date,
+  c.customer_id,
+  ci.city_name,
+  r.region_name,
+  co.country_name,
+  SUM(oi.quantity * p.price) AS revenue
+FROM analytics.orders o
+JOIN analytics.customers c ON o.customer_id = c.customer_id
+JOIN analytics.cities ci ON c.city_id = ci.city_id
+JOIN analytics.regions r ON ci.region_id = r.region_id
+JOIN analytics.countries co ON r.country_id = co.country_id
+JOIN analytics.order_items oi ON o.order_id = oi.order_id
+JOIN analytics.products p ON oi.product_id = p.product_id
+GROUP BY
+  o.order_id, o.order_date,
+  c.customer_id, ci.city_name,
+  r.region_name, co.country_name;
+```
+
+  
+- **This table will be reused later for:**
+  - Subqueries
+  - Window functions
+  - Advanced analytics
+
+---
+
+### Step 10 | Visualization
+
+**Use any tool**: SQL client charts is recommended
+
+**Focus on:**
+
+- Geography-based insights
+- Trends
+- Comparisons
+
+---
+
+### Step 11 | Create a Data Dictionary
+
+Document every table and column.
+
+**Example:**
+
+  
+- Table name  
+- Column name  
+- Data type  
+- Description  
+- Constraints  
+
+Store as: Markdown (`.md`) 
+
+This is a **professional requirement**, not optional.
+
+---
+
+### Step 12 | Final Review and Presentation
+
+**Deliverables:**
+
+- SQL database  
+- ERD  
+- GitHub repository  
+- Analytical tables  
+- Answered business questions  
+- Visuals  
+- Data dictionary  
+
+Final step:
+
+  
+- Present:
+  - Design decisions
+  - Normalization logic
+  - Join strategy
+  - Analytical findings
+
+### Evaluation Focus
+
+  
+- Correct normalization  
+- Correct joins  
+- Proper use of geography  
+- Clean SQL  
+- Reproducibility  
+- Analytical thinking  
+
+This project simulates real-world analytics work.
+
+
