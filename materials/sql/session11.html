@@ -596,6 +596,18 @@ window.Quarto = {
  <span class="menu-text">Session 11: DA with SQL | UDFs, Stored Procedures</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 12: DA with SQL | Advanced Aggregations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../materials/sql/session13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session 13: DA with SQL | Final Project</span></a>
+  </div>
+</li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
@@ -713,7 +725,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../materials/python/slides/session1.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Data Analyst</span></a>
+ <span class="menu-text">Session1</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -911,6 +923,19 @@ window.Quarto = {
   <li><a href="#example-4-active-orders-view" id="toc-example-4-active-orders-view" class="nav-link" data-scroll-target="#example-4-active-orders-view">Example 4: Active Orders View</a></li>
   </ul></li>
   <li><a href="#views-vs-functions-vs-stored-procedures" id="toc-views-vs-functions-vs-stored-procedures" class="nav-link" data-scroll-target="#views-vs-functions-vs-stored-procedures">Views vs Functions vs Stored Procedures</a></li>
+  <li><a href="#materialized-views-in-practice" id="toc-materialized-views-in-practice" class="nav-link" data-scroll-target="#materialized-views-in-practice">Materialized Views in Practice</a>
+  <ul class="collapse">
+  <li><a href="#materialized-view-as-a-physical-abstraction" id="toc-materialized-view-as-a-physical-abstraction" class="nav-link" data-scroll-target="#materialized-view-as-a-physical-abstraction">Materialized View as a Physical Abstraction</a></li>
+  <li><a href="#logical-position-of-materialized-views" id="toc-logical-position-of-materialized-views" class="nav-link" data-scroll-target="#logical-position-of-materialized-views">Logical Position of Materialized Views</a></li>
+  <li><a href="#why-sql-introduces-materialized-views" id="toc-why-sql-introduces-materialized-views" class="nav-link" data-scroll-target="#why-sql-introduces-materialized-views">Why SQL Introduces Materialized Views</a></li>
+  <li><a href="#general-syntax-of-a-materialized-view" id="toc-general-syntax-of-a-materialized-view" class="nav-link" data-scroll-target="#general-syntax-of-a-materialized-view">General Syntax of a Materialized View</a></li>
+  <li><a href="#analytical-perspective-on-materialized-view-design" id="toc-analytical-perspective-on-materialized-view-design" class="nav-link" data-scroll-target="#analytical-perspective-on-materialized-view-design">Analytical Perspective on Materialized View Design</a></li>
+  <li><a href="#example-1-customer-geography-snapshot" id="toc-example-1-customer-geography-snapshot" class="nav-link" data-scroll-target="#example-1-customer-geography-snapshot">Example 1: Customer Geography Snapshot</a></li>
+  <li><a href="#example-2-product-revenue-snapshot" id="toc-example-2-product-revenue-snapshot" class="nav-link" data-scroll-target="#example-2-product-revenue-snapshot">Example 2: Product Revenue Snapshot</a></li>
+  <li><a href="#example-3-active-orders-snapshot" id="toc-example-3-active-orders-snapshot" class="nav-link" data-scroll-target="#example-3-active-orders-snapshot">Example 3: Active Orders Snapshot</a></li>
+  </ul></li>
+  <li><a href="#views-vs-materialized-views" id="toc-views-vs-materialized-views" class="nav-link" data-scroll-target="#views-vs-materialized-views">Views vs Materialized Views</a></li>
+  <li><a href="#views-vs-materialized-views-vs-functions-vs-stored-procedures" id="toc-views-vs-materialized-views-vs-functions-vs-stored-procedures" class="nav-link" data-scroll-target="#views-vs-materialized-views-vs-functions-vs-stored-procedures">Views vs Materialized Views vs Functions vs Stored Procedures</a></li>
   <li><a href="#try-youself" id="toc-try-youself" class="nav-link" data-scroll-target="#try-youself">Try Youself</a></li>
   </ul>
 </nav>
@@ -2927,9 +2952,363 @@ Important
 </div>
 </div>
 </section>
+<section id="materialized-views-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="materialized-views-in-practice">Materialized Views in Practice</h2>
+<p>Materialized views provide a <strong>physical abstraction layer</strong> over base tables.<br>
+They store query results on disk and must be <strong>explicitly refreshed</strong>.</p>
+<p>A <strong>materialized view</strong> represents a persisted query result.</p>
+<p>Given base tables <span class="math inline">\(T\)</span>, a materialized view defines a stored relation <span class="math inline">\(M\)</span>:</p>
+<p><span class="math display">\[
+M = g(T)
+\]</span></p>
+<p><strong>The defining characteristics of a materialized view are:</strong></p>
+<ul>
+<li>Stores data physically<br>
+</li>
+<li>Does not automatically reflect underlying changes<br>
+</li>
+<li>Requires manual or scheduled refresh<br>
+</li>
+<li>Can be indexed for performance</li>
+</ul>
+<hr>
+<section id="materialized-view-as-a-physical-abstraction" class="level3">
+<h3 class="anchored" data-anchor-id="materialized-view-as-a-physical-abstraction">Materialized View as a Physical Abstraction</h3>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; BaseTables
+    BaseTables --&gt; QueryExecution
+    QueryExecution --&gt; StoredResult
+    StoredResult --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="logical-position-of-materialized-views" class="level3">
+<h3 class="anchored" data-anchor-id="logical-position-of-materialized-views">Logical Position of Materialized Views</h3>
+<p>Materialized views are <strong>queried directly</strong>, not expanded.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">stateDiagram-v2
+direction LR
+    [*] --&gt; FROM
+    FROM --&gt; MaterializedView
+    MaterializedView --&gt; WHERE
+    WHERE --&gt; SELECT
+    SELECT --&gt; [*]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="why-sql-introduces-materialized-views" class="level3">
+<h3 class="anchored" data-anchor-id="why-sql-introduces-materialized-views">Why SQL Introduces Materialized Views</h3>
+<p><strong>Materialized views exist to:</strong></p>
+<ul>
+<li>Improve query performance<br>
+</li>
+<li>Cache expensive joins and aggregations<br>
+</li>
+<li>Support BI dashboards and reporting<br>
+</li>
+<li>Reduce load on base tables</li>
+</ul>
+<hr>
+</section>
+<section id="general-syntax-of-a-materialized-view" class="level3">
+<h3 class="anchored" data-anchor-id="general-syntax-of-a-materialized-view">General Syntax of a Materialized View</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> view_name <span class="kw">AS</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">..</span>.</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> <span class="op">..</span>.</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="op">..</span>.;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">REFRESH</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> view_name;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="conventions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>conventions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Use materialized views for heavy aggregations.</li>
+<li>Always define a refresh strategy.</li>
+<li>Index materialized views when used in BI tools.</li>
+<li>Prefix naming with <code>mv_</code>.</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+<section id="analytical-perspective-on-materialized-view-design" class="level3">
+<h3 class="anchored" data-anchor-id="analytical-perspective-on-materialized-view-design">Analytical Perspective on Materialized View Design</h3>
+<p><strong>A well-designed analytical materialized view:</strong></p>
+<ul>
+<li>Represents a stable analytical dataset<br>
+</li>
+<li>Encapsulates expensive logic<br>
+</li>
+<li>Trades freshness for performance<br>
+</li>
+<li>Serves downstream dashboards and APIs</li>
+</ul>
+<hr>
+</section>
+<section id="example-1-customer-geography-snapshot" class="level3">
+<h3 class="anchored" data-anchor-id="example-1-customer-geography-snapshot">Example 1: Customer Geography Snapshot</h3>
+<p>Customer geography joins are frequently reused and expensive.</p>
+<p><strong>Customer geography snapshots are used in:</strong></p>
+<ul>
+<li>Executive dashboards<br>
+</li>
+<li>Regional KPIs<br>
+</li>
+<li>Geo-based reporting</li>
+</ul>
+<hr>
+<section id="materialized-view-definition" class="level4">
+<h4 class="anchored" data-anchor-id="materialized-view-definition">Materialized View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> analytics.mv_customers_geography <span class="kw">AS</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    c.customer_id,</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    c.first_name,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    c.last_name,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    ci.city_name,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    r.region_name,</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    co.country_name</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.customers c</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.cities   ci <span class="kw">ON</span> ci.city_id   <span class="op">=</span> c.city_id</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.regions  r  <span class="kw">ON</span> r.region_id  <span class="op">=</span> ci.region_id</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.countries co <span class="kw">ON</span> co.country_id <span class="op">=</span> r.country_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="refreshing-the-view" class="level4">
+<h4 class="anchored" data-anchor-id="refreshing-the-view">Refreshing the View</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">REFRESH</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> analytics.mv_customers_geography;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+</section>
+<section id="example-2-product-revenue-snapshot" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-product-revenue-snapshot">Example 2: Product Revenue Snapshot</h3>
+<p>Revenue aggregation is computationally expensive.</p>
+<p><strong>Revenue snapshots support:</strong></p>
+<ul>
+<li>High-performance dashboards<br>
+</li>
+<li>Revenue trend monitoring<br>
+</li>
+<li>Executive reporting</li>
+</ul>
+<hr>
+<section id="materialized-view-definition-1" class="level4">
+<h4 class="anchored" data-anchor-id="materialized-view-definition-1">Materialized View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> analytics.mv_product_revenue <span class="kw">AS</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    p.product_id,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    p.product_name,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    p.<span class="kw">category</span>,</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(oi.quantity)           <span class="kw">AS</span> total_qty,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>(oi.quantity <span class="op">*</span> p.price) <span class="kw">AS</span> revenue</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.products p</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> analytics.order_items oi</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ON</span> oi.product_id <span class="op">=</span> p.product_id</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> p.product_id, p.product_name, p.<span class="kw">category</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="refreshing-the-view-1" class="level4">
+<h4 class="anchored" data-anchor-id="refreshing-the-view-1">Refreshing the View</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">REFRESH</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> analytics.mv_product_revenue;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+</section>
+<section id="example-3-active-orders-snapshot" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-active-orders-snapshot">Example 3: Active Orders Snapshot</h3>
+<p>Operational dashboards often require fast access to active orders.</p>
+<p><strong>Active order snapshots are used in:</strong></p>
+<ul>
+<li>SLA monitoring<br>
+</li>
+<li>Live operational dashboards<br>
+</li>
+<li>Alerting systems</li>
+</ul>
+<hr>
+<section id="materialized-view-definition-2" class="level4">
+<h4 class="anchored" data-anchor-id="materialized-view-definition-2">Materialized View Definition</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> analytics.mv_active_orders <span class="kw">AS</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    order_id,</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    customer_id,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    order_date,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    status</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> analytics.orders</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> analytics.fn_order_activity(status) <span class="op">=</span> <span class="st">'Active'</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="refreshing-the-view-2" class="level4">
+<h4 class="anchored" data-anchor-id="refreshing-the-view-2">Refreshing the View</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">REFRESH</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> analytics.mv_active_orders;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+</section>
+</section>
+<section id="views-vs-materialized-views" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="views-vs-materialized-views">Views vs Materialized Views</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>View</th>
+<th>Materialized View</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data Storage</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Data Freshness</td>
+<td>Always current</td>
+<td>Stale until refreshed</td>
+</tr>
+<tr class="odd">
+<td>Performance</td>
+<td>Depends on base tables</td>
+<td>Fast (precomputed)</td>
+</tr>
+<tr class="even">
+<td>Refresh Required</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Can Be Indexed</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Typical Usage</td>
+<td>Semantic layer</td>
+<td>BI, dashboards, caching</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="views-vs-materialized-views-vs-functions-vs-stored-procedures" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="views-vs-materialized-views-vs-functions-vs-stored-procedures">Views vs Materialized Views vs Functions vs Stored Procedures</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 31%">
+<col style="width: 17%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>View</th>
+<th>Materialized View</th>
+<th>Function</th>
+<th>Stored Procedure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Purpose</td>
+<td>Query abstraction</td>
+<td>Cached dataset</td>
+<td>Calculation</td>
+<td>Workflow</td>
+</tr>
+<tr class="even">
+<td>Stores Data</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Accept Parameters</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Modify Data</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Use in SELECT</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Control Flow</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Performance Role</td>
+<td>Readability</td>
+<td>Speed</td>
+<td>Logic reuse</td>
+<td>Orchestration</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Views define <strong>logical semantics</strong></li>
+<li>Materialized views define <strong>physical snapshots</strong></li>
+<li>Functions define <strong>value-level logic</strong></li>
+<li>Stored procedures define <strong>actions and workflows</strong></li>
+</ul>
+</div>
+</div>
+</section>
 <section id="try-youself" class="level2">
 <h2 class="anchored" data-anchor-id="try-youself">Try Youself</h2>
-<p>Try to :</p>
+<p><strong>Try to :</strong></p>
 <p><strong>combining Views + UDFs + Stored Procedures into analytical pipelines</strong>.</p>
 
 
