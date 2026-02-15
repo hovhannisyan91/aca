@@ -630,22 +630,20 @@ We will move from stable dimensions to transactional tables.
 
 This avoids transitive dependency inside customer.
 
-##### Country
+**add postgis extention**
 
-**Here we need to couple of more steps:**
-
-1. **add postgis extention**
 ```sql
 DROP EXTENSION IF EXISTS postgis CASCADE;
 CREATE EXTENSION postgis;
 SELECT PostGIS_Version();
 ```
+$$\downarrow$$
 
 **this should return:** `3.4 USE_GEOS=1 USE_PROJ=1 USE_STATS=1`
-2. **add country bounderies:**
-3. join with the new table in order to have the visuals
 
+#### Country
 
+##### Create `country` Table
 
 ```sql
 DROP TABLE IF EXISTS analytics.country CASCADE;
@@ -655,7 +653,11 @@ CREATE TABLE analytics.country (
     country_name VARCHAR(50) UNIQUE NOT NULL,
     -- geometry 
 );
+```
 
+##### Insert Into `country` Table
+
+```sql
 INSERT INTO analytics.country (country_name)
 SELECT 
   DISTINCT 
@@ -666,10 +668,59 @@ LEFT JOIN analytics._stg_countries b on (a.country_name=b.country_name)
 WHERE customer_country IS NOT NULL;
 ```
 
+#### Country Bounderies
+
+Before running this, make sure to have in your `data folder` the **country geojson**, which you can [download from here.](https://raw.githubusercontent.com/hovhannisyan91/sql-analytics-portfolio/refs/heads/main/data/rockbuster/countries.geo.json)
+
+##### Create `_stg_world_countries` Table
+
+```sql
+CREATE TABLE analytics._stg_world_countries (
+    country_name TEXT NOT NULL,
+    geom geometry(MULTIPOLYGON, 4326) NOT NULL
+)
+;
+```
+
+##### Insert Into `_stg_world_countries` Table
+
+```sql
+INSERT INTO analytics._stg_world_countries (country_name, geom)
+SELECT
+    feature->'properties'->>'name' AS country_name,
+    ST_SetSRID(
+        ST_Multi(
+            ST_CollectionExtract(
+                ST_Force2D(
+                    ST_MakeValid(
+                        ST_GeomFromGeoJSON(feature->>'geometry')
+                    )
+                ),
+            3)
+        ),
+        4326
+    ) AS geom
+FROM (
+    SELECT jsonb_array_elements(data->'features') AS feature
+    FROM (
+        SELECT pg_read_file('/docker-entrypoint-initdb.d/data/rockbuster/countries.geo.json')::jsonb AS data
+    ) f
+) sub;
+```
+
+##### View `_stg_world_countries` Table
+
+```sql
+SELECT 
+ 	* 
+FROM analytics._stg_world_countries 
+LIMIT 10
+```
+
 
 #### City
 
-##### Create City Table
+##### Create `city` Table
 
 ```sql
 DROP TABLE IF EXISTS analytics.city CASCADE;
@@ -682,7 +733,7 @@ CREATE TABLE analytics.city (
 );
 ```
 
-##### Insert Into City Table
+##### Insert Into `city` Table
 
 
 ```sql
@@ -1271,6 +1322,11 @@ SELECT COUNT(*) FROM analytics.payment;
 
 **We have successfully derived a normalized relational schema directly from a flat CSV dataset.**
 
+### ERD
+
+
+![alt](../../img/sql/rockbuster3.png)
+
 ### What is the general statistical summary of movie rental conditions?
 
 
@@ -1309,3 +1365,74 @@ $$\downarrow$$
 
 - Most customers keep movies for approximately 5 days.  
 - This is slightly above typical 3–4 day rental policies, possibly indicating late returns.
+
+
+### How many customers are there per country?
+
+
+```sql
+SELECT
+    co.country_name,
+    COUNT(c.customer_id) AS total_customers
+FROM analytics.customer c
+JOIN analytics.address a   ON a.address_id = c.address_id
+JOIN analytics.city ci     ON ci.city_id = a.city_id
+JOIN analytics.country co  ON co.country_id = ci.country_id
+GROUP BY co.country_name
+ORDER BY total_customers DESC;
+```
+
+### How much revenue does each country generate?
+
+
+```sql
+SELECT
+    co.country_name,
+    SUM(p.amount) AS total_revenue,
+    COUNT(DISTINCT c.customer_id) AS total_customers
+FROM analytics.payment p
+JOIN analytics.rental r     ON r.rental_id = p.rental_id
+JOIN analytics.customer c   ON c.customer_id = r.customer_id
+JOIN analytics.address a    ON a.address_id = c.address_id
+JOIN analytics.city ci      ON ci.city_id = a.city_id
+JOIN analytics.country co   ON co.country_id = ci.country_id
+GROUP BY co.country_name
+ORDER BY total_revenue DESC;
+
+```
+
+### How much revenue does each country generate?
+
+
+```sql
+SELECT
+    co.country_name,
+    SUM(p.amount) AS total_revenue,
+    COUNT(DISTINCT c.customer_id) AS total_customers
+FROM analytics.payment p
+JOIN analytics.rental r     ON r.rental_id = p.rental_id
+JOIN analytics.customer c   ON c.customer_id = r.customer_id
+JOIN analytics.address a    ON a.address_id = c.address_id
+JOIN analytics.city ci      ON ci.city_id = a.city_id
+JOIN analytics.country co   ON co.country_id = ci.country_id
+GROUP BY co.country_name
+ORDER BY total_revenue DESC;
+```
+
+---
+
+### What is the average revenue per customer by country?
+
+```sql
+SELECT
+    co.country_name,
+    SUM(p.amount) / COUNT(DISTINCT c.customer_id) AS avg_revenue_per_customer
+FROM analytics.payment p
+JOIN analytics.rental r     ON r.rental_id = p.rental_id
+JOIN analytics.customer c   ON c.customer_id = r.customer_id
+JOIN analytics.address a    ON a.address_id = c.address_id
+JOIN analytics.city ci      ON ci.city_id = a.city_id
+JOIN analytics.country co   ON co.country_id = ci.country_id
+GROUP BY co.country_name
+ORDER BY avg_revenue_per_customer DESC;
+```
