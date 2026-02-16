@@ -665,8 +665,797 @@ Using a single chart allows:
 - Faster insight compared to separate charts
 - Better storytelling for time-based performance
 
----
 ![Dual Axis Chart](../../img/tableau/w2_dual_axis_chart.png)
+---
+
+## Tableau Histogram
+
+### Purpose
+A **Histogram** is used to analyze the **distribution of a continuous numeric variable** by grouping values into ranges (bins) and counting how many records fall into each range.
+
+Unlike bar charts, histograms focus on **frequency and shape of data**, not category comparison.
+
+---
+
+### Business Context 
+
+In this example, the histogram shows the **distribution of Order Total values**.
+
+Each bar represents:
+
+- A **range of Order Total values** (bin)
+- The **number of orders** that fall within that range
+
+This view helps answer questions such as:
+
+- What is the **typical order value range**?
+- Are most orders **small, medium, or large**?
+- Is the distribution **skewed**, and in which direction?
+- Do extremely large orders exist, and how frequent are they?
+
+---
+
+### Fields Used
+
+- **Binned Dimension:**  
+  `Order Total (bin)`
+
+- **Measure:**  
+  `COUNT([Order Total])`
+
+Bins group continuous values into equal-sized intervals, making patterns visible.
+
+---
+
+### How This Histogram Is Built
+
+1. Right-click **Order Total** → **Create → Bins**  
+2. Choose an appropriate **bin size** (based on data range and analysis goal)  
+3. Drag **Order Total (bin)** to the **Columns** shelf  
+4. Drag **COUNT([Order Total])** to the **Rows** shelf  
+5. Set Marks type to **Bar**
+
+---
+
+### How to Read This Histogram
+
+- **X-axis (bins):** ranges of Order Total values  
+- **Y-axis:** number of orders in each range  
+- Taller bars indicate **more frequent order values**
+- Short bars at the far right indicate **rare, high-value orders**
+
+In this chart, the distribution is **right-skewed**, meaning:
+- Most orders have relatively **low Order Totals**
+- A small number of orders have **very high values**
+
+---
+
+### Insights from This View
+
+- The majority of orders cluster in **lower value bins**
+- High-value orders exist but are **infrequent**
+- Average Order Total may be **pulled upward** by extreme values
+- Median Order Total is likely a **better representation** of a typical order
+
+
+![Histogram](../../img/tableau/w2_histogram.png)
+
+---
+
+## Tableau Heatmap
+
+### Purpose
+
+A **Heatmap** is used to compare **magnitude and intensity across two categorical dimensions** using color.  
+It is especially effective for identifying **patterns, clusters, and anomalies** that are hard to see in bar or line charts.
+
+---
+
+### Business Context (This Chart)
+
+In this example, the heatmap shows **Order Total performance by City across Years**.
+
+- **Rows:** City  
+- **Columns:** Year of Order Date  
+- **Color intensity:** `SUM([Order Total])`
+
+Each cell represents the **total order value** for a given **City–Year** combination.
+
+This view helps answer questions such as:
+- Which cities consistently generate **higher revenue**?
+- How does city performance **change year over year**?
+- Are there cities with **growth, decline, or volatility** over time?
+
+---
+
+### Fields Used
+
+- **Row Dimension:**  
+  `City`
+
+- **Column Dimension:**  
+  `YEAR([Order Date])`
+
+- **Measure (Color):**  
+  `SUM([Order Total])`
+
+Color encodes magnitude, allowing fast comparison across the grid.
+
+---
+
+### How This Heatmap Is Built
+
+1. Drag **City** to the **Rows** shelf.  
+2. Drag **YEAR([Order Date])** to the **Columns** shelf.  
+3. Drag **SUM([Order Total])** to **Color** on the Marks card.  
+4. Set Marks type to **Square** (or Automatic).  
+5. Adjust the color palette to:
+   - Light colors → lower values  
+   - Dark colors → higher values  
+
+---
+
+### How to Read This Heatmap
+
+- **Darker cells** indicate **higher total order value**
+- **Lighter cells** indicate **lower total order value**
+- Scan **horizontally** to see how a city changes over time
+- Scan **vertically** to compare cities within the same year
+
+Patterns emerge quickly:
+- Consistently dark rows → strong-performing cities
+- Sudden color changes → growth or decline
+- Uneven intensity → volatility
+
+![Heatmap](../../img/tableau/w2_heatmap.png)
+
+## Tableau Highlight Table
+
+### Purpose
+
+A **Highlight Table** combines the structure of a table with **color encoding** to show magnitude, allowing users to see **exact values** while still perceiving **patterns and intensity**.
+
+It is best used when both **comparison** and **precision** are required.
+
+---
+
+### Business Context (This Chart)
+
+In this example, the highlight table shows **Order Total by City and Year**.
+
+- **Rows:** City  
+- **Columns:** Year of Order Date  
+- **Color + Label:** `SUM([Order Total])`
+
+Each cell displays:
+- The **exact Order Total value**
+- A **color intensity** indicating relative magnitude
+
+This view helps answer questions such as:
+- Which cities generated the **highest revenue** each year?
+- How does revenue **change year over year** for each city?
+- Which cities experienced **growth or decline**?
+
+---
+
+### Fields Used
+
+- **Row Dimension:**  
+  `City`
+
+- **Column Dimension:**  
+  `YEAR([Order Date])`
+
+- **Measure:**  
+  `SUM([Order Total])`  
+  (used for both **Color** and **Label**)
+
+---
+
+### How This Highlight Table Is Built
+
+1. Drag **City** to the **Rows** shelf.  
+2. Drag **YEAR([Order Date])** to the **Columns** shelf.  
+3. Drag **SUM([Order Total])** to **Color** on the Marks card.  
+4. Drag **SUM([Order Total])** to **Label** on the Marks card.  
+5. Set Marks type to **Square**.  
+6. Adjust the color palette to reflect low → high values.
+
+---
+
+### How to Read a Highlight Table
+
+- **Darker cells** indicate **higher Order Totals**
+- **Lighter cells** indicate **lower Order Totals**
+- Scan **across a row** to evaluate a city’s performance over time
+- Scan **down a column** to compare cities within the same year
+- Labels provide **exact values** for precise comparison
+
+---
+
+### Insights from This View
+
+- Cities with consistently dark cells are **top revenue contributors**
+- Sudden color changes highlight **growth or decline**
+- Comparing years side by side makes **trends immediately visible**
+- Unlike heatmaps, this view supports **exact numeric reporting**
+
+---
+
+### Highlight Table vs Heatmap
+
+| Feature | Highlight Table | Heatmap |
+|------|----------------|---------|
+| Shows exact values | ✅ Yes | ❌ No |
+| Emphasizes patterns | ✅ Yes | ✅ Yes |
+| Best for dashboards | Reporting + Analysis | Pattern discovery |
+| Precision | High | Low |
+
+![Highlight Table](../../img/tableau/w2_highlight_table.png)
+---
+## Tableau Treemap
+
+### Purpose
+
+A **Treemap** is used to visualize **part-to-whole relationships** across **hierarchical dimensions** using area and color.  
+It is especially effective when you need to compare **many categories at once** and understand **relative contribution**.
+
+---
+
+### Business Context (This Chart)
+
+In this example, the treemap shows the **distribution of unique customers** across **States and Cities**.
+
+- **Hierarchy:** State → City  
+- **Size:** `COUNTD([Customer ID])`  
+- **Color intensity:** `COUNTD([Customer ID])`
+
+Each rectangle represents a **City**, grouped within its **State**, where:
+- **Larger areas** indicate more unique customers
+- **Darker colors** indicate higher customer concentration
+
+This view helps answer questions such as:
+- Which states contribute the **largest share of customers**?
+- Which cities dominate **within each state**?
+- Is customer distribution **concentrated or fragmented** geographically?
+
+---
+
+### Fields Used
+
+- **Hierarchical Dimensions:**  
+  - `State`  
+  - `City`
+
+- **Measure:**  
+  `COUNTD([Customer ID])`
+
+The distinct count ensures each customer is counted **once**, avoiding duplication.
+
+---
+
+### How This Treemap Is Built
+
+1. Drag **State** to **Label** (or first level in hierarchy).  
+2. Drag **City** to **Label** (nested under State).  
+3. Drag `COUNTD([Customer ID])` to **Size**.  
+4. Drag `COUNTD([Customer ID])` to **Color**.  
+5. Set Marks type to **Treemap**.  
+6. Drag `COUNTD([Customer ID])` to **Label**, right-click choose quick table qalqulations → percent of total. 
+
+---
+
+### How to Read This Treemap
+
+- **Large rectangles** represent cities with many customers  
+- **Small rectangles** represent cities with fewer customers  
+- Cities are visually grouped by **State**
+- Percent labels show **relative contribution** to the total customer base
+
+Scan the chart to quickly identify:
+- Dominant cities within a state
+- States with diversified vs concentrated customer bases
+- Cities that may warrant targeted marketing or expansion
+
+---
+
+### Insights from This View
+
+- A few cities contribute a **disproportionately large share** of customers
+- Some states show **balanced city distribution**, others are city-dominated
+- Customer concentration patterns may reflect:
+  - Population density
+  - Market maturity
+  - Sales coverage or logistics reach
+
+Treemaps are ideal for **high-level composition analysis**, not exact comparison.
+
+---
+
+### When to Use (and When Not to Use) a Treemap
+
+**Use a Treemap when:**
+- You need to show **part-to-whole** relationships
+- Categories are **many and hierarchical**
+- Relative importance matters more than precision
+
+**Avoid Treemaps when:**
+- Exact value comparison is required
+- Only a few categories exist (use bars instead)
+- Small differences must be detected precisely
+
+![Treemap](../../img/tableau/w2_treemap.png)
+
+## Calculated Fields (Row-Level vs Aggregate)
+
+Calculated fields allow you to **create new logic from existing data**.  
+They are one of the most powerful features in Tableau and are used to control **how data is classified, transformed, and analyzed**.
+
+### Why Use Calculated Fields?
+
+Calculated fields can be used to:
+
+- Segment data into meaningful groups  
+- Convert or standardize data types (e.g. text to date)  
+- Create new metrics from existing fields  
+- Filter or conditionally include data  
+- Calculate ratios, percentages, or performance indicators  
+
+In practice, calculated fields help translate **raw data into analytical insight**.
+
+---
+
+## Types of Calculations in Tableau
+
+Tableau supports three main types of calculations.  
+The choice depends on **when** and **at what level** the calculation should be evaluated.
+
+---
+
+### 1. Basic Calculations
+
+Basic calculations operate either at:
+
+- **Row level** (before aggregation), or  
+- **Aggregate level** (after aggregation in the view)
+
+They are the most commonly used calculation type.
+
+**Examples:**
+- Categorizing orders as High / Low value  
+- Calculating revenue per unit  
+- Applying conditional logic using `IF`, `IIF`, or `CASE`
+
+Basic calculations adapt automatically to the level of detail of the visualization.
+
+---
+
+### 2. Level of Detail (LOD) Expressions
+
+LOD expressions provide **explicit control over granularity**, independent of the view.
+
+They allow you to calculate values at:
+- A **more detailed level** → `INCLUDE`
+- A **less detailed level** → `EXCLUDE`
+- A **fixed level**, regardless of the view → `FIXED`
+
+LOD expressions are especially useful when:
+- You need consistent results across different views
+- Aggregation changes would otherwise distort calculations
+
+LOD calculations can be evaluated **before or after aggregation**, depending on their type.
+
+---
+
+### 3. Table Calculations
+
+Table calculations operate **only on the results shown in the view**.
+
+Key characteristics:
+- Calculated **after aggregation**
+- Depend on the structure of the visualization
+- Recalculate when the layout of the view changes
+
+**Examples:**
+- Running totals  
+- Moving averages  
+- Percent of total  
+- Rank  
+
+Table calculations are ideal for **trend and comparison analysis**, not data modeling.
+
+---
+
+## Choosing the Right Calculation Type
+
+| Question | Recommended Calculation |
+|--------|-------------------------|
+| Does this depend on individual rows? | Basic (Row-Level) |
+| Should this ignore the view’s granularity? | LOD Expression |
+| Does this depend on what’s visible in the view? | Table Calculation |
+
+The calculation type you choose directly affects **accuracy and interpretation**.
+
+---
+
+## Creating a Calculated Field
+
+Once the calculation type is clear, you can create a calculated field:
+
+1. Go to **Analysis → Create Calculated Field**
+2. Enter a meaningful name
+3. Write the calculation logic
+4. Validate and save
+
+![Calculated Field](../../img/tableau/w2_calculated_field.png)
+
+**Example: Order Line Revenue**
+
+`[Quantity] * [Unit Price]`
+
+![Revenue calculation](../../img/tableau/w2_revenue_calculation.png)
+
+![Revenue](../../img/tableau/w2_revenue.png)
+
+## Aggregate Calculations
+
+Aggregate calculations are evaluated **after data is grouped** based on the dimensions present in the view.
+
+They are used when results should change with:
+- Dimensions in the view  
+- Filters and context filters  
+
+### Example: Average Order Value
+
+
+`SUM([Order Total]) / COUNTD([Order ID])`
+
+![Average Order Value](../../img/tableau/w2_average_order_value.png)
+
+Changing the view (for example, adding **Region** or **Year**) will change the result of an aggregate calculation.
+
+---
+
+## Level of Detail (LOD) Expressions
+
+LOD expressions allow you to **explicitly control calculation granularity**, independent of the visualization.
+
+---
+
+### FIXED — Ignore the View
+
+`FIXED` calculations compute values at a **specific level**, regardless of the dimensions present in the view.
+
+#### Example: Customer Lifetime Value
+
+`{ FIXED [Customer ID] : SUM([Order Total]) }`
+
+![Customer Lifetime Value](../../img/tableau/w2_customer_lifetime_value.png)
+
+#### Example: Minimum Order Date per Customer
+
+`{ FIXED [Customer ID] : MIN([Order Date]) }`
+
+![Minimum Order Date per Customer](../../img/tableau/w2_customer_min_order_date.png)
+
+
+Use **FIXED** when:
+- A value must remain stable across different views  
+- You need customer-, product-, or order-level metrics  
+
+
+
+---
+
+### INCLUDE — Add Granularity
+
+`INCLUDE` calculations add **additional detail** to the calculation, even if that detail is not displayed in the view.
+
+#### Example: Average Sales by Region-Year
+
+`{ INCLUDE [Region] : AVG([Order Total]) }`
+
+`AVG([Order Total])` would give us the average sales per year, but with `INCLUDE` we can calculate the average sales per region and then aggregate it at the year level, even if region is not in the view.
+
+![Average Sales by Region-Year](../../img/tableau/w2_average_sales_include.png)
+
+As you can see, the average sales by year is different when we include region in the calculation, because it calculates the average sales per region and then averages those values at the year level, rather than averaging all sales together.
+
+Use **INCLUDE** when:
+
+- You need more granular logic than the view displays  
+- The calculation should still respond to filters  
+
+---
+
+### EXCLUDE — Remove Granularity
+
+`EXCLUDE` calculations remove a dimension from the calculation, even if it exists in the view.
+
+#### Example: Sales Ignoring Category
+
+
+`{ EXCLUDE [Region] : AVG([Order Total]) }`
+
+## Using EXCLUDE in LOD Expressions
+
+![Average Sales by Region/Excude](../../img/tableau/w2_average_sales_exclude.png)
+
+Use **EXCLUDE** when:
+
+- A dimension is required for display  
+- But should **not affect aggregation logic**
+
+`EXCLUDE` removes a dimension from the level of detail calculation, even if it appears in the view.
+
+## Differences in action
+
+![Differences of LOD expressions](../../img/tableau/w2_LOD_differences.png)
+
+Conclusion:
+
+As we can see in the view we have cantegory `Region`, dimension `Year` and the following calculations as measures:
+
+- `AVG([Order Total])` → gives us the average sales per year for each region
+- `{ INCLUDE [Region] : AVG([Order Total]) }` → gives us the average sales per region and then averages those values at the year level. That's why we have the same value in the first and second columns as the category for aggregation is the same.
+- `{ EXCLUDE [Region] : AVG([Order Total]) }` → gives us the average sales per year, ignoring the region dimension. That's why we have the same value for all the regions.
+- `{ FIXED [Region] : AVG([Order Total]) }` → gives us the average sales per region, regardless of the year dimension in the view. That's why we have different values for each region, but they are the same across years.
+
+## Table Calculations
+
+Table calculations are evaluated **after aggregation** and depend entirely on the **structure and order of the view**.
+
+They are ideal for:
+
+- Trends  
+- Comparisons  
+- Sequential analysis  
+
+---
+
+
+### Why Table Calculations Are Sensitive to Layout
+
+Table calculations are computed **based on the visible data in the view**.  
+This means they depend on:
+
+- The fields placed on Rows and Columns
+- The sorting order
+- The addressing and partitioning settings
+- Applied filters (especially dimension filters)
+
+Because of this, modifying the view can completely change the result.
+
+---
+
+## Partitioning and Addressing in Table Calculations
+
+When you add a **table calculation**, you must account for **all dimensions in the level of detail**.  
+Each dimension must be used either for:
+
+- **Partitioning (scoping)**, or  
+- **Addressing (direction)**  
+
+---
+
+### Partitioning Fields (Scope)
+
+Partitioning fields define **how the data is grouped** before the table calculation is applied.
+
+- They break the view into multiple **sub-tables (partitions)**  
+- The table calculation is performed **separately within each partition**  
+- They determine the **scope** of the calculation  
+
+In other words, partitioning controls *where the calculation resets*.
+
+---
+
+### Addressing Fields (Direction)
+
+Addressing fields define **how the calculation moves within each partition**.
+
+- They determine the **direction** of the calculation  
+- They control the sequence of marks used in calculations such as:
+  - Running totals  
+  - Differences between values  
+  - Percent change  
+
+In short, addressing controls *how the calculation progresses*.
+
+---
+
+### How Partitioning and Addressing Work Together
+
+1. Partitioning fields split the view into multiple sub-views (sub-tables).
+2. The table calculation is applied independently inside each partition.
+3. The addressing fields determine the direction in which the calculation moves through the marks within each partition.
+
+For example:
+
+- In a running total, addressing determines the order of accumulation.
+- In a difference calculation, addressing determines which value is compared to which.
+
+![Running Total Example](../../img/tableau/w2_running_total.png)
+
+![Difference Caalculation Example](../../img/tableau/w2_difference_calculation.png)
+
+---
+
+### Specific Dimensions vs Compute Using
+
+When using **Compute Using** options, Tableau automatically assigns some dimensions as:
+
+- Partitioning fields  
+- Addressing fields  
+
+However, when selecting **Specific Dimensions**, you must manually decide:
+
+- Which dimensions define the partition (scope)  
+- Which dimensions define the addressing (direction)  
+
+![Rank: The direction of movement](../../img/tableau/w2_rank_movement.png)
+
+![Rank: Specific Dimension](../../img/tableau/w2_rank_specific_dimension.png)
+
+In the *Specific Dimensions* section of the Table Calculation dialog:
+
+- The order of fields determines the **direction of movement** through the marks: `Pane (Down)`
+- Checked dimensions define how Tableau computes the table calculation across the view: `Year of Order Date`, `Region`.
+
+---
+
+::: {.callout-tip}
+
+A helpful mental model:
+
+- **Partitioning = Where does the calculation reset?**
+- **Addressing = In what order does it move?**
+
+Understanding this distinction is essential for correctly configuring running totals, rankings, percent differences, and other table calculations.
+
+:::
+
+
+### More Examples of Table Calculations
+
+## Using Table Calculations on *Marks card* fields
+
+When you place a table calculation on the **Marks card** Color, the table will be colored based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Color `SUM(Total Quantity)` will color the Revenue values based on the quantity values.
+
+![Marks Card Table Calculation](../../img/tableau/w2_marks_card_calculation.png)
+
+Year over year growth is another common use case for table calculations on the Marks card. For example, if you have `SUM(Revenue)` on the view and you add a table calculation that calculates the year-over-year growth of Revenue by Region.
+
+![Year over Year Growth Calculation](../../img/tableau/w2_year_over_year_growth_cal.png)
+
+![Year over Year Growth](../../img/tableau/w2_year_over_year_growth.png)
+
+## Using Table Calculations on *Rows or Columns* fields
+
+When you place a table calculation on the **Rows or Columns** shelf, the table will be calculated based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Rows or Columns `Moving Average` will add a moving average line to the view based on the Revenue values.
+
+![Moving Average Example](../../img/tableau/w2_moving_average.png)
+
+
+When you place a table calculation on the **Filters** shelf, the table will be filtered based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Filters `Rank` will filter the view to show only the top N values based on the Revenue values.
+
+## Influence of Filters, Parameters, and Context Filters on Calculated Fields
+
+Understanding how filters and parameters interact with calculated fields is critical for building accurate dashboards in Tableau.
+
+---
+
+## The Impact of Filters and Parameters on Calculated Fields
+
+Filters can change the result of calculated fields depending on **where they are applied in the order of operations**.
+
+### Dimension Filters
+
+Dimension filters are applied **after FIXED LOD expressions** but before table calculations.
+
+This means:
+
+- They **do NOT affect FIXED calculations**
+- They **DO affect INCLUDE / EXCLUDE**
+- They **DO affect table calculations**
+
+Example:
+
+` FIXED [Customer ID] : SUM([Sales]) }`
+
+If you filter by **Region** (dimension filter), this **FIXED** value will not change.
+
+---
+
+## Measure Filters
+
+Measure filters are applied **after aggregation**.
+
+They affect:
+
+- Table calculations  
+- Aggregated results  
+- Visual output  
+
+They do **not** recompute FIXED LOD expressions.
+
+---
+
+## Context Filters
+
+Context filters change the **order of operations**.
+
+When you add a filter to **Context**, Tableau processes it earlier in the pipeline.
+
+This means:
+
+- Context filters **DO affect FIXED LOD expressions**
+- They create a temporary data subset
+- Other filters are applied after the context filter
+
+### Example
+
+`{ FIXED [Customer ID] : SUM([Sales]) }`
+
+If **Region** is placed in **Context**, the FIXED result will now be calculated only for the selected Region.
+
+---
+
+## When to Use Context Filters
+
+Use context filters when:
+
+- You need a FIXED LOD to respect a filter  
+- You want to improve performance with large datasets  
+- You need dependent filters  
+
+---
+
+## Parameters
+
+Parameters behave differently from filters.
+
+- Parameters do **NOT** filter data automatically  
+- They must be used inside calculated fields  
+- They do **NOT** follow order of operations  
+- They do **NOT** affect LOD expressions unless referenced  
+
+### Example
+
+`IF [Sales] > [Sales Threshold Parameter] THEN "High"
+ELSE "Low"
+END`
+The parameter value controls logic dynamically.
+
+---
+
+## Filters and Table Calculations
+
+Table calculations are applied **after dimension and measure filters**.
+
+They are influenced by:
+
+- Sorting  
+- Layout  
+- Visible data  
+- Filters applied to the view  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
