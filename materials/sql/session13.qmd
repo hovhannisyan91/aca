@@ -677,9 +677,9 @@ Before running this, make sure to have in your `data folder` the **country geojs
 ```sql
 CREATE TABLE analytics._stg_world_countries (
     country_name TEXT NOT NULL,
+	country_code TEXT NOT NULL,
     geom geometry(MULTIPOLYGON, 4326) NOT NULL
-)
-;
+);
 ```
 
 ##### Insert Into `_stg_world_countries` Table
@@ -687,13 +687,14 @@ CREATE TABLE analytics._stg_world_countries (
 ```sql
 INSERT INTO analytics._stg_world_countries (country_name, geom)
 SELECT
-    feature->'properties'->>'name' AS country_name,
+    feature->‘properties’->>‘name’ AS country_name,
+	feature->>‘id’ AS country_code,
     ST_SetSRID(
         ST_Multi(
             ST_CollectionExtract(
                 ST_Force2D(
                     ST_MakeValid(
-                        ST_GeomFromGeoJSON(feature->>'geometry')
+                        ST_GeomFromGeoJSON(feature->>‘geometry’)
                     )
                 ),
             3)
@@ -701,9 +702,9 @@ SELECT
         4326
     ) AS geom
 FROM (
-    SELECT jsonb_array_elements(data->'features') AS feature
+    SELECT jsonb_array_elements(data->‘features’) AS feature
     FROM (
-        SELECT pg_read_file('/docker-entrypoint-initdb.d/data/rockbuster/countries.geo.json')::jsonb AS data
+        SELECT pg_read_file(‘/docker-entrypoint-initdb.d/data/rockbuster/countries.geo.json’)::jsonb AS data
     ) f
 ) sub;
 ```
