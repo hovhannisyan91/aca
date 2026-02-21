@@ -1,210 +1,1001 @@
 ---
 title: "Python Session 01: Programming for Data Analysts"
-categories: [Python]
+subtitle: "Why Programming for Data Analysts?"
+categories: [Python, Intro]
 ---
 
-# Introduction
+## Introduction
 
-## Why Python for Data Analysts?
 
-Python complements SQL by allowing:
 
-- Automation of repetitive tasks
+## The Strategic Shift: From Tool User to Workflow Designer
 
-- Advanced analytics and modeling
+Up to this point in the bootcamp, you have learned how to:
 
-- Data manipulation outside databases
+- **Think statistically**
+- **Structure data properly**  
+- **Query databases efficiently**  
 
-- Integration with APIs, files, and external systems
+>You already understand data.
 
-SQL answers *what* data you want.
+Now we move from **analyzing data** to **analyzing the data with controlling data workflows**.
 
-Python defines *how* to process and analyze it.
+Programming is not about replacing `SQL` or `Excel.`
 
----
-
-# Python vs SQL
-
-| Concept | SQL | Python |
-|----------|------|--------|
-| Filtering | WHERE | Boolean indexing |
-| Aggregation | GROUP BY | groupby() |
-| Join | JOIN | merge() |
-| Case Logic | CASE WHEN | if / functions |
-| Execution | Database engine | Python interpreter |
+It is about **extending** your analytical power beyond manual interaction.
 
 ---
 
-# Variables and Data Types
+## Your Journey So Far
 
-Python variables store values in memory.
-
-```python
-name = "Alice"
-age = 30
-salary = 2500.75
-is_active = True
-
-print(type(name))
-print(type(age))
+```{mermaid}
+journey
+    title Your Analytics Learning Journey
+    section Statistical Thinking
+      Understanding distributions: 5
+      Learning hypothesis testing: 4
+      Interpreting confidence intervals: 4
+    section SQL
+      Designing schemas: 5
+      Writing joins: 5
+      Building aggregations: 4
+    section Python (Now)
+      Automating workflows: 3
+      Handling larger data: 3
+      Designing reproducible analysis: 3
 ```
 
-## Core Data Types
+>You are upgrading your analytical capabilities.
 
-- int
 
-- float
+## Why Programming is Necessary
 
-- str
+The fundamental reason is **leverage.**
 
-- bool
+- `Excel` allows you to operate on data manually.
+- `SQL` allows you to ...
+ 
+**Python allows you to:**
+
+- Automate repetitive tasks  
+- Scale to larger datasets  
+- Ensure reproducibility  
+- Reduce dependency on licensed tools  
+- Increase speed and efficiency  
+
+::: {.callout-important}
+Programming transforms you **from an operator** into a **system designer.**
+:::
 
 ---
 
-# Data Structures
+### Automation: Eliminating Repetition
 
-## Lists
+**Consider a simple scenario:**
+
+- Every month you receive a CSV/Excel file.  
+- Every month you clean it manually.
+- Every month you need to `INSERT INTO` the Database  
+
+$$\Downarrow$$
+
+**Every month you repeat the same steps.**
+
+**Instead, you write the logic once.**
 
 ```python
-numbers = [10, 20, 30]
-print(numbers[0])
+import pandas as pd
+
+df = pd.read_csv("monthly_sales.csv")
+
+df = df[df["price"] > 0]
+df["revenue"] = df["price"] * df["quantity"]
+
+df.to_csv("cleaned_sales.csv", index=False)
+
+df.to_sql('sql_reference_folder')
 ```
 
-## Dictionaries
+::: {.callout-tip}
+Now the computer performs the task consistently and automatically.
+:::
 
-```python
-person = {"name": "Alice", "age": 30}
-print(person["name"])
+
+### Scale: Beyond Excel Limits
+
+**Excel maximum row capacity:** `1,048,576` rows.
+
+Modern systems generate millions of records daily.
+
+Python, especially when integrated with databases, handles large-scale datasets efficiently.
+
+```{mermaid}
+flowchart LR
+    A[Small Dataset] --> B[Excel Works]
+    C[Large Dataset] --> D[Excel Slows]
+    D --> E[Python + Database]
 ```
 
-## Tuples
+::: {.callout-caution}
+Large-scale analytics requires programmatic control.
+:::
+
+### Reproducibility: Making Analysis Transparent
+
+**Excel operations can disappear when formulas are overwritten.**
+
+In Python, every transformation is documented as code.
 
 ```python
-point = (5, 7)
+import pandas as pd
+
+df = pd.read_csv("sales.csv")
+
+df = df[df["price"] > 0]
+df["revenue"] = df["price"] * df["quantity"]
+
+df.head()
+```
+
+If someone reads your script, they can **reproduce** every step.
+
+::: {.callout-important}
+This is **critical** in professional analytics environments.
+:::
+
+---
+
+### Cost Efficiency
+
+**Traditional statistical/analytical tools** require **expensive** licenses.
+
+- SPSS  
+- SAS  
+- Stata  
+- Excel
+- Tableau
+- Power BI
+
+
+**Python:**
+
+- Open-source  
+- Free  
+- Community-supported  
+- Flexible (no restrictions)
+
+>This reduces organizational cost and increases accessibility.
+
+<!-- todo fix bellow mentioned callaout block -->
+::: {.callout-tip}
+Newly established and/or small companies they prefer to use `Python`, for data analytics and/or in analtyics workflows because of above mentioned reeasons
+:::
+
+### Speed and Performance
+
+When datasets grow, Excel becomes slower.
+
+Python processes filtering and transformations faster, especially when vectorized operations are used.
+
+**Example:**
+
+```{python}
+import pandas as pd
+import numpy as np
+
+data = np.random.randint(1, 100, size=1_000_000)
+df = pd.DataFrame({"value": data})
+
+filtered = df[df["value"] > 50]
+
+print(f'the shape of the main data: {df.shape}')
+print(f'the shape of the filtered data: {filtered.shape}')
+filtered.head()
+```
+
+This demonstrates processing of `one million` observations programmatically.
+
+
+## First Interaction with Python
+
+Before advanced analysis, let's try to understand execution flow.
+
+Python runs instructions sequentially.
+
+```{python}
+print("Hello, Data Analysts")
+```
+
+```{python}
+a = 10
+b = 5
+result = a + b
+print(result)
+```
+
+>This is the foundation of all automation.
+
+---
+
+## From SQL Logic to Python Logic
+
+**You already understand SQL filtering:**
+
+```sql
+SELECT *
+FROM sales
+WHERE price > 0;
+```
+
+**Equivalent logic in Python:**
+
+```python
+import pandas as pd
+
+df = pd.read_csv("sales.csv")
+filtered = df[df["price"] > 0]
+filtered.head()
+```
+
+The logic is familiar $\rightarrow$ The interface changes.
+
+---
+
+### Example: Removing Duplicates
+
+**In Excel:** Data $\rightarrow$ Remove Duplicates 
+
+**In SQL:** 
+
+```sql
+SELECT 
+    DISTINCT 
+    *
+FROM your_table;
+
+```
+
+**In Python:**
+
+```python
+
+import pandas as pd
+
+df = pd.DataFrame({
+    "name": ["Alice", "Bob", "Bob", "Charlie"],
+    "sales": [100, 200, 200, 300]
+})
+
+duplicates = df.duplicated()
+duplicates
+```
+
+```python
+df_clean = df.drop_duplicates()
+df_clean
+```
+
+
+::: {.callout-important title = 'The Difference'}
+
+The result is identical.
+
+The advantage is control and reusability.
+
+:::
+
+### Conceptual Evolution
+
+```{mermaid}
+journey
+    title From Manual Analysis to Automated Analytics
+    section Manual Tools
+      Clicking menus: 5
+      Repeating steps: 4
+      Risk of inconsistency: 3
+    section Programming
+      Writing logic once: 5
+      Automating workflows: 5
+      Ensuring reproducibility: 5
+```
+
+
+::: {.callout-important title = "efficiency and scalability"}
+- This is not about complexity.
+- It is about efficiency and scalability.
+:::
+
+
+## SQL vs Python
+
+At this stage, it is important to clearly position SQL and Python in the analytics stack.
+
+::: {.callout-note}
+They are not competitors $\rightarrow$ They serve different purposes.
+:::
+
+### High-Level Comparison
+
+| Dimension | SQL | Python |
+|------------|------|--------|
+| Primary Purpose | Query structured data | Control, transform, automate workflows |
+| Environment | Database engine | Programming environment |
+| Data Location | Data stays inside database | Data can be local, database, API, files |
+| Best For | Filtering, joining, aggregating | Automation, modeling, pipelines |
+| Execution Model | Declarative (what you want) | Imperative (how to do it) |
+| Reproducibility | Stored queries | Full scripts and pipelines |
+| Scalability | Excellent inside DB | Excellent with libraries & distributed systems |
+| Machine Learning | Limited | Extensive ecosystem (scikit-learn, etc.) |
+| Visualization | Basic | Advanced (matplotlib, seaborn, plotly) |
+| Automation | Limited | Strong |
+
+
+
+### Mental Model Difference
+
+SQL is **declarative**.
+
+**You describe the desired result:**
+
+```sql
+SELECT *
+FROM sales
+WHERE price > 0;
+```
+
+Python is **imperative**.
+
+**You describe the step-by-step logic:**
+
+```python
+import pandas as pd
+
+df = pd.read_csv("sales.csv")
+df = df[df["price"] > 0]
+df.head()
 ```
 
 ---
 
-# Control Flow
+### Conceptual Workflow
 
-## If Statements
-
-```python
-x = 5
-
-if x > 0:
-    print("Positive")
-else:
-    print("Negative")
+```{mermaid}
+flowchart LR
+    A[Raw Data in Database] --> B[SQL: Extract & Aggregate]
+    B --> C[Python: Transform & Automate]
+    C --> D[Modeling & Visualization]
 ```
 
-## Loops
+**SQL answers:** What data do I need?
+
+**Python answers:** What should happen next?
+
+---
+
+### Complementary Roles
+
+**Think of SQL and Python as two layers:**
+
+| Layer | Responsibility |
+|--------|----------------|
+| Database Layer | Efficient data retrieval |
+| Programming Layer | Analysis, automation, modeling |
+
+$$\Downarrow$$
+
+**A professional data analyst uses both.**
+
+---
+
+### Practical Example: Same Goal, Different Roles
+
+**Goal:** Calculate revenue per customer.
+
+### SQL
+
+```sql
+SELECT customer_id,
+       SUM(price * quantity) AS revenue
+FROM sales
+GROUP BY customer_id;
+```
+
+### Python (After Data Extraction)
 
 ```python
-numbers = [1, 2, 3]
+import pandas as pd
 
-for n in numbers:
-    print(n)
+df = pd.read_csv("sales.csv")
+
+df["revenue"] = df["price"] * df["quantity"]
+revenue_per_customer = df.groupby("customer_id")["revenue"].sum()
+
+revenue_per_customer.head()
 ```
 
 ---
 
-# Functions
+### Summary
 
-```python
-def square(x):
-    return x ** 2
+**SQL is optimized for:**
 
-print(square(4))
-```
+ 
+- Structured data  
+- Large-scale querying  
+- Efficient joins  
+- Database performance  
 
-Functions improve reusability and structure.
+**Python is optimized for:**
+ 
+- Automation  
+- Complex transformations  
+- Modeling  
+- Reproducibility  
+- End-to-end pipelines  
+
+**A modern data analyst must be fluent in both.**
+
+
+## Welcome to Notebook 
+
+::: {.callout-important title = '.ipynb alert'}
+
+**New file type alert!** `.ipynb`
+
+A `.ipynb` file is the standard file format used by Jupyter Notebooks, which is  an interactive computational notebook environment. 
+
+The extension stands for `Interactive PYthon Notebooks`
+
+`.ipynb` $\rightarrow$ `Interactive PYthon Notebooks`
+::: 
+
+Jupyter is unique in that it runs directly in your browser. Upon opening Jupyter, a new page should open in your browser revealing a simple file structure like the one below:
+
+Opening notebooks in your normal file manager won’t work. You can only load them from within the Jupyter dashboard.
+
+- Jupyter Notebook
+- Jupyter Lab
+- Vscode Notebook
+- Google Colabe
+- and many more...
+
+Since, we are comfortable with the `VScode`, we will continue working with Python using the same environment. Moreover, in the end we are going to build **Streamlit Dashboard**, which assumes working with the `.py` files. VScode is one of the best open source IDE in the world, thus our decision to stick with the VScode could be considered as a `data-driven`:) .
+
+
+### Organizing a Project Folder
+
+Before moving on, let’s take a moment to consider effective ways of organizing your Python projects (and why an organized method would be beneficial to your project work!). Following a strict method of organization for your files and scripts is essential when working with `Python`. 
+
+::: {.callout-important}
+It is for every programming language and not only! 
+:::
+
+
+**As a professional analyst**, you’ll often be working on a number of different projects at the same time. This means large numbers of data sets, scripts, and folders. If your file system is a mess, it becomes easy to lose track of where things are, leading to stress, frustration, and lost time. You’ll also find it much harder to reuse code from past projects—an essential part of the job given how many times you have to conduct similar tasks on different data sets. Without a system in place, you may never be able to find that particular script you’re looking for, leading to more wasted time rewriting it from scratch.
+
+Perhaps even more importantly, messy project folders won’t help you make any friends in your colleagues and project stakeholders. If you can’t find anything in your mess of a project, they certainly won’t be able to either, making collaboration a vexing affair. Collaboration is a big part of data analysis, especially when working for a larger organization. Knowing where your project documents live and how they’re named will make your life, and your collaborators’ lives, that much easier.
+
+
+
+![](../../img/python/01/organizing_projects.png)
+
+
+**Start with:**
+<!--  todo make folder main folder is data_analytics_with_python
+```bash
+data
+ |---scripts
+    imgs
+    docs
+ README```{mermaid}
+ .gitignore
+ ```
+``` -->
+
+
+### Navigating Notebooks
+
+That big bar you see in the middle of your notebook is called a cell. Cells are where you write your Python code. Try to stick to one step per cell—for example, one cell to load data and one cell to check how it looks. This makes it much easier to locate and fix errors in your code.
+
+![](../../img/python/01/navigating.png)
+
+::: {.callout-note}
+- Editing mode is **green**
+- Navigating mode is blue
+:::
+
+While in editing mode, press the Escape key on your keyboard to enter navigating mode. While in navigating mode, press Enter on your keyboard to enter editing mode.
+
+
+
+### Creating Cells
+
+To create cells, you have to be in **navigating mode. **
+
+Switch to navigating mode now, then press:
+
+- **A** key `four times` to create four new cells **above** your selected cell. 
+- **B** key on your keyboard `five times` to create five cells **below** your selected cell. 
+
+
+::: {.callout-note}
+Note that each time you create a new cell, it immediately becomes the selected cell. Once finished, your screen should look something like this:
+:::
+
+![](../../img/python/01/adding_cells.gif)
+
+### Deleting 
+
+The process for **deleting cells** is very similar to the process for creating cells. Simply ensure you’ve highlighted the cell you want to delete, then press the **D** key twice.
+
+![](../../img/python/01/deleting_cells.gif)
+
+
+### Creating Markdown Fields/Cells
+
+
+With the top cell in your notebook selected, press **M** on your keyboard. The cell will instantly change in appearance such as losing the `In [ ] :` brackets on the left. What this does is tell Notebook that whatever’s in this cell isn’t code that’s supposed to be executed.
+
+![](../../img/python/01/markdown_sample.gif)
+
+## Python Packages
+
+Before we begin serious analytical work in Python, we must understand how Python is extended.
+
+Python by itself is a **general-purpose language.**
+
+To perform data analytics efficiently, we use additional tools called **packages** and **libraries**.
 
 ---
 
-# Introduction to Pandas
+### What Is a Package?
+
+A package is a collection of **Python modules** organized in a directory structure.
+
+**In practical terms:**
+
+- A package adds new functionality to Python  
+- It can be installed and reused across projects  
+- It may depend on other packages  
+
+**Example:**
+
+`pandas` is a package for data manipulation and analysis.
+
+
+
+### What Is a Library?
+
+A library is a broader term.
+
+ 
+- It is a collection of **packages and modules**  
+- It provides functionality for a specific domain  
+
+**For example:**
+
+The Python Data Science ecosystem includes a library stack:
+
+ 
+- pandas  
+- numpy  
+- matplotlib  
+- scikit-learn  
+
+These together form a data analytics library ecosystem.
+
+In practice, the terms `package` and `library` are often used interchangeably.
+
+---
+
+### Why Packages Matter
+
+Without packages, **Python is limited.**
+
+With packages, Python becomes:
+ 
+- A data manipulation engine  
+- A visualization platform  
+- A machine learning environment  
+- An automation framework  
+
+---
+
+### Installing Packages
+
+Since you have installed Miniconda, you can install packages using:
+
+ 
+- `conda install`
+- `pip install`
+
+For this course, we will use `pip` inside our Conda environment.
+
+
+### Installing pandas
+
+Open your terminal inside your activated Conda environment.
+
+Run:
+
+```bash
+pip install pandas
+```
+
+After installation completes successfully, we verify it.
+
+---
+
+### Verifying Installation
+
+Open VSCode Notebook.
+
+Create a new notebook file.
+
+Run the following:
 
 ```python
 import pandas as pd
 ```
 
-## Creating a DataFrame
 
-```python
-data = {
-    "name": ["Alice", "Bob", "Charlie"],
-    "sales": [100, 150, 200]
-}
+Check the installed version:
 
-df = pd.DataFrame(data)
-print(df)
-```
-
----
-
-# SQL vs Pandas Example
-
-## SQL
-
-```sql
-SELECT name, sales
-FROM table
-WHERE sales > 120;
-```
-
-## Python
-
-```python
-filtered = df[df["sales"] > 120]
-print(filtered)
-```
-
----
-
-# Grouping Example
-
-```python
-avg_sales = df["sales"].mean()
-print(avg_sales)
-```
-
-Mathematically, the mean is:
-
-$$
-\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
-$$
-
----
-
-# Simple Visualization
 
 ```{python}
-#| echo: false
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
+pd.__version__
+```
 
-import matplotlib.pyplot as plt
+If the version number appears, the installation is successful.
 
-plt.bar(df["name"], df["sales"])
-plt.title("Sales by Person")
-plt.xlabel("Name")
-plt.ylabel("Sales")
-plt.show()
+Bellow message indicates that the package is not isntalled.
+
+![](../../img/python/01/no_module.png)
+
+
+
+### Important: Reproducibility with Requirements File
+
+Later in the course, we will not install packages manually.
+
+**Instead, we will use a file called:** `requirements.txt`
+
+This file lists all required packages and versions.
+
+**Example:**
+
+```bash
+pandas==2.2.2
+numpy==1.26.4
+matplotlib==3.8.4
+```
+
+**To install all packages at once:**
+
+```bash
+pip install -r requirements.txt
+```
+
+**This ensures:**
+
+- Reproducibility  
+- Environment conssistency  
+- Easier collaboration  
+
+
+## Data Types
+
+Every programming language works with data. `In Python`, every value has a **type**.
+
+**Understanding data types is fundamental because:**
+
+- Operations depend on type  
+- Comparisons depend on type  
+- Functions behave differently based on type  
+
+>In analytics, incorrect data types often cause incorrect results.
+
+
+### Integer
+
+An integer represents numeric data without a decimal point.
+
+**Examples:**
+
+1, 2, 3, -10, 0
+
+```{python}
+x = 10
+y = -3
+```
+
+```{python}
+x
+```
+
+```{python}
+print(type(x))
+```
+
+
+**Integers are typically used for:**
+
+- Counts  
+- IDs  
+- Discrete quantities  
+
+
+### Floating-Point Number
+
+A floating-point number represents numeric data with a decimal point.
+
+**Examples:**
+
+1.34, 4.567, 10.4, -2.5
+
+```{python}
+a = 3.14
+b = 10.0
+```
+
+```{python}
+a
+```
+
+```{python}
+print(type(a))
+```
+
+**Floats are typically used for:**
+ 
+- Continuous measurements  
+- Financial values  
+- Statistical calculations  
+
+
+### String
+
+A string represents textual data.
+
+Strings are written inside single or double quotes.
+
+**Examples:**
+
+"Hello", "Data", "Analytics"
+
+```{python}
+name = "Alice"
+city = 'Yerevan'
+```
+
+```{python}
+name
+```
+
+```{python}
+print(type(name))
+```
+
+**Strings are typically used for:**
+
+ 
+- Names  
+- Categories  
+- Labels  
+- Text descriptions  
+
+---
+
+### Boolean
+
+A Boolean represents truth values.
+
+It has only two possible values:
+
+True and False
+
+```{python}
+is_active = True
+is_complete = False
+```
+
+```{python}
+is_active
+```
+
+```{python}
+print(type(is_active))
+```
+
+Booleans often result from comparisons.
+
+```{python}
+x = 10
+x > 5
+```
+
+**Booleans are typically used for:**
+
+ 
+- Logical conditions  
+- Filtering data  
+- Decision making in code  
+
+
+
+## Variables
+
+A variable is a **named reference to a value stored in memory**.
+
+**In simple terms:**
+
+A variable allows us to **store data** and **reuse it later**.
+
+Instead of repeatedly writing the same value, we assign it a name.
+
+---
+
+### Why Variables Are Important
+
+**Variables allow us to:**
+ 
+- Store intermediate results  
+- Reuse computed values  
+- Make code readable  
+- Avoid repetition  
+- Build logical workflows  
+
+>Without variables, automation is impossible.
+
+---
+
+### Creating a Variable
+
+In `Python`, a variable is created using the assignment operator `=`.
+
+```{python}
+x = 10
+```
+
+**Here:**
+
+- `x` is the variable name  
+- `10` is the value  
+- `=` means “assign the value to the variable”  
+
+Now Python remembers that `x` refers to `10`.
+
+```{python}
+x
 ```
 
 ---
 
-# Summary
+### Variables Can Store Any Data Type
 
-- Python extends SQL capabilities
+#### Integer
 
-- Data structures enable flexible processing
+```{python}
+count = 100
+count
+```
 
-- Pandas provides SQL-like operations
+#### Float
 
-- Visualization communicates insights
+```{python}
+price = 19.99
+price
+```
 
-Next session: deeper dive into Pandas operations and data cleaning.
+#### String
+
+```{python}
+customer_name = "Alice"
+customer_name
+```
+
+#### Boolean
+
+```{python}
+is_active = True
+is_active
+```
+
+
+
+```{python}
+type(price)
+```
+
+
+::: {.callout-important}
+In `Python` a variable **does not** have a fixed type.
+
+Its type depends on the value assigned to it.
+
+:::
+
+### Reassigning Variables
+
+Variables can be updated.
+
+```{python}
+x = 5
+x
+```
+
+```{python}
+x = 20
+x
+```
+
+The variable name stays the same, while, the stored value changes.
+
+---
+
+### Variables in Computations
+
+**Variables are used to build logic.**
+
+```{python}
+price = 100
+quantity = 3
+
+revenue = price * quantity
+revenue
+```
+
+**Here:**
+
+- `price` stores 100  
+- `quantity` stores 3  
+- `revenue` stores the result of multiplication  
+
+This is the foundation of data analysis workflows.
+
+
+
+### Variable Naming Rules
+
+**Variable names:**
+
+- Must start with a letter or underscore  
+- Cannot start with a number  
+- Cannot contain spaces  
+- Are case-sensitive  
+
+**Valid examples:**
+
+```{python}
+total_sales = 500
+customer_id = 101
+average_price = 19.5
+```
+
+**Invalid examples:**
+
+```python
+# 1value = 10       # cannot start with a number
+# total sales = 50  # cannot contain spaces
+```
+
+
+
+### Variables as Memory Labels
+
+**Think of a variable as a labeled container.**
+
+```{mermaid}
+flowchart LR
+    A[Variable Name] --> B[Stored Value in Memory]
+    B --> C[Used in Computation]
+```
+
+The name allows us to access the stored value whenever needed.
+
+
+::: {.callout-tip}
+
+Variables are the building blocks of programming.
+
+:::
