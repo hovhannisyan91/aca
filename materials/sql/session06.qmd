@@ -3,81 +3,6 @@ title: "Session 06: DA with SQL | String Functions"
 categories: [SQL, String Functions]
 ---
 
-## From Session 4
-
-Before jumping to the built-in SQL Funcions let's ensure that we have `sales_analysis` table.
-
-### Running Docker 
-
-
-Lets run the Docker in **detached mode:**
-
-```bash
-docker compose up -d
-```
-
-### Create `sales_analysis` table
-
-```sql
-DROP TABLE IF EXISTS sales_analysis;
-
-CREATE TABLE sales_analysis AS
-SELECT
-    s.transaction_id,
-
-    o.order_date,
-    DATE(o.order_date) AS order_date_date,
-    o.year,
-    o.quarter,
-    o.month,
-
-    c.customer_name,
-    c.city,
-    c.zip_code,
-
-    p.product_name,
-    p.category,
-    p.price,
-
-    e.first_name AS employee_first_name,
-    e.last_name  AS employee_last_name,
-    e.salary     AS employee_salary,
-
-    s.quantity,
-    s.discount,
-    s.total_sales
-FROM sales AS s
-JOIN orders AS o
-    ON s.order_id = o.order_id
-JOIN customers AS c
-    ON s.customer_id = c.customer_id
-JOIN products AS p
-    ON s.product_id = p.product_id
-LEFT JOIN employees AS e
-    ON s.employee_id = e.employee_id;
-```
-
-### Indexes for Filtering Performance
-
-```sql
-CREATE INDEX idx_sales_analysis_order_date
-    ON sales_analysis(order_date_date);
-
-CREATE INDEX idx_sales_analysis_year
-    ON sales_analysis(year);
-
-CREATE INDEX idx_sales_analysis_city
-    ON sales_analysis(city);
-
-CREATE INDEX idx_sales_analysis_category
-    ON sales_analysis(category);
-```
-
-
-::: {.callout-note}
-Note, that we are going to take closer look on `JOINs` during the next session.
-:::
-
 ## Text Functions | General Overview
 
 Text (string) functions are used to **inspect, clean, standardize, and transform textual data** at the **row level**.
@@ -90,13 +15,21 @@ Unlike numeric aggregate functions (`SUM`, `AVG`, `COUNT`), most text functions:
 
 In analytical workflows, text functions are typically applied **before aggregation** to ensure that grouping, counting, and summarization behave correctly.
 
----
+
+## Running Docker 
+
+Lets run the Docker in **detached mode:**
+
+```bash
+docker compose up -d
+```
+
 
 ### Why Text Functions Matter in Analytics
 
 Real-world text data is often **dirty, inconsistent, and ambiguous**.
 
-Common issues include:
+**Common issues include:**
 
 - inconsistent casing (`Electronics` vs `electronics`)
 - leading or trailing spaces
@@ -104,20 +37,21 @@ Common issues include:
 - mixed formats (`ID-123`, `ID_123`, `123`)
 - missing or partially filled values
 
-If these issues are not handled explicitly:
+**If these issues are not handled explicitly:**
 
 - `GROUP BY` produces fragmented categories
 - `COUNT(DISTINCT ...)` overcounts entities
 - KPIs become inconsistent across dashboards
 - joins silently fail
 
-Text functions are therefore **data quality tools**, not cosmetic helpers.
+
+>Text functions are therefore **data quality tools**, not cosmetic helpers.
 
 ---
 
 ### Typical Analytical Use Cases
 
-Text functions are commonly used for:
+**Text functions are commonly used for:**
 
 - **data cleaning**
   - trimming spaces
@@ -141,25 +75,17 @@ Text functions are commonly used for:
 
 Text transformations change **how rows are grouped**.
 
-Because of this:
+**Because of this:**
 
 - text cleaning is an **analytical decision**
 - not a purely technical step
 - and must be done **intentionally and consistently**
 
-In the following sections, we will cover **built-in text functions one by one**, using the same structured approach as in Session 05:
-
-- what the function does  
-- why it matters analytically  
-- input → query → output  
-- common pitfalls and best practices  
-
-This foundation will prepare you to build **trustworthy categorical metrics** and **clean analytical dimensions** using SQL.
 
 
-### Dummy Setup | Raw Phone Numbers and Names
+## Dummy Setup | Raw Phone Numbers and Names
 
-To demonstrate **text normalization beyond phone numbers**, we extend the dummy table to include **first name** and **last name** fields with **inconsistent capitalization and formatting**.
+To demonstrate **text normalization beyond phone numbers**, let's create dummy table which will cover the entire spector.
 
 <!-- customers_raw_text -->
 
@@ -202,7 +128,7 @@ INSERT INTO customers_raw_text (
   - multi-part last names  
   - unstructured category 
 
-This mirrors **real-world dirty text data** and prepares us for the next set of string functions focused on **standardization and normalization**.
+>This mirrors **real-world dirty text data** and prepares us for the next set of string functions focused on **standardization and normalization**.
 
 
 ## LENGTH()
@@ -226,7 +152,7 @@ SELECT
 FROM customers_raw_text;
 ```
 
----
+$$\downarrow$$
 
 **Output**
 
@@ -331,14 +257,14 @@ FROM customers_raw_text;
 
 ### Result Interpretation
 
-From the output, we observe that:
+**From the output, we observe that:**
 
 - leading and trailing spaces are removed  
 - internal characters (digits, hyphens, parentheses) remain unchanged  
 - some rows move closer to the expected target length  
 - others still violate formatting rules  
 
-This confirms that:
+**This confirms that:**
 
 - whitespace was only **one of several issues**
 - further transformations are required for full standardization  
@@ -347,12 +273,14 @@ This confirms that:
 
 ### Directional Variants
 
-SQL also provides directional trimming functions:
+**SQL also provides directional trimming functions:**
 
 ```sql
 LTRIM(raw_phone)   -- removes leading spaces only
 RTRIM(raw_phone)   -- removes trailing spaces only
 ```
+
+$$\downarrow$$
 
 Using `TRIM()` is equivalent to applying **both**.
 
@@ -360,7 +288,7 @@ Using `TRIM()` is equivalent to applying **both**.
 
 ### Analytical Best Practice
 
-Always follow this pattern:
+**Always follow this pattern:**
 
 1. **Measure** (e.g., `LENGTH()`)
 2. **Transform** (e.g., `TRIM()`)
@@ -387,7 +315,7 @@ Always follow this pattern:
 
 Text values often differ only by **capitalization**, even though they represent the **same entity**.
 
-For example:
+**For example:**
 
 - `john`, `John`, `JOHN`
 - `van dyke`, `Van Dyke`, `VAN DYKE`
@@ -421,7 +349,7 @@ Case normalization is therefore a **data quality operation**, not a formatting p
 
 `LOWER()` converts all characters in a string to **lowercase**.
 
-This is the most common choice for:
+**This is the most common choice for:**
 
 - grouping keys  
 - joins  
@@ -504,7 +432,7 @@ FROM customers_raw_text;
 
 ### Analytical Best Practice
 
-A common and robust pattern is:
+**A common and robust pattern is:**
 
 - use `LOWER()` for **keys and joins**
 - use `INITCAP()` for **display purposes**
@@ -574,7 +502,7 @@ SELECT
 FROM customers_raw_text;
 ```
 
-**Conceptual Effect**
+$$\downarrow$$
 
 | raw_phone          | phone_no_hyphen |
 |--------------------|-----------------|
@@ -627,7 +555,7 @@ While `REPLACE()` is useful, it has important limitations:
 - it cannot validate correctness
 - rules must be hard-coded
 
-For example:
+**For example:**
 
 - it cannot remove “everything that is not a digit”
 - it cannot enforce length rules
@@ -2162,7 +2090,7 @@ GROUP BY category_raw
 ORDER BY COUNT(*) DESC;
 ```
 
-Answer:
+**Answer:**
 
 - how many logical categories exist?
 - how many categories appear due to annotations?
@@ -2171,20 +2099,20 @@ Answer:
 
 ### Expected Insight
 
-You should clearly see that:
+**You should clearly see that:**
 
 - grouping on raw text produces **fragmented dimensions**
 - phone numbers represent the same entity in multiple formats
 
 ---
 
-## Take-Home Case Study
+## Homework
 
 ### Scenario
 
 You are asked to produce **reliable KPIs** from `transactions_text_demo`.
 
-Business questions:
+**Business questions:**
 
 - revenue by category  
 - number of unique customers  
