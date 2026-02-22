@@ -3759,34 +3759,6 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session06.html#create-sales_analysis",
-    "href": "materials/sql/slides/session06.html#create-sales_analysis",
-    "title": "String Functions",
-    "section": "Create sales_analysis",
-    "text": "Create sales_analysis\nDROP TABLE IF EXISTS sales_analysis;\n\nCREATE TABLE sales_analysis AS\nSELECT\n    s.transaction_id,\n\n    o.order_date,\n    DATE(o.order_date) AS order_date_date,\n    o.year,\n    o.quarter,\n    o.month,\n\n    c.customer_name,\n    c.city,\n    c.zip_code,\n\n    p.product_name,\n    p.category,\n    p.price,\n\n    e.first_name AS employee_first_name,\n    e.last_name  AS employee_last_name,\n    e.salary     AS employee_salary,\n\n    s.quantity,\n    s.discount,\n    s.total_sales\nFROM sales AS s\nJOIN orders AS o\n    ON s.order_id = o.order_id\nJOIN customers AS c\n    ON s.customer_id = c.customer_id\nJOIN products AS p\n    ON s.product_id = p.product_id\nLEFT JOIN employees AS e\n    ON s.employee_id = e.employee_id;",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#indexes-for-filtering-performance",
-    "href": "materials/sql/slides/session06.html#indexes-for-filtering-performance",
-    "title": "String Functions",
-    "section": "Indexes for Filtering Performance",
-    "text": "Indexes for Filtering Performance\nCREATE INDEX idx_sales_analysis_order_date\n    ON sales_analysis(order_date_date);\n\nCREATE INDEX idx_sales_analysis_year\n    ON sales_analysis(year);\n\nCREATE INDEX idx_sales_analysis_city\n    ON sales_analysis(city);\n\nCREATE INDEX idx_sales_analysis_category\n    ON sales_analysis(category);",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
     "objectID": "materials/sql/slides/session06.html#text-functions-analytical-reality",
     "href": "materials/sql/slides/session06.html#text-functions-analytical-reality",
     "title": "String Functions",
@@ -3987,7 +3959,7 @@
     "href": "materials/sql/slides/session06.html#ltrim-vs-rtrim",
     "title": "String Functions",
     "section": "LTRIM vs RTRIM",
-    "text": "LTRIM vs RTRIM\nSQL also provides directional variants:\nLTRIM(raw_phone)   -- removes leading spaces | only LEFT\nRTRIM(raw_phone)   -- removes trailing spaces | ONLY right\nTRIM() is equivalent to applying both.",
+    "text": "LTRIM vs RTRIM\nSQL also provides directional variants:\nLTRIM(raw_phone)   -- removes leading spaces | only LEFT\nRTRIM(raw_phone)   -- removes trailing spaces | ONLY right\n\\[\\downarrow\\]\nTRIM() is equivalent to applying both.",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -5103,118 +5075,6 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session06.html#goal-of-the-exercise",
-    "href": "materials/sql/slides/session06.html#goal-of-the-exercise",
-    "title": "String Functions",
-    "section": "Goal of the Exercise",
-    "text": "Goal of the Exercise\nIn this in-class task, you will work with intentionally messy transaction data to understand:\n\nhow dirty text breaks GROUP BY\nwhy measurement must come before cleaning\nhow text functions affect analytical results\nTime: 10–15 minutes\n\nMode: Individual or pairs",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#step-1-create-messy-transaction-data",
-    "href": "materials/sql/slides/session06.html#step-1-create-messy-transaction-data",
-    "title": "String Functions",
-    "section": "Step 1 | Create Messy Transaction Data",
-    "text": "Step 1 | Create Messy Transaction Data\nWe simulate real-world dirty text commonly found in transactional systems.\nDROP TABLE IF EXISTS transactions_text_demo;\n\nCREATE TABLE transactions_text_demo (\n  transaction_id INTEGER,\n  customer_id    INTEGER,\n  raw_phone      TEXT,\n  category_raw   TEXT,\n  quantity       INTEGER,\n  price          NUMERIC(10,2)\n);",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#step-2-insert-1000-rows-of-messy-data",
-    "href": "materials/sql/slides/session06.html#step-2-insert-1000-rows-of-messy-data",
-    "title": "String Functions",
-    "section": "Step 2 | Insert 1,000 Rows of Messy Data",
-    "text": "Step 2 | Insert 1,000 Rows of Messy Data\nINSERT INTO transactions_text_demo\nSELECT\n  gs AS transaction_id,\n  (RANDOM() * 200)::INT + 1 AS customer_id,\n\n  CASE (gs % 6)\n    WHEN 0 THEN '   077600945  '\n    WHEN 1 THEN '077-600-045'\n    WHEN 2 THEN '(374)-77-600-945'\n    WHEN 3 THEN '37477600945'\n    WHEN 4 THEN '77600945'\n    ELSE '077600945'\n  END AS raw_phone,\n\n  CASE (gs % 5)\n    WHEN 0 THEN 'Accessories (Promo)'\n    WHEN 1 THEN 'Accessories (Test)'\n    WHEN 2 THEN 'Electronics (Old)'\n    WHEN 3 THEN 'Electronics (Promo)'\n    ELSE 'Accessories'\n  END AS category_raw,\n\n  (RANDOM() * 5)::INT + 1 AS quantity,\n  (RANDOM() * 500 + 10)::NUMERIC(10,2) AS price\nFROM generate_series(1, 1000) AS gs;",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#step-3-sanity-check",
-    "href": "materials/sql/slides/session06.html#step-3-sanity-check",
-    "title": "String Functions",
-    "section": "Step 3 | Sanity Check",
-    "text": "Step 3 | Sanity Check\nSELECT\n  COUNT(*) AS total_rows,\n  COUNT(DISTINCT raw_phone) AS distinct_raw_phones,\n  COUNT(DISTINCT category_raw) AS distinct_categories\nFROM transactions_text_demo;\nThink:\n\nDo these numbers look reasonable?\nWhat already looks suspicious?",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#task-1-phone-number-diagnostics",
-    "href": "materials/sql/slides/session06.html#task-1-phone-number-diagnostics",
-    "title": "String Functions",
-    "section": "Task 1 | Phone Number Diagnostics",
-    "text": "Task 1 | Phone Number Diagnostics\nWrite a query that shows:\n\nraw_phone\nLENGTH(raw_phone)\nposition of '-'\nposition of '('\nnumber of rows per pattern\n\nFunctions to use:\n\nLENGTH()\nPOSITION() or STRPOS()\nGROUP BY",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#task-2-category-fragmentation",
-    "href": "materials/sql/slides/session06.html#task-2-category-fragmentation",
-    "title": "String Functions",
-    "section": "Task 2 | Category Fragmentation",
-    "text": "Task 2 | Category Fragmentation\nGroup by raw category values.\nSELECT\n  category_raw,\n  COUNT(*) AS transactions\nFROM transactions_text_demo\nGROUP BY category_raw\nORDER BY transactions DESC;\nAnswer:\n\nhow many categories appear?\nhow many are actually the same category?",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#expected-insights",
-    "href": "materials/sql/slides/session06.html#expected-insights",
-    "title": "String Functions",
-    "section": "Expected Insights",
-    "text": "Expected Insights\nBy the end of this exercise, you should clearly see:\n\nthe same phone number appears in many formats\ncategory annotations fragment grouping\nGROUP BY blindly trusts text values\ndirty text leads to misleading KPIs",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
-    "objectID": "materials/sql/slides/session06.html#key-analytical-lesson",
-    "href": "materials/sql/slides/session06.html#key-analytical-lesson",
-    "title": "String Functions",
-    "section": "Key Analytical Lesson",
-    "text": "Key Analytical Lesson\n\ntext cleanliness is not cosmetic\nit directly affects:\n\ncounts\nrevenue aggregation\nuniqueness\n\ncleaning must be intentional and documented\n\nNext, we will clean this data and measure how KPIs change.",
-    "crumbs": [
-      "Syllabus",
-      "SQL",
-      "SQL",
-      "Slides",
-      "String Functions"
-    ]
-  },
-  {
     "objectID": "materials/sql/session05.html",
     "href": "materials/sql/session05.html",
     "title": "Session 05: DA with SQL | Numeric Functions",
@@ -5727,7 +5587,7 @@
     "href": "materials/python/session01.html#why-programming-is-necessary",
     "title": "Session 01: Programming for Data Analysts",
     "section": "Why Programming is Necessary",
-    "text": "Why Programming is Necessary\nThe fundamental reason is leverage.\n\nExcel allows you to operate on data manually.\nSQL allows you to …\n\nPython allows you to:\n\nAutomate repetitive tasks\n\nScale to larger datasets\n\nEnsure reproducibility\n\nReduce dependency on licensed tools\n\nIncrease speed and efficiency\n\n\n\n\n\n\n\nImportant\n\n\n\nProgramming transforms you from an operator into a system designer.\n\n\n\n\nAutomation: Eliminating Repetition\nConsider a simple scenario:\n\nEvery month you receive a CSV/Excel file.\n\nEvery month you clean it manually.\nEvery month you need to INSERT INTO the Database\n\n\\[\\Downarrow\\]\nEvery month you repeat the same steps.\nInstead, you write the logic once.\nimport pandas as pd\n\ndf = pd.read_csv(\"monthly_sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.to_csv(\"cleaned_sales.csv\", index=False)\n\ndf.to_sql('sql_reference_folder')\n\n\n\n\n\n\nTip\n\n\n\nNow the computer performs the task consistently and automatically.\n\n\n\n\nScale: Beyond Excel Limits\nExcel maximum row capacity: 1,048,576 rows.\nModern systems generate millions of records daily.\nPython, especially when integrated with databases, handles large-scale datasets efficiently.\n\n\n\n\n\nflowchart LR\n    A[Small Dataset] --&gt; B[Excel Works]\n    C[Large Dataset] --&gt; D[Excel Slows]\n    D --&gt; E[Python + Database]\n\n\n\n\n\n\n\n\n\n\n\n\nCaution\n\n\n\nLarge-scale analytics requires programmatic control.\n\n\n\n\nReproducibility: Making Analysis Transparent\nExcel operations can disappear when formulas are overwritten.\nIn Python, every transformation is documented as code.\nimport pandas as pd\n\ndf = pd.read_csv(\"sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.head()\nIf someone reads your script, they can reproduce every step.\n\n\n\n\n\n\nImportant\n\n\n\nThis is critical in professional analytics environments.\n\n\n\n\n\nCost Efficiency\nTraditional statistical/analytical tools require expensive licenses.\n\nSPSS\n\nSAS\n\nStata\n\nExcel\nTableau\nPower BI\n\nPython:\n\nOpen-source\n\nFree\n\nCommunity-supported\n\nFlexible (no restrictions)\n\n\nThis reduces organizational cost and increases accessibility.\n\n\n\n\n\n\n\n\nTip\n\n\n\nNewly established and/or small companies they prefer to use Python, for data analytics and/or in analtyics workflows because of above mentioned reeasons\n\n\n\n\nSpeed and Performance\nWhen datasets grow, Excel becomes slower.\nPython processes filtering and transformations faster, especially when vectorized operations are used.\nExample:\n\n\nCode\nimport pandas as pd\nimport numpy as np\n\ndata = np.random.randint(1, 100, size=1_000_000)\ndf = pd.DataFrame({\"value\": data})\n\nfiltered = df[df[\"value\"] &gt; 50]\n\nprint(f'the shape of the main data: {df.shape}')\nprint(f'the shape of the filtered data: {filtered.shape}')\nfiltered.head()\n\n\nthe shape of the main data: (1000000, 1)\nthe shape of the filtered data: (494626, 1)\n\n\n\n\n\n\n\n\n\nvalue\n\n\n\n\n1\n98\n\n\n2\n90\n\n\n3\n72\n\n\n4\n85\n\n\n6\n72\n\n\n\n\n\n\n\nThis demonstrates processing of one million observations programmatically.",
+    "text": "Why Programming is Necessary\nThe fundamental reason is leverage.\n\nExcel allows you to operate on data manually.\nSQL allows you to …\n\nPython allows you to:\n\nAutomate repetitive tasks\n\nScale to larger datasets\n\nEnsure reproducibility\n\nReduce dependency on licensed tools\n\nIncrease speed and efficiency\n\n\n\n\n\n\n\nImportant\n\n\n\nProgramming transforms you from an operator into a system designer.\n\n\n\n\nAutomation: Eliminating Repetition\nConsider a simple scenario:\n\nEvery month you receive a CSV/Excel file.\n\nEvery month you clean it manually.\nEvery month you need to INSERT INTO the Database\n\n\\[\\Downarrow\\]\nEvery month you repeat the same steps.\nInstead, you write the logic once.\nimport pandas as pd\n\ndf = pd.read_csv(\"monthly_sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.to_csv(\"cleaned_sales.csv\", index=False)\n\ndf.to_sql('sql_reference_folder')\n\n\n\n\n\n\nTip\n\n\n\nNow the computer performs the task consistently and automatically.\n\n\n\n\nScale: Beyond Excel Limits\nExcel maximum row capacity: 1,048,576 rows.\nModern systems generate millions of records daily.\nPython, especially when integrated with databases, handles large-scale datasets efficiently.\n\n\n\n\n\nflowchart LR\n    A[Small Dataset] --&gt; B[Excel Works]\n    C[Large Dataset] --&gt; D[Excel Slows]\n    D --&gt; E[Python + Database]\n\n\n\n\n\n\n\n\n\n\n\n\nCaution\n\n\n\nLarge-scale analytics requires programmatic control.\n\n\n\n\nReproducibility: Making Analysis Transparent\nExcel operations can disappear when formulas are overwritten.\nIn Python, every transformation is documented as code.\nimport pandas as pd\n\ndf = pd.read_csv(\"sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.head()\nIf someone reads your script, they can reproduce every step.\n\n\n\n\n\n\nImportant\n\n\n\nThis is critical in professional analytics environments.\n\n\n\n\n\nCost Efficiency\nTraditional statistical/analytical tools require expensive licenses.\n\nSPSS\n\nSAS\n\nStata\n\nExcel\nTableau\nPower BI\n\nPython:\n\nOpen-source\n\nFree\n\nCommunity-supported\n\nFlexible (no restrictions)\n\n\nThis reduces organizational cost and increases accessibility.\n\n\n\n\n\n\n\n\nTip\n\n\n\nNewly established and/or small companies they prefer to use Python, for data analytics and/or in analtyics workflows because of above mentioned reeasons\n\n\n\n\nSpeed and Performance\nWhen datasets grow, Excel becomes slower.\nPython processes filtering and transformations faster, especially when vectorized operations are used.\nExample:\n\n\nCode\nimport pandas as pd\nimport numpy as np\n\ndata = np.random.randint(1, 100, size=1_000_000)\ndf = pd.DataFrame({\"value\": data})\n\nfiltered = df[df[\"value\"] &gt; 50]\n\nprint(f'the shape of the main data: {df.shape}')\nprint(f'the shape of the filtered data: {filtered.shape}')\nfiltered.head()\n\n\nthe shape of the main data: (1000000, 1)\nthe shape of the filtered data: (495794, 1)\n\n\n\n\n\n\n\n\n\nvalue\n\n\n\n\n2\n59\n\n\n3\n68\n\n\n6\n65\n\n\n11\n72\n\n\n12\n98\n\n\n\n\n\n\n\nThis demonstrates processing of one million observations programmatically.",
     "crumbs": [
       "Syllabus",
       "Python",
