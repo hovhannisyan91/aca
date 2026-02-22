@@ -39,7 +39,7 @@ Text (string) functions operate at the **row level**  and are used to **inspect,
 They are **data quality tools**, not cosmetic helpers.
 
 
-# From Session 4
+
 
 ## Run Docker
 
@@ -48,65 +48,6 @@ Open Docker Desktop, Run and open **Pgadmin**:
 ```bash
 docker compose up -d
 ```
-
-## Create `sales_analysis`
-
-```sql
-DROP TABLE IF EXISTS sales_analysis;
-
-CREATE TABLE sales_analysis AS
-SELECT
-    s.transaction_id,
-
-    o.order_date,
-    DATE(o.order_date) AS order_date_date,
-    o.year,
-    o.quarter,
-    o.month,
-
-    c.customer_name,
-    c.city,
-    c.zip_code,
-
-    p.product_name,
-    p.category,
-    p.price,
-
-    e.first_name AS employee_first_name,
-    e.last_name  AS employee_last_name,
-    e.salary     AS employee_salary,
-
-    s.quantity,
-    s.discount,
-    s.total_sales
-FROM sales AS s
-JOIN orders AS o
-    ON s.order_id = o.order_id
-JOIN customers AS c
-    ON s.customer_id = c.customer_id
-JOIN products AS p
-    ON s.product_id = p.product_id
-LEFT JOIN employees AS e
-    ON s.employee_id = e.employee_id;
-```
-
-
-## Indexes for Filtering Performance
-
-```sql
-CREATE INDEX idx_sales_analysis_order_date
-    ON sales_analysis(order_date_date);
-
-CREATE INDEX idx_sales_analysis_year
-    ON sales_analysis(year);
-
-CREATE INDEX idx_sales_analysis_city
-    ON sales_analysis(city);
-
-CREATE INDEX idx_sales_analysis_category
-    ON sales_analysis(category);
-```
-
 
 ## Text Functions | Analytical Reality {.smaller}
 
@@ -129,7 +70,7 @@ CREATE INDEX idx_sales_analysis_category
 - KPIs drift across dashboards
 
 
-##  Workflow
+##  Workflow {.smaller}
 
 **Correct analytical order:**
 
@@ -180,12 +121,12 @@ INSERT INTO customers_raw_text (
 
 ## Target Standard
 
-Our target standardized phone number is:  **`77600945`**
+**Our target standardized phone number is:**  `77600945`
 
  
 # LENGTH()
 
-## What It Does
+## What It Does {.smaller}
 
 `LENGTH()` returns the **number of characters** in a text value.
 
@@ -193,7 +134,7 @@ It is a **diagnostic function**, not a cleaning function.
 
 ---
 
-## Analytical Question
+## Analytical Question {.smaller}
 
 **Before cleaning, we ask:**
 
@@ -229,7 +170,7 @@ $$\downarrow$$
 
 ---
 
-## Interpretation
+## Interpretation {.smaller}
 
 **Even without cleaning, patterns emerge:**
 
@@ -239,7 +180,7 @@ $$\downarrow$$
 - **13+ characters** → whitespace and symbols  
 
 
-## What We Just Learned
+## What We Just Learned {.smaller}
 
 **Without modifying data, we detected:**
 
@@ -252,7 +193,7 @@ This prevents **blind transformations** later.
 
 ---
 
-## Why This Is Critical
+## Why This Is Critical {.smaller}
 
 **Using `LENGTH()` early allows you to:**
 
@@ -262,7 +203,7 @@ This prevents **blind transformations** later.
 - avoid one-size-fits-all logic
 
 
-## Analytical Insight
+## Analytical Insight {.smaller}
 
 - the target `77600945` has a **known expected length**
 - this becomes a **post-cleaning validation rule**
@@ -281,7 +222,7 @@ CASE WHEN LENGTH(cleaned_phone_number) = 8 THEN 'Accept' ELSE 'Reject' END as fl
 
 # TRIM()
 
-## Why TRIM() Matters
+## Why TRIM() Matters {.smaller}
 
 **Whitespace issues are:**
 
@@ -292,7 +233,7 @@ CASE WHEN LENGTH(cleaned_phone_number) = 8 THEN 'Accept' ELSE 'Reject' END as fl
 Yet they are often **overlooked** in analysis.
 
 
-## Analytical Principle
+## Analytical Principle {.smaller}
 
 Whitespace has **no business meaning**.
 
@@ -329,7 +270,7 @@ $$\downarrow$$
 
 
 
-## LTRIM vs RTRIM
+## LTRIM vs RTRIM {.smaller}
 
 **SQL also provides directional variants:**
 
@@ -338,11 +279,13 @@ LTRIM(raw_phone)   -- removes leading spaces | only LEFT
 RTRIM(raw_phone)   -- removes trailing spaces | ONLY right
 ```
 
+$$\downarrow$$
+
 `TRIM()` is equivalent to applying **both**.
 
 
 
-## Analytical Insight
+## Analytical Insight {.smaller}
 
 `TRIM()` helps us decide:
 
@@ -352,7 +295,7 @@ RTRIM(raw_phone)   -- removes trailing spaces | ONLY right
 
 **Measurement → transformation → re-measurement**
 
-## Try Yourself
+## Try Yourself {.smaller}
 
 - Apply `LTRIM(raw_phone)`
 - Apply `RTRIM(raw_number)`
@@ -500,7 +443,7 @@ After handling **whitespace** and **capitalization**, the next common issue is *
 - dots (`.`), slashes(`\`,`/`), or underscores:   
 - inconsistent formatting characters  
 
-## Analytical Principle
+## Analytical Principle {.smaller}
 
 `REPLACE()` removes or substitutes **known, explicit characters**.
 
@@ -595,9 +538,13 @@ This tells us `REPLACE()` alone is **not sufficient**.
 
 Every `REPLACE()` encodes a **business assumption**.
 
+::: {.incremental}
+
 - what characters are allowed?  
 - what characters are noise?  
-- what if formats change later?  
+- what if formats change later? 
+
+::: 
 
 . . .
 
@@ -1594,7 +1541,9 @@ $$\downarrow$$
 | Complex extraction | SUBSTRING() |
 
 
-# In-Class Assignment
+<!-- ## In Class Assi -->
+
+<!-- # In-Class Assignment
 
 ## Goal of the Exercise {.smaller}
 
@@ -1735,4 +1684,4 @@ By the end of this exercise, you should clearly see:
   - uniqueness
 - cleaning must be **intentional and documented**
 
-Next, we will clean this data and **measure how KPIs change**.
+Next, we will clean this data and **measure how KPIs change**. -->
