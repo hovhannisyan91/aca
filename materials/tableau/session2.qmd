@@ -22,7 +22,7 @@ By the end of this session, students will be able to:
 
 This session transitions from **basic visual construction** to **analytical control**.
 
-Students learn how Tableau:
+You will learn how Tableau:
 - Combines data from multiple tables and sources
 - Calculates values at different levels of detail
 - Enables interaction through parameters and actions
@@ -45,23 +45,280 @@ In real-world analytics:
 - Poor data modeling leads to **incorrect numbers**, not just slow dashboards  
 
 Tableau provides several ways to combine data.  
-Understanding *when* and *why* to use each method is essential for trustworthy analysis.
+Understanding **when** and **why** to use each method is essential for trustworthy analysis.
 
 ---
 
-## Connecting to Databases (PostgreSQL)
+## Connecting to Databases 
 
 Beyond Excel and CSV files, Tableau connects directly to relational databases.
 
+On Tableau Desktop and Tableau Cloud, you can connect to different databases using built-in connectors. Technically it is not possible to do from Tableau Public, but the next slides will show how to connect to **Microsoft SQL Server** from Tableau Desktop, and the same connection can be published to Tableau Cloud.
+
+## Tableau Desktop Connectors to SQL Server
+
+Tableau Desktop can connect directly to **Microsoft SQL Server** to support both exploratory analysis and production dashboards.  
+SQL Server is one of the most common enterprise sources for Tableau because it supports:
+
+- Large datasets and complex schemas  
+- Stored procedures and views  
+- Reliable authentication options (Windows / SQL Server)  
+- Stable performance with extracts or optimized live queries  
+
+---
+
+### Why Use a SQL Server Connector?
+
+Connecting Tableau to SQL Server allows you to:
+
+- Query data without exporting to Excel/CSV  
+- Work with **multiple tables** (fact + dimensions) using relationships or joins  
+- Refresh dashboards consistently through extracts or live connections  
+- Push filtering and aggregation to the database for better performance 
+- Leverage existing SQL logic in views and stored procedures
+- Do all data cleaning, aggregation and modeling in SQL if desired, using Tableau primarily for visualization to optimize performance
+
+---
+
+## Connection Types: Live vs Extract
+
+Tableau supports two connection modes:
+
+### Live Connection
+
+A **live connection** queries SQL Server every time the user interacts with the dashboard.
+
+**Use it when:**
+- Data must be up-to-date (near real-time KPIs)
+- SQL Server performance is strong and stable
+- Dashboards have well-designed filters and aggregated views
+
+**Considerations:**
+- Heavy dashboards can become slow if queries are complex
+- Performance depends on network and server load
+- Can cause loading issues if the underlying data model is not optimized
+
+![Live Connection Schema](../../img/tableau/w2_live_connection_schema.png)
+
+---
+
+### Extract Connection
+
+An **extract** pulls SQL Server data into a local Tableau extract (`.hyper` file).
+
+**Use it when:**
+- You want fast dashboard performance
+- Data updates daily/weekly/monthly (not real time)
+- The dashboard is used by many users or has complex calculations
+- The analysis don't require the latest data on every interaction
+
+
+**Considerations:**
+- Data can become outdated between refreshes
+- Extract refresh requires scheduled jobs in Tableau Server/Cloud (for production)
+- Extract refreshes should be done taking into account of the SQL table refresh schedule to avoid data staleness
 
 ::: {.callout-tip}
 
-Use **extracts** for learning and prototyping.  
-Use **live connections** when data freshness is critical.
+For exploratory and prototyping dashboards, prefer **Extract**.  
+For business critical and fast monitoring dashboards where freshness matters, consider **Live**, but design carefully.
+
+
+## Step-by-Step: Connect Tableau to SQL Server
+
+1. Open **Tableau Desktop**  
+2. On the start page, under **Connect**, choose:  
+   **To a Server → Microsoft SQL Server**
+3. Enter connection details:
+
+- **Server:** SQL Server hostname or IP  
+- **Database:** target database name (optional at first)  
+- **Authentication:**  
+  - **Windows** (recommended in corporate environments)  
+  - **SQL Server** (username/password)  
+
+4. Click **Sign In**
+
+After connecting, Tableau shows the available databases and tables on the **Data Source** page.
+
+![Connecting To SQL Server](../../img/tableau/w2_connect_sql_server.png)
+
+---
+
+## Choosing the Right Objects: Tables, Views, or Stored Procedures
+
+### Custom SQL Query
+Tableau allows you to write custom SQL queries directly in the connection interface and do all aggregation and modeling in SQL.
+
+### Tables
+Using raw tables gives you maximum flexibility in Tableau, but it can lead to performance issues and incorrect results if the data model is not designed carefully.
+
+### Views
+Views are often better when:
+- Business logic is already defined in SQL  
+- You want consistent definitions of KPIs  
+- You want to hide complexity from Tableau  
+
+### Stored Procedures
+Tableau can connect to stored procedures, but behavior depends on how the procedure returns the result set.
+
+Stored procedures are useful when:
+- The dataset is expensive to compute and already optimized in SQL  
+- You need parameterized logic inside SQL  
+
+![Connecting To a Database](../../img/tableau/w2_connect_to_database.png)
+
+::: {.callout-note}
+
+Trusted views or stored procedures are preferable over raw tables.  
+This reduces duplication of business logic and improves consistency.
 
 :::
 
+
+## Creating Extracts 
+
+Extracts can be created on the web or on Tableau Desktop to improve data source performance and support additional analytical functions. When you extract your data source, Tableau copies the data from your remote data store to **Tableau Server** or **Tableau Cloud**.
+
+![Creating an Extract](../../img/tableau/w2_create_extract.png)
+
+::: {.callout-tip}
+
+It’s recommended to finalize your data model **before** you create the extract.  
+Extract creation may take a long time, and changes to your data model (such as adding new logical tables) can invalidate the extract.
+
+:::
+
+## Extract Properties
+
+When creating an extract, you can configure the following properties:
+
+![Extract Properties](../../img/tableau/w2_extract_properties.png)
+
+## Decide How the Extract Data Should Be Stored
+
+You can choose one of two storage structures (schemas):
+
+- **Logical Tables (denormalized schema)**
+- **Physical Tables (normalized schema)**
+
+This choice affects how data is *stored* in the extract—not how tables appear on the **Data Source** page.
+
 ---
+
+### Logical Tables
+
+Logical Tables store data using **one extract table per logical table** in the data source.
+
+- Physical tables that define a logical table are merged and stored with that logical table.
+- If the data source has:
+  - **1 logical table** → stored as **1 extract table**
+  - **3 logical tables** → stored as **3 extract tables** (one per logical table)
+- If the data source has **1 logical table** with 3 physical tables → stored as **1 extract table** (physical tables are merged)
+
+### Physical Tables
+
+Physical Tables store data using **one extract table per physical table** in the data source.
+
+Select **Physical Tables** when:
+
+- The extract is comprised of tables combined with **one or more equality joins**
+- Joins performed **at query time**, not during extract creation
+
+Potential benefits:
+
+- Can improve performance
+- Can reduce extract file size
+
+In some cases, this can be used as a workaround for **row-level security**.
+
+
+### Extract Filters
+
+Select **Add** to define one or more filters to limit how much data gets extracted based on fields and their values.
+
+---
+
+### Aggregate the Data in the Extract
+
+Select **Aggregate data for visible dimensions** to aggregate measures using their default aggregation.
+
+Benefits:
+
+- Consolidates rows
+- Minimizes extract size
+- Improves performance
+
+Optional:
+
+- Select **Roll up dates** to a specific level (Year, Month, etc.)
+
+
+### Choose the Rows to Extract (Sampling / Top N)
+
+Select the number of rows you want to extract:
+
+- **All rows**
+- **Top N rows** (where supported)
+
+Notes:
+
+- Tableau applies filters and aggregation first, then extracts the selected number of rows from the results.
+- Not all data sources support sampling, so you may not see this option.
+- Hidden fields (hidden in Data Source page or Sheet) are excluded from the extract.
+
+---
+
+## Configure Incremental Refresh Settings
+
+Most data sources support incremental refresh.
+
+Instead of rebuilding the entire extract, incremental refresh can:
+
+- Add only the rows that are new since the last extract
+- Optionally refresh a recent window of historical data to capture changes
+
+Example:
+
+If the sales data is updated daily, incremental refresh can add only the new daily transactions rather than rebuilding the full extract.
+
+::: {.callout-note}
+
+If the structure of the source data changes (e.g., a new column is added), you must do a **full refresh** before incremental refresh can resume.
+
+:::
+
+## Considerations When Refreshing Extracts
+
+### Editing an Extract
+
+When editing an existing extract, Tableau shows the **last refresh** so you can confirm you’re updating the correct extract.
+
+### Full Refresh
+
+A Full Refresh replaces all rows in the extract with data from the original source.
+
+- Can take longer
+- Can be expensive on the database
+
+### Date/Time Precision and Extracts
+
+The Tableau data engine stores time values with precision up to **3 decimal places**.
+
+If your database uses higher precision, incremental refresh can create duplicates.
+
+Example:
+
+- Database rows:
+  - `2015-03-13 17:30:56.502352`
+  - `2015-03-13 17:30:56.502852`
+- Tableau stores both as:
+  - `2015-03-13 17:30:56.502`
+
+This can result in duplicate rows after refresh.
+
+---
+
 
 ## Tableau Data Model
 
@@ -671,7 +928,7 @@ Using a single chart allows:
 ## Tableau Histogram
 
 ### Purpose
-A **Histogram** is used to analyze the **distribution of a continuous numeric variable** by grouping values into ranges (bins) and counting how many records fall into each range.
+**Histogram** is used to analyze the **distribution of a continuous numeric variable** by grouping values into ranges (bins) and counting how many records fall into each range.
 
 Unlike bar charts, histograms focus on **frequency and shape of data**, not category comparison.
 
@@ -900,9 +1157,7 @@ This view helps answer questions such as:
 A **Treemap** is used to visualize **part-to-whole relationships** across **hierarchical dimensions** using area and color.  
 It is especially effective when you need to compare **many categories at once** and understand **relative contribution**.
 
----
-
-### Business Context (This Chart)
+### Business Context 
 
 In this example, the treemap shows the **distribution of unique customers** across **States and Cities**.
 
@@ -1361,7 +1616,7 @@ This means:
 
 Example:
 
-` FIXED [Customer ID] : SUM([Sales]) }`
+` {FIXED [Customer ID] : SUM([Sales]) }`
 
 If you filter by **Region** (dimension filter), this **FIXED** value will not change.
 
@@ -1425,6 +1680,10 @@ Parameters behave differently from filters.
 `IF [Sales] > [Sales Threshold Parameter] THEN "High"
 ELSE "Low"
 END`
+
+`IF [Sales] > [Sales Threshold Parameter] THEN "High"
+ELSE "Low"
+END`
 The parameter value controls logic dynamically.
 
 ---
@@ -1439,6 +1698,174 @@ They are influenced by:
 - Layout  
 - Visible data  
 - Filters applied to the view  
+
+
+### Parameters  
+Parameters are **not filters** and do not automatically affect calculated fields. They must be **explicitly referenced** in calculations to have an effect.
+A **parameter** is a workbook variable (number, date, or string) that can replace a constant value in:
+
+- A calculation  
+- A filter  
+- A reference line  
+
+Parameters allow you to make dashboards **dynamic and interactive**.
+
+---
+
+## To Use a Parameter, You Must:
+
+1. **Create the parameter**
+2. **Use it** in a calculation, filter, or reference line
+3. **Provide a way to change its value** 
+
+If users cannot modify the parameter value, it does not provide value.
+
+---
+
+## Cases where parameters are used
+
+### Metric Swapping
+
+One of Tableau’s most common forms of parameter usage is inside of calculated fields. This is beneficial if there are several different metrics and want to allow a dashboard end-user change the metrics in the view. 
+
+To start choose **Create Parameter** from the Data Pane and create a parameter with the following properties:
+
+![Create Parameter](../../img/tableau/w2_create_parameter.png)
+
+![Parameter Properties](../../img/tableau/w2_create_parameter_properties.png)
+
+You can then call this parameter in a calculated field using a case statement:
+
+```sql
+CASE [Metric]
+WHEN 1 THEN SUM([Revenue])
+ELSE SUM([Quantity])
+END
+```
+
+![Metric Swapping Calculation](../../img/tableau/w2_metric_swapping_calc.png)
+
+
+::: {.calloot-note}
+
+Name of the calculated field should be identical to the parameter name and can include **p.** in the name to make it clear that it is a calculation for the parameter.
+This is a common convention to make it clear that the calculation is related to the parameter.
+
+:::
+
+Right cick to the parameter and choose **Show Parameter**, drag **p.Metric** and `[Order Date]` to the view and you will see that the values in the view change based on the value of the parameter.
+
+![Parameter View](../../img/tableau/w2_metric_swapping_view.png)
+
+### Dimension Swapping
+
+Like the first example, you can also use parameters in calculated fields to return strings and dates, not just numeric values.
+
+In this example parameter allows swapping between **Categories** `[State]` and `[Region]`.
+
+![Dimension Swapping](../../img/tableau/w2_dimension_swapping.png)
+
+The calculation:
+
+```sql
+CASE [Location Category]
+WHEN 'State' THEN [State]
+ELSE [City]
+END
+```
+
+![Dimension Swapping Calculation](../../img/tableau/w2_dimension_swapping_calculation.png)
+
+
+Drag **p.Location Category** to the existing view, **Rows** shelf. Play around with the parameter to see it changes between the two different dimensions.
+
+![Parameter View](../../img/tableau/w2_dimension_swapping_view.png)
+
+
+### Boolean Parameters
+
+Parameters can also be used to return boolean values (True/False) which can be used in calculated fields to control logic. For example, you can create a parameter that allows users to toggle between showing or customers who are from the **state** Florida.
+
+![Bollean Parameter](../../img/tableau/w2_boolean_parameter.png)
+
+The calculation:
+
+```sql
+IF [Is Florida] THEN 
+    [State] = 'FL'
+ELSE 
+    [State] <> 'FL'
+END
+```
+
+![Bollean Parameter](../../img/tableau/w2_boolean_parameter_calc.png)
+
+This calculation will return `TRUE` only for records where the state is Florida when the parameter is set to `1` and others when the parameter is set to `0`. 
+Drag this calculation to the **Filters** shelf and set it to `True` to filter the view based on the parameter value.
+
+![Boolean Parameter View](../../img/tableau/w2_boolean_parameter_view.png)
+
+### Parameters in Filtering
+
+Another use case for parameters is to control the view by allowing users to select Top N customers based on their revenue.
+
+To do this, create a parameter with the following properties:
+
+![Parameter Filter](../../img/tableau/w2_create_parameter_filter.png)
+
+Then, drag `[Customer Name]` to the view and `SUM([Revenue])` to the **Marks** card. Right click on the `[Customer Name]` field on the view and choose **Filter** and then choose the **Top** tab. Choose **By Field** and then **by** choose the parameter you just created `Top values`. Choose the aggregation `Sum` and the field `Revenue`.
+
+![Top N Filter](../../img/tableau/w2_top_n_param_filter.png)
+
+This will allow users to toggle between showing the top N customers and all customers based on their revenue.
+
+![Top Values Parameter View](../../img/tableau/w2_top_n_param_view.png)
+
+### Parameters in Date Calculations
+
+In Date calculations, parameters can be used to allow users to select a date range or a specific date to filter the view. For example, you can create a parameter that allows users to filter the view in a specific date range based on date column.
+
+![Date Filtering](../../img/tableau/w2_date_filtering.png)
+
+By clicking **Add values from** we can select the column which should be used for filter values, in our case that is `[Return Date]`.
+
+The calculation:
+
+```sql
+[Order Date] <= [Select Return Date]
+```
+
+![Date Filtering Calculation](../../img/tableau/w2_date_filtering_calculation.png)
+
+Drag the calculated field to the **Filters Shelf** and set it to **TRUE**.
+
+Add the following fields to the **Rows** shelf:
+   - `[Order ID]`
+   - `DAY([Order Date])`
+   - `DAY([Return Date])`
+
+The view will display the orders placed **before the selected refund date**, along with their corresponding order dates.
+
+![Date Filtering View](../../img/tableau/w2_date_filtering_view.png)
+
+
+
+::: {.callout-tip}
+
+You can set the difault value of the date parameter to a specific date or to a dynamic value such as `TODAY()` for live data or `MAX([ORDER DATE])` for the extract data to always show data up to the current date when the dashboard is opened.
+Ticking **When workbook opens, set value to** and choosing `MAX([ORDER DATE])` will ensure that the view always shows data up to the most recent order date when the dashboard is opened.
+This is a common practice to ensure that the dashboard remains relevant and up-to-date without requiring manual updates to the parameter value.
+
+
+![The Latest Date for Parameters](../../img/tableau/w2_latest_date_for_parameter.png)
+
+:::
+
+
+
+
+
+
 
 
 
