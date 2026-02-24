@@ -1,0 +1,1317 @@
+---
+title: "Python Session 02: Python basic Syntax, Data Structures"
+categories: [Python, List, Tuple, Set, Dictionary, Pandas DataFrames]
+---
+
+## Arithmetic Operations
+
+Let revenue be $r$ and tax rate be $t$.
+
+The total revenue including tax is:
+
+$$
+\text{total} = r \times (1 + t)
+$$
+
+```{python}
+r = 100
+t = 0.2
+
+total = r * (1 + t)
+total
+```
+
+
+**Python supports:**
+  
+- Addition `+`  
+- Subtraction `-`  
+- Multiplication `*`  
+- Division `/`  
+- Power `**` 
+
+
+Boolean values are either `True` or `False`.
+
+```python
+100 > 50
+100 == 50
+100 != 50
+```
+
+**Logical operators:**
+
+
+- `and`  
+- `or`  
+- `not`  
+
+```{python}
+print((100 > 50) and (20 < 30))
+```
+
+> Boolean logic becomes essential when filtering data.
+
+
+
+## Basic Data Structures
+
+Before working comfortably with pandas, we must understand the core Python data structures.
+
+Every DataFrame is built on top of them.
+
+In analytics, these structures represent:
+
+  
+- Collections of values  
+- Observations  
+- Attributes  
+- Mappings between keys and values  
+
+---
+
+## List
+
+A **list** is an ordered, mutable collection.
+
+```{python}
+sales = [100, 200, 150, 200]
+sales
+```
+
+**Properties:**
+
+- Ordered  
+- Indexed  
+- Allows duplicates  
+- Mutable  
+
+**Access elements:**
+
+```{python}
+sales[0]
+sales[-1]
+```
+
+**Modify elements:**
+
+```{python}
+sales.append(300)
+sales[1] = 250
+sales
+```
+
+**Remove elements:**
+
+```{python}
+sales.remove(150)
+sales
+```
+
+**Length of the list:**
+```{python}
+len(sales)
+```
+
+---
+
+### Analytical Context
+
+**A list can represent:**
+
+- Daily sales  
+- Customer revenues  
+- Monthly growth rates  
+
+If values are $x_1, x_2, ..., x_n$, the total revenue is:
+
+$$
+\sum_{i=1}^{n} x_i
+$$
+
+```{python}
+total = 0
+for value in sales:
+    total += value
+
+total
+```
+
+
+
+## Tuple
+
+A **tuple** is ordered but immutable.
+
+```{python}
+coordinates = (40.18, 44.51)
+coordinates
+```
+
+**Properties:**
+ 
+- Ordered  
+- Indexed  
+- Immutable  
+
+**Why immutability matters:**
+
+- Prevents accidental changes  
+- Safe for constant data  
+- Can be used as dictionary keys  
+
+## Set
+
+A **set** stores unique values.
+
+```{python}
+customer_ids = {1, 2, 3, 3, 4}
+customer_ids
+```
+
+**Properties:**
+
+- Unordered  
+- No duplicates  
+- Fast membership checking  
+
+**Analytical use case:**
+
+- Removing duplicates  
+- Comparing segments  
+
+```{python}
+segment_a = {1, 2, 3}
+segment_b = {3, 4, 5}
+
+segment_a.intersection(segment_b)
+```
+
+---
+
+## Dictionary
+
+A **dictionary** maps keys to values.
+
+```{python}
+customer = {
+    "name": "Anna",
+    "revenue": 150,
+    "city": "Yerevan"
+}
+
+customer
+```
+
+**Properties:**
+
+- Keys must be unique  
+- Values can be any type  
+- Fast lookup  
+
+**Access values:**
+
+```{python}
+customer["revenue"]
+```
+
+**Add or update:**
+
+```{python}
+customer["segment"] = "Premium"
+customer["revenue"] = 200
+customer
+```
+
+Remove:
+
+```{python}
+del customer["city"]
+customer
+```
+
+
+## From Dictionary to Structured Data
+
+A collection of dictionaries can represent tabular data:
+
+```{python}
+customers = [
+    {"name": "Anna", "revenue": 150},
+    {"name": "David", "revenue": 220},
+    {"name": "Mariam", "revenue": 90}
+]
+
+customers
+```
+
+This structure is very close to what pandas formalizes.
+
+---
+
+## Transition to Pandas
+
+**A pandas DataFrame is conceptually:**
+ 
+- A dictionary of columns  
+- Each column behaves like a labeled list  
+
+```{mermaid}
+flowchart LR
+    A[List] --> C[Dictionary]
+    C --> D[DataFrame]
+```
+
+---
+
+### Creating a DataFrame
+
+```{python}
+import pandas as pd
+
+data = {
+    "name": ["Anna", "David", "Mariam"],
+    "revenue": [150, 220, 90],
+    "city": ["Yerevan", "Tbilisi", "Warsaw"]
+}
+
+df = pd.DataFrame(data)
+df
+```
+
+---
+
+### Inspecting Structure
+
+```{python}
+df.info()
+df.shape
+df.columns
+```
+
+---
+
+## Basic DataFrame Manipulation
+
+### Selecting Columns
+
+```{python}
+df["revenue"]
+df[["name", "revenue"]]
+```
+
+---
+
+### Adding a Column
+
+Suppose tax rate $t = 0.2$.
+
+$$
+\text{revenue\_after\_tax} = r \times (1 - t)
+$$
+
+```{python}
+t = 0.2
+df["revenue_after_tax"] = df["revenue"] * (1 - t)
+df
+```
+
+---
+
+### Removing a Column
+
+```{python}
+df.drop("city", axis=1)
+```
+
+To modify permanently:
+
+```{python}
+df = df.drop("city", axis=1)
+df
+```
+
+---
+
+### Filtering Rows
+
+```{python}
+df[df["revenue"] > 100]
+```
+
+**Equivalent SQL:**
+
+```sql
+SELECT *
+FROM customers
+WHERE revenue > 100;
+```
+
+---
+
+### Updating Values
+
+```{python}
+df.loc[df["revenue"] < 100, "segment"] = "Low"
+df.loc[df["revenue"] >= 100, "segment"] = "High"
+df
+```
+
+This applies conditional logic to structured data.
+
+
+### Analytical Flow
+
+```{mermaid}
+flowchart LR
+    A[Python Structures] --> B[Dictionary of Lists]
+    B --> C[DataFrame]
+    C --> D[Select]
+    C --> E[Filter]
+    C --> F[Transform]
+    D --> G[Insights]
+    E --> G
+    F --> G
+```
+
+
+
+**We have have moved from:**
+  
+- Lists  
+- Dictionaries  
+- Sets  
+- Tuples  
+
+**To:**
+
+- Structured tabular data  
+- Column manipulation  
+- Row filtering  
+- Feature creation  
+
+
+::: {.callout-important}
+Understanding the foundations makes pandas intuitive instead of magical.
+
+Next, after contidions and loops, we will go deeper into selection, filtering, and aggregation using real datasets.
+:::
+
+
+::: {.callout-important}
+## Mutable vs Immutable
+
+Understanding mutability is essential for writing correct analytical code.
+
+### Mutable Objects
+
+Mutable objects **can be changed after creation**.
+
+  
+- `list`  
+- `dict`  
+- `set`  
+- pandas `DataFrame`  
+
+Example:
+
+```{python}
+sales = [100, 200, 150]
+sales[0] = 300
+sales
+```
+
+The original object is modified.
+
+---
+
+### Immutable Objects
+
+Immutable objects **cannot be changed after creation**.
+
+  
+- `int`  
+- `float`  
+- `str`  
+- `bool`  
+- `tuple`  
+
+Example:
+
+```{python}
+x = 10
+x = x + 5
+x
+```
+
+Here, a new object is created. The original value is not modified.
+
+Trying to modify a tuple:
+
+```{python}
+coordinates = (40.18, 44.51)
+# coordinates[0] = 41   # Error
+```
+
+---
+
+### Why This Matters in Data Analytics
+
+Mutability affects:
+
+  
+- Function behavior  
+- Memory references  
+- Unexpected side effects  
+- pandas chained assignments  
+
+If you modify a mutable object inside a function, the original data may change.
+
+Understanding this prevents subtle analytical bugs.
+
+:::
+
+
+## Conditional Statements
+
+Conditional statements allow a program to make decisions.
+In data analytics, decisions appear everywhere:
+
+- Filtering rows  
+- Classifying customers  
+- Detecting anomalies  
+- Creating segments  
+- Handling missing values  
+
+At the core of these operations lies the `if` statement.
+
+### The Basic `if` Statement
+
+```{python}
+revenue = 150
+
+if revenue > 100:
+    print("High revenue")
+else:
+    print("Normal revenue")
+```
+
+
+**Structure:**
+
+  
+- `if` keyword  
+- A condition that evaluates to `True` or `False`  
+- A colon `:`  
+- An indented block of code  
+
+If the condition is `True`, the indented block runs.  
+If it is `False`, nothing happens.
+
+
+### Indentation | Why It Matters
+
+In Python, indentation defines structure.  
+It is not optional formatting — it is syntax.
+
+```{python}
+revenue = 150
+
+if revenue > 100:
+    print("High revenue")
+
+print("Analysis complete")
+```
+
+Only the indented line belongs to the `if` block.
+
+If indentation is incorrect, Python raises an error:
+
+```python
+revenue = 150
+
+if revenue > 100:
+print("High revenue")   # IndentationError
+```
+
+**Best practice:**
+
+- Use 4 spaces per indentation level  
+- Never mix tabs and spaces  
+- Keep indentation consistent  
+
+---
+
+### Using `elif` for Multiple Conditions
+
+When there are more than two possible categories, use `elif`.
+
+```{python}
+revenue = 180
+
+if revenue > 200:
+    print("Very high revenue")
+elif revenue > 100:
+    print("High revenue")
+elif revenue > 50:
+    print("Medium revenue")
+else:
+    print("Low revenue")
+```
+
+**Important principles:**
+
+
+- Conditions are evaluated from top to bottom  
+- The first `True` condition executes  
+- Remaining conditions are skipped  
+
+### Boolean Expressions and Comparison Operators
+
+Every conditional statement depends on a Boolean expression.
+
+A Boolean expression evaluates to either `True` or `False`.
+
+```{python}
+100 > 50
+100 == 50
+100 != 50
+```
+
+**Common comparison operators:**
+  
+- `>` greater than  
+- `<` less than  
+- `>=` greater than or equal  
+- `<=` less than or equal  
+- `==` equal  
+- `!=` not equal 
+
+
+These operators form the foundation of filtering logic in data analysis.
+
+
+### Combining Conditions with Logical Operators
+
+Often, a single condition is not enough.
+
+Python provides logical operators:
+
+  
+- `and`  
+- `or`  
+- `not`  
+
+```{python}
+revenue = 150
+is_active = True
+
+if revenue > 100 and is_active:
+    print("Target customer")
+```
+
+Rules:
+
+  
+- `and` → both conditions must be `True`  
+- `or` → at least one condition must be `True`  
+- `not` → reverses the Boolean value  
+
+Example:
+
+```{python}
+is_active = False
+
+if not is_active:
+    print("Customer is inactive")
+```
+
+Logical operators become extremely important when filtering datasets with multiple criteria.
+
+
+### Nested Conditional Statements
+
+Conditionals can be placed inside other conditionals.
+
+```{python}
+revenue = 150
+region = "EU"
+
+if revenue > 100:
+    if region == "EU":
+        print("High EU revenue")
+    else:
+        print("High non-EU revenue")
+```
+
+Notice how indentation increases with each nested block.
+
+Each indentation level represents a new logical layer.
+
+Deep nesting reduces readability.  
+In data analytics, clarity is preferred over complexity.
+
+
+### Common Mistakes
+
+**1. Using `=` instead of `==`**
+
+```python
+if revenue = 100:   # SyntaxError
+```
+
+Correct:
+
+```{python}
+if revenue == 100:
+    print("Equal")
+```
+
+`=` assigns a value.  
+`==` compares values.
+
+---
+
+**2. Forgetting the colon**
+
+```python
+if revenue > 100
+    print("High")
+```
+
+The colon is mandatory.
+
+---
+
+**3. Incorrect indentation**
+
+```python
+if revenue > 100:
+print("High")
+```
+
+Python requires consistent indentation.
+
+---
+
+### Visualizing Conditional Flow
+
+```{mermaid}
+flowchart TD
+    A[Start] --> B{Condition True?}
+    B -->|Yes| C[Execute Block]
+    B -->|No| D[Skip Block]
+    C --> E[Continue]
+    D --> E
+```
+
+Indentation defines what belongs to the decision branch.
+
+---
+
+### Why Conditional Logic Matters in Analytics
+
+Conditional logic is the basis of:
+
+  
+- Data filtering  
+- Segmentation  
+- Rule-based scoring  
+- Feature creation  
+- Data validation  
+
+Every `WHERE` clause in SQL is conceptually an `if` statement applied to rows.
+
+Understanding conditional statements deeply ensures that later pandas filtering feels natural and intuitive.
+
+
+## Loops
+
+::: {.callout-important}
+Conditional statements allow decisions.  
+
+**Loops allow repetition.**
+:::
+
+**In data analytics, repetition appears constantly:**
+  
+- Iterating over values  
+- Applying rules to many observations  
+- Aggregating manually  
+- Cleaning records  
+- Transforming data  
+
+The most common loop in Python is the `for` loop.
+
+---
+
+### The Basic `for` Loop
+
+```{python}
+sales = [100, 200, 150]
+
+for value in sales:
+    print(value)
+```
+
+**Structure:**
+
+- `for` keyword  
+- A temporary variable (`value`)  
+- The keyword `in`  
+- An iterable object (`sales`)  
+- A colon `:`  
+- An indented block  
+
+The loop runs once for each element in the collection.
+
+---
+
+### How a `for` Loop Works
+
+```{mermaid}
+flowchart TD
+    A[Start] --> B[Take first element]
+    B --> C[Execute indented block]
+    C --> D{More elements?}
+    D -->|Yes| B
+    D -->|No| E[Stop]
+```
+
+>Each iteration processes one element.
+
+
+
+### Loop With Accumulation
+
+Loops are often used to compute totals.
+
+```{python}
+sales = [100, 200, 150]
+
+total = 0
+
+for value in sales:
+    total = total + value
+
+total
+```
+
+Mathematically, if values are $x_1, x_2, ..., x_n$:
+
+$$
+\text{Total} = \sum_{i=1}^{n} x_i
+$$
+
+This manual summation mirrors what `sum()` does internally.
+
+---
+
+### Loop With Conditional Logic
+
+You can combine loops and conditions.
+
+```{python}
+sales = [100, 200, 150, 50]
+
+for value in sales:
+    if value > 120:
+        print("High sale:", value)
+```
+
+**Now we are:**
+
+- Iterating  
+- Evaluating  
+- Filtering  
+
+This is conceptually similar to a SQL `WHERE` clause.
+
+---
+
+### Looping Over Dictionaries
+
+**Loops are not limited to lists.**
+
+```{python}
+customer = {
+    "name": "Anna",
+    "revenue": 150,
+    "city": "Yerevan"
+}
+
+for key in customer:
+    print(key, ":", customer[key])
+```
+
+**You can also iterate over key–value pairs:**
+
+```{python}
+for key, value in customer.items():
+    print(key, value)
+```
+
+---
+
+### The `range()` Function
+
+**Sometimes you need numeric iteration.**
+
+`range(5)` generates:
+
+```{python}
+for i in range(5):
+    print(i)
+```
+
+
+
+```{mermaid}
+flowchart LR
+    A[range(5)] --> B[0]
+    A --> C[1]
+    A --> D[2]
+    A --> E[3]
+    A --> F[4]
+```
+
+---
+
+### Nested Loops
+
+Loops can be nested inside each other.
+
+```{python}
+for i in range(3):
+    for j in range(2):
+        print("i =", i, ", j =", j)
+```
+
+Indentation increases with nesting.
+
+Each additional level increases computational complexity.
+
+---
+
+### Common Mistakes With Loops
+
+**1. Forgetting indentation**
+
+```python
+for value in sales:
+print(value)
+```
+
+Indentation is required.
+
+---
+
+**2. Modifying a collection while iterating**
+
+This can lead to unexpected behavior.
+
+
+
+### Analytical Perspective
+
+In analytics, loops are useful for:
+
+  
+- Custom feature engineering  
+- Rule-based transformations  
+- Processing API responses  
+- Working with nested structures  
+
+However:
+
+For tabular data, pandas vectorized operations are usually faster and cleaner than loops.
+
+Loops are foundational knowledge.  
+Vectorization is analytical optimization.
+
+
+
+
+### Summary
+
+**You now understand:**
+  
+- Basic `for` loop structure  
+- Loop flow  
+- Accumulation logic  
+- Combining loops with conditions  
+- Iterating over dictionaries  
+- Using `range()`  
+- Nested loops
+
+
+::: {.callout}
+For more information on loops, see the [official Python documentation](https://docs.python.org/3/tutorial/controlflow.html#for-statements):  or [this tutorial](https://www.geeksforgeeks.org/python/loops-in-python): 
+:::
+
+## List Comprehension
+
+List comprehension allows us to create new lists in a concise and readable way.
+
+It replaces many simple loops.
+
+### Basic Structure
+
+```python
+new_list = [expression for item in iterable]
+```
+
+**Equivalent traditional loop:**
+
+```python
+sales = [100, 200, 150]
+
+new_sales = []
+
+for value in sales:
+    new_sales.append(value * 1.2)
+
+new_sales
+```
+
+**Now using list comprehension:**
+
+```python
+sales = [100, 200, 150]
+
+new_sales = [value * 1.2 for value in sales]
+new_sales
+```
+
+**The result is identical, but the syntax is cleaner.**
+
+---
+
+### With Conditional Filtering
+
+**You can add a condition:**
+
+```python
+sales = [100, 200, 150, 50]
+
+high_sales = [value for value in sales if value > 120]
+high_sales
+```
+
+**Traditional version:**
+
+```python
+high_sales = []
+
+for value in sales:
+    if value > 120:
+        high_sales.append(value)
+
+high_sales
+```
+
+**List comprehension combines:**
+
+- Iteration  
+- Conditional filtering  
+- Transformation  
+
+In one readable line.
+
+---
+
+### Mathematical Interpretation
+
+If values are $x_1, x_2, ..., x_n$, and we want only those where $x_i > 120$:
+
+$$
+\{ x_i \mid x_i > 120 \}
+$$
+
+List comprehension expresses this directly in code.
+
+---
+
+### Conditional Expression Inside Comprehension
+
+**You can also transform conditionally:**
+
+```python
+sales = [100, 200, 150, 50]
+
+labels = ["High" if value > 120 else "Low" for value in sales]
+labels
+```
+
+This mirrors segmentation logic.
+
+---
+
+### When to Use List Comprehension
+
+**Use when:**
+
+  
+- You are transforming a list  
+- You are filtering values  
+- The logic is simple and readable  
+
+**Avoid when:**
+
+  
+- Logic becomes too complex  
+- Multiple nested conditions reduce clarity  
+
+Readability is more important than brevity.
+
+
+### Conceptual Flow
+
+```{mermaid}
+flowchart LR
+    A[Original List] --> B[Iterate]
+    B --> C{Condition?}
+    C -->|Yes| D[Transform]
+    C -->|No| E[Skip or Alternate]
+    D --> F[New List]
+    E --> F
+```
+
+List comprehension is structured iteration with transformation.
+
+
+### Train Yourself
+
+**Given:**
+
+```python
+revenues = [120, 250, 80, 310, 95]
+```
+
+1. Create a new list with revenues after applying 10% tax.
+2. Create a list containing only revenues greater than 100.
+3. Create a list labeling each revenue as `"High"` if > 200, otherwise `"Normal"`.
+
+Use list comprehension only.
+
+---
+
+## Why This Matters for Pandas
+
+**List comprehension is conceptually similar to:**
+
+  
+- Creating new columns  
+- Applying transformations  
+- Conditional feature engineering  
+
+Soon, you will see how pandas vectorizes this behavior.
+
+
+
+## Homework
+
+
+**This homework integrates:**
+
+- Arithmetic operations  
+- Boolean logic  
+- Lists, sets, dictionaries  
+- Conditional statements  
+- Loops  
+- List comprehension  
+- Basic pandas DataFrame manipulation  
+
+You will simulate a small revenue analytics pipeline and submit your work as a **Jupyter Notebook (`.ipynb`) file**.
+
+::: {.callout-note}
+Create a `02_python_foundamentals_for_data_analytics.ipynb` file and complete the following tasks. Once finished push to GitHub and share the link.
+:::
+
+### Scenario
+
+You are analyzing weekly transaction data for a small company.
+
+**The company wants to:**
+
+- Adjust revenues for tax  
+- Apply discount rules  
+- Classify customers  
+- Remove duplicate IDs  
+- Prepare data for structured analysis  
+
+
+### Part 1
+
+Given:
+
+```python
+revenues = [120, 250, 80, 310, 95]
+tax_rate = 0.18
+discount_rate = 0.10
+```
+
+Let revenue be $r$.
+
+Final revenue formula:
+
+$$
+\text{final} = r \times (1 + \text{tax\_rate}) \times (1 - \text{discount\_rate})
+$$
+
+### Tasks
+
+1. Compute revenues including tax.
+2. Compute final revenues after tax and discount.
+3. Create a Boolean list indicating whether revenue > 100.
+4. Create a Boolean list indicating whether revenue is between 100 and 300.
+5. Add Markdown explanation: Why do parentheses matter in the formula?
+
+
+### Part 2
+
+**Using:**
+
+```python
+sales = [120, 250, 80, 310, 95]
+```
+
+
+1. Compute total revenue manually using a loop.
+2. Compute average revenue.
+3. Identify the maximum value without using `max()`.
+4. Count how many values are greater than 150.
+5. Create a new list of revenues after adding 5% commission.
+
+### Part 3
+
+**Segmentation rules:**
+  
+- "Premium" if revenue > 250  
+- "Standard" if 100 < revenue ≤ 250  
+- "Low" otherwise  
+
+---
+
+1. Create a list of segment labels.
+2. Count how many customers fall into each segment.
+3. Add Markdown explanation: Why does the order of `elif` statements matter?
+
+---
+
+### Part 4
+
+**Given:**
+
+```python
+customer_ids = [1, 2, 3, 3, 4, 5, 5, 6]
+```
+---
+
+1. Remove duplicates using a set.
+2. Convert back to a list.
+3. Compare lengths before and after deduplication.
+4. Explain in Markdown why sets are unordered.
+
+---
+
+### Part 5
+
+**Create a dictionary:**
+
+```python
+customer = {
+    "name": "Anna",
+    "revenue": 250,
+    "city": "Yerevan"
+}
+```
+
+---
+
+1. Add a new key `"segment"` based on revenue.
+2. Update revenue to 300.
+3. Remove `"city"`.
+4. Loop over the dictionary and print key-value pairs.
+5. Add Markdown explanation: Why are dictionaries useful for structured data?
+
+---
+
+### Part 6
+
+**Using:**
+
+```python
+revenues = [120, 250, 80, 310, 95]
+```
+
+1. Create a list of revenues after 10% tax.
+2. Create a list of revenues greater than 100.
+3. Create a list labeling each revenue as:
+   - "High" if > 200
+   - "Normal" otherwise
+4. Compare list comprehension vs loop in Markdown.
+
+
+
+### Part 7
+
+**Convert your data into a DataFrame.**
+
+```python
+import pandas as pd
+
+data = {
+    "revenue": revenues
+}
+
+df = pd.DataFrame(data)
+df
+```
+
+---
+
+1. Add column `"revenue_after_tax"`.
+2. Add column `"segment"` using conditional logic.
+3. Filter rows where revenue > 100.
+4. Remove the `"revenue_after_tax"` column.
+5. Print the shape of the DataFrame.
+6. Add Markdown explanation: Why is this easier than manual loops?
+
+---
+
+### Bonus Reflection 
+
+**Answer briefly in Markdown:**
+
+- Difference between mutable and immutable objects  
+- Why loops are less efficient than pandas vectorization  
+- How Boolean logic relates to SQL `WHERE`  
+- Why understanding lists helps understand DataFrames  
+
+---
+
+### Submission Requirements
+
+  
+- Submit a **`.ipynb` file**  
+- Use both **code cells** and **Markdown cells**  
+- All code must execute without errors  
+- Clearly label each section  
+
+
+Notebook structure should be clean and readable.
+
+
+
+### Analytical Flow
+
+```{mermaid}
+flowchart LR
+    A[Raw Revenues] --> B[Arithmetic Transformations]
+    B --> C[Conditional Classification]
+    C --> D[Deduplication]
+    D --> E[Dictionary Structure]
+    E --> F[DataFrame]
+    F --> G[Filtering & Transformation]
+```
