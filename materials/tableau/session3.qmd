@@ -1,10 +1,581 @@
 ---
-title: "Tableau Session 03:"
-categories: [Tableau]
+title: "Tableau Session 03: Advanced Analytics"
+categories: [ADVANCED CALCULATIONS, LOD EXPRESSIONS, DATE FUNCTIONS, COHORT ANALYSIS, SPATIAL ANALYTICS, DATA MODELING, TABLEAU PREP]
 ---
 
+## Learning Goals
 
+- Use advanced Tableau functions for analytical modeling  
+- Build complex calculated fields  
+- Apply table calculations (running totals, percent of total, ranking)  
+- Work with advanced date logic and date parameters  
+- Understand and apply Level of Detail (LOD) expressions  
+- Build cohort and retention analysis views  
+- Perform spatial analysis and spatial joins  
+- Connect and visualize geographic data  
+- Understand Tableau data modeling (relationships vs joins)  
+- Prepare and clean data using Tableau Prep  
+- Build advanced KPI dashboards and analytical heatmaps  
+- Work with telecom, finance, and marketing datasets  
 
-# Tableau Tutorial
+---
 
-Comming Soon
+## Overview
+
+This session focuses on **Advanced Analytics in Tableau**.
+
+While previous sessions introduced core visualization techniques and intermediate modeling concepts, this week shifts toward **calculation-driven analysis and analytical architecture**.
+
+Students will learn how to:
+
+- Move beyond simple aggregations  
+- Control granularity independently from the view  
+- Design reusable calculation logic  
+- Implement dynamic date handling  
+- Build structured cohort retention tables  
+- Construct advanced KPI dashboards  
+
+The emphasis is on transforming Tableau from a visualization tool into a **full analytical platform** capable of supporting real business decision-making.
+
+::: {.callout-note}
+
+**By the end of this session, you should be able to build advanced KPI dashboards, retention heatmaps, spatial analysis views, and parameter-driven analytical models using complex Tableau functions.**
+
+:::
+
+---
+
+## Complex Calculations
+
+Complex calculations combine multiple functions, aggregations, logical statements, and sometimes LOD expressions to solve real analytical problems.
+
+Unlike basic calculations (e.g., SUM([Sales])), complex calculations often:
+
+- Mix aggregations and row-level logic  
+- Use nested IF or CASE statements  
+- Include date functions  
+- Combine parameters with measures  
+- Apply conditional logic with multiple criteria  
+
+### Example 1 — Conditional KPI
+
+Revenue only for profitable orders:
+
+IF SUM([Profit]) > 0 THEN SUM([Revenue]) END
+
+This calculation:
+- Aggregates Profit
+- Applies conditional logic
+- Returns aggregated Revenue only when the condition is satisfied
+
+---
+
+### Example 2 — Dynamic Metric Switching (Parameter-Based)
+
+IF [Metric Parameter] = "Revenue" THEN SUM([Revenue])
+ELSEIF [Metric Parameter] = "Profit" THEN SUM([Profit])
+ELSE SUM([Quantity])
+END
+
+Used for:
+- Dynamic KPI dashboards  
+- Toggle between financial metrics  
+- Executive reporting views  
+
+---
+
+### Example 3 — Nested Date + Logic Calculation
+
+Flag customers active in the last 30 days:
+
+DATEDIFF('day', [Last Activity Date], TODAY()) <= 30
+
+Combines:
+- Date difference calculation  
+- Logical comparison  
+- Boolean output  
+
+---
+
+### Example 4 — Cohort Index Calculation
+
+Months since activation:
+
+DATEDIFF(
+'month',
+DATETRUNC('month', [Activation Date]),
+DATETRUNC('month', [Activity Date])
+)
+
+This combines:
+- Date truncation  
+- Date difference  
+- Granularity control  
+
+Used for:
+- Retention heatmaps  
+- Subscriber lifecycle analysis  
+- Cohort modeling  
+
+---
+
+## Table Calculations
+
+Table calculations operate on **aggregated results already present in the view**.  
+They are computed after the query is executed and depend on:
+
+- Partitioning (how data is grouped)
+- Addressing (direction of calculation)
+
+They are essential for trend analysis and advanced comparisons.
+
+---
+
+### Running Total
+
+Calculates cumulative values across a dimension.
+
+RUNNING_SUM(SUM([Revenue]))
+
+Used for:
+- Cumulative revenue  
+- Subscriber growth tracking  
+- Rolling performance metrics  
+
+Example:
+Month 1 → 100  
+Month 2 → 250  
+Month 3 → 400  
+
+---
+
+### Percent of Total
+
+Calculates contribution relative to total.
+
+SUM([Revenue]) / TOTAL(SUM([Revenue]))
+
+Used for:
+- Market share  
+- Region contribution  
+- Product category distribution  
+
+Important:
+This depends on how the table is partitioned.
+
+---
+
+### Rank
+
+Ranks values within a partition.
+
+RANK(SUM([Revenue]))
+
+Variants:
+- RANK_DENSE()
+- RANK_UNIQUE()
+- RANK_PERCENTILE()
+
+Used for:
+- Top N regions  
+- Best performing products  
+- Highest revenue BTS sites  
+
+---
+
+## Key Differences: Aggregate vs Table Calculation
+
+| Type | When Computed | Example | Use Case |
+|------|---------------|---------|----------|
+| Aggregate | During query | SUM([Revenue]) | KPI totals |
+| Table Calculation | After query (in view) | RUNNING_SUM(SUM([Revenue])) | Cumulative trends |
+
+---
+
+## Why This Matters
+
+Complex calculations and table calculations enable:
+
+- Advanced KPI modeling  
+- Rolling analytics  
+- Cohort retention curves  
+- Dynamic ranking  
+- Executive-level dashboards  
+
+Mastering these concepts is critical for building analytical dashboards in telecom, finance, and marketing domains.
+## Date Functions  
+**Applies to:** Tableau Cloud, Tableau Desktop, Tableau Public, Tableau Server  
+
+Dates are a common element in many data sources. If a field contains recognizable dates, Tableau assigns it a **Date** or **DateTime** data type.
+
+When date fields are used in a visualization, Tableau provides:
+
+- Automatic date hierarchy (Year → Quarter → Month → Day)
+- Date-specific filtering options (Relative Date, Range of Dates)
+- Specialized formatting options
+- Built-in drill-down functionality
+
+Using dates in calculations requires **date-specific functions**, which allow you to manipulate, compare, truncate, shift, and construct date values.
+
+---
+
+## Important Date Concepts
+
+Some date functions reference additional date-related elements:
+
+- `date_part` argument (e.g., 'year', 'month', 'week')
+- Optional `[start_of_week]` parameter
+- Date literals using `#` symbols
+
+These concepts are explained in detail later in this section.
+
+---
+
+## Related Topics (Not Date Functions)
+
+These topics affect how dates behave but are not functions:
+
+- **Custom Date Formats** – Control how dates display in a visualization  
+- **Date Properties for a Data Source** – Set default calendar settings  
+- **Fiscal Dates** – Work with fiscal calendars  
+- **ISO-8601 Week-Based Calendar** – Use ISO week numbering  
+
+💡 Tip:  
+If your field already has a date icon in the Data pane and you only want to control how it appears (for example, display `22Sept2024` as `09/24`), you should use **formatting**, not a date calculation.
+
+Date functions manipulate date values — they do not control formatting.
+
+---
+
+# Date Functions Available in Tableau
+
+---
+
+## DATE
+
+Converts numbers or strings into dates (if recognizable).
+
+**Syntax**  
+DATE(expression)
+
+**Output**  
+Date
+
+**Definition**  
+Returns a date given a number, string, or date expression.
+
+**Examples**
+
+DATE([Employee Start Date])  
+DATE("September 22, 2018")  
+DATE("9/22/2018")  
+DATE(#2018-09-22 14:52#)
+
+**Notes**
+
+- Automatically recognizes many standard formats  
+- If recognition fails, use DATEPARSE  
+- MAKEDATE is similar but requires numeric year, month, and day  
+
+---
+
+## DATEADD
+
+Adds a specified number of date parts to a date.
+
+**Syntax**  
+DATEADD(date_part, interval, date)
+
+**Output**  
+Date
+
+**Definition**  
+Returns the date with the specified interval added.
+
+**Examples**
+
+Push due dates one week forward:
+
+DATEADD('week', 1, [Due Date])
+
+Add 280 days:
+
+DATEADD('day', 280, #2/20/21#) = #November 27, 2021#
+
+Supports ISO 8601 dates.
+
+---
+
+## DATEDIFF
+
+Returns the number of date parts between two dates.
+
+**Syntax**  
+DATEDIFF(date_part, date1, date2, [start_of_week])
+
+**Output**  
+Integer
+
+**Definition**  
+Returns the difference between date1 and date2 in units of date_part.
+
+**Examples**
+
+DATEDIFF('day', #3/25/1986#, #2/20/2021#) = 12751  
+DATEDIFF('month', [Date Joined], [Date Left])
+
+Supports ISO 8601 dates.
+
+---
+
+## DATENAME
+
+Returns the name of a date part as a string.
+
+**Syntax**  
+DATENAME(date_part, date, [start_of_week])
+
+**Output**  
+String
+
+**Examples**
+
+DATENAME('year', #3/25/1986#) = "1986"  
+DATENAME('month', #1986-03-25#) = "March"
+
+Similar to DATEPART but returns text instead of a number.
+
+---
+
+## DATEPARSE
+
+Converts specifically formatted strings into dates.
+
+**Syntax**  
+DATEPARSE(date_format, date_string)
+
+**Output**  
+Date
+
+**Example**
+
+DATEPARSE('yyyy-MM-dd', "1986-03-25") = #March 25, 1986#
+
+Use when DATE cannot automatically recognize format.
+
+Availability depends on connector type.
+
+---
+
+## DATEPART
+
+Returns a date part as an integer.
+
+**Syntax**  
+DATEPART(date_part, date, [start_of_week])
+
+**Output**  
+Integer
+
+**Examples**
+
+DATEPART('year', #1986-03-25#) = 1986  
+DATEPART('month', #1986-03-25#) = 3
+
+Faster than DATENAME because it returns numeric values.
+
+---
+
+## DATETRUNC
+
+Rounds a date down to a specific level.
+
+**Syntax**  
+DATETRUNC(date_part, date, [start_of_week])
+
+**Definition**  
+Returns a new date truncated to the specified level.
+
+**Examples**
+
+DATETRUNC('day', #9/22/2018#) = #9/22/2018#  
+DATETRUNC('iso-week', #9/22/2018#) = #9/17/2018#  
+DATETRUNC('quarter', #9/22/2018#) = #7/1/2018#
+
+Used heavily in:
+
+- Cohort analysis  
+- Monthly KPI grouping  
+- Quarterly reporting  
+
+---
+
+## DAY
+
+Returns day of month (1–31)
+
+DAY(#September 22, 2018#) = 22
+
+---
+
+## ISDATE
+
+Checks if a string is a valid date.
+
+ISDATE("09/22/2018") = true  
+ISDATE("22SEP18") = false  
+
+Only works on strings.
+
+---
+
+## ISO Functions
+
+ISO functions follow ISO-8601 week-based calendar rules.
+
+- ISOYEAR(date)
+- ISOQUARTER(date)
+- ISOWEEK(date)
+- ISOWEEKDAY(date)
+
+Example:
+
+ISOWEEK(#1986-03-25#) = 13  
+
+ISO weeks always start on Monday.
+
+---
+
+## MAKEDATE
+
+Constructs a date from numeric inputs.
+
+MAKEDATE(1986,3,25) = #1986-03-25#
+
+If values are invalid, Tableau adjusts automatically:
+MAKEDATE(2020,4,31) → May 1, 2020
+
+---
+
+## MAKEDATETIME
+
+Combines date and time.
+
+MAKEDATETIME([Date], [Time])
+
+Available only for MySQL-compatible connections.
+
+---
+
+## MAKETIME
+
+Creates a time value.
+
+MAKETIME(14, 52, 40) = #1/1/1899 14:52:40#
+
+Returns datetime (Tableau does not support standalone time type).
+
+---
+
+## MAX and MIN (Date Behavior)
+
+MAX(#3/25/1986#, #2/20/2021#) = most recent date  
+MIN(#3/25/1986#, #2/20/2021#) = earliest date  
+
+As aggregation:
+MAX([Date]) returns latest date in dataset.
+
+---
+
+## MONTH, QUARTER, WEEK, YEAR
+
+Basic extraction functions:
+
+MONTH(date)  
+QUARTER(date)  
+WEEK(date)  
+YEAR(date)
+
+---
+
+## TODAY and NOW
+
+TODAY() → Current date  
+NOW() → Current date and time  
+
+If using live connections, timezone may differ.
+
+---
+
+# date_part Argument
+
+Many date functions require a `date_part` string constant.
+
+Valid values include:
+
+- 'year'
+- 'quarter'
+- 'month'
+- 'dayofyear'
+- 'day'
+- 'weekday'
+- 'week'
+- 'hour'
+- 'minute'
+- 'second'
+- 'iso-year'
+- 'iso-quarter'
+- 'iso-week'
+- 'iso-weekday'
+
+---
+
+# start_of_week Parameter
+
+Some functions include optional `[start_of_week]`.
+
+Example:
+
+DATEDIFF('week', #2013-09-22#, #2013-09-24#, 'monday') = 1  
+DATEDIFF('week', #2013-09-22#, #2013-09-24#, 'sunday') = 0  
+
+Changing start_of_week changes week boundary logic.
+
+---
+
+# Date Literal (#)
+
+The `#` symbol indicates a date literal.
+
+Examples:
+
+'March 25, 1986' → String  
+#3/25/1986# → Date  
+03/25/1986 → Number  
+1986-03-25 → Integer  
+
+Without `#`, Tableau may interpret values incorrectly.
+
+---
+
+# Create a Date Calculation (Practice)
+
+Using Sample Superstore:
+
+1. Drag Order Date to Rows.
+2. Drill down from Year → Quarter → Month.
+3. Create calculated field:
+
+Quarter Date = DATETRUNC('quarter', [Order Date])
+
+4. Change to Exact Date and Discrete.
+
+This demonstrates:
+
+- Date hierarchy drill-down  
+- Truncation  
+- Date formatting vs calculation  
+- Discrete vs continuous date behavior  
+
+---
+
