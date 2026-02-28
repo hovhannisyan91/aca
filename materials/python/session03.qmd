@@ -1,0 +1,628 @@
+---
+title: "Session 03: Introduction to Pandas"
+categories: [Pandas, DataFrames]
+# variables:
+#     img_path: "/img/python/03"
+---
+
+
+## Environment Setup
+
+![](../../img/python/03/pandas.png)
+
+1. Create `04_data_import.ipynb` file in the `notebooks` folder.
+2. Import the necessary libraries: `pandas` and `numpy`.
+3. Dowload the dataset from [this link](https://github.com/hovhannisyan91/data_analytics_with_python/blob/main/data/raw/Archive.zip) and save it in the `data/raw` folder as `Archive.zip`
+4. Unzipping the file you will get 2 csv files:
+   1. `orders.csv`
+   2. `products.csv`
+
+
+
+## Unzipping the files
+
+There are 3 options to unzip the file:
+
+1. usiing the terminal
+2. using the file explorer
+3. using Python code
+
+>Guess which one we will use in this course? Yes, you are right! We will use **Python** code to unzip the file. :)
+
+
+```python
+
+import zipfile
+with zipfile.ZipFile("../ata/raw/Archive.zip", "r") as zip_ref:
+    zip_ref.extractall("../../data/raw")
+```
+
+As you can see, we are using the `zipfile` library to unzip the file. We are opening the zip file in **read** `r` mode and then extracting all the files to the specified location.
+
+
+::: {.callout-important}
+Pay attention to the size of the of the `orders.csv` file. It is around `109 GB`. So, it will not be possible to push it to GitHub. We will use only a sample of the data for our analysis. 
+
+**We can either:**
+
+1. Create a sample of the data using Python code and save it as a new csv file.
+2. Push zip file to GitHub and unzip it locally on our machines (just like we did in the code above) and then create a sample of the data using Python code and save it as a new csv file.
+:::
+
+
+## Core Data Structures
+
+**Pandas has two primary data structures:**
+
+ 
+- **Series:** 1-dimensional labeled array
+- **DataFrame:** 2-dimensional labeled table
+
+
+### Series Example
+
+```{python}
+import pandas as pd
+
+s = pd.Series([10, 20, 30, 40])
+s
+```
+
+**A Series consists of:**
+
+ 
+- Values
+- Index
+
+
+
+### DataFrame Example
+
+```{python}
+data = {
+    "customer": ["Anna", "David", "Liza"],
+    "revenue": [100, 250, 180]
+}
+
+df = pd.DataFrame(data)
+df
+```
+
+
+**A DataFrame consists of:**
+ 
+- Rows (index)
+- Columns
+- Values
+
+
+In mathematical form, a DataFrame can be represented as a matrix:
+
+$$
+X =
+\begin{bmatrix}
+x_{11} & x_{12} & \dots & x_{1p} \\
+x_{21} & x_{22} & \dots & x_{2p} \\
+\vdots & \vdots & \ddots & \vdots \\
+x_{n1} & x_{n2} & \dots & x_{np}
+\end{bmatrix}
+$$
+
+**Where:**
+
+ 
+- $n$ = number of observations (rows)
+- $p$ = number of variables (columns)
+
+
+## Importing the data
+
+
+Now that we have **unzipped the files**, we can import them into our Jupyter Notebook using the `pandas` library.
+
+::: {.callout-tip title = "Why CSV files?"}
+We will learn importing other formats of data in the next sessions. For now, we will focus on importing `csv files`, which is the most common format for storing tabular data.
+:::
+
+
+### Importing `orders.csv` file
+
+
+
+```{python}
+import pandas as pd
+
+df_orders = pd.read_csv("../../lab/python/data/raw/orders.csv")
+df_orders.head()
+```
+
+::: {.callout-important}
+try to make a heabit of using `head()` method after importing the data to check if the data is imported correctly and to get a quick overview of the data.
+:::
+
+
+### Importing `products.csv` file
+
+
+
+```python
+#| echo: false
+df_products = pd.read_csv("../data/raw/products.csv")
+df_products.head()
+```
+
+```{python}
+#| echo: false
+df_products = pd.read_csv("../../lab/python/data/raw/products.csv")
+df_products.head()
+```
+
+
+### Common parameters
+
+
+```python
+pd.read_csv(
+    "{data/sales.csv}",
+    sep=",",
+    header=0,
+    na_values=["NA", ""],
+    parse_dates=["order_date"]
+)
+```
+
+## Exploring Data with Pandas
+
+### Top `N` rows of the data
+
+Default value of `N` is 5, so if you do not specify the number of rows to display, it will show you the top 5 rows of the DataFrame.
+
+```{python}
+df_products.head()
+```
+
+
+
+```{python}
+df_orders.head()
+```
+
+::: {.callout-note}
+You can specify the number of rows to display by passing an integer to the `head()` method. For example, `df.head(10)` will display the top 10 rows of the DataFrame.
+:::
+
+
+### Top `N` rows of the data
+
+```{python}
+df_products.tail()
+```
+
+
+```{python}
+df_orders.tail()
+```
+
+
+From this simple overview of the data can see the strucutre and column names of each DataFrame. 
+
+### Column names of the DataFrame
+
+
+- **Orders** `{python} list(df_orders.columns)` columns
+- **Products** `{python} list(df_products.columns)` columns
+
+
+### Get Columns
+
+Although we can get the column names using `list(df.columns)`, it is more common to use `df.columns` to get the column names as an Index object.
+
+```{python}
+df_orders.columns
+```
+
+
+```{python}
+df_products.columns
+```
+
+### Data types of the columns
+
+Another handy function is the `df.info()` function. It returns some basic information about your dataframe, for instance, how many rows and columns it has, what the columns are called, and what data types the columns contain.
+
+
+```{python}
+df_orders.info()
+```
+
+```{python}
+df_orders.info()
+```
+
+
+There’s also a separate dedicated function just for checking the data types of a dataframe’s columns. If you only want to check the data types (and nothing else), you can use the `df.dtypes` function for a cleaner output:
+
+
+```python
+df_orders.dtypes
+```
+
+### Summary statistics of the data
+
+
+With just one function, you can automatically generate all those descriptive statistics you should be well familiar with by this point:
+
+- count
+- mean
+- standard deviation
+- minimum
+
+```{python}
+df_orders.describe()
+```
+
+
+::: {.callout-tip}
+- Compare this method with typing and copying formulas in `Excel!`
+- Compare this method with writing `SQL` queries to get the same information.
+:::
+
+
+
+
+## Data Wrangling and Subsetting
+
+The term **“data wrangling”** is just a fancy term for conducting manipulations or transformations on data. When you’re working with large sets of data, it can be difficult to see all the data entries and values in your dataframe. This is where Python (and pandas!) comes in. 
+
+<!-- todo add image -->
+
+
+### Data Wrangling Procedures
+
+
+- Dropping columns
+- Renaming columns
+- Changing data types
+- Transforming data (e.g., creating new columns, applying functions to columns)
+
+### Dropping columns
+
+The function itself is `df.drop()`, and within its parentheses comes the argument, which, in this case, is a list. The list should contain the individual columns that you want to drop, enclosed in quotation marks. To remove the `eval_set` column from your `orders.csv` dataframe, the full function would be:
+
+Create a new DataFrame without the `eval_set` column
+
+#### Option 1: 
+
+```python
+df_orders_new = df_orders.drop(columns=["eval_set"])
+```
+
+#### Option 2:
+
+```{python}
+df_orders.drop(columns = ['eval_set'])
+```
+
+```{python}
+df_orders.columns
+```
+
+
+
+::: {.callout-important}
+by doing this ,it will not change the original DataFrame `df_orders`. If you want to change the original DataFrame, you can either assign the result back to the original DataFrame or use the `inplace=True` parameter.
+:::
+
+
+```{.python}
+df_orders.drop(columns = ['eval_set'], inplace=True)
+
+df_orders.head()
+```
+
+
+
+### Renaming columns
+
+The function itself is `df.rename()`, and within its parentheses comes the argument `columns`, which expects a dictionary. The dictionary should map old column names to new column names. To rename the `eval_set` column to `dataset_type` in your `orders.csv` dataframe, the full function would be:
+
+Create a new DataFrame with the renamed column
+
+#### Option 1:
+
+```{python}
+df_orders_new = df_orders.rename(columns={"eval_set": "dataset_type"})
+df_orders_new.head()
+```
+
+#### Option 2:
+
+```{python}
+df_orders.rename(columns = {'eval_set': 'dataset_type'})
+```
+
+```{python}
+df_orders.columns
+```
+
+::: {.callout-important}
+By doing this, it will not change the original DataFrame `df_orders`. If you want to change the original DataFrame, you can either assign the result back to the original DataFrame or use the `inplace=True` parameter.
+:::
+
+```{python}
+df_orders.rename(columns = {'eval_set': 'dataset_type'}, inplace=True)
+
+df_orders.head()
+```
+
+
+---
+
+### Changing data types
+
+The function itself is `df.astype()`, and within its parentheses comes a dictionary that specifies the column name and the target data type. To change the `order_id` column to integer type in your `orders.csv` dataframe, the full function would be:
+
+Create a new DataFrame with updated data types
+
+#### Option 1:
+
+```python
+df_orders_new = df_orders.astype({"order_id": "int64"})
+```
+
+#### Option 2:
+
+```{python}
+df_orders.astype({'order_id': 'int64'})
+```
+
+```{python}
+df_orders.dtypes
+```
+
+::: {.callout-important}
+By doing this, it will not change the original DataFrame `df_orders`. If you want to change the original DataFrame, you can either assign the result back to the original DataFrame or overwrite the column directly.
+:::
+
+```{python}
+df_orders['order_id'] = df_orders['order_id'].astype('int64')
+
+df_orders.dtypes
+```
+
+
+
+### Transforming data (e.g., creating new columns, applying functions to columns)
+
+You can create new columns or transform existing ones using vectorized operations or the `apply()` function. Using the columns from your `orders` DataFrame (`order_id`, `user_id`, `eval_set`, `order_number`, `order_dow`, `order_hour_of_day`, `days_since_prior_order`), we will now create meaningful analytical features.
+
+---
+
+Create a new DataFrame with transformed data
+
+#### Option 1:
+
+```python
+df_orders_new = df_orders.assign(
+    is_weekend = df_orders["order_dow"].isin([0, 6]),
+    is_morning = df_orders["order_hour_of_day"] < 12
+)
+```
+
+#### Option 2:
+
+```{python}
+df_orders["is_weekend"] = df_orders["order_dow"].isin([0, 6])
+df_orders["is_morning"] = df_orders["order_hour_of_day"] < 12
+
+df_orders.head()
+```
+
+---
+
+Example: Creating an order frequency category based on `order_number`
+
+```{python}
+df_orders["order_frequency_category"] = df_orders["order_number"].apply(
+    lambda x: "New" if x == 1 
+    else "Low" if x <= 5 
+    else "High"
+)
+
+df_orders.head()
+```
+
+---
+
+Example: Handling missing values in `days_since_prior_order`
+
+```{python}
+df_orders["days_since_prior_order"] = df_orders["days_since_prior_order"].fillna(0)
+
+df_orders.head()
+```
+
+---
+
+Example: Creating time-of-day buckets
+
+```{python}
+df_orders["time_bucket"] = df_orders["order_hour_of_day"].apply(
+    lambda x: "Morning" if 6 <= x < 12
+    else "Afternoon" if 12 <= x < 18
+    else "Evening"
+)
+
+df_orders.head()
+```
+
+::: {.callout-important}
+Vectorized operations (like comparisons and arithmetic directly on columns) are preferred over `apply()` whenever possible because they are faster and more memory-efficient.
+:::
+
+
+
+### Transponsing a DateFrame
+
+
+Transposing refers to turning your dataframe’s rows into columns, and vice versa. This is also known as changing your data from `wide format` into `long format`. Let’s take a look at how to do this now in Python as it often involves more steps than you’d anticipate!
+
+
+```{python}
+df_departments = pd.read_csv("../../lab/python/data/raw/departments.csv")
+df_departments.head()
+```
+
+
+This is a **strange-looking** dataframe, isn’t it? There’s only 1 row and 22 columns, making the dataframe incredibly wide and incredibly short:
+
+```{python}
+df_departments.T
+```
+
+
+```{python}
+df_dep_t = df_departments.T
+```
+
+
+**Now let’s add the column names back to the transposed dataframe:**
+
+```{python}
+df_dep_t.reset_index(inplace=True)
+```
+
+
+```{python}
+new_header = df_dep_t.iloc[0]
+```
+
+```{python}
+df_dep_t_new = df_dep_t[1:]
+```
+
+
+**Setting the new header:**
+
+```{python}
+df_dep_t_new.columns = new_header   
+
+df_dep_t_new.head()
+```
+
+
+## Exporting the data
+
+**After cleaning and transforming data, we often export it.**
+
+### Exprting to CSV
+
+```python
+df_orders.to_csv("../data/processed/orders_cleaned.csv", index=False)
+``` 
+
+```{python}
+#| echo: false
+df.to_csv("../../lab/python/data/processed/orders_cleaned.csv", index=False)
+``` 
+
+
+```python
+df_products.to_csv("../data/processed/products_cleaned.csv", index=False)
+``` 
+
+```{python}
+#| echo: false
+df_products.to_csv("../../lab/python/data/processed/products_cleaned.csv", index=False)
+``` 
+
+```python
+df_dep_t_new.to_csv("../data/processed/departments_t.csv", index=False)
+``` 
+
+```{python}
+#| echo: false
+df_dep_t_new.to_csv("../../lab/python/data/processed/departments_t.csv", index=False)
+``` 
+
+
+
+::: {.callout-important}
+When exporting data, always set `index=False` to avoid including the row indices in the output file, if existing indices are not meaningful for the analysis.
+
+Try without `index=False` and see what happens. You will get an extra column with the row indices, which is not needed in most cases.
+:::
+
+
+
+
+
+## Understanding Relative Paths in Python
+
+### What is a File Path?
+
+A **file path** tells Python where to find a file or folder.
+
+- **Absolute Path**: A complete path from the root directory  
+  Example:  
+  `C:/Users/YourName/Project/data/file.xlsx`
+
+- **Relative Path**: A path relative to the *current working directory*  
+  Example:  
+  `data/file.xlsx`
+
+---
+
+### Why Use Relative Paths?
+
+- Makes your code portable  
+- Works across different computers or environments  
+- Avoids hardcoding full file system paths
+
+---
+
+
+### Option A: `os.path`
+
+```python
+import os
+
+# Get current working directory
+print("Current working directory:", os.getcwd())
+
+# Join a relative path
+file_path = os.path.join("data", "file.xlsx")
+print("Relative path:", file_path)
+```
+
+
+### Folder Structure
+
+```bash
+project/
+├── data/
+│   └── sample.xlsx
+└── scripts/
+    └── main.py
+    └── main.ipynb
+```
+
+> `main.ipynb` is inside the `notebooks/` folder, so it needs to go up one level (`..`) to access the `data/` folder.
+
+---
+
+### Option B:  Read the Excel file using a relative path
+
+```python
+import pandas as pd
+from pathlib import Path
+
+# Define relative path to the data folder from scripts/
+file_path = Path("../data") / "sample.csv"
+
+# Read the CSV file
+df = pd.read_csv(file_path)
+
+# Display the first few rows
+print(df.head())
+```
