@@ -1663,11 +1663,235 @@
     ]
   },
   {
-    "objectID": "materials/sql/slides/session08.html#one-title",
-    "href": "materials/sql/slides/session08.html#one-title",
+    "objectID": "materials/sql/slides/session08.html#why-normalization",
+    "href": "materials/sql/slides/session08.html#why-normalization",
     "title": "Normalization and JOINs",
-    "section": "One title",
-    "text": "One title",
+    "section": "Why Normalization?",
+    "text": "Why Normalization?\nRelational databases do not start with JOINs.\nThey start with structure.\nNormalization explains why data is split.\nJOINs explain how it is recombined.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#the-core-problem",
+    "href": "materials/sql/slides/session08.html#the-core-problem",
+    "title": "Normalization and JOINs",
+    "section": "The Core Problem",
+    "text": "The Core Problem\nImagine storing everything in one table.\n\n\n\norder_id\ncustomer_name\ncity\nproduct\nprice\nquantity\n\n\n\n\n1\nAnna\nYerevan\nPhone\n500\n1\n\n\n2\nAnna\nYerevan\nCase\n20\n2\n\n\n3\nArman\nGyumri\nPhone\n500\n1\n\n\n\n\n\nCustomer data is duplicated\n\nProduct prices are duplicated\n\nUpdates are risky\n\nDeletes may remove important information\n\nInserts may require fake values\n\n\n\n\\(\\downarrow\\) This structure is fragile.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#important",
+    "href": "materials/sql/slides/session08.html#important",
+    "title": "Normalization and JOINs",
+    "section": "Important",
+    "text": "Important\nThe previous table already satisfies 1NF.\nYet it is still badly designed.\nBecause multiple entities are mixed.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#what-is-the-logical-key",
+    "href": "materials/sql/slides/session08.html#what-is-the-logical-key",
+    "title": "Normalization and JOINs",
+    "section": "What Is the Logical Key?",
+    "text": "What Is the Logical Key?\nIn the unnormalized table:\n(order_id, product)\nBecause:\n\nOne order contains multiple products\n\nQuantity is defined per product per order",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#dependency-problem",
+    "href": "materials/sql/slides/session08.html#dependency-problem",
+    "title": "Normalization and JOINs",
+    "section": "Dependency Problem",
+    "text": "Dependency Problem\n\ncustomer_name depends only on order_id\n\nprice depends only on product\n\nquantity depends on (order_id, product)\n\nPartial dependencies exist.\nThis violates 2NF.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#customers",
+    "href": "materials/sql/slides/session08.html#customers",
+    "title": "Normalization and JOINs",
+    "section": "Customers",
+    "text": "Customers\n\n\n\ncustomer_id\ncustomer_name\ncity",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#products",
+    "href": "materials/sql/slides/session08.html#products",
+    "title": "Normalization and JOINs",
+    "section": "Products",
+    "text": "Products\n\n\n\nproduct_id\nproduct\nprice",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#orders",
+    "href": "materials/sql/slides/session08.html#orders",
+    "title": "Normalization and JOINs",
+    "section": "Orders",
+    "text": "Orders\n\n\n\norder_id\ncustomer_id",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#order-items",
+    "href": "materials/sql/slides/session08.html#order-items",
+    "title": "Normalization and JOINs",
+    "section": "Order Items",
+    "text": "Order Items\n\n\n\norder_id\nproduct_id\nquantity\n\n\n\n\n\nKey: (order_id, product_id)\nQuantity depends on the entire key.\n2NF achieved.",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#what-is-a-transitive-dependency",
+    "href": "materials/sql/slides/session08.html#what-is-a-transitive-dependency",
+    "title": "Normalization and JOINs",
+    "section": "What Is a Transitive Dependency?",
+    "text": "What Is a Transitive Dependency?\ncustomer_id → city\ncity → country\nTherefore:\ncustomer_id → country (indirectly)\nThis violates 3NF.\n\n\n\n\n\nflowchart LR\n    customer_id --&gt; city\n    city --&gt; country\n    customer_id --&gt; country",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#decomposition-to-3nf",
+    "href": "materials/sql/slides/session08.html#decomposition-to-3nf",
+    "title": "Normalization and JOINs",
+    "section": "Decomposition to 3NF",
+    "text": "Decomposition to 3NF",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#countries",
+    "href": "materials/sql/slides/session08.html#countries",
+    "title": "Normalization and JOINs",
+    "section": "Countries",
+    "text": "Countries\n\n\n\ncountry_id\ncountry",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#cities",
+    "href": "materials/sql/slides/session08.html#cities",
+    "title": "Normalization and JOINs",
+    "section": "Cities",
+    "text": "Cities\n\n\n\ncity_id\ncity\ncountry_id",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#customers-1",
+    "href": "materials/sql/slides/session08.html#customers-1",
+    "title": "Normalization and JOINs",
+    "section": "Customers",
+    "text": "Customers\n\n\n\ncustomer_id\ncustomer_name\ncity_id\n\n\n\n\n\n\n\n\n\n\nerDiagram\n    CUSTOMERS {\n        int customer_id PK\n        string customer_name\n        int city_id FK\n    }\n\n    CITIES {\n        int city_id PK\n        string city\n        int country_id FK\n    }\n\n    COUNTRIES {\n        int country_id PK\n        string country\n    }\n\n    CUSTOMERS ||--|| CITIES : lives_in\n    CITIES ||--|| COUNTRIES : belongs_to",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#normalization-path",
+    "href": "materials/sql/slides/session08.html#normalization-path",
+    "title": "Normalization and JOINs",
+    "section": "Normalization Path",
+    "text": "Normalization Path\n\n\n\n\n\nflowchart TB\n    A[Unnormalized] --&gt; B[1NF]\n    B --&gt; C[2NF]\n    C --&gt; D[3NF]",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#what-we-achieved",
+    "href": "materials/sql/slides/session08.html#what-we-achieved",
+    "title": "Normalization and JOINs",
+    "section": "What We Achieved",
+    "text": "What We Achieved\n\nRedundancy minimized\n\nUpdate anomalies removed\n\nDelete anomalies removed\n\nInsert anomalies removed\n\nReal-world structure modeled",
+    "crumbs": [
+      "Syllabus",
+      "SQL",
+      "SQL",
+      "Slides",
+      "Normalization and JOINs"
+    ]
+  },
+  {
+    "objectID": "materials/sql/slides/session08.html#after-3nf",
+    "href": "materials/sql/slides/session08.html#after-3nf",
+    "title": "Normalization and JOINs",
+    "section": "After 3NF",
+    "text": "After 3NF\nIn practice:\n\n3NF is usually sufficient\n\nBCNF is stricter\n\n4NF removes multi-valued dependencies\n\n5NF handles complex join dependencies\n\nMost transactional systems stop at 3NF or BCNF.\n\nBCNF: Boyce–Codd Normal Form",
     "crumbs": [
       "Syllabus",
       "SQL",
@@ -7766,7 +7990,7 @@
     "href": "index.html",
     "title": "Slides",
     "section": "",
-    "text": "Intro\n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\nSession 5\nSession 6\n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\nSession 5\nSession 6\nSession 7\nSession 8\nSession 9\nSession 10\nSession 11\nSession 12 \n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\nSession 5\nSession 6\nSession 7\n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\n\n\n\n\n\nSession 1\nSession 2\nSession 3"
+    "text": "Intro\n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\nSession 5\nSession 6\n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\nSession 5\nSession 6\nSession 7\nSession 8\nSession 9\nSession 10\nSession 11\nSession 12 \n\n\n\n\n\nSession 1\nSession 2\nSession 3 \n\n\n\n\n\nSession 1\nSession 2\nSession 3\nSession 4\n\n\n\n\n\nSession 1\nSession 2\nSession 3"
   },
   {
     "objectID": "index.html#intro",
@@ -7794,7 +8018,7 @@
     "href": "index.html#python",
     "title": "Slides",
     "section": "",
-    "text": "Session 1\nSession 2\nSession 3\nSession 4\nSession 5\nSession 6\nSession 7"
+    "text": "Session 1\nSession 2\nSession 3"
   },
   {
     "objectID": "index.html#tableau",
@@ -7981,7 +8205,7 @@
     "href": "materials/python/session01.html#why-programming-is-necessary",
     "title": "Session 01: Programming for Data Analysts",
     "section": "Why Programming is Necessary",
-    "text": "Why Programming is Necessary\nThe fundamental reason is leverage.\n\nExcel allows you to operate on data manually.\nSQL allows you to …\n\nPython allows you to:\n\nAutomate repetitive tasks\n\nScale to larger datasets\n\nEnsure reproducibility\n\nReduce dependency on licensed tools\n\nIncrease speed and efficiency\n\n\n\n\n\n\n\nImportant\n\n\n\nProgramming transforms you from an operator into a system designer.\n\n\n\n\nAutomation: Eliminating Repetition\nConsider a simple scenario:\n\nEvery month you receive a CSV/Excel file.\n\nEvery month you clean it manually.\nEvery month you need to INSERT INTO the Database\n\n\\[\\Downarrow\\]\nEvery month you repeat the same steps.\nInstead, you write the logic once.\nimport pandas as pd\n\ndf = pd.read_csv(\"monthly_sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.to_csv(\"cleaned_sales.csv\", index=False)\n\ndf.to_sql('sql_reference_folder')\n\n\n\n\n\n\nTip\n\n\n\nNow the computer performs the task consistently and automatically.\n\n\n\n\nScale: Beyond Excel Limits\nExcel maximum row capacity: 1,048,576 rows.\nModern systems generate millions of records daily.\nPython, especially when integrated with databases, handles large-scale datasets efficiently.\n\n\n\n\n\nflowchart LR\n    A[Small Dataset] --&gt; B[Excel Works]\n    C[Large Dataset] --&gt; D[Excel Slows]\n    D --&gt; E[Python + Database]\n\n\n\n\n\n\n\n\n\n\n\n\nCaution\n\n\n\nLarge-scale analytics requires programmatic control.\n\n\n\n\nReproducibility: Making Analysis Transparent\nExcel operations can disappear when formulas are overwritten.\nIn Python, every transformation is documented as code.\nimport pandas as pd\n\ndf = pd.read_csv(\"sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.head()\nIf someone reads your script, they can reproduce every step.\n\n\n\n\n\n\nImportant\n\n\n\nThis is critical in professional analytics environments.\n\n\n\n\n\nCost Efficiency\nTraditional statistical/analytical tools require expensive licenses.\n\nSPSS\n\nSAS\n\nStata\n\nExcel\nTableau\nPower BI\n\nPython:\n\nOpen-source\n\nFree\n\nCommunity-supported\n\nFlexible (no restrictions)\n\n\nThis reduces organizational cost and increases accessibility.\n\n\n\n\n\n\n\n\nTip\n\n\n\nNewly established and/or small companies they prefer to use Python, for data analytics and/or in analtyics workflows because of above mentioned reeasons\n\n\n\n\nSpeed and Performance\nWhen datasets grow, Excel becomes slower.\nPython processes filtering and transformations faster, especially when vectorized operations are used.\nExample:\n\nimport pandas as pd\nimport numpy as np\n\ndata = np.random.randint(1, 100, size=1_000_000)\ndf = pd.DataFrame({\"value\": data})\n\nfiltered = df[df[\"value\"] &gt; 50]\n\nprint(f'the shape of the main data: {df.shape}')\nprint(f'the shape of the filtered data: {filtered.shape}')\nfiltered.head()\n\nthe shape of the main data: (1000000, 1)\nthe shape of the filtered data: (494224, 1)\n\n\n\n\n\n\n\n\n\nvalue\n\n\n\n\n1\n74\n\n\n3\n59\n\n\n5\n51\n\n\n6\n81\n\n\n7\n68\n\n\n\n\n\n\n\nThis demonstrates processing of one million observations programmatically.",
+    "text": "Why Programming is Necessary\nThe fundamental reason is leverage.\n\nExcel allows you to operate on data manually.\nSQL allows you to …\n\nPython allows you to:\n\nAutomate repetitive tasks\n\nScale to larger datasets\n\nEnsure reproducibility\n\nReduce dependency on licensed tools\n\nIncrease speed and efficiency\n\n\n\n\n\n\n\nImportant\n\n\n\nProgramming transforms you from an operator into a system designer.\n\n\n\n\nAutomation: Eliminating Repetition\nConsider a simple scenario:\n\nEvery month you receive a CSV/Excel file.\n\nEvery month you clean it manually.\nEvery month you need to INSERT INTO the Database\n\n\\[\\Downarrow\\]\nEvery month you repeat the same steps.\nInstead, you write the logic once.\nimport pandas as pd\n\ndf = pd.read_csv(\"monthly_sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.to_csv(\"cleaned_sales.csv\", index=False)\n\ndf.to_sql('sql_reference_folder')\n\n\n\n\n\n\nTip\n\n\n\nNow the computer performs the task consistently and automatically.\n\n\n\n\nScale: Beyond Excel Limits\nExcel maximum row capacity: 1,048,576 rows.\nModern systems generate millions of records daily.\nPython, especially when integrated with databases, handles large-scale datasets efficiently.\n\n\n\n\n\nflowchart LR\n    A[Small Dataset] --&gt; B[Excel Works]\n    C[Large Dataset] --&gt; D[Excel Slows]\n    D --&gt; E[Python + Database]\n\n\n\n\n\n\n\n\n\n\n\n\nCaution\n\n\n\nLarge-scale analytics requires programmatic control.\n\n\n\n\nReproducibility: Making Analysis Transparent\nExcel operations can disappear when formulas are overwritten.\nIn Python, every transformation is documented as code.\nimport pandas as pd\n\ndf = pd.read_csv(\"sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.head()\nIf someone reads your script, they can reproduce every step.\n\n\n\n\n\n\nImportant\n\n\n\nThis is critical in professional analytics environments.\n\n\n\n\n\nCost Efficiency\nTraditional statistical/analytical tools require expensive licenses.\n\nSPSS\n\nSAS\n\nStata\n\nExcel\nTableau\nPower BI\n\nPython:\n\nOpen-source\n\nFree\n\nCommunity-supported\n\nFlexible (no restrictions)\n\n\nThis reduces organizational cost and increases accessibility.\n\n\n\n\n\n\n\n\nTip\n\n\n\nNewly established and/or small companies they prefer to use Python, for data analytics and/or in analtyics workflows because of above mentioned reeasons\n\n\n\n\nSpeed and Performance\nWhen datasets grow, Excel becomes slower.\nPython processes filtering and transformations faster, especially when vectorized operations are used.\nExample:\n\nimport pandas as pd\nimport numpy as np\n\ndata = np.random.randint(1, 100, size=1_000_000)\ndf = pd.DataFrame({\"value\": data})\n\nfiltered = df[df[\"value\"] &gt; 50]\n\nprint(f'the shape of the main data: {df.shape}')\nprint(f'the shape of the filtered data: {filtered.shape}')\nfiltered.head()\n\nthe shape of the main data: (1000000, 1)\nthe shape of the filtered data: (494959, 1)\n\n\n\n\n\n\n\n\n\nvalue\n\n\n\n\n4\n54\n\n\n5\n57\n\n\n6\n77\n\n\n9\n90\n\n\n14\n74\n\n\n\n\n\n\n\nThis demonstrates processing of one million observations programmatically.",
     "crumbs": [
       "Syllabus",
       "Python",

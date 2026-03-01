@@ -125,6 +125,9 @@
       margin-right: 0; 
     }
   </style>
+  <script src="../../../site_libs/quarto-diagram/mermaid.min.js"></script>
+  <script src="../../../site_libs/quarto-diagram/mermaid-init.js"></script>
+  <link href="../../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .icon-xxl { font-size: 84px; }
@@ -153,11 +156,439 @@ Karen Hovhannisyan
 
   <p class="date">2026-03-01</p>
 </section>
-<section id="one-title" class="slide level2">
-<h2>One title</h2>
-
+<section id="why-normalization" class="slide level2">
+<h2>Why Normalization?</h2>
+<p>Relational databases do not start with <code>JOIN</code>s.</p>
+<p>They start with <strong>structure</strong>.</p>
+<p>Normalization explains <strong>why data is split</strong>.<br>
+JOINs explain <strong>how it is recombined</strong>.</p>
+</section>
+<section id="the-core-problem" class="slide level2 smaller">
+<h2>The Core Problem</h2>
+<p>Imagine storing everything in one table.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>customer_name</th>
+<th>city</th>
+<th>product</th>
+<th>price</th>
+<th>quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Anna</td>
+<td>Yerevan</td>
+<td>Phone</td>
+<td>500</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Anna</td>
+<td>Yerevan</td>
+<td>Case</td>
+<td>20</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Arman</td>
+<td>Gyumri</td>
+<td>Phone</td>
+<td>500</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<ul>
+<li class="fragment">Customer data is duplicated<br>
+</li>
+<li class="fragment">Product prices are duplicated<br>
+</li>
+<li class="fragment">Updates are risky<br>
+</li>
+<li class="fragment">Deletes may remove important information<br>
+</li>
+<li class="fragment">Inserts may require fake values</li>
+</ul>
+</div>
+<div class="fragment">
+<p><span class="math inline">\(\downarrow\)</span> This structure is fragile.</p>
+</div>
+</section>
+<section class="slide level2">
 
 </section>
+<section>
+<section id="first-normal-form-1nf" class="title-slide slide level1 center">
+<h1>First Normal Form (1NF)</h1>
+<p>A table is in <strong>1NF</strong> if:</p>
+<ul>
+<li class="fragment">Each column contains atomic values<br>
+</li>
+<li class="fragment">No repeating groups<br>
+</li>
+<li class="fragment">Each row is uniquely identifiable</li>
+</ul>
+</section>
+<section id="important" class="slide level2">
+<h2>Important</h2>
+<p>The previous table already satisfies <strong>1NF</strong>.</p>
+<p>Yet it is still badly designed.</p>
+<p>Because multiple entities are mixed.</p>
+</section>
+<section class="slide level2">
+
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">erDiagram
+    ORDERS {
+        int order_id
+        string customer_name
+        string city
+        string product
+        float price
+        int quantity
+    }
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="second-normal-form-2nf" class="title-slide slide level1 center">
+<h1>Second Normal Form (2NF)</h1>
+<p>A table is in <strong>2NF</strong> if:</p>
+<ul>
+<li>It is already in <code>1NF</code><br>
+</li>
+<li>No partial dependency on a composite key</li>
+</ul>
+</section>
+<section id="what-is-the-logical-key" class="slide level2">
+<h2>What Is the Logical Key?</h2>
+<p>In the unnormalized table:</p>
+<p>(order_id, product)</p>
+<p><strong>Because:</strong></p>
+<ul>
+<li>One order contains multiple products<br>
+</li>
+<li>Quantity is defined per product per order</li>
+</ul>
+</section>
+<section id="dependency-problem" class="slide level2">
+<h2>Dependency Problem</h2>
+<ul>
+<li>customer_name depends only on order_id<br>
+</li>
+<li>price depends only on product<br>
+</li>
+<li>quantity depends on (order_id, product)</li>
+</ul>
+<p>Partial dependencies exist.</p>
+<p><strong>This violates 2NF.</strong></p>
+</section>
+<section class="slide level2">
+
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    K[(order_id, product)]
+    K --&gt; Q[quantity]
+    order_id --&gt; C[customer_name, city]
+    product --&gt; P[price]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="decomposition-to-2nf" class="title-slide slide level1 center">
+<h1>Decomposition to 2NF</h1>
+<p>We separate real-world entities.</p>
+</section>
+<section id="customers" class="slide level2">
+<h2>Customers</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>customer_name</th>
+<th>city</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</section>
+<section id="products" class="slide level2">
+<h2>Products</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>product_id</th>
+<th>product</th>
+<th>price</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</section>
+<section id="orders" class="slide level2">
+<h2>Orders</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>customer_id</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</section>
+<section id="order-items" class="slide level2 smaller">
+<h2>Order Items</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>order_id</th>
+<th>product_id</th>
+<th>quantity</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>Key: (order_id, product_id)</p>
+<p>Quantity depends on the entire key.</p>
+<p>2NF achieved.</p>
+</section>
+<section class="slide level2">
+
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">erDiagram
+    CUSTOMERS {
+        int customer_id PK
+        string customer_name
+        string city
+    }
+
+    PRODUCTS {
+        int product_id PK
+        string product
+        float price
+    }
+
+    ORDERS {
+        int order_id PK
+        int customer_id FK
+    }
+
+    ORDER_ITEMS {
+        int order_id FK
+        int product_id FK
+        int quantity
+    }
+
+    CUSTOMERS ||--o{ ORDERS : places
+    ORDERS ||--o{ ORDER_ITEMS : contains
+    PRODUCTS ||--o{ ORDER_ITEMS : included_in
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="third-normal-form-3nf" class="title-slide slide level1 center">
+<h1>Third Normal Form (3NF)</h1>
+<p>A table is in <strong>3NF</strong> if:</p>
+<ul>
+<li>It is already in 2NF<br>
+</li>
+<li>No transitive dependencies</li>
+</ul>
+</section>
+<section id="what-is-a-transitive-dependency" class="slide level2 smaller">
+<h2>What Is a Transitive Dependency?</h2>
+<p>customer_id → city<br>
+city → country</p>
+<p>Therefore:</p>
+<p>customer_id → country (indirectly)</p>
+<p>This violates 3NF.</p>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    customer_id --&gt; city
+    city --&gt; country
+    customer_id --&gt; country
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="decomposition-to-3nf" class="slide level2">
+<h2>Decomposition to 3NF</h2>
+</section>
+<section id="countries" class="slide level2">
+<h2>Countries</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>country_id</th>
+<th>country</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</section>
+<section id="cities" class="slide level2">
+<h2>Cities</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>city_id</th>
+<th>city</th>
+<th>country_id</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</section>
+<section id="customers-1" class="slide level2">
+<h2>Customers</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>customer_id</th>
+<th>customer_name</th>
+<th>city_id</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">erDiagram
+    CUSTOMERS {
+        int customer_id PK
+        string customer_name
+        int city_id FK
+    }
+
+    CITIES {
+        int city_id PK
+        string city
+        int country_id FK
+    }
+
+    COUNTRIES {
+        int country_id PK
+        string country
+    }
+
+    CUSTOMERS ||--|| CITIES : lives_in
+    CITIES ||--|| COUNTRIES : belongs_to
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="normalization-path" class="slide level2 smaller">
+<h2>Normalization Path</h2>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart TB
+    A[Unnormalized] --&gt; B[1NF]
+    B --&gt; C[2NF]
+    C --&gt; D[3NF]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="what-we-achieved" class="slide level2 smaller">
+<h2>What We Achieved</h2>
+<ul>
+<li>Redundancy minimized<br>
+</li>
+<li>Update anomalies removed<br>
+</li>
+<li>Delete anomalies removed<br>
+</li>
+<li>Insert anomalies removed<br>
+</li>
+<li>Real-world structure modeled</li>
+</ul>
+</section>
+<section id="after-3nf" class="slide level2 smaller">
+<h2>After 3NF</h2>
+<p><strong>In practice:</strong></p>
+<ul>
+<li>3NF is usually sufficient<br>
+</li>
+<li>BCNF is stricter<br>
+</li>
+<li>4NF removes multi-valued dependencies<br>
+</li>
+<li>5NF handles complex join dependencies</li>
+</ul>
+<p>Most transactional systems stop at 3NF or BCNF.</p>
+<blockquote>
+<p><strong>BCNF:</strong> Boyce–Codd Normal Form</p>
+</blockquote>
+
+
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="../../../img/favicon.png" class="slide-logo"></p>
