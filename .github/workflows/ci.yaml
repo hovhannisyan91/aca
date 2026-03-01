@@ -3,13 +3,14 @@ name: ci
 on:
   push:
     branches:
-      - master
       - main
+      - master
     paths:
       - "index.qmd"
       - "_quarto.yml"
       - "materials/**"
       - "styles/**"
+      - "requirements.txt"
 
 permissions:
   contents: write
@@ -19,46 +20,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Setup Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Cache Python packages
+      # 3. Cache pip dependencies
+      - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      
-      - name: Unzip data
+
+      # 4. Install system dependencies
+      - name: Install system packages
         run: |
-          if [ -f lab/python/data/raw/Archive.zip]; then
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      # 5. Unzip data (safe + verbose)
+      - name: Extract data if archive exists
+        run: |
+          if [ -f lab/python/data/raw/Archive.zip ]; then
+            echo "Archive found. Extracting..."
             unzip -o lab/python/data/raw/Archive.zip -d lab/python/data/raw
+          else
+            echo "Archive.zip not found. Skipping extraction."
           fi
 
-
+      # 6. Install Python dependencies
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set up Quarto
+      # 7. Setup Quarto
+      - name: Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: "1.6.39"
 
-      - name: Render site with Quarto
+      # 8. Render site
+      - name: Render Quarto site
         run: quarto render
 
+      # 9. Deploy to GitHub Pages
       - name: Publish to GitHub Pages
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           target: gh-pages
-          path: docs
+          path: docs     # change to _site if you are not using docs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
