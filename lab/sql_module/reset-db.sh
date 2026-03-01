@@ -3,7 +3,7 @@
 set -e  # Exit immediately if any command fails
 
 echo "Stopping containers..."
-docker compose down
+docker compose down -v
 
 echo "Removing Postgres data directory..."
 rm -rf ./postgres_data
