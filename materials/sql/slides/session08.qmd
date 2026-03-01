@@ -29,5 +29,310 @@ format:
           </style>
 ---
 
-## One title
+## Why Normalization? 
+
+Relational databases do not start with `JOIN`s.  
+
+They start with **structure**.
+
+Normalization explains **why data is split**.  
+JOINs explain **how it is recombined**.
+
+---
+
+## The Core Problem {.smaller}
+
+Imagine storing everything in one table.
+
+| order_id | customer_name | city | product | price | quantity |
+|----------|--------------|------|---------|-------|----------|
+| 1 | Anna | Yerevan | Phone | 500 | 1 |
+| 2 | Anna | Yerevan | Case | 20 | 2 |
+| 3 | Arman | Gyumri | Phone | 500 | 1 |
+
+. . .
+
+::: {.incremental}
+
+- Customer data is duplicated  
+- Product prices are duplicated  
+- Updates are risky  
+- Deletes may remove important information  
+- Inserts may require fake values 
+
+::: 
+
+. . .
+
+$\downarrow$
+This structure is fragile.
+
+---
+
+# First Normal Form (1NF)
+
+A table is in **1NF** if:
+
+::: {.incremental}
+
+- Each column contains atomic values  
+- No repeating groups  
+- Each row is uniquely identifiable  
+
+:::
+
+---
+
+## Important
+
+The previous table already satisfies **1NF**.
+
+Yet it is still badly designed.
+
+Because multiple entities are mixed.
+
+---
+
+```{mermaid}
+erDiagram
+    ORDERS {
+        int order_id
+        string customer_name
+        string city
+        string product
+        float price
+        int quantity
+    }
+```
+
+---
+
+# Second Normal Form (2NF)
+
+A table is in **2NF** if:
+
+- It is already in `1NF`  
+- No partial dependency on a composite key  
+
+---
+
+## What Is the Logical Key?
+
+In the unnormalized table:
+
+(order_id, product)
+
+**Because:**
+
+- One order contains multiple products  
+- Quantity is defined per product per order  
+
+---
+
+## Dependency Problem
+
+- customer_name depends only on order_id  
+- price depends only on product  
+- quantity depends on (order_id, product)  
+
+Partial dependencies exist.
+
+**This violates 2NF.**
+
+---
+
+```{mermaid}
+flowchart LR
+    K[(order_id, product)]
+    K --> Q[quantity]
+    order_id --> C[customer_name, city]
+    product --> P[price]
+```
+
+---
+
+# Decomposition to 2NF
+
+We separate real-world entities.
+
+
+## Customers
+
+| customer_id | customer_name | city |
+|-------------|--------------|------|
+
+---
+
+## Products
+
+| product_id | product | price |
+|------------|--------|-------|
+
+---
+
+## Orders
+
+| order_id | customer_id |
+|----------|-------------|
+
+---
+
+## Order Items {.smaller}
+
+| order_id | product_id | quantity |
+|----------|------------|----------|
+
+Key: (order_id, product_id)
+
+Quantity depends on the entire key.
+
+2NF achieved.
+
+---
+
+```{mermaid}
+erDiagram
+    CUSTOMERS {
+        int customer_id PK
+        string customer_name
+        string city
+    }
+
+    PRODUCTS {
+        int product_id PK
+        string product
+        float price
+    }
+
+    ORDERS {
+        int order_id PK
+        int customer_id FK
+    }
+
+    ORDER_ITEMS {
+        int order_id FK
+        int product_id FK
+        int quantity
+    }
+
+    CUSTOMERS ||--o{ ORDERS : places
+    ORDERS ||--o{ ORDER_ITEMS : contains
+    PRODUCTS ||--o{ ORDER_ITEMS : included_in
+```
+
+---
+
+# Third Normal Form (3NF)
+
+A table is in **3NF** if:
+
+- It is already in 2NF  
+- No transitive dependencies  
+
+---
+
+## What Is a Transitive Dependency? {.smaller}
+
+customer_id → city  
+city → country  
+
+Therefore:
+
+customer_id → country (indirectly)
+
+This violates 3NF.
+
+
+
+```{mermaid}
+flowchart LR
+    customer_id --> city
+    city --> country
+    customer_id --> country
+```
+
+---
+
+## Decomposition to 3NF
+
+---
+
+## Countries
+
+| country_id | country |
+|------------|---------|
+
+---
+
+## Cities
+
+| city_id | city | country_id |
+|---------|------|------------|
+
+---
+
+## Customers 
+
+| customer_id | customer_name | city_id |
+|-------------|--------------|---------|
+
+
+```{mermaid}
+erDiagram
+    CUSTOMERS {
+        int customer_id PK
+        string customer_name
+        int city_id FK
+    }
+
+    CITIES {
+        int city_id PK
+        string city
+        int country_id FK
+    }
+
+    COUNTRIES {
+        int country_id PK
+        string country
+    }
+
+    CUSTOMERS ||--|| CITIES : lives_in
+    CITIES ||--|| COUNTRIES : belongs_to
+```
+
+
+
+## Normalization Path {.smaller}
+
+```{mermaid}
+flowchart TB
+    A[Unnormalized] --> B[1NF]
+    B --> C[2NF]
+    C --> D[3NF]
+```
+
+
+
+## What We Achieved {.smaller}
+
+- Redundancy minimized  
+- Update anomalies removed  
+- Delete anomalies removed  
+- Insert anomalies removed  
+- Real-world structure modeled  
+
+
+
+## After 3NF {.smaller}
+
+**In practice:**
+
+- 3NF is usually sufficient  
+- BCNF is stricter  
+- 4NF removes multi-valued dependencies  
+- 5NF handles complex join dependencies  
+
+Most transactional systems stop at 3NF or BCNF.
+
+>**BCNF:** Boyce–Codd Normal Form
 
