@@ -26,7 +26,7 @@ This session focuses on **Advanced Analytics in Tableau**.
 
 While previous sessions introduced core visualization techniques and intermediate modeling concepts, this week shifts toward **calculation-driven analysis and analytical architecture**.
 
-Students will learn how to:
+This session teaches how to:
 
 - Move beyond simple aggregations  
 - Control granularity independently from the view  
@@ -34,15 +34,9 @@ Students will learn how to:
 - Implement dynamic date handling  
 - Build structured cohort retention tables  
 - Construct advanced KPI dashboards  
-
-The emphasis is on transforming Tableau from a visualization tool into a **full analytical platform** capable of supporting real business decision-making.
-
-::: {.callout-note}
-
-**By the end of this session, you should be able to build advanced KPI dashboards, retention heatmaps, spatial analysis views, and parameter-driven analytical models using complex Tableau functions.**
-
-:::
-
+- Connect and analyze spatial data
+- Prepare and model data for complex analysis
+  
 ---
 
 ## Complex Calculations
@@ -185,10 +179,10 @@ Used for:
 
 ## Key Differences: Aggregate vs Table Calculation
 
-| Type | When Computed | Example | Use Case |
-|------|---------------|---------|----------|
-| Aggregate | During query | SUM([Revenue]) | KPI totals |
-| Table Calculation | After query (in view) | RUNNING_SUM(SUM([Revenue])) | Cumulative trends |
+    | Type | When Computed | Example | Use Case |
+    |------|---------------|---------|----------|
+    | Aggregate | During query | SUM([Revenue]) | KPI totals |
+    | Table Calculation | After query (in view) | RUNNING_SUM(SUM([Revenue])) | Cumulative trends |
 
 ---
 
@@ -203,379 +197,1244 @@ Complex calculations and table calculations enable:
 - Executive-level dashboards  
 
 Mastering these concepts is critical for building analytical dashboards in telecom, finance, and marketing domains.
-## Date Functions  
-**Applies to:** Tableau Cloud, Tableau Desktop, Tableau Public, Tableau Server  
 
-Dates are a common element in many data sources. If a field contains recognizable dates, Tableau assigns it a **Date** or **DateTime** data type.
+## Date Functions
 
-When date fields are used in a visualization, Tableau provides:
+Dates are a common element in most data sources.  
+If a field contains recognizable dates, Tableau automatically assigns it a **Date** or **Date & Time** data type and enables special functionality.
 
-- Automatic date hierarchy (Year → Quarter → Month → Day)
-- Date-specific filtering options (Relative Date, Range of Dates)
-- Specialized formatting options
-- Built-in drill-down functionality
+When date fields are used in visualizations, Tableau provides:
 
-Using dates in calculations requires **date-specific functions**, which allow you to manipulate, compare, truncate, shift, and construct date values.
+- Automatic date hierarchy (Year → Quarter → Month → Day)  
+- Date-specific filtering options  
+- Continuous and discrete date options  
+- Specialized date formatting  
 
----
+Date functions are used to **manipulate date values**, not just change how they are displayed.
 
-## Important Date Concepts
+If you only want to change appearance (for example, show 01/09/24 instead of September 01, 2024), use formatting — not a calculation.
 
-Some date functions reference additional date-related elements:
+![Date Foematting Action 1](../../img/tableau/w3_date_formatting_1.png)
 
-- `date_part` argument (e.g., 'year', 'month', 'week')
-- Optional `[start_of_week]` parameter
-- Date literals using `#` symbols
-
-These concepts are explained in detail later in this section.
+![Date Foematting Action 2](../../img/tableau/w3_date_formatting_2.png)
 
 ---
 
-## Related Topics (Not Date Functions)
+### Date Parts
 
-These topics affect how dates behave but are not functions:
+Many date functions use a `date_part` argument.
 
-- **Custom Date Formats** – Control how dates display in a visualization  
-- **Date Properties for a Data Source** – Set default calendar settings  
-- **Fiscal Dates** – Work with fiscal calendars  
-- **ISO-8601 Week-Based Calendar** – Use ISO week numbering  
+Common date parts include:
 
-💡 Tip:  
-If your field already has a date icon in the Data pane and you only want to control how it appears (for example, display `22Sept2024` as `09/24`), you should use **formatting**, not a date calculation.
-
-Date functions manipulate date values — they do not control formatting.
+![Datepart](../../img/tableau/w3_datepart.png) 
 
 ---
 
-# Date Functions Available in Tableau
+### Core Date Functions
+
+#### DATE
+
+Date converts a string to a date. It can also be used to truncate a datetime to a date.
+
+```sql
+DATE(string) 
+```
 
 ---
 
-## DATE
+#### DATEADD
 
-Converts numbers or strings into dates (if recognizable).
+DateAdd adds a specified time interval to a date.
 
-**Syntax**  
-DATE(expression)
-
-**Output**  
-Date
-
-**Definition**  
-Returns a date given a number, string, or date expression.
-
-**Examples**
-
-DATE([Employee Start Date])  
-DATE("September 22, 2018")  
-DATE("9/22/2018")  
-DATE(#2018-09-22 14:52#)
-
-**Notes**
-
-- Automatically recognizes many standard formats  
-- If recognition fails, use DATEPARSE  
-- MAKEDATE is similar but requires numeric year, month, and day  
-
----
-
-## DATEADD
-
-Adds a specified number of date parts to a date.
-
-**Syntax**  
+```sql 
 DATEADD(date_part, interval, date)
+```
+**Example:** Calculate Expected Delivery Date
 
-**Output**  
-Date
+Objective: Add 5 days to Order Date to estimate delivery.
 
-**Definition**  
-Returns the date with the specified interval added.
+```sql
+DATEADD('day', 5, [Order Date])
+```
+![Expected Delivey Date](../../img/tableau/w3_expected_delivery_date.png) 
 
-**Examples**
+**Example:**  Rolling 12-Months Window
 
-Push due dates one week forward:
+Objective: Filter records from the last 12 months dynamically.
 
-DATEADD('week', 1, [Due Date])
-
-Add 280 days:
-
-DATEADD('day', 280, #2/20/21#) = #November 27, 2021#
-
-Supports ISO 8601 dates.
-
----
-
-## DATEDIFF
-
-Returns the number of date parts between two dates.
-
-**Syntax**  
-DATEDIFF(date_part, date1, date2, [start_of_week])
-
-**Output**  
-Integer
-
-**Definition**  
-Returns the difference between date1 and date2 in units of date_part.
-
-**Examples**
-
-DATEDIFF('day', #3/25/1986#, #2/20/2021#) = 12751  
-DATEDIFF('month', [Date Joined], [Date Left])
-
-Supports ISO 8601 dates.
+```sql
+[Order Date] >= DATEADD('month', -12, TODAY())
+```
+![Filtering Last 12 Months](../../img/tableau/w3_filtering_last_12_months.png) 
 
 ---
 
-## DATENAME
+#### DATEDIFF
 
-Returns the name of a date part as a string.
+Datediff calculates the difference between two dates in specified date parts.
 
-**Syntax**  
-DATENAME(date_part, date, [start_of_week])
+```sql 
+DATEDIFF(date_part, start_date, end_date, [start_of_week])
+```
 
-**Output**  
-String
+Optional parameter:  
+`[start_of_week]` defines week beginning (Sunday, Monday, etc.)
 
-**Examples**
+**Example:** Time to First Order
 
-DATENAME('year', #3/25/1986#) = "1986"  
-DATENAME('month', #1986-03-25#) = "March"
+Objective: Measure when customers place their first order after signing up or before it.
 
-Similar to DATEPART but returns text instead of a number.
+First order date per customer:
 
----
+```sql
+{ FIXED [Customer ID] : MIN([Order Date]) }
+```
 
-## DATEPARSE
+Months between signup and first order:
 
-Converts specifically formatted strings into dates.
+```sql
+DATEDIFF('month', [Signup Date], [First Order Date])
+```
 
-**Syntax**  
-DATEPARSE(date_format, date_string)
-
-**Output**  
-Date
-
-**Example**
-
-DATEPARSE('yyyy-MM-dd', "1986-03-25") = #March 25, 1986#
-
-Use when DATE cannot automatically recognize format.
-
-Availability depends on connector type.
+![Sign Up, First Order](../../img/tableau/w3_sign_up_first_order.png) 
 
 ---
 
-## DATEPART
+#### DATENAME
 
-Returns a date part as an integer.
+DateName returns the name of a date part as a string. For example, if you want to extract the month from a date, DATENAME will return the name of the month (e.g., "January", "February", etc.).
 
-**Syntax**  
-DATEPART(date_part, date, [start_of_week])
-
-**Output**  
-Integer
-
-**Examples**
-
-DATEPART('year', #1986-03-25#) = 1986  
-DATEPART('month', #1986-03-25#) = 3
-
-Faster than DATENAME because it returns numeric values.
+```sql
+DATENAME(date_part, date)
+```
 
 ---
 
-## DATETRUNC
+#### DATEPART
 
-Rounds a date down to a specific level.
+Datepart returns the integer value of a date part. For example, if you want to extract the month from a date, DATEPART will return a number between 1 and 12, while DATENAME would return the name of the month (e.g., "January", "February", etc.).
 
-**Syntax**  
+```sql
+DATEPART(date_part, date)
+```
+::: {.callout-note}
+DATEPART is typically faster than DATENAME.
+:::
+
+**Example:** Extract Year for Grouping
+
+Objective: Build yearly trend charts, create custom year filters  
+
+```sql
+DATEPART('year', [Order Date])
+```
+When used in the view, make the calcuated field discrete dimension to group by year.
+
+![Year Grouping](../../img/tableau/w3_year_grouping.png) 
+
+---
+
+#### DATEPARSE
+
+Converts a specifically formatted string into a date.
+
+```sql
+DATEPARSE(format, string)
+```
+
+Use case: When DATE cannot recognize custom format  
+
+---
+
+#### DATETRUNC
+
+Truncates a date to a specified level.
+
+```sql
 DATETRUNC(date_part, date, [start_of_week])
+```
 
-**Definition**  
-Returns a new date truncated to the specified level.
+::: {.callout-important}
 
-**Examples**
+DATETRUNC changes the actual value, not just the display.
 
-DATETRUNC('day', #9/22/2018#) = #9/22/2018#  
-DATETRUNC('iso-week', #9/22/2018#) = #9/17/2018#  
-DATETRUNC('quarter', #9/22/2018#) = #7/1/2018#
+:::
 
-Used heavily in:
+**Example:**  Order Date = 28-12-2023 15:45:30
 
-- Cohort analysis  
-- Monthly KPI grouping  
-- Quarterly reporting  
+`DATETRUNC('month', [Order Date])`  
+→ 01-12-2023 00:00:00  
 
----
+`DATETRUNC('year', [Order Date])` 
+→ 01-01-2023 00:00:00  
 
-## DAY
+Notice that:
 
-Returns day of month (1–31)
+- The date is not just displayed differently  
+- The underlying value is changed  
 
-DAY(#September 22, 2018#) = 22
+If you only want to hide the time portion (for example, remove hours/minutes visually), you should format the field instead of using DATETRUNC.
 
----
-
-## ISDATE
-
-Checks if a string is a valid date.
-
-ISDATE("09/22/2018") = true  
-ISDATE("22SEP18") = false  
-
-Only works on strings.
+Formatting affects appearance.  
+DATETRUNC affects the data itself.
 
 ---
 
-## ISO Functions
+### What Is [start_of_week]?
 
-ISO functions follow ISO-8601 week-based calendar rules.
+This optional parameter defines which day is considered the first day of the week. The further calculations will be based on this definition of a week. 
 
-- ISOYEAR(date)
-- ISOQUARTER(date)
-- ISOWEEK(date)
-- ISOWEEKDAY(date)
+**Example:** Calculate week based on ISO standard (week starts on Monday) and week starting on Sunday.
+
+```sql
+DATETRUNC('week', [Order Date], 'sunday')
+```
+
+![Order Week](../../img/tableau/w3_order_week.png) 
+
+The first calculated field `[Order Week]` will calculated week based on ISO standard, which will group orders by week starting on Monday, while the second one `[Order Week From Sunday]` will group orders by week starting on Sunday.
+
+---
+
+#### DAY / MONTH / QUARTER / YEAR / WEEK
+
+These functions extract specific parts of a date as integers.
+
+```sql
+DAY(Order Date) 
+```
+
+![Order Day](../../img/tableau/w3_order_day.png) 
+
+---
+
+#### TODAY
+
+Returns the current system date (without time).
+
+```sql
+TODAY()
+```
+
+---
+
+#### NOW
+
+Returns the current system date and time.
+
+```sql
+NOW()
+```
+
+---
+
+#### MAKEDATE
+
+Constructs a date from numeric year, month, and day.
+
+```sql
+MAKEDATE(year, month, day)
+```
+**Example:** Create Date for 01.01.2026 as `[Reporting Date]`
+
+```sql
+MAKEDATE(2026, 1, 1)
+```
+![Reporting Date](../../img/tableau/w3_reporting_date.png) 
+
+---
+
+#### MAKEDATETIME
+
+Combines date and time into datetime.
+
+```sql
+MAKEDATETIME(date, time)
+```
+
+---
+
+#### MAKETIME
+
+Constructs time using hour, minute, second.
+
+```sql
+MAKETIME(hour, minute, second)
+```
+::: {.callout-note}
+Output is datetime (Tableau does not support standalone time type).
+:::
+
+---
+
+#### ISDATE
+
+Checks whether a string is a valid date.
+
+```sql
+ISDATE(string)
+```
+Use case is data validation and cleaning messy datasets. 
+
+---
+
+#### MAX and MIN (with Dates)
+
+Most recent date:
+
+```sql
+MAX(date)
+```   
+
+Earliest date:  
+
+```sql
+MIN(date) 
+```
+
+---
+
+### The Date Literal (#)
+
+Date values enclosed in # symbols are interpreted as date literals.
+
+Example: #3/25/2025#
+
+This is a special syntax that allows you to directly input date values in calculations without using functions like DATE().
+
+When you use #3/25/2025#, Tableau recognizes it as a date literal and treats it as a date value in calculations.
+
+Without #, Tableau may interpret the value as:
+
+- String  
+- Number  
+- Invalid format  
+
+![Custom Date](../../img/tableau/w3_custom_date.png) 
+
+---
+
+## Date Parameters
+
+Date parameters are user-defined controls that allow viewers to dynamically select dates and influence calculations, filters, and visual behavior within a Tableau workbook.
+
+Unlike quick filters, which are directly tied to a specific field in a specific data source, parameters are independent objects. This independence makes them extremely powerful in advanced analytical scenarios, especially when working with multiple data sources, custom logic, or dynamic aggregations.
+
+
+### Conceptual Understanding
+
+A parameter in Tableau is a single value that can be referenced inside one or more calculated fields. When that parameter is of data type Date (or Date & Time), it becomes a flexible time control that can drive time-based logic across worksheets.
+
+Date parameters do not filter data automatically. Instead, they act as inputs to calculations. This means you must explicitly reference them inside a calculated field to control behavior.
+
+For example:
+
+- They can define the start and end of a reporting period.
+- They can determine which dates should be included in a KPI.
+- They can dynamically adjust the level of time aggregation on an axis.
+- They can drive rolling windows or forecast periods.
+
+Because parameters are global to the workbook, one Date parameter can influence multiple worksheets simultaneously.
+
+
+### How Date Parameters Differ from Filters
+
+A standard date filter:
+
+- Is tied to a single data source.
+- Automatically filters the data.
+- Cannot easily control multiple data sources.
+
+A Date parameter:
+
+- Is independent of any single data source.
+- Must be referenced in a calculation.
+- Can control multiple data sources.
+- Can drive complex logic beyond simple filtering.
+
+This distinction is important. Filters limit data directly. Parameters influence calculations that then determine what to display.
+
+
+### Common Use Cases
+
+#### 1. Custom Date Range Selection
+
+Instead of using a quick filter with a slider, you can create:
+
+- Start Date parameter  
+- End Date parameter  
+
+These parameters are referenced in a Boolean calculation such as:
+
+Order Date >= Start Date  
+AND  
+Order Date <= End Date  
+
+This approach allows:
+
+- One unified date control across multiple data sources.
+- More advanced logic inside calculations.
+- Custom behavior beyond simple filtering.
+
+---
+
+#### 2. Dynamic KPI Calculations
+
+Date parameters can define a reporting window inside calculations.
+
+For example, instead of filtering out data outside the selected range, you can write a calculation that returns Sales only if the Order Date falls between the selected parameters.
+
+This allows you to:
+
+- Compare full dataset vs selected period.
+- Build dynamic period-to-period comparisons.
+- Create flexible dashboard controls.
+
+/This will be further explored in the KPI section./
+
+---
+
+#### 3. Dynamic Time Aggregation
+
+One advanced use of Date Parameters is dynamically controlling the level of date aggregation.
+
+For example, the date axis can automatically aggregate by:
+
+- Week  
+- Month  
+- Quarter  
+- Year  
+
+depending on the selected parameter value or selected date range.
+
+This is typically achieved by:
+
+- DATETRUNC → to adjust the aggregation level  
+
+By using this approach, the visualization adapts automatically to the selected time span.
+
+For doing this we need.
+
+**Step 1**
+
+Create a parameter and name it **Date Granula**. The data type should be **string** and values: **day, week, quarter, month, year**.
+
+![Date Parameter](../../img/tableau/w3_date_granularity.png) 
+
+**Step 2**
+
+
+
+#### 4. Multi-Source Dashboards
+
+When working with multiple data sources, each source has its own date field.
+
+Using quick filters would require:
+
+- One filter per data source.
+
+Using Date parameters allows:
+
+- A single Start Date parameter.
+- A single End Date parameter.
+- Separate calculated filters in each source referencing the same parameters.
+
+This creates a seamless user experience on dashboards.
+
+---
+
+### Technical Characteristics
+
+- Date parameters store a single date value.
+- They can be configured to allow all values, a list, or a range.
+- They can be shown as a date picker on dashboards.
+- They must be used inside calculated fields to affect data.
+
+They do not inherently create a date hierarchy and do not automatically aggregate data. Their power comes from how they are used inside logic.
+
+---
+
+### Advantages
+
+Date parameters provide:
+
+- Cross–data-source control.
+- Advanced analytical flexibility.
+- Dynamic time logic.
+- Cleaner dashboards (fewer filters).
+- Greater customization than built-in filters.
+
+---
+
+### Limitations
+
+- They do not automatically filter data.
+- They require calculated fields to function.
+- They must be manually synchronized with logic.
+- Incorrect logic can produce misleading results.
+
+---
+
+### Best Practices
+
+- Always set meaningful default values.
+- Clearly label parameter controls.
+- Use Boolean calculations for filtering.
+- Combine with DATEDIFF and DATETRUNC for dynamic aggregation.
+- Test edge cases (very short or very long date ranges).
+
+---
+
+### Summary
+
+Date parameters are advanced control mechanisms in Tableau that allow users to dynamically influence time-based logic across worksheets and data sources.
+
+They are not simply filters.  
+They are analytical drivers.
+
+By combining Date parameters with calculated fields and date functions, you can build:
+
+- Custom date range filters  
+- Dynamic KPIs  
+- Adaptive time axes  
+- Multi-source dashboards  
+- Sophisticated time-series analytics  
+
+They are a foundational concept for building professional, flexible Tableau dashboards.
+
+## Spatial Analytics (spatial relationships, spatial joins, spatial functions)
+
+Spatial analytics involves analyzing data that has a geographic or spatial component.
+
+It allows you to answer questions related to location, distance, and spatial relationships between geographic entities.
+
+**Why Put The Data on a Map?**
+
+Maps answer **spatial questions** that cannot be easily answered with traditional charts or tables.
+
+They help us understand:
+
+- Where is something happening?  
+- What overlaps with what?  
+- How far apart are locations?  
+- How do locations interact?  
+- How does something move over time?  
+- How metrics change over time on then specific territories in the map?  
+
+Map is used when geography is essential to understanding the pattern.
+
+**Gographic Data Format**
+
+Geographic data can come in various formats, including:
+
+- Spatial files (Shapefile, GeoJSON, KML)  
+- Excel files  
+- CSV files  
+- Databases  
+
+**Spatial Files**
+
+Spatial files are specifically designed to store geographic information. They contain both:
+- **Geometry** (the shape and location of geographic features)
+- **Attributes** (descriptive information about those features)
+
+Geometry can be in the form of points, lines, or polygons, and it allows Tableau to render these features on a map accurately.
+
+When connected, Tableau recognizes the geometry field and treats it as spatial data, enabling mapping and spatial analysis capabilities.
+
+**Location-Based Data**
+
+Location-based data contains fields that represent geographic locations, such as:
+
+- Latitude / Longitude  
+- Country  
+- State  
+- City  
+- Postal Code  
+
+Tableau can geocode these fields to plot them on a map, but they do not contain the actual geometry of shapes or boundaries. They are typically used for point-based mapping (e.g., plotting store locations, customer addresses).
+
+
+## Datasets for Spatial Analytics Example  
+
+In this session, we will use **Citi Bike System Data** to explore spatial analytics and mobility patterns. 
+Additionally, we will use **NY_Community_District_Tabulation_Area.geojson** file to analyze the trips by district and build maps showing the distribution of the trips across New York city.
+
+**Citi Bike Trip History (NYC)** is a public dataset of bike share trips in New York City, including start/end locations (lat/long), timestamps, and user types.
+
+The dataset helps answer questions such as:
+
+- Where do Citi Bike users ride?  
+- When are rides most frequent?  
+- How far do riders travel?  
+- Which stations are the most popular?  
+- When are rides highest?  
+
+Data is provided in multiple CSV files, each containing a month's worth of trip data. Each file has the same structure, allowing us to combine them for analysis.
+
+**Data fields include:**
+
+Core Trip Information
+
+- Ride ID  
+- Rideable Type  
+- Started At (timestamp)  
+- Ended At (timestamp)  
+- Member or Casual Ride  
+
+Start Station Information
+
+- Start Station Name  
+- Start Station ID  
+- Start Latitude  
+- Start Longitude  
+
+End Station Information
+
+
+
+**Community_District_Tabulation_Area (NYC)** is a GeoJSON file containing the boundaries of community districts in New York City. Each district is represented as a polygon geometry, allowing us to analyze spatial relationships between bike trips and district boundaries.
+
+This is a common format for storing geographic shapes (boundaries, districts, zones, etc.).
+
+In this file, each record represents a community district with:
+
+GeoJSON Structure
+
+**Top-Level Object**
+
+`type`
+
+- **Description:** Identifies the GeoJSON container type  
+- **Expected value:** `FeatureCollection`  
+- **Meaning:** This file contains multiple geographic objects (features)  
+
+`features`
+
+- **Description:** A list (array) of individual geographic records  
+- **Each item:** One `Feature` (one district/zone/polygon, etc.)  
+
+**Feature-Level Fields (Each Record)**
+
+Each item in `features` usually contains:
+
+`type`
+
+- **Description:** Identifies the object type  
+- **Expected value:** `Feature`  
+- **Meaning:** A single geographic object (one row)  
+
+`geometry`
+
+- **Description:** Stores the spatial shape itself (polygon, multipolygon, line, point)  
+
+`geometry.type`
+
+- **Description:** The geometry shape type  
+- **Your value:** `MultiPolygon`  
+- **Meaning:** One feature can contain **multiple polygons** (for example: islands, separated areas, holes)  
+
+`geometry.coordinates`
+
+- **Description:** The actual coordinate arrays that define the shape  
+- **Coordinate order:** `[longitude, latitude]`  
+- **Example:** `[-73.9240590965993, 40.71411156014706]`  
+
+---
+
+## Spatial Relationships 
+
+Spatial relationships define how two spatial objects relate to each other.  
+Here are the main steps to make the relationship work between the spatial file and the tabular file and make the resulting visualisations work properly.  
+As the spatial file and the tabular file do not have any common fields, we will create dummy fields in both tables with the same value to make the relationship work.
+
+### How to Create a Spatial Relationship
+
+Here are the steps to create a spatial relationship between the Citi Bike trip data and the NYC district polygons:
+
+**Step 1:** Load The Data
+
+- Open Tableau Public  
+- Click Text File  
+- Choose one of the files of the folder and click **open** and all the **csv** files will apper on the Tableu workspace  
+
+You land on the **Data Source page**.
+
+
+**Step 2:** Union The Data
+
+As the data in in multiple sheets the union should be done. Make sure that all the columns are identical in all files.
+
+If they share a common columns, we can **Union** them.
+
+- Drag one of the files to the workspace  
+- Right click then **convert to union**  
+- Add all the files left to the union  
+
+![Union](../../img/tableau/w3_union.png)
+
+![Union Details](../../img/tableau/w3_union_details.png)
+
+When combining multiple files or tables in Tableau, you can use either:
+
+- **Specific (Manual) Union**  
+- **Wildcard (Automatic) Union**  
+
+They both stack data vertically (row-wise), but the way files are selected is different.
+
+In case of **Specific (Manual) Union** you should manually select and add each table or file that should be combined.
+
+You explicitly define:
+
+- Which tables to include  
+- In what order they are stacked  
+This is useful when you have a small number of files or when files do not follow a consistent naming pattern.
+
+**Wildcard (Automatic) Union** automatically unions multiple files based on a **common naming pattern**.
+
+Instead of selecting each file, you define a pattern or the folder with the files:
+
+- city_bike_trip  
+
+Tableau then automatically includes all matching files.
+
+
+**Step 3** Defining a Spatial Relationship
+
+The next step is bringing shape file of New York city to the view. In order to do that
+
+- Click to **Add**  
+- Choose **Spatial file**  
+- Add **NY_Community_District_Tabulation_Area.geojson**  
+- Bring the table to the view.  
+
+Tableau will automatically define that there is no relationship between the two tables. So will create dummy columns in each table to make relationship work.
+
+- Click on **Select a filed** on the newly created **city bike rides** unioned table  
+- Choose **Create relationship calculation**  
+- When **Relationship Calculations** opens write `'New York'` and Tableau will create a column with the string **New York**  
+- Do the same steps for **NY_Community_District_Tabulation_Area.geojson**  
+
+![Relationship Calculations](../../img/tableau/w3_relationship_calculation.png)
+
+Now we have a working relationship between two tables.
+
+![Spatial Relationship](../../img/tableau/w3_spatial_relationship.png)
+
+---
+
+## Spatial Joins   
+
+Spatial joins combine spatial data based on their geographic relationship.  
+For example, you can join Citi Bike trip data (with lat/long) to NYC district polygons.  
+This allows you to analyze trips by district, even though the two datasets do not share a common key.
+
+In Tableau spatial joins are performed at the physical layer, which means they are executed before any aggregations or calculations. This allows you to join data based on spatial relationships directly in the data source, enabling more efficient analysis and visualization of geographic data. The function for spatial join is **Intersects** which checks if the geometry of one dataset intersects with the geometry of another dataset.
+
+In our example, as the Citi Bike trip data contains latitude and longitude points of trip start and end locations, and the NYC district data contains polygon geometries of districts, we can use an **Intersects** spatial join to determine which trips started or ended in which districts. We will choose **Left Join** to include all trips and only match those that intersect with the district polygons. 
+
+### How to Create a Spatial Join
+
+Here are the steps to create a spatial join between the Citi Bike trip data and the NYC district polygons:
+
+**Step 1** 
+
+Go to the Data Source page and drag the city bike trip data to the workspace.
+
+**Step 2** 
+
+Make the union of the files as explained in relation to spatial relationships section. This will create a single table with all the trip data combined, which we can then join to the spatial file.
+
+**Step 3** 
+
+Right click on the unioned table and open the physical layer.
+Click on **Add** and choose **Spatial file** and add the spatial file of New York city.
+
+**Step 4** 
+
+Drag the new table to the workspace and choose **Left Join**.
+In the join configuration, select the spatial relationship as **Intersects** between the geometry fields.  
+
+**Step 5** 
+
+As we don't have spatial objects in the city bike trip data, we will use the latitude and longitude fields to create spatial points using MAKEPOINT function and then use these points to perform the spatial join with the district polygons. 
+To create spatial points, we will create a calculated field in the city bike trip data with the following formula: `MAKEPOINT([Start Lat], [Start Lng])`.  
+Now the same should be done for the end latitude and longitude to create another spatial point for the end location of the trip: `MAKEPOINT([End Lat], [End Lng])`.  
+
+Now we can use these spatial points to perform the spatial join with the district polygons using the INTERSECTS function. The join condition will be: `INTERSECTS([District Geometry], [Starting Point])` for the start location and `INTERSECTS([District Geometry], [Ending Point])` for the end location.
+
+![Spatial Join](../../img/tableau/w3_spatial_join.png)
+
+---
+
+### Troubleshooting Spatial Joins
+
+When working with spatial joins in Tableau, you may encounter errors related to geometry compatibility. One common error is:
+
+**SQL Server Error: Geometry is incompatible with geography**
+
+::: {.callout-warning}
+**Error Message:** Geometry is incompatible with geography
+:::
+
+When working with spatial data from SQL Server, this error usually appears when Tableau cannot interpret the spatial field correctly.
+
+This is because SQL Server supports two spatial data types: `geometry` and `geography`, but Tableau only supports the `geography` data type for spatial analysis.
+
+- If your spatial column is stored as `geometry`, Tableau will not be able to process it, resulting in the error message above.
+- Additionally, if the spatial data uses an unsupported Spatial Reference System Identifier (SRID), Tableau will also fail to process it.
+
+::: {.callout-tip}
+Tableau supports only the following EPSG codes from SQL Server:
+
+- **EPSG:4326** → WGS84  
+- **EPSG:4269** → NAD83  
+- **EPSG:4258** → ETRS89  
+:::
+
+If your spatial data uses projected coordinates (e.g., UTM) instead of geographic coordinates (latitude/longitude), Tableau will also have trouble interpreting it, leading to errors in spatial joins and map rendering.
+
+**How to Fix:**
+In SQL Server, you can convert your spatial data to the `geography` type and ensure it uses a supported SRID (preferably 4326 for latitude/longitude).
+
+::: {.callout-important}
+To ensure compatibility with Tableau:
+
+- Convert `geometry` to `geography` in SQL Server  
+- Set SRID to 4326 (recommended)  
+- Ensure coordinates are stored as longitude/latitude 
+- Validate spatial fields before connecting to Tableau   
+:::
+
+
+## Spatial Functions
+
+The table below summarizes the main spatial functions available in Tableau and their purpose.
+
+| Function | Description | Typical Use Case |
+|-----------|-------------|------------------|
+| MAKEPOINT | Converts latitude and longitude columns into a spatial point. | Enabling spatial joins for coordinate-based datasets. |
+| MAKELINE | Creates a line between two spatial points. | Origin–destination maps, mobility analysis, route visualization. |
+| DISTANCE | Calculates the distance between two spatial points using specified units. | Nearest branch analysis, trip distance calculation, proximity analysis. |
+| AREA | Returns the total surface area of a spatial polygon. | Territory size comparison, land coverage analysis. |
+| LENGTH | Returns the total geodetic length of a linestring geometry. | Route length measurement, infrastructure analysis. |
+| BUFFER | Creates a radius around a point, line, or polygon. | Service coverage zones, delivery radius modeling, proximity analysis. |
+| INTERSECTS | Returns True or False indicating whether two geometries overlap. | Spatial joins, containment checks. |
+| INTERSECTION | Returns the overlapping portion between two geometries. | Market overlap analysis, shared service area evaluation. |
+| DIFFERENCE | Subtracts the overlapping area of one polygon from another. | Identifying uncovered or restricted areas. |
+| SYMDIFFERENCE | Removes overlapping portions from both geometries and returns the remaining parts. | Territory comparison and competitive analysis. |
+| OUTLINE | Converts polygon geometry into boundary lines. | Styling borders separately from polygon fill. |
+| SHAPETYPE | Returns the geometry structure as text (Point, Polygon, etc.). | Debugging spatial data issues. |
+| VALIDATE | Confirms whether spatial geometry is topologically correct. | Cleaning corrupted spatial files and preventing join errors. |
+
+---
+
+## Mapping in Tableau (Map Layers, Map Styling & Configuration)
+
+Mapping in Tableau is not only about placing marks on a geographic background.  
+It is a combination of:
+
+- Data modeling  
+- Geocoding  
+- Aggregation logic  
+- Visual design  
+
+For a map to function correctly — analytically and visually — four foundational components must be configured properly:
+
+1. Data Type  
+2. Data Role  
+3. Geographic Role  
+4. Geographic Hierarchy  
+
+If any of these elements are misconfigured, you may encounter:
+
+- Unknown locations  
+- Incorrect aggregation  
+- Missing map rendering  
+- Broken drill-down behavior  
+- Spatial joins that do not work as expected  
+
+### Geographical data configuration
+
+Mapping accuracy begins with proper data configuration.
+
+**Data Type — Structural Foundation**
+
+The **Data Type** determines how Tableau stores and interprets the raw values.
+
+This is the first layer of configuration.
+
+Common Geographic Data Types
+
+| Field Type | Required Data Type | Why |
+|------------|-------------------|-----|
+| Latitude | Number (Decimal) | Must allow precise coordinate plotting |
+| Longitude | Number (Decimal) | Must allow precise coordinate plotting |
+| Country/State/City | String | Needed for geocoding |
+| Postal Code | String | Preserves leading zeros |
+| Geometry (GeoJSON/Shapefile) | Geometry | Native spatial object |
+
+
+Incorrect data types can cause:
+
+- Aggregation errors  
+- Loss of leading zeros (postal codes)  
+- Tableau not recognizing geographic information  
+- Failure in map rendering  
 
 Example:
 
-ISOWEEK(#1986-03-25#) = 13  
+If Postal Code is stored as Number:
+- `01234` becomes `1234`
+- Geocoding fails
 
-ISO weeks always start on Monday.
+**Data Role — Analytical Behavior**
 
----
+The **Data Role** defines how Tableau treats the field in analysis.
 
-## MAKEDATE
+Two primary roles:
 
-Constructs a date from numeric inputs.
+- **Dimension** → categorical grouping  
+- **Measure** → numeric aggregation  
 
-MAKEDATE(1986,3,25) = #1986-03-25#
+**Typical Configuration for Mapping**
 
-If values are invalid, Tableau adjusts automatically:
-MAKEDATE(2020,4,31) → May 1, 2020
+| Field | Data Role |
+|--------|-----------|
+| Latitude | Measure |
+| Longitude | Measure |
+| Country | Dimension |
+| State | Dimension |
+| City | Dimension |
+| Geometry | Measure |
 
----
+If Latitude/Longitude are set as Dimensions:
+- Points may not render correctly  
+- Aggregation logic may break  
 
-## MAKEDATETIME
 
-Combines date and time.
+**Geographic Role — Geocoding Layer**
 
-MAKEDATETIME([Date], [Time])
+The **Geographic Role** connects a field to Tableau’s geocoding engine.
 
-Available only for MySQL-compatible connections.
+This tells Tableau:
+> “This field represents a real-world geographic level.”
 
----
+Common Geographic Roles
 
-## MAKETIME
+- Country/Region  
+- State/Province  
+- County  
+- City  
+- Postal Code  
+- Latitude  
+- Longitude  
 
-Creates a time value.
+Once a geographic role is assigned:
 
-MAKETIME(14, 52, 40) = #1/1/1899 14:52:40#
+- Tableau generates **Latitude (generated)**  
+- Tableau generates **Longitude (generated)**  
 
-Returns datetime (Tableau does not support standalone time type).
+These generated fields are automatically used for plotting.
 
----
+How Tableau Geocoding Works
 
-## MAX and MIN (Date Behavior)
+When using location names:
 
-MAX(#3/25/1986#, #2/20/2021#) = most recent date  
-MIN(#3/25/1986#, #2/20/2021#) = earliest date  
+1. Tableau references its internal geographic database  
+2. Matches names to coordinates  
+3. Places marks accordingly  
 
-As aggregation:
-MAX([Date]) returns latest date in dataset.
+If Tableau cannot match values, you will see:
 
----
+- Unknown locations warning  
 
-## MONTH, QUARTER, WEEK, YEAR
+To resolve:
 
-Basic extraction functions:
+- Click the warning icon  
+- Edit locations  
+- Specify country context  
+- Correct spelling inconsistencies  
 
-MONTH(date)  
-QUARTER(date)  
-WEEK(date)  
-YEAR(date)
 
----
+**Geographic Hierarchy — Drill-Down Structure**
 
-## TODAY and NOW
-
-TODAY() → Current date  
-NOW() → Current date and time  
-
-If using live connections, timezone may differ.
-
----
-
-# date_part Argument
-
-Many date functions require a `date_part` string constant.
-
-Valid values include:
-
-- 'year'
-- 'quarter'
-- 'month'
-- 'dayofyear'
-- 'day'
-- 'weekday'
-- 'week'
-- 'hour'
-- 'minute'
-- 'second'
-- 'iso-year'
-- 'iso-quarter'
-- 'iso-week'
-- 'iso-weekday'
-
----
-
-# start_of_week Parameter
-
-Some functions include optional `[start_of_week]`.
+A **Hierarchy** defines the logical order of geographic levels.
 
 Example:
 
-DATEDIFF('week', #2013-09-22#, #2013-09-24#, 'monday') = 1  
-DATEDIFF('week', #2013-09-22#, #2013-09-24#, 'sunday') = 0  
+- Country  
+  - State  
+    - City  
+      - Postal Code  
 
-Changing start_of_week changes week boundary logic.
+Hierarchies allow:
 
+- Drill-down navigation  
+- Controlled aggregation  
+- Structured geographic exploration  
+
+How to Create a Hierarchy
+
+1. Right-click a geographic field (e.g., Country)  
+2. Select **Hierarchy → Create Hierarchy**  
+3. Drag lower levels into it  
+
+Benefits
+
+- Enables + / − drill controls  
+- Maintains geographic logic  
+- Improves dashboard interactivity  
+
+### Mapping
+
+**Mapping with Raw Coordinates**
+
+If your dataset contains Latitude and Longitude:
+
+Required Configuration
+
+- Data Type → Number (Decimal)  
+- Data Role → Measure  
+- Geographic Role → Latitude / Longitude  
+
+Validation Rules
+
+- Longitude range: -180 to 180  
+- Latitude range: -90 to 90  
+- Coordinates must be decimal degrees  
+
+Longitude always goes to:
+
+- Columns (X-axis)
+
+Latitude always goes to:
+
+- Rows (Y-axis)
+
+If properly configured:
+
+- Tableau plots points automatically  
+- No internal geocoding is required  
+
+**Mapping with Location Names**
+
+If your dataset contains names instead of coordinates:
+
+Required Configuration
+
+- Data Type → String  
+- Data Role → Dimension  
+- Geographic Role → Appropriate geographic level  
+
+Tableau converts names into coordinates using geocoding. In some cases, you may need to specify the country context to resolve ambiguities.
+
+
+**Mapping with Spatial Files (GeoJSON / Shapefile)**
+
+Spatial files contain embedded geometry objects.
+
+When imported:
+
+- Field Type → Geometry  
+- Data Role → Measure  
+
+Characteristics:
+
+- Coordinates are embedded  
+- No geocoding required  
+- Supports polygon and line rendering  
+
+Enables:
+
+- Choropleth maps  
+- Boundary overlays  
+- Spatial joins  
+- Spatial calculations  
+
+### Map Styling and Layering
+
+**Map Styles**
+
+Once configuration is correct, map styling enhances interpretability.
+
+Background Map Styles are
+
+- Light  
+- Normal  
+- Streets  
+- Satellite  
+
+Choose style based on:
+
+- Analytical clarity  
+- Contrast with marks  
+- Density visualization  
+
+**Map Layers**
+
+Tableau allows multiple layers:
+
+- Polygon layer (district boundaries)  
+- Point layer (stations)  
+- Line layer (routes)  
+
+Multi-layer maps enable:
+
+- Territory + event visualization  
+- Origin–destination flows  
+- Hotspot analysis  
+
+Each layer can have:
+
+- Independent mark type  
+- Independent color  
+- Independent size  
+  
 ---
 
-# Date Literal (#)
+### Basic Map Creation
 
-The `#` symbol indicates a date literal.
+Now let's create a simple map showing the distribution of the trips across New York city using the geometry field from the spatial file.
 
-Examples:
+**Step 1**
 
-'March 25, 1986' → String  
-#3/25/1986# → Date  
-03/25/1986 → Number  
-1986-03-25 → Integer  
+As we do not have a column with states we will make a calculated field `'New York'` and assign it as a geographic role with the level of **State/Province**. This will allow us to use the geometry field from the spatial file to plot the map of New York city.
 
-Without `#`, Tableau may interpret values incorrectly.
+**Step 2**
 
----
+Now we can make a hierarchy by right clicking on the newly created field, `[State]` and choosing **Hierarchy** → **Create Hierarchy** and then dragging the `[Boroname]` field (NYC borough) to the hierarchy. This will allow us to drill down from the state level to the geometry level and see the different districts of New York city which are available in our spatial file.
 
-# Create a Date Calculation (Practice)
+![Location Hierarchy](../../img/tableau/w3_location_hierarchy.png)
 
-Using Sample Superstore:
+**Step 3**
 
-1. Drag Order Date to Rows.
-2. Drill down from Year → Quarter → Month.
-3. Create calculated field:
+In order to count rides by district, we will drag the `Ride ID` field to the view and change the aggregation to **Count**. To show the distribution we can place the `Count of Ride ID` on the color mark and we will have a **choropleth map** showing the distribution of the rides across the different districts of New York city.
 
-Quarter Date = DATETRUNC('quarter', [Order Date])
+**Step 4**
 
-4. Change to Exact Date and Discrete.
+To make districts more visible drag and drop `[Boroname]` field to the label mark and we will have the name of the district on the map.
 
-This demonstrates:
+**Step 5**
 
-- Date hierarchy drill-down  
-- Truncation  
-- Date formatting vs calculation  
-- Discrete vs continuous date behavior  
+To make the map more readable, we can also change the background map style by right clicking on the map and choosing **Background Layers** and then choosing the style that we like. In this case, we will choose the **Light** style to make the districts more visible and add **Background Map Layer** by ticked prefferences such as **Land Cover** and **Labels** to make the map more informative.
 
----
+![Simple Map](../../img/tableau/w3_simple_map.png)
+
+### Map with layers, polygons, points, and lines
+
+**Step 1**  
+
+As we have already did the join between the spatial file and the tabular file, we can now build a map using the geometry field from the spatial file. To do that:
+
+- First make sure that the fields with geographic roles are correctly assigned
+- Double click on the geometry field and it will be added to the view
+
+Tableau automatically:
+
+- Adds Latitude (generated) to Rows  
+- Adds Longitude (generated) to Columns  
+- Places Geometry on the Marks card, Details
+
+The result is a map of New York City with its districts.
+
+![Polygons](../../img/tableau/w3_polygons.png)
+
+
+**Step 2**
+
+Now we can add the trips data to the map. To do that let's create calculated fields for the start and end locations of the trips using `MAKEPOINT()` function as explained in the spatial joins section. Then we can add these calculated fields to the view to show the trip start and end locations on the map.
+
+
+**Step 3**
+
+Having the trip start and end locations we can now make a flow map to show the movement of the trips between the start and end locations. To do that we will use `MAKELINE()` function to create a line between the start and end points of each trip. Then we can add this line to the view to visualize the flow of trips across the city.
+
+![Lines](../../img/tableau/w3_lines.png)
+
+**Step 4**
+
+In map visualizations, we can use different geometry types adding map layers to show different aspects of the data. For example, we can draw routes to the polygon layer by dragging the line geometry to the view and we can also show the start and end points of the trips by dragging the point geometry to the view. This allows us to create a multi-layered map that shows both the routes and the locations of trip starts and ends.
+
+![Map with layers](../../img/tableau/w3_map_with_layers.png)
+
+
+### Proportional Symbol Map
+
+Proportional symbol maps use sized marks (usually circles) to represent the magnitude of a measure at specific locations. The size of each mark is proportional to the value it represents.
+
+**Step 1**
+
+As in previous examples, we will start by creating a map using the geometry field `[Boroname]` from the spatial file to show the districts of New York city.
+
+**Step 2**
+
+Add `[Starting point]` to the view to show the start locations of the trips on the map.
+
+**Step 3**
+
+Now we can add the `Count of Ride ID` to the size mark to show the number of trips starting at each location. This will create a proportional symbol map where the size of each mark corresponds to the number of trips starting at that location.
+
+**Step 4**
+
+Add the `Count of Ride ID` to the color mark to show the distribution of the trips across the city. From color marks activate borders.This will allow us to quickly identify areas where there are more trips starting based on the color intensity of the marks on the map. 
+
+**Step 5**
+
+Add `[Starting Point ID]` to the detail mark to show the individual starting points of the trips on the map.
+
+**Step 6**
+
+From the Marks card, we can also change the mark type to **Circle** and adjust the size and color to make the map more visually appealing and easier to interpret. This will allow us to quickly identify areas with high trip activity based on the size of the circles on the map.
+
+**Step 7**
+
+Add `[Boroname]` to the filter shelf for interactive filtering by district. This will allow users to select specific districts and see the corresponding trip data on the map, enabling more detailed analysis of trip patterns within different areas of New York City.
+
+This analysis can help identify which districts have the highest demand for Citi Bike trips, and can inform decisions about where to add more bike stations or increase bike availability.
+
+![Proportional Symbol Map](../../img/tableau/w3_proportional_symbol_map.png)
+
+### Density Map
+
+Dencity maps use color intensity to represent the concentration of points in a given area. They are useful for visualizing patterns of activity across a geographic space.
+
+**Step 1**
+
+Bring `[Make route]` calculated field, `[Start Station ID]` and `[End Station ID]` to the view to show the routes of the trips on the map.
+
+**Step 2**
+
+Change the mark type to **Density** to create a density map that shows the concentration of trips across the city. The color intensity will indicate areas with higher or lower trip activity.
+
+**Step 3**
+
+Adjust map style to **Streets** to make the trips density patterns more visible on the street map background. This will allow us to better understand the spatial distribution of trips in relation to the city's street layout.
+
+**Step 4**
+
+Make density color intensity and opacity adjustments to enhance the visibility of high-density areas. This will help us quickly identify hotspots of trip activity across New York City.
+
+This type of analysis can be useful for understanding where the highest demand for Citi Bike trips is located, and can inform decisions about where to focus resources for bike station placement or maintenance.
+
+**Step 5**
+
+Untick **Aggregate Measures**  on the top pane **Analysis** section to show the individual trip routes on the map. Density maps calculate intensity based on the **number of marks in a geographic area**, so if we want to see the actual routes of the trips, we need to turn off aggregation. 
+
+![Density Map](../../img/tableau/w3_density_map.png)
+
+
+::: {.callout-note}
+### Analysis → Aggregate Measures in Maps
+
+- **ON (default)** → Measures are summarized (SUM, AVG, etc.).  
+  Use for choropleth maps, KPIs by region, and territory comparison.
+
+- **OFF** → Each row becomes an individual mark.  
+  Use for point distribution maps, density maps, and event-level analysis.
+
+Rule of thumb:  
+Use aggregation for **regional summaries**.  
+Turn it off for **raw spatial events and clustering analysis**.
+:::
 
