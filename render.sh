@@ -6,15 +6,6 @@ source ~/Envs/quarto/bin/activate
 
 
 
-MODULE="$1"
-SESSION="$2"
-
-if [[ -z "${MODULE:-}" || -z "${SESSION:-}" ]]; then
-  echo "Usage: ./preview.sh <module> <session_number>"
-  echo "Example: ./preview.sh statistics 03"
-  exit 1
-fi
-
 
 quarto render
 
