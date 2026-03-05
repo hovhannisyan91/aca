@@ -12,7 +12,7 @@ echo "Removing Postgres data directory..."
 rm -rf ./pgadmin_data
 
 echo "Starting containers..."
-docker compose up --build
+docker compose up
 
 echo "Database reset complete. Init scripts reran successfully."
 
