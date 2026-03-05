@@ -41,7 +41,6 @@ This session covers:
 
 These concepts allow you to transform dashboards into analytical systems.
 
----
 
 # Complex Calculations
 
@@ -72,11 +71,11 @@ As we have discussed in previous session **calculation levels** are.
 
 Mixing these incorrectly produces errors such as:
 
-> Cannot mix aggregate and non-aggregate arguments.
+>Cannot mix aggregate and non-aggregate arguments.
 
 Understanding this distinction is fundamental in advanced Tableau work.
 
----
+
 
 ## Conditional Logic (IF Statements)
 
@@ -606,6 +605,7 @@ DateAdd adds a specified time interval to a date.
 ```sql 
 DATEADD(date_part, interval, date)
 ```
+
 **Example:** Calculate Expected Delivery Date
 
 Objective: Add 5 days to Order Date to estimate delivery.
@@ -613,6 +613,7 @@ Objective: Add 5 days to Order Date to estimate delivery.
 ```sql
 DATEADD('day', 5, [Order Date])
 ```
+
 ![Expected Delivey Date]({{< meta image_path >}}/w3_expected_delivery_date.png) 
 
 **Example:**  Rolling 12-Months Window
@@ -622,6 +623,7 @@ Objective: Filter records from the last 12 months dynamically.
 ```sql
 [Order Date] >= DATEADD('month', -12, TODAY())
 ```
+
 ![Filtering Last 12 Months]({{< meta image_path >}}/w3_filtering_last_12_months.png) 
 
 ---
@@ -665,7 +667,7 @@ DateName returns the name of a date part as a string. For example, if you want t
 DATENAME(date_part, date)
 ```
 
----
+
 
 #### DATEPART
 
@@ -674,6 +676,7 @@ Datepart returns the integer value of a date part. For example, if you want to e
 ```sql
 DATEPART(date_part, date)
 ```
+
 ::: {.callout-note}
 DATEPART is typically faster than DATENAME.
 :::
@@ -685,6 +688,7 @@ Objective: Build yearly trend charts, create custom year filters
 ```sql
 DATEPART('year', [Order Date])
 ```
+
 When used in the view, make the calcuated field discrete dimension to group by year.
 
 ![Year Grouping]({{< meta image_path >}}/w3_year_grouping.png) 
@@ -792,11 +796,13 @@ Constructs a date from numeric year, month, and day.
 ```sql
 MAKEDATE(year, month, day)
 ```
+
 **Example:** Create Date for 01.01.2026 as `[Reporting Date]`
 
 ```sql
 MAKEDATE(2026, 1, 1)
 ```
+
 ![Reporting Date]({{< meta image_path >}}/w3_reporting_date.png) 
 
 ---
@@ -818,6 +824,7 @@ Constructs time using hour, minute, second.
 ```sql
 MAKETIME(hour, minute, second)
 ```
+
 ::: {.callout-note}
 Output is datetime (Tableau does not support standalone time type).
 :::
@@ -831,6 +838,7 @@ Checks whether a string is a valid date.
 ```sql
 ISDATE(string)
 ```
+
 Use case is data validation and cleaning messy datasets. 
 
 ---
@@ -842,6 +850,7 @@ Most recent date:
 ```sql
 MAX(date)
 ```   
+
 
 Earliest date:  
 
@@ -916,8 +925,7 @@ This distinction is important. Filters limit data directly. Parameters influence
 
 ### Custom N Date Part Selection
 
-This type of date parameter
- is flexible because it allows users to simultaneously choose:
+This type of date parameter is flexible because it allows users to simultaneously choose:
 
 - The date part (day, week, month, quarter, year)  
 - The date range (N periods)
@@ -981,6 +989,7 @@ Create a calculated field: **Latest Order Date**
 ```sql
 { FIXED : MAX([Order Date]) }
 ```
+
 We are doing this way beacause 
 
 - `TODAY()` → depends on the system date  
@@ -997,6 +1006,7 @@ ELSEIF [Date Part] = 'month' THEN ([Order Date]) > DATEADD('month', -[N Values],
 ELSE ([Order Date]) > DATEADD('year', -[N Values], [Latest Order Date])
 END
 ```
+
 **Step 5**
 
 - Drag **p. Date Part** to filters shelf
@@ -1025,7 +1035,7 @@ This allows you to:
 - Build dynamic period-to-period comparisons.
 - Create flexible dashboard controls.
 
-/This will be further explored in the KPI section./
+>This will be further explored in the KPI section.
 
 
 
