@@ -197,7 +197,7 @@ erDiagram
   - product_id
   - quantity
 
-**As a rusult:**
+**As a result:**
 
 1. There are **no partial dependencies left**.
 2. Each non-key attribute now depends on the **entire key** of its table.
@@ -367,14 +367,14 @@ flowchart TB
 
 ::: {.callout-tip title = "After 3NF..."}
 
-**3NF** commonly considered sufficient in practice for many transactional systems.
+**3NF is** commonly considered sufficient in practice for many transactional systems.
 
-- **Boyce-Codd Normal Form (BCNF)** BCNF is a stricter refinement of 3NF A table: 
+- **Boyce-Codd Normal Form (BCNF):** BCNF is a stricter refinement of 3NF. A table is in BCNF if:
   - For every functional dependency (X → Y), X must be a superkey (a unique identifier for the table).
   - This eliminates certain anomalies that can still exist in 3NF designs.
 - **Fourth Normal Form (4NF):** Removes multi-valued dependencies (if the table is already in BCNF).
 - **Fifth Normal Form (5NF):** Eliminates join dependencies beyond 4NF.
-- **Sixth Normal Form (6NF) and others exist mostly for theoretical completeness.**
+- **Sixth Normal Form (6NF)** and others exist mostly for theoretical completeness.
 
 For more information you can visit [here](https://www.geeksforgeeks.org/dbms/normal-forms-in-dbms/?utm_source=chatgpt.com)
 
@@ -404,13 +404,13 @@ For more information you can visit [here](https://www.geeksforgeeks.org/dbms/nor
 **In case of failure you can use below scripts:**
 
 - **Windows Users:**
-  - `reset-db-full.ps1` complete re-run the docker containers deleting the containers 
-  - `reset-db.ps1` reruning the postgres db keeping pgadmin info there
+- `reset-db-full.ps1` completely re-runs the Docker containers and removes old containers.
+- `reset-db.ps1` re-runs the Postgres DB while keeping pgAdmin data.
 - **MacOS Users:**
-- `reset-db-full.sh` complete re-run the docker containers deleting the containers 
-- `reset-db.sh` reruning the postgres db keeping pgadmin info there
+- `reset-db-full.sh` completely re-runs the Docker containers and removes old containers.
+- `reset-db.sh` re-runs the Postgres DB while keeping pgAdmin data.
 
-Open the terminal/powershell in `vscode` and typ
+Open the terminal/PowerShell in `vscode` and type:
 
 - **Windows Users:** 
   - `powershell -ExecutionPolicy Bypass -File reset-db.ps1`
@@ -423,7 +423,7 @@ Open the terminal/powershell in `vscode` and typ
 
 ### Docker Update
 
-As usal, we are starting from starting our docker containers:
+As usual, we are starting by running our Docker containers:
 
 1. the database
 2. pgadmin (viewer)
@@ -482,7 +482,7 @@ docker compose up
 docker compose up -d
 ```
 
-### Add PostGIS Extention
+### Add PostGIS Extension
 
 Once the PostGIS-enabled container is running, we enable the extension **inside the database**.
 
@@ -507,7 +507,7 @@ We do **not** use the default `public` schema for analytics.
 Instead, we create a dedicated schema called `analytics`.
 
 
->if you right click on the schemas
+>If you right-click on the schemas
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS analytics;
@@ -557,8 +557,9 @@ JOIN analytics.customers c ON o.customer_id = c.customer_id;
 ### Sync with GitHub
 
 Remember to push the changes into  **GitHub:**
-1. `git add docker-compose.yam`
-2. `git commit -m "adding postgis extention"`
+
+1. `git add docker-compose.yml`
+2. `git commit -m "adding postgis extension"`
 3. `git push`
 
 
@@ -572,7 +573,7 @@ The schema follows a **normalized (3NF)** design with a **clear geographic hiera
 
 >You can check the newly created `analytics` schema, and refresh it after each new table creation.
 
-### Countires
+### Countries
 
 This table represents sovereign countries and serves as the **top-level geographic entity**.
 
@@ -710,9 +711,9 @@ Check out the [this repository](https://github.com/hovhannisyan91/sql-analytics-
 
 ### ERD
 
-In order to generate and check the `ERD` you need to:
+In order to generate and check the `ERD`, you need to:
 
-1. right click on `analytisc schema`
+1. right-click on `analytics schema`
 2. select ERD
 3. you must see below image
 
@@ -744,7 +745,7 @@ It should return: `postgis_version: 3.4 USE_GEOS=1 USE_PROJ=1 USE_STATS=1`
 
 ### Sync with GitHub
 
-Save the quiries in proper file similar [this repository](https://github.com/hovhannisyan91/sql-analytics-portfolio/tree/main/queries) and push do **GitHub.**
+Save the queries in a proper file similar to [this repository](https://github.com/hovhannisyan91/sql-analytics-portfolio/tree/main/queries) and push to **GitHub.**
 
 
 ## Populating the Data
@@ -863,7 +864,7 @@ SELECT * FROM analytics.order_items LIMIT 10;
 ```
 
 
-### Boundarie Tables
+### Boundary Tables
 
 Here we need to do something important transformation, by creating temporary tables
 
@@ -932,6 +933,8 @@ SELECT
   country_id,
   ST_GeomFromText(wkt, 4326)
 FROM analytics._stg_country_boundaries;
+
+SELECT * FROM analytics.country_boundaries;
 ```
 
 
@@ -944,6 +947,7 @@ SELECT
   ST_GeomFromText(wkt, 4326)
 FROM analytics._stg_region_boundaries;
 
+SELECT * FROM analytics.region_boundaries;
 
 ```
 
@@ -956,6 +960,8 @@ SELECT
   ST_GeomFromText(wkt, 4326)
 FROM analytics._stg_city_boundaries;
 
+SELECT * FROM analytics.city_boundaries;
+
 ```
 
 
@@ -967,6 +973,8 @@ SELECT
   point_id,
   ST_GeomFromText(wkt, 4326)
 FROM analytics._stg_points;
+
+SELECT * FROM analytics.customer_locations;
 
 ```
 
@@ -1237,11 +1245,11 @@ JOIN analytics.order_items oi
 ## Homework
 
 1. Normalize [this](https://docs.google.com/spreadsheets/d/1ddpzF3RGDkUmIw8-XsLtoi4KM-4acvDa_JBCfDYS3dw/edit?gid=0#gid=0) table
-2. Answer to this questions from our database**
+2. Answer these questions from our database:
    -  **Q1:** Who are our customers and where are they located?
    -  **Q2:** Do we have customers who have never placed an order?
    -  **Q3:** Why does joining orders to order items increase row count?
    -  **Q4:** What products were sold, to whom, and where?
    -  **Q5:** Total revenue per country.
-   -  **Q6:** Are there customers without city ?
-3. Start thinking abouth [final project.](session13.qmd)
+   -  **Q6:** Are there customers without a city?
+3. Start thinking about the [final project](session13.qmd).
