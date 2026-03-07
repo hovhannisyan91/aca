@@ -4,7 +4,43 @@ categories: [Pandas, Aggregating, Merging]
 image_path: "/img/python/04"
 ---
 
+## Introduction
+
+In the previous session, we learned how to import `.csv` files into Pandas and perform the first exploratory checks on a dataset. We worked with the structure of a single table and practiced reading rows, understanding columns, and interpreting the basic shape of a DataFrame.
+
+In this session, we move from **single-table exploration** to **multi-table analytical thinking**.
+
+Our goal is to understand the Instacart dataset table by table, identify what each table represents, ask meaningful analytical questions, and then connect the tables using `pd.merge()`.
+
+This reflects real analytical work. In practice, data is often stored in several related tables rather than in one large spreadsheet. An analyst must first understand each table independently, then combine them carefully in order to answer richer business questions.
+
+
+**For this session, we work with the following files:**
+ 
+- `orders.csv`
+- `order_products_train.csv`
+- `products.csv`
+- `departments_t.csv`
+- `aisles.csv`
+
+::: {.callout-important}
+
+[Here](https://www.kaggle.com/datasets/psparks/instacart-market-basket-analysis/data) you can find the Instacart Market Basket Analysis dataset and its related documentation.
+
+:::
+
+
+
+![]({{< meta image_path >}}/instacart.png)
+
 ## Importing the data
+
+**Now let's omport the needed data one by one:**
+
+::: {.callout-important title="Downlaod Archieve.zip file again"} 
+Remember to download the [Archieve.zip](https://github.com/hovhannisyan91/data_analytics_with_python/blob/main/data/raw/Archive.zip) file.
+:::
+
 
 ### Importing `orders.csv` file
 
@@ -99,13 +135,430 @@ df_products.head()
 
 
 
+## Data Dictionary
 
-<!-- ::: {.callout-important}
-Pay attention to the folder: processeed. Here we changed the location
-::: -->
-## Data Source extra Information
+Before performing any analysis, we need to understand what each table represents.
+
+### Overview of the Tables
+
+| Table | Analytical Role | Grain | Main Key |
+|---|---|---|---|
+| `orders` | Behavioral table | One row per order | `order_id` |
+| `order_products_train` | Transaction bridge table | One row per product within an order | no single unique key |
+| `products` | Product master table | One row per product | `product_id` |
+| `departments_t` | Department lookup table | One row per department | `department_id` |
+| `aisles` | Aisle lookup table | One row per aisle | `aisle_id` |
+
+
+### The `orders` Table
+
+The `orders` table is the behavioral table of the dataset.
+
+Each row represents **one order placed by one user**.
+
+```{python}
+df_orders.head()
+```
+
+**Important columns:**
+
+- `order_id`: unique order identifier
+- `user_id`: identifier of the customer
+- `eval_set`: indicates whether the order belongs to `prior`, `train`, or `test` (we are going to use `train`)
+- `order_number`: sequence number of the order for that user
+- `order_dow`: day of week of the order
+- `order_hour_of_day`: hour of day of the order
+- `days_since_prior_order`: number of days since the customer’s previous order
+
+**Analytical questions that can be answered from this table alone:**
+
+- How many total orders are there?
+- How many users are represented?
+- What is the distribution of `eval_set`?
+- On which days do customers place orders most frequently?
+- At what hours do customers place orders most frequently?
+- Are missing values in `days_since_prior_order` meaningful?
+
+### The `order_products_train` Table
+
+This is the `transaction bridge` table for train orders.
+
+Each row represents **one product inside one order**.
+
+**Important columns:**
+ 
+- `order_id`: identifier of the order
+- `product_id`: identifier of the product
+- `add_to_cart_order`: the sequence in which the product was added to the basket
+- `reordered`: indicates whether the item had been ordered before by the same customer
 
 
 ::: {.callout-important}
-[Here](https://www.kaggle.com/datasets/psparks/instacart-market-basket-analysis/data) you can find Instacart related info, data and many more
+- `order_id` is not unique in this table
+- `product_id` is not unique in this table
+- repeated values are expected because one order can contain many products, and one product can appear in many orders
+:::
+
+**Analytical questions that can be answered from this table alone:**
+ 
+- How many line items are there?
+- How many unique orders are represented?
+- How many unique products are represented?
+- What proportion of items are reordered?
+- What does the distribution of `add_to_cart_order` look like?
+
+### The `products` Table
+
+The `products` table is the product master table.
+
+Each row represents **one product**.
+
+**Important columns:**
+
+- `product_id`: unique identifier of the product
+- `product_name`: product name
+- `aisle_id`: identifier of the aisle
+- `department_id`: identifier of the department
+
+**Analytical questions that can be answered from this table alone:**
+
+ 
+- How many products exist?
+- Are product IDs unique?
+- How many departments are represented in the product catalog?
+- How many aisles are represented in the product catalog?
+- Do some product names repeat?
+
+### The `departments_t` Table
+
+**This is a `lookup` table.**
+
+Each row represents **one department**.
+
+**Important columns:**
+
+- `department_id`: unique department identifier
+- `department`: department name
+
+
+**Analytical questions that can be answered from this table alone:**
+ 
+- How many departments exist?
+- Are department IDs unique?
+
+### The `aisles` Table
+
+This is also a lookup table.
+
+Each row represents **one aisle**.
+
+**Important columns:**
+
+ 
+- `aisle_id`: unique aisle identifier
+- `aisle`: aisle name
+
+**Analytical questions that can be answered from this table alone:**
+ 
+- How many aisles exist?
+- Are aisle IDs unique?
+
+## Relationship Between the Tables
+
+Before merging, we should understand how the tables are connected.
+
+```{mermaid}
+flowchart LR
+    A[orders] -->|order_id| B[order_products_train]
+    B -->|product_id| C[products]
+    C -->|department_id| D[departments_t]
+    C -->|aisle_id| E[aisles]
+```
+
+**This tells us the following:**
+ 
+- the `orders` table contains order-level behavior
+- the `order_products_train` table connects orders to products
+- the `products` table adds product information
+- the `departments_t` and `aisles` tables make product categories more interpretable
+
+### Why We Explore Table by Table First
+
+Before using `pd.merge()`, it is good analytical practice to inspect each table independently.
+
+**This allows us to:**
+ 
+- understand the grain of the data
+- identify key columns
+- find missing values
+- **check whether IDs are unique where they should be unique**
+- **detect possible problems before combining tables**
+
+## Exploring the `orders` Table
+
+We begin with the `orders` table because it is the most intuitive table in the `Instacart` dataset. It contains behavioral information about **when** users place orders and **how frequently** they shop.
+
+Each row in this table represents **one order placed by one user**.
+
+### Previewing the data
+
+```{python}
+df_orders.head()
+```
+
+
+**The output helps us answer two important structural questions:**
+ 
+- How many rows and columns does the table have?
+- What variables are available for analysis?
+
+<!-- todo: try inlin -->
+
+
+### Inspecting the schema
+
+A very important step in Pandas is checking the schema of the table. This helps us understand the data types and whether missing values are present.
+
+```{python}
+
+df_orders.info()
+```
+
+### Looking at data types
+
+Each column has a specific role, and its data type should match its meaning.
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+df_orders.dtypes
+```
+
+### Descriptive statistics
+
+For numeric columns, descriptive statistics provide a first summary of the data.
+
+```{python}
+df_orders.describe()
+```
+
+
+**This is useful for checking the ranges of variables such as:**
+
+ 
+- `order_number`
+- `order_dow`
+- `order_hour_of_day`
+- `days_since_prior_order`
+
+>Note, that from now on we will use `pd.options.display.float_format = '{:,.2f}'.format` option for data reporting in order to make the value more representative.
+
+```{python}
+pd.options.display.float_format = '{:,.2f}'.format
+df_orders.describe()
+```
+
+
+### Missing values
+
+Missing values should always be checked before moving to deeper analysis.
+
+```{python}
+
+df_orders.isna().sum()
+```
+
+
+::: {.callout-tip}
+This is especially important for `days_since_prior_order`, because in this dataset null values may be meaningful rather than erroneous.
+:::
+
+### Analytical questions that can be answered from `orders`
+
+**Even without merging, the `orders` table already allows us to answer several useful analytical questions.**
+
+ 
+- How many orders are there in total?
+- How many unique users are represented?
+- What is the distribution of `eval_set`?
+- On which days do customers place orders most frequently?
+- At what hours do customers place orders most frequently?
+- Are missing values in `days_since_prior_order` meaningful?
+- Is the first order of a user treated differently from later orders?
+
+### Q1: How many unique orders exist?
+
+```{python}
+df_orders["order_id"].nunique()
+
+```
+
+### Q2: How many distinct customers are represented in the dataset?
+
+```{python}
+df_orders["user_id"].nunique()
+```
+
+### Q3: Exploring the `eval_set` distribution
+
+The `eval_set` variable is very important because it determines which subset of orders we will use later in the analysis.
+
+**This helps us understand how the orders are split into:**
+
+```{python}
+df_orders["eval_set"].value_counts(dropna=False)
+```
+
+
+>Later, we will filter this table to the `train` subset before merging it with `order_products_train`.
+
+### Q4: Orders by day of week
+
+This tells us how orders are distributed across the week.
+We can now begin exploring ordering behavior.
+
+```{python}
+df_orders["order_dow"].value_counts().sort_index()
+```
+
+
+>**A useful analytical question here is:** Are some days clearly more active than others?
+
+<!-- TODO lets visualize it here  -->
+
+### Q5: Orders by hour of day
+
+Next, we examine the hourly distribution of orders.
+
+- At what time of day do customers shop most often?
+- Is ordering behavior concentrated in a small time window?
+
+```{python}
+df_orders["order_hour_of_day"].value_counts().sort_index()
+```
+
+<!-- TODO add some visualization -->
+
+### Q5:Understanding missing values in `days_since_prior_order`
+
+This is one of the most interesting columns in the table because its missing values may actually have a logical explanation.
+
+```{python}
+
+df_orders["days_since_prior_order"].isna().sum()
+```
+
+**At first glance, missing values may seem like a data quality issue. However, here we should ask a better question:**
+
+ 
+>Could these null values correspond to the first order of each user?
+
+### Logical check: first orders and null values
+
+**We can test this directly.**
+
+```{python}
+
+df_orders.loc[df_orders["order_number"] == 1, "days_since_prior_order"].isna().all()
+```
+
+If the result is `True`, then the null values are not random. They are structurally meaningful.
+
+::: {.callout-caution}
+**This is an important analytical lesson:**
+
+- not every null is a problem
+- some null values reflect the business logic of the data
+:::
+
+
+### Consistency checks for the `orders` table
+
+Before using a table in deeper analysis, it is good practice to perform a few basic consistency checks.
+
+#### Is `order_id` unique?
+
+Since each row should represent one order, `order_id` should uniquely identify rows.
+
+```{python}
+df_orders["order_id"].is_unique
+```
+
+#### Is `order_dow` in the correct range?
+
+Day of week should logically be between `0` and `6`.
+
+```{python}
+df_orders["order_dow"].between(0, 6).all()
+```
+
+#### Is `order_hour_of_day` in the correct range?
+
+Hour of day should logically be between `0` and `23`.
+
+```{python}
+df_orders["order_hour_of_day"].between(0, 23).all()
+```
+
+::: {.callout-warning}
+These checks are simple, but they are important. They help us confirm that the table behaves as expected before we move on.
+:::
+
+### Filtering the `orders` table to train orders
+
+Since the next transactional table we will use is `order_products_train.csv`, we should prepare the matching subset of orders in advance.
+
+```{python}
+
+df_orders_train = df_orders[df_orders["eval_set"] == "train"]
+df_orders_train.head()
+```
+
+### Why do we filter first?
+
+**This is an important analytical step.**
+
+- `order_products_train.csv` contains only products from train orders
+- filtering first keeps the analysis focused and consistent
+- this is similar to applying a `WHERE` condition before a `JOIN` in SQL
+
+### Keeping only the columns we need
+
+To make the next steps cleaner, we can keep only the most relevant columns from the filtered table.
+
+```{python}
+
+df_orders_train.drop(columns=["eval_set"])
+df_orders_train.head()
+```
+
+
+::: {.callout-important}
+`df_orders` takes significant amount of memory, thus once finishing working with the dataframe, we can delete it:
+
+```{python}
+del df_orders
+```
+:::
+
+### Summary of the `orders` table
+
+At this stage, we understand the `orders` table both structurally and analytically.
+
+- It is a behavioral table with one row per order
+- It helps us study timing and frequency of customer orders
+- It introduces the important `eval_set` variable
+- It provides a good example of meaningful null values
+- It allows us to prepare the correct subset before merging with the train basket table
+
+
+## Pandas Cheatsheet
+
+::: {.callout-important}
+For mor infformation about `pandas` you can find [here](https://pandas.pydata.org/Pandas_Cheat_Sheet.pdf)
 :::
