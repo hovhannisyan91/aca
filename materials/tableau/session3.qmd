@@ -1884,3 +1884,334 @@ Use aggregation for **regional summaries**.
 Turn it off for **raw spatial events and clustering analysis**.
 :::
 
+## Cohort Analysis in Tableau
+
+Cohort Analysis is a technique used to analyze the behavior of groups of users that share a common characteristic over time.
+
+Instead of analyzing all users together, cohort analysis groups users based on a **shared starting event**, allowing to observe how behavior changes across time for each group.
+
+Common cohort grouping criteria include:
+
+- First purchase date  
+- First login date  
+- First subscription date  
+- First product activation  
+
+This method is widely used in:
+ 
+- Customer retention analysis  
+- Product usage analysis  
+- Marketing performance evaluation  
+- Telecom subscriber lifecycle analysis  
+
+For example:
+ 
+- Customers who made their **first purchase in January**
+- Customers who made their **first purchase in February**
+
+Each of these groups becomes a **cohort**.
+
+---
+
+### Why Cohort Analysis is Important
+
+Traditional aggregation mixes users with different histories.
+
+For example:
+ 
+- Some customers joined yesterday  
+- Some customers joined one year ago  
+
+If we calculate overall metrics like revenue or retention, the results can be misleading.
+
+Cohort analysis solves this problem by aligning users based on **their starting point**.
+
+This allows analysts to answer questions such as:
+  
+- Do newer users retain better than older users?
+- How long does customer engagement last?
+- Which acquisition month produced the most loyal users?
+
+---
+
+### Cohort Analysis Concept
+
+A cohort analysis typically consists of three components:
+ 
+- **Period**
+- **Start Date**
+- **Metric Being Measured**
+
+Example:
+
+| Start Date | Period 0 | Period 1 | Period 2 | Period 3 |
+|---------------|--------|--------|--------|--------|
+| Jan 2024 | 100% | 70% | 55% | 40% |
+| Feb 2024 | 100% | 75% | 60% | 45% |
+| Mar 2024 | 100% | 72% | 58% | 44% |
+
+Interpretation:
+
+- Month 0 → when users first appeared
+- Month 1 → one month after acquisition
+- Month 2 → two months after acquisition
+
+This structure allows us to analyze **retention or activity decay** over time.
+
+---
+
+## Cohort Analysis Workflow in Tableau
+
+Steps include:
+
+- Identify the **first activity date for each user**
+- Assign each user to a **cohort group**
+- Calculate **time elapsed since the cohort start**
+- Aggregate metrics by cohort and time period
+
+### Cohort Analysis Example
+
+Let's explore Cohort Analysis in Tableau Using the Online Retail Dataset
+
+Cohort analysis becomes very practical with the **Online Retail** dataset because the table contains transactional data at the invoice line level.
+
+From the, we can see the following important fields:
+
+- **Customer ID** identifies the customer
+- **Invoice Date** identifies when the transaction happened
+- **Quantity** and **Unit Price** can be used to calculate sales
+- multiple rows can belong to the same invoice because one invoice may contain several products
+
+In cohort analysis, we usually group customers based on the date of their **first purchase** and then track their later activity.
+
+In this dataset:
+ 
+- each row is a product line within an invoice
+- one customer can have many invoices
+- one invoice can contain many products
+- customers purchase at different times
+
+This allows us to answer questions such as:
+
+- In which month did the customer make the first purchase?
+- Did the customer return in later months?
+- Which cohort has better retention?
+- Which cohort generates more revenue over time?
+
+
+For this dataset, the cohort can be defined as:
+
+**Customers grouped by the month of their first invoice date**
+
+So:
+  
+- customers whose first order was in **January 2011** belong to the **January 2011 cohort**
+- customers whose first order was in **February 2011** belong to the **February 2011 cohort**
+
+Then we compare how active those customers remain in later months.
+
+### Cohort Analysis Logic
+
+The cohort analysis process in Tableau will follow this logic:
+
+```{mermaid}
+flowchart LR
+A[Customer ID] --> B[Find First Invoice Date]
+B --> C[Assign Cohort Month]
+C --> D[Calculate Months Since First Purchase]
+D --> E[Measure Retention or Sales]
+E --> F[Build Cohort Heatmap]
+```
+
+---
+
+**Step 1:** Find the First Purchase Date per Customer
+
+We first need to identify when each customer made their very first purchase.
+
+Create a calculated field:
+
+```sql
+{ FIXED [Customer ID] : MIN([Invoice Date]) }
+```
+
+Name: **First Purchase Date**
+
+**Explanation**
+
+This LOD expression tells Tableau:
+
+- look at each **Customer ID**
+- find the earliest **Invoice Date**
+- return that same first purchase date for all rows of that customer
+
+So if Customer 17850 first purchased on **2010-12-01**, every row for Customer 17850 will carry that first purchase date.
+
+---
+
+**Step 2:** Create the Cohort Month
+
+Cohorts are usually analyzed by month, so we truncate the first purchase date to month level.
+
+```sql
+DATETRUNC('month', [First Purchase Date])
+```
+
+Name: **Cohort Month**
+
+**Explanation**
+
+If a customer's first purchase date is:
+
+- 2011-01-20 18:08:00
+
+then the cohort month becomes:
+
+- 2011-01-01
+
+In Tableau it will usually be displayed as **January 2011**.
+
+This is the cohort to which the customer belongs.
+
+---
+
+**Step 3:** Calculate Purchase Month of Each Transaction
+
+Now we need to identify the month of each transaction row.
+
+```sql
+DATETRUNC('month', [Invoice Date])
+```
+
+Name: **Invoice Month**
+
+This gives the monthly bucket of every purchase activity.
+
+---
+
+**Step 4:** Calculate Months Since First Purchase
+
+Now calculate how many months passed between the customer's first purchase and each later transaction.
+
+```sql
+DATEDIFF('month', [Cohort Month], [Invoice Month])
+```
+
+Name: **Period**
+
+**Explanation**
+
+This field shows the position of the transaction relative to the first purchase month.
+
+---
+
+**Step 5:** Calculate Active Customers
+
+To measure retention, count how many distinct customers are active in each cohort period.
+
+```sql
+COUNTD([Customer ID])
+```
+Name: **Active Customers**
+
+When this field is placed in a view with:
+
+- **MONTH(Cohort Month)**
+- **Period**
+
+it returns the number of distinct customers from that cohort who made a purchase in that month offset.
+
+---
+
+**Step 6:** Build the Heatmap
+
+- Drag the field `MONTH([Cohort Month])` and `[Period]` to the view and make them **descrete, dimension**.
+- Choose **Square** from the **Marks card**.
+- Drag `COUNTD([Customer ID])` to the **Label** from the **Marks card**.
+- Drag `COUNTD([Customer ID])` to the **Color** from the **Marks card**.
+- In order to show **Retention Rate** as well, drag `COUNTD([Customer ID])` to the **Label** again, from **Quick table calculations** choose **Calculation Type - Percent From**, **Campute Using - Table(accross)** and **Relative to - First**. This will allow to show percent of active customers relative to the first period.
+
+![Retention Rate Calculation]({{< meta image_path >}}/w3_retention_rate_calculation.png)
+
+![Cohort Initial View]({{< meta image_path >}}/w3_cohort_initial_view.png)
+
+---
+
+**Step 7:** Control the View
+
+In order to show only the blocks with values we should filter the view:
+
+- Drag the calculation of **Retention Rate** from Marks Card to the Data Pane and name it `[Retention Rate]`.
+- Then drag the newly calculated field to the filters shelf, choose **At least** values from **0.01%** and the **0%** values will be filtered.
+
+![Cohort Final View]({{< meta image_path >}}/w3_cohort_final_view.png)
+
+---
+
+### Example Interpretation 
+
+Suppose the **December 2010 cohort** contains customers whose first order happened in January.
+
+If retention for that cohort is:
+
+- Month 0 = 100%
+- Month 1 = 38.19%
+- Month 2 = 33.44%
+
+this means:
+ 
+- all customers in the cohort purchased in their first month
+- 38% of them returned and purchased again one month later
+- 33% of them were still purchasing two months later
+
+This helps identify whether customer engagement is improving or declining across acquisition periods.
+
+---
+
+### Additional Analysis 
+
+Because this dataset also has **Country**, **Stock Code**, and **Description**, we can extend cohort analysis further.
+
+### 1. Cohort by Country
+
+Add **Country** as a filter or detail to compare retention across markets.
+
+Questions answered:
+ 
+- Do customers from the United Kingdom retain better than others?
+- Which countries have stronger repeat purchasing?
+
+---
+
+### 2. Product-Based Cohort Analysis
+
+We can analyze cohorts of customers based on the first product category they bought.
+
+Questions answered:
+
+  
+- Do customers who first bought decorative items retain differently from customers who first bought gift items?
+- Which first-purchase products lead to stronger repeat behavior?
+
+---
+
+### 3. Revenue Cohorts
+
+Instead of customer retention, focus on monetary value.
+
+Questions answered:
+
+  
+- Which acquisition month generated the highest long-term revenue?
+- Do newer cohorts spend more or less than older ones?
+
+---
+
+
+
+
+
+
+
+
+#
