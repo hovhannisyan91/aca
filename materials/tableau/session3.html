@@ -108,6 +108,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -930,7 +933,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#proportional-symbol-map" id="toc-proportional-symbol-map" class="nav-link" data-scroll-target="#proportional-symbol-map">Proportional Symbol Map</a></li>
   <li><a href="#density-map" id="toc-density-map" class="nav-link" data-scroll-target="#density-map">Density Map</a></li>
   </ul></li>
+  <li><a href="#cohort-analysis-in-tableau" id="toc-cohort-analysis-in-tableau" class="nav-link" data-scroll-target="#cohort-analysis-in-tableau">Cohort Analysis in Tableau</a>
+  <ul class="collapse">
+  <li><a href="#why-cohort-analysis-is-important" id="toc-why-cohort-analysis-is-important" class="nav-link" data-scroll-target="#why-cohort-analysis-is-important">Why Cohort Analysis is Important</a></li>
+  <li><a href="#cohort-analysis-concept" id="toc-cohort-analysis-concept" class="nav-link" data-scroll-target="#cohort-analysis-concept">Cohort Analysis Concept</a></li>
   </ul></li>
+  <li><a href="#cohort-analysis-workflow-in-tableau" id="toc-cohort-analysis-workflow-in-tableau" class="nav-link" data-scroll-target="#cohort-analysis-workflow-in-tableau">Cohort Analysis Workflow in Tableau</a>
+  <ul class="collapse">
+  <li><a href="#cohort-analysis-example" id="toc-cohort-analysis-example" class="nav-link" data-scroll-target="#cohort-analysis-example">Cohort Analysis Example</a></li>
+  <li><a href="#cohort-analysis-logic" id="toc-cohort-analysis-logic" class="nav-link" data-scroll-target="#cohort-analysis-logic">Cohort Analysis Logic</a></li>
+  <li><a href="#example-interpretation" id="toc-example-interpretation" class="nav-link" data-scroll-target="#example-interpretation">Example Interpretation</a></li>
+  <li><a href="#additional-analysis" id="toc-additional-analysis" class="nav-link" data-scroll-target="#additional-analysis">Additional Analysis</a></li>
+  <li><a href="#cohort-by-country" id="toc-cohort-by-country" class="nav-link" data-scroll-target="#cohort-by-country">1. Cohort by Country</a></li>
+  <li><a href="#product-based-cohort-analysis" id="toc-product-based-cohort-analysis" class="nav-link" data-scroll-target="#product-based-cohort-analysis">2. Product-Based Cohort Analysis</a></li>
+  <li><a href="#revenue-cohorts" id="toc-revenue-cohorts" class="nav-link" data-scroll-target="#revenue-cohorts">3. Revenue Cohorts</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
   </ul>
 </nav>
     </div>
@@ -3001,10 +3020,323 @@ Use aggregation for <strong>regional summaries</strong>.<br>
 Turn it off for <strong>raw spatial events and clustering analysis</strong>.</p>
 </div>
 </div>
-
-
 </section>
 </section>
+<section id="cohort-analysis-in-tableau" class="level2">
+<h2 class="anchored" data-anchor-id="cohort-analysis-in-tableau">Cohort Analysis in Tableau</h2>
+<p>Cohort Analysis is a technique used to analyze the behavior of groups of users that share a common characteristic over time.</p>
+<p>Instead of analyzing all users together, cohort analysis groups users based on a <strong>shared starting event</strong>, allowing to observe how behavior changes across time for each group.</p>
+<p>Common cohort grouping criteria include:</p>
+<ul>
+<li>First purchase date<br>
+</li>
+<li>First login date<br>
+</li>
+<li>First subscription date<br>
+</li>
+<li>First product activation</li>
+</ul>
+<p>This method is widely used in:</p>
+<ul>
+<li>Customer retention analysis<br>
+</li>
+<li>Product usage analysis<br>
+</li>
+<li>Marketing performance evaluation<br>
+</li>
+<li>Telecom subscriber lifecycle analysis</li>
+</ul>
+<p>For example:</p>
+<ul>
+<li>Customers who made their <strong>first purchase in January</strong></li>
+<li>Customers who made their <strong>first purchase in February</strong></li>
+</ul>
+<p>Each of these groups becomes a <strong>cohort</strong>.</p>
+<hr>
+<section id="why-cohort-analysis-is-important" class="level3">
+<h3 class="anchored" data-anchor-id="why-cohort-analysis-is-important">Why Cohort Analysis is Important</h3>
+<p>Traditional aggregation mixes users with different histories.</p>
+<p>For example:</p>
+<ul>
+<li>Some customers joined yesterday<br>
+</li>
+<li>Some customers joined one year ago</li>
+</ul>
+<p>If we calculate overall metrics like revenue or retention, the results can be misleading.</p>
+<p>Cohort analysis solves this problem by aligning users based on <strong>their starting point</strong>.</p>
+<p>This allows analysts to answer questions such as:</p>
+<ul>
+<li>Do newer users retain better than older users?</li>
+<li>How long does customer engagement last?</li>
+<li>Which acquisition month produced the most loyal users?</li>
+</ul>
+<hr>
+</section>
+<section id="cohort-analysis-concept" class="level3">
+<h3 class="anchored" data-anchor-id="cohort-analysis-concept">Cohort Analysis Concept</h3>
+<p>A cohort analysis typically consists of three components:</p>
+<ul>
+<li><strong>Period</strong></li>
+<li><strong>Start Date</strong></li>
+<li><strong>Metric Being Measured</strong></li>
+</ul>
+<p>Example:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Start Date</th>
+<th>Period 0</th>
+<th>Period 1</th>
+<th>Period 2</th>
+<th>Period 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Jan 2024</td>
+<td>100%</td>
+<td>70%</td>
+<td>55%</td>
+<td>40%</td>
+</tr>
+<tr class="even">
+<td>Feb 2024</td>
+<td>100%</td>
+<td>75%</td>
+<td>60%</td>
+<td>45%</td>
+</tr>
+<tr class="odd">
+<td>Mar 2024</td>
+<td>100%</td>
+<td>72%</td>
+<td>58%</td>
+<td>44%</td>
+</tr>
+</tbody>
+</table>
+<p>Interpretation:</p>
+<ul>
+<li>Month 0 → when users first appeared</li>
+<li>Month 1 → one month after acquisition</li>
+<li>Month 2 → two months after acquisition</li>
+</ul>
+<p>This structure allows us to analyze <strong>retention or activity decay</strong> over time.</p>
+<hr>
+</section>
+</section>
+<section id="cohort-analysis-workflow-in-tableau" class="level2">
+<h2 class="anchored" data-anchor-id="cohort-analysis-workflow-in-tableau">Cohort Analysis Workflow in Tableau</h2>
+<p>Steps include:</p>
+<ul>
+<li>Identify the <strong>first activity date for each user</strong></li>
+<li>Assign each user to a <strong>cohort group</strong></li>
+<li>Calculate <strong>time elapsed since the cohort start</strong></li>
+<li>Aggregate metrics by cohort and time period</li>
+</ul>
+<section id="cohort-analysis-example" class="level3">
+<h3 class="anchored" data-anchor-id="cohort-analysis-example">Cohort Analysis Example</h3>
+<p>Let’s explore Cohort Analysis in Tableau Using the Online Retail Dataset</p>
+<p>Cohort analysis becomes very practical with the <strong>Online Retail</strong> dataset because the table contains transactional data at the invoice line level.</p>
+<p>From the, we can see the following important fields:</p>
+<ul>
+<li><strong>Customer ID</strong> identifies the customer</li>
+<li><strong>Invoice Date</strong> identifies when the transaction happened</li>
+<li><strong>Quantity</strong> and <strong>Unit Price</strong> can be used to calculate sales</li>
+<li>multiple rows can belong to the same invoice because one invoice may contain several products</li>
+</ul>
+<p>In cohort analysis, we usually group customers based on the date of their <strong>first purchase</strong> and then track their later activity.</p>
+<p>In this dataset:</p>
+<ul>
+<li>each row is a product line within an invoice</li>
+<li>one customer can have many invoices</li>
+<li>one invoice can contain many products</li>
+<li>customers purchase at different times</li>
+</ul>
+<p>This allows us to answer questions such as:</p>
+<ul>
+<li>In which month did the customer make the first purchase?</li>
+<li>Did the customer return in later months?</li>
+<li>Which cohort has better retention?</li>
+<li>Which cohort generates more revenue over time?</li>
+</ul>
+<p>For this dataset, the cohort can be defined as:</p>
+<p><strong>Customers grouped by the month of their first invoice date</strong></p>
+<p>So:</p>
+<ul>
+<li>customers whose first order was in <strong>January 2011</strong> belong to the <strong>January 2011 cohort</strong></li>
+<li>customers whose first order was in <strong>February 2011</strong> belong to the <strong>February 2011 cohort</strong></li>
+</ul>
+<p>Then we compare how active those customers remain in later months.</p>
+</section>
+<section id="cohort-analysis-logic" class="level3">
+<h3 class="anchored" data-anchor-id="cohort-analysis-logic">Cohort Analysis Logic</h3>
+<p>The cohort analysis process in Tableau will follow this logic:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+A[Customer ID] --&gt; B[Find First Invoice Date]
+B --&gt; C[Assign Cohort Month]
+C --&gt; D[Calculate Months Since First Purchase]
+D --&gt; E[Measure Retention or Sales]
+E --&gt; F[Build Cohort Heatmap]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+<p><strong>Step 1:</strong> Find the First Purchase Date per Customer</p>
+<p>We first need to identify when each customer made their very first purchase.</p>
+<p>Create a calculated field:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">MIN</span>([Invoice <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Name: <strong>First Purchase Date</strong></p>
+<p><strong>Explanation</strong></p>
+<p>This LOD expression tells Tableau:</p>
+<ul>
+<li>look at each <strong>Customer ID</strong></li>
+<li>find the earliest <strong>Invoice Date</strong></li>
+<li>return that same first purchase date for all rows of that customer</li>
+</ul>
+<p>So if Customer 17850 first purchased on <strong>2010-12-01</strong>, every row for Customer 17850 will carry that first purchase date.</p>
+<hr>
+<p><strong>Step 2:</strong> Create the Cohort Month</p>
+<p>Cohorts are usually analyzed by month, so we truncate the first purchase date to month level.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'month'</span>, [<span class="fu">First</span> Purchase <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Name: <strong>Cohort Month</strong></p>
+<p><strong>Explanation</strong></p>
+<p>If a customer’s first purchase date is:</p>
+<ul>
+<li>2011-01-20 18:08:00</li>
+</ul>
+<p>then the cohort month becomes:</p>
+<ul>
+<li>2011-01-01</li>
+</ul>
+<p>In Tableau it will usually be displayed as <strong>January 2011</strong>.</p>
+<p>This is the cohort to which the customer belongs.</p>
+<hr>
+<p><strong>Step 3:</strong> Calculate Purchase Month of Each Transaction</p>
+<p>Now we need to identify the month of each transaction row.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'month'</span>, [Invoice <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Name: <strong>Invoice Month</strong></p>
+<p>This gives the monthly bucket of every purchase activity.</p>
+<hr>
+<p><strong>Step 4:</strong> Calculate Months Since First Purchase</p>
+<p>Now calculate how many months passed between the customer’s first purchase and each later transaction.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(<span class="st">'month'</span>, [Cohort <span class="dt">Month</span>], [Invoice <span class="dt">Month</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Name: <strong>Period</strong></p>
+<p><strong>Explanation</strong></p>
+<p>This field shows the position of the transaction relative to the first purchase month.</p>
+<hr>
+<p><strong>Step 5:</strong> Calculate Active Customers</p>
+<p>To measure retention, count how many distinct customers are active in each cohort period.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>COUNTD([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Name: <strong>Active Customers</strong></p>
+<p>When this field is placed in a view with:</p>
+<ul>
+<li><strong>MONTH(Cohort Month)</strong></li>
+<li><strong>Period</strong></li>
+</ul>
+<p>it returns the number of distinct customers from that cohort who made a purchase in that month offset.</p>
+<hr>
+<p><strong>Step 6:</strong> Build the Heatmap</p>
+<ul>
+<li>Drag the field <code>MONTH([Cohort Month])</code> and <code>[Period]</code> to the view and make them <strong>descrete, dimension</strong>.</li>
+<li>Choose <strong>Square</strong> from the <strong>Marks card</strong>.</li>
+<li>Drag <code>COUNTD([Customer ID])</code> to the <strong>Label</strong> from the <strong>Marks card</strong>.</li>
+<li>Drag <code>COUNTD([Customer ID])</code> to the <strong>Color</strong> from the <strong>Marks card</strong>.</li>
+<li>In order to show <strong>Retention Rate</strong> as well, drag <code>COUNTD([Customer ID])</code> to the <strong>Label</strong> again, from <strong>Quick table calculations</strong> choose <strong>Calculation Type - Percent From</strong>, <strong>Campute Using - Table(accross)</strong> and <strong>Relative to - First</strong>. This will allow to show percent of active customers relative to the first period.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../img/tableau/03/w3_retention_rate_calculation.png" class="img-fluid figure-img"></p>
+<figcaption>Retention Rate Calculation</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../img/tableau/03/w3_cohort_initial_view.png" class="img-fluid figure-img"></p>
+<figcaption>Cohort Initial View</figcaption>
+</figure>
+</div>
+<hr>
+<p><strong>Step 7:</strong> Control the View</p>
+<p>In order to show only the blocks with values we should filter the view:</p>
+<ul>
+<li>Drag the calculation of <strong>Retention Rate</strong> from Marks Card to the Data Pane and name it <code>[Retention Rate]</code>.</li>
+<li>Then drag the newly calculated field to the filters shelf, choose <strong>At least</strong> values from <strong>0.01%</strong> and the <strong>0%</strong> values will be filtered.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../img/tableau/03/w3_cohort_final_view.png" class="img-fluid figure-img"></p>
+<figcaption>Cohort Final View</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="example-interpretation" class="level3">
+<h3 class="anchored" data-anchor-id="example-interpretation">Example Interpretation</h3>
+<p>Suppose the <strong>December 2010 cohort</strong> contains customers whose first order happened in January.</p>
+<p>If retention for that cohort is:</p>
+<ul>
+<li>Month 0 = 100%</li>
+<li>Month 1 = 38.19%</li>
+<li>Month 2 = 33.44%</li>
+</ul>
+<p>this means:</p>
+<ul>
+<li>all customers in the cohort purchased in their first month</li>
+<li>38% of them returned and purchased again one month later</li>
+<li>33% of them were still purchasing two months later</li>
+</ul>
+<p>This helps identify whether customer engagement is improving or declining across acquisition periods.</p>
+<hr>
+</section>
+<section id="additional-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="additional-analysis">Additional Analysis</h3>
+<p>Because this dataset also has <strong>Country</strong>, <strong>Stock Code</strong>, and <strong>Description</strong>, we can extend cohort analysis further.</p>
+</section>
+<section id="cohort-by-country" class="level3">
+<h3 class="anchored" data-anchor-id="cohort-by-country">1. Cohort by Country</h3>
+<p>Add <strong>Country</strong> as a filter or detail to compare retention across markets.</p>
+<p>Questions answered:</p>
+<ul>
+<li>Do customers from the United Kingdom retain better than others?</li>
+<li>Which countries have stronger repeat purchasing?</li>
+</ul>
+<hr>
+</section>
+<section id="product-based-cohort-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="product-based-cohort-analysis">2. Product-Based Cohort Analysis</h3>
+<p>We can analyze cohorts of customers based on the first product category they bought.</p>
+<p>Questions answered:</p>
+<ul>
+<li>Do customers who first bought decorative items retain differently from customers who first bought gift items?</li>
+<li>Which first-purchase products lead to stronger repeat behavior?</li>
+</ul>
+<hr>
+</section>
+<section id="revenue-cohorts" class="level3">
+<h3 class="anchored" data-anchor-id="revenue-cohorts">3. Revenue Cohorts</h3>
+<p>Instead of customer retention, focus on monetary value.</p>
+<p>Questions answered:</p>
+<ul>
+<li>Which acquisition month generated the highest long-term revenue?</li>
+<li>Do newer cohorts spend more or less than older ones?</li>
+</ul>
+<hr>
+</section>
+</section>
+</section>
+<section id="section" class="level1">
+<h1></h1>
+
+
 </section>
 
 </main> <!-- /main -->
