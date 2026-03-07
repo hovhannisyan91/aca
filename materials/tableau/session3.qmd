@@ -2205,13 +2205,570 @@ Questions answered:
 - Which acquisition month generated the highest long-term revenue?
 - Do newer cohorts spend more or less than older ones?
 
+## Cleaning and Reshaping Data in 
+
+Before building visualizations or dashboards, data must often be cleaned and reshaped.  
+Real-world datasets rarely arrive in a perfectly structured format suitable for analysis.
+
+Common issues include:
+
+- Missing values
+- Incorrect data types
+- Duplicated records
+- Inconsistent formatting
+- Wide tables that need to be normalized
+- Columns containing multiple values
+
+Cleaning ensures **data accuracy**, while reshaping ensures **data structure fits analytical needs**.
+
+```{mermaid}
+flowchart LR
+A[Raw Data] --> B[Data Cleaning]
+B --> C[Data Reshaping/optional/]
+C --> D[Structured Analytical Dataset]
+D --> E[Visualization & Analysis]
+```
+
 ---
 
+### Data Cleaning in Tableau
+
+Data cleaning focuses on improving **data quality** before performing analysis.
+
+Tableau allows several cleaning operations directly inside the **Data Source page** or through **Calculated Fields**.
+
+---
+
+### Handling Missing Values (NULL Values)
+
+Missing values are one of the most common problems in datasets.  
+NULL values may represent missing records, unavailable information, or incomplete data collection.
+
+Common approaches to handle NULL values include:
+
+- Replace NULL values with a default value
+- Filter out rows containing NULL values
+- Use calculated fields to define fallback values
+
+Example calculation replacing NULL revenue with zero:
+
+```sql
+IFNULL([Revenue],0)
+```
+
+Another common approach:
+
+```sql
+ZN([Revenue])
+```
+
+`ZN()` converts NULL numeric values to **zero**, which is often useful in financial analysis.
+
+---
+
+### Correcting Data Types
+
+Each field in Tableau has a **data type** such as:
+
+- String
+- Number
+- Date
+- Boolean
+- Geographic
+
+Incorrect data types can lead to incorrect aggregations or calculation errors.
+
+Common corrections include:
+
+- Converting strings to numeric values
+- Converting strings to date values
+- Changing dimensions to measures
+
+Example converting a field to a date:
+
+```sql
+DATE([Order Date])
+```
+
+Example converting a string to a number:
+
+```sql
+INT([Customer Age])
+```
+
+Ensuring the correct data type improves calculation accuracy and visualization behavior.
+
+---
+
+### Removing Duplicate Records
+
+Duplicate rows can distort metrics such as totals, averages, or counts.
+
+Instead of counting all records, analysts often count **distinct entities**.
+
+Example:
+
+```sql
+COUNTD([Customer ID])
+```
+
+This ensures that each customer is counted only once.
+
+---
+
+### Splitting Columns
+
+Some datasets contain multiple pieces of information within a **single column**.  
+For proper analysis, it is often necessary to separate these values into multiple fields.
+
+In the **Online Retail dataset**, the `Description` column contains long product names that may include multiple descriptive elements.
+
+Example:
+
+| Description |
+|-------------|
+| SET/4 BADGES CUTE CREATURES |
+| SET/4 SKULL BADGES |
+| FANCY FONT BIRTHDAY CARD |
+
+Sometimes product descriptions may contain structured information such as **category and product name** within a single field.
 
 
+**Steps:**
+
+1. Right-click the column
+2. Select **Split** or **Custom Split**
+3. Choose the delimiter (for example `/` or a space)
+
+After splitting, Tableau automatically creates new columns.
+
+Example result:
+
+| Product Type | Product Name |
+|--------------|--------------|
+| SET | 4 BADGES CUTE CREATURES |
+| SET | 4 SKULL BADGES |
+| FANCY | FONT BIRTHDAY CARD |
+
+Splitting fields improves:
+
+- filtering
+- grouping
+- hierarchical analysis
+- product categorization
+
+---
+
+### Creating Hierarchies
+
+Hierarchies organize fields into **structured levels** that support drill-down analysis.
+
+Example geographic hierarchy:
+
+```{mermaid}
+graph TD
+A[Country] --> B[Customer ID]
+B --> C[Invoice No]
+```
+
+Hierarchies allow:
+
+- Drill-down exploration
+- Structured navigation in dashboards
+- Aggregated views across levels
+- Simplified analysis of large datasets
 
 
+The Online Retail dataset naturally supports a hierarchy such as:
+
+```{mermaid}
+graph TD
+A[Country] --> B[Customer ID]
+B --> C[Invoice No]
+```
+
+Example structure:
+
+| Country | Customer ID | Invoice No |
+|--------|-------------|------------|
+| United Kingdom | 17850 | 541696 |
+| France | 12583 | 541697 |
+
+This hierarchy allows users to:
+
+1. Analyze sales by **Country**
+2. Drill down into **Customers**
+3. Explore specific **Invoices**
+
+**Steps:**
+
+1. Drag one dimension onto another in the **Data Pane**
+2. Tableau creates a hierarchy automatically
+3. Rename the hierarchy if needed
+4. Use the hierarchy in visualizations for **drill-down analysis**
+
+---
+
+### Using Tableau Prep for Advanced Data Preparation
+
+When datasets become more complex, **Tableau Prep** provides a visual workflow for preparing and reshaping data.
+
+Tableau Prep allows:
+
+- Joining multiple datasets
+- Removing duplicates
+- Standardizing values
+- Pivoting and unpivoting columns
+- Aggregating datasets
+- Cleaning inconsistent values
+
+```{mermaid}
+flowchart LR
+A[Raw Sources] --> B[Tableau Prep Flow]
+B --> C[Cleaning Steps]
+C --> D[Reshaped Dataset]
+D --> E[Tableau Visualization]
+```
+
+Prep uses a **visual flow interface**, allowing analysts to inspect transformations step by step before publishing the final dataset.
+
+---
+
+### When Data Cleaning Should Be Done Outside Tableau
+
+Although Tableau supports many data preparation operations, some transformations are better performed upstream.
+
+Typical tools include:
+
+- SQL databases
+- ETL pipelines
+- Python data pipelines
+- Data warehouses
+
+Reasons include:
+
+- Better performance for large datasets
+- Centralized transformation logic
+- Reusable data pipelines
+- Improved data governance
+
+In production environments, Tableau often connects to **pre-cleaned analytical datasets**.
+
+---
+
+### Data Reshaping in Tableau
+
+Data reshaping changes the **structure of a dataset** so that it fits analytical needs.
+
+Many datasets are stored in **wide format**, while Tableau analysis works better with **long format**.
+
+```{mermaid}
+flowchart LR
+A[Wide Data Format] --> B[Pivot Operation]
+B --> C[Long/Tidy Data Format]
+```
+
+---
+
+### Pivoting Data in Tableau
+
+Pivoting is a data reshaping technique used to convert **columns into rows**.  
+This transformation is particularly useful when datasets store similar measures in multiple columns instead of a single column.
+
+Many analytical workflows and visualization tools work better with **long (tidy) data structures**, where:
+
+- one column represents the **type of measure**
+- another column represents the **value of the measure**
+
+```{mermaid}
+flowchart LR
+A[Gold Column]
+B[Silver Column]
+C[Bronze Column]
+
+A --> D[Pivot Operation]
+B --> D
+C --> D
+
+D --> E[Medal Type]
+D --> F[Medal Count]
+```
+
+---
+
+### Example Dataset: Olympic Medals
+
+For this example we use a dataset containing **Olympic medal counts by country and year**.  
+The dataset contains the following columns:
+
+- `Country`
+- `Year`
+- `Season`
+- `Gold`
+- `Silver`
+- `Bronze`
+- `Total Medals`
+
+Structure before pivoting:
+
+![Data Structure]({{< meta image_path >}}/w3_data_structure.png)
+
+In this structure:
+
+- each **medal type is stored in a separate column**
+- this is called a **wide format dataset**
+
+However, comparing medal types dynamically in Tableau becomes easier when the dataset is reshaped.
+
+---
+
+### Pivoting Medal Columns
+
+To reshape the dataset, we pivot the following columns:
+
+- `Gold`
+- `Silver`
+- `Bronze`
+
+### Steps in Tableau
+
+1. Open the dataset in **Tableau**
+2. Navigate to the **Data Source page**
+3. Select the columns:
+
+   - Gold  
+   - Silver  
+   - Bronze  
+
+4. Right-click the selected columns
+5. Choose **Pivot**
+
+Tableau automatically creates two new fields:
+
+- `Pivot Field Names`
+- `Pivot Field Values`
+
+Rename these fields:
+
+| Default Name | New Name |
+|--------------|----------|
+| Pivot Field Names | Medal Type |
+| Pivot Field Values | Medal Count |
 
 
+Dataset after pivoting:
 
-#
+![Pivot]({{< meta image_path >}}/w3_dataset_after_pivoting.png)
+
+---
+
+### Benefits of Pivoting
+
+Pivoting provides several advantages for analysis and visualization:
+
+- Enables comparison of **multiple measures within one chart**
+- Simplifies dataset structure
+- Allows filtering by **measure type**
+- Supports dynamic dashboards and parameter-driven visualizations
+
+Example visualization setup:
+
+| Columns | Rows | Color |
+|--------|------|------|
+| Year | SUM(Medal Count) | Medal Type |
+
+This visualization shows **Gold, Silver, and Bronze medals over time in a single chart**.
+
+---
+
+## #Analytical Questions Enabled by Pivoting
+
+After reshaping the dataset, it becomes easier to answer questions such as:
+
+- How do **Gold, Silver, and Bronze medals change over time**?
+- Which countries win the **most gold medals**?
+- How do medal distributions differ between **Summer and Winter Olympics**?
+- Which countries have the **highest total medal counts** across seasons?
+
+Pivoting therefore helps transform datasets into a structure that is **more flexible for exploration and analysis in Tableau**.
+
+---
+
+### Using Tableau Prep for Advanced Data Preparation
+
+When datasets become more complex, **Tableau Prep** provides a visual workflow for preparing and reshaping data.
+
+Tableau Prep allows:
+
+- Joining multiple datasets
+- Removing duplicates
+- Standardizing values
+- Pivoting and unpivoting columns
+- Aggregating datasets
+- Cleaning inconsistent values
+
+```{mermaid}
+flowchart LR
+A[Raw Sources] --> B[Tableau Prep Flow]
+B --> C[Cleaning Steps]
+C --> D[Reshaped Dataset]
+D --> E[Tableau Visualization]
+```
+
+Prep uses a **visual flow interface**, allowing analysts to inspect transformations step by step before publishing the final dataset.
+
+---
+
+### Tableau Prep vs Tableau Desktop
+
+Both **Tableau Prep** and **Tableau Desktop** support data preparation tasks, but they are designed for different stages of the analytics workflow.
+
+Tableau Desktop is primarily used for **data exploration and visualization**, while Tableau Prep is designed for **building reusable data preparation pipelines**.
+
+---
+
+### When to Use Tableau Desktop
+
+Tableau Desktop is suitable for **simple or analysis-driven data preparation**.
+
+Typical use cases include:
+
+- Creating calculated fields
+- Handling small data cleaning tasks
+- Filtering rows or removing unwanted records
+- Performing quick pivots
+- Adjusting data types
+- Creating hierarchies
+### Using Tableau Prep for Advanced Data Preparation
+
+When datasets become more complex, **Tableau Prep** provides a visual workflow for preparing and reshaping data.
+
+Tableau Prep allows:
+
+- Joining multiple datasets
+- Removing duplicates
+- Standardizing values
+- Pivoting and unpivoting columns
+- Aggregating datasets
+- Cleaning inconsistent values
+
+```{mermaid}
+flowchart LR
+A[Raw Sources] --> B[Tableau Prep Flow]
+B --> C[Cleaning Steps]
+C --> D[Reshaped Dataset]
+D --> E[Tableau Visualization]
+```
+
+Prep uses a **visual flow interface**, allowing analysts to inspect transformations step by step before publishing the final dataset.
+
+---
+
+### Tableau Prep vs Tableau Desktop
+
+Both **Tableau Prep** and **Tableau Desktop** support data preparation tasks, but they are designed for different stages of the analytics workflow.
+
+Tableau Desktop is primarily used for **data exploration and visualization**, while Tableau Prep is designed for **building reusable data preparation pipelines**.
+
+---
+
+### When to Use Tableau Desktop
+
+Tableau Desktop is suitable for **simple or analysis-driven data preparation**.
+
+Typical use cases include:
+
+
+- Creating calculated fields
+- Handling small data cleaning tasks
+- Filtering rows or removing unwanted records
+- Performing quick pivots
+- Adjusting data types
+- Creating hierarchies
+
+Example in the Online Retail dataset:
+
+- Creating a `Revenue` calculation  
+- Extracting `Invoice Month` from `Invoice Date`
+- Filtering rows with negative quantities
+
+In these cases, cleaning happens **inside the workbook** and is closely tied to the analysis.
+
+---
+
+### When to Use Tableau Prep
+
+Tableau Prep is more appropriate for **complex data preparation workflows** or when the prepared dataset needs to be reused across multiple dashboards.
+
+Typical use cases include:
+
+- Combining multiple datasets
+- Cleaning very large datasets
+- Creating standardized datasets for teams
+- Performing complex joins and unions
+- Building repeatable data pipelines
+- Automating data preparation processes
+
+Example workflow with the Online Retail dataset:
+
+- Join retail transactions with **product category tables**
+- Standardize product descriptions
+- Remove duplicate invoices
+- Aggregate monthly revenue tables
+- Export the cleaned dataset for Tableau dashboards
+
+In this case, the data preparation happens **before analysis** and produces a clean dataset ready for visualization.
+
+---
+
+### Summary
+
+| Task Type | Tableau Desktop | Tableau Prep |
+|----------|----------------|--------------|
+| Quick data fixes | ✓ | |
+| Calculated fields | ✓ | |
+| Simple pivots | ✓ | |
+| Complex joins | | ✓ |
+| Large dataset cleaning | | ✓ |
+| Reusable data pipelines | | ✓ |
+
+In practice, analysts often use **both tools together**:
+
+1. **Tableau Prep** to prepare and structure the dataset  
+2. **Tableau Desktop** to explore, analyze, and visualize the data
+
+---
+
+### When Data Cleaning Should Be Done Outside Tableau
+
+Although Tableau supports many data preparation operations, some transformations are better performed upstream.
+
+Typical tools include:
+
+
+- SQL databases
+- ETL pipelines
+- Python data pipelines
+- Data warehouses
+
+Reasons include:
+
+- Better performance for large datasets
+- Centralized transformation logic
+- Reusable data pipelines
+- Improved data governance
+
+In production environments, Tableau often connects to **pre-cleaned analytical datasets**.
+
+---
+
+### Best Practices for Data Cleaning and Reshaping
+
+- Inspect datasets before building visualizations
+- Verify data types and formats
+- Handle NULL values explicitly
+- Convert wide datasets into tidy structures when needed
+- Document data transformations
+
+Properly cleaned and reshaped data leads to **more reliable analysis and better-performing dashboards**.
+
