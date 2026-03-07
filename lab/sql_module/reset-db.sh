@@ -8,8 +8,6 @@ docker compose down -v
 echo "Removing Postgres data directory..."
 rm -rf ./postgres_data
 
-echo "Removing Postgres data directory..."
-rm -rf ./pgadmin_data
 
 echo "Starting containers..."
 docker compose up --build
