@@ -129,8 +129,10 @@ df_aisles.head()
 
 ```{python}
 #| echo: false
-df_products = pd.read_csv("../../lab/python/data/raw/aisles.csv")
-df_products.head()
+df_aisles = pd.read_csv("../../lab/python/data/raw/aisles.csv")
+print(df_aisles.columns)
+print(df_aisles.shape)
+df_aisles.head()
 ```
 
 
@@ -555,6 +557,1387 @@ At this stage, we understand the `orders` table both structurally and analytical
 - It introduces the important `eval_set` variable
 - It provides a good example of meaningful null values
 - It allows us to prepare the correct subset before merging with the train basket table
+
+
+## Exploring the `order_products_train` Table
+
+We now move to the `order_products_train` table. Unlike `orders`, this is not an order-level table. Instead, it is a **transaction bridge** table that connects orders to products.
+
+Each row in this table represents **one product inside one order**.
+
+### Previewing the data
+
+```{python}
+df_orders_products_train.head()
+```
+
+**The output helps us answer two important structural questions:**
+ 
+- What does one row represent in this table?
+- Which columns help us connect orders to products?
+
+### Inspecting the schema
+
+A very important step in Pandas is checking the schema of the table. This helps us understand the data types and whether missing values are present.
+
+```{python}
+df_orders_products_train.info()
+```
+
+### Looking at data types
+
+Each column has a specific role, and its data type should match its meaning.
+
+```{python}
+df_orders_products_train.dtypes
+```
+
+### Descriptive statistics
+
+For numeric columns, descriptive statistics provide a first summary of the data.
+
+```{python}
+df_orders_products_train.describe()
+```
+
+**This is useful for checking the ranges of variables such as:**
+
+ 
+- `order_id`
+- `product_id`
+- `add_to_cart_order`
+- `reordered`
+
+### Missing values
+
+Missing values should always be checked before moving to deeper analysis.
+
+```{python}
+df_orders_products_train.isna().sum()
+```
+
+::: {.callout-tip}
+This is an especially important table because it will later be used for merging. If key columns such as `order_id` or `product_id` have missing values, the merge process may produce incomplete results.
+:::
+
+### Analytical questions that can be answered from `order_products_train`
+
+**Even without merging, the `order_products_train` table already allows us to answer several useful analytical questions.**
+
+ 
+- How many line items are there in total?
+- How many unique orders are represented?
+- How many unique products are represented?
+- What is the distribution of `reordered`?
+- What does `add_to_cart_order` tell us about basket construction?
+- Are there any suspicious or inconsistent values?
+
+### Q1: How many line items exist?
+
+```{python}
+len(df_orders_products_train)
+```
+
+### Q2: How many unique orders are represented in this table?
+
+```{python}
+df_orders_products_train["order_id"].nunique()
+```
+
+### Q3: How many unique products are represented in this table?
+
+```{python}
+df_orders_products_train["product_id"].nunique()
+```
+
+### Q4: Exploring reorder behavior
+
+The `reordered` variable is analytically important because it helps us understand repeated purchase behavior.
+
+**This helps us understand how the product rows are split into:**
+
+```{python}
+df_orders_products_train["reordered"].value_counts(dropna=False)
+```
+
+>Later, after merging with `products`, `departments_t`, and `aisles`, we will be able to see which products and categories have the highest reorder tendency.
+
+### Q5: Reorder share
+
+Instead of only counts, we can also look at proportions.
+
+```{python}
+df_orders_products_train["reordered"].value_counts(normalize=True)
+```
+
+>**A useful analytical question here is:** What share of line items in train orders corresponds to reordered products?
+
+### Q6: Understanding `add_to_cart_order`
+
+This variable tells us the sequence in which a product was added to the cart.
+
+```{python}
+df_orders_products_train["add_to_cart_order"].describe()
+```
+
+**This allows us to ask:**
+
+ 
+- Are most products added early in the basket-building process?
+- How large do baskets tend to become?
+
+### Q7: Which cart positions appear most often?
+
+```{python}
+df_orders_products_train["add_to_cart_order"].value_counts().sort_index().head(20)
+```
+
+>Later, after merging, we may ask whether some products or departments tend to be added earlier than others.
+
+### Understanding repeated keys in the table
+
+This table behaves differently from `orders`.
+
+```{python}
+df_orders_products_train["order_id"].is_unique
+```
+
+```{python}
+df_orders_products_train["product_id"].is_unique
+```
+
+If these results are `False`, that is expected.
+
+::: {.callout-caution}
+**This is an important analytical lesson:**
+
+- `order_id` is expected to repeat because one order can contain many products
+- `product_id` is expected to repeat because the same product can appear in many different orders
+- repeated keys are not always an error; sometimes they reflect the grain of the table
+:::
+
+### Consistency checks for the `order_products_train` table
+
+Before using a table in deeper analysis, it is good practice to perform a few basic consistency checks.
+
+#### Is `reordered` limited to valid values?
+
+The `reordered` column should logically contain only `0` and `1`.
+
+```{python}
+df_orders_products_train["reordered"].isin([0, 1]).all()
+```
+
+#### Is `add_to_cart_order` positive?
+
+Since this variable captures position in the basket, it should be greater than `0`.
+
+```{python}
+(df_orders_products_train["add_to_cart_order"] > 0).all()
+```
+
+#### Are there missing values in the key columns?
+
+```{python}
+df_orders_products_train[["order_id", "product_id"]].isna().sum()
+```
+
+::: {.callout-warning}
+These checks are simple, but they are important. They help us confirm that the table behaves as expected before we move on.
+:::
+
+### Why this table matters for merging
+
+This table is the bridge between `orders` and `products`.
+
+- `order_id` will connect this table to `orders_train`
+- `product_id` will connect this table to `products`
+- after merging, we will be able to connect customer order behavior with product attributes
+
+Without this table, we would know **when** orders happened and **what** products exist, but not **which products were purchased in which orders**.
+
+### Summary of the `order_products_train` table
+
+At this stage, we understand the `order_products_train` table both structurally and analytically.
+
+- It is a transaction bridge table with one row per product within an order
+- It connects orders to products
+- It helps us study basket composition and reorder behavior
+- It introduces repeated keys as a natural property of line-item data
+- It prepares the foundation for the merge process
+
+## Exploring the `products` Table
+
+We now move to the `products` table. Unlike `orders` and `order_products_train`, this is a **master data** table.
+
+Each row in this table represents **one product**.
+
+### Previewing the data
+
+```{python}
+df_products.head()
+```
+
+**The output helps us answer two important structural questions:**
+ 
+- What attributes are available for each product?
+- Which columns will later help us enrich the transaction data?
+
+### Inspecting the schema
+
+A very important step in Pandas is checking the schema of the table. This helps us understand the data types and whether missing values are present.
+
+```{python}
+df_products.info()
+```
+
+### Looking at data types
+
+Each column has a specific role, and its data type should match its meaning.
+
+```{python}
+df_products.dtypes
+```
+
+### Descriptive statistics
+
+For numeric columns, descriptive statistics provide a first summary of the data.
+
+```{python}
+df_products.describe()
+```
+
+**This is useful for checking the ranges of variables such as:**
+
+ 
+- `product_id`
+- `aisle_id`
+- `department_id`
+
+### Missing values
+
+Missing values should always be checked before moving to deeper analysis.
+
+```{python}
+df_products.isna().sum()
+```
+
+::: {.callout-tip}
+This table is especially important because it provides product attributes that will later be attached to the transaction data. Missing values in `aisle_id` or `department_id` could weaken the interpretation of merged results.
+:::
+
+### Analytical questions that can be answered from `products`
+
+**Even without merging, the `products` table already allows us to answer several useful analytical questions.**
+
+ 
+- How many products are there in total?
+- Are product IDs unique?
+- How many aisles and departments are represented?
+- Do product names repeat?
+- Is the product catalog evenly distributed across categories?
+
+### Q1: How many unique products exist?
+
+```{python}
+df_products["product_id"].nunique()
+```
+
+### Q2: Are product IDs unique?
+
+```{python}
+df_products["product_id"].is_unique
+```
+
+### Q3: How many unique departments are referenced in the product table?
+
+```{python}
+df_products["department_id"].nunique()
+```
+
+### Q4: How many unique aisles are referenced in the product table?
+
+```{python}
+df_products["aisle_id"].nunique()
+```
+
+### Q5: Do some product names repeat?
+
+```{python}
+df_products["product_name"].duplicated().sum()
+```
+
+>Later, after merging with lookup tables, we will be able to interpret department and aisle information in business language instead of numeric IDs.
+
+### Understanding the role of `department_id` and `aisle_id`
+
+The `products` table does not contain department names or aisle names directly. Instead, it contains numeric keys.
+
+```{python}
+df_products[["product_id", "product_name", "aisle_id", "department_id"]].head()
+```
+
+This means:
+
+ 
+- `department_id` will later connect to `departments_t`
+- `aisle_id` will later connect to `aisles`
+
+### Consistency checks for the `products` table
+
+Before using a table in deeper analysis, it is good practice to perform a few basic consistency checks.
+
+#### Are `product_id` values unique?
+
+```{python}
+df_products["product_id"].is_unique
+```
+
+#### Are `department_id` values missing?
+
+```{python}
+df_products["department_id"].isna().sum()
+```
+
+#### Are `aisle_id` values missing?
+
+```{python}
+df_products["aisle_id"].isna().sum()
+```
+
+::: {.callout-warning}
+These checks are simple, but they are important. They help us confirm that the table behaves as expected before we move on.
+:::
+
+### Why this table matters for merging
+
+This table gives business meaning to the `product_id` values in the transaction table.
+
+- it introduces product names
+- it connects products to aisles
+- it connects products to departments
+- it will later help us move from product IDs to interpretable categories
+
+### Summary of the `products` table
+
+At this stage, we understand the `products` table both structurally and analytically.
+
+- It is a master data table with one row per product
+- It provides product names and categorical keys
+- It prepares the foundation for enrichment through lookup tables
+- It will later help us interpret transaction data more meaningfully
+
+## Exploring the `departments_t` Table
+
+We now move to the `departments_t` table. This is a **lookup** table.
+
+Each row in this table represents **one department**.
+
+### Previewing the data
+
+```{python}
+df_departments.head()
+```
+
+**The output helps us answer two important structural questions:**
+ 
+- How many departments are there?
+- What labels will later be used to interpret `department_id` values?
+
+### Inspecting the schema
+
+A very important step in Pandas is checking the schema of the table. This helps us understand the data types and whether missing values are present.
+
+```{python}
+df_departments.info()
+```
+
+### Looking at data types
+
+Each column has a specific role, and its data type should match its meaning.
+
+```{python}
+df_departments.dtypes
+```
+
+### Missing values
+
+Missing values should always be checked before moving to deeper analysis.
+
+```{python}
+df_departments.isna().sum()
+```
+
+### Analytical questions that can be answered from `departments_t`
+
+**Even without merging, the `departments_t` table already allows us to answer several useful analytical questions.**
+
+ 
+- How many departments exist?
+- Are department IDs unique?
+- Are there any missing department labels?
+
+### Q1: How many departments exist?
+
+```{python}
+df_departments["department"].nunique()
+```
+
+### Q2: Are `department_id` values unique?
+
+```{python}
+df_departments["department_id"].is_unique
+```
+
+### Q3: Are there missing values in the table?
+
+```{python}
+df_departments.isna().sum()
+```
+
+### Why this table matters for merging
+
+This is a small table, but it is analytically important.
+
+- it translates `department_id` into a readable department name
+- it makes the final merged dataset interpretable
+- without it, we would only see numeric department codes
+
+### Summary of the `departments_t` table
+
+At this stage, we understand the `departments_t` table both structurally and analytically.
+
+- It is a lookup table with one row per department
+- It provides readable department names
+- It will later enrich the `products` table
+
+## Exploring the `aisles` Table
+
+We now move to the `aisles` table. Like `departments_t`, this is also a **lookup** table.
+
+Each row in this table represents **one aisle**.
+
+### Previewing the data
+
+```{python}
+df_aisles.head()
+```
+
+**The output helps us answer two important structural questions:**
+ 
+- How many aisles are there?
+- What labels will later be used to interpret `aisle_id` values?
+
+### Inspecting the schema
+
+A very important step in Pandas is checking the schema of the table. This helps us understand the data types and whether missing values are present.
+
+```{python}
+df_aisles.info()
+```
+
+### Looking at data types
+
+Each column has a specific role, and its data type should match its meaning.
+
+```{python}
+df_aisles.dtypes
+```
+
+### Missing values
+
+Missing values should always be checked before moving to deeper analysis.
+
+```{python}
+df_aisles.isna().sum()
+```
+
+### Analytical questions that can be answered from `aisles`
+
+**Even without merging, the `aisles` table already allows us to answer several useful analytical questions.**
+
+ 
+- How many aisles exist?
+- Are aisle IDs unique?
+- Are there any missing aisle labels?
+
+### Q1: How many aisles exist?
+
+```{python}
+df_aisles["aisle"].nunique()
+```
+
+### Q2: Are `aisle_id` values unique?
+
+```{python}
+df_aisles["aisle_id"].is_unique
+```
+
+### Q3: Are there missing values in the table?
+
+```{python}
+df_aisles.isna().sum()
+```
+
+### Why this table matters for merging
+
+This is also a small table, but it is analytically important.
+
+- it translates `aisle_id` into a readable aisle name
+- it provides a more detailed grouping level than department
+- it will later enrich the `products` table and make category-level analysis more informative
+
+### Summary of the `aisles` table
+
+At this stage, we understand the `aisles` table both structurally and analytically.
+
+- It is a lookup table with one row per aisle
+- It provides readable aisle names
+- It will later enrich the `products` table
+
+## Summary Before Merging
+
+At this stage, we have explored all tables individually.
+
+- `orders` is a behavioral table with one row per order
+- `order_products_train` is a transaction bridge table with one row per product within an order
+- `products` is a master table with one row per product
+- `departments_t` is a lookup table for department names
+- `aisles` is a lookup table for aisle names
+
+
+
+## Understanding `pd.merge()`
+
+Until now, we explored each table independently. That was an important first step because good analytical work starts with understanding the structure, meaning, and limitations of each table before combining them.
+
+Now we move to the next stage: **merging tables**.
+
+In relational data, different pieces of information are stored in different tables.
+
+ 
+- `orders` tells us about order behavior
+- `order_products_train` tells us which products were included in each order
+- `products` gives product attributes
+- `departments_t` and `aisles` translate category IDs into readable labels
+
+If we want to answer **richer analytical questions**, we need to connect these tables.
+
+In Pandas, the main tool for this is `pd.merge()`.
+
+### SQL and Pandas Connection
+
+If you already know SQL, the logic of `pd.merge()` should feel familiar.
+
+| SQL Concept | Pandas Equivalent |
+|---|---|
+| `JOIN` | `pd.merge()` |
+| `ON` | `on=` |
+| `LEFT JOIN` | `how="left"` |
+| `INNER JOIN` | `how="inner"` |
+| `RIGHT JOIN` | `how="right"` |
+| `FULL OUTER JOIN` | `how="outer"` |
+
+**The core idea is the same:**
+
+ 
+- identify a shared key
+- decide which rows you want to keep
+- combine the matching columns
+
+### General Structure of `pd.merge()`
+
+**The general syntax is:**
+
+```python
+pd.merge(left_df, right_df, on="key_column", how="left")
+```
+
+**The most important arguments are:**
+
+ 
+- `left_df`: the DataFrame on the left side of the merge
+- `right_df`: the DataFrame on the right side of the merge
+- `on`: the column used as the matching key
+- `how`: the type of join
+- `indicator`: adds a special column showing where each row came from
+
+### Visual Idea of a Merge
+
+A merge can be imagined as matching rows based on shared IDs.
+
+```{mermaid}
+flowchart LR
+    A[Left Table] --> C[Shared Key]
+    B[Right Table] --> C
+    C --> D[Merged Result]
+```
+
+**This looks simple, but analytically it is very important because:**
+
+ 
+- if the key is wrong, the result is wrong
+- if keys are duplicated unexpectedly, rows may multiply
+- if matches are missing, null values may appear
+
+>That is why merging should always be followed by validation.
+
+### Simple Merge
+
+Before merging the large transactional tables, it is better to start with a simpler and safer example.
+
+**The cleanest first step is:**
+
+- merge `products` with `departments_t`
+- merge that result with `aisles`
+
+This lets us enrich product information first.
+
+### Merge: `products` with `departments_t`
+
+The `products` table contains `department_id`, but it does not contain the actual department name.
+
+If we want readable categories, we need to merge it with `departments_t`.
+
+### Visual view of the first merge
+
+```{mermaid}
+flowchart LR
+    A[products] -->|department_id| C[merge]
+    B[departments_t] -->|department_id| C
+    C --> D[products + department]
+```
+
+### Performing the merge
+
+```{python}
+df_products_departments = pd.merge(
+    df_products,
+    df_departments,
+    on="department_id",
+    how="left"
+)
+
+df_products_departments.head()
+```
+
+### Why do we use `how="left"` here?
+
+We use a **left join** because we want to keep all rows from `df_products`.
+
+**That means:**
+ 
+- every product should remain in the result
+- department information will be added where a match exists
+- if a match is missing, Pandas will keep the product row and place `NaN` in the department column
+
+This is usually the safest merge for analytical enrichment.
+
+## Understanding the `indicator` Argument
+
+One of the most useful but underused options in `pd.merge()` is the `indicator` argument.
+
+When we set `indicator=True`, Pandas adds a new column called `_merge` that tells us where each row came from.
+
+```{python}
+df_products_departments_check = pd.merge(
+    df_products,
+    df_departments,
+    on="department_id",
+    how="left",
+    indicator=True
+)
+
+df_products_departments_check.head()
+```
+
+### What does `_merge` mean?
+
+The `_merge` column can contain three values:
+
+| `_merge` value | Meaning |
+|---|---|
+| `left_only` | row appears only in the left table |
+| `right_only` | row appears only in the right table |
+| `both` | row matched in both tables |
+
+This is extremely helpful for checking merge quality.
+
+### Visual explanation of `indicator=True`
+
+```{mermaid}
+flowchart LR
+    A[Left table row] --> D[_merge = left_only]
+    B[Right table row] --> E[_merge = right_only]
+    C[Matched row] --> F[_merge = both]
+```
+
+### Looking at the indicator results
+
+```{python}
+df_products_departments_check["_merge"].value_counts()
+```
+
+### Why is this useful?
+
+This tells us whether the merge behaved as expected.
+
+**For example:**
+ 
+- if all rows are `both`, then every product found a matching department
+- if some rows are `left_only`, then some products have department IDs that do not exist in `departments_t`
+- if we ever see `right_only` in a left join result, that would be unusual in the displayed merged result because left joins retain left rows; however, the right-side categories may still appear through other join types or different validation setups
+
+::: {.callout-important}
+The `indicator` argument is especially useful for **data quality checks** and **referential integrity checks**.
+:::
+
+### Investigating unmatched rows
+
+If the merge indicator shows `left_only`, we should inspect those rows.
+
+```{python}
+df_products_departments_check[
+    df_products_departments_check["_merge"] == "left_only"
+].head()
+```
+
+This helps us identify whether some `department_id` values in `products` are missing from the lookup table.
+
+### Cleaning the indicator result
+
+Once we finish checking the merge, we usually drop the `_merge` column or rerun the merge without `indicator=True`.
+
+```{python}
+df_products_departments = pd.merge(
+    df_products,
+    df_departments,
+    on="department_id",
+    how="left"
+)
+
+df_products_departments.head()
+```
+
+
+
+## Homework P1: Questions unlocked after the first merge
+
+After this merge, we can ask more meaningful questions.
+
+Before the merge, we only had numeric `department_id` values.
+
+**Now we can ask:**
+
+ 
+- How many products belong to each department?
+- Which departments contain the most products?
+- Are products concentrated in a small number of departments?
+
+
+### Example: number of products by department
+
+```{python}
+df_products_departments["department"].value_counts()
+```
+
+## Adding `aisles`
+
+Now we enrich the product table further.
+
+The `products` table also contains `aisle_id`, but not the aisle name itself. So we merge with `aisles`.
+
+### Visual view of the second merge
+
+```{mermaid}
+flowchart LR
+    A[products + department] -->|aisle_id| C[merge]
+    B[aisles] -->|aisle_id| C
+    C --> D[products enriched]
+```
+
+### Performing the second merge
+
+```{python}
+df_products_enriched = pd.merge(
+    df_products_departments,
+    df_aisles,
+    on="aisle_id",
+    how="left"
+)
+
+df_products_enriched.head()
+```
+
+### Checking the second merge with `indicator=True`
+
+```{python}
+df_products_aisles_check = pd.merge(
+    df_products_departments,
+    df_aisles,
+    on="aisle_id",
+    how="left",
+    indicator=True
+)
+
+df_products_aisles_check["_merge"].value_counts()
+```
+
+### Investigating unmatched aisle rows
+
+```{python}
+df_products_aisles_check[
+    df_products_aisles_check["_merge"] == "left_only"
+].head()
+```
+
+### What do we have after these two merges?
+
+At this stage, we have created an enriched product table.
+
+**Each product now includes:**
+
+ 
+- `product_name`
+- `department`
+- `aisle`
+
+This is much better for analysis than working only with IDs.
+
+### Why validate row counts after a merge?
+
+One very important habit is checking whether the number of rows changed unexpectedly.
+
+If `departments_t` has one row per department, and each product has only one department, then merging products with departments should usually keep the same number of rows.
+
+### Checking row counts
+
+```{python}
+print(df_products.shape)
+print(df_products_departments.shape)
+print(df_products_enriched.shape)
+```
+
+If the number of rows increases unexpectedly, that may indicate duplicated keys in the lookup table.
+
+## Checking uniqueness in lookup tables before merging
+
+This is why uniqueness checks matter.
+
+```{python}
+df_departments["department_id"].is_unique
+```
+
+```{python}
+df_aisles["aisle_id"].is_unique
+```
+
+If these are `False`, a merge can create duplicated rows in the result.
+
+## Homework P2: Questions unlocked after enriching products
+
+After merging `products`, `departments_t`, and `aisles`, we can answer questions such as:
+
+ 
+- How many products belong to each department?
+- How many products belong to each aisle?
+- Which aisles are most populated?
+- Which departments span the widest variety of products?
+- How are departments and aisles related?
+
+### Example: products by aisle
+
+```{python}
+df_products_enriched["aisle"].value_counts().head(10)
+```
+
+### Example: cross-tab of departments and aisles
+
+```{python}
+pd.crosstab(
+    df_products_enriched["department"],
+    df_products_enriched["aisle"]
+)
+```
+
+
+
+## Merge types in brief
+
+Although we mainly use `left` joins in this session, it is good to understand the common merge types.
+
+### Inner join
+
+Keeps only rows that match in both tables.
+
+```{python}
+pd.merge(
+    df_products,
+    df_departments,
+    on="department_id",
+    how="inner"
+).head()
+```
+
+### Left join
+
+Keeps all rows from the left table.
+
+```{python}
+pd.merge(
+    df_products,
+    df_departments,
+    on="department_id",
+    how="left"
+).head()
+```
+
+### Outer join
+
+Keeps all rows from both tables.
+
+```{python}
+pd.merge(
+    df_products,
+    df_departments,
+    on="department_id",
+    how="outer",
+    indicator=True
+).head()
+```
+
+### Why `indicator` is especially useful with outer joins
+
+The `indicator` column becomes even more informative in an outer join because all three categories are easier to observe:
+
+ 
+- rows found only in the left table
+- rows found only in the right table
+- rows found in both tables
+
+This makes outer joins useful for diagnostics, even if they are not always the final analytical choice.
+
+### Visual summary of the product enrichment process
+
+```{mermaid}
+flowchart LR
+    A[products] -->|department_id| B[products + departments]
+    B -->|aisle_id| C[products enriched]
+    D[departments_t] --> B
+    E[aisles] --> C
+```
+
+
+## Pandas merge versus SQL join
+
+If you already know SQL, you may notice an important difference.
+
+In SQL, we can join many tables inside a single query. In Pandas, however, `pd.merge()` works with only **two DataFrames at a time**.
+
+This means that when we need to combine several tables, we must do it step by step:
+
+ 
+- merge two DataFrames first
+- store the result in a new DataFrame
+- merge that result with the next DataFrame
+- continue until the final analytical table is built
+
+>This approach is not only a limitation. It is also useful, because it makes the merge process easier to understand, validate, and debug.
+
+## Continuing the Merge Process
+
+**At this point, we already created an enriched product table by combining:**
+
+
+- `products`
+- `departments_t`
+- `aisles`
+
+Now we move to the behavioral side of the data.
+
+The next goal is to connect:
+
+ 
+`orders_train` $\rightarrow$ `order_products_train`
+
+This is the step that links **order behavior** to **basket contents**.
+
+### Why do we need this merge?
+
+
+ 
+- `df_orders_train` tells us **when** an order happened and **which user** placed it
+- `df_orders_products_train` tells us **which products** were included in the order
+
+Separately, each table is useful. But once we merge them, we can start answering richer analytical questions such as:
+
+ 
+- How many items are there in each order?
+- Do some days tend to have larger baskets?
+- At what hour do larger baskets appear?
+- Does reorder behavior vary by order timing?
+
+### Visual view of the merge
+
+```{mermaid}
+flowchart LR
+    A[orders_train] -->|order_id| C[merge]
+    B[order_products_train] -->|order_id| C
+    C --> D[train_transactions]
+```
+
+### Performing the merge
+
+We merge the filtered order table with the transaction bridge table using `order_id`.
+
+```{python}
+df_train_transactions = pd.merge(
+    df_orders_train,
+    df_orders_products_train,
+    on="order_id",
+    how="left"
+)
+
+df_train_transactions.head()
+```
+
+### Why do we use `how="left"` here?
+
+We use a **left join** because we want to keep all rows from `df_orders_train`.
+
+**That means:**
+
+ 
+- every train order should remain in the result
+- transaction rows will be added where a match exists
+- if an order has no matching line items, the product-related columns will become `NaN`
+
+This is analytically useful because it helps us preserve the order-level structure and inspect missing matches if they exist.
+
+### Checking the merge with `indicator=True`
+
+As before, it is a good idea to validate the merge using the `indicator` argument.
+
+```{python}
+df_train_transactions_check = pd.merge(
+    df_orders_train,
+    df_orders_products_train,
+    on="order_id",
+    how="left",
+    indicator=True
+)
+
+df_train_transactions_check.head()
+```
+
+### Inspecting the `_merge` column
+
+```{python}
+df_train_transactions_check["_merge"].value_counts()
+```
+
+### How do we interpret the result?
+
+The `_merge` column tells us whether each row came from:
+
+ 
+- only the left table
+- only the right table
+- both tables
+
+**In this case:**
+
+
+- `both` means the order from `orders_train` found matching product rows in `order_products_train`
+- `left_only` means the order exists in `orders_train` but did not find matching rows in `order_products_train`
+
+For a left join, this is a very important diagnostic check.
+
+### Looking at unmatched orders
+
+If any rows are marked as `left_only`, we should inspect them.
+
+```{python}
+df_train_transactions_check[
+    df_train_transactions_check["_merge"] == "left_only"
+].head()
+```
+
+This allows us to investigate whether some train orders are missing from the transaction table.
+
+### Why can the number of rows increase after this merge?
+
+**This is a very important point.**
+
+When we merged `products` with `departments_t`, the number of rows was expected to stay the same.
+
+But here the logic is different.
+
+Each order can contain many products, so when we merge `orders_train` with `order_products_train`, the number of rows can increase.
+
+This is not an error. It is expected because:
+
+ 
+- `orders_train` has one row per order
+- `order_products_train` has one row per product within an order
+
+So after the merge, the resulting table has one row per **order-product combination**.
+
+### Visual explanation of row expansion
+
+```{mermaid}
+flowchart TD
+    A[One row in orders_train] --> B[Product 1]
+    A --> C[Product 2]
+    A --> D[Product 3]
+    B --> E[Three rows in merged table]
+    C --> E
+    D --> E
+```
+
+This is one of the most important conceptual differences between different merge scenarios.
+
+### Checking the row counts
+
+```{python}
+print(df_orders_train.shape)
+print(df_orders_products_train.shape)
+print(df_train_transactions.shape)
+```
+
+This helps us confirm that the merged table has the expected order-product level of detail.
+
+### What columns do we now have?
+
+```{python}
+df_train_transactions.columns
+```
+
+**After this merge, we have both:**
+
+- order-level variables such as `user_id`, `order_dow`, and `order_hour_of_day`
+- transaction-level variables such as `product_id`, `add_to_cart_order`, and `reordered`
+
+This is already a much more useful analytical table.
+
+## Homework P3: Questions unlocked after this merge
+
+**After merging `orders_train` with `order_products_train`, we can now answer questions such as:**
+
+ 
+- How many products are included in each order?
+- What is the typical basket size?
+- Are larger baskets more common on specific days?
+- Are reordered items more common at certain times of day?
+- Does basket construction differ across customer order sequence?
+
+### Example: basket size by order
+
+If each row now represents one product within an order, then counting rows per `order_id` gives us basket size.
+
+```{python}
+df_train_transactions.groupby("order_id").size().head()
+```
+
+### Example: descriptive summary of basket size
+
+```{python}
+df_train_transactions.groupby("order_id").size().describe()
+```
+
+This helps us understand the distribution of how many items customers place in their baskets.
+
+### Example: average basket size by day of week
+
+```{python}
+df_train_transactions.groupby("order_dow").size() / df_train_transactions["order_id"].nunique()
+```
+
+**The expression above is only a quick exploratory step. A more careful calculation groups at the order level first and then averages by day.**
+
+```{python}
+basket_size_by_order = (
+    df_train_transactions
+    .groupby(["order_id", "order_dow"])
+    .size()
+    .reset_index(name="basket_size")
+)
+
+basket_size_by_order.groupby("order_dow")["basket_size"].mean()
+```
+
+### Example: reorder behavior by hour of day
+
+```{python}
+df_train_transactions.groupby("order_hour_of_day")["reordered"].mean()
+```
+
+This allows us to explore whether reordered items are more common at certain times.
+
+
+
+### Are there missing `product_id` values after the merge?
+
+```{python}
+df_train_transactions["product_id"].isna().sum()
+```
+
+### Are there missing `user_id` values after the merge?
+
+```{python}
+df_train_transactions["user_id"].isna().sum()
+```
+
+### Does every row now represent an order-product combination?
+
+A quick way to inspect this is to look at repeated `order_id` values.
+
+```{python}
+df_train_transactions["order_id"].value_counts().head()
+```
+
+This confirms that orders now appear multiple times, which is exactly what we expect in a line-item-level merged table.
+
+::: {.callout-warning}
+After a merge, always check both the **row count** and the **missing values** in newly attached columns.
+
+A merge may run without errors and still produce incomplete or misleading analytical results.
+:::
+
+## From transactional table to analytical table
+
+**At this stage, we have created a transactional table that combines:**
+
+- order behavior
+- basket contents
+
+However, `product_id` is still only a numeric identifier. To make the table fully interpretable, we need one final merge.
+
+**We now attach the enriched product table.**
+
+The last step is to merge `df_train_transactions` with `df_products_enriched`.
+
+```{mermaid}
+flowchart LR
+    A[train_transactions] -->|product_id| C[merge]
+    B[products_enriched] -->|product_id| C
+    C --> D[train_analytic]
+```
+
+```{python}
+df_train_analytic = pd.merge(
+    df_train_transactions,
+    df_products_enriched,
+    on="product_id",
+    how="left"
+)
+
+df_train_analytic.head()
+```
+
+### Checking the final merge with `indicator=True`
+
+```{python}
+df_train_analytic_check = pd.merge(
+    df_train_transactions,
+    df_products_enriched,
+    on="product_id",
+    how="left",
+    indicator=True
+)
+
+df_train_analytic_check["_merge"].value_counts()
+```
+
+### Investigating unmatched product rows
+
+```{python}
+df_train_analytic_check[
+    df_train_analytic_check["_merge"] == "left_only"
+].head()
+```
+
+If such rows exist, then some `product_id` values in the transaction table do not have a match in the enriched product table.
+
+### What do we gain from the final merge?
+
+At this stage, the table becomes fully analysis-ready.
+
+**Each row now includes:**
+
+- order-level behavior
+- transaction-level basket information
+- product name
+- department name
+- aisle name
+
+This means we can finally move from numeric IDs to interpretable business categories.
+
+## Homework P4  Questions unlocked after the final merge
+
+After building the full analytical table, we can answer much richer questions such as:
+
+ 
+- Which products are purchased most often?
+- Which departments dominate train orders?
+- Which aisles dominate train orders?
+- Which departments have the highest reorder rates?
+- Which aisles appear most often in large baskets?
+- At what times are certain departments purchased more frequently?
+
+### Example: most frequently purchased products
+
+```{python}
+df_train_analytic["product_name"].value_counts().head(10)
+```
+
+### Example: most frequently purchased departments
+
+```{python}
+df_train_analytic["department"].value_counts()
+```
+
+### Example: reorder rate by department
+
+```{python}
+df_train_analytic.groupby("department")["reordered"].mean().sort_values(ascending=False)
+```
+
+### Example: cross-tab of department and reordered flag
+
+```{python}
+pd.crosstab(
+    df_train_analytic["department"],
+    df_train_analytic["reordered"]
+)
+```
+
+### Example: cross-tab of order day and reordered flag
+
+```{python}
+pd.crosstab(
+    df_train_analytic["order_dow"],
+    df_train_analytic["reordered"],
+    normalize="index"
+)
+```
+
+### Visual summary of the full merge pipeline
+
+```{mermaid}
+flowchart LR
+    A[products] -->|department_id| B[products + departments]
+    B -->|aisle_id| C[products_enriched]
+    D[departments_t] --> B
+    E[aisles] --> C
+    F[orders_train] -->|order_id| G[train_transactions]
+    H[order_products_train] -->|order_id| G
+    G -->|product_id| I[train_analytic]
+    C -->|product_id| I
+```
+
+
+
 
 
 ## Pandas Cheatsheet
