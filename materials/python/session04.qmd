@@ -1877,7 +1877,6 @@ This means we can finally move from numeric IDs to interpretable business catego
 ## Homework P4  Questions unlocked after the final merge
 
 After building the full analytical table, we can answer much richer questions such as:
-
  
 - Which products are purchased most often?
 - Which departments dominate train orders?
@@ -1935,6 +1934,104 @@ flowchart LR
     H[order_products_train] -->|order_id| G
     G -->|product_id| I[train_analytic]
     C -->|product_id| I
+```
+
+## Homework | Solution
+
+
+### Step 1 | Downlaoding the Data
+
+In order to have the final version of the dataframe and contintue the main analytical tasks, we need to also merge `customers` and `states` dimensions.
+
+
+
+```{python}
+data = ['customers.csv', 'states.csv']
+
+URL = 'https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/python/data/raw/'
+
+ldf = []
+for i in data: 
+    df = pd.read_csv(URL+i)
+    # քանի որ ցանկանում ենք նաև միացնել տվյալները մենք կարող ենք դա անել միանգամից՝ նախ սկզբում պահելով այն լիստի մեջ
+    ldf.append(df)
+```
+
+
+```{python}
+df_customers = ldf[0]
+df_states = ldf[1]
+```
+
+
+### Step 2 | Exploring the Dataframes
+
+#### `customers`
+
+```{python}
+df_customers.head()
+```
+
+#### `states`
+
+```{.python}
+df_states.head()
+```
+
+
+### Step 3 | Merging `customers` with `states`
+
+::: {.callout-important}
+Pay attention to the states name column in `df_customers`
+
+Before merging first we need to **rename** it: from `STATE` to `state`
+:::
+
+```{python}
+df_customers.rename(columns={'STATE':'state'}, inplace=True)
+```
+
+
+```{python}
+df_customers_states = df_customers.merge(df_states,on = 'state')
+```
+
+
+```{python}
+df_customers_states.head()
+```
+
+
+### Step 4 | merging with the main dataframe
+
+
+```{python}
+df_train_analytics_final = df_train_analytic.merge(df_customers_states, on='user_id', how='left')
+```
+
+Now we can drop the `user_id` column as well.
+
+
+```{python}
+df_train_analytics_final.drop(columns='user_id',inplace=True)
+```
+
+
+```{python}
+print(df_train_analytics_final.shape)
+df_train_analytics_final.head()
+```
+
+### Step 5 | saving in the `data/processed` folder
+
+
+```python
+df_train_analytics_final.to_csv("../data/processed/instacart.csv")
+```
+
+```{python}
+#| echo: false
+df_train_analytics_final.to_csv("../../lab/python/data/processed/instacart.csv", index = False)
 ```
 
 
