@@ -1,0 +1,1300 @@
+---
+title: "Session 05: Advanced Pandas"
+categories: [Pandas, Aggregating, Data Visualization]
+image_path: "/img/python/05"
+---
+
+
+## Introduction to Data Visualization
+
+Data visualization is not only about making charts look attractive. It is about helping the reader understand patterns, comparisons, distributions, relationships, and trends with the least possible confusion.
+
+A good visualization should answer a question clearly. A poor visualization may still contain the same data, but it forces the audience to work harder, notice the wrong things, or misunderstand the message.
+
+In this section, we begin with the theory of visualization before applying it to the `Instacart` project.
+
+## Why Do We Visualize Data?
+
+Visualizations help us do the following:
+- summarize large amounts of information
+- identify patterns quickly
+- compare categories
+- detect trends over time
+- notice unusual values or outliers
+- communicate findings to others
+
+A table is often precise, but a chart is often more effective for seeing structure.
+
+## A Good Visualization Starts with a Question
+
+**Before selecting a chart, we must ask:**
+- What exactly am I trying to show?
+- Am I comparing categories?
+- Am I showing a trend over time?
+- Am I showing a distribution?
+- Am I showing a relationship between variables?
+- Am I highlighting part-to-whole structure?
+
+The chart type must match the analytical question.
+
+## Matching the Question to the Visualization
+
+| Analytical Question | Recommended Visualization |
+|---|---|
+| Compare categories | bar chart |
+| Show trend over time | line chart |
+| Show distribution of one variable | histogram |
+| Show relationship between two numeric variables | scatter plot |
+| Show proportions or shares | bar chart, stacked bar chart |
+| Show ranking | sorted bar chart |
+| Show matrix-like comparisons | heatmap |
+| Show exact numbers only | table |
+
+
+
+## Main Principles of Good Visualization
+
+### 1. Clarity over decoration
+
+The main goal is communication, not visual effects.
+
+A chart should reduce cognitive effort, not increase it.
+
+### 2. Show the data, not the software
+
+A visualization is not a place to demonstrate all formatting options. Extra effects often distract from the message.
+
+### 3. Use the simplest chart that answers the question
+
+If a bar chart communicates the message, there is no reason to use a more complicated chart.
+
+### 4. Keep comparisons easy
+
+The reader should be able to compare values quickly.
+
+### 5. Labels, scales, and titles matter
+
+A chart without clear labeling is difficult to interpret, even if the graph itself is correct.
+
+## Data-Ink Ratio
+
+One of the most influential ideas in visualization comes from Edward Tufte: the **data-ink ratio**.
+
+**The idea is simple:**
+
+$$
+\text{Data-Ink Ratio} = \frac{\text{Ink used to show data}}{\text{Total ink used in the graphic}}
+$$
+
+::: {.callout-important}
+A good chart should maximize the amount of visual space used to communicate the data and minimize unnecessary visual elements.
+:::
+
+**Unnecessary elements may include:**
+
+- heavy borders
+- excessive gridlines
+- decorative backgrounds
+- 3D effects
+- shadows
+- distracting colors
+- redundant labels
+
+This does **not** mean charts must be plain or ugly. It means every element should have a purpose.
+
+## Chartjunk
+
+Tufte also warned against **chartjunk**.
+
+**Chartjunk** refers to visual elements that do not improve understanding and often make it worse.
+
+**Examples:**
+
+- 3D bar charts
+- gradient fills
+- patterned backgrounds
+- unnecessary icons
+- overly bright colors
+- duplicate legends and labels
+
+## Poor Visualization vs Good Visualization
+
+A useful learning approach is to compare bad and good versions of the same chart.
+
+The data can remain identical. What changes is how well the chart communicates.
+
+### Example 1: Comparing Categories
+
+Suppose we want to compare the sales or counts of several categories.
+
+#### Poor choice
+
+A pie chart with too many categories makes comparison difficult.
+
+**Why it is poor:**
+
+- angles are harder to compare than lengths
+- labels become crowded
+- small differences are difficult to see
+
+#### Better choice
+
+A sorted horizontal bar chart is usually better.
+
+**Why it is better:**
+
+- category names fit more easily
+- lengths are easier to compare than angles
+- sorting reveals ranking immediately
+
+#### Demonstration
+
+```{python}
+#| echo: false
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df_demo = pd.DataFrame({
+    "category": ["A", "B", "C", "D", "E", "F"],
+    "value": [120, 65, 75, 50, 30, 15]
+})
+```
+
+**Poor visualization (unsorted bars):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.bar(df_demo["category"], df_demo["value"])
+plt.title("Poor Example: Unsorted Categories with Default Presentation")
+plt.xlabel("Category")
+plt.ylabel("Value")
+plt.show()
+```
+
+**Better visualization (sorted horizontal bars):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+df_demo_sorted = df_demo.sort_values("value", ascending=True)
+
+plt.figure()
+plt.barh(df_demo_sorted["category"], df_demo_sorted["value"])
+plt.title("Better Example: Sorted Category Comparison")
+plt.xlabel("Value")
+plt.ylabel("Category")
+plt.show()
+```
+
+### Example 2: Showing a Trend
+
+Suppose we want to show change across time.
+
+#### Poor choice
+
+A bar chart with many time periods can become crowded and visually heavy.
+
+#### Better choice
+
+A line chart is better when the main goal is to show direction and trend over time.
+
+**Why it is better:**
+
+- continuous change is easier to read
+- peaks and declines become more obvious
+- the chart emphasizes movement rather than isolated bars
+
+#### Demonstration
+
+```{python}
+#| echo: false
+df_trend = pd.DataFrame({
+    "month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "orders": [210, 250, 240, 300, 320, 360]
+})
+```
+
+**Poor visualization (bars for trend):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.bar(df_trend["month"], df_trend["orders"])
+plt.title("Poor Example: Trend Displayed as Bars")
+plt.xlabel("Month")
+plt.ylabel("Orders")
+plt.show()
+```
+
+**Better visualization (line for trend):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.plot(df_trend["month"], df_trend["orders"], marker="o")
+plt.title("Better Example: Orders Over Time")
+plt.xlabel("Month")
+plt.ylabel("Orders")
+plt.show()
+```
+
+### Example 3: Showing a Distribution
+
+Suppose we want to understand how values are spread.
+
+#### Poor choice
+
+A bar chart of every unique numeric value often becomes cluttered and hides the overall shape.
+
+#### Better choice
+
+A histogram groups values into bins and helps reveal:
+
+- skewness
+- concentration
+- spread
+- possible outliers
+
+#### Demonstration
+
+```{python}
+#| echo: false
+import numpy as np
+
+np.random.seed(42)
+df_distribution = pd.DataFrame({
+    "income": np.random.normal(50000, 12000, 500)
+})
+```
+
+**Poor visualization (individual bars):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+sample_vals = df_distribution["income"].head(30).reset_index(drop=True)
+
+plt.figure()
+plt.bar(sample_vals.index.astype(str), sample_vals.values)
+plt.title("Poor Example: Bar Chart for Distribution")
+plt.xlabel("Observation")
+plt.ylabel("Income")
+plt.show()
+```
+
+**Better visualization (histogram):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.hist(df_distribution["income"], bins=20)
+plt.title("Better Example: Distribution of Income")
+plt.xlabel("Income")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+### Example 4: Showing a Relationship
+
+Suppose we want to see how two numeric variables move together.
+
+#### Poor choice
+
+Two separate bar charts do not show the relationship directly.
+
+#### Better choice
+
+A scatter plot makes the relationship visible.
+
+It helps reveal:
+
+- positive association
+- negative association
+- clusters
+- outliers
+
+#### Demonstration
+
+```{python}
+#| echo: false
+np.random.seed(42)
+x = np.random.normal(10, 2, 100)
+y = x * 3 + np.random.normal(0, 3, 100)
+
+df_relationship = pd.DataFrame({
+    "x": x,
+    "y": y
+})
+```
+
+**Poor visualization (separate charts):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.bar(range(len(df_relationship["x"].head(20))), df_relationship["x"].head(20))
+plt.title("Poor Example: First Variable Shown Separately")
+plt.xlabel("Observation")
+plt.ylabel("x")
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.bar(range(len(df_relationship["y"].head(20))), df_relationship["y"].head(20))
+plt.title("Poor Example: Second Variable Shown Separately")
+plt.xlabel("Observation")
+plt.ylabel("y")
+plt.show()
+```
+
+**Better visualization (scatter):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.scatter(df_relationship["x"], df_relationship["y"])
+plt.title("Better Example: Relationship Between Two Variables")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+```
+
+### Example 5: Showing Proportions
+
+Suppose we want to compare shares across groups.
+
+#### Poor choice
+
+A pie chart, especially with many slices or similar sizes, makes comparison difficult.
+
+#### Better choice
+
+A bar chart or normalized stacked bar chart is often clearer.
+
+#### Demonstration
+
+**Poor visualization (many-slice pie chart):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 7
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.pie(df_demo["value"], labels=df_demo["category"], autopct="%1.1f%%")
+plt.title("Poor Example: Pie Chart for Category Comparison")
+plt.show()
+```
+
+**Better visualization (bar chart for proportions):**
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+df_demo_sorted = df_demo.sort_values("value", ascending=False)
+
+plt.figure()
+plt.bar(df_demo_sorted["category"], df_demo_sorted["value"])
+plt.title("Better Example: Bar Chart for Category Comparison")
+plt.xlabel("Category")
+plt.ylabel("Value")
+plt.show()
+```
+
+## A Simple Decision Guide
+
+```{mermaid}
+flowchart TD
+    A[What do you want to show?] --> B[Compare categories]
+    A --> C[Trend over time]
+    A --> D[Distribution]
+    A --> E[Relationship]
+    A --> F[Composition]
+
+    B --> B1[Bar chart]
+    C --> C1[Line chart]
+    D --> D1[Histogram]
+    E --> E1[Scatter plot]
+    F --> F1[Bar chart or stacked bar chart]
+```
+
+## Common Visualization Mistakes
+
+### Too many categories
+
+If a chart has too many categories, the message becomes hard to read.
+
+A common solution is:
+
+- show top categories only
+- group the rest into `Other`
+- sort values meaningfully
+
+#### Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+categories = [f"C{i}" for i in range(1, 21)]
+values = [70, 68, 66, 64, 60, 58, 55, 50, 45, 40, 35, 30, 28, 26, 24, 22, 20, 18, 16, 14]
+df_many = pd.DataFrame({"category": categories, "value": values})
+
+top8 = df_many.nlargest(8, "value").copy()
+other_sum = df_many.nsmallest(len(df_many) - 8, "value")["value"].sum()
+df_top_other = pd.concat(
+    [top8, pd.DataFrame([{"category": "Other", "value": other_sum}])],
+    ignore_index=True
+)
+df_top_other = df_top_other.sort_values("value", ascending=False)
+
+fig, ax = plt.subplots(1, 2)
+ax[0].bar(df_many["category"], df_many["value"])
+ax[0].set_title("Poor: Too Many Categories")
+ax[0].tick_params(axis="x", rotation=90)
+ax[1].bar(df_top_other["category"], df_top_other["value"])
+ax[1].set_title("Better: Top Categories + Other")
+ax[1].tick_params(axis="x", rotation=45)
+plt.tight_layout()
+plt.show()
+```
+
+### Too many colors
+
+Color should support meaning, not distract attention.
+
+Use color when:
+
+- distinguishing groups
+- highlighting one important category
+- showing intensity or value
+
+Avoid random color usage.
+
+#### Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+df_color = pd.DataFrame({
+    "group": ["A", "B", "C", "D", "E", "F"],
+    "value": [40, 55, 43, 70, 62, 48]
+})
+
+random_colors = ["red", "lime", "blue", "gold", "magenta", "cyan"]
+focus_colors = ["#A7C7E7", "#A7C7E7", "#A7C7E7", "#E07A5F", "#A7C7E7", "#A7C7E7"]
+
+fig, ax = plt.subplots(1, 2)
+ax[0].bar(df_color["group"], df_color["value"], color=random_colors)
+ax[0].set_title("Poor: Random Colors")
+ax[1].bar(df_color["group"], df_color["value"], color=focus_colors)
+ax[1].set_title("Better: Intentional Highlight")
+plt.tight_layout()
+plt.show()
+```
+
+### Unsorted categories
+
+When categories are not sorted, comparison becomes harder.
+
+Sorted bars usually improve readability.
+
+#### Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+df_rank = pd.DataFrame({
+    "department": ["Produce", "Bakery", "Dairy", "Frozen", "Snacks", "Beverages"],
+    "orders": [820, 250, 640, 300, 710, 520]
+})
+
+fig, ax = plt.subplots(1, 2)
+ax[0].bar(df_rank["department"], df_rank["orders"])
+ax[0].set_title("Poor: Unsorted Categories")
+ax[0].tick_params(axis="x", rotation=45)
+df_rank_sorted = df_rank.sort_values("orders", ascending=False)
+ax[1].bar(df_rank_sorted["department"], df_rank_sorted["orders"])
+ax[1].set_title("Better: Sorted by Value")
+ax[1].tick_params(axis="x", rotation=45)
+plt.tight_layout()
+plt.show()
+```
+
+### Misleading axes
+
+Axis scales can distort perception.
+
+Be careful with:
+
+- truncated axes in bar charts
+- inconsistent intervals
+- unclear numeric scales
+
+#### Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+df_axis = pd.DataFrame({
+    "model": ["Model A", "Model B"],
+    "accuracy": [91, 94]
+})
+
+fig, ax = plt.subplots(1, 2)
+ax[0].bar(df_axis["model"], df_axis["accuracy"])
+ax[0].set_ylim(88, 95)
+ax[0].set_title("Poor: Truncated Y-Axis")
+ax[1].bar(df_axis["model"], df_axis["accuracy"])
+ax[1].set_ylim(0, 100)
+ax[1].set_title("Better: Full Scale Context")
+plt.tight_layout()
+plt.show()
+```
+
+### Overloaded labels
+
+Too many labels can make a chart unreadable.
+
+Keep only labels that help interpretation.
+
+#### Example
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+orders = [210, 230, 220, 260, 280, 310]
+
+fig, ax = plt.subplots(1, 2)
+ax[0].plot(months, orders, marker="o")
+for i, val in enumerate(orders):
+    ax[0].text(i, val + 2, f"{val}\nOrders in month {months[i]}", ha="center", fontsize=8)
+ax[0].set_title("Poor: Overloaded Labels")
+ax[1].plot(months, orders, marker="o")
+for i, val in enumerate(orders):
+    if i in [0, len(orders) - 1]:
+        ax[1].text(i, val + 2, str(val), ha="center", fontsize=9)
+ax[1].set_title("Better: Essential Labels")
+plt.tight_layout()
+plt.show()
+```
+
+## Practical Guidelines for Good Visualization
+
+When building a chart, follow these guidelines:
+
+- choose the chart type based on the analytical question
+- remove unnecessary decoration
+- keep titles informative and specific
+- label axes clearly
+- sort categories when ranking matters
+- use color intentionally, not randomly
+- avoid 3D effects and chartjunk
+- prefer readability over novelty
+
+## A Good Workflow for Visualization
+
+A useful workflow is:
+
+- start from the analytical question
+- choose the simplest chart that answers it
+- remove unnecessary visual elements
+- check whether the message is immediately clear
+- revise the chart if the reader must work too hard to understand it
+
+## Summary
+
+At this stage, we introduced the theory behind good data visualization.
+
+We discussed:
+
+- why visualization matters
+- how to choose a chart based on the question
+- the idea of data-ink ratio
+- the problem of chartjunk
+- when to use bar charts, line charts, histograms, and scatter plots
+- how poor and good versions of the same chart can communicate very differently
+
+In the next part, we will apply these principles to the `Instacart` dataset and create visualizations that answer real analytical questions.
+
+
+## Introduction to Matplotlib with the `Instacart` DataFrame
+
+Now that we have created the final `instacart` DataFrame, we can begin the visualization part of the course using real project data rather than artificial examples.
+
+In this section, we introduce `matplotlib`, which is one of the foundational visualization libraries in Python. It gives us direct control over chart creation and helps us understand the building blocks behind many other visualization tools.
+
+We will start with simple visualizations based on the `instacart` dataset and connect each chart to a specific analytical question.
+
+::: {.callout-tip title= "Documentation"}
+Matplotlib Documentation you can find [here](https://matplotlib.org/stable/index.html)
+:::
+
+## Why Start with Matplotlib?
+
+`matplotlib` is important because:
+
+ 
+- it is one of the core plotting libraries in Python
+
+- many other libraries are built on top of it
+
+- it helps students understand how charts are constructed
+
+- it gives more control over titles, labels, axes, and figure size
+
+- it is useful for analytical reporting and notebook-based analysis
+
+Even if students later use `seaborn`, `plotly`, or dashboard tools, understanding `matplotlib` remains valuable.
+
+## Importing Matplotlib
+
+Before plotting, we need to import the library.
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+```
+
+If the `instacart.csv` file has already been saved, we can load it as follows.
+
+```python
+df_instacart = pd.read_csv("../data/processed/instacart.csv")
+df_instacart.head()
+```
+
+```{python}
+# echo : False
+df_instacart = pd.read_csv("../../lab/python/data/processed/instacart.csv")
+df_instacart.head()
+```
+
+
+## First Look at the DataFrame
+
+Before plotting, it is useful to remind ourselves what kind of table we are working with.
+
+```{python}
+df_instacart.shape
+```
+
+```{python}
+df_instacart.columns
+```
+
+This tells us that the dataset contains:
+
+- order-level variables
+
+- basket-level variables
+
+- product-level variables
+
+- customer-level variables
+
+That means the same DataFrame can support many kinds of visualizations.
+
+## The Basic Plotting Workflow in Matplotlib
+
+A simple plotting workflow usually includes:
+
+
+- selecting or preparing the data
+
+- creating a figure
+
+- choosing a chart type
+
+- adding a title
+
+- labeling the axes
+
+- displaying the chart
+
+A very simple structure looks like this:
+
+```python
+plt.figure()
+plt.bar(x_values, y_values)
+plt.title("Chart Title")
+plt.xlabel("X Label")
+plt.ylabel("Y Label")
+plt.show()
+```
+
+We will now apply this logic directly to the `instacart` data.
+
+## Example 1: Visualizing Orders by Day of Week
+
+### Analytical question
+
+A natural first question is:
+
+ 
+- On which days of the week are orders placed most frequently?
+
+This is a **category comparison** problem, so a bar chart is a reasonable first choice.
+
+### Preparing the data
+
+```{python}
+orders_by_day = (
+    df_instacart[["order_id", "order_dow"]]
+    .drop_duplicates()
+    .groupby("order_dow")
+    .size()
+)
+
+orders_by_day
+```
+
+We use `.drop_duplicates()` because the final `instacart` table is at the product-within-order level, and we want to count each order only once.
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+orders_by_day = (
+    df_instacart[["order_id", "order_dow"]]
+    .drop_duplicates()
+    .groupby("order_dow")
+    .size()
+)
+
+plt.figure()
+plt.bar(orders_by_day.index, orders_by_day.values)
+plt.title("Number of Orders by Day of Week")
+plt.xlabel("Day of Week")
+plt.ylabel("Number of Orders")
+plt.show()
+```
+
+### What do we learn here?
+
+This is our first real `matplotlib` chart using the project data.
+
+It shows us:
+
+ 
+- how to prepare grouped data before plotting
+
+- how to build a bar chart
+
+- how to add a title and axis labels
+
+It also reinforces an important analytical lesson:
+
+ 
+- when using a line-item dataset, we must think carefully about the correct level of aggregation
+
+## Example 2: Visualizing Orders by Hour of Day
+
+### Analytical question
+
+Another useful question is:
+
+ 
+- At what hours are orders placed most frequently?
+
+This is also a category comparison problem, but now the categories are hours.
+
+### Preparing the data
+
+```{python}
+orders_by_hour = (
+    df_instacart[["order_id", "order_hour_of_day"]]
+    .drop_duplicates()
+    .groupby("order_hour_of_day")
+    .size()
+)
+
+orders_by_hour
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+orders_by_hour = (
+    df_instacart[["order_id", "order_hour_of_day"]]
+    .drop_duplicates()
+    .groupby("order_hour_of_day")
+    .size()
+)
+
+plt.figure()
+plt.bar(orders_by_hour.index, orders_by_hour.values)
+plt.title("Number of Orders by Hour of Day")
+plt.xlabel("Hour of Day")
+plt.ylabel("Number of Orders")
+plt.show()
+```
+
+### Why is this a good introductory example?
+
+This chart helps students practice:
+
+ 
+- grouping the data
+
+- plotting numeric categories on the x-axis
+
+- interpreting demand patterns across time
+
+It also introduces an important analytical idea:
+
+ 
+- the chart is simple, but the real work begins with asking the right aggregation question
+
+## Example 3: Visualizing the Most Popular Departments
+
+### Analytical question
+
+Now we move from order behavior to product categories.
+
+A natural question is:
+
+ 
+- Which departments appear most often in the dataset?
+
+This is again a category comparison problem, so a bar chart is appropriate.
+
+### Preparing the data
+
+```{python}
+top_departments = df_instacart["department"].value_counts().head(10)
+top_departments
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+top_departments = df_instacart["department"].value_counts().head(10)
+
+plt.figure()
+plt.bar(top_departments.index, top_departments.values)
+plt.title("Top 10 Departments by Number of Purchased Items")
+plt.xlabel("Department")
+plt.ylabel("Number of Purchased Items")
+plt.xticks(rotation=45)
+plt.show()
+```
+
+### Why do we rotate the labels?
+
+The department names are longer than simple numeric categories. Rotating labels improves readability.
+
+This is an important practical lesson in `matplotlib`:
+
+ 
+- a chart may be correct but still difficult to read if labels are not formatted well
+
+## Example 4: Improving Readability with a Horizontal Bar Chart
+
+The previous chart is correct, but category labels can still feel crowded.
+
+A horizontal bar chart is often better when category names are longer.
+
+### Creating the improved chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+top_departments_sorted = df_instacart["department"].value_counts().head(10).sort_values()
+
+plt.figure()
+plt.barh(top_departments_sorted.index, top_departments_sorted.values)
+plt.title("Top 10 Departments by Number of Purchased Items")
+plt.xlabel("Number of Purchased Items")
+plt.ylabel("Department")
+plt.show()
+```
+
+### What is better here?
+
+This chart is often easier to read because:
+
+ 
+- the labels fit naturally
+
+- the category ranking is easier to interpret
+
+- the chart emphasizes comparison more clearly
+
+This is a good moment to remind students that visualization is not only about plotting. It is also about choosing the clearest version of a chart.
+
+## Example 5: Visualizing the Distribution of Prices
+
+### Analytical question
+
+Now let us move to a different question:
+
+ 
+- How are product prices distributed?
+
+This is not a category comparison problem. It is a **distribution** problem.
+
+For distributions, a histogram is usually a better choice than a bar chart.
+
+### Preparing the data
+
+```{python}
+df_instacart["prices"].describe()
+```
+
+### Creating the histogram
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.hist(df_instacart["prices"].dropna(), bins=30)
+plt.title("Distribution of Product Prices")
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+### What does this teach us?
+
+This example introduces a second core chart type in `matplotlib`.
+
+It shows students that:
+
+ 
+- not every problem should be visualized with bars
+
+- the chart type must match the analytical question
+
+- histograms are useful for understanding spread, concentration, and skewness
+
+## Example 6: Visualizing Average Price by Department
+
+### Analytical question
+
+A more analytical question is:
+
+ 
+- Which departments have the highest average prices?
+
+This requires both aggregation and visualization.
+
+### Preparing the data
+
+```{python}
+avg_price_by_department = (
+    df_instacart
+    .groupby("department")["prices"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+avg_price_by_department
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 7
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+avg_price_by_department = (
+    df_instacart
+    .groupby("department")["prices"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+plt.figure()
+plt.barh(avg_price_by_department.index, avg_price_by_department.values)
+plt.title("Average Product Price by Department")
+plt.xlabel("Average Price")
+plt.ylabel("Department")
+plt.show()
+```
+
+### Why is this an important example?
+
+It connects three ideas together:
+
+ 
+- grouping data with Pandas
+
+- summarizing with `.mean()`
+
+- visualizing the result with `matplotlib`
+
+This is exactly the kind of workflow students will use in real analysis.
+
+## Example 7: Visualizing Reorder Rate by Region
+
+### Analytical question
+
+Now we bring customer geography into the picture.
+
+A useful question is:
+
+ 
+- Which regions have the highest reorder rate?
+
+### Preparing the data
+
+```{python}
+reorder_rate_by_region = (
+    df_instacart
+    .groupby("region")["reordered"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+reorder_rate_by_region
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+reorder_rate_by_region = (
+    df_instacart
+    .groupby("region")["reordered"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+plt.figure()
+plt.barh(reorder_rate_by_region.index, reorder_rate_by_region.values)
+plt.title("Reorder Rate by Region")
+plt.xlabel("Reorder Rate")
+plt.ylabel("Region")
+plt.show()
+```
+
+### What do we learn here?
+
+This chart introduces an important interpretation point:
+
+ 
+- a mean of a binary variable such as `reordered` can be interpreted as a proportion or rate
+
+That is a powerful idea for analytical visualization.
+
+## Example 8: Visualizing Relationship Between Age and Income
+
+### Analytical question
+
+Now we try a relationship question:
+
+ 
+- Is there a visible relationship between customer age and income?
+
+For two numeric variables, a scatter plot is often the right starting point.
+
+### Preparing the data
+
+```{python}
+customer_profile = df_instacart[
+    ["First Name", "Surnam", "Age", "income"]
+].drop_duplicates()
+
+customer_profile.head()
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+customer_profile = df_instacart[
+    ["First Name", "Surnam", "Age", "income"]
+].drop_duplicates()
+
+plt.figure()
+plt.scatter(customer_profile["Age"], customer_profile["income"])
+plt.title("Customer Age and Income")
+plt.xlabel("Age")
+plt.ylabel("Income")
+plt.show()
+```
+
+### Why do we use a deduplicated customer table here?
+
+Because the `instacart` DataFrame is at the product-within-order level, customer variables repeat many times.
+
+If we want a customer-level relationship, we should remove repeated customer rows first.
+
+This is an essential analytical lesson:
+
+ 
+- the right chart depends not only on the variables, but also on the correct grain of the data
+
+## What Students Should Learn from This Introduction
+
+At this stage, students should understand that `matplotlib` is not just a plotting library. It is part of the analytical workflow.
+
+The process usually looks like this:
+
+ 
+- define the question
+
+- prepare the data
+
+- choose the chart type
+
+- create the figure
+
+- label the chart clearly
+
+- interpret the result
+
+## A Visual Summary of the Workflow
+
+```{mermaid}
+flowchart TD
+    A[Ask an analytical question] --> B[Prepare the data with Pandas]
+    B --> C[Choose the right chart type]
+    C --> D[Create the chart with Matplotlib]
+    D --> E[Interpret the result]
+```
+
+## Summary
+
+In this section, we introduced `matplotlib` using the real `instacart` dataset.
+
+We learned how to create:
+
+ 
+- bar charts
+
+- horizontal bar charts
+
+- histograms
+
+- scatter plots
+
+We also learned that chart creation starts with the analytical question, not with the code.
+
+In the next section, we will refine these visualizations further and discuss how to improve them using stronger design choices and clearer storytelling.
