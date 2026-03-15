@@ -237,9 +237,9 @@ Karen Hovhannisyan
 <h1>Temporary Tables</h1>
 
 </section>
-<section id="why-temporary-tables-exist" class="slide level2">
+<section id="why-temporary-tables-exist" class="slide level2 smaller">
 <h2>Why Temporary Tables Exist</h2>
-<p>In real analytical work, SQL queries are rarely written once and discarded.</p>
+<p>In <strong>real analytical work</strong>, SQL queries are rarely written once and discarded.</p>
 <ul>
 <li>Joins are repeated across questions<br>
 </li>
@@ -251,11 +251,11 @@ Karen Hovhannisyan
 <p>Temporary tables allow us to <strong>materialize intermediate results</strong> and reuse them cleanly.</p>
 </div>
 </section>
-<section id="what-is-a-temporary-table" class="slide level2">
+<section id="what-is-a-temporary-table" class="slide level2 smaller">
 <h2>What Is a Temporary Table?</h2>
 <p>A temporary table is a <strong>session-scoped</strong> database table used to store intermediate query results.</p>
 <ul>
-<li>Exists only within the current database session<br>
+<li>Exists <strong>only</strong> within the <strong>current database session</strong><br>
 </li>
 <li>Automatically dropped at session end<br>
 </li>
@@ -285,7 +285,7 @@ Karen Hovhannisyan
 </div>
 </div>
 </section>
-<section id="creating-a-temporary-table" class="slide level2">
+<section id="creating-a-temporary-table" class="slide level2 smaller">
 <h2>Creating a Temporary Table</h2>
 <p>Temporary tables are created using <code>CREATE TEMP TABLE</code>.</p>
 <ul>
@@ -296,7 +296,7 @@ Karen Hovhannisyan
 <li>Suitable for multi-step analytics</li>
 </ul>
 </section>
-<section id="example-order-level-revenue" class="slide level2">
+<section id="example-order-level-revenue" class="slide level2 smaller">
 <h2>Example: Order-Level Revenue</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-code-line-numbers="1|1-10"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a></a><span class="kw">CREATE</span> TEMP <span class="kw">TABLE</span> tmp_order_revenue <span class="kw">AS</span></span>
 <span id="cb1-2"><a></a><span class="kw">SELECT</span></span>
@@ -308,13 +308,15 @@ Karen Hovhannisyan
 <span id="cb1-8"><a></a><span class="kw">JOIN</span> analytics.order_items oi <span class="kw">ON</span> o.order_id <span class="op">=</span> oi.order_id</span>
 <span id="cb1-9"><a></a><span class="kw">JOIN</span> analytics.products p <span class="kw">ON</span> oi.product_id <span class="op">=</span> p.product_id</span>
 <span id="cb1-10"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> o.order_id, o.customer_id, o.order_date;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
 <blockquote>
 <p><code>tmp_order_revenue</code> behaves like a normal table.</p>
 </blockquote>
+</div>
 </section>
-<section id="inspecting-temporary-tables" class="slide level2">
+<section id="inspecting-temporary-tables" class="slide level2 smaller">
 <h2>Inspecting Temporary Tables</h2>
-<p>Before continuing analysis, intermediate results should be validated.</p>
+<p><strong>Before continuing analysis, intermediate results should be validated.</strong></p>
 <ul>
 <li>Row counts<br>
 </li>
@@ -328,8 +330,28 @@ Karen Hovhannisyan
 <span id="cb2-4"><a></a>    <span class="fu">MAX</span>(order_revenue) <span class="kw">AS</span> max_revenue,</span>
 <span id="cb2-5"><a></a>    <span class="fu">AVG</span>(order_revenue) <span class="kw">AS</span> avg_revenue</span>
 <span id="cb2-6"><a></a><span class="kw">FROM</span> tmp_order_revenue;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">total_orders</th>
+<th style="text-align: right;">min_revenue</th>
+<th style="text-align: right;">max_revenue</th>
+<th style="text-align: right;">avg_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">5.98</td>
+<td style="text-align: right;">89.97</td>
+<td style="text-align: right;">28.63</td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
-<section id="reusing-temporary-tables" class="slide level2">
+<section id="reusing-temporary-tables" class="slide level2 smaller">
 <h2>Reusing Temporary Tables</h2>
 <p>Once created, the temporary table can be reused without recomputing joins.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a></a><span class="kw">SELECT</span></span>
@@ -337,12 +359,48 @@ Karen Hovhannisyan
 <span id="cb3-3"><a></a>    <span class="fu">AVG</span>(order_revenue) <span class="kw">AS</span> avg_order_revenue</span>
 <span id="cb3-4"><a></a><span class="kw">FROM</span> tmp_order_revenue</span>
 <span id="cb3-5"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> customer_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">customer_id</th>
+<th style="text-align: right;">avg_order_revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">11.49</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">10.99</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">11.49</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">11.49</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">11.49</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">10.99</td>
+</tr>
+</tbody>
+</table>
 <p><strong>This separation clarifies intent:</strong></p>
-<ul>
-<li>Step 1: Define revenue<br>
+<ol type="1">
+<li>Define revenue<br>
 </li>
-<li>Step 2: Analyze revenue</li>
-</ul>
+<li>Analyze revenue</li>
+</ol>
+</div>
 </section>
 <section id="example-city-level-revenue" class="slide level2 smaller">
 <h2>Example: City-Level Revenue</h2>
@@ -365,8 +423,41 @@ Karen Hovhannisyan
 <span id="cb5-5"><a></a><span class="kw">FROM</span> tmp_customer_spend</span>
 <span id="cb5-6"><a></a><span class="kw">GROUP</span> <span class="kw">BY</span> city_id;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">city_id</th>
+<th style="text-align: right;">avg_customer_spend</th>
+<th style="text-align: right;">max_customer_spend</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">176.8866666666666667</td>
+<td style="text-align: right;">230.86</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">262.8650000000000000</td>
+<td style="text-align: right;">294.87</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">115.4175000000000000</td>
+<td style="text-align: right;">260.85</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
-<section id="why-not-repeat-the-query" class="slide level2">
+<section id="why-not-repeat-the-query" class="slide level2 smaller">
 <h2>Why Not Repeat the Query?</h2>
 <p><strong>Without temporary tables, the same logic must be repeated.</strong></p>
 <div class="cell" data-reveal="true" data-layout-align="default">
@@ -402,10 +493,10 @@ Karen Hovhannisyan
 </div>
 </div>
 </div>
-<p>Temporary tables reduce duplication and cognitive load.</p>
+<p><strong>Temporary tables reduce duplication and cognitive load.</strong></p>
 </div>
 </section>
-<section id="performance-and-practical-considerations" class="slide level2">
+<section id="performance-and-practical-considerations" class="slide level2 smaller">
 <h2>Performance and Practical Considerations</h2>
 <ul>
 <li class="fragment">Reduce repeated scans of large tables<br>
@@ -434,7 +525,7 @@ Karen Hovhannisyan
 <h1>Subqueries</h1>
 
 </section>
-<section id="what-is-a-subquery" class="slide level2">
+<section id="what-is-a-subquery" class="slide level2 smaller">
 <h2>What Is a Subquery?</h2>
 <p><strong>A subquery is a query nested inside another SQL query.</strong></p>
 <p>Unlike temporary tables, subqueries do <strong>not</strong> materialize intermediate results as standalone objects.<br>
@@ -448,7 +539,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <p>Subqueries are most useful when intermediate results are needed <strong>only once and do not justify explicit materialization.</strong></p>
 </div>
 </section>
-<section id="temporary-tables-vs.-subqueries" class="slide level2">
+<section id="temporary-tables-vs.-subqueries" class="slide level2 smaller">
 <h2>Temporary Tables vs.&nbsp;Subqueries</h2>
 <p><strong>Temporary tables</strong> externalize intermediate results as named objects. Subqueries take the next step by embedding intermediate logic directly inside a query.</p>
 <ul>
@@ -459,7 +550,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <li>Better suited for <strong>one-off</strong> comparisons</li>
 </ul>
 </section>
-<section id="types-of-subqueries" class="slide level2">
+<section id="types-of-subqueries" class="slide level2 smaller">
 <h2>Types of Subqueries</h2>
 <p><strong>We will study subqueries in the following order:</strong></p>
 <ul>
@@ -474,7 +565,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <h1>Filter Subqueries</h1>
 
 </section>
-<section id="what-are-filter-subqueries" class="slide level2">
+<section id="what-are-filter-subqueries" class="slide level2 smaller">
 <h2>What Are Filter Subqueries?</h2>
 <p>Filter subqueries are used to <strong>restrict rows</strong> in the outer query based on the result of another query.</p>
 <p><strong>Mental model</strong></p>
@@ -569,35 +660,12 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </table>
 </div>
 </section>
-<section id="example-from-analytics-schema" class="slide level2">
+<section id="example-from-analytics-schema" class="slide level2 smaller">
 <h2>Example from <code>Analytics Schema</code></h2>
-<blockquote>
-<p>Which customers have an <strong>average order revenue above the overall average order revenue</strong>?</p>
-</blockquote>
-</section>
-<section id="step-1-subquery-overall-average" class="slide level2">
-<h2>Step 1: Subquery (Overall Average)</h2>
+<p><strong>Q:</strong> Which customers have an <strong>average order revenue above the overall average order revenue</strong>?</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a></a><span class="kw">SELECT</span></span>
 <span id="cb7-2"><a></a>    <span class="fu">AVG</span>(order_revenue)</span>
 <span id="cb7-3"><a></a><span class="kw">FROM</span> tmp_order_revenue;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div title="In case of errors">
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>In case of errors</strong></p>
-</div>
-<div class="callout-content">
-<p>If you encounter an error, recreate the temporary table <code>tmp_order_revenue</code> before running this query.</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="step-2-filter-query-using-subquery" class="slide level2">
-<h2>Step 2: Filter Query Using Subquery</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a></a><span class="kw">SELECT</span></span>
 <span id="cb8-2"><a></a>    customer_id,</span>
 <span id="cb8-3"><a></a>    <span class="fu">AVG</span>(order_revenue) <span class="kw">AS</span> avg_customer_revenue</span>
@@ -608,9 +676,6 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <span id="cb8-8"><a></a>           <span class="kw">SELECT</span> <span class="fu">AVG</span>(order_revenue)</span>
 <span id="cb8-9"><a></a>           <span class="kw">FROM</span> tmp_order_revenue</span>
 <span id="cb8-10"><a></a>       );</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output" class="slide level2">
-<h2>Output</h2>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -632,24 +697,33 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <td style="text-align: right;">56.64</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">14</td>
-<td style="text-align: right;">49.15</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">49.15</td>
-</tr>
-<tr class="even">
 <td style="text-align: right;">…</td>
 <td style="text-align: right;">…</td>
 </tr>
 </tbody>
 </table>
+<div title="In case of errors">
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>In case of errors</strong></p>
+</div>
+<div class="callout-content">
+<p>If you encounter an error, recreate the temporary table <code>tmp_order_revenue</code> before running this query.</p>
+</div>
+</div>
+</div>
+</div>
 <!-- here -->
 </section>
-<section id="filter-subquery-using-another-table-conceptual" class="slide level2">
+<section id="filter-subquery-using-another-table-conceptual" class="slide level2 smaller">
 <h2>Filter Subquery Using Another Table (Conceptual)</h2>
-<p><strong>Input Tables</strong> <code>employees</code> and <code>departments</code></p>
+<p><strong>Q:</strong> Select employees earning <strong>above their department’s target salary</strong>.</p>
+<div class="columns">
+<div class="column">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -676,6 +750,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </tr>
 </tbody>
 </table>
+</div><div class="column">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -694,15 +769,9 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </tr>
 </tbody>
 </table>
-</section>
-<section class="slide level2">
-
-<p><span class="math display">\[\downarrow\]</span></p>
-<p><strong>Q:</strong> Select employees earning <strong>above their department’s target salary</strong>.</p>
-</section>
-<section class="slide level2">
-
-<p><span class="math display">\[\downarrow\]</span></p>
+</div></div>
+<!-- end columns -->
+<div class="fragment">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
 <span id="cb9-2"><a></a><span class="kw">FROM</span> employees e</span>
 <span id="cb9-3"><a></a><span class="kw">WHERE</span> salary <span class="op">&gt;</span> (</span>
@@ -710,7 +779,8 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <span id="cb9-5"><a></a>    <span class="kw">FROM</span> departments d</span>
 <span id="cb9-6"><a></a>    <span class="kw">WHERE</span> d.department <span class="op">=</span> e.department</span>
 <span id="cb9-7"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><span class="math display">\[\downarrow\]</span></p>
+</div>
+<div class="fragment">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -732,13 +802,11 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </tr>
 </tbody>
 </table>
+</div>
 </section>
-<section id="subquery-using-another-table-analytics-schema" class="slide level2">
+<section id="subquery-using-another-table-analytics-schema" class="slide level2 smaller">
 <h2>Subquery Using Another Table <code>Analytics Schema</code></h2>
 <p>Which customers have <strong>total spend above the average spend of all customers</strong>?</p>
-</section>
-<section id="query" class="slide level2 smaller">
-<h2>Query</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-code-line-numbers="1-3|4-11|13-25"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a></a><span class="kw">SELECT</span></span>
 <span id="cb10-2"><a></a>    c.customer_id</span>
 <span id="cb10-3"><a></a><span class="kw">FROM</span> analytics.customers c</span>
@@ -763,59 +831,8 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <span id="cb10-22"><a></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This query uses <strong>multiple tables inside the filter subquery</strong> while still producing a single comparison value.</p>
 </section>
-<section class="slide level2">
-
-<h5 id="input-tables">Input Tables</h5>
-<ul>
-<li><code>customers</code></li>
-<li><code>orders</code></li>
-<li><code>order_items</code></li>
-<li><code>products</code></li>
-</ul>
-<h5 id="output-table">Output Table</h5>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th style="text-align: right;">customer_id</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">4</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">6</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">10</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">18</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section class="slide level2">
-
-<div title="Common Issue">
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Common Issue</strong></p>
-</div>
-<div class="callout-content">
-<p>Ensure that filter subqueries return a value compatible with the comparison operator<br>
-(e.g., a single scalar value for <code>&gt;</code>, <code>&lt;</code>, <code>=</code>).</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="when-to-use" class="slide level2">
-<h2>When to Use?</h2>
+<section id="when-to-use-.smaller" class="slide level2 smaller">
+<h2>When to Use? {.smaller}</h2>
 <ul>
 <li>Filtering based on <strong>global</strong> or <strong>group-level</strong> aggregates<br>
 </li>
@@ -829,7 +846,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <h1>Column Subqueries (<code>SELECT</code>)</h1>
 
 </section>
-<section id="what-is-a-column-subquery" class="slide level2">
+<section id="what-is-a-column-subquery" class="slide level2 smaller">
 <h2>What Is a Column Subquery?</h2>
 <p>A column subquery returns a <strong>single value</strong> and is evaluated for <strong>each row</strong> of the outer query.</p>
 <ul>
@@ -838,7 +855,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <li class="fragment">Enriches each row with contextual information</li>
 </ul>
 </section>
-<section id="mental-model" class="slide level2">
+<section id="mental-model" class="slide level2 smaller">
 <h2>Mental Model</h2>
 <blockquote>
 <p>Attach a contextual metric to each row.</p>
@@ -867,7 +884,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </div>
 </div>
 </section>
-<section id="conceptual-flow" class="slide level2">
+<section id="conceptual-flow" class="slide level2 smaller">
 <h2>Conceptual Flow</h2>
 <div class="cell" data-reveal="true" data-layout-align="default">
 <div class="cell-output-display">
@@ -921,6 +938,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <span id="cb11-5"><a></a><span class="kw">FROM</span> employees;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
+<p><span class="math display">\[\downarrow\]</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -949,7 +967,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </table>
 </div>
 </section>
-<section id="interpretation" class="slide level2">
+<section id="interpretation" class="slide level2 smaller">
 <h2>Interpretation</h2>
 <ul>
 <li class="fragment">Subquery computes <strong>one global value</strong></li>
@@ -999,8 +1017,8 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </table>
 </div>
 </section>
-<section id="using-another-table-conceptual-smaller" class="slide level2">
-<h2>Using Another Table (Conceptual) {smaller}</h2>
+<section id="using-another-table-conceptual" class="slide level2 smaller">
+<h2>Using Another Table (Conceptual)</h2>
 <p><code>employees</code></p>
 <table class="caption-top">
 <thead>
@@ -1048,7 +1066,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </tbody>
 </table>
 </section>
-<section id="query-output" class="slide level2">
+<section id="query-output" class="slide level2 smaller">
 <h2>Query &amp; Output</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a></a><span class="kw">SELECT</span></span>
 <span id="cb13-2"><a></a>    e.emp_id,</span>
@@ -1087,7 +1105,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </tbody>
 </table>
 </section>
-<section id="key-observation" class="slide level2">
+<section id="key-observation" class="slide level2 smaller">
 <h2>Key Observation</h2>
 <p>This is a <strong>correlated scalar subquery</strong>.</p>
 <ul>
@@ -1124,7 +1142,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <span id="cb14-18"><a></a><span class="kw">FROM</span> analytics.customers c;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="output-1" class="slide level2">
+<section id="output" class="slide level2 smaller">
 <h2>Output</h2>
 <table class="caption-top">
 <thead>
@@ -1153,7 +1171,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </tbody>
 </table>
 </section>
-<section id="important-rule" class="slide level2">
+<section id="important-rule" class="slide level2 smaller">
 <h2>Important Rule</h2>
 <div class="callout callout-warning callout-titled callout-style-default">
 <div class="callout-body">
@@ -1173,7 +1191,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </div>
 </div>
 </section>
-<section id="when-column-subqueries-are-useful" class="slide level2">
+<section id="when-column-subqueries-are-useful" class="slide level2 smaller">
 <h2>When Column Subqueries Are Useful</h2>
 <ul>
 <li class="fragment">Adding global or contextual metrics</li>
@@ -1181,7 +1199,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <li class="fragment">Logical stepping stone to window functions</li>
 </ul>
 </section>
-<section id="why-column-subqueries-become-limiting" class="slide level2">
+<section id="why-column-subqueries-become-limiting" class="slide level2 smaller">
 <h2>Why Column Subqueries Become Limiting</h2>
 <ul>
 <li class="fragment">Evaluated per row</li>
@@ -1194,7 +1212,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <h1>Derived Tables (<code>FROM</code>)</h1>
 
 </section>
-<section id="what-is-a-derived-table" class="slide level2">
+<section id="what-is-a-derived-table" class="slide level2 smaller">
 <h2>What Is a Derived Table?</h2>
 <p>A <strong>derived table</strong> is a subquery used inside the <code>FROM</code> clause.</p>
 <ul>
@@ -1205,7 +1223,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <li class="fragment">Must always have an alias</li>
 </ul>
 </section>
-<section id="mental-model-1" class="slide level2">
+<section id="mental-model-1" class="slide level2 smaller">
 <h2>Mental Model</h2>
 <blockquote>
 <p>Create an inline dataset, then query it.</p>
@@ -1219,7 +1237,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <li class="fragment">A stepping stone toward CTEs</li>
 </ul>
 </section>
-<section id="conceptual-flow-1" class="slide level2">
+<section id="conceptual-flow-1" class="slide level2 smaller">
 <h2>Conceptual Flow</h2>
 <div class="cell" data-reveal="true" data-layout-align="default">
 <div class="cell-output-display">
@@ -1301,7 +1319,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </table>
 </div>
 </section>
-<section id="key-observation-1" class="slide level2">
+<section id="key-observation-1" class="slide level2 smaller">
 <h2>Key Observation</h2>
 <ul>
 <li class="fragment">Subquery produces a <strong>table</strong><br>
@@ -1429,7 +1447,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </table>
 </div>
 </section>
-<section id="important-rule-1" class="slide level2">
+<section id="important-rule-1" class="slide level2 smaller">
 <h2>Important Rule</h2>
 <div class="callout callout-warning callout-titled callout-style-default">
 <div class="callout-body">
@@ -1449,7 +1467,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </div>
 </div>
 </section>
-<section id="when-derived-tables-are-a-good-choice" class="slide level2">
+<section id="when-derived-tables-are-a-good-choice" class="slide level2 smaller">
 <h2>When Derived Tables Are a Good Choice</h2>
 <ul>
 <li class="fragment">Intermediate results needed only once<br>
@@ -1461,7 +1479,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 <li class="fragment">Preparing logic for CTE refactoring</li>
 </ul>
 </section>
-<section id="why-derived-tables-become-limiting" class="slide level2">
+<section id="why-derived-tables-become-limiting" class="slide level2 smaller">
 <h2>Why Derived Tables Become Limiting</h2>
 <ul>
 <li class="fragment">Deep nesting hurts readability<br>
@@ -1470,24 +1488,13 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 </li>
 <li class="fragment">Debugging is harder than with CTEs</li>
 </ul>
-</section>
-<section id="transition-to-common-table-expressions-ctes" class="slide level2">
-<h2>Transition to Common Table Expressions (CTEs)</h2>
-</section>
-<section id="motivation" class="slide level2">
-<h2>Motivation</h2>
-<ul>
-<li class="fragment">Derived tables create <strong>inline pipelines</strong>.<br>
-</li>
-<li class="fragment">CTEs turn those pipelines into <strong>named, readable workflows</strong>.</li>
-</ul>
 </section></section>
 <section>
 <section id="common-table-expressions-ctes" class="title-slide slide level1 center">
 <h1>Common Table Expressions (CTEs)</h1>
 
 </section>
-<section id="why-ctes" class="slide level2">
+<section id="why-ctes" class="slide level2 smaller">
 <h2>Why CTEs?</h2>
 <p>Derived tables create <strong>inline pipelines</strong>.<br>
 CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
@@ -1497,7 +1504,7 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 <li class="fragment">Better for reasoning, debugging, and teaching</li>
 </ul>
 </section>
-<section id="mental-model-2" class="slide level2">
+<section id="mental-model-2" class="slide level2 smaller">
 <h2>Mental Model</h2>
 <blockquote>
 <p>Build a readable data pipeline step by step.</p>
@@ -1508,7 +1515,7 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 <li class="fragment">SQL reads top → bottom</li>
 </ul>
 </section>
-<section id="what-is-a-cte" class="slide level2">
+<section id="what-is-a-cte" class="slide level2 smaller">
 <h2>What Is a CTE?</h2>
 <p>A <strong>Common Table Expression (CTE)</strong> is a named, temporary result set defined using <code>WITH</code>.</p>
 <ul>
@@ -1517,7 +1524,7 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 <li class="fragment">Designed for multi-step analytics</li>
 </ul>
 </section>
-<section id="simple-syntax" class="slide level2">
+<section id="simple-syntax" class="slide level2 smaller">
 <h2>Simple Syntax</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a></a><span class="kw">WITH</span> cte_name <span class="kw">AS</span> (</span>
 <span id="cb19-2"><a></a>    <span class="kw">SELECT</span> <span class="op">..</span>.</span>
@@ -1532,7 +1539,7 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 <li class="fragment">Exists only within the statement</li>
 </ul>
 </section>
-<section id="pipeline-of-ctes" class="slide level2">
+<section id="pipeline-of-ctes" class="slide level2 smaller">
 <h2>Pipeline of CTEs</h2>
 <p>CTEs naturally form <strong>pipelines</strong>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a></a><span class="kw">WITH</span> step1 <span class="kw">AS</span> (</span>
@@ -1550,7 +1557,7 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 <span id="cb20-13"><a></a><span class="kw">FROM</span> step3;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Each step builds on the previous one.</p>
 </section>
-<section id="ctes-in-the-analytical-workflow" class="slide level2">
+<section id="ctes-in-the-analytical-workflow" class="slide level2 smaller">
 <h2>CTEs in the Analytical Workflow</h2>
 <div class="cell" data-reveal="true" data-layout-align="default">
 <div class="cell-output-display">
@@ -1569,7 +1576,7 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 </div>
 <p>Each CTE is a <strong>logical checkpoint</strong>.</p>
 </section>
-<section id="simple-example-conceptual-2" class="slide level2">
+<section id="simple-example-conceptual-2" class="slide level2 smaller">
 <h2>Simple Example (Conceptual)</h2>
 <p><strong>Input Table: <code>employees</code></strong></p>
 <table class="caption-top">
@@ -1603,14 +1610,8 @@ CTEs make those pipelines <strong>named, readable, and reusable</strong>.</p>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="business-question" class="slide level2">
-<h2>Business Question</h2>
-<p>Compute average salary per department<br>
-and keep only departments above 1000.</p>
-</section>
-<section id="query-1" class="slide level2">
-<h2>Query</h2>
+<p><strong>Q:</strong> Compute average salary per department and keep only departments above 1000.</p>
+<div class="fragment">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a></a><span class="kw">WITH</span> dept_avg <span class="kw">AS</span> (</span>
 <span id="cb21-2"><a></a>    <span class="kw">SELECT</span></span>
 <span id="cb21-3"><a></a>        department,</span>
@@ -1623,9 +1624,9 @@ and keep only departments above 1000.</p>
 <span id="cb21-10"><a></a>    avg_salary</span>
 <span id="cb21-11"><a></a><span class="kw">FROM</span> dept_avg</span>
 <span id="cb21-12"><a></a><span class="kw">WHERE</span> avg_salary <span class="op">&gt;</span> <span class="dv">1000</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output-2" class="slide level2">
-<h2>Output</h2>
+<p><span class="math inline">\(\downarrow\)</span></p>
+</div>
+<div class="fragment">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1640,8 +1641,9 @@ and keep only departments above 1000.</p>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
-<section id="key-observations" class="slide level2">
+<section id="key-observations" class="slide level2 smaller">
 <h2>Key Observations</h2>
 <ul>
 <li class="fragment">Each CTE is a named intermediate result</li>
@@ -1649,26 +1651,21 @@ and keep only departments above 1000.</p>
 <li class="fragment">Matches analytical thinking</li>
 </ul>
 </section>
-<section id="why-ctes-improve-readability" class="slide level2">
+<section id="why-ctes-improve-readability" class="slide level2 smaller">
 <h2>Why CTEs Improve Readability</h2>
 <ul>
 <li class="fragment">Derived tables → inside-out reading</li>
 <li class="fragment">CTEs → step-by-step reading</li>
 <li class="fragment">Easier to debug and extend</li>
 </ul>
-</section></section>
-<section>
-<section id="analytics-schema-example-2" class="title-slide slide level1 center">
-<h1>Analytics Schema Example</h1>
-
 </section>
-<section id="business-question-1" class="slide level2">
-<h2>Business Question</h2>
-<p>What is the <strong>average order revenue per customer</strong>,<br>
-and which customers are above the overall average?</p>
-</section>
-<section id="query-2" class="slide level2">
-<h2>Query</h2>
+<section id="business-question-analytics-schema" class="slide level2 smaller">
+<h2>Business Question | Analytics Schema</h2>
+<blockquote>
+<p>What is the <strong>average order revenue per customer</strong>, and which customers are above the overall average?</p>
+</blockquote>
+<div class="fragment">
+<p><span class="math inline">\(\downarrow\)</span></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a></a><span class="kw">WITH</span> customer_avg <span class="kw">AS</span> (</span>
 <span id="cb22-2"><a></a>    <span class="kw">SELECT</span></span>
 <span id="cb22-3"><a></a>        customer_id,</span>
@@ -1685,8 +1682,9 @@ and which customers are above the overall average?</p>
 <span id="cb22-14"><a></a>          <span class="kw">SELECT</span> <span class="fu">AVG</span>(order_revenue)</span>
 <span id="cb22-15"><a></a>          <span class="kw">FROM</span> tmp_order_revenue</span>
 <span id="cb22-16"><a></a>      );</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
-<section id="input-output" class="slide level2">
+<section id="input-output" class="slide level2 smaller">
 <h2>Input → Output</h2>
 <p><strong>Input Tables</strong></p>
 <ul>
@@ -1695,9 +1693,8 @@ and which customers are above the overall average?</p>
 <li><code>products</code></li>
 </ul>
 <p>(aggregated into <code>tmp_order_revenue</code>)</p>
-</section>
-<section id="cte-customer_avg" class="slide level2">
-<h2>CTE: <code>customer_avg</code></h2>
+<p><span class="math inline">\(\downarrow\)</span></p>
+<p><code>customer_avg</code></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1720,9 +1717,7 @@ and which customers are above the overall average?</p>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="final-output" class="slide level2">
-<h2>Final Output</h2>
+<p><span class="math inline">\(\downarrow\)</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1747,7 +1742,7 @@ and which customers are above the overall average?</p>
 <h1>Nested CTEs (Pipeline)</h1>
 
 </section>
-<section id="business-question-2" class="slide level2">
+<section id="business-question" class="slide level2 smaller">
 <h2>Business Question</h2>
 <p>For each city, compute:</p>
 <ul>
@@ -1755,7 +1750,7 @@ and which customers are above the overall average?</p>
 <li class="fragment">Maximum customer spend</li>
 </ul>
 </section>
-<section id="step-by-step-cte-pipeline" class="slide level2">
+<section id="step-by-step-cte-pipeline" class="slide level2 smaller">
 <h2>Step-by-Step CTE Pipeline</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource sql number-lines code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a></a><span class="kw">WITH</span> customer_spend <span class="kw">AS</span> (</span>
 <span id="cb23-2"><a></a>    <span class="kw">SELECT</span></span>
@@ -1778,9 +1773,7 @@ and which customers are above the overall average?</p>
 <span id="cb23-19"><a></a>)</span>
 <span id="cb23-20"><a></a><span class="kw">SELECT</span> <span class="op">*</span></span>
 <span id="cb23-21"><a></a><span class="kw">FROM</span> city_agg;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output-3" class="slide level2">
-<h2>Output</h2>
+<p><span class="math inline">\(\downarrow\)</span></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1803,7 +1796,7 @@ and which customers are above the overall average?</p>
 </tbody>
 </table>
 </section>
-<section id="ctes-vs-other-constructs" class="slide level2">
+<section id="ctes-vs-other-constructs" class="slide level2 smaller">
 <h2>CTEs vs Other Constructs</h2>
 <table class="caption-top">
 <thead>
@@ -1842,7 +1835,7 @@ and which customers are above the overall average?</p>
 </tbody>
 </table>
 </section>
-<section id="when-ctes-are-the-right-choice" class="slide level2">
+<section id="when-ctes-are-the-right-choice" class="slide level2 smaller">
 <h2>When CTEs Are the Right Choice</h2>
 <ul>
 <li class="fragment">Multi-step analytical workflows</li>
@@ -1851,7 +1844,7 @@ and which customers are above the overall average?</p>
 <li class="fragment">Preparing for window functions</li>
 </ul>
 </section>
-<section id="limitations-of-ctes" class="slide level2">
+<section id="limitations-of-ctes" class="slide level2 smaller">
 <h2>Limitations of CTEs</h2>
 <ul>
 <li class="fragment">Scoped to a single query</li>
