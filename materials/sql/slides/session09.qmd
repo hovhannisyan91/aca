@@ -40,9 +40,9 @@ image_path: "/img/sql/09"
 
 # Temporary Tables
 
-## Why Temporary Tables Exist
+## Why Temporary Tables Exist {.smaller}
 
-In real analytical work, SQL queries are rarely written once and discarded.
+In **real analytical work**, SQL queries are rarely written once and discarded.
 
 - Joins are repeated across questions  
 - Business logic is reused and refined  
@@ -52,11 +52,11 @@ In real analytical work, SQL queries are rarely written once and discarded.
 
 Temporary tables allow us to **materialize intermediate results** and reuse them cleanly.
 
-## What Is a Temporary Table?
+## What Is a Temporary Table? {.smaller}
 
 A temporary table is a **session-scoped** database table used to store intermediate query results.
 
-- Exists only within the current database session  
+- Exists **only** within the **current database session**  
 - Automatically dropped at session end  
 - Isolated per user connection  
 - Behaves like a regular table  
@@ -77,7 +77,7 @@ flowchart LR
 ```
 
 
-## Creating a Temporary Table
+## Creating a Temporary Table {.smaller}
 
 Temporary tables are created using `CREATE TEMP TABLE`.
 
@@ -85,7 +85,7 @@ Temporary tables are created using `CREATE TEMP TABLE`.
 - Can be queried multiple times  
 - Suitable for multi-step analytics  
 
-## Example: Order-Level Revenue
+## Example: Order-Level Revenue {.smaller}
 
 ```{.sql code-line-numbers="1|1-10"}
 CREATE TEMP TABLE tmp_order_revenue AS
@@ -99,14 +99,13 @@ JOIN analytics.order_items oi ON o.order_id = oi.order_id
 JOIN analytics.products p ON oi.product_id = p.product_id
 GROUP BY o.order_id, o.customer_id, o.order_date;
 ```
-
-
+. . .
 
 > `tmp_order_revenue` behaves like a normal table.
 
-## Inspecting Temporary Tables
+## Inspecting Temporary Tables {.smaller}
 
-Before continuing analysis, intermediate results should be validated.
+**Before continuing analysis, intermediate results should be validated.**
 
 - Row counts  
 - Value ranges  
@@ -121,7 +120,13 @@ SELECT
 FROM tmp_order_revenue;
 ```
 
-## Reusing Temporary Tables
+. . .
+
+| total_orders | min_revenue | max_revenue | avg_revenue |
+|-------------:|------------:|------------:|------------:|
+| 120 | 5.98 | 89.97 | 28.63 |
+
+## Reusing Temporary Tables {.smaller}
 
 Once created, the temporary table can be reused without recomputing joins.
 
@@ -133,10 +138,21 @@ FROM tmp_order_revenue
 GROUP BY customer_id;
 ```
 
+. . .
+
+| customer_id | avg_order_revenue |
+|------------:|------------------:|
+| 11 | 11.49 |
+| 9  | 10.99 |
+| 15 | 11.49 |
+| 19 | 11.49 |
+| 3  | 11.49 |
+| 17 | 10.99 |
+
 **This separation clarifies intent:**
 
-- Step 1: Define revenue  
-- Step 2: Analyze revenue  
+1. Define revenue  
+2. Analyze revenue  
 
 ##  Example: City-Level Revenue {.smaller}
 
@@ -166,7 +182,17 @@ FROM tmp_customer_spend
 GROUP BY city_id;
 ```
 
-## Why Not Repeat the Query?
+. . .
+
+| city_id | avg_customer_spend | max_customer_spend |
+|--------:|-------------------:|-------------------:|
+| 3 | 176.8866666666666667 | 230.86 |
+| 5 | 262.8650000000000000 | 294.87 |
+| 4 | 115.4175000000000000 | 260.85 |
+| ... | ... | ... |
+
+
+## Why Not Repeat the Query? {.smaller}
 
 **Without temporary tables, the same logic must be repeated.**
 
@@ -189,9 +215,9 @@ flowchart TB
     T --> R3[Analysis 3]
 ```
 
-Temporary tables reduce duplication and cognitive load.
+**Temporary tables reduce duplication and cognitive load.**
 
-## Performance and Practical Considerations
+## Performance and Practical Considerations {.smaller}
 
 ::: {.incremental}
 
@@ -212,13 +238,12 @@ Temporary tables reduce duplication and cognitive load.
 
 # Subqueries
 
-## What Is a Subquery?
+## What Is a Subquery? {.smaller}
 
 **A subquery is a query nested inside another SQL query.**
 
 Unlike temporary tables, subqueries do **not** materialize intermediate results as standalone objects.  
 Instead, they embed logic directly inside a statement and are evaluated as part of query execution.
-
 
 . . .
 
@@ -230,7 +255,7 @@ Instead, they embed logic directly inside a statement and are evaluated as part 
 Subqueries are most useful when intermediate results are needed **only once and do not justify explicit materialization.**
 
 
-## Temporary Tables vs. Subqueries
+## Temporary Tables vs. Subqueries {.smaller}
 
 **Temporary tables** externalize intermediate results as named objects. Subqueries take the next step by embedding intermediate logic directly inside a query.
 
@@ -239,7 +264,7 @@ Subqueries are most useful when intermediate results are needed **only once and 
 - Better suited for **one-off** comparisons  
 
 
-## Types of Subqueries
+## Types of Subqueries {.smaller}
 
 **We will study subqueries in the following order:**
 
@@ -253,7 +278,7 @@ Subqueries are most useful when intermediate results are needed **only once and 
 
 # Filter Subqueries
 
-## What Are Filter Subqueries?
+## What Are Filter Subqueries? {.smaller}
 
 Filter subqueries are used to **restrict rows** in the outer query based on the result of another query.
 
@@ -304,24 +329,15 @@ WHERE salary > (
 | 4 | IT | 1100 |
 
 
-## Example from `Analytics Schema`
+## Example from `Analytics Schema` {.smaller}
 
->Which customers have an **average order revenue above the overall average order revenue**?
-
-
-## Step 1: Subquery (Overall Average)
+**Q:** Which customers have an **average order revenue above the overall average order revenue**?
 
 ```sql
 SELECT
     AVG(order_revenue)
 FROM tmp_order_revenue;
 ```
-
-::: {.callout-warning title="In case of errors"}
-If you encounter an error, recreate the temporary table `tmp_order_revenue` before running this query.
-:::
-
-## Step 2: Filter Query Using Subquery
 
 ```sql
 SELECT
@@ -336,51 +352,43 @@ HAVING AVG(order_revenue) >
        );
 ```
 
-
-
-## Output 
-
-
 | customer_id | avg_customer_revenue |
 | ----------: | -------------------: |
 |           4 |                38.48 |
 |          10 |                49.15 |
 |           6 |                56.64 |
-|          14 |                49.15 |
-|           2 |                49.15 |
 |          ... |                ... |
 
+::: {.callout-warning title="In case of errors"}
+If you encounter an error, recreate the temporary table `tmp_order_revenue` before running this query.
+:::
 
 <!-- here -->
 
-## Filter Subquery Using Another Table (Conceptual)
-
-**Input Tables** `employees` and `departments`
+## Filter Subquery Using Another Table (Conceptual)  {.smaller}
 
 
+**Q:** Select employees earning **above their department’s target salary**.
+
+::: {.columns}
+::: {.column}
 | emp_id | department | salary |
 |------:|-----------:|-------:|
 | 1 | Sales | 1200 |
 | 2 | Sales | 900 |
 | 3 | IT | 1500 |
-
-
-
-
+:::
+::: {.column}
 | department | target_salary |
 |-----------:|--------------:|
 | Sales | 1000 |
 | IT | 1300 |
+:::
+:::
+<!-- end columns -->
 
---- 
+. . .
 
-$$\downarrow$$
-
-**Q:** Select employees earning **above their department’s target salary**.
-
---- 
-
-$$\downarrow$$
 
 ```sql
 SELECT *
@@ -392,7 +400,8 @@ WHERE salary > (
 );
 ```
 
-$$\downarrow$$
+. . .
+
 
 | emp_id | department | salary |
 |------:|-----------:|-------:|
@@ -401,11 +410,9 @@ $$\downarrow$$
 
 
 
-## Subquery Using Another Table `Analytics Schema`
+## Subquery Using Another Table `Analytics Schema` {.smaller}
 
 Which customers have **total spend above the average spend of all customers**?
-
-## Query {.smaller}
 
 ```{.sql code-line-numbers="1-3|4-11|13-25"}
 SELECT
@@ -434,35 +441,9 @@ WHERE (
 
 This query uses **multiple tables inside the filter subquery** while still producing a single comparison value.
 
----
 
 
-##### Input Tables
-
-- `customers`
-- `orders`
-- `order_items`
-- `products`
-
-##### Output Table
-
-| customer_id |
-|------------:|
-| 4 |
-| 6 |
-| 10 |
-| 18 |
-
----
-
-::: {.callout-warning title="Common Issue"}
-Ensure that filter subqueries return a value compatible with the comparison operator  
-(e.g., a single scalar value for `>`, `<`, `=`).
-:::
-
-
-
-## When to Use?
+## When to Use? {.smaller} {.smaller}
 
 - Filtering based on **global** or **group-level** aggregates  
 - One-off analytical conditions  
@@ -471,7 +452,7 @@ Ensure that filter subqueries return a value compatible with the comparison oper
 
 # Column Subqueries (`SELECT`)
 
-## What Is a Column Subquery?
+## What Is a Column Subquery?  {.smaller}
 
 A column subquery returns a **single value** and is evaluated for **each row** of the outer query.
 
@@ -483,7 +464,7 @@ A column subquery returns a **single value** and is evaluated for **each row** o
 
 :::
 
-## Mental Model
+## Mental Model {.smaller}
 
 > Attach a contextual metric to each row.
 
@@ -500,7 +481,7 @@ This is often where subqueries feel **powerful but heavy**.
 
 :::
 
-## Conceptual Flow
+## Conceptual Flow {.smaller}
 
 ```{mermaid}
 flowchart LR
@@ -510,7 +491,6 @@ flowchart LR
 ```
 
 ## Simple Example (Conceptual) {.smaller}
-
 
 | emp_id | department | salary |
 |------:|-----------:|-------:|
@@ -530,13 +510,15 @@ FROM employees;
 
 . . .
 
+$$\downarrow$$
+
 | emp_id | salary | avg_salary |
 |------:|-------:|-----------:|
 | 1 | 1200 | 1200 |
 | 2 | 900 | 1200 |
 | 3 | 1500 | 1200 |
 
-## Interpretation
+## Interpretation {.smaller}
 
 ::: {.incremental}
 
@@ -571,7 +553,7 @@ FROM tmp_order_revenue;
 | 102 | 55.00 | 47.18 |
 | 103 | 38.00 | 47.18 |
 
-## Using Another Table (Conceptual) {smaller}
+## Using Another Table (Conceptual) {.smaller}
 
 `employees`
 
@@ -588,7 +570,7 @@ FROM tmp_order_revenue;
 | Sales | 1000 |
 | IT | 1300 |
 
-## Query & Output
+## Query & Output {.smaller}
 
 ```sql
 SELECT
@@ -611,7 +593,7 @@ FROM employees e;
 | 3 | 1500 | 1300 |
 
 
-## Key Observation
+## Key Observation {.smaller}
 
 This is a **correlated scalar subquery**.
 
@@ -654,7 +636,7 @@ SELECT
 FROM analytics.customers c;
 ```
 
-## Output
+## Output {.smaller}
 
 | customer_id | customer_spend | avg_city_spend |
 |------------:|---------------:|---------------:|
@@ -662,7 +644,7 @@ FROM analytics.customers c;
 | 6 | 240.00 | 198.75 |
 | 10 | 165.40 | 198.75 |
 
-## Important Rule
+## Important Rule {.smaller}
 
 ::: {.callout-warning}
 
@@ -673,7 +655,7 @@ A column subquery **must return exactly one value per outer row**.
 
 :::
 
-## When Column Subqueries Are Useful
+## When Column Subqueries Are Useful {.smaller}
 
 ::: {.incremental}
 
@@ -683,7 +665,7 @@ A column subquery **must return exactly one value per outer row**.
 
 :::
 
-## Why Column Subqueries Become Limiting
+## Why Column Subqueries Become Limiting {.smaller}
 
 ::: {.incremental}
 
@@ -696,7 +678,7 @@ A column subquery **must return exactly one value per outer row**.
 
 # Derived Tables (`FROM`)
 
-## What Is a Derived Table?
+## What Is a Derived Table? {.smaller}
 
 A **derived table** is a subquery used inside the `FROM` clause.
 
@@ -708,7 +690,7 @@ A **derived table** is a subquery used inside the `FROM` clause.
 
 :::
 
-## Mental Model
+## Mental Model {.smaller}
 
 > Create an inline dataset, then query it.
 
@@ -722,7 +704,7 @@ Derived tables sit conceptually **between** column subqueries and CTEs.
 
 :::
 
-## Conceptual Flow
+## Conceptual Flow {.smaller}
 
 ```{mermaid}
 flowchart LR
@@ -765,7 +747,7 @@ WHERE avg_salary > 1000;
 |-----------:|-----------:|
 | IT | 1300 |
 
-## Key Observation
+## Key Observation {.smaller}
 
 ::: {.incremental}
 
@@ -856,7 +838,7 @@ GROUP BY city_id;
 | 2 | 198.75 | 240.00 |
 | 5 | 154.30 | 182.50 |
 
-## Important Rule
+## Important Rule {.smaller}
  
 ::: {.callout-warning}
 
@@ -872,7 +854,7 @@ Without an alias, the query will **fail.**
 
 :::
 
-## When Derived Tables Are a Good Choice
+## When Derived Tables Are a Good Choice {.smaller}
 
 ::: {.incremental}
 
@@ -883,7 +865,7 @@ Without an alias, the query will **fail.**
 
 :::
 
-## Why Derived Tables Become Limiting
+## Why Derived Tables Become Limiting {.smaller}
 
 ::: {.incremental}
 
@@ -893,21 +875,10 @@ Without an alias, the query will **fail.**
 
 :::
 
-## Transition to Common Table Expressions (CTEs)
-
-## Motivation
-
-::: {.incremental}
-
-- Derived tables create **inline pipelines**.  
-- CTEs turn those pipelines into **named, readable workflows**.
-
-:::
-
 
 # Common Table Expressions (CTEs)
 
-## Why CTEs?
+## Why CTEs? {.smaller}
 
 Derived tables create **inline pipelines**.  
 CTEs make those pipelines **named, readable, and reusable**.
@@ -920,7 +891,7 @@ CTEs make those pipelines **named, readable, and reusable**.
 
 :::
 
-## Mental Model
+## Mental Model {.smaller}
 
 > Build a readable data pipeline step by step.
 
@@ -932,7 +903,7 @@ CTEs make those pipelines **named, readable, and reusable**.
 
 :::
 
-## What Is a CTE?
+## What Is a CTE? {.smaller}
 
 A **Common Table Expression (CTE)** is a named, temporary result set defined using `WITH`.
 
@@ -944,7 +915,7 @@ A **Common Table Expression (CTE)** is a named, temporary result set defined usi
 
 :::
 
-## Simple Syntax
+## Simple Syntax {.smaller}
 
 ```sql
 WITH cte_name AS (
@@ -964,7 +935,7 @@ WHERE ...;
 
 :::
 
-## Pipeline of CTEs
+## Pipeline of CTEs {.smaller}
 
 CTEs naturally form **pipelines**.
 
@@ -986,7 +957,7 @@ FROM step3;
 
 Each step builds on the previous one.
 
-## CTEs in the Analytical Workflow
+## CTEs in the Analytical Workflow {.smaller}
 
 ```{mermaid}
 flowchart LR
@@ -997,7 +968,7 @@ flowchart LR
 
 Each CTE is a **logical checkpoint**.
 
-## Simple Example (Conceptual)
+## Simple Example (Conceptual) {.smaller}
 
 **Input Table: `employees`**
 
@@ -1008,12 +979,11 @@ Each CTE is a **logical checkpoint**.
 | 3 | IT | 1500 |
 | 4 | IT | 1100 |
 
-## Business Question
 
-Compute average salary per department  
-and keep only departments above 1000.
 
-## Query
+**Q:** Compute average salary per department  and keep only departments above 1000.
+
+. . .
 
 ```sql
 WITH dept_avg AS (
@@ -1030,13 +1000,16 @@ FROM dept_avg
 WHERE avg_salary > 1000;
 ```
 
-## Output
+$\downarrow$
+
+. . .
+
 
 | department | avg_salary |
 |-----------:|-----------:|
 | IT | 1300 |
 
-## Key Observations
+## Key Observations {.smaller}
 
 ::: {.incremental}
 
@@ -1046,7 +1019,7 @@ WHERE avg_salary > 1000;
 
 :::
 
-## Why CTEs Improve Readability
+## Why CTEs Improve Readability {.smaller}
 
 ::: {.incremental}
 
@@ -1056,14 +1029,13 @@ WHERE avg_salary > 1000;
 
 :::
 
-# Analytics Schema Example
+## Business Question | Analytics Schema  {.smaller}
 
-## Business Question
+>What is the **average order revenue per customer**,  and which customers are above the overall average?
 
-What is the **average order revenue per customer**,  
-and which customers are above the overall average?
+. . .
 
-## Query
+$\downarrow$
 
 ```sql
 WITH customer_avg AS (
@@ -1084,7 +1056,7 @@ WHERE avg_order_revenue >
       );
 ```
 
-## Input → Output
+## Input → Output {.smaller}
 
 **Input Tables**
 
@@ -1094,7 +1066,9 @@ WHERE avg_order_revenue >
 
 (aggregated into `tmp_order_revenue`)
 
-## CTE: `customer_avg`
+$\downarrow$
+
+`customer_avg`
 
 | customer_id | avg_order_revenue |
 |------------:|------------------:|
@@ -1102,16 +1076,18 @@ WHERE avg_order_revenue >
 | 6 | 56.64 |
 | 10 | 49.15 |
 
-## Final Output
+$\downarrow$
 
 | customer_id | avg_order_revenue |
 |------------:|------------------:|
 | 6 | 56.64 |
 | 10 | 49.15 |
 
+
+
 # Nested CTEs (Pipeline)
 
-## Business Question
+## Business Question {.smaller}
 
 For each city, compute:
 
@@ -1122,7 +1098,7 @@ For each city, compute:
 
 :::
 
-## Step-by-Step CTE Pipeline
+## Step-by-Step CTE Pipeline {.smaller}
 
 ```sql
 WITH customer_spend AS (
@@ -1148,14 +1124,14 @@ SELECT *
 FROM city_agg;
 ```
 
-## Output
+$\downarrow$
 
 | city_id | avg_city_spend | max_city_spend |
 |-------:|---------------:|---------------:|
 | 2 | 198.75 | 240.00 |
 | 5 | 154.30 | 182.50 |
 
-## CTEs vs Other Constructs
+## CTEs vs Other Constructs {.smaller}
 
 | Feature | Derived Table | CTE | Temporary Table |
 |-------|---------------|-----|-----------------|
@@ -1164,7 +1140,7 @@ FROM city_agg;
 | Lifetime | Single query | Single query | Session |
 | Readability | Medium | High | High |
 
-## When CTEs Are the Right Choice
+## When CTEs Are the Right Choice {.smaller}
 
 ::: {.incremental}
 
@@ -1175,7 +1151,7 @@ FROM city_agg;
 
 :::
 
-## Limitations of CTEs
+## Limitations of CTEs {.smaller}
 
 ::: {.incremental}
 
