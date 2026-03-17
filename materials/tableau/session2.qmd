@@ -1270,404 +1270,485 @@ The choice depends on **when** and **at what level** the calculation should be e
 
 ---
 
-### 1. Basic Calculations
+## Types of Calculations in Tableau
 
-Basic calculations operate either at:
+Calculations in Tableau allow analysts to transform data, apply business logic, and create analytical metrics directly within the visualization environment.
 
-- **Row level** (before aggregation), or  
-- **Aggregate level** (after aggregation in the view)
+Tableau calculations can be evaluated at different stages of the data processing pipeline. The most fundamental distinction is between **row-level calculations** and **aggregate calculations**.
 
-They are the most commonly used calculation type.
+Level of Detail (LOD) expressions extend this concept by allowing analysts to explicitly control the **granularity of calculations** independent of the visualization.
 
-**Examples:**
-- Categorizing orders as High / Low value  
-- Calculating revenue per unit  
-- Applying conditional logic using `IF`, `IIF`, or `CASE`
-
-Basic calculations adapt automatically to the level of detail of the visualization.
-
----
-
-### 2. Level of Detail (LOD) Expressions
-
-LOD expressions provide **explicit control over granularity**, independent of the view.
-
-They allow you to calculate values at:
-- A **more detailed level** → `INCLUDE`
-- A **less detailed level** → `EXCLUDE`
-- A **fixed level**, regardless of the view → `FIXED`
-
-LOD expressions are especially useful when:
-- You need consistent results across different views
-- Aggregation changes would otherwise distort calculations
-
-LOD calculations can be evaluated **before or after aggregation**, depending on their type.
+```{mermaid}
+flowchart LR
+A[Raw Data Rows] --> B[Row-Level Calculations]
+B --> C[Aggregation Based on View]
+C --> D[Aggregate Calculations]
+D --> E[Visualization]
+```
 
 ---
 
-### 3. Table Calculations
+## Calculated Fields
 
-Table calculations operate **only on the results shown in the view**.
+A **calculated field** is a new field created using existing data fields and formulas.
 
-Key characteristics:
-- Calculated **after aggregation**
-- Depend on the structure of the visualization
-- Recalculate when the layout of the view changes
+Calculated fields allow analysts to:
 
-**Examples:**
-- Running totals  
-- Moving averages  
-- Percent of total  
-- Rank  
+  
+- Create new metrics  
+- Apply business logic  
+- Categorize data  
+- Perform mathematical operations  
+- Transform or combine columns  
 
-Table calculations are ideal for **trend and comparison analysis**, not data modeling.
+To create a calculated field in Tableau:
 
----
-
-## Choosing the Right Calculation Type
-
-| Question | Recommended Calculation |
-|--------|-------------------------|
-| Does this depend on individual rows? | Basic (Row-Level) |
-| Should this ignore the view’s granularity? | LOD Expression |
-| Does this depend on what’s visible in the view? | Table Calculation |
-
-The calculation type you choose directly affects **accuracy and interpretation**.
-
----
-
-## Creating a Calculated Field
-
-Once the calculation type is clear, you can create a calculated field:
-
-1. Go to **Analysis → Create Calculated Field**
-2. Enter a meaningful name
-3. Write the calculation logic
-4. Validate and save
+  
+1. Go to **Analysis → Create Calculated Field**  
+2. Enter a name for the calculation  
+3. Write the formula  
+4. Validate and save  
 
 ![Calculated Field]({{< meta image_path >}}/w2_calculated_field.png)
 
-**Example: Order Line Revenue**
+---
 
-`[Quantity] * [Unit Price]`
+## Row-Level Calculations
+
+Row-level calculations operate on **individual records before aggregation occurs**.
+
+This means the formula is applied to **each row in the dataset independently**.
+
+Row-level calculations are commonly used for:
+
+  
+- Creating derived measures  
+- Transforming numeric values  
+- Creating categorical classifications  
+- Performing arithmetic operations between fields  
+
+### Example: Order Line Revenue
+
+```
+[Quantity] * [Unit Price]
+```
+
+Each record calculates the revenue of that specific order line.
 
 ![Revenue calculation]({{< meta image_path >}}/w2_revenue_calculation.png)
 
+When this calculated field is placed in the view, Tableau will **automatically aggregate the results**.
+
 ![Revenue]({{< meta image_path >}}/w2_revenue.png)
+
+---
 
 ## Aggregate Calculations
 
-Aggregate calculations are evaluated **after data is grouped** based on the dimensions present in the view.
+Aggregate calculations operate **after Tableau groups data based on the dimensions present in the view**.
 
-They are used when results should change with:
-- Dimensions in the view  
-- Filters and context filters  
+Instead of evaluating individual rows, aggregate calculations summarize multiple records into a **single value per group**.
+
+Common aggregation functions include:
+
+  
+- `SUM()`  
+- `AVG()`  
+- `COUNT()`  
+- `COUNTD()`  
+- `MIN()`  
+- `MAX()`  
+
+Aggregate calculations depend on:
+
+  
+- The dimensions placed in the view  
+- Filters applied to the data  
+- The level of aggregation in the visualization  
 
 ### Example: Average Order Value
 
+```sql
+SUM([Order Total]) / COUNTD([Order ID])
+```
 
-`SUM([Order Total]) / COUNTD([Order ID])`
+This calculation returns the **average revenue generated per order**.
 
 ![Average Order Value]({{< meta image_path >}}/w2_average_order_value.png)
 
-Changing the view (for example, adding **Region** or **Year**) will change the result of an aggregate calculation.
+If additional dimensions such as **Region** or **Year** are added to the view, the aggregation level changes and the result will update accordingly.
+
+---
+
+## Row-Level vs Aggregate Calculations
+
+| Calculation Type | Evaluation Stage | Granularity |
+|---|---|---|
+| Row-Level | Before aggregation | Individual records |
+| Aggregate | After aggregation | Groups defined in the view |
+
+Understanding this distinction is essential because Tableau does not allow **mixing row-level fields and aggregate fields incorrectly in the same calculation**.
 
 ---
 
 ## Level of Detail (LOD) Expressions
 
-LOD expressions allow you to **explicitly control calculation granularity**, independent of the visualization.
+Level of Detail expressions allow analysts to **explicitly define the granularity of a calculation**, independent of the fields used in the visualization.
+
+Normally, Tableau determines aggregation based on the **dimensions present in the view**.
+
+LOD expressions override this behavior by specifying the exact level at which a calculation should be computed.
+
+There are three types of LOD expressions:
+
+  
+- **FIXED**  
+- **INCLUDE**  
+- **EXCLUDE**  
+
+```{mermaid}
+flowchart LR
+A[Visualization Level] --> B[Default Aggregation]
+B --> C[LOD Override]
+C --> D[FIXED]
+C --> E[INCLUDE]
+C --> F[EXCLUDE]
+```
 
 ---
 
-### FIXED — Ignore the View
+## FIXED — Define a Fixed Granularity
 
-`FIXED` calculations compute values at a **specific level**, regardless of the dimensions present in the view.
+`FIXED` calculations compute values at a **specified level of detail**, regardless of the dimensions used in the view.
 
-#### Example: Customer Lifetime Value
+This makes them useful for calculations that must remain **stable across different visualizations**.
 
-`{ FIXED [Customer ID] : SUM([Order Total]) }`
+### Example: Customer Lifetime Value
+
+```sql
+{ FIXED [Customer ID] : SUM([Order Total]) }
+```
+
+This calculation computes the **total revenue generated by each customer**, even if the view only displays Region or Year.
 
 ![Customer Lifetime Value]({{< meta image_path >}}/w2_customer_lifetime_value.png)
 
-#### Example: Minimum Order Date per Customer
+---
 
-`{ FIXED [Customer ID] : MIN([Order Date]) }`
+### Example: Minimum Order Date per Customer
+
+```sql
+{ FIXED [Customer ID] : MIN([Order Date]) }
+```
+
+This calculation returns the **first purchase date for each customer**.
 
 ![Minimum Order Date per Customer]({{< meta image_path >}}/w2_customer_min_order_date.png)
 
+`FIXED` is typically used when:
 
-Use **FIXED** when:
-- A value must remain stable across different views  
-- You need customer-, product-, or order-level metrics  
-
-
+  
+- The calculation must ignore the dimensions in the view  
+- A metric should remain stable across dashboards  
+- Metrics must be calculated at a specific business entity level  
 
 ---
 
-### INCLUDE — Add Granularity
+## INCLUDE — Add Granularity
 
-`INCLUDE` calculations add **additional detail** to the calculation, even if that detail is not displayed in the view.
+`INCLUDE` expressions add **additional dimensions to the calculation level**, even if those dimensions are not present in the view.
 
-#### Example: Average Sales by Region-Year
+This allows the calculation to consider **more detailed data than the visualization displays**.
 
-`{ INCLUDE [Region] : AVG([Order Total]) }`
+### Example: Average Sales by Region-Year
 
-`AVG([Order Total])` would give us the average sales per year, but with `INCLUDE` we can calculate the average sales per region and then aggregate it at the year level, even if region is not in the view.
+```sql
+{ INCLUDE [Region] : AVG([Order Total]) }
+```
+
+Without `INCLUDE`, the calculation would compute the average sales **only at the year level**.
+
+With `INCLUDE`, Tableau first calculates the average **per region**, then aggregates those results to the year level.
 
 ![Average Sales by Region-Year]({{< meta image_path >}}/w2_average_sales_include.png)
 
-As you can see, the average sales by year is different when we include region in the calculation, because it calculates the average sales per region and then averages those values at the year level, rather than averaging all sales together.
-
 Use **INCLUDE** when:
 
-- You need more granular logic than the view displays  
+  
+- A calculation must consider additional detail not visible in the view  
 - The calculation should still respond to filters  
 
 ---
 
-### EXCLUDE — Remove Granularity
+## EXCLUDE — Remove Granularity
 
-`EXCLUDE` calculations remove a dimension from the calculation, even if it exists in the view.
+`EXCLUDE` removes a dimension from the level of detail of the calculation, even if that dimension appears in the view.
 
-#### Example: Sales Ignoring Category
+This allows the calculation to be performed at a **higher level of aggregation** than the visualization.
 
+### Example: Sales Ignoring Region
 
-`{ EXCLUDE [Region] : AVG([Order Total]) }`
+```sql
+{ EXCLUDE [Region] : AVG([Order Total]) }
+```
 
-## Using EXCLUDE in LOD Expressions
+Even if **Region** appears in the view, this calculation computes the average as if the Region dimension did not exist.
 
 ![Average Sales by Region/Excude]({{< meta image_path >}}/w2_average_sales_exclude.png)
 
 Use **EXCLUDE** when:
 
-- A dimension is required for display  
-- But should **not affect aggregation logic**
+  
+- A dimension is necessary for display  
+- But should not affect the aggregation logic  
 
-`EXCLUDE` removes a dimension from the level of detail calculation, even if it appears in the view.
+---
 
-## Differences in action
+## Differences Between LOD Expressions
 
 ![Differences of LOD expressions]({{< meta image_path >}}/w2_LOD_differences.png)
 
-Conclusion:
+In the visualization:
 
-As we can see in the view we have cantegory `Region`, dimension `Year` and the following calculations as measures:
+  
+- **Region** is used as a category  
+- **Year** is used as a dimension  
+- Multiple calculations appear as measures  
 
-- `AVG([Order Total])` → gives us the average sales per year for each region
-- `{ INCLUDE [Region] : AVG([Order Total]) }` → gives us the average sales per region and then averages those values at the year level. That's why we have the same value in the first and second columns as the category for aggregation is the same.
-- `{ EXCLUDE [Region] : AVG([Order Total]) }` → gives us the average sales per year, ignoring the region dimension. That's why we have the same value for all the regions.
-- `{ FIXED [Region] : AVG([Order Total]) }` → gives us the average sales per region, regardless of the year dimension in the view. That's why we have different values for each region, but they are the same across years.
+Interpretation of the calculations:
 
-## Table Calculations
+  
+- `AVG([Order Total])`  
+  → Calculates average sales **per Region and Year**
 
-Table calculations are evaluated **after aggregation** and depend entirely on the **structure and order of the view**.
+- `{ INCLUDE [Region] : AVG([Order Total]) }`  
+  → Calculates average sales **per Region**, then aggregates to Year
 
-They are ideal for:
+- `{ EXCLUDE [Region] : AVG([Order Total]) }`  
+  → Calculates average sales **per Year ignoring Region**
 
-- Trends  
-- Comparisons  
-- Sequential analysis  
-
----
-
-
-### Why Table Calculations Are Sensitive to Layout
-
-Table calculations are computed **based on the visible data in the view**.  
-This means they depend on:
-
-- The fields placed on Rows and Columns
-- The sorting order
-- The addressing and partitioning settings
-- Applied filters (especially dimension filters)
-
-Because of this, modifying the view can completely change the result.
+- `{ FIXED [Region] : AVG([Order Total]) }`  
+  → Calculates average sales **per Region regardless of Year**
 
 ---
 
-## Partitioning and Addressing in Table Calculations
+## When to Use LOD Expressions
 
-When you add a **table calculation**, you must account for **all dimensions in the level of detail**.  
-Each dimension must be used either for:
+LOD expressions are useful when calculations must be performed at **specific levels of granularity independent of the view**.
 
-- **Partitioning (scoping)**, or  
-- **Addressing (direction)**  
+Common use cases include:
+
+  
+- Customer lifetime value  
+- First purchase date calculations  
+- Cohort analysis  
+- Benchmark metrics  
+- Consistent KPIs across dashboards  
+
+LOD expressions are a powerful tool that allow Tableau to behave more like a **data modeling engine**, enabling complex analytical logic directly inside the visualization layer.
+
 
 ---
 
-### Partitioning Fields (Scope)
+## Tableau Basic Functions
 
-Partitioning fields define **how the data is grouped** before the table calculation is applied.
+Tableau provides a set of **basic built-in functions** that allow analysts to perform calculations, transform data, and create analytical logic within calculated fields.
 
-- They break the view into multiple **sub-tables (partitions)**  
-- The table calculation is performed **separately within each partition**  
-- They determine the **scope** of the calculation  
+These functions are used to manipulate data values, perform mathematical operations, categorize information, and convert data types when necessary.
 
-In other words, partitioning controls *where the calculation resets*.
+Functions are written inside **calculated fields** and typically follow the structure:
 
----
-
-### Addressing Fields (Direction)
-
-Addressing fields define **how the calculation moves within each partition**.
-
-- They determine the **direction** of the calculation  
-- They control the sequence of marks used in calculations such as:
-  - Running totals  
-  - Differences between values  
-  - Percent change  
-
-In short, addressing controls *how the calculation progresses*.
-
----
-
-### How Partitioning and Addressing Work Together
-
-1. Partitioning fields split the view into multiple sub-views (sub-tables).
-2. The table calculation is applied independently inside each partition.
-3. The addressing fields determine the direction in which the calculation moves through the marks within each partition.
-
-For example:
-
-- In a running total, addressing determines the order of accumulation.
-- In a difference calculation, addressing determines which value is compared to which.
-
-![Running Total Example]({{< meta image_path >}}/w2_running_total.png)
-
-![Difference Caalculation Example]({{< meta image_path >}}/w2_difference_calculation.png)
-
----
-
-### Specific Dimensions vs Compute Using
-
-When using **Compute Using** options, Tableau automatically assigns some dimensions as:
-
-- Partitioning fields  
-- Addressing fields  
-
-However, when selecting **Specific Dimensions**, you must manually decide:
-
-- Which dimensions define the partition (scope)  
-- Which dimensions define the addressing (direction)  
-
-![Rank: The direction of movement]({{< meta image_path >}}/w2_rank_movement.png)
-
-![Rank: Specific Dimension]({{< meta image_path >}}/w2_rank_specific_dimension.png)
-
-In the *Specific Dimensions* section of the Table Calculation dialog:
-
-- The order of fields determines the **direction of movement** through the marks: `Pane (Down)`
-- Checked dimensions define how Tableau computes the table calculation across the view: `Year of Order Date`, `Region`.
-
----
-
-::: {.callout-tip}
-
-A helpful mental model:
-
-- **Partitioning = Where does the calculation reset?**
-- **Addressing = In what order does it move?**
-
-Understanding this distinction is essential for correctly configuring running totals, rankings, percent differences, and other table calculations.
-
-:::
-
-
-### More Examples of Table Calculations
-
-## Using Table Calculations on *Marks card* fields
-
-When you place a table calculation on the **Marks card** Color, the table will be colored based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Color `SUM(Total Quantity)` will color the Revenue values based on the quantity values.
-
-![Marks Card Table Calculation]({{< meta image_path >}}/w2_marks_card_calculation.png)
-
-Year over year growth is another common use case for table calculations on the Marks card. For example, if you have `SUM(Revenue)` on the view and you add a table calculation that calculates the year-over-year growth of Revenue by Region.
-
-![Year over Year Growth Calculation]({{< meta image_path >}}/w2_year_over_year_growth_cal.png)
-
-![Year over Year Growth]({{< meta image_path >}}/w2_year_over_year_growth.png)
-
-## Using Table Calculations on *Rows or Columns* fields
-
-When you place a table calculation on the **Rows or Columns** shelf, the table will be calculated based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Rows or Columns `Moving Average` will add a moving average line to the view based on the Revenue values.
-
-![Moving Average Example]({{< meta image_path >}}/w2_moving_average.png)
-
-
-When you place a table calculation on the **Filters** shelf, the table will be filtered based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Filters `Rank` will filter the view to show only the top N values based on the Revenue values.
-
-## Influence of Filters, Parameters, and Context Filters on Calculated Fields
-
-Understanding how filters and parameters interact with calculated fields is critical for building accurate dashboards in Tableau.
-
----
-
-## The Impact of Filters and Parameters on Calculated Fields
-
-Filters can change the result of calculated fields depending on **where they are applied in the order of operations**.
-
-### Dimension Filters
-
-Dimension filters are applied **after FIXED LOD expressions** but before table calculations.
-
-This means:
-
-- They **do NOT affect FIXED calculations**
-- They **DO affect INCLUDE / EXCLUDE**
-- They **DO affect table calculations**
+```sql
+FUNCTION_NAME(argument1, argument2, ...)
+```
 
 Example:
 
-` {FIXED [Customer ID] : SUM([Sales]) }`
+```sql
+SUM([Sales])
+```
 
-If you filter by **Region** (dimension filter), this **FIXED** value will not change.
+In this expression:
 
----
+- `SUM` is the function  
+- `[Sales]` is the argument  
+- The result is the total value of the field
 
-## Measure Filters
-
-Measure filters are applied **after aggregation**.
-
-They affect:
-
-- Table calculations  
-- Aggregated results  
-- Visual output  
-
-They do **not** recompute FIXED LOD expressions.
+Functions can also be combined with **logical conditions and operators** to create more complex calculations.
 
 ---
 
-## Context Filters
+## Categories of Basic Tableau Functions
 
-Context filters change the **order of operations**.
+Basic Tableau functions can be grouped into several categories based on their purpose.
 
-When you add a filter to **Context**, Tableau processes it earlier in the pipeline.
+  
+- Aggregate Functions  
+- Number Functions  
+- String Functions  
+- Logical Functions  
+- Type Conversion Functions  
 
-This means:
+```{mermaid}
+flowchart TD
+A[Tableau Basic Functions] --> B[Aggregate Functions]
+A --> C[Number Functions]
+A --> D[String Functions]
+A --> E[Logical Functions]
+A --> F[Type Conversion Functions]
+```
 
-- Context filters **DO affect FIXED LOD expressions**
-- They create a temporary data subset
-- Other filters are applied after the context filter
+---
 
-### Example
+## Aggregate Functions
 
-`{ FIXED [Customer ID] : SUM([Sales]) }`
+Aggregate functions summarize multiple records into a **single aggregated value**.  
+They are commonly used to calculate totals, averages, and counts within a dataset.
 
-If **Region** is placed in **Context**, the FIXED result will now be calculated only for the selected Region.
+These functions operate based on the **level of detail present in the visualization**.
+
+Common aggregate functions include:
+
+  
+- `SUM()` – calculates the total value of a numeric field  
+- `AVG()` – calculates the average value  
+- `MIN()` – returns the smallest value  
+- `MAX()` – returns the largest value  
+- `COUNT()` – counts the number of rows  
+- `COUNTD()` – counts distinct values  
+- `MEDIAN()` – returns the median value
+
+Example:
+
+```sql
+SUM([Sales])
+```
+
+This function returns the **total sales value** within the current view.
 
 ---
 
-## When to Use Context Filters
+## Number Functions
 
-Use context filters when:
+Number functions perform **mathematical operations** on numeric data.
 
-- You need a FIXED LOD to respect a filter  
-- You want to improve performance with large datasets  
-- You need dependent filters  
+They are used to modify numeric values, apply rounding, or perform mathematical transformations.
+
+Common number functions include:
+
+  
+- `ABS()` – returns the absolute value of a number  
+- `ROUND()` – rounds a number to a specified number of digits  
+- `CEILING()` – rounds a number up to the nearest integer  
+- `FLOOR()` – rounds a number down to the nearest integer  
+- `SQRT()` – calculates the square root of a number  
+- `POWER()` – raises a number to a specified power
+
+Example:
+
+```sql
+ROUND([Revenue], 2)
+```
+
+This function rounds the revenue value to **two decimal places**.
 
 ---
+
+## String Functions
+
+String functions manipulate **text values** within a dataset.
+
+They are useful when cleaning, formatting, or extracting parts of textual data.
+
+Common string functions include:
+
+  
+- `LEFT()` – extracts characters from the left side of a string  
+- `RIGHT()` – extracts characters from the right side of a string  
+- `MID()` – extracts characters from the middle of a string  
+- `LEN()` – returns the length of a string  
+- `UPPER()` – converts text to uppercase  
+- `LOWER()` – converts text to lowercase  
+- `TRIM()` – removes leading and trailing spaces  
+- `REPLACE()` – replaces text within a string
+
+Example:
+
+```sql
+UPPER([Customer Name])
+```
+
+This converts the customer name to **uppercase text**.
+
+---
+
+## Logical Functions
+
+Logical functions evaluate **conditions** and return results based on whether those conditions are **true or false**.
+
+They are frequently used for classification, filtering logic, and conditional calculations.
+
+Common logical functions include:
+
+  
+- `IF / THEN / ELSE` – evaluates a condition and returns values accordingly  
+- `CASE` – evaluates multiple possible conditions  
+- `IIF()` – shorthand conditional function  
+- `AND` – checks if multiple conditions are true  
+- `OR` – checks if at least one condition is true  
+- `NOT` – reverses a logical condition
+
+Example:
+
+```sql
+IF [Sales] > 1000 THEN "High Sales"
+ELSE "Low Sales"
+END
+```
+
+This categorizes sales values into **High Sales** and **Low Sales**.
+
+---
+
+## Type Conversion Functions
+
+Type conversion functions change the **data type** of a field.
+
+These functions are useful when performing calculations that require compatible data types.
+
+Common type conversion functions include:
+
+  
+- `INT()` – converts a value to an integer  
+- `FLOAT()` – converts a value to a floating-point number  
+- `STR()` – converts a numeric value to text  
+- `DATE()` – converts a value to a date  
+- `DATETIME()` – converts a value to datetime format
+
+Example:
+
+```sql
+STR([Customer ID])
+```
+
+This converts the customer ID from a **numeric value to text**.
+
+---
+
+## Summary
+
+Basic Tableau functions allow analysts to transform raw data into useful analytical outputs.
+
+They enable:
+
+  
+- Aggregating and summarizing data  
+- Performing mathematical operations  
+- Manipulating text values  
+- Creating conditional logic  
+- Converting between different data types  
+
+These functions form the **foundation of calculated fields in Tableau** and are essential for building analytical dashboards and visualizations.
 
 ## Parameters
 
@@ -1863,6 +1944,73 @@ This is a common practice to ensure that the dashboard remains relevant and up-t
 ![The Latest Date for Parameters]({{< meta image_path >}}/w2_latest_date_for_parameter.png)
 
 :::
+
+---
+
+## The Impact of Filters and Parameters on Calculated Fields
+
+Filters can change the result of calculated fields depending on **where they are applied in the order of operations**.
+
+### Dimension Filters
+
+Dimension filters are applied **after FIXED LOD expressions** but before table calculations.
+
+This means:
+
+- They **do NOT affect FIXED calculations**
+- They **DO affect INCLUDE / EXCLUDE**
+- They **DO affect table calculations**
+
+Example:
+
+` {FIXED [Customer ID] : SUM([Sales]) }`
+
+If you filter by **Region** (dimension filter), this **FIXED** value will not change.
+
+---
+
+## Measure Filters
+
+Measure filters are applied **after aggregation**.
+
+They affect:
+
+- Table calculations  
+- Aggregated results  
+- Visual output  
+
+They do **not** recompute FIXED LOD expressions.
+
+---
+
+## Context Filters
+
+Context filters change the **order of operations**.
+
+When you add a filter to **Context**, Tableau processes it earlier in the pipeline.
+
+This means:
+
+- Context filters **DO affect FIXED LOD expressions**
+- They create a temporary data subset
+- Other filters are applied after the context filter
+
+### Example
+
+`{ FIXED [Customer ID] : SUM([Sales]) }`
+
+If **Region** is placed in **Context**, the FIXED result will now be calculated only for the selected Region.
+
+---
+
+## When to Use Context Filters
+
+Use context filters when:
+
+- You need a FIXED LOD to respect a filter  
+- You want to improve performance with large datasets  
+- You need dependent filters  
+
 
 
 

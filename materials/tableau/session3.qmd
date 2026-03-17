@@ -31,528 +31,120 @@ In previous sessions, we focused on:
 
 Now we move from **building charts** to **building analytical logic inside Tableau**.
 
-This session covers:
+## Table Calculations
 
-- **Complex Calculations**  
-- **Table Calculations**
-  - Running Totals  
-  - Percent of Total  
-  - Rank  
+When you add a **table calculation**, you must account for **all dimensions in the level of detail**.  
+Each dimension must be used either for:
 
-These concepts allow you to transform dashboards into analytical systems.
-
-
-# Complex Calculations
-
-## What Makes a Calculation “Complex”?
-
-A calculation becomes complex when it:
-
-- Combines multiple fields  
-- Uses conditional logic  
-- Includes nested logic  
-- Mixes row-level and aggregate expressions  
-- Encodes business rules  
-
-It is no longer a simple `SUM([Sales])`.
-
-It becomes analytical modeling.
+- **Partitioning (scoping)**, or  
+- **Addressing (direction)**  
 
 ---
 
-## Row-Level vs Aggregate Logic
+### Partitioning Fields (Scope)
 
-As we have discussed in previous session **calculation levels** are.
+Partitioning fields define **how the data is grouped** before the table calculation is applied.
 
-| Level | Description | Example |
-|-------|-------------|----------|
-| Row-level | Operates per record | `[Price] * [Quantity]` |
-| Aggregate | Operates on grouped data | `SUM([Sales])` |
+- They break the view into multiple **sub-tables (partitions)**  
+- The table calculation is performed **separately within each partition**  
+- They determine the **scope** of the calculation  
 
-Mixing these incorrectly produces errors such as:
-
->Cannot mix aggregate and non-aggregate arguments.
-
-Understanding this distinction is fundamental in advanced Tableau work.
-
-
-
-## Conditional Logic (IF Statements)
-
-Complex calculations frequently rely on business classification.
-
-Example: Revenue Segmentation
-
-- If total sales are greater than a high threshold → classify as High  
-- If sales fall between two thresholds → classify as Medium  
-- Otherwise → classify as Low  
-
-This transforms raw numbers into decision-support categories.
+In other words, partitioning controls *where the calculation resets*.
 
 ---
 
-## Nested Logic
+### Addressing Fields (Direction)
 
-Complex scenarios often require layered conditions.
+Addressing fields define **how the calculation moves within each partition**.
+
+- They determine the **direction** of the calculation  
+- They control the sequence of marks used in calculations such as:
+  - Running totals  
+  - Differences between values  
+  - Percent change  
+
+In short, addressing controls *how the calculation progresses*.
+
+---
+
+### How Partitioning and Addressing Work Together
+
+1. Partitioning fields split the view into multiple sub-views (sub-tables).
+2. The table calculation is applied independently inside each partition.
+3. The addressing fields determine the direction in which the calculation moves through the marks within each partition.
 
 For example:
 
-- If Category = Technology  
-    - Then check performance threshold  
-    - Assign internal label  
-- Else classify as Other  
+- In a running total, addressing determines the order of accumulation.
+- In a difference calculation, addressing determines which value is compared to which.
 
-Nested logic allows modeling multi-step business reasoning.
+![Running Total Example]({{< meta image_path >}}/w3_running_total.png)
 
----
-
-## Logical Operators
-
-Advanced calculations often use:
-
-- `AND`  
-- `OR`  
-- `NOT`  
-
-Example scenario:
-
-A customer is considered “High Value” only if:
-
-- Sales exceed threshold  
-- AND Profit exceeds threshold  
-
-This ensures multi-metric validation.
+![Difference Caalculation Example]({{< meta image_path >}}/w3_difference_calculation.png)
 
 ---
 
-## Date-Based Complex Logic
+### Specific Dimensions vs Compute Using
 
-Complex calculations frequently include temporal logic:
+When using **Compute Using** options, Tableau automatically assigns some dimensions as:
 
-- Identifying current year vs previous year  
-- Flagging recent periods  
-- Creating rolling time segments  
+- Partitioning fields  
+- Addressing fields  
 
-Date logic is foundational in KPI modeling and trend analysis.
+However, when selecting **Specific Dimensions**, you must manually decide:
+
+- Which dimensions define the partition (scope)  
+- Which dimensions define the addressing (direction)  
+
+![Rank: The direction of movement]({{< meta image_path >}}/w3_rank_movement.png)
+
+![Rank: Specific Dimension]({{< meta image_path >}}/w3_rank_specific_dimension.png)
+
+In the *Specific Dimensions* section of the Table Calculation dialog:
+
+- The order of fields determines the **direction of movement** through the marks: `Pane (Down)`
+- Checked dimensions define how Tableau computes the table calculation across the view: `Year of Order Date`, `Region`.
 
 ---
 
-::: {.callout-important}
-Complex calculations transform Tableau from a visualization tool into a business logic engine.
+::: {.callout-tip}
+
+A helpful mental model:
+
+- **Partitioning = Where does the calculation reset?**
+- **Addressing = In what order does it move?**
+
+Understanding this distinction is essential for correctly configuring running totals, rankings, percent differences, and other table calculations.
+
 :::
 
----
 
-# Table Calculations
+### More Examples of Table Calculations
 
-## What Is a Table Calculation?
+## Using Table Calculations on *Marks card* fields
 
-A table calculation:
+When you place a table calculation on the **Marks card** Color, the table will be colored based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Color `SUM(Total Quantity)` will color the Revenue values based on the quantity values.
 
-- Is computed after aggregation  
-- Operates on results already displayed in the view  
-- Depends on how dimensions are arranged in the visualization  
+![Marks Card Table Calculation]({{< meta image_path >}}/w3_marks_card_calculation.png)
 
-Unlike row-level or aggregate calculations:
+Year over year growth is another common use case for table calculations on the Marks card. For example, if you have `SUM(Revenue)` on the view and you add a table calculation that calculates the year-over-year growth of Revenue by Region.
 
-> Table calculations are view-dependent.
+![Year over Year Growth Calculation]({{< meta image_path >}}/w3_year_over_year_growth_cal.png)
 
-They are recalculated dynamically when the structure of the view changes.
+![Year over Year Growth]({{< meta image_path >}}/w3_year_over_year_growth.png)
 
----
+## Using Table Calculations on *Rows or Columns* fields
 
-## Execution Order Concept
+When you place a table calculation on the **Rows or Columns** shelf, the table will be calculated based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Rows or Columns `Moving Average` will add a moving average line to the view based on the Revenue values.
 
-Data Source  
-→ Filters  
-→ Aggregation  
-→ Table Calculation  
-→ Visualization  
+![Moving Average Example]({{< meta image_path >}}/w3_moving_average.png)
 
-Table calculations occur after the data is already grouped.
 
-This is why they depend on layout.
+When you place a table calculation on the **Filters** shelf, the table will be filtered based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Filters `Rank` will filter the view to show only the top N values based on the Revenue values.
 
----
+## Influence of Filters, Parameters, and Context Filters on Calculated Fields
 
-# Running Total
-
-## Concept
-
-A running total accumulates values progressively.
-
-Mathematically:
-
-Running Total at point n equals the sum of all previous values up to n.
-
----
-
-## Business Use Cases
-
-Running totals help answer:
-
-- How revenue accumulates over time  
-- When break-even is reached  
-- How performance evolves month over month  
-- How cumulative growth behaves  
-
-Running totals are commonly applied to:
-
-- Sales over time  
-- Customer acquisition  
-- Profit progression  
-
----
-
-## Compute Using (Critical Concept)
-
-Running totals require defining:
-
-- What direction the calculation moves (Addressing)  
-- Where the calculation resets (Partitioning)  
-
-If compute direction is incorrect, results will be misleading.
-
-Always verify:
-
-Edit Table Calculation → Compute Using.
-
----
-
-# Percent of Total
-
-## Concept
-
-Percent of total shows proportional contribution.
-
-It answers:
-
-How much does each category contribute relative to the whole?
-
----
-
-## Business Applications
-
-Used for:
-
-- Market share analysis  
-- Category contribution  
-- Revenue distribution  
-- Portfolio composition  
-- Regional performance comparison  
-
-Percent of total simplifies relative comparison and strategic prioritization.
-
----
-
-# Rank
-
-## Concept
-
-Ranking assigns ordered positions based on a metric.
-
-Example:
-
-- Highest sales → Rank 1  
-- Second highest → Rank 2  
-
-Ranking allows prioritization and competitive analysis.
-
----
-
-## Business Applications
-
-Rank is commonly used for:
-
-- Top 10 customers  
-- Best performing products  
-- Highest revenue regions  
-- Underperforming segments  
-
-Ranking enables focused decision-making.
-
----
-
-## Rank Variants
-
-Different ranking behaviors exist:
-
-- `RANK()` – standard ranking (may skip numbers)  
-- `RANK_DENSE()` – no gaps  
-- `RANK_MODIFIED()` – competition ranking  
-- `RANK_PERCENTILE()` – percentile rank  
-
-Choice depends on analytical objective.
-
----
-
-# Partitioning vs Addressing
-
-This is one of the most important concepts in table calculations.
-
-### Addressing
-
-Defines:
-
-What dimension the calculation moves across.
-
-### Partitioning
-
-Defines:
-
-Where the calculation restarts.
-
-Example scenario:
-
-If computing running total by:
-
-- Region  
-- Order Date  
-
-Partition by Region  
-Address by Order Date  
-
-Each region accumulates independently.
-
-Understanding this distinction prevents analytical errors.
-
----
-
-# When to Use Table Calculations
-
-Use table calculations when:
-
-- You need cumulative metrics  
-- You need ranking  
-- You need percent contribution  
-- The logic depends on how the data is displayed  
-
-Avoid using table calculations when:
-
-- You need consistent metric logic across multiple dashboards  
-- You require data-source-level consistency  
-
-In such cases, consider using LOD expressions instead.
-
----
-
-# Analytical Maturity
-
-Basic Level:
-
-- SUM  
-- AVG  
-- Simple filters  
-
-Intermediate Level:
-
-- Conditional logic  
-- Nested calculations  
-
-Advanced Level:
-
-- Running totals  
-- Percent of total  
-- Rank  
-- Partitioning and addressing control  
-
----
-
-## Summary
-
-### Complex Calculations
-
-- Encode business rules  
-- Combine multiple logical conditions  
-- Transform raw metrics into analytical signals  
-
-### Table Calculations
-
-- Operate on aggregated results  
-- Depend on visualization structure  
-- Enable cumulative, ranking, and proportional analysis  
-
-Together, they elevate dashboards from visual summaries to analytical systems.
-
-## Overview
-
-This session focuses on **Advanced Analytics in Tableau**.
-
-While previous sessions introduced core visualization techniques and intermediate modeling concepts, this week shifts toward **calculation-driven analysis and analytical architecture**.
-
-This session teaches how to:
-
-- Move beyond simple aggregations  
-- Control granularity independently from the view  
-- Design reusable calculation logic  
-- Implement dynamic date handling  
-- Build structured cohort retention tables  
-- Construct advanced KPI dashboards  
-- Connect and analyze spatial data
-- Prepare and model data for complex analysis
-  
----
-
-## Complex Calculations
-
-Complex calculations combine multiple functions, aggregations, logical statements, and sometimes LOD expressions to solve real analytical problems.
-
-Unlike basic calculations (e.g., SUM([Sales])), complex calculations often:
-
-- Mix aggregations and row-level logic  
-- Use nested IF or CASE statements  
-- Include date functions  
-- Combine parameters with measures  
-- Apply conditional logic with multiple criteria  
-
-### Example 1 — Conditional KPI
-
-Revenue only for profitable orders:
-
-IF SUM([Profit]) > 0 THEN SUM([Revenue]) END
-
-This calculation:
-- Aggregates Profit
-- Applies conditional logic
-- Returns aggregated Revenue only when the condition is satisfied
-
----
-
-### Example 2 — Dynamic Metric Switching (Parameter-Based)
-
-IF [Metric Parameter] = "Revenue" THEN SUM([Revenue])
-ELSEIF [Metric Parameter] = "Profit" THEN SUM([Profit])
-ELSE SUM([Quantity])
-END
-
-Used for:
-- Dynamic KPI dashboards  
-- Toggle between financial metrics  
-- Executive reporting views  
-
----
-
-### Example 3 — Nested Date + Logic Calculation
-
-Flag customers active in the last 30 days:
-
-DATEDIFF('day', [Last Activity Date], TODAY()) <= 30
-
-Combines:
-- Date difference calculation  
-- Logical comparison  
-- Boolean output  
-
----
-
-### Example 4 — Cohort Index Calculation
-
-Months since activation:
-
-DATEDIFF(
-'month',
-DATETRUNC('month', [Activation Date]),
-DATETRUNC('month', [Activity Date])
-)
-
-This combines:
-- Date truncation  
-- Date difference  
-- Granularity control  
-
-Used for:
-- Retention heatmaps  
-- Subscriber lifecycle analysis  
-- Cohort modeling  
-
-
-
----
-
-## Table Calculations
-
-Table calculations operate on **aggregated results already present in the view**.  
-They are computed after the query is executed and depend on:
-
-- Partitioning (how data is grouped)
-- Addressing (direction of calculation)
-
-They are essential for trend analysis and advanced comparisons.
-
----
-
-### Running Total
-
-Calculates cumulative values across a dimension.
-
-RUNNING_SUM(SUM([Revenue]))
-
-Used for:
-- Cumulative revenue  
-- Subscriber growth tracking  
-- Rolling performance metrics  
-
-Example:
-Month 1 → 100  
-Month 2 → 250  
-Month 3 → 400  
-
----
-
-### Percent of Total
-
-Calculates contribution relative to total.
-
-SUM([Revenue]) / TOTAL(SUM([Revenue]))
-
-Used for:
-- Market share  
-- Region contribution  
-- Product category distribution  
-
-Important:
-This depends on how the table is partitioned.
-
----
-
-### Rank
-
-Ranks values within a partition.
-
-RANK(SUM([Revenue]))
-
-Variants:
-- RANK_DENSE()
-- RANK_UNIQUE()
-- RANK_PERCENTILE()
-
-Used for:
-- Top N regions  
-- Best performing products  
-- Highest revenue BTS sites  
-
----
-
-## Key Differences: Aggregate vs Table Calculation
-
-    | Type | When Computed | Example | Use Case |
-    |------|---------------|---------|----------|
-    | Aggregate | During query | SUM([Revenue]) | KPI totals |
-    | Table Calculation | After query (in view) | RUNNING_SUM(SUM([Revenue])) | Cumulative trends |
-
----
-
-## Why This Matters
-
-Complex calculations and table calculations enable:
-
-- Advanced KPI modeling  
-- Rolling analytics  
-- Cohort retention curves  
-- Dynamic ranking  
-- Executive-level dashboards  
-
-Mastering these concepts is critical for building analytical dashboards in telecom, finance, and marketing domains.
+Understanding how filters and parameters interact with calculated fields is critical for building accurate dashboards in Tableau.
 
 ## Date Functions
 
@@ -2363,14 +1955,6 @@ Splitting fields improves:
 
 Hierarchies organize fields into **structured levels** that support drill-down analysis.
 
-Example geographic hierarchy:
-
-```{mermaid}
-graph TD
-A[Country] --> B[Customer ID]
-B --> C[Invoice No]
-```
-
 Hierarchies allow:
 
 - Drill-down exploration
@@ -2581,7 +2165,7 @@ This visualization shows **Gold, Silver, and Bronze medals over time in a single
 
 ---
 
-## #Analytical Questions Enabled by Pivoting
+### Analytical Questions Enabled by Pivoting
 
 After reshaping the dataset, it becomes easier to answer questions such as:
 
@@ -2639,28 +2223,7 @@ Typical use cases include:
 - Performing quick pivots
 - Adjusting data types
 - Creating hierarchies
-### Using Tableau Prep for Advanced Data Preparation
 
-When datasets become more complex, **Tableau Prep** provides a visual workflow for preparing and reshaping data.
-
-Tableau Prep allows:
-
-- Joining multiple datasets
-- Removing duplicates
-- Standardizing values
-- Pivoting and unpivoting columns
-- Aggregating datasets
-- Cleaning inconsistent values
-
-```{mermaid}
-flowchart LR
-A[Raw Sources] --> B[Tableau Prep Flow]
-B --> C[Cleaning Steps]
-C --> D[Reshaped Dataset]
-D --> E[Tableau Visualization]
-```
-
-Prep uses a **visual flow interface**, allowing analysts to inspect transformations step by step before publishing the final dataset.
 
 ---
 
@@ -2669,55 +2232,6 @@ Prep uses a **visual flow interface**, allowing analysts to inspect transformati
 Both **Tableau Prep** and **Tableau Desktop** support data preparation tasks, but they are designed for different stages of the analytics workflow.
 
 Tableau Desktop is primarily used for **data exploration and visualization**, while Tableau Prep is designed for **building reusable data preparation pipelines**.
-
----
-
-### When to Use Tableau Desktop
-
-Tableau Desktop is suitable for **simple or analysis-driven data preparation**.
-
-Typical use cases include:
-
-
-- Creating calculated fields
-- Handling small data cleaning tasks
-- Filtering rows or removing unwanted records
-- Performing quick pivots
-- Adjusting data types
-- Creating hierarchies
-
-Example in the Online Retail dataset:
-
-- Creating a `Revenue` calculation  
-- Extracting `Invoice Month` from `Invoice Date`
-- Filtering rows with negative quantities
-
-In these cases, cleaning happens **inside the workbook** and is closely tied to the analysis.
-
----
-
-### When to Use Tableau Prep
-
-Tableau Prep is more appropriate for **complex data preparation workflows** or when the prepared dataset needs to be reused across multiple dashboards.
-
-Typical use cases include:
-
-- Combining multiple datasets
-- Cleaning very large datasets
-- Creating standardized datasets for teams
-- Performing complex joins and unions
-- Building repeatable data pipelines
-- Automating data preparation processes
-
-Example workflow with the Online Retail dataset:
-
-- Join retail transactions with **product category tables**
-- Standardize product descriptions
-- Remove duplicate invoices
-- Aggregate monthly revenue tables
-- Export the cleaned dataset for Tableau dashboards
-
-In this case, the data preparation happens **before analysis** and produces a clean dataset ready for visualization.
 
 ---
 
@@ -2772,3 +2286,465 @@ In production environments, Tableau often connects to **pre-cleaned analytical d
 
 Properly cleaned and reshaped data leads to **more reliable analysis and better-performing dashboards**.
 
+## Tableau Dashboard Creation 
+
+In Tableau, a **Dashboard** is a workspace that combines multiple worksheets, filters, legends, and interactive components into a single analytical interface. Dashboards allow analysts to present different perspectives of data in one place and enable users to explore insights through interaction.
+
+Dashboard creation involves designing the **layout, responsiveness, visual formatting, and interactivity** of visualizations so users can easily interpret and explore the data.
+
+When creating dashboards, analysts configure:
+
+- Dashboard size and responsiveness
+- Layout containers and object positioning
+- Dashboard objects
+- Visual formatting and styling
+- Interactive dashboard actions
+
+A well-designed dashboard enables users to quickly identify patterns, compare metrics, and drill into detailed insights.
+
+---
+
+## Tableau Dashboard Interface Sections
+
+The Tableau Dashboard workspace is divided into several sections that help analysts design layouts, add visualizations, and manage dashboard components.
+
+![Dashboard Canvas]({{< meta image_path >}}/w3_dashboard_canvas.png)
+
+![Dashboard Layout]({{< meta image_path >}}/w3_dashboard_layout.png)
+
+---
+
+## 1. Dashboard Canvas
+
+The **Dashboard Canvas** is the central workspace where the dashboard is built.
+
+When a dashboard is empty, Tableau displays the message:
+
+```
+Drop sheets here
+```
+
+This area is used to:
+
+- Place worksheets
+- Arrange visualizations
+- Add filters and legends
+- Organize layout containers
+- Design the final dashboard layout
+
+Worksheets are dragged from the **Sheets panel** and dropped into this canvas.
+
+---
+
+## 2. Dashboard Settings Panel
+
+The **Dashboard Settings panel** allows users to configure the overall dashboard properties.
+
+### Device Layout
+
+Device layouts allow dashboards to be optimized for different screen types.
+
+Options include:
+
+- Default (Desktop layout)
+- Phone layout
+- Device Preview
+
+This ensures dashboards remain readable across different devices.
+
+### Dashboard Size
+
+The **Size option** controls the overall dimensions of the dashboard.
+
+Example shown:
+
+```
+Desktop Browser (1000 × 800)
+```
+
+Tableau provides three size options.
+
+| Size Mode | Description |
+|------|------|
+| Automatic | Dashboard resizes according to screen size |
+| Fixed Size | Dashboard maintains constant dimensions |
+| Range | Dashboard scales between minimum and maximum sizes |
+
+---
+
+## 3. Sheets Panel
+
+The **Sheets panel** lists all worksheets available in the workbook.
+
+Worksheets represent visualizations such as:
+
+- charts
+- tables
+- maps
+- KPI indicators
+- cohort analysis views
+
+To add a worksheet to the dashboard:
+
+1. Drag the worksheet from the Sheets panel  
+2. Drop it onto the **Dashboard Canvas**
+
+Multiple worksheets can be combined to create a complete analytical dashboard.
+
+---
+
+## 4. Objects Panel
+
+The **Objects panel** contains elements that help structure dashboards and add interactivity. These objects appear in the lower left part of the Dashboard pane.
+
+Dashboard objects help organize the layout, add information, and enable interaction.
+
+---
+
+### Layout Containers
+
+Containers are the **backbone of dashboard design**.
+
+They allow multiple objects to be grouped together and aligned properly.
+
+| Container | Description |
+|------|------|
+| Horizontal Container | Arranges objects side-by-side |
+| Vertical Container | Stacks objects vertically |
+
+Containers can hold:
+
+- worksheets
+- text
+- images
+- other containers
+
+Containers support advanced features such as:
+
+- **Show/Hide buttons**
+- **Dynamic Zone Visibility** (introduced in newer Tableau versions)
+
+This allows dashboards to show or hide entire sections depending on user interaction.
+
+---
+
+### Text Object
+
+The **Text object** is a simple text box used to display information.
+
+Common uses include:
+
+- Dashboard titles
+- Section headers
+- Explanatory notes
+- Footnotes
+- Dynamic labels
+
+Text objects can also be **dynamic** by inserting parameter values.
+
+Example use:
+
+If a dashboard allows selecting a custom date range, the selected start and end dates can be inserted into the text box to display the current filter range.
+
+---
+
+### Image Object
+
+The **Image object** is one of the most versatile dashboard objects.
+
+Images can be used for:
+
+- Company logos
+- Navigation buttons
+- Background images
+- Custom icons
+- Alerts or visual indicators
+
+Images can be linked to:
+
+- Local files
+- Image URLs
+
+Images can also function as **navigation buttons** by linking them to URLs or dashboards.
+
+This makes them useful for creating custom interactive interfaces.
+
+---
+
+### Blank Object
+
+The **Blank object** is an empty dashboard element.
+
+Although simple, it is extremely useful for layout design.
+
+Blank objects can be used to:
+
+- Add white space
+- Create separators
+- Improve alignment
+- Hide dashboard elements
+
+Blank objects can be colored, resized, or used as layout placeholders.
+
+---
+
+### Extension Object
+
+The **Extension object** allows third-party developers to add additional functionality to Tableau dashboards.
+
+Examples of extensions include:
+
+- custom visualizations
+- advanced formatting tools
+- embedded code editors
+- custom styling options
+
+Extensions can be downloaded from **Tableau Exchange** and added to dashboards.
+
+There are two types of extensions:
+
+| Type | Description |
+|------|------|
+| Sandboxed | Hosted securely by Tableau |
+| Network-enabled | Can access external systems |
+
+When using network-enabled extensions, it is important to review **data security settings**.
+
+---
+
+### Pulse Metric
+
+The **Pulse Metric object** displays key performance indicators connected to **Tableau Pulse**.
+
+Pulse is designed for monitoring business metrics.
+
+Typical uses include:
+
+- revenue monitoring
+- KPI tracking
+- performance monitoring dashboards
+
+Pulse metrics highlight the most important measures in a dashboard.
+
+---
+
+### Workflow Object
+
+The **Workflow object** integrates Tableau dashboards with **Salesforce Flow**, allowing dashboards to trigger automated workflows.
+
+Example workflow:
+
+1. User selects marks in a chart  
+2. Selected data is sent to Salesforce Flow  
+3. Automated processes are triggered
+
+Examples include:
+
+- updating CRM records
+- triggering notifications
+- automating business processes
+
+---
+
+### Web Page Object
+
+The **Web Page object** functions as a mini web browser within the dashboard.
+
+It can display:
+
+- external websites
+- documentation
+- embedded applications
+- maps
+
+Web Page objects can be **static or dynamic**.
+
+Dynamic web pages can update based on **URL actions** triggered by user interaction.
+
+---
+
+### Navigation Object
+
+The **Navigation object** allows users to move between dashboards or worksheets.
+
+Before Tableau version 2020.3 this object was called a **Button**.
+
+Navigation buttons can be styled as:
+
+- text buttons
+- image buttons
+
+Common uses include:
+
+- dashboard menus
+- drill-down navigation
+- switching between summary and detail views
+
+---
+
+### Download Object
+
+The **Download object** allows users to export data from dashboards.
+
+Export options include:
+
+| Export Type | Description |
+|------|------|
+| Crosstab | Export data table (Server / Cloud only) |
+| Image | Export dashboard as PNG |
+| PDF | Export workbook or dashboard |
+| PowerPoint | Export dashboards as slides |
+
+This feature is often required by stakeholders who need data snapshots for reporting.
+
+---
+
+### Add Filters Extension
+
+The **Add Filters extension** allows dashboard users to choose which filters they want to display.
+
+Instead of creating multiple dashboard versions, users can dynamically select filters relevant to them.
+
+Example:
+
+Different users may want different filters:
+
+- one group filters by **date and location**
+- another group filters by **sales and profit**
+
+The Add Filters extension allows each user group to configure filters themselves.
+
+---
+
+### Einstein Discovery
+
+**Einstein Discovery** integrates Salesforce AI with Tableau dashboards.
+
+It allows dashboards to include **machine learning predictions** and **automated insights**.
+
+Capabilities include:
+
+- predictive modeling
+- trend explanation
+- recommendation generation
+
+Einstein Discovery requires a **Salesforce license**.
+
+---
+
+## 5. Layout Panel
+
+The **Layout panel** allows configuration of properties for the selected dashboard object.
+
+Properties include:
+
+| Property | Description |
+|------|------|
+| Position | X and Y coordinates |
+| Size | Width and height |
+| Border | Border styling |
+| Background | Background color |
+| Corner Radius | Rounded container corners |
+| Padding | Space around objects |
+
+These settings allow precise control of dashboard layout.
+
+---
+
+## 6. Item Hierarchy
+
+The **Item Hierarchy panel** displays the structure of objects within the dashboard.
+
+Example structure:
+
+```
+Dashboard
+   Tiled
+      Blank
+      Horizontal Container
+```
+
+The hierarchy panel helps users:
+
+- understand dashboard structure
+- manage nested containers
+- select objects within complex layouts
+
+---
+
+## Dashboard Actions
+
+Dashboard **Actions** allow visualizations to interact with each other.
+
+Actions are configured using:
+
+```
+Dashboard → Actions
+```
+
+```{mermaid}
+flowchart LR
+A[User Interaction] --> B[Dashboard Action]
+B --> C[Filter Action]
+B --> D[Highlight Action]
+B --> E[Navigation Action]
+B --> F[Parameter Action]
+B --> G[URL Action]
+B --> H[Set Action]
+```
+
+---
+
+## Filter Actions
+
+Filter actions allow one worksheet to filter another worksheet.
+
+Example workflow:
+
+1. User selects a category in a chart  
+2. Other charts update to show related data  
+
+---
+
+## Highlight Actions
+
+Highlight actions emphasize related data across visualizations without filtering the data.
+
+---
+
+## URL Actions
+
+URL actions allow dashboards to open external web resources.
+
+Examples include:
+
+- linking to product pages
+- connecting to external systems
+
+---
+
+## Navigation Actions
+
+Navigation actions allow users to move between dashboards or worksheets.
+
+These actions are used to build **multi-dashboard analytical applications**.
+
+---
+
+## Parameter Actions
+
+Parameter actions allow interactions to update parameter values dynamically.
+
+---
+
+## Set Actions
+
+Set actions allow users to dynamically modify sets through interaction.
+
+This enables:
+
+- dynamic segmentation
+- interactive comparisons
+- scenario analysis
+
+---
