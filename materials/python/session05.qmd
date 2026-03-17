@@ -734,7 +734,7 @@ Matplotlib Documentation you can find [here](https://matplotlib.org/stable/index
 
 Even if students later use `seaborn`, `plotly`, or dashboard tools, understanding `matplotlib` remains valuable.
 
-## Importing Matplotlib
+## Matplotlib
 
 Before plotting, we need to import the library.
 
@@ -743,4 +743,557 @@ import pandas as pd
 import matplotlib.pyplot as plt
 ```
 
-<!-- temp -->
+If the `instacart.csv` file has already been saved, we can load it as follows.
+
+```python
+df_instacart = pd.read_parquet("../data/processed/instacart.parquet")
+df_instacart.head()
+```
+
+```{python}
+# echo : False
+df_instacart = pd.read_parquet("../../lab/python/data/processed/instacart.parquet")
+df_instacart.head()
+```
+
+
+## First Look at the DataFrame
+
+Before plotting, it is useful to remind ourselves what kind of table we are working with.
+
+```{python}
+df_instacart.shape
+```
+
+```{python}
+df_instacart.columns
+```
+
+This tells us that the dataset contains:
+
+- order-level variables
+
+- basket-level variables
+
+- product-level variables
+
+- customer-level variables
+
+That means the same DataFrame can support many kinds of visualizations.
+
+## The Basic Plotting Workflow in Matplotlib
+
+A simple plotting workflow usually includes:
+
+
+- selecting or preparing the data
+
+- creating a figure
+
+- choosing a chart type
+
+- adding a title
+
+- labeling the axes
+
+- displaying the chart
+
+A very simple structure looks like this:
+
+```python
+plt.figure()
+plt.bar(x_values, y_values)
+plt.title("Chart Title")
+plt.xlabel("X Label")
+plt.ylabel("Y Label")
+plt.show()
+```
+
+We will now apply this logic directly to the `instacart` data.
+
+## Example 1: Visualizing Orders by Day of Week
+
+### Analytical question
+
+A natural first question is:
+
+ 
+- On which days of the week are orders placed most frequently?
+
+This is a **category comparison** problem, so a bar chart is a reasonable first choice.
+
+### Preparing the data
+
+```{python}
+orders_by_day = (
+    df_instacart[["order_id", "order_dow"]]
+    .drop_duplicates()
+    .groupby("order_dow")
+    .size()
+)
+
+orders_by_day
+```
+
+We use `.drop_duplicates()` because the final `instacart` table is at the product-within-order level, and we want to count each order only once.
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+orders_by_day = (
+    df_instacart[["order_id", "order_dow"]]
+    .drop_duplicates()
+    .groupby("order_dow")
+    .size()
+)
+
+plt.figure()
+plt.bar(orders_by_day.index, orders_by_day.values)
+plt.title("Number of Orders by Day of Week")
+plt.xlabel("Day of Week")
+plt.ylabel("Number of Orders")
+plt.show()
+```
+
+### What do we learn here?
+
+This is our first real `matplotlib` chart using the project data.
+
+It shows us:
+
+ 
+- how to prepare grouped data before plotting
+
+- how to build a bar chart
+
+- how to add a title and axis labels
+
+It also reinforces an important analytical lesson:
+
+ 
+- when using a line-item dataset, we must think carefully about the correct level of aggregation
+
+## Example 2: Visualizing Orders by Hour of Day
+
+### Analytical question
+
+Another useful question is:
+
+ 
+- At what hours are orders placed most frequently?
+
+This is also a category comparison problem, but now the categories are hours.
+
+### Preparing the data
+
+```{python}
+orders_by_hour = (
+    df_instacart[["order_id", "order_hour_of_day"]]
+    .drop_duplicates()
+    .groupby("order_hour_of_day")
+    .size()
+)
+
+orders_by_hour
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+orders_by_hour = (
+    df_instacart[["order_id", "order_hour_of_day"]]
+    .drop_duplicates()
+    .groupby("order_hour_of_day")
+    .size()
+)
+
+plt.figure()
+plt.bar(orders_by_hour.index, orders_by_hour.values)
+plt.title("Number of Orders by Hour of Day")
+plt.xlabel("Hour of Day")
+plt.ylabel("Number of Orders")
+plt.show()
+```
+
+### Why is this a good introductory example?
+
+This chart helps students practice:
+
+ 
+- grouping the data
+
+- plotting numeric categories on the x-axis
+
+- interpreting demand patterns across time
+
+It also introduces an important analytical idea:
+
+ 
+- the chart is simple, but the real work begins with asking the right aggregation question
+
+## Example 3: Visualizing the Most Popular Departments
+
+### Analytical question
+
+Now we move from order behavior to product categories.
+
+A natural question is:
+
+ 
+- Which departments appear most often in the dataset?
+
+This is again a category comparison problem, so a bar chart is appropriate.
+
+### Preparing the data
+
+```{python}
+top_departments = df_instacart["department"].value_counts().head(10)
+top_departments
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+top_departments = df_instacart["department"].value_counts().head(10)
+
+plt.figure()
+plt.bar(top_departments.index, top_departments.values)
+plt.title("Top 10 Departments by Number of Purchased Items")
+plt.xlabel("Department")
+plt.ylabel("Number of Purchased Items")
+plt.xticks(rotation=45)
+plt.show()
+```
+
+### Why do we rotate the labels?
+
+The department names are longer than simple numeric categories. Rotating labels improves readability.
+
+This is an important practical lesson in `matplotlib`:
+
+ 
+- a chart may be correct but still difficult to read if labels are not formatted well
+
+## Example 4: Improving Readability with a Horizontal Bar Chart
+
+The previous chart is correct, but category labels can still feel crowded.
+
+A horizontal bar chart is often better when category names are longer.
+
+### Creating the improved chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+top_departments_sorted = df_instacart["department"].value_counts().head(10).sort_values()
+
+plt.figure()
+plt.barh(top_departments_sorted.index, top_departments_sorted.values)
+plt.title("Top 10 Departments by Number of Purchased Items")
+plt.xlabel("Number of Purchased Items")
+plt.ylabel("Department")
+plt.show()
+```
+
+### What is better here?
+
+This chart is often easier to read because:
+
+ 
+- the labels fit naturally
+
+- the category ranking is easier to interpret
+
+- the chart emphasizes comparison more clearly
+
+This is a good moment to remind students that visualization is not only about plotting. It is also about choosing the clearest version of a chart.
+
+## Example 5: Visualizing the Distribution of Prices
+
+### Analytical question
+
+Now let us move to a different question:
+
+ 
+- How are product prices distributed?
+
+This is not a category comparison problem. It is a **distribution** problem.
+
+For distributions, a histogram is usually a better choice than a bar chart.
+
+### Preparing the data
+
+```{python}
+df_instacart["prices"].describe()
+```
+
+### Creating the histogram
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+plt.figure()
+plt.hist(df_instacart["prices"].dropna(), bins=30)
+plt.title("Distribution of Product Prices")
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+### What does this teach us?
+
+This example introduces a second core chart type in `matplotlib`.
+
+It shows students that:
+
+ 
+- not every problem should be visualized with bars
+
+- the chart type must match the analytical question
+
+- histograms are useful for understanding spread, concentration, and skewness
+
+## Example 6: Visualizing Average Price by Department
+
+### Analytical question
+
+A more analytical question is:
+
+ 
+- Which departments have the highest average prices?
+
+This requires both aggregation and visualization.
+
+### Preparing the data
+
+```{python}
+avg_price_by_department = (
+    df_instacart
+    .groupby("department")["prices"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+avg_price_by_department
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 7
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+avg_price_by_department = (
+    df_instacart
+    .groupby("department")["prices"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+plt.figure()
+plt.barh(avg_price_by_department.index, avg_price_by_department.values)
+plt.title("Average Product Price by Department")
+plt.xlabel("Average Price")
+plt.ylabel("Department")
+plt.show()
+```
+
+### Why is this an important example?
+
+It connects three ideas together:
+
+ 
+- grouping data with Pandas
+
+- summarizing with `.mean()`
+
+- visualizing the result with `matplotlib`
+
+This is exactly the kind of workflow students will use in real analysis.
+
+## Example 7: Visualizing Reorder Rate by Region
+
+### Analytical question
+
+Now we bring customer geography into the picture.
+
+A useful question is:
+
+ 
+- Which regions have the highest reorder rate?
+
+### Preparing the data
+
+```{python}
+reorder_rate_by_region = (
+    df_instacart
+    .groupby("region")["reordered"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+reorder_rate_by_region
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+reorder_rate_by_region = (
+    df_instacart
+    .groupby("region")["reordered"]
+    .mean()
+    .sort_values(ascending=True)
+)
+
+plt.figure()
+plt.barh(reorder_rate_by_region.index, reorder_rate_by_region.values)
+plt.title("Reorder Rate by Region")
+plt.xlabel("Reorder Rate")
+plt.ylabel("Region")
+plt.show()
+```
+
+### What do we learn here?
+
+This chart introduces an important interpretation point:
+
+ 
+- a mean of a binary variable such as `reordered` can be interpreted as a proportion or rate
+
+That is a powerful idea for analytical visualization.
+
+## Example 8: Visualizing Relationship Between Age and Income
+
+### Analytical question
+
+Now we try a relationship question:
+
+ 
+- Is there a visible relationship between customer age and income?
+
+For two numeric variables, a scatter plot is often the right starting point.
+
+### Preparing the data
+
+```{python}
+customer_profile = df_instacart[
+    ["First Name", "Surnam", "Age", "income"]
+].drop_duplicates()
+
+customer_profile.head()
+```
+
+### Creating the chart
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+customer_profile = df_instacart[
+    ["First Name", "Surnam", "Age", "income"]
+].drop_duplicates()
+
+plt.figure()
+plt.scatter(customer_profile["Age"], customer_profile["income"])
+plt.title("Customer Age and Income")
+plt.xlabel("Age")
+plt.ylabel("Income")
+plt.show()
+```
+
+### Why do we use a deduplicated customer table here?
+
+Because the `instacart` DataFrame is at the product-within-order level, customer variables repeat many times.
+
+If we want a customer-level relationship, we should remove repeated customer rows first.
+
+This is an essential analytical lesson:
+
+ 
+- the right chart depends not only on the variables, but also on the correct grain of the data
+
+## What Students Should Learn from This Introduction
+
+At this stage, students should understand that `matplotlib` is not just a plotting library. It is part of the analytical workflow.
+
+The process usually looks like this:
+
+ 
+- define the question
+
+- prepare the data
+
+- choose the chart type
+
+- create the figure
+
+- label the chart clearly
+
+- interpret the result
+
+## A Visual Summary of the Workflow
+
+```{mermaid}
+flowchart TD
+    A[Ask an analytical question] --> B[Prepare the data with Pandas]
+    B --> C[Choose the right chart type]
+    C --> D[Create the chart with Matplotlib]
+    D --> E[Interpret the result]
+```
+
+## Summary
+
+In this section, we introduced `matplotlib` using the real `instacart` dataset.
+
+We learned how to create:
+
+ 
+- bar charts
+
+- horizontal bar charts
+
+- histograms
+
+- scatter plots
+
+We also learned that chart creation starts with the analytical question, not with the code.
+
+In the next section, we will refine these visualizations further and discuss how to improve them using stronger design choices and clearer storytelling.
