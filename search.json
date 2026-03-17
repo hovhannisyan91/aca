@@ -8569,7 +8569,7 @@
     "href": "materials/python/session04.html#homework-solution",
     "title": "Session 04: Advanced Pandas",
     "section": "Homework | Solution",
-    "text": "Homework | Solution\n\nStep 1 | Downlaoding the Data\nIn order to have the final version of the dataframe and contintue the main analytical tasks, we need to also merge customers and states dimensions.\ndata = ['customers.csv', 'states.csv']\n\nURL = 'https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/python/data/raw/'\n\nldf = []\nfor i in data: \n    df = pd.read_csv(URL+i)\n    # քանի որ ցանկանում ենք նաև միացնել տվյալները մենք կարող ենք դա անել միանգամից՝ նախ սկզբում պահելով այն լիստի մեջ\n    ldf.append(df)\ndf_customers = ldf[0]\ndf_states = ldf[1]\n\n# echo : False\ndf_customers = pd.read_csv('../../lab/python/data/raw/customers.csv')\ndf_states = pd.read_csv('../../lab/python/data/raw/states.csv')\n\n\n\nStep 2 | Exploring the Dataframes\n\ncustomers\n\ndf_customers.head()\n\n\n\n\n\n\n\n\nuser_id\nFirst Name\nSurnam\nGender\nSTATE\nAge\ndate_joined\nn_dependants\nfam_status\nincome\n\n\n\n\n0\n26711\nDeborah\nEsquivel\nFemale\nMissouri\n48\n1/1/2017\n3\nmarried\n165665\n\n\n1\n33890\nPatricia\nHart\nFemale\nNew Mexico\n36\n1/1/2017\n0\nsingle\n59285\n\n\n2\n65803\nKenneth\nFarley\nMale\nIdaho\n35\n1/1/2017\n2\nmarried\n99568\n\n\n3\n125935\nMichelle\nHicks\nFemale\nIowa\n40\n1/1/2017\n0\nsingle\n42049\n\n\n4\n130797\nAnn\nGilmore\nFemale\nMaryland\n26\n1/1/2017\n1\nmarried\n40374\n\n\n\n\n\n\n\n\n\nstates\ndf_states.head()\n\n\n\nStep 3 | Merging customers with states\n\n\n\n\n\n\nImportant\n\n\n\nPay attention to the states name column in df_customers\nBefore merging first we need to rename it: from STATE to state\n\n\n\ndf_customers.rename(columns={'STATE':'state'}, inplace=True)\n\n\ndf_customers_states = df_customers.merge(df_states,on = 'state')\n\n\ndf_customers_states.head()\n\n\n\n\n\n\n\n\nuser_id\nFirst Name\nSurnam\nGender\nstate\nAge\ndate_joined\nn_dependants\nfam_status\nincome\nregion\ndivision\n\n\n\n\n0\n26711\nDeborah\nEsquivel\nFemale\nMissouri\n48\n1/1/2017\n3\nmarried\n165665\nMidwest\nWest North Central\n\n\n1\n33890\nPatricia\nHart\nFemale\nNew Mexico\n36\n1/1/2017\n0\nsingle\n59285\nWest\nMountain\n\n\n2\n65803\nKenneth\nFarley\nMale\nIdaho\n35\n1/1/2017\n2\nmarried\n99568\nWest\nMountain\n\n\n3\n125935\nMichelle\nHicks\nFemale\nIowa\n40\n1/1/2017\n0\nsingle\n42049\nMidwest\nWest North Central\n\n\n4\n130797\nAnn\nGilmore\nFemale\nMaryland\n26\n1/1/2017\n1\nmarried\n40374\nSouth\nSouth Atlantic\n\n\n\n\n\n\n\n\n\nStep 4 | merging with the main dataframe\n\ndf_train_analytics_final = df_train_analytic.merge(df_customers_states, on='user_id', how='left')\n\nNow we can drop the all the ids\n\ndf_train_analytics_final.drop(columns=['user_id','eval_set','product_id', 'aisle_id', 'department_id'],inplace=True)\n\n\nprint(df_train_analytics_final.shape)\ndf_train_analytics_final.head()\n\n(1384706, 22)\n\n\n\n\n\n\n\n\n\norder_id\norder_number\norder_dow\norder_hour_of_day\ndays_since_prior_order\nadd_to_cart_order\nreordered\nproduct_name\nprices\ndepartment\n...\nSurnam\nGender\nstate\nAge\ndate_joined\nn_dependants\nfam_status\nincome\nregion\ndivision\n\n\n\n\n0\n1187899\n11\n4\n8\n14.00\n1\n1\nSoda\n9.00\nbeverages\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n1\n1187899\n11\n4\n8\n14.00\n2\n1\nOrganic String Cheese\n8.60\ndairy eggs\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n2\n1187899\n11\n4\n8\n14.00\n3\n1\n0% Greek Strained Yogurt\n12.60\ndairy eggs\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n3\n1187899\n11\n4\n8\n14.00\n4\n1\nXL Pick-A-Size Paper Towel Rolls\n1.00\nhousehold\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n4\n1187899\n11\n4\n8\n14.00\n5\n1\nMilk Chocolate Almonds\n6.80\nsnacks\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n\n\n5 rows × 22 columns\n\n\n\n\n\nStep 5 | saving in the data/processed folder\ndf_train_analytics_final.to_csv(\"../data/processed/instacart.csv\", index = False)",
+    "text": "Homework | Solution\n\nStep 1 | Downlaoding the Data\nIn order to have the final version of the dataframe and contintue the main analytical tasks, we need to also merge customers and states dimensions.\ndata = ['customers.csv', 'states.csv']\n\nURL = 'https://raw.githubusercontent.com/hovhannisyan91/aca/refs/heads/main/lab/python/data/raw/'\n\nldf = []\nfor i in data: \n    df = pd.read_csv(URL+i)\n    # քանի որ ցանկանում ենք նաև միացնել տվյալները մենք կարող ենք դա անել միանգամից՝ նախ սկզբում պահելով այն լիստի մեջ\n    ldf.append(df)\ndf_customers = ldf[0]\ndf_states = ldf[1]\n\n# echo : False\ndf_customers = pd.read_csv('../../lab/python/data/raw/customers.csv')\ndf_states = pd.read_csv('../../lab/python/data/raw/states.csv')\n\n\n\nStep 2 | Exploring the Dataframes\n\ncustomers\n\ndf_customers.head()\n\n\n\n\n\n\n\n\nuser_id\nFirst Name\nSurnam\nGender\nSTATE\nAge\ndate_joined\nn_dependants\nfam_status\nincome\n\n\n\n\n0\n26711\nDeborah\nEsquivel\nFemale\nMissouri\n48\n1/1/2017\n3\nmarried\n165665\n\n\n1\n33890\nPatricia\nHart\nFemale\nNew Mexico\n36\n1/1/2017\n0\nsingle\n59285\n\n\n2\n65803\nKenneth\nFarley\nMale\nIdaho\n35\n1/1/2017\n2\nmarried\n99568\n\n\n3\n125935\nMichelle\nHicks\nFemale\nIowa\n40\n1/1/2017\n0\nsingle\n42049\n\n\n4\n130797\nAnn\nGilmore\nFemale\nMaryland\n26\n1/1/2017\n1\nmarried\n40374\n\n\n\n\n\n\n\n\n\nstates\ndf_states.head()\n\n\n\nStep 3 | Merging customers with states\n\n\n\n\n\n\nImportant\n\n\n\nPay attention to the states name column in df_customers\nBefore merging first we need to rename it: from STATE to state\n\n\n\ndf_customers.rename(columns={'STATE':'state'}, inplace=True)\n\n\ndf_customers_states = df_customers.merge(df_states,on = 'state')\n\n\ndf_customers_states.head()\n\n\n\n\n\n\n\n\nuser_id\nFirst Name\nSurnam\nGender\nstate\nAge\ndate_joined\nn_dependants\nfam_status\nincome\nregion\ndivision\n\n\n\n\n0\n26711\nDeborah\nEsquivel\nFemale\nMissouri\n48\n1/1/2017\n3\nmarried\n165665\nMidwest\nWest North Central\n\n\n1\n33890\nPatricia\nHart\nFemale\nNew Mexico\n36\n1/1/2017\n0\nsingle\n59285\nWest\nMountain\n\n\n2\n65803\nKenneth\nFarley\nMale\nIdaho\n35\n1/1/2017\n2\nmarried\n99568\nWest\nMountain\n\n\n3\n125935\nMichelle\nHicks\nFemale\nIowa\n40\n1/1/2017\n0\nsingle\n42049\nMidwest\nWest North Central\n\n\n4\n130797\nAnn\nGilmore\nFemale\nMaryland\n26\n1/1/2017\n1\nmarried\n40374\nSouth\nSouth Atlantic\n\n\n\n\n\n\n\n\n\nStep 4 | merging with the main dataframe\n\ndf_train_analytics_final = df_train_analytic.merge(df_customers_states, on='user_id', how='left')\n\nNow we can drop the all the ids\n\ndf_train_analytics_final.drop(columns=['user_id','eval_set','product_id', 'aisle_id', 'department_id'],inplace=True)\n\n\nprint(df_train_analytics_final.shape)\ndf_train_analytics_final.head()\n\n(1384706, 22)\n\n\n\n\n\n\n\n\n\norder_id\norder_number\norder_dow\norder_hour_of_day\ndays_since_prior_order\nadd_to_cart_order\nreordered\nproduct_name\nprices\ndepartment\n...\nSurnam\nGender\nstate\nAge\ndate_joined\nn_dependants\nfam_status\nincome\nregion\ndivision\n\n\n\n\n0\n1187899\n11\n4\n8\n14.00\n1\n1\nSoda\n9.00\nbeverages\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n1\n1187899\n11\n4\n8\n14.00\n2\n1\nOrganic String Cheese\n8.60\ndairy eggs\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n2\n1187899\n11\n4\n8\n14.00\n3\n1\n0% Greek Strained Yogurt\n12.60\ndairy eggs\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n3\n1187899\n11\n4\n8\n14.00\n4\n1\nXL Pick-A-Size Paper Towel Rolls\n1.00\nhousehold\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n4\n1187899\n11\n4\n8\n14.00\n5\n1\nMilk Chocolate Almonds\n6.80\nsnacks\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n\n\n5 rows × 22 columns\n\n\n\n\n\nStep 5 | saving in the data/processed folder\nWe are going to have very large, thus we will save it as parquet file. parquet type compresses the data much more effectively.\n# NOTE THE VIRTUAL ENVIRONMENT MUST BE ACTIVE\npip install pyarrow fastparquet\ndf_train_analytics_final.to_parquet(\"../data/processed/instacart.parquet\", index = False)\n\n\n\n\n\n\nTip\n\n\n\nTry to save the same df_train_analytics_final dataframe both in csv and parquet format, in order to feel the difference!",
     "crumbs": [
       "Syllabus",
       "Python",
@@ -9114,7 +9114,7 @@
     "href": "materials/python/session01.html#why-programming-is-necessary",
     "title": "Session 01: Programming for Data Analysts",
     "section": "Why Programming is Necessary",
-    "text": "Why Programming is Necessary\nThe fundamental reason is leverage.\n\nExcel allows you to operate on data manually.\nSQL allows you to …\n\nPython allows you to:\n\nAutomate repetitive tasks\n\nScale to larger datasets\n\nEnsure reproducibility\n\nReduce dependency on licensed tools\n\nIncrease speed and efficiency\n\n\n\n\n\n\n\nImportant\n\n\n\nProgramming transforms you from an operator into a system designer.\n\n\n\n\nAutomation: Eliminating Repetition\nConsider a simple scenario:\n\nEvery month you receive a CSV/Excel file.\n\nEvery month you clean it manually.\nEvery month you need to INSERT INTO the Database\n\n\\[\\Downarrow\\]\nEvery month you repeat the same steps.\nInstead, you write the logic once.\nimport pandas as pd\n\ndf = pd.read_csv(\"monthly_sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.to_csv(\"cleaned_sales.csv\", index=False)\n\ndf.to_sql('sql_reference_folder')\n\n\n\n\n\n\nTip\n\n\n\nNow the computer performs the task consistently and automatically.\n\n\n\n\nScale: Beyond Excel Limits\nExcel maximum row capacity: 1,048,576 rows.\nModern systems generate millions of records daily.\nPython, especially when integrated with databases, handles large-scale datasets efficiently.\n\n\n\n\n\nflowchart LR\n    A[Small Dataset] --&gt; B[Excel Works]\n    C[Large Dataset] --&gt; D[Excel Slows]\n    D --&gt; E[Python + Database]\n\n\n\n\n\n\n\n\n\n\n\n\nCaution\n\n\n\nLarge-scale analytics requires programmatic control.\n\n\n\n\nReproducibility: Making Analysis Transparent\nExcel operations can disappear when formulas are overwritten.\nIn Python, every transformation is documented as code.\nimport pandas as pd\n\ndf = pd.read_csv(\"sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.head()\nIf someone reads your script, they can reproduce every step.\n\n\n\n\n\n\nImportant\n\n\n\nThis is critical in professional analytics environments.\n\n\n\n\n\nCost Efficiency\nTraditional statistical/analytical tools require expensive licenses.\n\nSPSS\n\nSAS\n\nStata\n\nExcel\nTableau\nPower BI\n\nPython:\n\nOpen-source\n\nFree\n\nCommunity-supported\n\nFlexible (no restrictions)\n\n\nThis reduces organizational cost and increases accessibility.\n\n\n\n\n\n\n\n\nTip\n\n\n\nNewly established and/or small companies they prefer to use Python, for data analytics and/or in analtyics workflows because of above mentioned reeasons\n\n\n\n\nSpeed and Performance\nWhen datasets grow, Excel becomes slower.\nPython processes filtering and transformations faster, especially when vectorized operations are used.\nExample:\n\nimport pandas as pd\nimport numpy as np\n\ndata = np.random.randint(1, 100, size=1_000_000)\ndf = pd.DataFrame({\"value\": data})\n\nfiltered = df[df[\"value\"] &gt; 50]\n\nprint(f'the shape of the main data: {df.shape}')\nprint(f'the shape of the filtered data: {filtered.shape}')\nfiltered.head()\n\nthe shape of the main data: (1000000, 1)\nthe shape of the filtered data: (494521, 1)\n\n\n\n\n\n\n\n\n\nvalue\n\n\n\n\n1\n64\n\n\n2\n67\n\n\n4\n69\n\n\n5\n83\n\n\n8\n57\n\n\n\n\n\n\n\nThis demonstrates processing of one million observations programmatically.",
+    "text": "Why Programming is Necessary\nThe fundamental reason is leverage.\n\nExcel allows you to operate on data manually.\nSQL allows you to …\n\nPython allows you to:\n\nAutomate repetitive tasks\n\nScale to larger datasets\n\nEnsure reproducibility\n\nReduce dependency on licensed tools\n\nIncrease speed and efficiency\n\n\n\n\n\n\n\nImportant\n\n\n\nProgramming transforms you from an operator into a system designer.\n\n\n\n\nAutomation: Eliminating Repetition\nConsider a simple scenario:\n\nEvery month you receive a CSV/Excel file.\n\nEvery month you clean it manually.\nEvery month you need to INSERT INTO the Database\n\n\\[\\Downarrow\\]\nEvery month you repeat the same steps.\nInstead, you write the logic once.\nimport pandas as pd\n\ndf = pd.read_csv(\"monthly_sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.to_csv(\"cleaned_sales.csv\", index=False)\n\ndf.to_sql('sql_reference_folder')\n\n\n\n\n\n\nTip\n\n\n\nNow the computer performs the task consistently and automatically.\n\n\n\n\nScale: Beyond Excel Limits\nExcel maximum row capacity: 1,048,576 rows.\nModern systems generate millions of records daily.\nPython, especially when integrated with databases, handles large-scale datasets efficiently.\n\n\n\n\n\nflowchart LR\n    A[Small Dataset] --&gt; B[Excel Works]\n    C[Large Dataset] --&gt; D[Excel Slows]\n    D --&gt; E[Python + Database]\n\n\n\n\n\n\n\n\n\n\n\n\nCaution\n\n\n\nLarge-scale analytics requires programmatic control.\n\n\n\n\nReproducibility: Making Analysis Transparent\nExcel operations can disappear when formulas are overwritten.\nIn Python, every transformation is documented as code.\nimport pandas as pd\n\ndf = pd.read_csv(\"sales.csv\")\n\ndf = df[df[\"price\"] &gt; 0]\ndf[\"revenue\"] = df[\"price\"] * df[\"quantity\"]\n\ndf.head()\nIf someone reads your script, they can reproduce every step.\n\n\n\n\n\n\nImportant\n\n\n\nThis is critical in professional analytics environments.\n\n\n\n\n\nCost Efficiency\nTraditional statistical/analytical tools require expensive licenses.\n\nSPSS\n\nSAS\n\nStata\n\nExcel\nTableau\nPower BI\n\nPython:\n\nOpen-source\n\nFree\n\nCommunity-supported\n\nFlexible (no restrictions)\n\n\nThis reduces organizational cost and increases accessibility.\n\n\n\n\n\n\n\n\nTip\n\n\n\nNewly established and/or small companies they prefer to use Python, for data analytics and/or in analtyics workflows because of above mentioned reeasons\n\n\n\n\nSpeed and Performance\nWhen datasets grow, Excel becomes slower.\nPython processes filtering and transformations faster, especially when vectorized operations are used.\nExample:\n\nimport pandas as pd\nimport numpy as np\n\ndata = np.random.randint(1, 100, size=1_000_000)\ndf = pd.DataFrame({\"value\": data})\n\nfiltered = df[df[\"value\"] &gt; 50]\n\nprint(f'the shape of the main data: {df.shape}')\nprint(f'the shape of the filtered data: {filtered.shape}')\nfiltered.head()\n\nthe shape of the main data: (1000000, 1)\nthe shape of the filtered data: (494012, 1)\n\n\n\n\n\n\n\n\n\nvalue\n\n\n\n\n2\n97\n\n\n3\n80\n\n\n5\n92\n\n\n7\n57\n\n\n10\n76\n\n\n\n\n\n\n\nThis demonstrates processing of one million observations programmatically.",
     "crumbs": [
       "Syllabus",
       "Python",
@@ -9552,11 +9552,180 @@
     ]
   },
   {
-    "objectID": "materials/python/session05.html#importing-matplotlib",
-    "href": "materials/python/session05.html#importing-matplotlib",
+    "objectID": "materials/python/session05.html#matplotlib",
+    "href": "materials/python/session05.html#matplotlib",
     "title": "Session 05: Intro to Data Visualization",
-    "section": "Importing Matplotlib",
-    "text": "Importing Matplotlib\nBefore plotting, we need to import the library.\n\nimport pandas as pd\nimport matplotlib.pyplot as plt",
+    "section": "Matplotlib",
+    "text": "Matplotlib\nBefore plotting, we need to import the library.\n\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\nIf the instacart.csv file has already been saved, we can load it as follows.\ndf_instacart = pd.read_parquet(\"../data/processed/instacart.parquet\")\ndf_instacart.head()\n\n# echo : False\ndf_instacart = pd.read_parquet(\"../../lab/python/data/processed/instacart.parquet\")\ndf_instacart.head()\n\n\n\n\n\n\n\n\norder_id\norder_number\norder_dow\norder_hour_of_day\ndays_since_prior_order\nadd_to_cart_order\nreordered\nproduct_name\nprices\ndepartment\n...\nSurnam\nGender\nstate\nAge\ndate_joined\nn_dependants\nfam_status\nincome\nregion\ndivision\n\n\n\n\n0\n1187899\n11\n4\n8\n14.0\n1\n1\nSoda\n9.0\nbeverages\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n1\n1187899\n11\n4\n8\n14.0\n2\n1\nOrganic String Cheese\n8.6\ndairy eggs\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n2\n1187899\n11\n4\n8\n14.0\n3\n1\n0% Greek Strained Yogurt\n12.6\ndairy eggs\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n3\n1187899\n11\n4\n8\n14.0\n4\n1\nXL Pick-A-Size Paper Towel Rolls\n1.0\nhousehold\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n4\n1187899\n11\n4\n8\n14.0\n5\n1\nMilk Chocolate Almonds\n6.8\nsnacks\n...\nNguyen\nFemale\nAlabama\n31\n2/17/2019\n3\nmarried\n40423\nSouth\nEast South Central\n\n\n\n\n5 rows × 22 columns",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#first-look-at-the-dataframe",
+    "href": "materials/python/session05.html#first-look-at-the-dataframe",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "First Look at the DataFrame",
+    "text": "First Look at the DataFrame\nBefore plotting, it is useful to remind ourselves what kind of table we are working with.\n\ndf_instacart.shape\n\n(1384706, 22)\n\n\n\ndf_instacart.columns\n\nIndex(['order_id', 'order_number', 'order_dow', 'order_hour_of_day',\n       'days_since_prior_order', 'add_to_cart_order', 'reordered',\n       'product_name', 'prices', 'department', 'aisle', 'First Name', 'Surnam',\n       'Gender', 'state', 'Age', 'date_joined', 'n_dependants', 'fam_status',\n       'income', 'region', 'division'],\n      dtype='object')\n\n\nThis tells us that the dataset contains:\n\norder-level variables\nbasket-level variables\nproduct-level variables\ncustomer-level variables\n\nThat means the same DataFrame can support many kinds of visualizations.",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#the-basic-plotting-workflow-in-matplotlib",
+    "href": "materials/python/session05.html#the-basic-plotting-workflow-in-matplotlib",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "The Basic Plotting Workflow in Matplotlib",
+    "text": "The Basic Plotting Workflow in Matplotlib\nA simple plotting workflow usually includes:\n\nselecting or preparing the data\ncreating a figure\nchoosing a chart type\nadding a title\nlabeling the axes\ndisplaying the chart\n\nA very simple structure looks like this:\nplt.figure()\nplt.bar(x_values, y_values)\nplt.title(\"Chart Title\")\nplt.xlabel(\"X Label\")\nplt.ylabel(\"Y Label\")\nplt.show()\nWe will now apply this logic directly to the instacart data.",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-1-visualizing-orders-by-day-of-week",
+    "href": "materials/python/session05.html#example-1-visualizing-orders-by-day-of-week",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 1: Visualizing Orders by Day of Week",
+    "text": "Example 1: Visualizing Orders by Day of Week\n\nAnalytical question\nA natural first question is:\n\nOn which days of the week are orders placed most frequently?\n\nThis is a category comparison problem, so a bar chart is a reasonable first choice.\n\n\nPreparing the data\n\norders_by_day = (\n    df_instacart[[\"order_id\", \"order_dow\"]]\n    .drop_duplicates()\n    .groupby(\"order_dow\")\n    .size()\n)\n\norders_by_day\n\norder_dow\n0    27465\n1    19672\n2    16119\n3    15687\n4    15959\n5    17406\n6    18901\ndtype: int64\n\n\nWe use .drop_duplicates() because the final instacart table is at the product-within-order level, and we want to count each order only once.\n\n\nCreating the chart\n\norders_by_day = (\n    df_instacart[[\"order_id\", \"order_dow\"]]\n    .drop_duplicates()\n    .groupby(\"order_dow\")\n    .size()\n)\n\nplt.figure()\nplt.bar(orders_by_day.index, orders_by_day.values)\nplt.title(\"Number of Orders by Day of Week\")\nplt.xlabel(\"Day of Week\")\nplt.ylabel(\"Number of Orders\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhat do we learn here?\nThis is our first real matplotlib chart using the project data.\nIt shows us:\n\nhow to prepare grouped data before plotting\nhow to build a bar chart\nhow to add a title and axis labels\n\nIt also reinforces an important analytical lesson:\n\nwhen using a line-item dataset, we must think carefully about the correct level of aggregation",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-2-visualizing-orders-by-hour-of-day",
+    "href": "materials/python/session05.html#example-2-visualizing-orders-by-hour-of-day",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 2: Visualizing Orders by Hour of Day",
+    "text": "Example 2: Visualizing Orders by Hour of Day\n\nAnalytical question\nAnother useful question is:\n\nAt what hours are orders placed most frequently?\n\nThis is also a category comparison problem, but now the categories are hours.\n\n\nPreparing the data\n\norders_by_hour = (\n    df_instacart[[\"order_id\", \"order_hour_of_day\"]]\n    .drop_duplicates()\n    .groupby(\"order_hour_of_day\")\n    .size()\n)\n\norders_by_hour\n\norder_hour_of_day\n0       852\n1       507\n2       305\n3       223\n4       218\n5       402\n6      1121\n7      3376\n8      6343\n9      9033\n10    10585\n11    10610\n12    10622\n13    10711\n14    11103\n15    11075\n16    10495\n17     9353\n18     7558\n19     5721\n20     3978\n21     3050\n22     2442\n23     1526\ndtype: int64\n\n\n\n\nCreating the chart\n\norders_by_hour = (\n    df_instacart[[\"order_id\", \"order_hour_of_day\"]]\n    .drop_duplicates()\n    .groupby(\"order_hour_of_day\")\n    .size()\n)\n\nplt.figure()\nplt.bar(orders_by_hour.index, orders_by_hour.values)\nplt.title(\"Number of Orders by Hour of Day\")\nplt.xlabel(\"Hour of Day\")\nplt.ylabel(\"Number of Orders\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhy is this a good introductory example?\nThis chart helps students practice:\n\ngrouping the data\nplotting numeric categories on the x-axis\ninterpreting demand patterns across time\n\nIt also introduces an important analytical idea:\n\nthe chart is simple, but the real work begins with asking the right aggregation question",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-3-visualizing-the-most-popular-departments",
+    "href": "materials/python/session05.html#example-3-visualizing-the-most-popular-departments",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 3: Visualizing the Most Popular Departments",
+    "text": "Example 3: Visualizing the Most Popular Departments\n\nAnalytical question\nNow we move from order behavior to product categories.\nA natural question is:\n\nWhich departments appear most often in the dataset?\n\nThis is again a category comparison problem, so a bar chart is appropriate.\n\n\nPreparing the data\n\ntop_departments = df_instacart[\"department\"].value_counts().head(10)\ntop_departments\n\ndepartment\nproduce            409087\ndairy eggs         217051\nsnacks             118862\nbeverages          113962\nfrozen             100426\npantry              81242\nbakery              48394\ncanned goods        46799\ndeli                44291\ndry goods pasta     38713\nName: count, dtype: int64\n\n\n\n\nCreating the chart\n\ntop_departments = df_instacart[\"department\"].value_counts().head(10)\n\nplt.figure()\nplt.bar(top_departments.index, top_departments.values)\nplt.title(\"Top 10 Departments by Number of Purchased Items\")\nplt.xlabel(\"Department\")\nplt.ylabel(\"Number of Purchased Items\")\nplt.xticks(rotation=45)\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhy do we rotate the labels?\nThe department names are longer than simple numeric categories. Rotating labels improves readability.\nThis is an important practical lesson in matplotlib:\n\na chart may be correct but still difficult to read if labels are not formatted well",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-4-improving-readability-with-a-horizontal-bar-chart",
+    "href": "materials/python/session05.html#example-4-improving-readability-with-a-horizontal-bar-chart",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 4: Improving Readability with a Horizontal Bar Chart",
+    "text": "Example 4: Improving Readability with a Horizontal Bar Chart\nThe previous chart is correct, but category labels can still feel crowded.\nA horizontal bar chart is often better when category names are longer.\n\nCreating the improved chart\n\ntop_departments_sorted = df_instacart[\"department\"].value_counts().head(10).sort_values()\n\nplt.figure()\nplt.barh(top_departments_sorted.index, top_departments_sorted.values)\nplt.title(\"Top 10 Departments by Number of Purchased Items\")\nplt.xlabel(\"Number of Purchased Items\")\nplt.ylabel(\"Department\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhat is better here?\nThis chart is often easier to read because:\n\nthe labels fit naturally\nthe category ranking is easier to interpret\nthe chart emphasizes comparison more clearly\n\nThis is a good moment to remind students that visualization is not only about plotting. It is also about choosing the clearest version of a chart.",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-5-visualizing-the-distribution-of-prices",
+    "href": "materials/python/session05.html#example-5-visualizing-the-distribution-of-prices",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 5: Visualizing the Distribution of Prices",
+    "text": "Example 5: Visualizing the Distribution of Prices\n\nAnalytical question\nNow let us move to a different question:\n\nHow are product prices distributed?\n\nThis is not a category comparison problem. It is a distribution problem.\nFor distributions, a histogram is usually a better choice than a bar chart.\n\n\nPreparing the data\n\ndf_instacart[\"prices\"].describe()\n\ncount    1.384618e+06\nmean     1.411711e+01\nstd      6.802253e+02\nmin      1.000000e+00\n25%      4.300000e+00\n50%      7.400000e+00\n75%      1.130000e+01\nmax      9.999900e+04\nName: prices, dtype: float64\n\n\n\n\nCreating the histogram\n\nplt.figure()\nplt.hist(df_instacart[\"prices\"].dropna(), bins=30)\nplt.title(\"Distribution of Product Prices\")\nplt.xlabel(\"Price\")\nplt.ylabel(\"Frequency\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhat does this teach us?\nThis example introduces a second core chart type in matplotlib.\nIt shows students that:\n\nnot every problem should be visualized with bars\nthe chart type must match the analytical question\nhistograms are useful for understanding spread, concentration, and skewness",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-6-visualizing-average-price-by-department",
+    "href": "materials/python/session05.html#example-6-visualizing-average-price-by-department",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 6: Visualizing Average Price by Department",
+    "text": "Example 6: Visualizing Average Price by Department\n\nAnalytical question\nA more analytical question is:\n\nWhich departments have the highest average prices?\n\nThis requires both aggregation and visualization.\n\n\nPreparing the data\n\navg_price_by_department = (\n    df_instacart\n    .groupby(\"department\")[\"prices\"]\n    .mean()\n    .sort_values(ascending=True)\n)\n\navg_price_by_department\n\ndepartment\nsnacks              4.272277\nother               7.184457\ndry goods pasta     7.388252\nhousehold           7.402065\ncanned goods        7.530263\nbeverages           7.660526\nbabies              7.682672\ndeli                7.768707\ninternational       7.799126\nfrozen              7.801781\nbakery              7.833023\npets                7.867823\npantry              7.955316\npersonal care       7.989259\nproduce             7.997862\nbreakfast           8.090261\nalcohol             8.126044\nbulk                8.211626\nmissing             8.599139\nmeat seafood       16.202349\ndairy eggs         48.606962\nName: prices, dtype: float64\n\n\n\n\nCreating the chart\n\navg_price_by_department = (\n    df_instacart\n    .groupby(\"department\")[\"prices\"]\n    .mean()\n    .sort_values(ascending=True)\n)\n\nplt.figure()\nplt.barh(avg_price_by_department.index, avg_price_by_department.values)\nplt.title(\"Average Product Price by Department\")\nplt.xlabel(\"Average Price\")\nplt.ylabel(\"Department\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhy is this an important example?\nIt connects three ideas together:\n\ngrouping data with Pandas\nsummarizing with .mean()\nvisualizing the result with matplotlib\n\nThis is exactly the kind of workflow students will use in real analysis.",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-7-visualizing-reorder-rate-by-region",
+    "href": "materials/python/session05.html#example-7-visualizing-reorder-rate-by-region",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 7: Visualizing Reorder Rate by Region",
+    "text": "Example 7: Visualizing Reorder Rate by Region\n\nAnalytical question\nNow we bring customer geography into the picture.\nA useful question is:\n\nWhich regions have the highest reorder rate?\n\n\n\nPreparing the data\n\nreorder_rate_by_region = (\n    df_instacart\n    .groupby(\"region\")[\"reordered\"]\n    .mean()\n    .sort_values(ascending=True)\n)\n\nreorder_rate_by_region\n\nregion\nSouth        0.596392\nMidwest      0.598615\nWest         0.599062\nNortheast    0.602097\nName: reordered, dtype: float64\n\n\n\n\nCreating the chart\n\nreorder_rate_by_region = (\n    df_instacart\n    .groupby(\"region\")[\"reordered\"]\n    .mean()\n    .sort_values(ascending=True)\n)\n\nplt.figure()\nplt.barh(reorder_rate_by_region.index, reorder_rate_by_region.values)\nplt.title(\"Reorder Rate by Region\")\nplt.xlabel(\"Reorder Rate\")\nplt.ylabel(\"Region\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhat do we learn here?\nThis chart introduces an important interpretation point:\n\na mean of a binary variable such as reordered can be interpreted as a proportion or rate\n\nThat is a powerful idea for analytical visualization.",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#example-8-visualizing-relationship-between-age-and-income",
+    "href": "materials/python/session05.html#example-8-visualizing-relationship-between-age-and-income",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Example 8: Visualizing Relationship Between Age and Income",
+    "text": "Example 8: Visualizing Relationship Between Age and Income\n\nAnalytical question\nNow we try a relationship question:\n\nIs there a visible relationship between customer age and income?\n\nFor two numeric variables, a scatter plot is often the right starting point.\n\n\nPreparing the data\n\ncustomer_profile = df_instacart[\n    [\"First Name\", \"Surnam\", \"Age\", \"income\"]\n].drop_duplicates()\n\ncustomer_profile.head()\n\n\n\n\n\n\n\n\nFirst Name\nSurnam\nAge\nincome\n\n\n\n\n0\nLinda\nNguyen\n31\n40423\n\n\n11\nNorma\nChapman\n68\n64940\n\n\n42\nJanet\nLester\n75\n115242\n\n\n51\nPeter\nVillegas\n39\n89095\n\n\n60\nAnna\nAllison\n32\n88603\n\n\n\n\n\n\n\n\n\nCreating the chart\n\ncustomer_profile = df_instacart[\n    [\"First Name\", \"Surnam\", \"Age\", \"income\"]\n].drop_duplicates()\n\nplt.figure()\nplt.scatter(customer_profile[\"Age\"], customer_profile[\"income\"])\nplt.title(\"Customer Age and Income\")\nplt.xlabel(\"Age\")\nplt.ylabel(\"Income\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nWhy do we use a deduplicated customer table here?\nBecause the instacart DataFrame is at the product-within-order level, customer variables repeat many times.\nIf we want a customer-level relationship, we should remove repeated customer rows first.\nThis is an essential analytical lesson:\n\nthe right chart depends not only on the variables, but also on the correct grain of the data",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#what-students-should-learn-from-this-introduction",
+    "href": "materials/python/session05.html#what-students-should-learn-from-this-introduction",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "What Students Should Learn from This Introduction",
+    "text": "What Students Should Learn from This Introduction\nAt this stage, students should understand that matplotlib is not just a plotting library. It is part of the analytical workflow.\nThe process usually looks like this:\n\ndefine the question\nprepare the data\nchoose the chart type\ncreate the figure\nlabel the chart clearly\ninterpret the result",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#a-visual-summary-of-the-workflow",
+    "href": "materials/python/session05.html#a-visual-summary-of-the-workflow",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "A Visual Summary of the Workflow",
+    "text": "A Visual Summary of the Workflow\n\n\n\n\n\nflowchart TD\n    A[Ask an analytical question] --&gt; B[Prepare the data with Pandas]\n    B --&gt; C[Choose the right chart type]\n    C --&gt; D[Create the chart with Matplotlib]\n    D --&gt; E[Interpret the result]",
+    "crumbs": [
+      "Syllabus",
+      "Python",
+      "Python",
+      "Session 05: Intro to Data Visualization"
+    ]
+  },
+  {
+    "objectID": "materials/python/session05.html#summary-1",
+    "href": "materials/python/session05.html#summary-1",
+    "title": "Session 05: Intro to Data Visualization",
+    "section": "Summary",
+    "text": "Summary\nIn this section, we introduced matplotlib using the real instacart dataset.\nWe learned how to create:\n\nbar charts\nhorizontal bar charts\nhistograms\nscatter plots\n\nWe also learned that chart creation starts with the analytical question, not with the code.\nIn the next section, we will refine these visualizations further and discuss how to improve them using stronger design choices and clearer storytelling.",
     "crumbs": [
       "Syllabus",
       "Python",
