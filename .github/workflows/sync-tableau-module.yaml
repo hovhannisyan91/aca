@@ -15,29 +15,14 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
 
-      - name: Clone or initialize target repo
-        env:
-          GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
-        run: |
-          set -euo pipefail
+      - name: Checkout tableau-analytics-portfolio
+        uses: actions/checkout@v4
+        with:
+          repository: hovhannisyan91/tableau-analytics-portfolio
+          token: ${{ secrets.SQL_PORTFOLIO_PAT }}
+          path: target
 
-          REPO_URL="https://${GH_TOKEN}@github.com/hovhannisyan91/tableau-analytics-portfolio.git"
-
-          if git ls-remote --exit-code --heads "$REPO_URL" main >/dev/null 2>&1; then
-            git clone --depth 1 "$REPO_URL" target
-          else
-            mkdir target
-            cd target
-            git init
-            git checkout --orphan main
-            git remote add origin "$REPO_URL"
-          fi
-
-          cd target
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-
-      - name: Sync tableau module into target repo root
+      - name: Sync tableau module into target repo root (preserve metadata)
         run: |
           rsync -av --delete \
             --exclude ".git/" \
@@ -48,9 +33,16 @@ jobs:
             target/
 
       - name: Commit and push if changed
+        env:
+          GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
         run: |
           set -euo pipefail
+
           cd target
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
           git add -A
 
           if git diff --cached --quiet; then
@@ -59,4 +51,5 @@ jobs:
           fi
 
           git commit -m "Sync Tableau module from course repo"
-          git push origin main
+
+          git push origin HEAD:main
