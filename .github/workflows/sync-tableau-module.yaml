@@ -1,0 +1,49 @@
+name: Sync Tableau Module to Portfolio Root
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "lab/tableau/**"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Checkout tableau-analytics-portfolio
+        uses: actions/checkout@v4
+        with:
+          repository: hovhannisyan91/tableau-analytics-portfolio
+          token: ${{ secrets.SQL_PORTFOLIO_PAT }}
+          path: target
+
+      - name: Sync tableau_module into target repo root (preserve metadata)
+        run: |
+          rsync -av --delete \
+            --exclude ".git/" \
+            --exclude ".github/" \
+            --exclude ".gitignore" \
+            --exclude "LICENSE" \
+            lab/teblea_module/ \
+            target/
+
+      - name: Commit and push if changed
+        env:
+          GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
+        run: |
+          cd target
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "Sync Tableau module from course repo"
+
+          CLEAN_TOKEN=$(printf "%s" "$GH_TOKEN")
+          git remote set-url origin "https://${CLEAN_TOKEN}@github.com/hovhannisyan91/tableau-analytics-portfolio.git"
+          git push origin HEAD:main
+
+
