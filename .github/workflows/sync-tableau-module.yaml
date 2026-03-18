@@ -29,9 +29,8 @@ jobs:
 
           # If the remote already has a main branch, use it; otherwise create one.
           if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
-            git fetch origin main
-            git checkout main
-            git reset --hard origin/main
+            git fetch origin main:refs/remotes/origin/main
+            git checkout -B main origin/main
           else
             git checkout -B main
           fi
@@ -50,6 +49,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
         run: |
+          set -euo pipefail
           cd target
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -58,6 +58,11 @@ jobs:
 
           CLEAN_TOKEN=$(printf "%s" "$GH_TOKEN")
           git remote set-url origin "https://${CLEAN_TOKEN}@github.com/hovhannisyan91/tableau-analytics-portfolio.git"
-          git push -u origin main
 
+          # Handle updates pushed between checkout and push.
+          if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+            git pull --rebase origin main
+          fi
+
+          git push origin HEAD:main
 
