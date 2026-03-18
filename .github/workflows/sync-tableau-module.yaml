@@ -15,27 +15,29 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
 
-      - name: Prepare target repo (may be empty)
+      - name: Clone or initialize target repo
         env:
           GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
         run: |
           set -euo pipefail
-          mkdir -p target
-          cd target
-          git init
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git remote add origin "https://${GH_TOKEN}@github.com/hovhannisyan91/tableau-analytics-portfolio.git"
 
-          # If the remote already has a main branch, use it; otherwise create one.
-          if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
-            git fetch origin main:refs/remotes/origin/main
-            git checkout -B main origin/main
+          REPO_URL="https://${GH_TOKEN}@github.com/hovhannisyan91/tableau-analytics-portfolio.git"
+
+          if git ls-remote --exit-code --heads "$REPO_URL" main >/dev/null 2>&1; then
+            git clone --depth 1 "$REPO_URL" target
           else
-            git checkout -B main
+            mkdir target
+            cd target
+            git init
+            git checkout --orphan main
+            git remote add origin "$REPO_URL"
           fi
 
-      - name: Sync tableau module into target repo root (preserve metadata)
+          cd target
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+      - name: Sync tableau module into target repo root
         run: |
           rsync -av --delete \
             --exclude ".git/" \
@@ -46,23 +48,15 @@ jobs:
             target/
 
       - name: Commit and push if changed
-        env:
-          GH_TOKEN: ${{ secrets.SQL_PORTFOLIO_PAT }}
         run: |
           set -euo pipefail
           cd target
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add .
-          git diff --cached --quiet || git commit -m "Sync Tableau module from course repo"
+          git add -A
 
-          CLEAN_TOKEN=$(printf "%s" "$GH_TOKEN")
-          git remote set-url origin "https://${CLEAN_TOKEN}@github.com/hovhannisyan91/tableau-analytics-portfolio.git"
-
-          # Handle updates pushed between checkout and push.
-          if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
-            git pull --rebase origin main
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
           fi
 
-          git push origin HEAD:main
-
+          git commit -m "Sync Tableau module from course repo"
+          git push origin main
