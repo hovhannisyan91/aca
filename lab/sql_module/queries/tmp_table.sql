@@ -1,35 +1,58 @@
+CREATE TEMP TABLE tmp_sales AS
+SELECT *
+FROM (
+    VALUES
+        
+        (1,  'A', DATE '2024-01-01', 100, 'online'),
+        (2,  'A', DATE '2024-01-02', 120, 'store'),
+        (3,  'A', DATE '2024-01-03', 90,  'online'),
+        (4,  'A', DATE '2024-01-04', 130, 'store'),
+
+        
+        (5,  'B', DATE '2024-01-01', 180, 'store'),
+        (6,  'B', DATE '2024-01-02', 200, 'online'),
+        (7,  'B', DATE '2024-01-03', 220, 'online'),
+        (8,  'B', DATE '2024-01-04', 200, 'store'),
+
+        
+        (9,  'C', DATE '2024-01-01', 150, 'online'),
+        (10, 'C', DATE '2024-01-02', 150, 'online'),
+        (11, 'C', DATE '2024-01-03', 170, 'online'),
+
+        
+        (12, 'D', DATE '2024-01-01', 90,  'store'),
+        (13, 'D', DATE '2024-01-02', 110, 'store'),
+
+        
+        (14, 'E', DATE '2024-01-01', 140, 'store'),
+        (15, 'E', DATE '2024-01-02', 160, 'online'),
+        (16, 'E', DATE '2024-01-03', 155, 'store')
+) AS t(
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    channel
+);
 
 
-CREATE TEMP TABLE tmp_order_products AS (
+
+WITH T AS (
+
 	SELECT
-		o.order_id,
-		o.customer_id,
-		oi.quantity,
-		p.price,
-		oi.quantity*p.price AS order_revenue,
-		p.product_name,
-		p.category
-	FROM analytics.orders o
-	INNER JOIN analytics.order_items oi ON (o.order_id = oi.order_id)
-	LEFT JOIN  analytics.products p ON (oi.product_id = p.product_id)
-)
-;
-
--- What is the average order revenue per customer, and which customers are above the overall average?
-
-WITH avg_customer AS (
-	SELECT 
-		customer_id,
-		AVG(order_revenue) as avg_revenue
-	FROM tmp_order_products 
-	GROUP BY customer_id
+	    sale_id,
+	    customer_id,
+	    sale_date,
+	    amount,
+		ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) as rn_sd,
+		RANK() OVER (PARTITION BY customer_id ORDER BY amount DESC) as rnk_sd,
+		DENSE_RANK() OVER (PARTITION BY customer_id ORDER BY amount DESC) as dense_sd
+		
+	FROM tmp_sales
 )
 
 SELECT 
-	
-FROM avg_customer
-WHERE avg_revenue > (
-	SELECT AVG(order_revenue) FROM tmp_order_products
-)
 
-
+	* 
+FROM T 
+WHERE rnk_sd <= 2
