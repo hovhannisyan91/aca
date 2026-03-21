@@ -738,7 +738,7 @@ df_instacart.head()
 ```
 
 ```{python}
-# echo : False
+#| echo: False
 df_instacart = pd.read_parquet("../../lab/python/data/processed/instacart.parquet")
 df_instacart.head()
 ```
@@ -839,7 +839,7 @@ plt.ylabel("Number of Orders")
 plt.show()
 ```
 
-### What do we learn here?
+#### What do we learn here?
 
 **This is our first real `matplotlib` chart using the project data.**
 
@@ -998,22 +998,182 @@ df_instacart["prices"].describe()
 #| fig-align: center
 
 plt.figure()
-plt.hist(df_instacart["prices"].dropna(), bins=30)
+plt.hist(df_instacart["prices"].dropna(), bins=10)
 plt.title("Distribution of Product Prices")
 plt.xlabel("Price")
 plt.ylabel("Frequency")
 plt.show()
 ```
 
+
+
+::: {.callout-important}
+At first glance, the histogram appears to show **only a single vertical bar.** The chart is not wrong, but it is not yet informative.
+
+The main reason is the presence of **extreme values** in the `prices` variable. A few unusually large observations stretch the horizontal axis so much that most regular prices become compressed into the first part of the plot.
+
+This is a very common issue in visualization. Before interpreting a histogram, we should always ask whether the variable contains:
+
+ 
+- extreme outliers
+- data entry issues
+- a long right tail
+- unrealistic values compared with the rest of the distribution
+
+**There are several ways to handle this problem:**
+ 
+- **using z-scores**, where we remove values that are too many standard deviations away from the mean
+- **using quantiles**, where we trim the extreme tail by keeping only values up to a chosen percentile
+- **setting axis limits**, where we keep all data but visually zoom into the most informative range
+- **using a log scale**, where we compress the scale to make very large values less dominant
+
+
+In this section, we will use the second approach: **quantiles**.
+
+**The main idea is simple:**
+
+- calculate the upper percentile threshold
+- keep only observations below that threshold
+- redraw the histogram on the trimmed data
+
+This does not mean the removed values are unimportant. It simply means that for the purpose of understanding **the main distribution**, we want to reduce the visual influence of extreme observations.
+:::
+
+#### Alternative 1: Using the 99th percentile
+
+This is a common and practical choice. It removes only the most extreme 1% of observations.
+
+##### Step 1: Calculate the upper quantile
+
+```{python}
+upper_limit = df_instacart["prices"].quantile(0.99)
+upper_limit
+```
+
+##### Step 2: Filter the data
+
+```{python}
+df_prices_q = df_instacart[df_instacart["prices"] <= upper_limit]
+df_prices_q["prices"].describe()
+```
+
+##### Step 3: Plot the trimmed distribution
+
+```{python}
+plt.figure()
+plt.hist(df_prices_q["prices"].dropna(), bins=30)
+plt.title("Distribution of Product Prices (Up to 99th Percentile)")
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+#### Alternative 2: Using the 95th percentile
+
+This version is stricter. It removes a larger extreme tail and can make the central shape even clearer.
+
+##### Step 1: Calculate the upper quantile
+
+```{python}
+upper_limit_95 = df_instacart["prices"].quantile(0.95)
+upper_limit_95
+```
+
+##### Step 2: Filter the data
+
+```{python}
+df_prices_q95 = df_instacart[df_instacart["prices"] <= upper_limit_95]
+df_prices_q95["prices"].describe()
+```
+
+##### Step 3: Plot the trimmed distribution
+
+```{python}
+plt.figure()
+plt.hist(df_prices_q95["prices"].dropna(), bins=30)
+plt.title("Distribution of Product Prices (Up to 95th Percentile)")
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+#### Alternative 3: Keeping all rows but zooming the x-axis
+
+In this approach, we do not remove any values. Instead, we limit the visible range of the horizontal axis.
+
+**This is useful when:**
+
+- we want to preserve all observations
+- we only want to improve readability
+- we do not want to create a filtered copy of the dataset
+
+```{python}
+plt.figure()
+plt.hist(df_instacart["prices"].dropna(), bins=30)
+plt.xlim(0, 50)
+plt.title("Distribution of Product Prices (Zoomed X-Axis)")
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+#### Alternative 4: Using z-scores
+
+Another common approach is to identify values that are far away from the mean in terms of standard deviations.
+
+The z-score is calculated as:
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+**where:**
+
+ 
+- $x$ is the observation
+- $\mu$ is the mean
+- $\sigma$ is the standard deviation
+
+A typical rule is to keep observations with absolute z-score less than 3.
+
+```{python}
+mean_price = df_instacart["prices"].mean()
+std_price = df_instacart["prices"].std()
+
+z_scores = (df_instacart["prices"] - mean_price) / std_price
+
+df_prices_z = df_instacart[z_scores.abs() < 3]
+
+plt.figure()
+plt.hist(df_prices_z["prices"].dropna(), bins=30)
+plt.title("Distribution of Product Prices (Z-Score Filtered)")
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.show()
+```
+
+#### Which method should we prefer?
+
+**There is no single universal answer. The right choice depends on the analytical goal.**
+
+| Method | When it is useful | Main limitation |
+|---|---|---|
+| Quantile filtering | When we want a robust and simple way to trim the extreme tail | The cutoff is relative, not based on domain knowledge |
+| Z-score filtering | When the data is roughly symmetric and mean-based filtering is acceptable | Can be sensitive when the distribution is highly skewed |
+| Axis limits | When we want to keep all data but improve readability | Extreme values still exist in the data and may still affect interpretation |
+| Log scale | When values span multiple orders of magnitude | Harder for beginners to interpret |
+
+
 #### What does this teach us?
 
 This example introduces a second core chart type in `matplotlib`.
 
-**It shows students that:**
+**It shows:**
 
 - not every problem should be visualized with bars
 - the chart type must match the analytical question
 - histograms are useful for understanding spread, concentration, and skewness
+
 
 ### Example 6: Visualizing Average Price by Department
 
@@ -1111,12 +1271,12 @@ plt.show()
 
 ### What do we learn here?
 
-This** chart introduces an important interpretation point:**
+This **chart introduces an important interpretation point:**
 
  
 >a mean of a binary variable such as `reordered` can be interpreted as a proportion or rate
 
-That is a powerful idea for analytical visualization.
+That is a powerful idea for analytical visualization. 
 
 ### Example 8: Visualizing Relationship Between Age and Income
 
@@ -1128,7 +1288,7 @@ For two numeric variables, a scatter plot is often the right starting point.
 
 ```{python}
 customer_profile = df_instacart[
-    ["First Name", "Surnam", "Age", "income"]
+    ["First Name", "Surname", "Age", "income"]
 ].drop_duplicates()
 
 customer_profile.head()
@@ -1144,7 +1304,7 @@ customer_profile.head()
 #| fig-align: center
 
 customer_profile = df_instacart[
-    ["First Name", "Surnam", "Age", "income"]
+    ["First Name", "Surname", "Age", "income"]
 ].drop_duplicates()
 
 plt.figure()
@@ -1173,4 +1333,5 @@ flowchart TD
     C --> D[Create the chart with Matplotlib]
     D --> E[Interpret the result]
 ```
+
 
