@@ -24,11 +24,12 @@ format:
             .muted { opacity: .8 }
             .pill { border-radius: 10px; }
             .circle { border-radius: 50%; }
+            .small-table table {font-size: 0.6em;}
           </style>
 image_path: "/img/sql/10"
 ---
 
-## Transition to Window Functions
+## Transition to Window Functions {.smaller}
 
 **CTEs** define **what** is computed and **in what order**.
 
@@ -39,7 +40,7 @@ image_path: "/img/sql/10"
 
 # Window Functions
 
-## Core Idea (Syntax Skeleton)
+## Core Idea (Syntax Skeleton) {.smaller}
 
 ```sql
 function_name(expression)
@@ -51,7 +52,7 @@ OVER (
 ```
 
 
-## Window Functions vs Aggregations
+## Window Functions vs Aggregations {.smaller}
 
 | Feature | GROUP BY | Window Function |
 |-------|----------|-----------------|
@@ -93,7 +94,7 @@ FROM sales;
 | 3 | 20 | 200 | 200 |
 
 
-## Analytical Value of Window Functions
+## Analytical Value of Window Functions {.smaller}
 
 
 ::: {.incremental}
@@ -107,8 +108,7 @@ FROM sales;
 :::
 
 
-
-## Window Functions in Dataa Aalytics
+## Window Functions in Data Aalytics {.smaller}
 
 
 ::: {.incremental}
@@ -123,10 +123,10 @@ FROM sales;
 
 . . .
 
-They are a cornerstone of **modern analytical SQL**.
+> Window functions are a cornerstone of **modern analytical SQL**.
 
 
----
+--- 
 
 | Construct | Purpose |
 |---------|--------|
@@ -185,18 +185,17 @@ FROM (
 ::: {.incremental}
 
 1. Aggregate over a window (e.g., `SUM()`, `AVG()`, `COUNT()`)  
-2. Value from another row (e.g., `LAG()`, `LEAD()`)  
+2. Navigational & Value from another row (e.g., `LAG()`, `LEAD()`, `FIRST_VALUE()`, `LAST_VALUE()`)  
 3. Ranking functions (e.g., `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`)  
 4. Cumulative distributions (e.g., `CUME_DIST()`, `PERCENT_RANK()`)  
 5. String aggregation (e.g., `STRING_AGG()`)
-6. Navigational functions (e.g., `FIRST_VALUE()`, `LAST_VALUE()`)
-7. Framing & Advanced Window Control (Advanced)
+6. Framing & Advanced Window Control (Advanced)
    
 :::
 
 
 
-# Simple Aggregate Window Functions {.r-fit-text}
+# Simple Aggregate Window Functions {.smaller}
 
 
 ##  Concept {.smaller}
@@ -228,9 +227,10 @@ All of them become window functions when combined with `OVER(...)`.
 
 ##  Example: Average Amount per Customer {.smaller}
 
-**Business intuition:** “How much does this sale differ from the customer’s typical behavior?”
+**Business intuition:** *“How much does this sale differ from the customer’s typical behavior?”*
 
 . . .
+
 
 ```sql
 SELECT
@@ -246,6 +246,7 @@ FROM tmp_sales;
 
 . . .
 
+
 | sale_id | customer_id | amount | avg_customer_amount |
 |--------:|-------------|-------:|--------------------:|
 | 1 | A | 100 | 110.00 |
@@ -260,7 +261,6 @@ FROM tmp_sales;
 
 # Statistical Window Functions
 
-
 ##  Concept {.smaller}
 
 Statistical window functions extend simple aggregates by answering **distributional questions** instead of basic totals or averages.
@@ -270,8 +270,7 @@ Statistical window functions extend simple aggregates by answering **distributio
 > Where does this row stand within the distribution of its group?
 
 
-## Common Functions in This Layer
-
+## Common Functions in This Layer {.smaller}
   
 - `PERCENTILE_CONT()`  
 - `PERCENTILE_DISC()`  
@@ -279,7 +278,7 @@ Statistical window functions extend simple aggregates by answering **distributio
 - `CUME_DIST()`  
 
 
-## Generic Pattern
+## Generic Pattern {.smaller}
 
 ```sql
 STAT_FUNCTION(...)
@@ -290,7 +289,7 @@ OVER (
 ```
 
 
-## Example 1: Percentile Rank of Sale Amount {.smaller}
+## Example 1: `PERCENTILE_CONT()` of Sale Amount {.smaller}
 
 **Business intuition:** “What is the typical (middle) transaction size for this customer?”
 
@@ -303,6 +302,15 @@ SELECT
 FROM tmp_sales
 GROUP BY customer_id;
 ```
+
+. . .
+
+| customer_id | median_amount |
+|-------------|---------------|
+| B           | 200           |
+| C           | 150           |
+| D           | 100           |
+| E           | 155           |
 
 ## Example 2: Percent Rank of Each Transaction {.smaller}
 
@@ -322,13 +330,30 @@ FROM tmp_sales;
 
 . . .
 
-**Interpretation:**
 
-- `0.0` → lowest value in group  
-- `1.0` → highest value in group 
+| sale_id | customer_id | amount | percent_rank |
+|--------:|-------------|-------:|-------------:|
+| 3       | A           | 90     | 0.000 |
+| 1       | A           | 100    | 0.333 |
+| 2       | A           | 120    | 0.667 |
+| 4       | A           | 130    | **1.000** |
+| 5       | B           | 180    | 0.000 |
+| 6       | B           | 200    | 0.333 |
+| 8       | B           | 200    | 0.333 |
+| 7       | B           | 220    | **1.000** |
+| 9       | C           | 150    | 0.000 |
+| 10      | C           | 150    | 0.000 |
+| 11      | C           | 170    | **1.000** |
+| 12      | D           | 90     | 0.000 |
+| 13      | D           | 110    | **1.00**0 |
+| 14      | E           | 140    | 0.000 |
+| 16      | E           | 155    | 0.500 |
+| 15      | E           | 160    | **1.000** |
 
 
-## Example 3: Cumulative Distribution
+
+
+## Example 3: Cumulative Distribution {.smaller}
 
 `CUME_DIST()` shows the **share of rows less than or equal to the current row**.
 
@@ -344,24 +369,48 @@ SELECT
 FROM tmp_sales;
 ```
 
+. . .
 
-## Important 
+
+| sale_id | customer_id | amount | cumulative_distribution |
+|--------:|-------------|-------:|------------------------:|
+| 3       | A           | 90     | 0.25                    |
+| 1       | A           | 100    | 0.5                     |
+| 2       | A           | 120    | 0.75                    |
+| 4       | A           | 130    | 1                       |
+| 5       | B           | 180    | 0.25                    |
+| 6       | B           | 200    | 0.75                    |
+| 8       | B           | 200    | 0.75                    |
+| 7       | B           | 220    | 1                       |
+| 9       | C           | 150    | 0.666      |
+| 10      | C           | 150    | 0.666      |
+| 11      | C           | 170    | 1                       |
+| 12      | D           | 90     | 0.5                     |
+| 13      | D           | 110    | 1                       |
+| 14      | E           | 140    | 0.333      |
+| 16      | E           | 155    | 0.666      |
+| 15      | E           | 160    | 1                       |
+
+
+## Important  {.smaller}
 
 - Statistical window functions are **order-sensitive**
 - They expose **distribution shape**
 - Results are **relative**, not absolute
-- They are critical for:
+- They are **critical** for:
   - Outlier detection  
   - Segmentation  
   - Threshold-based decisions  
 
 
-# Value-from-Another-Row Functions
+<!-- todo one more options -->
+
+# Value from Another Row Functions {.smaller}
 
 
 ## Concept {.smaller}
 
-> How does this row relate to previous or next rows in sequence?
+> How does this row relate to **previous** or **next** rows in sequence?
 
 . . .
 
@@ -375,7 +424,7 @@ These functions are inherently **time-aware** and **sequence-aware**.
 :::
 
 
-## Generic Pattern
+## Generic Pattern  {.smaller}
 
 ```sql
 VALUE_FUNCTION(column [, offset])
@@ -385,12 +434,11 @@ OVER (
 )
 ```
 
-
 - `offset` (optional) defines how many rows forward/backward to look
 - Default offset is `1`
 
 
-## Example 1: Previous Transaction Amount (`LAG`)
+## Example 1: Previous Transaction Amount (`LAG`) {.smaller}
 
 **Business intuition:**  
 “How did this transaction change compared to the previous one?”
@@ -408,10 +456,30 @@ SELECT
 FROM tmp_sales;
 ```
 
+. . .
+
+| sale_id | customer_id | sale_date  | amount | previous_amount |
+|--------:|-------------|------------|-------:|----------------:|
+| 1       | A           | 2024-01-01 | 100    |                 |
+| 2       | A           | 2024-01-02 | 120    | 100             |
+| 3       | A           | 2024-01-03 | 90     | 120             |
+| 4       | A           | 2024-01-04 | 130    | 90              |
+| 5       | B           | 2024-01-01 | 180    |                 |
+| 6       | B           | 2024-01-02 | 200    | 180             |
+| 7       | B           | 2024-01-03 | 220    | 200             |
+| 8       | B           | 2024-01-04 | 200    | 220             |
+| 9       | C           | 2024-01-01 | 150    |                 |
+| 10      | C           | 2024-01-02 | 150    | 150             |
+| 11      | C           | 2024-01-03 | 170    | 150             |
+| 12      | D           | 2024-01-01 | 90     |                 |
+| 13      | D           | 2024-01-02 | 110    | 90              |
+| 14      | E           | 2024-01-01 | 140    |                 |
+| 15      | E           | 2024-01-02 | 160    | 140             |
+| 16      | E           | 2024-01-03 | 155    | 160             |
 
 
 
-## Example 2: Next Transaction Amount (`LEAD`)
+## Example 2: Next Transaction Amount (`LEAD`) {.smaller}
 
 ```sql
 SELECT
@@ -426,8 +494,31 @@ SELECT
 FROM tmp_sales;
 ```
 
+. . .
 
-## Example 3: First Transaction Amount per Customer
+| sale_id | customer_id | sale_date  | amount | next_amount |
+|--------:|-------------|------------|-------:|------------:|
+| 1       | A           | 2024-01-01 | 100    | 120         |
+| 2       | A           | 2024-01-02 | 120    | 90          |
+| 3       | A           | 2024-01-03 | 90     | 130         |
+| 4       | A           | 2024-01-04 | 130    |             |
+| 5       | B           | 2024-01-01 | 180    | 200         |
+| 6       | B           | 2024-01-02 | 200    | 220         |
+| 7       | B           | 2024-01-03 | 220    | 200         |
+| 8       | B           | 2024-01-04 | 200    |             |
+| 9       | C           | 2024-01-01 | 150    | 150         |
+| 10      | C           | 2024-01-02 | 150    | 170         |
+| 11      | C           | 2024-01-03 | 170    |             |
+| 12      | D           | 2024-01-01 | 90     | 110         |
+| 13      | D           | 2024-01-02 | 110    |             |
+| 14      | E           | 2024-01-01 | 140    | 160         |
+| 15      | E           | 2024-01-02 | 160    | 155         |
+| 16      | E           | 2024-01-03 | 155    |             |
+
+
+<!-- ##  Example 3:  {.smaller} -->
+
+## Example 3: First Transaction Amount per Customer 
 
 ```sql
 SELECT
@@ -441,6 +532,29 @@ SELECT
     ) AS first_amount
 FROM tmp_sales;
 ```
+
+| sale_id | customer_id | sale_date  | amount | first_amount |
+|--------:|-------------|------------|-------:|-------------:|
+| 1       | A           | 2024-01-01 | 100    | 100          |
+| 2       | A           | 2024-01-02 | 120    | 100          |
+| 3       | A           | 2024-01-03 | 90     | 100          |
+| 4       | A           | 2024-01-04 | 130    | 100          |
+| 5       | B           | 2024-01-01 | 180    | 180          |
+| 6       | B           | 2024-01-02 | 200    | 180          |
+| 7       | B           | 2024-01-03 | 220    | 180          |
+| 8       | B           | 2024-01-04 | 200    | 180          |
+| 9       | C           | 2024-01-01 | 150    | 150          |
+| 10      | C           | 2024-01-02 | 150    | 150          |
+| 11      | C           | 2024-01-03 | 170    | 150          |
+| 12      | D           | 2024-01-01 | 90     | 90           |
+| 13      | D           | 2024-01-02 | 110    | 90           |
+| 14      | E           | 2024-01-01 | 140    | 140          |
+| 15      | E           | 2024-01-02 | 160    | 140          |
+| 16      | E           | 2024-01-03 | 155    | 140          |
+
+
+
+<!-- todo last value -->
 
 # Ranking Functions
 
@@ -463,8 +577,7 @@ FROM tmp_sales;
 Ranking functions do **not aggregate values**, instead they organize rows.
 
 
-
-## Generic Pattern
+## Generic Pattern {.smaller}
 
 ```sql
 RANKING_FUNCTION()
@@ -475,7 +588,7 @@ OVER (
 ```
 
 
-## Function Semantics
+## Function Semantics {.smaller}
 
 
 ::: {.callout-important title ="Ranking Function Comparison | Interview Question"}
@@ -487,8 +600,7 @@ OVER (
 
 :::
 
-
-## Example 1: Sequential Ordering (`ROW_NUMBER`)
+## Example 1: Sequential Ordering (`ROW_NUMBER`) {.smaller}
 
 **Business intuition:**  
 “What is the chronological position of each transaction?”
@@ -505,8 +617,28 @@ SELECT
 FROM tmp_sales;
 ```
 
+## Example 1: Output {.scrollable .smaller}
 
-## Example 2: Dense Ranking by Amount (`DENSE_RANK`)
+ | sale_id | customer_id | sale_date  | row_number |
+|--------:|-------------|------------|-----------:|
+| 1       | A           | 2024-01-01 | 1          |
+| 2       | A           | 2024-01-02 | 2          |
+| 3       | A           | 2024-01-03 | 3          |
+| 4       | A           | 2024-01-04 | 4          |
+| 5       | B           | 2024-01-01 | 1          |
+| 6       | B           | 2024-01-02 | 2          |
+| 7       | B           | 2024-01-03 | 3          |
+| 8       | B           | 2024-01-04 | 4          |
+| 9       | C           | 2024-01-01 | 1          |
+| 10      | C           | 2024-01-02 | 2          |
+| 11      | C           | 2024-01-03 | 3          |
+| 12      | D           | 2024-01-01 | 1          |
+| 13      | D           | 2024-01-02 | 2          |
+| 14      | E           | 2024-01-01 | 1          |
+| 15      | E           | 2024-01-02 | 2          |
+| 16      | E           | 2024-01-03 | 3          |
+
+## Example 2: Dense Ranking by Amount (`DENSE_RANK`) {.smaller}
 
 ```sql
 SELECT
@@ -520,10 +652,34 @@ SELECT
 FROM tmp_sales;
 ```
 
-## Example 3: Ranking by Amount with Gaps (`RANK`)
 
-**Business intuition:**  
-“What is the spending rank of each transaction?”
+## Example 2: Output {.scrollable .smaller}
+
+| sale_id | customer_id | amount | dense_rank_amount |
+|--------:|-------------|-------:|------------------:|
+| 4       | A           | 130    | 1                 |
+| 2       | A           | 120    | 2                 |
+| 1       | A           | 100    | 3                 |
+| 3       | A           | 90     | 4                 |
+| 7       | B           | 220    | 1                 |
+| 6       | B           | **200**| **2**             |
+| 8       | B           | **200**| **2**             |
+| 5       | B           | 180    | 3                 |
+| 11      | C           | 170    | 1                 |
+| 9       | C           | **150**| **2**             |
+| 10      | C           | **150**| **2**             |
+| 13      | D           | 110    | 1                 |
+| 12      | D           | 90     | 2                 |
+| 15      | E           | 160    | 1                 |
+| 16      | E           | 155    | 2                 |
+| 14      | E           | 140    | 3                 |
+    
+
+
+
+## Example 3: Ranking by Amount with Gaps (`RANK`) {.smaller}
+
+**Business intuition:** *“What is the spending rank of each transaction?”*
 
 ```sql
 SELECT
@@ -537,7 +693,75 @@ SELECT
 FROM tmp_sales;
 ```
 
-# String Aggregation Window Functions
+## Example 3: Output {.scrollable .smaller}
+
+| sale_id | customer_id | amount | rank_amount |
+|--------:|-------------|-------:|------------:|
+| 4       | A           | 130    | 1           |
+| 2       | A           | 120    | 2           |
+| 1       | A           | 100    | 3           |
+| 3       | A           | 90     | 4           |
+| 7       | B           | 220    | 1           |
+| 6       | B           | **200**| **2**       |
+| 8       | B           | **200**| **2**       |
+| 5       | B           | 180    | 4           |
+| 11      | C           | 170    | 1           |
+| 9       | C           | **150**| **2**       |
+| 10      | C           | **150**| **2**       |
+| 13      | D           | 110    | 1           |
+| 12      | D           | 90     | 2           |
+| 15      | E           | 160    | 1           |
+| 16      | E           | 155    | 2           |
+| 14      | E           | 140    | 3           |
+
+## Example 4: Comparison {.smaller}
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS row_number_amount,
+    RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS rank_amount,
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS dense_rank_amount
+FROM tmp_sales
+ORDER BY customer_id, amount DESC, sale_id;
+```
+
+## Example 4: Output {.scrollable .smaller}
+
+
+| sale_id | customer_id | amount | row_number_amount | rank_amount | dense_rank_amount |
+|--------:|-------------|-------:|------------------:|------------:|------------------:|
+| 4       | A           | 130    | 1                 | 1           | 1                 |
+| 2       | A           | 120    | 2                 | 2           | 2                 |
+| 1       | A           | 100    | 3                 | 3           | 3                 |
+| 3       | A           | 90     | 4                 | 4           | 4                 |
+| 7       | B           | 220    | 1                 | 1           | 1                 |
+| **6**   | **B**       | **200**| **2**             | **2**       | **2**             |
+| **8**   | **B**       | **200**| **3**             | **2**       | **2**             |
+| **5**       | **B**           | **180**    | **4**                 | **4**           | **3**                 |
+| 11      | C           | 170    | 1                 | 1           | 1                 |
+| **9**   | **C**       | **150**| **2**             | **2**       | **2**             |
+| **10**  | **C**       | **150**| **3**             | **2**       | **2**             |
+| 13      | D           | 110    | 1                 | 1           | 1                 |
+| 12      | D           | 90     | 2                 | 2           | 2                 |
+| 15      | E           | 160    | 1                 | 1           | 1                 |
+| 16      | E           | 155    | 2                 | 2           | 2                 |
+| 14      | E           | 140    | 3                 | 3           | 3                 |
+
+
+
+# String Aggregation
 
 
 ## Concept {.smaller}
@@ -573,8 +797,9 @@ OVER (
 
 ## Example 1: Channels Used by Each Customer (Cumulative)
 
-**Business intuition:**  
-“What interaction channels has this customer used up to this point?”
+**Business intuition:**  *“What interaction channels has this customer used up to this point?”*
+
+. . .
 
 ```sql
 SELECT
@@ -589,8 +814,28 @@ SELECT
 FROM tmp_sales;
 ```
 
+## Example 1: Output {.scrollable .smaller}
 
-## Example 2: Full Channel History per Customer
+| sale_id | customer_id | sale_date  | channel | channels_used_so_far              |
+|--------:|-------------|------------|---------|----------------------------------|
+| 1       | A           | 2024-01-01 | online  | online                           |
+| 2       | A           | 2024-01-02 | store   | online, store                    |
+| 3       | A           | 2024-01-03 | online  | online, store, online            |
+| 4       | A           | 2024-01-04 | store   | online, store, online, store     |
+| 5       | B           | 2024-01-01 | store   | store                            |
+| 6       | B           | 2024-01-02 | online  | store, online                    |
+| 7       | B           | 2024-01-03 | online  | store, online, online            |
+| 8       | B           | 2024-01-04 | store   | store, online, online, store     |
+| 9       | C           | 2024-01-01 | online  | online                           |
+| 10      | C           | 2024-01-02 | online  | online, online                   |
+| 11      | C           | 2024-01-03 | online  | online, online, online           |
+| 12      | D           | 2024-01-01 | store   | store                            |
+| 13      | D           | 2024-01-02 | store   | store, store                     |
+| 14      | E           | 2024-01-01 | store   | store                            |
+| 15      | E           | 2024-01-02 | online  | store, online                    |
+| 16      | E           | 2024-01-03 | store   | store, online, store             |
+
+## Example 2: Full Channel History per Customer {.smaller}
 
 To attach the **complete history** to every row, use an explicit frame.
 
@@ -607,8 +852,75 @@ SELECT
 FROM tmp_sales;
 ```
 
+`ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`:
 
-## Example 3: Channel Combination Pattern (Customer Behavior Signature)
+- `UNBOUNDED PRECEDING` → start from the first row in the partition
+- `UNBOUNDED FOLLOWING` → go until the last row in the partition
+
+## Example 2: Output {.scrollable .smaller}
+
+| sale_id | customer_id | channel | full_channel_history           |
+|--------:|-------------|---------|--------------------------------|
+| 1       | A           | online  | online, store, online, store   |
+| 2       | A           | store   | online, store, online, store   |
+| 3       | A           | online  | online, store, online, store   |
+| 4       | A           | store   | online, store, online, store   |
+| 5       | B           | store   | store, online, online, store   |
+| 6       | B           | online  | store, online, online, store   |
+| 7       | B           | online  | store, online, online, store   |
+| 8       | B           | store   | store, online, online, store   |
+| 9       | C           | online  | online, online, online         |
+| 10      | C           | online  | online, online, online         |
+| 11      | C           | online  | online, online, online         |
+| 12      | D           | store   | store, store                   |
+| 13      | D           | store   | store, store                   |
+| 14      | E           | store   | store, online, store           |
+| 15      | E           | online  | store, online, store           |
+| 16      | E           | store   | store, online, store           |
+
+## Example 3: Channel Combination Pattern 1 {.smaller}
+
+```sql
+SELECT
+	customer_id,
+	STRING_AGG(channel, ', ' ORDER BY channel) AS channel_pattern
+	
+FROM tmp_sales
+GROUP BY customer_id
+```
+
+| customer_id | channel_pattern              |
+|-------------|------------------------------|
+| A           | online, online, store, store |
+| B           | online, online, store, store |
+| C           | online, online, online       |
+| D           | store, store                 |
+| E           | online, store, store         |
+
+::: {.callout-important}
+try without ORDER BY in STRING_AGG to see different results
+:::
+
+## Example 4: Channel Combination Pattern 2 {.smaller}
+
+```sql
+SELECT
+	customer_id,
+	STRING_AGG(channel, ', ' ORDER BY channel) AS channel_pattern,
+	STRING_AGG(DISTINCT channel, ', ' ORDER BY channel) AS channel_pattern_distinct
+FROM tmp_sales
+GROUP BY customer_id
+```
+
+| customer_id | channel_pattern              | channel_pattern_distinct |
+|-------------|------------------------------|--------------------------|
+| A           | online, online, store, store | online, store            |
+| B           | online, online, store, store | online, store            |
+| C           | online, online, online       | online                   |
+| D           | store, store                 | store                    |
+| E           | online, store, store         | online, store            |
+
+## Example 5: Channel Combination Pattern Grouped {.smaller}
 
 ```sql
 WITH customer_channels AS (
@@ -625,13 +937,16 @@ FROM customer_channels
 GROUP BY channel_pattern;
 ```
 
-::: {.callout-important}
-try without ORDER BY in STRING_AGG to see different results
-:::
+$$\downarrow$$
+
+| channel_pattern | customer_count |
+|-----------------|----------------|
+| online          | 1              |
+| store           | 1              |
+| online, store   | 3              |
 
 
-# Window Framing & Advanced Window Control
-
+# Window Framing Advanced Window Control {.smaller}
 
 ## Concept {.smaller}
 
@@ -648,7 +963,7 @@ try without ORDER BY in STRING_AGG to see different results
 . . .
 
 
-The **frame** defines **how far backward and forward the window can see**.
+The **frame** defines **how far backward and forward the window can see**. 
 
 Without an explicit frame, SQL engines apply **default framing rules**, which can lead to **unexpected results**, especially for cumulative and navigational functions.
 
@@ -679,7 +994,7 @@ ROWS | RANGE BETWEEN <start> AND <end>
 - More subtle and engine-dependent
 
 
-## Common Frame Boundaries
+## Common Frame Boundaries {.smaller}
 
 | Boundary | Meaning |
 |-------|--------|
@@ -690,8 +1005,10 @@ ROWS | RANGE BETWEEN <start> AND <end>
 | `n FOLLOWING` | n rows after |
 
 
+![]({{< meta image_path >}}/frame_boundaries.png)
 
-## Example 1: Running Total (Explicit Frame)
+
+## Example 1: Running Total (Explicit Frame) {.smaller}
 
 ```sql
 SELECT
@@ -708,6 +1025,27 @@ FROM tmp_sales;
 ```
 
 
+## Example 1: Output {.smaller .scrollable}
+
+| sale_id | customer_id | sale_date  | amount | running_total |
+|--------:|-------------|------------|-------:|--------------:|
+| 1       | A           | 2024-01-01 | 100    | **100**       |
+| 2       | A           | 2024-01-02 | 120    | **220**       |
+| 3       | A           | 2024-01-03 | 90     | **310**       |
+| 4       | A           | 2024-01-04 | 130    | **440**       |
+| 5       | B           | 2024-01-01 | 180    | **180**       |
+| 6       | B           | 2024-01-02 | 200    | **380**       |
+| 7       | B           | 2024-01-03 | 220    | **600**       |
+| 8       | B           | 2024-01-04 | 200    | **800**       |
+| 9       | C           | 2024-01-01 | 150    | **150**       |
+| 10      | C           | 2024-01-02 | 150    | **300**       |
+| 11      | C           | 2024-01-03 | 170    | **470**       |
+| 12      | D           | 2024-01-01 | 90     | **90**        |
+| 13      | D           | 2024-01-02 | 110    | **200**       |
+| 14      | E           | 2024-01-01 | 140    | **140**       |
+| 15      | E           | 2024-01-02 | 160    | **300**       |
+| 16      | E           | 2024-01-03 | 155    | **455**       |
+
 ## Example 2: Full-Partition Aggregate (Stable Value)
 
 ```sql
@@ -722,9 +1060,29 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+## Example 2: Output  {.scrollable .smaller}
 
-## Example 3: Moving Window (Last 2 Transactions)
+| sale_id | customer_id | amount | full_partition_avg |
+|--------:|-------------|-------:|-------------------:|
+| 1       | A           | 100    | 110.000            |
+| 2       | A           | 120    | 110.000            |
+| 3       | A           | 90     | 110.000            |
+| 4       | A           | 130    | 110.000            |
+| 5       | B           | 180    | 200.000            |
+| 6       | B           | 200    | 200.000            |
+| 7       | B           | 220    | 200.000            |
+| 8       | B           | 200    | 200.000            |
+| 9       | C           | 150    | 156.667            |
+| 10      | C           | 150    | 156.667            |
+| 11      | C           | 170    | 156.667            |
+| 12      | D           | 90     | 100.000            |
+| 13      | D           | 110    | 100.000            |
+| 14      | E           | 140    | 151.667            |
+| 15      | E           | 160    | 151.667            |
+| 16      | E           | 155    | 151.667            |
+
+
+## Example 3: Moving Window (Last 2 Transactions)  {.smaller}
 
 ```sql
 SELECT
@@ -739,4 +1097,114 @@ SELECT
     ) AS moving_avg_2
 FROM tmp_sales;
 ```
+
+::: {.callout-note}
+
+Here we can us any aggregate function: `SUM()`, `MAX()`
+
+:::
+
+## Example 3: Output  {.scrollable .smaller}
+
+| sale_id | customer_id | sale_date  | amount | moving_avg_2 |
+|--------:|-------------|------------|-------:|-------------:|
+| 1       | A           | 2024-01-01 | 100    | **100.000**  |
+| 2       | A           | 2024-01-02 | 120    | **110.000**  |
+| 3       | A           | 2024-01-03 | 90     | **105.000**  |
+| 4       | A           | 2024-01-04 | 130    | **110.000**  |
+| 5       | B           | 2024-01-01 | 180    | **180.000**  |
+| 6       | B           | 2024-01-02 | 200    | **190.000**  |
+| 7       | B           | 2024-01-03 | 220    | **210.000**  |
+| 8       | B           | 2024-01-04 | 200    | **210.000**  |
+| 9       | C           | 2024-01-01 | 150    | **150.000**  |
+| 10      | C           | 2024-01-02 | 150    | **150.000**  |
+| 11      | C           | 2024-01-03 | 170    | **160.000**  |
+| 12      | D           | 2024-01-01 | 90     | **90.000**   |
+| 13      | D           | 2024-01-02 | 110    | **100.000**  |
+| 14      | E           | 2024-01-01 | 140    | **140.000**  |
+| 15      | E           | 2024-01-02 | 160    | **150.000**  |
+| 16      | E           | 2024-01-03 | 155    | **157.500**  |
+
+
+##  Example 4: Forward-Looking Average {.smaller}
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+        ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING
+    ) AS forward_avg_2
+FROM tmp_sales;
+```
+
+
+## Example 4: Output {.scrollable .smaller}
+
+| sale_id | customer_id | sale_date  | amount | forward_avg_2          |
+|--------:|-------------|------------|-------:|-----------------------:|
+| 1       | A           | 2024-01-01 | 100    | 110.0000000000000000   |
+| 2       | A           | 2024-01-02 | 120    | 105.0000000000000000   |
+| 3       | A           | 2024-01-03 | 90     | 110.0000000000000000   |
+| 4       | A           | 2024-01-04 | 130    | 130.0000000000000000   |
+| 5       | B           | 2024-01-01 | 180    | 190.0000000000000000   |
+| 6       | B           | 2024-01-02 | 200    | 210.0000000000000000   |
+| 7       | B           | 2024-01-03 | 220    | 210.0000000000000000   |
+| 8       | B           | 2024-01-04 | 200    | 200.0000000000000000   |
+| 9       | C           | 2024-01-01 | 150    | 150.0000000000000000   |
+| 10      | C           | 2024-01-02 | 150    | 160.0000000000000000   |
+| 11      | C           | 2024-01-03 | 170    | 170.0000000000000000   |
+| 12      | D           | 2024-01-01 | 90     | 100.0000000000000000   |
+| 13      | D           | 2024-01-02 | 110    | 110.0000000000000000   |
+| 14      | E           | 2024-01-01 | 140    | 150.0000000000000000   |
+| 15      | E           | 2024-01-02 | 160    | 157.5000000000000000   |
+| 16      | E           | 2024-01-03 | 155    | 155.0000000000000000   |
+
+
+## Example 5: Centered Moving Average (Previous + Current + Next)  {.smaller .scrollable}
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+        ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+    ) AS centered_avg_3
+FROM tmp_sales;
+```
+
+
+## Example 5: Output {.smaller .scrollable}
+
+
+| sale_id | customer_id | sale_date  | amount | centered_avg_3 |
+|--------:|-------------|------------|-------:|---------------:|
+| 1       | A           | 2024-01-01 | 100    | **110.00**     |
+| 2       | A           | 2024-01-02 | 120    | **103.33**     |
+| 3       | A           | 2024-01-03 | 90     | **113.33**     |
+| 4       | A           | 2024-01-04 | 130    | **110.00**     |
+| 5       | B           | 2024-01-01 | 180    | **190.00**     |
+| 6       | B           | 2024-01-02 | 200    | **200.00**     |
+| 7       | B           | 2024-01-03 | 220    | **206.67**     |
+| 8       | B           | 2024-01-04 | 200    | **210.00**     |
+| 9       | C           | 2024-01-01 | 150    | **150.00**     |
+| 10      | C           | 2024-01-02 | 150    | **156.67**     |
+| 11      | C           | 2024-01-03 | 170    | **160.00**     |
+| 12      | D           | 2024-01-01 | 90     | **100.00**     |
+| 13      | D           | 2024-01-02 | 110    | **100.00**     |
+| 14      | E           | 2024-01-01 | 140    | **150.00**     |
+| 15      | E           | 2024-01-02 | 160    | **151.67**     |
+| 16      | E           | 2024-01-03 | 155    | **157.50**     |
+
+
+
+
 
