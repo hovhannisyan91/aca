@@ -65,7 +65,7 @@ OVER (
 - The window determines **which rows are visible**
 
 
-## Step 0: Create an Extended Dummy Temporary Table
+## Create an Extended Dummy Temporary Table
 
 Before applying window functions to the `analytics` schema, we use a **controlled temporary table** with:
 
@@ -113,92 +113,28 @@ FROM (
 );
 ```
 
----
-
-### Base Input Table
+### Output
 
 | sale_id | customer_id | sale_date  | amount | channel |
 |--------:|-------------|------------|-------:|---------|
-| 1 | A | 2024-01-01 | 100 | online |
-| 2 | A | 2024-01-02 | 120 | store |
-| 3 | A | 2024-01-03 | 90 | online |
-| 4 | A | 2024-01-04 | 130 | store |
-| 5 | B | 2024-01-01 | 200 | online |
-| 6 | B | 2024-01-02 | 180 | store |
-| 7 | B | 2024-01-03 | 220 | online |
-| 8 | B | 2024-01-04 | 200 | store |
-| 9 | C | 2024-01-01 | 150 | store |
-|10 | C | 2024-01-02 | 150 | online |
-|11 | C | 2024-01-03 | 170 | online |
-
----
-
-## Window Function 1: Aggregate Over a Window
-
-### Example: Average Amount per Customer
-
-```sql
-SELECT
-    sale_id,
-    customer_id,
-    sale_date,
-    amount,
-    AVG(amount) OVER (PARTITION BY customer_id) AS avg_customer_amount
-FROM tmp_sales;
-```
-
-### Output
-
-| sale_id | customer_id | amount | avg_customer_amount |
-|--------:|-------------|-------:|--------------------:|
-| 1 | A | 100 | 110.00 |
-| 2 | A | 120 | 110.00 |
-| 3 | A | 90 | 110.00 |
-| 4 | A | 130 | 110.00 |
-| 5 | B | 200 | 200.00 |
-| 6 | B | 180 | 200.00 |
-| 7 | B | 220 | 200.00 |
-| 8 | B | 200 | 200.00 |
-| 9 | C | 150 | 156.67 |
-|10 | C | 150 | 156.67 |
-|11 | C | 170 | 156.67 |
+| 1       | A           | 2024-01-01 | 100    | online  |
+| 2       | A           | 2024-01-02 | 120    | store   |
+| 3       | A           | 2024-01-03 | 90     | online  |
+| 4       | A           | 2024-01-04 | 130    | store   |
+| 5       | B           | 2024-01-01 | 180    | store   |
+| 6       | B           | 2024-01-02 | 200    | online  |
+| 7       | B           | 2024-01-03 | 220    | online  |
+| 8       | B           | 2024-01-04 | 200    | store   |
+| 9       | C           | 2024-01-01 | 150    | online  |
+| 10      | C           | 2024-01-02 | 150    | online  |
+| 11      | C           | 2024-01-03 | 170    | online  |
+| 12      | D           | 2024-01-01 | 90     | store   |
+| 13      | D           | 2024-01-02 | 110    | store   |
+| 14      | E           | 2024-01-01 | 140    | store   |
+| 15      | E           | 2024-01-02 | 160    | online  |
+| 16      | E           | 2024-01-03 | 155    | store   |
 
 
-## Creating an Extended Dummy Temporary Table
-
-Before applying window functions to the `analytics` schema, we use a **controlled temporary table** with:
-
-Before applying window functions to the `analytics` schema, we use a **controlled temporary table** with:
-
-- Multiple entities  
-- Time ordering  
-- Repeated values (for ranking)  
-- A categorical column (for `STRING_AGG`)  
-
-```sql
-CREATE TEMP TABLE tmp_sales AS
-SELECT *
-FROM (
-    VALUES
-        (1,  'A', DATE '2024-01-01', 100, 'online'),
-        (2,  'A', DATE '2024-01-02', 120, 'store'),
-        (3,  'A', DATE '2024-01-03', 90,  'online'),
-        (4,  'A', DATE '2024-01-04', 130, 'store'),
-        (5,  'B', DATE '2024-01-01', 200, 'online'),
-        (6,  'B', DATE '2024-01-02', 180, 'store'),
-        (7,  'B', DATE '2024-01-03', 220, 'online'),
-        (8,  'B', DATE '2024-01-04', 200, 'store'),
-        (9,  'C', DATE '2024-01-01', 150, 'store'),
-        (10, 'C', DATE '2024-01-02', 150, 'online'),
-        (11, 'C', DATE '2024-01-03', 170, 'online')
-) AS t(
-    sale_id,
-    customer_id,
-    sale_date,
-    amount,
-    channel
-);
-```
 
 
 ## Window Function Layer 1: Simple Aggregate Window Functions
@@ -235,8 +171,6 @@ Unlike `GROUP BY`:
 
 All of them become window functions when combined with `OVER(...)`.
 
----
-
 ### Generic Pattern
 
 ```sql
@@ -246,12 +180,8 @@ OVER (
 )
 ```
 
----
 
 ### Example 1: Average Amount per Customer
-
-**Business intuition:**  
-“How much does this sale differ from the customer’s typical behavior?”
 
 ```sql
 SELECT
@@ -259,31 +189,47 @@ SELECT
     customer_id,
     sale_date,
     amount,
-    AVG(amount) OVER (
-        PARTITION BY customer_id
-    ) AS avg_customer_amount
+    AVG(amount) OVER (PARTITION BY customer_id) AS avg_customer_amount
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
 
-### Output
 
-| sale_id | customer_id | amount | avg_customer_amount |
-|--------:|-------------|-------:|--------------------:|
-| 1 | A | 100 | 110.00 |
-| 2 | A | 120 | 110.00 |
-| 3 | A | 90 | 110.00 |
-| 4 | A | 130 | 110.00 |
-| 5 | B | 200 | 200.00 |
-| 6 | B | 180 | 200.00 |
-| 7 | B | 220 | 200.00 |
-| 8 | B | 200 | 200.00 |
-| 9 | C | 150 | 156.67 |
-|10 | C | 150 | 156.67 |
-|11 | C | 170 | 156.67 |
+| sale_id | customer_id | sale_date  | amount | avg_customer_amount |
+|--------:|-------------|------------|-------:|--------------------:|
+| 1       | A           | 2024-01-01 | 100    | **110.000**         |
+| 2       | A           | 2024-01-02 | 120    | **110.000**         |
+| 3       | A           | 2024-01-03 | 90     | **110.000**         |
+| 4       | A           | 2024-01-04 | 130    | **110.000**         |
+| 5       | B           | 2024-01-01 | 180    | **200.000**         |
+| 6       | B           | 2024-01-02 | 200    | **200.000**         |
+| 7       | B           | 2024-01-03 | 220    | **200.000**         |
+| 8       | B           | 2024-01-04 | 200    | **200.000**         |
+| 9       | C           | 2024-01-01 | 150    | **156.667**         |
+| 10      | C           | 2024-01-02 | 150    | **156.667**         |
+| 11      | C           | 2024-01-03 | 170    | **156.667**         |
+| 12      | D           | 2024-01-01 | 90     | **100.000**         |
+| 13      | D           | 2024-01-02 | 110    | **100.000**         |
+| 14      | E           | 2024-01-01 | 140    | **151.667**         |
+| 15      | E           | 2024-01-02 | 160    | **151.667**         |
+| 16      | E           | 2024-01-03 | 155    | **151.667**         |
 
----
+
+$\downarrow$
+
+```bash
+Customer A
+Amounts: 100 120 90 130
+Average: (100 + 120 + 90 + 130) / 4 = 110
+
+Each row sees ALL rows in partition:
+
+[100, 120, 90, 130] → 110
+[100, 120, 90, 130] → 110
+[100, 120, 90, 130] → 110
+[100, 120, 90, 130] → 110
+```
 
 ### Example 2: Total Spend per Customer
 
@@ -298,9 +244,45 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
 
-### Example 3: Number of Transactions per Customer
+
+| sale_id | customer_id | amount | total_customer_spend |
+|--------:|-------------|-------:|---------------------:|
+| 1       | A           | 100    | **440.000**          |
+| 2       | A           | 120    | **440.000**          |
+| 3       | A           | 90     | **440.000**          |
+| 4       | A           | 130    | **440.000**          |
+| 5       | B           | 180    | **800.000**          |
+| 6       | B           | 200    | **800.000**          |
+| 7       | B           | 220    | **800.000**          |
+| 8       | B           | 200    | **800.000**          |
+| 9       | C           | 150    | **470.000**          |
+| 10      | C           | 150    | **470.000**          |
+| 11      | C           | 170    | **470.000**          |
+| 12      | D           | 90     | **200.000**          |
+| 13      | D           | 110    | **200.000**          |
+| 14      | E           | 140    | **455.000**          |
+| 15      | E           | 160    | **455.000**          |
+| 16      | E           | 155    | **455.000**          |
+
+
+$\downarrow$
+
+```bash
+Customer A
+Amounts: 100 120 90 130
+Total: 100 + 120 + 90 + 130 = 440
+
+Each row sees ALL rows in partition:
+
+[100, 120, 90, 130] → 440
+[100, 120, 90, 130] → 440
+[100, 120, 90, 130] → 440
+[100, 120, 90, 130] → 440
+```
+
+### Example 3: Transaction Count per Customer 
 
 ```sql
 SELECT
@@ -312,7 +294,44 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
+
+
+
+| sale_id | customer_id | transaction_count |
+|--------:|-------------|------------------:|
+| 1       | A           | **4**             |
+| 2       | A           | **4**             |
+| 3       | A           | **4**             |
+| 4       | A           | **4**             |
+| 5       | B           | **4**             |
+| 6       | B           | **4**             |
+| 7       | B           | **4**             |
+| 8       | B           | **4**             |
+| 9       | C           | **3**             |
+| 10      | C           | **3**             |
+| 11      | C           | **3**             |
+| 12      | D           | **2**             |
+| 13      | D           | **2**             |
+| 14      | E           | **3**             |
+| 15      | E           | **3**             |
+| 16      | E           | **3**             |
+
+$\downarrow$
+
+```bash
+Customer A
+Transactions: 4 rows
+
+Each row sees ALL rows in partition:
+
+[1, 2, 3, 4] → 4
+[1, 2, 3, 4] → 4
+[1, 2, 3, 4] → 4
+[1, 2, 3, 4] → 4
+```
+
+
 
 ### Example 4: Minimum and Maximum Amount per Customer
 
@@ -330,7 +349,46 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
+
+
+
+| sale_id | customer_id | amount | min_amount | max_amount |
+|--------:|-------------|-------:|-----------:|-----------:|
+| 1       | A           | 100    | **90.000** | **130.000**|
+| 2       | A           | 120    | **90.000** | **130.000**|
+| 3       | A           | 90     | **90.000** | **130.000**|
+| 4       | A           | 130    | **90.000** | **130.000**|
+| 5       | B           | 180    | **180.000**| **220.000**|
+| 6       | B           | 200    | **180.000**| **220.000**|
+| 7       | B           | 220    | **180.000**| **220.000**|
+| 8       | B           | 200    | **180.000**| **220.000**|
+| 9       | C           | 150    | **150.000**| **170.000**|
+| 10      | C           | 150    | **150.000**| **170.000**|
+| 11      | C           | 170    | **150.000**| **170.000**|
+| 12      | D           | 90     | **90.000** | **110.000**|
+| 13      | D           | 110    | **90.000** | **110.000**|
+| 14      | E           | 140    | **140.000**| **160.000**|
+| 15      | E           | 160    | **140.000**| **160.000**|
+| 16      | E           | 155    | **140.000**| **160.000**|
+
+$\downarrow$
+
+```bash
+Customer A
+Amounts: 100 120 90 130
+Min: 90
+Max: 130
+
+Each row sees ALL rows in partition:
+
+[100, 120, 90, 130] → min=90, max=130
+[100, 120, 90, 130] → min=90, max=130
+[100, 120, 90, 130] → min=90, max=130
+[100, 120, 90, 130] → min=90, max=130
+```
+
+
 
 ### Summary of Simple Aggregate Window Functions
 
@@ -399,12 +457,7 @@ OVER (
 )
 ```
 
----
-
-### Example 1: Median Amount per Customer
-
-**Business intuition:**  
-“What is the typical (middle) transaction size for this customer?”
+### Example 1: Median Amount per Customer 
 
 ```sql
 SELECT
@@ -414,11 +467,33 @@ FROM tmp_sales
 GROUP BY customer_id;
 ```
 
+$\downarrow$
+
+
+
+| customer_id | median_amount |
+|-------------|--------------:|
+| A           | **110.000**   |
+| B           | **200.000**   |
+| C           | **150.000**   |
+| D           | **100.000**   |
+| E           | **155.000**   |
+
+$\downarrow$
+
+```bash
+Customer A
+Sorted amounts: 90 100 120 130
+Median = (100 + 120) / 2 = 110
+
+Customer C
+Sorted amounts: 150 150 170
+Median = 150
+```
+
 ---
 
-### Example 2: Percent Rank of Each Transaction
-
-`PERCENT_RANK()` shows **relative position** between 0 and 1.
+### Example 2: Percent Rank of Each Transaction 
 
 ```sql
 SELECT
@@ -432,16 +507,42 @@ SELECT
 FROM tmp_sales;
 ```
 
-**Interpretation:**
+$\downarrow$
 
-- `0.0` → lowest value in group  
-- `1.0` → highest value in group  
+
+
+| sale_id | customer_id | amount | percent_rank |
+|--------:|-------------|-------:|-------------:|
+| 3       | A           | 90     | **0.000**    |
+| 1       | A           | 100    | **0.333**    |
+| 2       | A           | 120    | **0.667**    |
+| 4       | A           | 130    | **1.000**    |
+| 5       | B           | 180    | **0.000**    |
+| 6       | B           | 200    | **0.333**    |
+| 8       | B           | 200    | **0.333**    |
+| 7       | B           | 220    | **1.000**    |
+| 9       | C           | 150    | **0.000**    |
+| 10      | C           | 150    | **0.000**    |
+| 11      | C           | 170    | **1.000**    |
+
+$\downarrow$
+
+```bash
+Customer A
+Sorted: 90 100 120 130
+
+Position formula:
+(rank - 1) / (n - 1)
+
+90  → (1-1)/3 = 0
+100 → (2-1)/3 = 0.33
+120 → (3-1)/3 = 0.67
+130 → (4-1)/3 = 1
+```
 
 ---
 
 ### Example 3: Cumulative Distribution
-
-`CUME_DIST()` shows the **share of rows less than or equal to the current row**.
 
 ```sql
 SELECT
@@ -455,11 +556,38 @@ SELECT
 FROM tmp_sales;
 ```
 
+$\downarrow$
+
+
+
+| sale_id | customer_id | amount | cumulative_distribution |
+|--------:|-------------|-------:|------------------------:|
+| 3       | A           | 90     | **0.250**               |
+| 1       | A           | 100    | **0.500**               |
+| 2       | A           | 120    | **0.750**               |
+| 4       | A           | 130    | **1.000**               |
+| 5       | B           | 180    | **0.250**               |
+| 6       | B           | 200    | **0.750**               |
+| 8       | B           | 200    | **0.750**               |
+| 7       | B           | 220    | **1.000**               |
+
+$\downarrow$
+
+```bash
+Customer A
+Sorted: 90 100 120 130
+
+CUME_DIST = (# values ≤ current) / total
+
+90  → 1/4 = 0.25
+100 → 2/4 = 0.50
+120 → 3/4 = 0.75
+130 → 4/4 = 1
+```
+
 ---
 
-### Example 4: Quartile Assignment
-
-Assign each transaction to a quartile using percentiles.
+### Example 4: Quartile Assignment 
 
 ```sql
 SELECT
@@ -472,6 +600,36 @@ SELECT
     ) AS quartile
 FROM tmp_sales;
 ```
+
+$\downarrow$
+
+
+
+| sale_id | customer_id | amount | quartile |
+|--------:|-------------|-------:|---------:|
+| 3       | A           | 90     | **1**    |
+| 1       | A           | 100    | **2**    |
+| 2       | A           | 120    | **3**    |
+| 4       | A           | 130    | **4**    |
+| 5       | B           | 180    | **1**    |
+| 6       | B           | 200    | **2**    |
+| 8       | B           | 200    | **3**    |
+| 7       | B           | 220    | **4**    |
+
+$\downarrow$
+
+```bash
+Customer A
+Sorted: 90 100 120 130
+
+Split into 4 equal buckets:
+
+90  → Q1
+100 → Q2
+120 → Q3
+130 → Q4
+```
+
 
 ---
 
@@ -543,8 +701,6 @@ OVER (
 - `offset` (optional) defines how many rows forward/backward to look
 - Default offset is `1`
 
----
-
 ### Example 1: Previous Transaction Amount (`LAG`)
 
 **Business intuition:**  
@@ -563,6 +719,43 @@ SELECT
 FROM tmp_sales;
 ```
 
+$\downarrow$
+
+
+
+| sale_id | customer_id | sale_date  | amount | previous_amount |
+|--------:|-------------|------------|-------:|----------------:|
+| 1       | A           | 2024-01-01 | 100    |                 |
+| 2       | A           | 2024-01-02 | 120    | **100**         |
+| 3       | A           | 2024-01-03 | 90     | **120**         |
+| 4       | A           | 2024-01-04 | 130    | **90**          |
+| 5       | B           | 2024-01-01 | 180    |                 |
+| 6       | B           | 2024-01-02 | 200    | **180**         |
+| 7       | B           | 2024-01-03 | 220    | **200**         |
+| 8       | B           | 2024-01-04 | 200    | **220**         |
+| 9       | C           | 2024-01-01 | 150    |                 |
+| 10      | C           | 2024-01-02 | 150    | **150**         |
+| 11      | C           | 2024-01-03 | 170    | **150**         |
+| 12      | D           | 2024-01-01 | 90     |                 |
+| 13      | D           | 2024-01-02 | 110    | **90**          |
+| 14      | E           | 2024-01-01 | 140    |                 |
+| 15      | E           | 2024-01-02 | 160    | **140**         |
+| 16      | E           | 2024-01-03 | 155    | **160**         |
+
+$\downarrow$
+
+```bash
+Customer A
+Transactions by date: 100 120 90 130
+
+Current row looks 1 row backward:
+
+100 → previous = NULL
+120 → previous = 100
+90  → previous = 120
+130 → previous = 90
+```
+
 ---
 
 ### Example 2: Next Transaction Amount (`LEAD`)
@@ -578,6 +771,43 @@ SELECT
         ORDER BY sale_date
     ) AS next_amount
 FROM tmp_sales;
+```
+
+$\downarrow$
+
+
+
+| sale_id | customer_id | sale_date  | amount | next_amount |
+|--------:|-------------|------------|-------:|------------:|
+| 1       | A           | 2024-01-01 | 100    | **120**     |
+| 2       | A           | 2024-01-02 | 120    | **90**      |
+| 3       | A           | 2024-01-03 | 90     | **130**     |
+| 4       | A           | 2024-01-04 | 130    |             |
+| 5       | B           | 2024-01-01 | 180    | **200**     |
+| 6       | B           | 2024-01-02 | 200    | **220**     |
+| 7       | B           | 2024-01-03 | 220    | **200**     |
+| 8       | B           | 2024-01-04 | 200    |             |
+| 9       | C           | 2024-01-01 | 150    | **150**     |
+| 10      | C           | 2024-01-02 | 150    | **170**     |
+| 11      | C           | 2024-01-03 | 170    |             |
+| 12      | D           | 2024-01-01 | 90     | **110**     |
+| 13      | D           | 2024-01-02 | 110    |             |
+| 14      | E           | 2024-01-01 | 140    | **160**     |
+| 15      | E           | 2024-01-02 | 160    | **155**     |
+| 16      | E           | 2024-01-03 | 155    |             |
+
+$\downarrow$
+
+```bash
+Customer A
+Transactions by date: 100 120 90 130
+
+Current row looks 1 row forward:
+
+100 → next = 120
+120 → next = 90
+90  → next = 130
+130 → next = NULL
 ```
 
 ---
@@ -598,6 +828,44 @@ SELECT
 FROM tmp_sales;
 ```
 
+$\downarrow$
+
+
+
+| sale_id | customer_id | sale_date  | amount | amount_change |
+|--------:|-------------|------------|-------:|--------------:|
+| 1       | A           | 2024-01-01 | 100    |               |
+| 2       | A           | 2024-01-02 | 120    | **20**        |
+| 3       | A           | 2024-01-03 | 90     | **-30**       |
+| 4       | A           | 2024-01-04 | 130    | **40**        |
+| 5       | B           | 2024-01-01 | 180    |               |
+| 6       | B           | 2024-01-02 | 200    | **20**        |
+| 7       | B           | 2024-01-03 | 220    | **20**        |
+| 8       | B           | 2024-01-04 | 200    | **-20**       |
+| 9       | C           | 2024-01-01 | 150    |               |
+| 10      | C           | 2024-01-02 | 150    | **0**         |
+| 11      | C           | 2024-01-03 | 170    | **20**        |
+| 12      | D           | 2024-01-01 | 90     |               |
+| 13      | D           | 2024-01-02 | 110    | **20**        |
+| 14      | E           | 2024-01-01 | 140    |               |
+| 15      | E           | 2024-01-02 | 160    | **20**        |
+| 16      | E           | 2024-01-03 | 155    | **-5**        |
+
+$\downarrow$
+
+```bash
+Customer A
+Transactions by date: 100 120 90 130
+
+Formula:
+current amount - previous amount
+
+100 → NULL
+120 - 100 = 20
+90  - 120 = -30
+130 - 90  = 40
+```
+
 ---
 
 ### Example 4: First Transaction Amount per Customer
@@ -615,9 +883,46 @@ SELECT
 FROM tmp_sales;
 ```
 
+$\downarrow$
+
+
+
+| sale_id | customer_id | sale_date  | amount | first_amount |
+|--------:|-------------|------------|-------:|-------------:|
+| 1       | A           | 2024-01-01 | 100    | **100**      |
+| 2       | A           | 2024-01-02 | 120    | **100**      |
+| 3       | A           | 2024-01-03 | 90     | **100**      |
+| 4       | A           | 2024-01-04 | 130    | **100**      |
+| 5       | B           | 2024-01-01 | 180    | **180**      |
+| 6       | B           | 2024-01-02 | 200    | **180**      |
+| 7       | B           | 2024-01-03 | 220    | **180**      |
+| 8       | B           | 2024-01-04 | 200    | **180**      |
+| 9       | C           | 2024-01-01 | 150    | **150**      |
+| 10      | C           | 2024-01-02 | 150    | **150**      |
+| 11      | C           | 2024-01-03 | 170    | **150**      |
+| 12      | D           | 2024-01-01 | 90     | **90**       |
+| 13      | D           | 2024-01-02 | 110    | **90**       |
+| 14      | E           | 2024-01-01 | 140    | **140**      |
+| 15      | E           | 2024-01-02 | 160    | **140**      |
+| 16      | E           | 2024-01-03 | 155    | **140**      |
+
+$\downarrow$
+
+```bash
+Customer A
+Transactions by date: 100 120 90 130
+
+First row in partition = 100
+
+100 → 100
+120 → 100
+90  → 100
+130 → 100
+```
+
 ---
 
-### Example 5: Last Transaction Amount per Customer
+### Example 5: Last Transaction Amount per Customer 
 
 ```sql
 SELECT
@@ -633,7 +938,42 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
+
+
+
+| sale_id | customer_id | sale_date  | amount | last_amount |
+|--------:|-------------|------------|-------:|------------:|
+| 1       | A           | 2024-01-01 | 100    | **130**     |
+| 2       | A           | 2024-01-02 | 120    | **130**     |
+| 3       | A           | 2024-01-03 | 90     | **130**     |
+| 4       | A           | 2024-01-04 | 130    | **130**     |
+| 5       | B           | 2024-01-01 | 180    | **200**     |
+| 6       | B           | 2024-01-02 | 200    | **200**     |
+| 7       | B           | 2024-01-03 | 220    | **200**     |
+| 8       | B           | 2024-01-04 | 200    | **200**     |
+| 9       | C           | 2024-01-01 | 150    | **170**     |
+| 10      | C           | 2024-01-02 | 150    | **170**     |
+| 11      | C           | 2024-01-03 | 170    | **170**     |
+| 12      | D           | 2024-01-01 | 90     | **110**     |
+| 13      | D           | 2024-01-02 | 110    | **110**     |
+| 14      | E           | 2024-01-01 | 140    | **155**     |
+| 15      | E           | 2024-01-02 | 160    | **155**     |
+| 16      | E           | 2024-01-03 | 155    | **155**     |
+
+$\downarrow$
+
+```bash
+Customer A
+Transactions by date: 100 120 90 130
+
+Last row in partition = 130
+
+100 → 130
+120 → 130
+90  → 130
+130 → 130
+```
 
 
 ::: {.callout-important}
@@ -712,6 +1052,8 @@ OVER (
 
 ---
 
+
+
 ### Example 1: Sequential Ordering (`ROW_NUMBER`)
 
 **Business intuition:**  
@@ -729,12 +1071,69 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
 
-### Example 2: Ranking by Amount with Gaps (`RANK`)
 
-**Business intuition:**  
-“What is the spending rank of each transaction?”
+| sale_id | customer_id | sale_date  | row_number |
+|--------:|-------------|------------|-----------:|
+| 1       | A           | 2024-01-01 | 1          |
+| 2       | A           | 2024-01-02 | 2          |
+| 3       | A           | 2024-01-03 | 3          |
+| 4       | A           | 2024-01-04 | 4          |
+| 5       | B           | 2024-01-01 | 1          |
+| 6       | B           | 2024-01-02 | 2          |
+| 7       | B           | 2024-01-03 | 3          |
+| 8       | B           | 2024-01-04 | 4          |
+| 9       | C           | 2024-01-01 | 1          |
+| 10      | C           | 2024-01-02 | 2          |
+| 11      | C           | 2024-01-03 | 3          |
+| 12      | D           | 2024-01-01 | 1          |
+| 13      | D           | 2024-01-02 | 2          |
+| 14      | E           | 2024-01-01 | 1          |
+| 15      | E           | 2024-01-02 | 2          |
+| 16      | E           | 2024-01-03 | 3          |
+
+### Example 2: Dense Ranking by Amount (`DENSE_RANK`) 
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    amount,
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS dense_rank_amount
+FROM tmp_sales;
+```
+
+$\downarrow$
+
+| sale_id | customer_id | amount | dense_rank_amount |
+|--------:|-------------|-------:|------------------:|
+| 4       | A           | 130    | 1                 |
+| 2       | A           | 120    | 2                 |
+| 1       | A           | 100    | 3                 |
+| 3       | A           | 90     | 4                 |
+| 7       | B           | 220    | 1                 |
+| 6       | B           | **200**| **2**             |
+| 8       | B           | **200**| **2**             |
+| 5       | B           | 180    | 3                 |
+| 11      | C           | 170    | 1                 |
+| 9       | C           | **150**| **2**             |
+| 10      | C           | **150**| **2**             |
+| 13      | D           | 110    | 1                 |
+| 12      | D           | 90     | 2                 |
+| 15      | E           | 160    | 1                 |
+| 16      | E           | 155    | 2                 |
+| 14      | E           | 140    | 3                 |
+    
+
+
+
+### Example 3: Ranking by Amount with Gaps (`RANK`)
+
+**Business intuition:** *“What is the spending rank of each transaction?”*
 
 ```sql
 SELECT
@@ -748,21 +1147,75 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$\downarrow$
 
-### Example 3: Dense Ranking by Amount (`DENSE_RANK`)
+
+| sale_id | customer_id | amount | rank_amount |
+|--------:|-------------|-------:|------------:|
+| 4       | A           | 130    | 1           |
+| 2       | A           | 120    | 2           |
+| 1       | A           | 100    | 3           |
+| 3       | A           | 90     | 4           |
+| 7       | B           | 220    | 1           |
+| 6       | B           | **200**| **2**       |
+| 8       | B           | **200**| **2**       |
+| 5       | B           | 180    | 4           |
+| 11      | C           | 170    | 1           |
+| 9       | C           | **150**| **2**       |
+| 10      | C           | **150**| **2**       |
+| 13      | D           | 110    | 1           |
+| 12      | D           | 90     | 2           |
+| 15      | E           | 160    | 1           |
+| 16      | E           | 155    | 2           |
+| 14      | E           | 140    | 3           |
+
+### Example 4: Comparison
 
 ```sql
 SELECT
     sale_id,
     customer_id,
     amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS row_number_amount,
+    RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS rank_amount,
     DENSE_RANK() OVER (
         PARTITION BY customer_id
         ORDER BY amount DESC
     ) AS dense_rank_amount
-FROM tmp_sales;
+FROM tmp_sales
+ORDER BY customer_id, amount DESC, sale_id;
 ```
+
+$\downarrow$
+
+
+| sale_id | customer_id | amount | row_number_amount | rank_amount | dense_rank_amount |
+|--------:|-------------|-------:|------------------:|------------:|------------------:|
+| 4       | A           | 130    | 1                 | 1           | 1                 |
+| 2       | A           | 120    | 2                 | 2           | 2                 |
+| 1       | A           | 100    | 3                 | 3           | 3                 |
+| 3       | A           | 90     | 4                 | 4           | 4                 |
+| 7       | B           | 220    | 1                 | 1           | 1                 |
+| **6**   | **B**       | **200**| **2**             | **2**       | **2**             |
+| **8**   | **B**       | **200**| **3**             | **2**       | **2**             |
+| **5**       | **B**           | **180**    | **4**                 | **4**           | **3**                 |
+| 11      | C           | 170    | 1                 | 1           | 1                 |
+| **9**   | **C**       | **150**| **2**             | **2**       | **2**             |
+| **10**  | **C**       | **150**| **3**             | **2**       | **2**             |
+| 13      | D           | 110    | 1                 | 1           | 1                 |
+| 12      | D           | 90     | 2                 | 2           | 2                 |
+| 15      | E           | 160    | 1                 | 1           | 1                 |
+| 16      | E           | 155    | 2                 | 2           | 2                 |
+| 14      | E           | 140    | 3                 | 3           | 3                 |
+
+
+
 
 
 ### Summary of Ranking Functions
@@ -848,8 +1301,9 @@ OVER (
 
 ### Example 1: Channels Used by Each Customer (Cumulative)
 
-**Business intuition:**  
-“What interaction channels has this customer used up to this point?”
+**Business intuition:**  *“What interaction channels has this customer used up to this point?”*
+
+. . .
 
 ```sql
 SELECT
@@ -864,18 +1318,26 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$$\downarrow$$
 
-### Output (Conceptual)
-
-| sale_id | customer_id | sale_date | channel | channels_used_so_far |
-|--------:|-------------|-----------|---------|----------------------|
-| 1 | A | 2024-01-01 | online | online |
-| 2 | A | 2024-01-02 | store | online, store |
-| 3 | A | 2024-01-03 | online | online, store, online |
-| 4 | A | 2024-01-04 | store | online, store, online, store |
-
----
+| sale_id | customer_id | sale_date  | channel | channels_used_so_far              |
+|--------:|-------------|------------|---------|----------------------------------|
+| 1       | A           | 2024-01-01 | online  | online                           |
+| 2       | A           | 2024-01-02 | store   | online, store                    |
+| 3       | A           | 2024-01-03 | online  | online, store, online            |
+| 4       | A           | 2024-01-04 | store   | online, store, online, store     |
+| 5       | B           | 2024-01-01 | store   | store                            |
+| 6       | B           | 2024-01-02 | online  | store, online                    |
+| 7       | B           | 2024-01-03 | online  | store, online, online            |
+| 8       | B           | 2024-01-04 | store   | store, online, online, store     |
+| 9       | C           | 2024-01-01 | online  | online                           |
+| 10      | C           | 2024-01-02 | online  | online, online                   |
+| 11      | C           | 2024-01-03 | online  | online, online, online           |
+| 12      | D           | 2024-01-01 | store   | store                            |
+| 13      | D           | 2024-01-02 | store   | store, store                     |
+| 14      | E           | 2024-01-01 | store   | store                            |
+| 15      | E           | 2024-01-02 | online  | store, online                    |
+| 16      | E           | 2024-01-03 | store   | store, online, store             |
 
 ### Example 2: Full Channel History per Customer
 
@@ -894,7 +1356,81 @@ SELECT
 FROM tmp_sales;
 ```
 
-### Example 3: Channel Combination Pattern (Customer Behavior Signature)
+`ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`:
+
+- `UNBOUNDED PRECEDING` → start from the first row in the partition
+- `UNBOUNDED FOLLOWING` → go until the last row in the partition
+
+$$\downarrow$$
+
+| sale_id | customer_id | channel | full_channel_history           |
+|--------:|-------------|---------|--------------------------------|
+| 1       | A           | online  | online, store, online, store   |
+| 2       | A           | store   | online, store, online, store   |
+| 3       | A           | online  | online, store, online, store   |
+| 4       | A           | store   | online, store, online, store   |
+| 5       | B           | store   | store, online, online, store   |
+| 6       | B           | online  | store, online, online, store   |
+| 7       | B           | online  | store, online, online, store   |
+| 8       | B           | store   | store, online, online, store   |
+| 9       | C           | online  | online, online, online         |
+| 10      | C           | online  | online, online, online         |
+| 11      | C           | online  | online, online, online         |
+| 12      | D           | store   | store, store                   |
+| 13      | D           | store   | store, store                   |
+| 14      | E           | store   | store, online, store           |
+| 15      | E           | online  | store, online, store           |
+| 16      | E           | store   | store, online, store           |
+
+
+
+### Example 3: Channel Combination Pattern 1 
+
+```sql
+SELECT
+	customer_id,
+	STRING_AGG(channel, ', ' ORDER BY channel) AS channel_pattern
+	
+FROM tmp_sales
+GROUP BY customer_id
+```
+
+$$\downarrow$$
+
+| customer_id | channel_pattern              |
+|-------------|------------------------------|
+| A           | online, online, store, store |
+| B           | online, online, store, store |
+| C           | online, online, online       |
+| D           | store, store                 |
+| E           | online, store, store         |
+
+::: {.callout-important}
+try without ORDER BY in STRING_AGG to see different results
+:::
+
+### Example 4: Channel Combination Pattern 2 
+
+```sql
+SELECT
+	customer_id,
+	STRING_AGG(channel, ', ' ORDER BY channel) AS channel_pattern,
+	STRING_AGG(DISTINCT channel, ', ' ORDER BY channel) AS channel_pattern_distinct
+FROM tmp_sales
+GROUP BY customer_id
+```
+
+$$\downarrow$$
+
+| customer_id | channel_pattern              | channel_pattern_distinct |
+|-------------|------------------------------|--------------------------|
+| A           | online, online, store, store | online, store            |
+| B           | online, online, store, store | online, store            |
+| C           | online, online, online       | online                   |
+| D           | store, store                 | store                    |
+| E           | online, store, store         | online, store            |
+
+### Example 5: Channel Combination Pattern Grouped 
 
 ```sql
 WITH customer_channels AS (
@@ -911,10 +1447,13 @@ FROM customer_channels
 GROUP BY channel_pattern;
 ```
 
-::: {.callout-important}
-try without ORDER BY in STRING_AGG to see different results
-:::
+$$\downarrow$$
 
+| channel_pattern | customer_count |
+|-----------------|----------------|
+| online          | 1              |
+| store           | 1              |
+| online, store   | 3              |
 
 ### Summary of String Aggregation Window Functions
 
@@ -1029,7 +1568,7 @@ This is **not always what you want**.
 
 ---
 
-### Example 1: Running Total (Explicit Frame)
+### Example 1: Running Total (Explicit Frame) 
 
 ```sql
 SELECT
@@ -1045,7 +1584,27 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+
+$$\downarrow$$
+
+| sale_id | customer_id | sale_date  | amount | running_total |
+|--------:|-------------|------------|-------:|--------------:|
+| 1       | A           | 2024-01-01 | 100    | **100**       |
+| 2       | A           | 2024-01-02 | 120    | **220**       |
+| 3       | A           | 2024-01-03 | 90     | **310**       |
+| 4       | A           | 2024-01-04 | 130    | **440**       |
+| 5       | B           | 2024-01-01 | 180    | **180**       |
+| 6       | B           | 2024-01-02 | 200    | **380**       |
+| 7       | B           | 2024-01-03 | 220    | **600**       |
+| 8       | B           | 2024-01-04 | 200    | **800**       |
+| 9       | C           | 2024-01-01 | 150    | **150**       |
+| 10      | C           | 2024-01-02 | 150    | **300**       |
+| 11      | C           | 2024-01-03 | 170    | **470**       |
+| 12      | D           | 2024-01-01 | 90     | **90**        |
+| 13      | D           | 2024-01-02 | 110    | **200**       |
+| 14      | E           | 2024-01-01 | 140    | **140**       |
+| 15      | E           | 2024-01-02 | 160    | **300**       |
+| 16      | E           | 2024-01-03 | 155    | **455**       |
 
 ### Example 2: Full-Partition Aggregate (Stable Value)
 
@@ -1061,7 +1620,27 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+$$\downarrow$$
+
+| sale_id | customer_id | amount | full_partition_avg |
+|--------:|-------------|-------:|-------------------:|
+| 1       | A           | 100    | 110.000            |
+| 2       | A           | 120    | 110.000            |
+| 3       | A           | 90     | 110.000            |
+| 4       | A           | 130    | 110.000            |
+| 5       | B           | 180    | 200.000            |
+| 6       | B           | 200    | 200.000            |
+| 7       | B           | 220    | 200.000            |
+| 8       | B           | 200    | 200.000            |
+| 9       | C           | 150    | 156.667            |
+| 10      | C           | 150    | 156.667            |
+| 11      | C           | 170    | 156.667            |
+| 12      | D           | 90     | 100.000            |
+| 13      | D           | 110    | 100.000            |
+| 14      | E           | 140    | 151.667            |
+| 15      | E           | 160    | 151.667            |
+| 16      | E           | 155    | 151.667            |
+
 
 ### Example 3: Moving Window (Last 2 Transactions)
 
@@ -1079,11 +1658,35 @@ SELECT
 FROM tmp_sales;
 ```
 
----
+::: {.callout-note}
 
-### Example 4: Correct `LAST_VALUE()` Usage
+Here we can us any aggregate function: `SUM()`, `MAX()`
 
-Without a full frame, `LAST_VALUE()` often returns the **current row**, not the true last value.
+:::
+
+$$\downarrow$$
+
+| sale_id | customer_id | sale_date  | amount | moving_avg_2 |
+|--------:|-------------|------------|-------:|-------------:|
+| 1       | A           | 2024-01-01 | 100    | **100.000**  |
+| 2       | A           | 2024-01-02 | 120    | **110.000**  |
+| 3       | A           | 2024-01-03 | 90     | **105.000**  |
+| 4       | A           | 2024-01-04 | 130    | **110.000**  |
+| 5       | B           | 2024-01-01 | 180    | **180.000**  |
+| 6       | B           | 2024-01-02 | 200    | **190.000**  |
+| 7       | B           | 2024-01-03 | 220    | **210.000**  |
+| 8       | B           | 2024-01-04 | 200    | **210.000**  |
+| 9       | C           | 2024-01-01 | 150    | **150.000**  |
+| 10      | C           | 2024-01-02 | 150    | **150.000**  |
+| 11      | C           | 2024-01-03 | 170    | **160.000**  |
+| 12      | D           | 2024-01-01 | 90     | **90.000**   |
+| 13      | D           | 2024-01-02 | 110    | **100.000**  |
+| 14      | E           | 2024-01-01 | 140    | **140.000**  |
+| 15      | E           | 2024-01-02 | 160    | **150.000**  |
+| 16      | E           | 2024-01-03 | 155    | **157.500**  |
+
+
+###  Example 4: Forward-Looking Average 
 
 ```sql
 SELECT
@@ -1091,15 +1694,76 @@ SELECT
     customer_id,
     sale_date,
     amount,
-    LAST_VALUE(amount) OVER (
+    AVG(amount) OVER (
         PARTITION BY customer_id
         ORDER BY sale_date
-        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-    ) AS true_last_amount
+        ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING
+    ) AS forward_avg_2
 FROM tmp_sales;
 ```
 
----
+
+$$\downarrow$$
+
+| sale_id | customer_id | sale_date  | amount | forward_avg_2          |
+|--------:|-------------|------------|-------:|-----------------------:|
+| 1       | A           | 2024-01-01 | 100    | 110.0000000000000000   |
+| 2       | A           | 2024-01-02 | 120    | 105.0000000000000000   |
+| 3       | A           | 2024-01-03 | 90     | 110.0000000000000000   |
+| 4       | A           | 2024-01-04 | 130    | 130.0000000000000000   |
+| 5       | B           | 2024-01-01 | 180    | 190.0000000000000000   |
+| 6       | B           | 2024-01-02 | 200    | 210.0000000000000000   |
+| 7       | B           | 2024-01-03 | 220    | 210.0000000000000000   |
+| 8       | B           | 2024-01-04 | 200    | 200.0000000000000000   |
+| 9       | C           | 2024-01-01 | 150    | 150.0000000000000000   |
+| 10      | C           | 2024-01-02 | 150    | 160.0000000000000000   |
+| 11      | C           | 2024-01-03 | 170    | 170.0000000000000000   |
+| 12      | D           | 2024-01-01 | 90     | 100.0000000000000000   |
+| 13      | D           | 2024-01-02 | 110    | 110.0000000000000000   |
+| 14      | E           | 2024-01-01 | 140    | 150.0000000000000000   |
+| 15      | E           | 2024-01-02 | 160    | 157.5000000000000000   |
+| 16      | E           | 2024-01-03 | 155    | 155.0000000000000000   |
+
+
+### Example 5: Centered Moving Average (Previous + Current + Next) 
+
+```sql
+SELECT
+    sale_id,
+    customer_id,
+    sale_date,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY sale_date
+        ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+    ) AS centered_avg_3
+FROM tmp_sales;
+```
+
+
+$$\downarrow$$
+
+
+| sale_id | customer_id | sale_date  | amount | centered_avg_3 |
+|--------:|-------------|------------|-------:|---------------:|
+| 1       | A           | 2024-01-01 | 100    | **110.00**     |
+| 2       | A           | 2024-01-02 | 120    | **103.33**     |
+| 3       | A           | 2024-01-03 | 90     | **113.33**     |
+| 4       | A           | 2024-01-04 | 130    | **110.00**     |
+| 5       | B           | 2024-01-01 | 180    | **190.00**     |
+| 6       | B           | 2024-01-02 | 200    | **200.00**     |
+| 7       | B           | 2024-01-03 | 220    | **206.67**     |
+| 8       | B           | 2024-01-04 | 200    | **210.00**     |
+| 9       | C           | 2024-01-01 | 150    | **150.00**     |
+| 10      | C           | 2024-01-02 | 150    | **156.67**     |
+| 11      | C           | 2024-01-03 | 170    | **160.00**     |
+| 12      | D           | 2024-01-01 | 90     | **100.00**     |
+| 13      | D           | 2024-01-02 | 110    | **100.00**     |
+| 14      | E           | 2024-01-01 | 140    | **150.00**     |
+| 15      | E           | 2024-01-02 | 160    | **151.67**     |
+| 16      | E           | 2024-01-03 | 155    | **157.50**     |
+
 
 ### Key Observations
 
