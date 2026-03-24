@@ -1,0 +1,1057 @@
+---
+title: "Session 07: Data Visualization | Dates & Plotly"
+categories: [Pandas, Dates, Plotly, RFM,  Data Visualization]
+image_path: "/img/python/07"
+---
+
+## Working with Dates in Python
+
+Before building **time-based** visualizations, we need to become comfortable working with `dates`. In analytics, dates are **everywhere**: `transaction dates`, `signup dates`, `campaign start dates`, `delivery timestamps`, and `monthly summaries`. 
+
+
+::: {.callout-warning}
+If you **do not understand** how Python handles dates, you will struggle with:
+
+- filtering time periods
+- calculating intervals
+- grouping by month
+- building correct visualizations.
+
+:::
+
+In `Python`, there are **two** closely related ways to work with dates:
+
+- the built-in `datetime` module
+- Pandas date functionality
+
+The `datetime` module is part of standard Python and is useful for creating and manipulating individual date and time objects.
+
+`Pandas` extends this idea to entire columns and time series. It is the main tool analysts use when dates are stored inside DataFrames.
+
+### Why Date Handling Matters
+
+As we have found out during the SQL sessions, **Dates are not just text.**  Even if a date looks like `"2024-07-01"`, Python must understand that it represents a calendar value rather than an ordinary string.
+
+If dates remain as plain text, many analytical tasks become difficult or incorrect:
+ be calculated properly
+- resampling and aggregation over time will not work correctly
+
+That is why one of the first tasks in real analytical workflows is converting date columns into proper datetime format.
+
+- sorting may behave like text sorting instead of time sorting
+- filtering by year or month becomes inconvenient
+- time differences cannot
+
+## `datetime` Module
+
+The built-in `datetime` module is useful when working with individual date values.
+
+```{python}
+from datetime import datetime, date, timedelta
+```
+
+### Creating a Date Object
+
+A `date` object stores only year, month, and day.
+
+```{python}
+simple_date = date(2024, 7, 1)
+simple_date
+```
+
+| Position | Value | Meaning |
+|---|---:|---|
+| 1st | `2024` | year |
+| 2nd | `7` | month |
+| 3rd | `1` | day |
+
+
+### Creating a Datetime Object
+
+A `datetime` object stores both date and time.
+
+```{python}
+
+full_datetime = datetime(2024, 7, 1, 14, 30, 0)
+full_datetime
+```
+
+| Position | Value | Meaning |
+|---|---:|---|
+| 1st | `2024` | year |
+| 2nd | `7` | month |
+| 3rd | `1` | day |
+| 4th | `14` | hour |
+| 5th | `30` | minute |
+| 6th | `0` | second |
+
+### Getting the Current Date and Time
+
+
+```{python}
+#| echo: true
+
+today = date.today()
+now = datetime.now()
+
+print(f'today is {today}')
+print(f'right now is {now}')
+```
+
+### Accessing Parts of a Datetime
+
+**A datetime object has useful attributes.**
+
+```{python}
+print(f"Year: {full_datetime.year}")
+print(f"Month: {full_datetime.month}")
+print(f"Day: {full_datetime.day}")
+print(f"Hour: {full_datetime.hour}")
+print(f"Minute: {full_datetime.minute}")
+print(f"Second: {full_datetime.second}")
+```
+
+### Formatting Dates as Strings
+
+**Most of the times we want to display a date in a readable format.**
+
+
+```{python}
+#| echo: true
+
+full_datetime.strftime("%Y-%m-%d")
+```
+
+```{python}
+#| echo: true
+
+full_datetime.strftime("%d/%m/%Y")
+```
+
+```{python}
+#| echo: true
+
+full_datetime.strftime("%B %d, %Y")
+```
+
+### Common Formatting Codes
+
+| Code | Meaning | Example |
+|---|---|---|
+| `%Y` | 4-digit year | 2024 |
+| `%m` | 2-digit month | 07 |
+| `%d` | 2-digit day | 01 |
+| `%H` | hour (24-hour clock) | 14 |
+| `%M` | minute | 30 |
+| `%S` | second | 00 |
+| `%b` | short month name | Jul |
+| `%B` | full month name | July |
+
+### Parsing Strings into Datetime
+
+**This is the reverse of formatting.**
+
+```{python}
+#| echo: true
+
+dt = datetime.strptime("2024-07-01", "%Y-%m-%d")
+dt
+```
+
+This is useful when reading text dates and converting them into structured date objects.
+
+### Arithmetic with Dates
+
+One of the most important date operations is measuring time differences.
+
+```{python}
+#| echo: true
+
+start = date(2024, 7, 1)
+end = date(2024, 7, 15)
+
+delta = end - start
+delta
+```
+
+```{python}
+#| echo: true
+
+delta.days
+```
+
+We can also add or subtract days using `timedelta`.
+
+```{python}
+#| echo: true
+
+start + timedelta(days=10)
+```
+
+```{python}
+#| echo: true
+
+start - timedelta(days=7)
+```
+
+
+We can also add or subtract time using `timedelta`.
+
+When we work with a `date` object, the most natural granularity is usually days or weeks.
+
+```{python}
+#| echo: true
+
+print(start + timedelta(days=10))
+print(start - timedelta(days=7))
+print(start + timedelta(weeks=2))
+print(start - timedelta(weeks=1))
+```
+
+Other **granularity** are available as well: such as hours, minutes, or seconds, we usually work with a `datetime` object instead of a plain `date`.
+
+```{python}
+#| echo: true
+
+start_dt = datetime(2024, 7, 1, 14, 30, 0)
+
+print(start_dt + timedelta(days=1))
+print(start_dt + timedelta(hours=5))
+print(start_dt + timedelta(minutes=45))
+print(start_dt + timedelta(seconds=30))
+print(start_dt + timedelta(days=2, hours=3, minutes=15, seconds=10))
+```
+
+**Here are the most common `timedelta` units:**
+
+| Argument | Meaning |
+|---|---|
+| `days` | add or subtract days |
+| `weeks` | add or subtract weeks |
+| `hours` | add or subtract hours |
+| `minutes` | add or subtract minutes |
+| `seconds` | add or subtract seconds |
+
+So `timedelta` helps us move forward or backward in time with different levels of granularity.
+
+### Why `datetime` is Useful?
+
+**The built-in module is especially useful when:**
+
+- creating **single** date values manually
+- measuring time differences
+- formatting dates for display
+- parsing custom date strings
+
+However, once we start working with full columns of data, Pandas becomes much more practical.
+
+## Working with Dates in Pandas
+
+In analytics, dates usually appear inside DataFrames. As we know Pandas provides powerful tools to convert, extract, filter, and aggregate date values.
+
+### Creating a Sample DataFrame
+
+```{python}
+#| echo: true
+
+import pandas as pd
+
+df_dates = pd.DataFrame({
+    "customer_id": [101, 102, 103, 104, 105],
+    "signup_date": ["2024-01-15", "2024-02-20", "2024-03-05", "2024-03-18", "2024-04-10"],
+    "last_purchase": ["2024-06-01", "2024-06-15", "2024-07-01", "2024-07-08", "2024-07-12"]
+})
+
+df_dates
+```
+
+At this point, the dates are still **strings**.
+
+### Checking Data Types
+
+```{python}
+#| echo: true
+
+df_dates.dtypes
+```
+
+Notice that the date columns are usually stored as `object`, which means **text.**
+
+::: {.callout-note}
+Newer version of pandas, might use `txt` instead of `object`.
+:::
+
+### Converting to Datetime
+
+We use `pd.to_datetime()`.
+
+```{python}
+#| echo: true
+
+df_dates["signup_date"] = pd.to_datetime(df_dates["signup_date"])
+df_dates["last_purchase"] = pd.to_datetime(df_dates["last_purchase"])
+
+df_dates.dtypes
+```
+
+**Now Pandas recognizes them as datetime columns.**
+
+::: {.callout-warning}
+When importing from the data csv or any other file type, it is recommended to explicitly mention the date type:
+
+```python
+pd.read_file('filename.type', parse_dates = ['date_column_name'])
+```
+:::
+
+**Once converted, we can:**
+
+- extract year, month, day
+- calculate time differences
+- filter by time period
+- sort properly by calendar order
+- group by month, quarter, or year
+
+### Extracting Date Components with `.dt`
+
+Pandas provides the `.dt` accessor for datetime columns.
+
+### Year, Month, and Day
+
+```{python}
+#| echo: true
+
+df_dates["signup_year"] = df_dates["signup_date"].dt.year
+df_dates["signup_month"] = df_dates["signup_date"].dt.month
+df_dates["signup_day"] = df_dates["signup_date"].dt.day
+
+df_dates
+```
+
+### Month Name and Day Name
+
+```{python}
+#| echo: true
+
+df_dates["signup_month_name"] = df_dates["signup_date"].dt.month_name()
+df_dates["signup_day_name"] = df_dates["signup_date"].dt.day_name()
+
+df_dates[["signup_date", "signup_month_name", "signup_day_name"]]
+```
+
+### Quarter
+
+```{python}
+#| echo: true
+
+df_dates["signup_quarter"] = df_dates["signup_date"].dt.quarter
+df_dates[["signup_date", "signup_quarter"]]
+```
+
+### Day of Week
+
+**Pandas represents weekdays numerically:**
+
+- Monday = 0
+- Tuesday = 1
+- Wednesday = 2
+- Thursday = 3
+- Friday = 4
+- Saturday = 5
+- Sunday = 6
+
+```{python}
+#| echo: true
+
+df_dates["signup_dow"] = df_dates["signup_date"].dt.dayofweek
+df_dates[["signup_date", "signup_dow"]]
+```
+
+### Weekend Flag
+
+This is a practical example of a derivative date column.
+
+```{python}
+#| echo: true
+
+df_dates["is_weekend"] = (df_dates["signup_date"].dt.dayofweek >= 5).astype(int)
+df_dates[["signup_date", "signup_dow", "is_weekend"]]
+```
+
+**This is especially useful later in behavioral and transaction analysis.**
+
+### Calculating Differences Between Dates
+
+A very common analytical task is measuring how much time passed between two events.
+
+```{python}
+#| echo: true
+
+df_dates["days_between_signup_and_purchase"] = (
+    df_dates["last_purchase"] - df_dates["signup_date"]
+).dt.days
+
+df_dates[["signup_date", "last_purchase", "days_between_signup_and_purchase"]]
+```
+
+**This pattern is extremely common in analytics:**
+
+- days until first purchase
+- days since prior order
+- time to churn
+- time between visits
+
+### Filtering by Date Conditions
+
+Once a column is datetime, filtering becomes easy and natural.
+
+#### Filter Rows After a Given Date
+
+```{python}
+#| echo: true
+
+df_dates[df_dates["signup_date"] >= "2024-03-01"]
+```
+
+#### Filter a Specific Month
+
+```{python}
+#| echo: true
+
+df_dates[df_dates["signup_date"].dt.month == 3]
+```
+
+#### Filter a Specific Year
+
+```{python}
+#| echo: true
+
+df_dates[df_dates["signup_date"].dt.year == 2024]
+```
+
+::: {.callout-important}
+Pandas is flexible here because it understands date-like strings.
+:::
+
+### Sorting by Date
+
+**Sorting works correctly only when the column is in datetime format.**
+
+This becomes especially important in time-series analysis and line charts.
+
+```{python}
+#| echo: true
+
+df_dates.sort_values("signup_date")
+```
+
+
+
+### Creating Date Ranges
+
+Sometimes we need to generate a **sequence** of dates.
+
+#### Daily Date Range
+
+```{python}
+#| echo: true
+
+pd.date_range(start="2024-07-01", periods=7, freq="D")
+```
+
+#### Monthly Date Range
+
+```{python}
+#| echo: true
+
+pd.date_range(start="2024-01-01", periods=6, freq="MS")
+```
+
+Here, `MS` means month start.
+
+### Common Frequency Codes
+
+| Code | Meaning |
+|---|---|
+| `D` | daily |
+| `W` | weekly |
+| `MS` | month start |
+| `M` | month end |
+| `Q` | quarter end |
+| `Y` | year end |
+| `H` | hourly |
+
+**Date ranges are useful for:**
+
+- synthetic datasets
+- building time-series examples
+- resampling and alignment
+
+
+### Begining and the End of Month
+
+We can also work with the **beginning of the month (bom)** and the **end of the month (eom)**, which is very common in analytics.
+
+**This is useful when we want to:**
+
+- align dates to monthly reporting periods
+- calculate monthly summaries
+- label values by month start or month end
+- prepare data for time-based aggregation
+
+
+With `Pandas`, this functionality is very convenient.
+
+```{python}
+#| echo: true
+
+import pandas as pd
+
+some_date = pd.Timestamp("2024-07-15")
+
+print(f"Original date: {some_date}")
+print(f"Beginning of month: {some_date.to_period('M').start_time}")
+print(f"End of month: {some_date.to_period('M').end_time}")
+```
+
+**Here:**
+
+- `to_period('M')` converts the date into a monthly period
+- `.start_time` returns the first moment of that month
+- `.end_time` returns the last moment of that month
+
+::: {.callout-tip title = "If We Only Want the Calendar Date"}
+
+Sometimes the full timestamp is not needed, and we want just the date part.
+
+```{python}
+#| echo: true
+
+print(f"Beginning of month (date only): {some_date.to_period('M').start_time.date()}")
+print(f"End of month (date only): {some_date.to_period('M').end_time.date()}")
+```
+
+:::
+
+
+**This is especially useful in DataFrames.**
+
+
+```{python}
+#| echo: true
+
+df_dates["signup_month"] = df_dates["signup_date"].dt.to_period("M").dt.start_time
+df_dates["signup_month"] = df_dates["signup_date"].dt.to_period("M").dt.end_time
+
+df_dates
+```
+
+**This creates two new columns:**
+
+- `month_start` = first day of the month
+- `month_end` = last day of the month
+
+#### Why This Matters
+
+`Beginning-of-month` and `end-of-month` functionality is helpful for tasks such as:
+
+- monthly KPI reporting
+- billing cycle analysis
+- customer cohort preparation
+- monthly sales aggregation
+- aligning dates before plotting line charts
+
+
+#### A Simple Summary
+
+| Functionality | Example |
+|---|---|
+| beginning of month | `some_date.to_period('M').start_time` |
+| end of month | `some_date.to_period('M').end_time` |
+| beginning of month as date only | `some_date.to_period('M').start_time.date()` |
+| end of month as date only | `some_date.to_period('M').end_time.date()` |
+
+
+::: {.callout-important}
+#### Important Note
+
+The end of month returned by Pandas is the **last timestamp of that month**, not just the last date. That is why you may see a time like:
+
+`2024-07-31 23:59:59.999999999`
+
+If you want only the calendar date, use `.date()`.
+:::
+
+## Homework 1
+
+The following tasks are designed to help you practice the main ideas from the date tutorial you developed, including `datetime`, `timedelta`, `pd.to_datetime()`, `.dt` accessors, filtering, date ranges, and beginning/end of month functionality. 
+
+### Practice with the `datetime` Module
+
+1. **Create a `date` Object and name it `my_date`**
+   - `my_date` must be  representing **March 15, 2025**.
+   - Print each component separately using **f-strings:**
+     - the full value
+     - the year
+     - the month
+     - the day
+2. **Create a `datetime` Object and name it `meeting_time`**
+   - `meeting_time` mustbe representing **October 8, 2025 at 16:45:30**.
+   - Print each component separately using **f-strings:**
+   - year
+   - month
+   - day
+   - hour
+   - minute
+   - second
+3. **Format Dates as Strings** using `meeting_time`, display the date in the following formats:
+   - `YYYY-MM-DD`
+   - `DD/MM/YYYY`
+   - full month name, day, year
+
+4. **Parse a String into a Datetime**
+   - Convert the string `"2025-12-31"` into a Python datetime object using `strptime()`.
+   - Then print the resulting object again using f-strings.
+5. **Date Arithmetic**
+   - `start = date(2025, 1, 10)`
+   - `end = date(2025, 2, 5)`
+   - calculate the difference between `end` and `start`
+   - the number of days only
+6. Work with `timedelta` Using `start`, calculate and print with f-strings:
+   - 10 days after `start`
+   - 14 days before `start`
+   - 3 weeks after `start`
+   - Then create a datetime object and add:
+     - 5 hours
+     - 20 minutes
+     - 45 seconds
+
+### Practice with Pandas Dates
+
+1. **Create a DataFrame with Date Strings**
+
+| customer_id | signup_date | last_purchase |
+|---|---|---|
+| 1 | 2024-01-10 | 2024-02-15 |
+| 2 | 2024-02-05 | 2024-03-01 |
+| 3 | 2024-03-12 | 2024-03-28 |
+| 4 | 2024-04-01 | 2024-05-10 |
+| 5 | 2024-05-20 | 2024-06-25 |
+
+2. **Check the data types of all columns.**
+3. **Convert String Columns to Datetime**
+4. convert `signup_date` into proper datetime columns
+5. convert `last_purchase` into proper datetime columns
+6. Then print the data types again. (you must see `pd.datetime` instead of )
+7. **Extract Date Components** `signup_date`, create the following new columns:
+   - `signup_year`
+   - `signup_month`
+   - `signup_day`
+   - `signup_quarter`
+   - `signup_month_name`
+   - `signup_day_name`
+8. **Create a Day-of-Week and Weekend Flag**
+   - `signup_dow` using `.dt.dayofweek`
+   - `is_weekend` where weekend = `1` and weekday = `0`
+9. Create a new column called `days_between_signup_and_purchase`. *It should show the number of days between `signup_date` and `last_purchase`.*
+10. **Filter Data:** Write code to return:
+    - customers who signed up after `"2024-03-01"`
+    - customers who signed up in March
+    - customers who signed up in 2024
+11. **Sort by Date:** Sort the DataFrame by `signup_date` from earliest to latest.
+12. **Generate a daily date range starting from `"2024-07-01"` for 10 days.**
+13. Generate a monthly date range starting from `"2024-01-01"` for 12 months using month start frequency.
+14. **Create a DataFrame with:**
+    - a `date` column covering 15 daily dates starting from `"2024-01-01"`
+    - a `sales` column with any numeric values you choose
+    - Then create the following derivative columns:
+      - `year`
+      - `month`
+      - `day`
+      - `day_name`
+      - `dow`
+      - `is_weekend`
+
+15. Beginning and End of Month for One Date for `some_date = pd.Timestamp("2024-08-18")`, then print:
+    - original date
+    - beginning of month
+    - end of month
+    - beginning of month as date only
+    - end of month as date only
+16. Beginning and End of Month for a Full ColumnUsing the `signup_date` column in your DataFrame, create two new columns:
+    - `month_start`
+    - `month_end`
+    - *Make sure both are derived from `signup_date`.*
+
+## Intro to Plotly
+
+
+## RFM
+
+### Downloading the Data
+
+Before starting this exercise first let's download the data, which you can find [here](https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/rfm/orders.csv)
+
+::: {.callout-tip}
+Try to download this data the way learnt during the previous sessionss. 
+:::
+
+<!-- todo add the URL -->
+
+### Customer Segmentation
+
+Customer segmentation can be defined as the practice of dividing a customer base into groups of individuals that are similar in specific ways relevant to marketing.
+
+![]({{< meta image_path >}}/Bases.png)
+
+### Why Segment Customers?
+
+In short **For differentiation!**
+
+In **Marketing and Service:**
+
+- Make more focused/targeted marketing
+- Identify the most profitable and at-risk customers
+- Build relationships
+- Create user personas
+
+In  **Product and Brand:**
+
+- Brand to appeal to particular segments
+- Customize products and services
+- Predict future purchasing patterns
+
+In **Pricing:**
+
+  - Pricing products by groups
+  - Determine willingness to pay for optimal value
+
+
+### What is RFM
+
+RFM (recency, frequency, monetary) analysis is a behavior-based technique used to segment customers by examining their transaction history.
+
+- how recently a customer has purchased **(Recency)**
+- how often they purchase **(Frequency)**
+- how much the customer spends **(Monetary)**
+
+**RFM model** is a straightforward yet effective method for segmentation, especially in retail.
+
+RFM helps to identify customers who are more likely to respond to promotions by segmenting them into various categories.
+
+### The Components of RFM
+
+- A **Recency Score** is assigned to each customer based on the most recent purchase date. The score is generated by binning the recency values into several categories. For example, suppose one uses four categories. In that case, the customers with the most recent purchase dates receive a recency ranking of **4**, and those with purchase dates in the distant past receive a recency ranking of **1**.
+- A **Frequency Score** is assigned similarly. Customers with high purchase frequency are assigned a higher score (**4** or **5**), and those with the lowest frequency score are assigned **1**.
+- A **Monetary Score** is assigned based on the total revenue generated by the customer in the period under consideration for the analysis. Customers with the highest revenue or order amount are assigned a higher score, while those with the lowest ones are assigned a score of **1**.
+
+### RFM Score
+
+**RFM score** is generated by simply combining the above mentioned components or scores into a single value.
+
+**RFM Score could be calculated as:**
+
+- Average of the three scores
+- Weighted average
+- Simple concatenation
+
+
+### Loading Packages and Data
+
+```{python}
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+
+pd.set_option('display.max_columns', None)
+px.defaults.template = "plotly_white"
+```
+
+```python
+orders = pd.read_csv('../data/rfm/orders.csv', parse_dates=['order_date'])
+orders.head()
+```
+
+```{python}
+#| echo: false
+orders = pd.read_csv('../../lab/python/data/rfm/orders.csv', parse_dates=['order_date'])
+orders.head()
+```
+
+## Revenue Distribution
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.histogram(
+    orders,
+    x='revenue',
+    nbins=30,
+    title='Histogram of Revenue'
+)
+
+fig.update_layout(
+    xaxis_title='Revenue',
+    yaxis_title='Count'
+)
+
+fig.show()
+```
+
+### R, F, M Scores
+
+Let us create `R`, `F`, and `M` columns.
+
+```{python}
+max_date = orders['order_date'].max()
+
+rfm = orders.groupby('customer_id').agg(
+    {
+        'order_date': lambda date: (max_date - date.max()).days,
+        'customer_id': lambda num: len(num),
+        'revenue': lambda price: price.sum()
+    }
+)
+
+rfm.columns = ['Recency', 'Frequency', 'Monetary']
+rfm.reset_index(inplace=True)
+rfm.head()
+```
+
+::: {.callout-important}
+Think about a reasons we used `lambda` function
+:::
+
+Let us create `5` categories based on the quartiles for each RFM variable using `pd.qcut()` method
+
+```{python}
+rfm['R'] = pd.qcut(rfm['Recency'], 4, ['1', '2', '3', '4'])
+rfm['F'] = pd.qcut(rfm['Frequency'], 4, ['4', '3', '2', '1'])
+rfm['M'] = pd.qcut(rfm['Monetary'], 4, ['4', '3', '2', '1'])
+```
+
+::: {.callout-important}
+Pay attention to the order of **Frequency** $(\downarrow)$.
+:::
+
+### RFM Scores
+
+```{python}
+rfm.head()
+```
+
+Distributions of R, F, M
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = go.Figure()
+
+fig.add_trace(go.Histogram(x=rfm['Recency'], name='Recency', opacity=0.75))
+fig.add_trace(go.Histogram(x=rfm['Frequency'], name='Frequency', opacity=0.75))
+fig.add_trace(go.Histogram(x=rfm['Monetary'], name='Monetary', opacity=0.75))
+
+fig.update_layout(
+    title='Distributions of R, F, M',
+    xaxis_title='Value',
+    yaxis_title='Count',
+    barmode='overlay'
+)
+
+fig.show()
+```
+
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+fig = make_subplots(
+    rows=1,
+    cols=3,
+    subplot_titles=("Recency", "Frequency", "Monetary")
+)
+
+fig.add_trace(
+    go.Histogram(x=rfm["Recency"], nbinsx=30, name="Recency"),
+    row=1,
+    col=1
+)
+
+fig.add_trace(
+    go.Histogram(x=rfm["Frequency"], nbinsx=30, name="Frequency"),
+    row=1,
+    col=2
+)
+
+fig.add_trace(
+    go.Histogram(x=rfm["Monetary"], nbinsx=30, name="Monetary"),
+    row=1,
+    col=3
+)
+
+fig.update_layout(
+    title="Distributions of Recency, Frequency, and Monetary",
+    showlegend=False
+)
+
+fig.update_xaxes(title_text="Recency", row=1, col=1)
+fig.update_xaxes(title_text="Frequency", row=1, col=2)
+fig.update_xaxes(title_text="Monetary", row=1, col=3)
+
+fig.update_yaxes(title_text="Count", row=1, col=1)
+fig.update_yaxes(title_text="Count", row=1, col=2)
+fig.update_yaxes(title_text="Count", row=1, col=3)
+
+fig.show()
+```
+
+### RFM Score and RFM Segment
+
+- **RFM Segments:** converting `R`, `F`, `M` scores to string and concatenating
+- **RFM Score:** sum of the `R`, `F`, `M` scores
+
+```{python}
+rfm['RFM_Score'] = rfm.R.astype(int) + rfm.F.astype(int) + rfm.M.astype(int)
+rfm['RFM_Segment'] = rfm.R.astype(str) + rfm.F.astype(str) + rfm.M.astype(str)
+
+rfm.head()
+```
+
+### Finding Top Customers
+
+Sorting `RFM_Segment` in descending order, we will get the list of top customers.
+
+```{python}
+rfm = rfm.sort_values('RFM_Segment', ascending=False)
+rfm.head()
+```
+
+### Number of RFM Segments
+
+```{python}
+rfm_segments = rfm.groupby('RFM_Segment').count().reset_index(level=0)
+rfm_segments.head()
+```
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    rfm_segments.sort_values('customer_id'),
+    x='customer_id',
+    y='RFM_Segment',
+    orientation='h',
+    title='Number of Customers by RFM Segment'
+)
+
+fig.update_layout(
+    xaxis_title='Number of Customers',
+    yaxis_title='RFM Segment'
+)
+
+fig.show()
+```
+
+### Naming the Segments
+
+The next step for customer segmentation is naming those very segments. The number of segments depends on the scope of the marketing campaign. Here `naming()` function just contains a set of conditional rules, which comes from classical segmentation.
+
+```{python}
+def naming(df):
+    if df['RFM_Score'] >= 9:
+        return 'Can\'t Loose Them'
+    elif ((df['RFM_Score'] >= 8) and (df['RFM_Score'] < 9)):
+        return 'Champions'
+    elif ((df['RFM_Score'] >= 7) and (df['RFM_Score'] < 8)):
+        return 'Loyal/Commited'
+    elif ((df['RFM_Score'] >= 6) and (df['RFM_Score'] < 7)):
+        return 'Potential'
+    elif ((df['RFM_Score'] >= 5) and (df['RFM_Score'] < 6)):
+        return 'Promising'
+    elif ((df['RFM_Score'] >= 4) and (df['RFM_Score'] < 5)):
+        return 'Requires Attention'
+    else:
+        return 'Demands Activation'
+```
+
+
+Now let us apply the above-defined function by creating `Segment_Name` column.
+
+```{python}
+rfm['Segment_Name'] = rfm.apply(naming, axis=1)
+rfm.head(5)
+```
+
+### Segment Distribution
+
+```{python}
+grouped_by = rfm.groupby('Segment_Name').agg({
+    'Recency': 'mean',
+    'Frequency': 'mean',
+    'Monetary': ['mean', 'count']
+}).round(1)
+```
+
+### Segments' Distribution
+
+```{python}
+grouped_by
+```
+
+### Segments' Visualization
+
+Using Plotly, we can visualize segments with a treemap.
+
+```{python}
+grouped_by.columns = ['RecencyMean', 'FrequencyMean', 'MonetaryMean', 'Count']
+grouped_by = grouped_by.reset_index()
+
+grouped_by
+```
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 7
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.treemap(
+    grouped_by,
+    path=['Segment_Name'],
+    values='Count',
+    color='MonetaryMean',
+    hover_data=['RecencyMean', 'FrequencyMean', 'MonetaryMean'],
+    title='RFM Segments'
+)
+
+fig.show()
+```
+
+
+
+
