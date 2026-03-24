@@ -685,6 +685,490 @@ The following tasks are designed to help you practice the main ideas from the da
 
 ## Intro to Plotly
 
+Plotly is a Python library for creating **interactive visualizations**. It is widely used in analytics, data science, business intelligence, dashboards, and reporting because it allows users not only to see a chart, but also to interact with it.
+
+**Unlike static plotting libraries, Plotly charts allow the audience to:**
+
+- hover over data points to see exact values
+- zoom into specific regions
+- pan across the chart
+- hide or show categories from the legend
+- inspect complex charts more carefully
+
+This makes Plotly especially useful when we want to move beyond simple chart display and support deeper data exploration.
+
+::: {.callout-tip}
+Explore plotly [here](https://plotly.com/python/)
+:::
+
+### Why Plotly is Important
+
+Plotly is important for several reasons.
+
+1. it works very naturally with **Pandas DataFrames**, which means analysts can move directly from cleaned and transformed data into visualization.
+2. it supports a wide variety of chart types, from basic charts to more advanced business and analytical visuals.
+3. Plotly is highly useful in modern Python applications such as:
+   - Jupyter notebooks
+   - Quarto documents
+   - Dash applications
+   - Streamlit applications
+
+>So Plotly is not only a charting library. It is also part of a larger ecosystem for analytical communication and interactive reporting.
+
+### Static vs Interactive Visualization
+
+A useful way to understand Plotly is to compare static and interactive charts.
+
+A **static chart** gives one fixed view. It is suitable for printed reports, PDFs, or slides where the figure is meant to be consumed passively.
+
+An **interactive chart** gives the user control. The reader can inspect exact values, focus on specific sections, or compare categories dynamically.
+
+>This does not mean interactive charts are always better. It means that Plotly is particularly strong when the audience benefits from exploration.
+
+### Plotly Architecture
+
+**Plotly in Python is usually used in two main ways:**
+
+- **Plotly Express**
+- **Graph Objects**
+
+#### Plotly Express
+
+**Plotly Express is the high-level interface.**
+
+It is designed to make chart creation fast, concise, and readable. In many cases, a complete interactive chart can be built in a single line.
+
+**It is especially useful when:**
+
+- the data is already tidy
+- the goal is to build a standard chart quickly
+- we want to map variables to color, size, symbol, or facets in a simple way
+
+`Plotly Express` is often the best starting point for analysts because it reduces boilerplate and helps students focus on chart logic rather than technical details.
+
+#### Graph Objects
+
+`plotly.graph_objects` is the lower-level interface.
+
+**It provides more control and flexibility. It is useful when:**
+
+- we need custom traces
+- we want complex layouts
+- we need subplots
+- we want advanced annotations or specialized visual structures
+
+>In practice, many analysts start with Plotly Express and move to Graph Objects when they need more control.
+
+
+### Plotly and the Grammar of Graphics
+
+Plotly also connects well to the idea of the **grammar of graphics**.
+
+**Instead of thinking only in terms of chart names, we can think in terms of components:**
+
+- **data**: the table behind the chart
+- **mapping**: how variables are assigned to axes or visual properties
+- **geometry**: bars, lines, points, areas, flows
+- **aesthetics**: color, size, labels, symbols
+- **annotations**: average lines, reference markers, labels, notes
+
+>This way of thinking is useful because it teaches students that charting is not only about memorizing functions. It is about translating business questions into visual structure.
+
+### Common Chart Families in Plotly
+
+**Plotly supports many chart families. Some of the most common are:**
+
+- **bar plots** for category comparison
+
+- **line plots** for trends over time
+
+- **histograms** for distributions
+
+- **scatter plots** for relationships between variables
+
+- **multi-line charts** for comparing trends across groups
+
+These chart types form the foundation of most analytical reporting.
+
+#### Bar Plot
+
+A bar plot is used when we want to compare values across discrete categories.
+
+Typical examples include:
+
+- sales by region
+
+- customers by segment
+
+- revenue by product category
+
+#### Line Plot
+
+A line plot is used when the x-axis has an order, most often time.
+
+Typical examples include:
+
+- monthly sales
+
+- daily website traffic
+
+- weekly active users
+
+#### Histogram
+
+A histogram is used to show the distribution of a numeric variable.
+
+Typical examples include:
+
+- revenue distribution
+
+- customer age distribution
+
+- distribution of transaction amounts
+
+#### Scatter Plot
+
+A scatter plot is used to study the relationship between two numeric variables.
+
+Typical examples include:
+
+- advertising spend vs sales
+
+- income vs spending
+
+- customers vs revenue
+
+#### Multi-Line Chart
+
+A multi-line chart is a variation of the line plot where several groups are shown together.
+
+Typical examples include:
+
+- sales by region over time
+- churn rate by segment across months
+- traffic by channel over several weeks
+
+
+### A Practical Workflow
+
+A common analytical workflow with Plotly looks like this:
+
+$$
+\text{Raw Data} \rightarrow \text{Cleaning} \rightarrow \text{Transformation} \rightarrow \text{Aggregation} \rightarrow \text{Visualization in Plotly} \rightarrow \text{Insight}
+$$
+
+This reminds students that visualization is not the first step. Plotly becomes most useful after the data is already structured for analysis.
+
+## Dummy Dataset for Plotly Examples
+
+**Before introducing the major chart types, let us create a small synthetic dataset.**
+
+```{python}
+#| echo: true
+
+import pandas as pd
+import numpy as np
+import plotly.express as px
+
+np.random.seed(42)
+px.defaults.template = "plotly_white"
+
+months = pd.date_range("2024-01-01", periods=6, freq="MS")
+regions = ["North", "South", "East"]
+products = ["A", "B"]
+
+rows = []
+
+for month in months:
+    for region in regions:
+        for product in products:
+            sales = np.random.randint(80, 220)
+            customers = np.random.randint(20, 90)
+            units = np.random.randint(10, 70)
+            
+            rows.append([month, region, product, sales, customers, units])
+
+df_plotly = pd.DataFrame(
+    rows,
+    columns=["month", "region", "product", "sales", "customers", "units"]
+)
+
+df_plotly["month_name"] = df_plotly["month"].dt.strftime("%b")
+df_plotly.head()
+```
+
+**This dummy dataset gives us:**
+
+- a time variable: `month`
+- categorical variables: `region`, `product`
+- numeric variables: `sales`, `customers`, `units`
+
+This structure is enough to introduce the most common chart types in Plotly.
+
+### Example 1: Bar Plot
+
+A **bar plot** is useful when we want to compare values across categories.
+
+For example, we may want to compare total sales across regions.
+
+```{python}
+#| echo: true
+
+region_sales = (
+    df_plotly.groupby("region", as_index=False)["sales"]
+             .sum()
+)
+
+region_sales
+```
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    region_sales,
+    x="region",
+    y="sales",
+    text="sales",
+    title="Bar Plot: Total Sales by Region"
+)
+
+fig.update_traces(textposition="outside")
+fig.update_layout(
+    xaxis_title="Region",
+    yaxis_title="Sales"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+**This chart helps answer:**
+
+- Which region has the highest total sales?
+
+- Which region performs the weakest?
+
+- How large are the differences across regions?
+
+### Example 2: Line Plot
+
+A **line plot** is useful for showing change over time.
+
+For example, we may want to study monthly total sales.
+
+```{python}
+#| echo: true
+
+monthly_sales = (
+    df_plotly.groupby("month", as_index=False)["sales"]
+             .sum()
+)
+
+monthly_sales
+```
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Line Plot: Monthly Total Sales"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales"
+)
+
+fig.show()
+```
+
+### Interpretation
+
+This chart helps answer:
+
+- Is sales performance increasing or decreasing?
+
+- Which month had the highest sales?
+
+- Are there visible fluctuations over time?
+
+### Example 3: Histogram
+
+A **histogram** is used to show the distribution of a numeric variable.
+
+For example, we may want to understand how sales values are distributed across all observations.
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.histogram(
+    df_plotly,
+    x="sales",
+    nbins=15,
+    title="Histogram: Distribution of Sales"
+)
+
+fig.update_layout(
+    xaxis_title="Sales",
+    yaxis_title="Count"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+**This chart helps answer:**
+
+- Are most sales values concentrated in one range?
+- Is the distribution symmetric or skewed?
+
+- Are there unusually small or large values?
+
+### Example 4: Scatter Plot
+
+A **scatter plot** is used to study the relationship between two numeric variables.
+
+For example, we may want to see whether more customers are associated with higher sales.
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.scatter(
+    df_plotly,
+    x="customers",
+    y="sales",
+    color="region",
+    hover_data=["product", "month_name", "units"],
+    title="Scatter Plot: Customers vs Sales"
+)
+
+fig.update_layout(
+    xaxis_title="Customers",
+    yaxis_title="Sales",
+    legend_title="Region"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+This chart helps answer:
+
+- Do higher customer counts tend to correspond to higher sales?
+
+- Are there outliers?
+
+- Do regions behave differently?
+
+### Example 5: Multi-Line Chart
+
+A **multi-line chart** is a grouped line chart. It allows us to compare trends across categories over time.
+
+For example, we may want to compare monthly sales by region.
+
+```{python}
+#| echo: true
+
+monthly_region_sales = (
+    df_plotly.groupby(["month", "region"], as_index=False)["sales"]
+             .sum()
+)
+
+monthly_region_sales.head()
+```
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_region_sales,
+    x="month",
+    y="sales",
+    color="region",
+    markers=True,
+    title="Multi-Line Chart: Monthly Sales by Region"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales",
+    legend_title="Region"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+This chart helps answer:
+
+- Which region is strongest over time?
+
+- Which region is most volatile?
+
+- Do all regions move in the same direction?
+
+### Summary of the Main Chart Types
+
+| Chart Type | Best Used For | Example Question |
+|---|---|---|
+| Bar plot | comparing categories | Which region has the highest sales? |
+| Line plot | trends over time | How are monthly sales changing? |
+| Histogram | distributions | What does the sales distribution look like? |
+| Scatter plot | relationships between numeric variables | Do more customers lead to more sales? |
+| Multi-line chart | comparing trends across groups | How do regions compare over time? |
+
+### Why These Charts Matter
+
+These chart types form the foundation of analytical reporting.
+
+They are not chosen randomly. Each chart answers a different type of question:
+
+- **bar plot** $\rightarrow$ comparison
+
+- **line plot** $\rightarrow$ trend
+
+- **histogram** $\rightarrow$ distribution
+
+- **scatter plot** $\rightarrow$ relationship
+
+- **multi-line chart** $\rightarrow$ grouped trend comparison
+
+When students understand this logic, chart choice becomes much easier.
+
 
 ## RFM
 
