@@ -1447,3 +1447,321 @@ fig.update_layout(
 fig.show()
 ```
 
+
+## Vertical and Horizontal Reference Lines
+
+Sometimes a chart becomes much more useful when we add a reference line. A reference line helps us move beyond simply displaying values and begin interpreting them.
+
+**Vertical and horizontal lines are commonly used to show:**
+
+- average values
+- targets or thresholds
+- important dates
+- campaign launch points
+- policy changes
+- before-and-after comparisons
+
+**These lines are not decorative. They are analytical tools. They help the audience answer questions such as:**
+
+- Which observations are above average?
+- Which values are below the target?
+- What happened after a major event?
+- Did the pattern change after a certain date?
+
+### Why Reference Lines Matter
+
+A chart without a reference line may show a pattern, but a chart with a reference line often shows meaning more clearly.
+
+For example:
+
+- a line chart of monthly sales shows trend
+- a line chart of monthly sales with an average line shows which months performed above or below the overall benchmark
+- a line chart with a campaign start marker helps separate pre-campaign and post-campaign periods
+
+So reference lines help connect the chart to a business question.
+
+### Horizontal Lines 
+
+A horizontal line is usually used to show a **benchmark on the y-axis.**
+
+**Common examples include:**
+
+- average sales
+- target revenue
+- minimum acceptable performance
+- upper control limit
+- lower control limit
+
+Suppose we want to examine monthly sales and compare each month against the average monthly sales.
+
+First, let us create the summary table.
+
+```{python}
+#| echo: true
+
+monthly_sales = (
+    df_plotly.groupby("month", as_index=False)["sales"]
+             .sum()
+)
+
+monthly_sales
+```
+
+Now let us compute the average.
+
+```{python}
+#| echo: true
+
+avg_sales = monthly_sales["sales"].mean()
+avg_sales
+```
+
+##### Understanding the Main Arguments
+
+Before executing the chart, let us understand the important parts.
+
+We first create the chart with `px.line()`.
+
+Then we add a reference line with `fig.add_hline()`.
+
+**The most important arguments are:**
+
+- `y` = the y-value where the horizontal line will be placed
+- `line_dash` = controls the line style, such as solid, dash, or dot
+- `annotation_text` = the label shown near the line
+- `annotation_position` = where the label appears
+
+**In our example:**
+
+- `y=avg_sales` places the line at the average sales value
+- `line_dash="dash"` makes the line visually different from the main chart line
+- `annotation_text="Average Sales"` adds an explanatory label
+
+#### Try It Yourself
+
+**Try to experiment with the following changes:**
+
+- change the line style from `"dash"` to `"dot"`
+- replace the average with a fixed target value such as `900`
+- change the annotation text
+- change the annotation position
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Line Plot with Horizontal Reference Line"
+)
+
+fig.add_hline(
+    y=avg_sales,
+    line_dash="dash",
+    annotation_text="Average Sales",
+    annotation_position="top left"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+**This chart helps answer:**
+
+- Which months are above average?
+- Which months are below average?
+- Is performance consistently above the benchmark or not?
+
+### Vertical Lines
+
+A vertical line is usually used to mark a specific point on the x-axis.
+
+**Common examples include:**
+
+- campaign start date
+- product launch date
+- policy change date
+- market shock
+- start of a promotion
+
+When the x-axis is time, vertical lines are especially useful.
+
+
+Suppose a campaign started on April 1, 2024, and we want to mark that point on the chart.
+
+#### Important Note
+
+::: {.callout-important}
+**When working with Plotly and datetime axes, `add_vline()` with `annotation_text=...` may raise errors in some environments. A safer and more reliable pattern is:**
+
+- add the vertical line with `fig.add_vline()`
+- add the label separately with `fig.add_annotation()`
+:::
+
+
+#### Understanding the Main Arguments
+
+**For the vertical line:**
+
+- `x` = the x-value where the vertical line will be placed
+- `line_dash` = the style of the line
+- `line_color` = the color of the line
+
+**For the annotation:**
+
+- `x` = where the label points
+- `y` = the vertical position of the label anchor
+- `text` = label text
+- `showarrow=True` = displays an arrow
+- `ax` and `ay` = control the arrow direction and text position
+
+#### Try It Yourself
+
+Try to experiment with the following changes:
+
+- move the event date to another month
+- change the line color
+- change the annotation text
+- adjust `ax` and `ay` to move the label
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+campaign_start = pd.Timestamp("2024-04-01")
+
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Line Plot with Vertical Event Line"
+)
+
+fig.add_vline(
+    x=campaign_start,
+    line_dash="dot",
+    line_color="red"
+)
+
+fig.add_annotation(
+    x=campaign_start,
+    y=monthly_sales["sales"].max(),
+    text="Campaign Start",
+    showarrow=True,
+    arrowhead=2,
+    ax=40,
+    ay=-40
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+This chart helps answer:
+
+- What happened before the campaign?
+- What happened after the campaign?
+- Is there a visible shift in the pattern after the event?
+
+### Horizontal and Vertical Lines Together
+
+In many real analytical situations, both types of lines are useful together.
+
+**For example, we may want to show:**
+
+- the average performance level
+- the moment when a campaign started
+
+**This gives the audience both:**
+
+- a benchmark
+- an event marker
+
+
+**When both lines appear together:**
+
+- the horizontal line helps compare values against a benchmark
+- the vertical line helps compare periods before and after an event
+
+This makes the chart much more analytical.
+
+#### Try It Yourself
+
+Try to experiment with the following changes:
+
+- change the benchmark from average to a target value
+- move the campaign start to another date
+- change the colors and line styles
+- change the annotation text
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+campaign_start = pd.Timestamp("2024-04-01")
+avg_sales = monthly_sales["sales"].mean()
+
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Line Plot with Horizontal and Vertical Reference Lines"
+)
+
+fig.add_hline(
+    y=avg_sales,
+    line_dash="dash",
+    annotation_text="Average Sales",
+    annotation_position="top left"
+)
+
+fig.add_vline(
+    x=campaign_start,
+    line_dash="dot",
+    line_color="red"
+)
+
+fig.add_annotation(
+    x=campaign_start,
+    y=monthly_sales["sales"].max(),
+    text="Campaign Start",
+    showarrow=True,
+    arrowhead=2,
+    ax=40,
+    ay=-40
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales"
+)
+
+fig.show()
+```
+
