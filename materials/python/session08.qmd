@@ -1,140 +1,238 @@
 ---
-title: "Session 08: Data Analytics | Segmentation"
-categories: [Plotly, RFM, Segmentation, Data Visualization]
+title: "Session 08: Data Visualization | Plotly"
+categories: [Plotly,  Data Visualization]
 image_path: "/img/python/08"
 ---
 
+## Intro to Plotly
 
-## RFM
+Plotly is a Python library for creating **interactive visualizations**. It is widely used in analytics, data science, business intelligence, dashboards, and reporting because it allows users not only to see a chart, but also to interact with it.
 
-### Downloading the Data
+**Unlike static plotting libraries, Plotly charts allow the audience to:**
 
-Before starting this exercise first let's download the data, which you can find [here](https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/rfm/orders.csv)
+- hover over data points to see exact values
+- zoom into specific regions
+- pan across the chart
+- hide or show categories from the legend
+- inspect complex charts more carefully
+
+This makes Plotly especially useful when we want to move beyond simple chart display and support deeper data exploration.
 
 ::: {.callout-tip}
-Try to download this data the way have learnt during the previous sessions. 
+Explore plotly [here](https://plotly.com/python/)
+:::
 
-Let's also try to create a function named `csv_downloader(URL, name, path)` which will take `URL`, `name` and `path` as an arguments
+### Why Plotly is Important
 
-```python
-URL = 'https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/rfm/orders.csv'
-df = pd.read_csv(URL)
+Plotly is important for several reasons.
+
+1. it works very naturally with **Pandas DataFrames**, which means analysts can move directly from cleaned and transformed data into visualization.
+2. it supports a wide variety of chart types, from basic charts to more advanced business and analytical visuals.
+3. Plotly is highly useful in modern Python applications such as:
+   - Jupyter notebooks
+   - Quarto documents
+   - Dash applications
+   - Streamlit applications
+
+>So Plotly is not only a charting library. It is also part of a larger ecosystem for analytical communication and interactive reporting.
+
+### Static vs Interactive Visualization
+
+A useful way to understand Plotly is to compare static and interactive charts.
+
+A **static chart** gives one fixed view. It is suitable for printed reports, PDFs, or slides where the figure is meant to be consumed passively.
+
+An **interactive chart** gives the user control. The reader can inspect exact values, focus on specific sections, or compare categories dynamically.
+
+>This does not mean interactive charts are always better. It means that Plotly is particularly strong when the audience benefits from exploration.
+
+### Plotly Architecture
+
+**Plotly in Python is usually used in two main ways:**
+
+- Plotly Express
+- Graph Objects
+
+#### Plotly Express
+
+**Plotly Express is the high-level interface.**
+
+It is designed to make chart creation fast, concise, and readable. In many cases, a complete interactive chart can be built in a single line.
+
+**It is especially useful when:**
+
+- the data is already tidy
+- the goal is to build a standard chart quickly
+- we want to map variables to color, size, symbol, or facets in a simple way
+
+`Plotly Express` is often the best starting point for analysts because it reduces boilerplate and helps students focus on chart logic rather than technical details.
+
+#### Graph Objects
+
+`plotly.graph_objects` is the lower-level interface.
+
+**It provides more control and flexibility. It is useful when:**
+
+- we need custom traces
+- we want complex layouts
+- we need subplots
+- we want advanced annotations or specialized visual structures
+
+>In practice, many analysts start with Plotly Express and move to Graph Objects when they need more control.
+
+
+### Plotly and the Grammar of Graphics
+
+Plotly also connects well to the idea of the **grammar of graphics**.
+
+**Instead of thinking only in terms of chart names, we can think in terms of components:**
+
+- **data**: the table behind the chart
+- **mapping**: how variables are assigned to axes or visual properties
+- **geometry**: bars, lines, points, areas, flows
+- **aesthetics**: color, size, labels, symbols
+- **annotations**: average lines, reference markers, labels, notes
+
+>This way of thinking is useful because it teaches students that charting is not only about memorizing functions. It is about translating business questions into visual structure.
+
+### Common Chart Families in Plotly
+
+**Plotly supports many chart families. Some of the most common are:**
+
+- **bar plots** for category comparison
+- **line plots** for trends over time
+- **histograms** for distributions
+- **scatter plots** for relationships between variables
+- **multi-line charts** for comparing trends across groups
+
+These chart types form the foundation of most analytical reporting.
+
+
+### A Practical Workflow
+
+A common analytical workflow with Plotly looks like this:
+
+$$
+\text{Raw Data} \rightarrow \text{Cleaning} \rightarrow \text{Transformation} \rightarrow \text{Aggregation} \rightarrow \text{Visualization in Plotly} \rightarrow \text{Insight}
+$$
+
+This reminds students that visualization is not the first step. Plotly becomes most useful after the data is already structured for analysis.
+
+## Dummy Dataset for Plotly Examples
+
+**Before introducing the major chart types, let us create a small synthetic dataset.**
+
+```{python}
+#| echo: true
+
+import pandas as pd
+import numpy as np
+import plotly.express as px
+
+np.random.seed(42)
+px.defaults.template = "plotly_white"
+
+months = pd.date_range("2024-01-01", periods=6, freq="MS")
+regions = ["North", "South", "East"]
+products = ["A", "B"]
+
+rows = []
+
+for month in months:
+    for region in regions:
+        for product in products:
+            sales = np.random.randint(80, 220)
+            customers = np.random.randint(20, 90)
+            units = np.random.randint(10, 70)
+            
+            rows.append([month, region, product, sales, customers, units])
+
+df_plotly = pd.DataFrame(
+    rows,
+    columns=["month", "region", "product", "sales", "customers", "units"]
+)
+
+df_plotly["month_name"] = df_plotly["month"].dt.strftime("%b")
+df_plotly.head()
 ```
+
+**This dummy dataset gives us:**
+
+- a time variable: `month`
+- categorical variables: `region`, `product`
+- numeric variables: `sales`, `customers`, `units`
+
+This structure is enough to introduce the most common chart types in Plotly.
+
+
+### Random Seed 
+
+::: {.callout-warning title = "Random Seed"}
+What does it mean `np.random.seed(42)`?
+
+**Computers are not truly random.**
+They use algorithms called pseudo-random number generators (PRNGs).
+
+**These algorithms:**
+
+- Take an initial value → the seed
+- Then produce a sequence of numbers based on it
+
+>If you use the same seed, you get exactly the same sequence every time
 
 :::
 
 
-### `csv_downloader()`
+
+### Plotly Templates
+
+[Here](https://plotly.com/python/templates/) you can explore plotly templates. In the scope of this program we will stick with the `plotly_white`. However I highly encourage you to explore other themes and adjust for your prjects:
 
 ```python
-def csv_downloader(URL:str, name:str, path:str)->pd.Dataframe:
-    df = pd.read_csv(URL)
-    df.to_csv(f'{path}/{name}.csv', index = False)
-    print(f'The {name}.csv was successfully stored in {path}')
-    return df
-```
-
-
-Now we can use this to make our operations faster and efficient.
-
-```python
-csv_downloader(URL = URL, name = 'orders',path = '../data')
-```
-
-### Customer Segmentation
-
-Customer segmentation can be defined as the practice of dividing a customer base into groups of individuals that are similar in specific ways relevant to marketing.
-
-![]({{< meta image_path >}}/Variables.png)
-
-**Segmentation assumes:**
-
-1. Identify segmentation bases and segment the market
-2. Develop a profile of the resulting segments
-
-
-
-![]({{< meta image_path >}}/Bases.png)
-
-### Why Segment Customers?
-
-In short **For differentiation!**
-
-In **Marketing and Service:**
-
-- Make more focused/targeted marketing
-- Identify the most profitable and at-risk customers
-- Build relationships
-- Create user personas
-
-In  **Product and Brand:**
-
-- Brand to appeal to particular segments
-- Customize products and services
-- Predict future purchasing patterns
-
-In **Pricing:**
-
-  - Pricing products by groups
-  - Determine willingness to pay for optimal value
-
-
-### What is RFM
-
-RFM (recency, frequency, monetary) analysis is a behavior-based technique used to segment customers by examining their transaction history.
-
-- how recently a customer has purchased **(Recency)**
-- how often they purchase **(Frequency)**
-- how much the customer spends **(Monetary)**
-
-**RFM model** is a straightforward yet effective method for segmentation, especially in retail.
-
-RFM helps to identify customers who are more likely to respond to promotions by segmenting them into various categories.
-
-### The Components of RFM
-
-- A **Recency Score** is assigned to each customer based on the most recent purchase date. The score is generated by binning the recency values into several categories. For example, suppose one uses four categories. In that case, the customers with the most recent purchase dates receive a recency ranking of **4**, and those with purchase dates in the distant past receive a recency ranking of **1**.
-- A **Frequency Score** is assigned similarly. Customers with high purchase frequency are assigned a higher score (**4** or **5**), and those with the lowest frequency score are assigned **1**.
-- A **Monetary Score** is assigned based on the total revenue generated by the customer in the period under consideration for the analysis. Customers with the highest revenue or order amount are assigned a higher score, while those with the lowest ones are assigned a score of **1**.
-
-### RFM Score
-
-**RFM score** is generated by simply combining the above mentioned components or scores into a single value.
-
-**RFM Score could be calculated as:**
-
-- Average of the three scores
-- Weighted average
-- Simple concatenation
-
-
-### Loading Packages and Data
-
-```{python}
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
-
-pd.set_option('display.max_columns', None)
 px.defaults.template = "plotly_white"
 ```
 
+**The default template is `'plotly'`**
 
->
+**Available templates:**
 
-```python
-orders = pd.read_csv('../data/rfm/orders.csv', parse_dates=['order_date'])
-orders.head()
-```
+- 'ggplot2'
+- 'seaborn'
+- 'simple_white'
+- 'plotly',
+- 'plotly_white'
+- 'plotly_dark'
+- 'presentation'
+- 'xgridoff',
+- 'ygridoff'
+- 'gridon'
+- 'none'
+ 
+### Example 1: Bar Plot
+
+A bar plot is used when we want to compare values across discrete categories.
+
+**Typical examples include:**
+
+- sales by region
+- customers by segment
+- revenue by product category
+
+
+A **bar plot** is useful when we want to compare values across categories.
+
+For this example, we may want to compare total sales across regions.
 
 ```{python}
-#| echo: false
-orders = pd.read_csv('../../lab/python/data/rfm/orders.csv', parse_dates=['order_date'])
-orders.head()
-```
+#| echo: true
 
-### Revenue Distribution
+region_sales = (
+    df_plotly.groupby("region", as_index=False)["sales"]
+             .sum()
+)
+
+region_sales
+```
 
 ```{python}
 #| fig-width: 18
@@ -143,65 +241,145 @@ orders.head()
 #| out-height: auto
 #| fig-align: center
 
-fig = px.histogram(
-    orders,
-    x='revenue',
-    nbins=30,
-    title='Histogram of Revenue'
+fig = px.bar(
+    region_sales,
+    x="region",
+    y="sales",
+    text="sales",
+    title="Total Sales by Region"
 )
 
+fig.update_traces(textposition="outside")
 fig.update_layout(
-    xaxis_title='Revenue',
-    yaxis_title='Count'
+    xaxis_title="Region",
+    yaxis_title="Sales"
 )
 
 fig.show()
 ```
 
-### R, F, M Scores
+#### Interpretation
 
-Let us create `R`, `F`, and `M` columns.
+**This chart helps answer:**
+
+- Which region has the highest total sales?
+- Which region performs the weakest?
+- How large are the differences across regions?
+
+### Example 2: Line Plot
+
+A line plot is used when the x-axis has an order, most often time, in other words **line plot** is useful for showing change over time.
+
+**Typical examples include:**
+
+- monthly sales
+- daily website traffic
+- weekly active users
+
+**For example, we may want to study monthly total sales.**
 
 ```{python}
-max_date = orders['order_date'].max()
+#| echo: true
 
-rfm = orders.groupby('customer_id').agg(
-    {
-        'order_date': lambda date: (max_date - date.max()).days,
-        'customer_id': lambda num: len(num),
-        'revenue': lambda price: price.sum()
-    }
+monthly_sales = (
+    df_plotly.groupby("month", as_index=False)["sales"]
+             .sum()
 )
 
-rfm.columns = ['Recency', 'Frequency', 'Monetary']
-rfm.reset_index(inplace=True)
-rfm.head()
+monthly_sales
 ```
-
-::: {.callout-important}
-Think about a reasons we used `lambda` function...
-:::
-
-Let us create `5` categories based on the quartiles for each RFM variable using `pd.qcut()` method
 
 ```{python}
-rfm['R'] = pd.qcut(rfm['Recency'], 4, ['1', '2', '3', '4'])
-rfm['F'] = pd.qcut(rfm['Frequency'], 4, ['4', '3', '2', '1'])
-rfm['M'] = pd.qcut(rfm['Monetary'], 4, ['4', '3', '2', '1'])
+
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Monthly Total Sales"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales"
+)
+
+fig.show()
 ```
 
-::: {.callout-important}
-Pay attention to the order of **Frequency** $(\downarrow)$.
-:::
+#### Interpretation
 
-### RFM Scores and Distributions
+**This chart helps answer:**
+
+- Is sales performance increasing or decreasing?
+- Which month had the highest sales?
+- Are there visible fluctuations over time?
+
+### Example 3: Histogram
+
+
+A histogram is used to show the distribution of a numeric variable.
+
+**Typical examples include:**
+
+- revenue distribution
+- customer age distribution
+- distribution of transaction amounts
+
+A **histogram** is used to show the distribution of a numeric variable.
+
+For example, we may want to understand how sales values are distributed across all observations.
 
 ```{python}
-rfm.head()
+
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.histogram(
+    df_plotly,
+    x="sales",
+    nbins=15,
+    title="Distribution of Sales"
+)
+
+fig.update_layout(
+    xaxis_title="Sales",
+    yaxis_title="Count"
+)
+
+fig.show()
 ```
 
-Distributions of `R`, `F`, `M`
+#### Interpretation
 
+**This chart helps answer:**
+
+- Are most sales values concentrated in one range?
+- Is the distribution symmetric or skewed?
+- Are there unusually small or large values?
+
+### Example 4: Scatter Plot
+
+
+A **scatter plot** is used to study the relationship between **two** numeric variables.
+
+**Typical examples include:**
+
+- advertising spend vs sales
+- income vs spending
+- customers vs revenue 
+
+
+For example, we may want to see whether more customers are associated with higher sales.
 
 ```{python}
 
@@ -211,178 +389,240 @@ Distributions of `R`, `F`, `M`
 #| out-height: auto
 #| fig-align: center
 
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-
-fig = make_subplots(
-    rows=1,
-    cols=3,
-    subplot_titles=("Recency", "Frequency", "Monetary")
-)
-
-fig.add_trace(
-    go.Histogram(x=rfm["Recency"], nbinsx=30, name="Recency"),
-    row=1,
-    col=1
-)
-
-fig.add_trace(
-    go.Histogram(x=rfm["Frequency"], nbinsx=30, name="Frequency"),
-    row=1,
-    col=2
-)
-
-fig.add_trace(
-    go.Histogram(x=rfm["Monetary"], nbinsx=30, name="Monetary"),
-    row=1,
-    col=3
+fig = px.scatter(
+    df_plotly,
+    x="customers",
+    y="sales",
+    color="region",
+    hover_data=["product", "month_name", "units"],
+    title="Scatter Plot: Customers vs Sales"
 )
 
 fig.update_layout(
-    title="",
-    showlegend=False
+    xaxis_title="Customers",
+    yaxis_title="Sales",
+    legend_title="Region"
 )
-
-fig.update_xaxes(title_text="Recency", row=1, col=1)
-fig.update_xaxes(title_text="Frequency", row=1, col=2)
-fig.update_xaxes(title_text="Monetary", row=1, col=3)
-
-fig.update_yaxes(title_text="Count", row=1, col=1)
-fig.update_yaxes(title_text="Count", row=1, col=2)
-fig.update_yaxes(title_text="Count", row=1, col=3)
 
 fig.show()
 ```
 
-### RFM Score and RFM Segment
+#### Interpretation
 
-- **RFM Segments:** converting `R`, `F`, `M` scores to string and concatenating
-- **RFM Score:** sum of the `R`, `F`, `M` scores
+**This chart helps answer:**
 
-```{python}
-rfm['RFM_Score'] = rfm.R.astype(int) + rfm.F.astype(int) + rfm.M.astype(int)
-rfm['RFM_Segment'] = rfm.R.astype(str) + rfm.F.astype(str) + rfm.M.astype(str)
+- Do higher customer counts tend to correspond to higher sales?
+- Are there outliers?
+- Do regions behave differently?
 
-rfm.head()
-```
+### Example 5: Multi-Line Chart
 
-### Finding Top Customers
+A **multi-line chart** is a grouped line chart. It allows us to compare trends across categories over time.
 
-Sorting `RFM_Segment` in descending order, we will get the list of top customers.
 
-```{python}
-rfm = rfm.sort_values('RFM_Segment', ascending=False)
-rfm.head()
-```
+**Typical examples include:**
 
-### Number of RFM Segments
+- sales by region over time
+- churn rate by segment across months
+- traffic by channel over several weeks
+
+For example, we may want to compare monthly sales by region.
 
 ```{python}
-rfm_segments = rfm.groupby('RFM_Segment').count().reset_index(level=0)
-rfm_segments.head()
+#| echo: true
+
+monthly_region_sales = (
+    df_plotly.groupby(["month", "region"], as_index=False)["sales"]
+             .sum()
+)
+
+monthly_region_sales.head()
 ```
 
 ```{python}
 
 #| fig-width: 18
 #| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_region_sales,
+    x="month",
+    y="sales",
+    color="region",
+    markers=True,
+    title="Monthly Sales by Region"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales",
+    legend_title="Region"
+)
+
+fig.show()
+```
+
+#### Interpretation
+
+**This chart helps answer:**
+
+- Which region is strongest over time?
+- Which region is most volatile?
+- Do all regions move in the same direction?
+
+
+
+### Example 6: Grouped Bar Plot
+
+A grouped bar plot extends the basic bar plot by introducing one more categorical variable. Instead of showing only one bar per category, it allows us to compare subgroups inside each main category.
+
+For example, we may want to compare sales by **region** and **product** at the same time. This helps us answer not only which region performs better, but also whether the same pattern holds across products.
+
+```{python}
+#| echo: true
+
+region_product_sales = (
+    df_plotly.groupby(["region", "product"], as_index=False)["sales"]
+             .sum()
+)
+
+region_product_sales
+```
+
+#### Understanding the Main Arguments
+
+Before executing the code, let us understand the key arguments of `px.bar()` in this example.
+
+- `data_frame` = the dataset used for plotting
+- `x` = the main categorical variable shown on the x-axis
+- `y` = the numeric variable represented by the bar height
+- `color` = the variable used to split bars into subgroups
+- `barmode="group"` = places the subgroup bars side by side
+- `title` = chart title
+
+**In our example:**
+
+- `x="region"` means each main category on the x-axis is a region
+- `y="sales"` means bar heights represent sales
+- `color="product"` means each region is split into product-based bars
+- `barmode="group"` means those bars appear side by side instead of stacked
+
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
 #| out-width: 100%
 #| out-height: auto
 #| fig-align: center
 
 fig = px.bar(
-    rfm_segments.sort_values('customer_id'),
-    x='customer_id',
-    y='RFM_Segment',
-    orientation='h',
-    title='Number of Customers by RFM Segment'
+    region_product_sales,
+    x="region",
+    y="sales",
+    color="product",
+    barmode="group",
+    title="Sales by Region and Product"
 )
 
 fig.update_layout(
-    xaxis_title='Number of Customers',
-    yaxis_title='RFM Segment'
+    xaxis_title="Region",
+    yaxis_title="Sales",
+    legend_title="Product"
 )
 
 fig.show()
 ```
 
-### Naming the Segments
+#### Interpretation
 
-The next step for customer segmentation is naming those very segments. The number of segments depends on the scope of the marketing campaign. Here `naming()` function just contains a set of conditional rules, which comes from classical segmentation.
+**This chart helps answer:**
+
+- Which product performs better within each region?
+- Are some regions strong across both products?
+- Does one product dominate across all regions?
+
+#### Try It Yourself
+
+::: {.callout-tip title ="Try It Yourself"}
+Students should experiment with the following changes:
+
+- change `y="sales"` to another numeric column such as `customers` or `units`
+- change `color="product"` to `color="region"` and observe what happens
+- change `barmode="group"` to `barmode="stack"`
+- change the title to reflect the new chart meaning
+:::
+
+
+### Example 7: Donut Chart
+
+**A donut chart** is a variation of a pie chart with a hole in the center. It is useful when we want to show how a total is divided across categories.
+
+For example, we may want to understand how total sales are distributed across products.
 
 ```{python}
-def naming(df):
-    if df['RFM_Score'] >= 9:
-        return 'Can\'t Loose Them'
-    elif ((df['RFM_Score'] >= 8) and (df['RFM_Score'] < 9)):
-        return 'Champions'
-    elif ((df['RFM_Score'] >= 7) and (df['RFM_Score'] < 8)):
-        return 'Loyal/Commited'
-    elif ((df['RFM_Score'] >= 6) and (df['RFM_Score'] < 7)):
-        return 'Potential'
-    elif ((df['RFM_Score'] >= 5) and (df['RFM_Score'] < 6)):
-        return 'Promising'
-    elif ((df['RFM_Score'] >= 4) and (df['RFM_Score'] < 5)):
-        return 'Requires Attention'
-    else:
-        return 'Demands Activation'
+#| echo: true
+
+product_sales = (
+    df_plotly.groupby("product", as_index=False)["sales"]
+             .sum()
+)
+
+product_sales
 ```
 
+#### Understanding the Main Arguments
 
-Now let us apply the above-defined function by creating `Segment_Name` column.
+Before executing the code, let us understand the key arguments of `px.pie()` in this example.
 
-```{python}
-rfm['Segment_Name'] = rfm.apply(naming, axis=1)
-rfm.head(5)
-```
+- `data_frame` = the dataset used for plotting
+- `names` = the categorical variable that defines the slices
+- `values` = the numeric variable that determines slice sizes
+- `hole` = controls the size of the empty center and turns the pie chart into a donut chart
+- `title` = chart title
 
-### Segment Distribution
+In our example:
 
-```{python}
-grouped_by = rfm.groupby('Segment_Name').agg({
-    'Recency': 'mean',
-    'Frequency': 'mean',
-    'Monetary': ['mean', 'count']
-}).round(1)
-```
+- `names="product"` means each slice represents a product
+- `values="sales"` means slice size depends on total sales
+- `hole=0.5` creates the donut shape
 
-### Segments' Distribution
+#### Try It Yourself
 
-```{python}
-grouped_by
-```
+Students should experiment with the following changes:
 
-### Segments' Visualization
-
-Using Plotly, we can visualize segments with a treemap.
+- change `values="sales"` to `values="customers"` or `values="units"`
+- change `hole=0.5` to `hole=0.2` or `hole=0.7`
+- change `names="product"` to `names="region"` after preparing a suitable aggregated table
+- change the title to reflect the new chart meaning
 
 ```{python}
-grouped_by.columns = ['RecencyMean', 'FrequencyMean', 'MonetaryMean', 'Count']
-grouped_by = grouped_by.reset_index()
-
-grouped_by
-```
-
-```{python}
-
 #| fig-width: 18
-#| fig-height: 7
+#| fig-height: 6
 #| out-width: 100%
 #| out-height: auto
 #| fig-align: center
 
-fig = px.treemap(
-    grouped_by,
-    path=['Segment_Name'],
-    values='Count',
-    color='MonetaryMean',
-    hover_data=['RecencyMean', 'FrequencyMean', 'MonetaryMean'],
-    title='RFM Segments'
+fig = px.pie(
+    product_sales,
+    names="product",
+    values="sales",
+    hole=0.5,
+    title="Donut Chart: Share of Total Sales by Product"
 )
+
+fig.update_traces(textinfo="label+percent")
 
 fig.show()
 ```
 
+#### Interpretation
 
+This chart helps answer:
 
+- Which product contributes the largest share of total sales?
+- Is the sales split balanced or concentrated?
+- How much of the total does each product represent?
 
