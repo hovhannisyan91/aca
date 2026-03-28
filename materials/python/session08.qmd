@@ -395,7 +395,7 @@ fig = px.scatter(
     y="sales",
     color="region",
     hover_data=["product", "month_name", "units"],
-    title="Scatter Plot: Customers vs Sales"
+    title="Customers vs Sales"
 )
 
 fig.update_layout(
@@ -610,7 +610,7 @@ fig = px.pie(
     names="product",
     values="sales",
     hole=0.5,
-    title="Donut Chart: Share of Total Sales by Product"
+    title="Share of Total Sales by Product"
 )
 
 fig.update_traces(textinfo="label+percent")
@@ -618,11 +618,832 @@ fig.update_traces(textinfo="label+percent")
 fig.show()
 ```
 
-#### Interpretation
 
-This chart helps answer:
+## Changing Colors in Plotly
 
-- Which product contributes the largest share of total sales?
-- Is the sales split balanced or concentrated?
-- How much of the total does each product represent?
+In Plotly, colors can be changed in several ways depending on the chart type and how much control you want.
+
+**The most common approaches are:**
+
+- set a single color for the whole chart
+- assign different colors by category
+- provide a custom color sequence
+- manually control colors in traces
+
+
+::: {.callout-tip}
+[Here](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3) you can find some interesting pallets.
+
+We are going to deep dive here during the tableau sessions.
+:::
+
+
+### Common Color Formats in Plotly
+
+**Plotly accepts several color formats:**
+
+- **named colors:** `"blue", "red", "green"`
+- **hex colors:** `"#3B6EAD"`
+- **RGB:** `"rgb(59,110,173)"`
+- **RGBA:** `"rgba(59,110,173,0.5)"`
+
+
+### Single Color for the Whole Plot
+
+If you want all bars, points, or lines to have the same color, you can use `color_discrete_sequence`.
+
+
+```{python}
+fig = px.bar(
+    region_sales,
+    x="region",
+    y="sales",
+    title="Total Sales by Region",
+    color_discrete_sequence=["#a34e31"]
+)
+
+fig.show()
+```
+
+**Here:**
+
+- `color_discrete_sequence=["steelblue"]` tells Plotly to use **one** color
+- you can replace `"steelblue"` with any valid CSS color name or hex code
+
+
+::: {.callout-tip title = "Try It Yourself"}
+
+**Change `"#a34e31"` to:**
+
+- `"orange"`
+- `"green"`
+- `"#3B6EAD"`
+- `"#B7C2D1"`
+
+:::
+
+### Different Colors by Category
+
+If your chart uses a grouping variable such as `color="product"` or `color="region"`, Plotly automatically assigns colors.
+
+You can override those defaults with `color_discrete_sequence`.
+
+Checkout bellow **Grouped Bar Plot with Custom Colors**
+
+```{python}
+fig = px.bar(
+    region_product_sales,
+    x="region",
+    y="sales",
+    color="product",
+    barmode="group",
+    title="Sales by Region and Product",
+    color_discrete_sequence=["#3B6EAD", "#AFC4E8"]
+)
+
+fig.show()
+```
+
+**Here:**
+
+- the first category gets the first color
+- the second category gets the second color
+
+
+### Map Specific Categories to Specific Colors
+
+If you want full control over which category gets which color, use `color_discrete_map`. In other words we can have `Fixed Colors for Products`
+
+
+```{python}
+fig = px.bar(
+    region_product_sales,
+    x="region",
+    y="sales",
+    color="product",
+    barmode="group",
+    title="Sales by Region and Product",
+    color_discrete_map={
+        "A": "#3B6EAD",
+        "B": "#AFC4E8"
+    }
+)
+
+fig.show()
+```
+
+>This is often better than `color_discrete_sequence` when you want consistency across many charts.
+
+
+### Change Line Colors
+
+**For line charts, the same logic applies.**
+
+#### Single Line Color
+
+```{python}
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Monthly Total Sales",
+    color_discrete_sequence=["crimson"]
+)
+
+fig.show()
+```
+
+#### Multi-Line Colors
+
+```{python}
+fig = px.line(
+    monthly_region_sales,
+    x="month",
+    y="sales",
+    color="region",
+    markers=True,
+    title="Monthly Sales by Region",
+    color_discrete_sequence=["#1f77b4", "#ff7f0e", "#2ca02c"]
+)
+
+fig.show()
+```
+
+
+<!-- TODO remove x axis title -->
+
+### Change Histogram Colors
+
+
+
+```{python}
+fig = px.histogram(
+    df_plotly,
+    x="sales",
+    nbins=15,
+    title="Distribution of Sales",
+    color_discrete_sequence=["purple"]
+)
+
+fig.show()
+```
+
+### Change Scatter Plot Colors
+
+
+```{python}
+fig = px.scatter(
+    df_plotly,
+    x="customers",
+    y="sales",
+    title="Customers vs Sales",
+    color_discrete_sequence=["darkorange"]
+)
+
+fig.show()
+```
+
+
+
+```{python}
+fig = px.scatter(
+    df_plotly,
+    x="customers",
+    y="sales",
+    color="region",
+    title="Customers vs Sales by Region",
+    color_discrete_sequence=["#3B6EAD", "#AFC4E8", "#B7C2D1"]
+)
+
+fig.show()
+```
+
+### Change Colors After the Figure is Created
+
+**You can also modify colors after building the figure.**
+
+#### Example 1: Update Trace Color
+
+```{python}
+fig = px.bar(
+    region_sales,
+    x="region",
+    y="sales",
+    title="Total Sales by Region"
+)
+
+fig.update_traces(marker_color="teal")
+
+fig.show()
+```
+
+#### Example 2: Update Trace Color
+
+```{python}
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    title="Monthly Total Sales"
+)
+
+fig.update_traces(line_color="red")
+
+fig.show()
+```
+
+
+
+### Recommendtion
+
+**A practical rule for learning is:**
+
+- use `color_discrete_sequence` when you just want nicer colors
+- use `color_discrete_map` when you want specific categories to always keep the same colors
+- use `update_traces()` when you want to modify the figure after it is already created
+
+
+::: {.callout-tip title = "Try yourself"}
+
+**Take one of your earlier charts and try all of the following:**
+
+- apply one single custom color
+- apply two category colors
+- map exact colors to product names
+- update the color after the figure is created
+
+This helps you to understand that color in Plotly is not fixed. It is another argument they can control.
+
+:::
+
+## Highlighting Only the Specific Categories
+
+
+Sometimes we want to guide the audience's attention very deliberately. Instead of giving every category a different color, we can keep most categories in a **neutral tone** and highlight only the largest/smallest category.
+
+This is a very useful analytical design technique because it helps the chart communicate one main message clearly.
+
+**It is especially useful when:**
+
+- we want to emphasize the top-performing category
+- we want to reduce visual clutter
+- we want to make the most important comparison obvious
+- we want to keep the chart clean and readable
+
+The same logic can be reused across multiple chart types.
+
+**The general pattern is:**
+
+1. aggregate the data
+2. find the category with the highest/lowest value
+3. create a helper column for coloring
+4. assign one color to the largest category and another color to the rest
+
+### Highlighting the Largest Category in a Bar Plot
+
+
+#### Preparing the Data
+
+A bar plot is one of the most natural places to use this technique.
+
+
+1. Build a summary table by Region: `as_index=False` the region stays normal column
+2. Find the region with the highest sales: `top_region` would provide the largest value (`idxmin()` would return the lowest valued region)
+3. Create a helper column for highlighting
+
+```{python}
+#| echo: true
+
+region_sales = (
+    df_plotly.groupby("region", as_index=False)["sales"]
+             .sum()
+)
+
+top_region = region_sales.loc[region_sales["sales"].idxmax(), "region"]
+
+region_sales["highlight"] = np.where(
+    region_sales["region"] == top_region,
+    "Highest Sales",
+    "Other Regions"
+)
+
+region_sales
+```
+
+
+
+#### Creating the Bar Plot
+
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    region_sales,
+    x="region",
+    y="sales",
+    color="highlight",
+    text="sales",
+    title="Highlighting Only the Largest Category",
+    color_discrete_map={
+        "Highest Sales": "#3B6EAD",
+        "Other Regions": "#D9D9D9"
+    }
+)
+
+fig.update_traces(textposition="outside")
+
+fig.update_layout(
+    xaxis_title="Region",
+    yaxis_title="Sales",
+    legend_title=""
+)
+
+fig.show()
+```
+
+
+::: {.callout-important title = "Text Position"}
+
+In Plotly, textposition controls where the label (text) is placed relative to a data point, bar, or shape
+
+- `"inside"` → text inside the bar
+- `"outside"` → text outside (at the end of the bar)
+- `"auto"` → smart placement (inside unless too small → then outside)
+- `"none"` → hides text
+
+:::
+
+
+::: {.callout-tip title = "Try Yourself"}
+- change the highlight color
+- change the neutral color
+- replace `sales` with `customers`
+- repeat the same logic for `product`
+:::
+
+### Highlighting the Largest Category in a Donut Chart
+
+
+
+**A donut chart can also highlight the largest category very effectively.**
+
+#### Preparing the Data
+
+```{python}
+#| echo: true
+
+product_sales = (
+    df_plotly.groupby("product", as_index=False)["sales"]
+             .sum()
+)
+
+top_product = product_sales.loc[product_sales["sales"].idxmax(), "product"]
+
+product_sales["highlight"] = np.where(
+    product_sales["product"] == top_product,
+    "Highest Sales",
+    "Other Products"
+)
+
+product_sales
+```
+
+
+
+::: {.callout-tip title = "Try It Yourself"}
+
+- change the hole size
+- highlight by `customers` instead of `sales`
+- create the same chart for `region`
+:::
+
+
+
+#### Creating the Visualization
+```{python}
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.pie(
+    product_sales,
+    names="product",
+    values="sales",
+    color="highlight",
+    hole=0.5,
+    title="Highlighting Only the Largest Category",
+    color_discrete_map={
+        "Highest Sales": "#3B6EAD",
+        "Other Products": "#D9D9D9"
+    }
+)
+
+fig.update_traces(textinfo="label+percent")
+
+fig.show()
+```
+
+
+### Highlighting the Smallest Category in a Scatter Plot
+
+In a scatter plot, this technique can be used to highlight only the observations that belong to the smallest category.
+
+Here we first identify the region with the highest total sales, then color all points from that region differently.
+
+
+#### Preparing the Data
+
+```{python}
+#| echo: true
+
+region_totals = (
+    df_plotly.groupby("region", as_index=False)["sales"]
+             .sum()
+)
+
+top_region = region_totals.loc[region_totals["sales"].idxmin(), "region"]
+
+df_scatter = df_plotly.copy()
+
+df_scatter["highlight"] = np.where(
+    df_scatter["region"] == top_region,
+    "Highest Sales Region",
+    "Other Regions"
+)
+
+df_scatter.head()
+```
+
+
+::: {.callout-tip title = "Try It Yourself"}
+- change the highlighted grouping from `region` to `product`
+- change `x="customers"` to `x="units"`
+- add `size="units"`
+:::
+
+
+#### Building the Plot
+
+```{python}
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.scatter(
+    df_scatter,
+    x="customers",
+    y="sales",
+    color="highlight",
+    hover_data=["region", "product", "month_name", "units"],
+    title="Highlighting the Largest Category",
+    color_discrete_map={
+        "Highest Sales Region": "#3B6EAD",
+        "Other Regions": "#D9D9D9"
+    }
+)
+
+fig.update_layout(
+    xaxis_title="Customers",
+    yaxis_title="Sales",
+    legend_title=""
+)
+
+fig.show()
+```
+
+
+
+### Highlighting the Largest Category in a Bubble Chart
+
+A bubble chart is similar to a scatter plot, but it adds size as another visual dimension.
+
+
+#### Building the Data
+```{python}
+#| echo: true
+
+df_bubble = df_plotly.copy()
+
+df_bubble["highlight"] = np.where(
+    df_bubble["region"] == top_region,
+    "Highest Sales Region",
+    "Other Regions"
+)
+
+df_bubble.head()
+```
+
+
+
+::: {.callout-tip title = "Try It Yourself"}
+- change `size="units"` to another numeric variable
+- highlight the top product instead of the top region
+- compare the bubble chart to the simpler scatter plot
+:::
+
+```{python}
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.scatter(
+    df_bubble,
+    x="customers",
+    y="sales",
+    size="units",
+    color="highlight",
+    hover_data=["region", "product", "month_name"],
+    title="Highlighting the Largest Category",
+    color_discrete_map={
+        "Highest Sales Region": "#3B6EAD",
+        "Other Regions": "#D9D9D9"
+    }
+)
+
+fig.update_layout(
+    xaxis_title="Customers",
+    yaxis_title="Sales",
+    legend_title=""
+)
+
+fig.show()
+```
+
+### Highlighting the Largest Category in a Line Chart
+
+For a simple line chart, there is only one line, so highlighting a category is not applicable in exactly the same way. But we can highlight the maximum point instead.
+
+This is a closely related analytical idea.
+
+xw
+
+```{python}
+#| echo: true
+
+monthly_sales = (
+    df_plotly.groupby("month", as_index=False)["sales"]
+             .sum()
+)
+
+max_month_row = monthly_sales.loc[monthly_sales["sales"].idxmax()]
+max_month_row
+```
+
+
+
+
+::: {.callout-tip title = "Try It Yourself"}
+- highlight the minimum point instead
+- change marker size
+- change marker color
+:::
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_sales,
+    x="month",
+    y="sales",
+    markers=True,
+    title="Highlighting the Maximum Point"
+)
+
+fig.add_scatter(
+    x=[max_month_row["month"]],
+    y=[max_month_row["sales"]],
+    mode="markers",
+    marker=dict(size=14, color="#3B6EAD"),
+    name="Maximum"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales"
+)
+
+fig.show()
+```
+
+### Highlighting the Largest Category in a Multi-Line Chart
+
+For a grouped line chart, we can highlight the category with the highest total and keep the other lines neutral.
+
+
+#### Data Preperation
+
+```{python}
+#| echo: true
+
+monthly_region_sales = (
+    df_plotly.groupby(["month", "region"], as_index=False)["sales"]
+             .sum()
+)
+
+region_totals = (
+    monthly_region_sales.groupby("region", as_index=False)["sales"]
+                        .sum()
+)
+
+top_region = region_totals.loc[region_totals["sales"].idxmax(), "region"]
+
+monthly_region_sales["highlight"] = np.where(
+    monthly_region_sales["region"] == top_region,
+    monthly_region_sales["region"],
+    "Other Regions"
+)
+
+monthly_region_sales.head()
+```
+
+
+::: {.callout-tip title = 'Try Yourself'}
+
+- highlight the top product instead of the top region
+- change the highlighted color
+- change line width using `update_traces()`
+
+:::
+
+
+#### Building the Plot
+
+```{python}
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    monthly_region_sales,
+    x="month",
+    y="sales",
+    color="highlight",
+    markers=True,
+    title="Highlighting Only the Largest Category",
+    color_discrete_map={
+        top_region: "#3B6EAD",
+        "Other Regions": "#D9D9D9"
+    }
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Sales",
+    legend_title=""
+)
+
+fig.show()
+```
+
+### Highlighting the Largest Category in a Histogram
+
+A histogram shows a distribution, so categories are not always directly visible. But if we color observations by whether they belong to the largest category, we can compare the highlighted group against all others.
+
+#### Preperating the Data
+
+```{python}
+#| echo: true
+
+df_hist = df_plotly.copy()
+
+df_hist["highlight"] = np.where(
+    df_hist["region"] == top_region,
+    "Highest Sales Region",
+    "Other Regions"
+)
+
+df_hist.head()
+```
+
+
+>`barmode="overlay"` = allows overlap for comparison
+
+
+::: {.callout-tip title = 'Try Yourself'}
+
+- switch from `sales` to `customers`
+- try `barmode="group"`
+- reduce opacity for cleaner overlap
+:::
+
+#### Building the Plot
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.histogram(
+    df_hist,
+    x="sales",
+    color="highlight",
+    barmode="overlay",
+    opacity=0.7,
+    title="Distribution with Highlighted Largest Category",
+    color_discrete_map={
+        "Highest Sales Region": "#3B6EAD",
+        "Other Regions": "#D9D9D9"
+    }
+)
+
+fig.update_layout(
+    xaxis_title="Sales",
+    yaxis_title="Count",
+    legend_title=""
+)
+
+fig.show()
+```
+
+### Highlighting the Largest Category in a Grouped Bar Plot
+
+For a grouped bar plot, we can highlight only the subgroup belonging to the largest category.
+
+Here we highlight the product with the highest total sales.
+
+
+#### Preparing the Data
+```{python}
+#| echo: true
+
+region_product_sales = (
+    df_plotly.groupby(["region", "product"], as_index=False)["sales"]
+             .sum()
+)
+
+product_totals = (
+    region_product_sales.groupby("product", as_index=False)["sales"]
+                        .sum()
+)
+
+top_product = product_totals.loc[product_totals["sales"].idxmax(), "product"]
+
+region_product_sales["highlight"] = np.where(
+    region_product_sales["product"] == top_product,
+    top_product,
+    "Other Products"
+)
+
+region_product_sales
+```
+
+
+
+::: {.callout-tip title = "Try It Yourself"}
+- instead of product, highlight the top region
+- use `customers` instead of `sales`
+- switch to stacked bars
+:::
+
+
+#### Building the Plot
+
+```{python}
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    region_product_sales,
+    x="region",
+    y="sales",
+    color="highlight",
+    barmode="group",
+    title="Highlighting Only the Largest Category",
+    color_discrete_map={
+        top_product: "#3B6EAD",
+        "Other Products": "#D9D9D9"
+    }
+)
+
+fig.update_layout(
+    xaxis_title="Region",
+    yaxis_title="Sales",
+    legend_title=""
+)
+
+fig.show()
+```
 
