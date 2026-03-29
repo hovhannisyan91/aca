@@ -336,6 +336,54 @@ FROM analytics.mv_order_revenue;
 | NULL         | NULL        | NULL      | NULL         | 2312.68       |
 
 
+### Try Yourself
+
+**Create new Column which will handle all the combinations:**
+
+- Country-level revenue
+- Region-level revenue
+- City-level revenue
+- Grand total
+
+```sql
+SELECT
+    country_name,
+    region_name,
+    city_name,
+    SUM(revenue) AS total_revenue
+FROM analytics.mv_order_revenue
+GROUP BY country_name, region_name, city_name
+
+UNION ALL
+
+SELECT
+    country_name,
+    region_name,
+    NULL,
+    SUM(revenue)
+FROM analytics.mv_order_revenue
+GROUP BY country_name, region_name
+
+UNION ALL
+
+SELECT
+    country_name,
+    NULL,
+    NULL,
+    SUM(revenue)
+FROM analytics.mv_order_revenue
+GROUP BY country_name
+
+UNION ALL
+
+SELECT
+    NULL,
+    NULL,
+    NULL,
+    SUM(revenue)
+FROM analytics.mv_order_revenue;
+```
+
 ## Beyond Simple `GROUP BY`
 
 Traditional `GROUP BY` generates **one aggregation level at a time**.
@@ -345,6 +393,8 @@ Traditional `GROUP BY` generates **one aggregation level at a time**.
 - Analytical reporting often needs subtotals and totals together  
 
 Advanced aggregations solve this by computing **multiple grouping levels in a single query**.
+
+
 
 
 ## ROLLUP
@@ -771,6 +821,7 @@ If you know exactly what you want, then use `GROUPING SETS`.
 :::
 
 ---
+
 
 ## ROLLUP vs CUBE vs GROUPING SET
 
