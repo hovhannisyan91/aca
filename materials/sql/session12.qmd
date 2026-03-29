@@ -53,7 +53,7 @@ JOIN analytics.countries c
     ON r.country_id = c.country_id;
 ```
 
-
+<!-- TODO -->
 ## `UNION`
 
 `UNION` is a set operator used to **combine the results of multiple `SELECT` statements into a single result set**.
@@ -205,6 +205,24 @@ SELECT
 FROM analytics.mv_order_revenue;
 ```
 
+#### Output Table
+
+| country_name | region_name | city_name | total_revenue |
+|--------------|-------------|-----------|---------------|
+| Armenia      | Lori        | Vanadzor  | 272.76        |
+| Armenia      | Shirak      | Gyumri    | 530.66        |
+| Armenia      | Yerevan     | Yerevan   | 1645.10       |
+| Georgia      | Adjara      | Batumi    | 525.73        |
+| Georgia      | Tbilisi     | Tbilisi   | 461.67        |
+| Georgia      | Tbilisi     | NULL      | 461.67        |
+| Armenia      | Shirak      | NULL      | 530.66        |
+| Armenia      | Lori        | NULL      | 272.76        |
+| Armenia      | Yerevan     | NULL      | 1645.10       |
+| Georgia      | Adjara      | NULL      | 525.73        |
+| Armenia      | NULL        | NULL      | 2448.59       |
+| Georgia      | NULL        | NULL      | 987.40        |
+| NULL         | NULL        | NULL      | 3435.99       |
+
 ---
 
 ### Problems with `UNION` Based Solution
@@ -277,6 +295,45 @@ SELECT
     SUM(revenue)
 FROM analytics.mv_order_revenue;
 ```
+
+#### Output Table
+
+| country_name | region_name | city_name | category     | total_revenue |
+|--------------|-------------|-----------|--------------|---------------|
+| Georgia      | Adjara      | Batumi    | Internet     | 209.93        |
+| Georgia      | Adjara      | Batumi    | Cloud        | 20.93         |
+| Georgia      | Tbilisi     | Tbilisi   | TV           | 71.94         |
+| Armenia      | Yerevan     | Yerevan   | Internet     | 239.92        |
+| Armenia      | Yerevan     | Yerevan   | TV           | 571.69        |
+| Armenia      | Shirak      | Gyumri    | Entertainment| 23.97         |
+| Armenia      | Lori        | Vanadzor  | TV           | 35.97         |
+| Georgia      | Adjara      | Batumi    | Mobile       | 174.93        |
+| Armenia      | Lori        | Vanadzor  | Entertainment| 71.91         |
+| Armenia      | Shirak      | Gyumri    | Cloud        | 41.86         |
+| Georgia      | Tbilisi     | Tbilisi   | Internet     | 284.89        |
+| Armenia      | Shirak      | Gyumri    | Internet     | 464.83        |
+| Georgia      | Tbilisi     | Tbilisi   | Mobile       | 59.94         |
+| Armenia      | Lori        | Vanadzor  | Mobile       | 39.97         |
+| Georgia      | Adjara      | NULL      | Internet     | 209.93        |
+| Georgia      | Adjara      | NULL      | Cloud        | 20.93         |
+| Georgia      | Adjara      | NULL      | Mobile       | 174.93        |
+| Georgia      | Tbilisi     | NULL      | TV           | 71.94         |
+| Georgia      | Tbilisi     | NULL      | Internet     | 284.89        |
+| Georgia      | Tbilisi     | NULL      | Mobile       | 59.94         |
+| Armenia      | Yerevan     | NULL      | Internet     | 239.92        |
+| Armenia      | Yerevan     | NULL      | TV           | 571.69        |
+| Armenia      | Shirak      | NULL      | Entertainment| 23.97         |
+| Armenia      | Shirak      | NULL      | Cloud        | 41.86         |
+| Armenia      | Shirak      | NULL      | Internet     | 464.83        |
+| Armenia      | Lori        | NULL      | TV           | 35.97         |
+| Armenia      | Lori        | NULL      | Entertainment| 71.91         |
+| Armenia      | Lori        | NULL      | Mobile       | 39.97         |
+| NULL         | NULL        | NULL      | Internet     | 1199.57       |
+| NULL         | NULL        | NULL      | TV           | 679.60        |
+| NULL         | NULL        | NULL      | Mobile       | 274.84        |
+| NULL         | NULL        | NULL      | Cloud        | 62.79         |
+| NULL         | NULL        | NULL      | Entertainment| 95.88         |
+| NULL         | NULL        | NULL      | NULL         | 2312.68       |
 
 
 ## Beyond Simple `GROUP BY`
@@ -355,6 +412,25 @@ ORDER BY
     region_name,
     city_name;
 ```
+
+
+#### Output Table
+
+| country_name | region_name | city_name | total_revenue |
+|--------------|-------------|-----------|---------------|
+| Armenia      | Lori        | Vanadzor  | 272.76        |
+| Armenia      | Lori        | NULL      | 272.76        |
+| Armenia      | Shirak      | Gyumri    | 530.66        |
+| Armenia      | Shirak      | NULL      | 530.66        |
+| Armenia      | Yerevan     | Yerevan   | 1645.17       |
+| Armenia      | Yerevan     | NULL      | 1645.17       |
+| Armenia      | NULL        | NULL      | 2448.59       |
+| Georgia      | Adjara      | Batumi    | 525.73        |
+| Georgia      | Adjara      | NULL      | 525.73        |
+| Georgia      | Tbilisi     | Tbilisi   | 461.67        |
+| Georgia      | Tbilisi     | NULL      | 461.67        |
+| Georgia      | NULL        | NULL      | 987.40        |
+| NULL         | NULL        | NULL      | 3435.99       |
 
 
 ### What ROLLUP Produces
@@ -593,6 +669,24 @@ ORDER BY
     category;
 ```
 
+#### Output Table
+
+| country_name | region_name | city_name | category      | total_revenue |
+|--------------|-------------|-----------|---------------|---------------|
+| Georgia      | Adjara      | Batumi    | NULL          | 525.73        |
+| Georgia      | Tbilisi     | Tbilisi   | Cloud         | 20.93         |
+| Georgia      | Tbilisi     | Tbilisi   | Entertainment | 23.97         |
+| Georgia      | Tbilisi     | Tbilisi   | Internet      | 284.89        |
+| Georgia      | Tbilisi     | Tbilisi   | Mobile        | 59.94         |
+| Georgia      | Tbilisi     | Tbilisi   | TV            | 71.94         |
+| Georgia      | Tbilisi     | NULL      | NULL          | 461.67        |
+| NULL         | NULL        | NULL      | Cloud         | 107.64        |
+| NULL         | NULL        | NULL      | Entertainment | 119.85        |
+| NULL         | NULL        | NULL      | Internet      | 1334.48       |
+| NULL         | NULL        | NULL      | Mobile        | 1004.48       |
+| NULL         | NULL        | NULL      | TV            | 779.54        |
+| NULL         | NULL        | NULL      | NULL          | 3435.99       |
+
 
 
 ### What GROUPING SETS Produces
@@ -650,7 +744,21 @@ GROUP BY GROUPING SETS (
 - `GROUPING(col) = 1` → column aggregated away  
 - `GROUPING(col) = 0` → actual value  
 
----
+| country_name | region_name | city_name | category      | g_city | g_category | total_revenue |
+|--------------|-------------|-----------|---------------|--------|------------|---------------|
+| Armenia      | Lori        | Vanadzor  | Entertainment | 0      | 0          | 71.91         |
+| Georgia      | Adjara      | Batumi    | Cloud         | 0      | 0          | 20.93         |
+| Armenia      | Shirak      | Gyumri    | Entertainment | 0      | 0          | 23.97         |
+| NULL         | NULL        | NULL      | Cloud         | 1      | 0          | 107.64        |
+| NULL         | NULL        | NULL      | TV            | 1      | 0          | 779.54        |
+| NULL         | NULL        | NULL      | Entertainment | 1      | 0          | 119.85        |
+| NULL         | NULL        | NULL      | Internet      | 1      | 0          | 1334.48       |
+| NULL         | NULL        | NULL      | Mobile        | 1      | 0          | 1004.48       |
+| Georgia      | Tbilisi     | NULL      | NULL          | 1      | 1          | 461.67        |
+| Armenia      | Shirak      | NULL      | NULL          | 1      | 1          | 530.66        |
+| Armenia      | Lori        | NULL      | NULL          | 1      | 1          | 272.76        |
+| Armenia      | Yerevan     | NULL      | NULL          | 1      | 1          | 1645.17       |
+| Georgia      | Adjara      | NULL      | NULL          | 1      | 1          | 525.73        |
 
 ### When to Use GROUPING SETS
 
