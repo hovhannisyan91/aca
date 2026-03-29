@@ -8,280 +8,427 @@ image_path: "/img/tableau/02"
 
 By the end of this session, students will be able to:
 
-- Connect Tableau to relational databases (PostgreSQL)
+- Connect Tableau to relational databases such as PostgreSQL and Microsoft SQL Server
+- Understand the difference between live and extract connections
 - Combine data using relationships, joins, unions, and blending
 - Understand Tableau’s logical and physical data model
-- Create calculated fields (row-level vs aggregate)
+- Create calculated fields at different levels of evaluation
+- Use basic Tableau functions in analytical calculations
+- Apply Level of Detail (LOD) expressions correctly
 - Use parameters for interactive analysis
-- Apply filters correctly using Tableau’s order of operations
-- Build advanced charts (dual-axis, histogram, boxplot, heatmap)
-- Design dashboards with interactivity (actions, filters, tooltips)
+- Understand Tableau’s filter order of operations
+- Build advanced analytical charts such as area charts, bullet charts, and box plots
+- Design interactive dashboards with actions, filters, and tooltips
+
 
 ---
 
 ## Overview
 
-This session transitions from **basic visual construction** to **analytical control**.
+This session moves from basic chart building to analytical modeling and interactive dashboard design.
 
 You will learn how Tableau:
+
+- Connects to relational databases
 - Combines data from multiple tables and sources
-- Calculates values at different levels of detail
-- Enables interaction through parameters and actions
-- Supports more sophisticated analytical chart types
+- Evaluates calculations at different levels of detail
+- Uses filters and parameters to control analytical logic
+- Supports advanced chart types for deeper insight
+- Enables interactive dashboards for exploratory analysis
+
 
 ::: {.callout-note}
 
-**By the end of this class, you should be able to model multi-table data correctly, build advanced analytical charts, and create interactive dashboards that respond to user input.**
+By the end of this class, you should be able to model multi-table data correctly, create advanced analytical views, and build interactive dashboards that respond to user input in a controlled and predictable way.
 
 :::
+
 
 ---
 
 ## Introduction: From Flat Tables to Analytical Models
 
-In real-world analytics:
+In real-world analytics, data rarely exists in a single flat file.
 
-- Data rarely exists in a single flat table  
-- Business questions span multiple entities (customers, orders, products, time)
-- Poor data modeling leads to **incorrect numbers**, not just slow dashboards  
+Business questions usually span multiple entities such as:
 
-Tableau provides several ways to combine data.  
-Understanding **when** and **why** to use each method is essential for trustworthy analysis.
+- Customers
+- Orders
+- Products
+- Locations
+- Time
+
+Poor data modeling can lead to:
+
+- Incorrect aggregations
+- Duplicated values
+- Slow dashboards
+- Misleading conclusions
+
+Tableau provides several ways to combine and evaluate data. Choosing the correct method is essential for both accuracy and performance.
+
+```{mermaid}
+flowchart LR
+A[Raw Tables] --> B[Data Connection]
+B --> C[Data Modeling]
+C --> D[Calculations]
+D --> E[Filters and Parameters]
+E --> F[Visual Analysis]
+F --> G[Interactive Dashboard]
+```
+
 
 ---
 
-## Connecting to Databases 
+### Dataset Used in This Session
 
-Beyond Excel and CSV files, Tableau connects directly to relational databases.
+For this session, we use a multi-table retail dataset consisting of:
 
-On Tableau Desktop and Tableau Cloud, you can connect to different databases using built-in connectors. Technically it is not possible to do from Tableau Public, but the next slides will show how to connect to **Microsoft SQL Server** from Tableau Desktop, and the same connection can be published to Tableau Cloud.
+- customers.csv
+- customer_addresses.csv
+- orders.csv and quarterly order files
+- order_details.csv
+- products.csv
+- returns.csv
+- salespeople.csv
 
-## Tableau Desktop Connectors to SQL Server
+This dataset represents a real-world analytical scenario where multiple tables must be combined to answer business questions.
 
-Tableau Desktop can connect directly to **Microsoft SQL Server** to support both exploratory analysis and production dashboards.  
-SQL Server is one of the most common enterprise sources for Tableau because it supports:
-
-- Large datasets and complex schemas  
-- Stored procedures and views  
-- Reliable authentication options (Windows / SQL Server)  
-- Stable performance with extracts or optimized live queries  
 
 ---
 
-### Why Use a SQL Server Connector?
+## Connecting to Databases
 
-Connecting Tableau to SQL Server allows you to:
+Beyond Excel and CSV files, Tableau can connect directly to relational databases.
 
-- Query data without exporting to Excel/CSV  
-- Work with **multiple tables** (fact + dimensions) using relationships or joins  
-- Refresh dashboards consistently through extracts or live connections  
-- Push filtering and aggregation to the database for better performance 
-- Leverage existing SQL logic in views and stored procedures
-- Do all data cleaning, aggregation and modeling in SQL if desired, using Tableau primarily for visualization to optimize performance
+Common enterprise sources include:
+
+- PostgreSQL
+- Microsoft SQL Server
+- MySQL
+- Snowflake
+- Oracl
+- Google BigQuery
+
+Tableau Desktop and Tableau Cloud support these connectors. Tableau Public does not support direct database connections.
+
+### Why Use Database Connections
+
+Connecting Tableau to a database allows you to:
+
+- Query data without exporting it into flat files
+- Reuse existing warehouse tables, views, and SQL logic
+- Refresh dashboards with current data
+- Support multi-table analysis
+- Push heavy computation to the database engine
+- Improve governance and consistency in reporting
+
+
+::: {.callout-note}
+
+For production dashboards, direct database connectivity usually provides better scalability and better control over data freshness than manually exported files.
+
+:::
+
+
+---
+
+### Tableau Desktop Connectors to SQL Server
+
+Tableau Desktop can connect directly to Microsoft SQL Server for both exploratory analysis and production reporting.
+
+SQL Server is widely used because it supports:
+
+- Large relational schemas
+- Strong authentication options
+- Views and stored procedures
+- Live querying and extract workflows
+- Enterprise-grade data governance
+
+### Why Use a SQL Server Connector
+
+A SQL Server connection is useful when you want to:
+
+- Query large datasets directly
+- Build dashboards on top of trusted data models
+- Reuse business logic defined in SQL views
+- Control performance using indexing and database optimization
+- Reduce duplication of transformation logic in Tableau
+
 
 ---
 
 ## Connection Types: Live vs Extract
 
-Tableau supports two connection modes:
+Tableau supports two main connection modes:
+
+- Live connection
+- Extract connection
 
 ### Live Connection
 
-A **live connection** queries SQL Server every time the user interacts with the dashboard.
+A live connection queries the underlying database every time the user interacts with the dashboard.
 
-**Use it when:**
-- Data must be up-to-date (near real-time KPIs)
-- SQL Server performance is strong and stable
-- Dashboards have well-designed filters and aggregated views
+Use it when:
 
-**Considerations:**
-- Heavy dashboards can become slow if queries are complex
-- Performance depends on network and server load
-- Can cause loading issues if the underlying data model is not optimized
+- Data must be up-to-date
+- The database is well optimized
+- Dashboard queries are not excessively heavy
+- Freshness is more important than speed
+
+Considerations:
+
+- Performance depends on database speed, network, and query complexity
+- Complex dashboards may become slow
+- Inefficient data models can create long load times
 
 ![Live Connection Schema]({{< meta image_path >}}/w2_live_connection_schema.png)
 
----
-
 ### Extract Connection
 
-An **extract** pulls SQL Server data into a local Tableau extract (`.hyper` file).
+An extract copies data into Tableau’s `.hyper` format.
 
-**Use it when:**
-- You want fast dashboard performance
-- Data updates daily/weekly/monthly (not real time)
-- The dashboard is used by many users or has complex calculations
-- The analysis don't require the latest data on every interaction
+Use it when:
 
+- Dashboard performance is critical
+- Data does not need real-time updates
+- Dashboards contain complex calculations
+- Many users will access the dashboard
 
-**Considerations:**
+Considerations:
+
 - Data can become outdated between refreshes
-- Extract refresh requires scheduled jobs in Tableau Server/Cloud (for production)
-- Extract refreshes should be done taking into account of the SQL table refresh schedule to avoid data staleness
+- Refresh schedules must be managed
+- Extract design should align with upstream refresh timing
+
+![Extract Connection]({{< meta image_path >}}/w2_create_extract.png)
 
 ::: {.callout-tip}
 
-For exploratory and prototyping dashboards, prefer **Extract**.  
-For business critical and fast monitoring dashboards where freshness matters, consider **Live**, but design carefully.
+For exploratory work and many production dashboards, extracts are often the best choice because they improve speed and reduce pressure on the source database.
+
 :::
 
-## Step-by-Step: Connect Tableau to SQL Server
 
-1. Open **Tableau Desktop**  
-2. On the start page, under **Connect**, choose:  
-   **To a Server → Microsoft SQL Server**
-3. Enter connection details:
+---
 
+### Step-by-Step: Connect Tableau to SQL Server
+
+1. Open **Tableau Desktop**
+2. Under **Connect**, choose **Microsoft SQL Server**
+3. Enter the connection details:
 - **Server:** SQL Server hostname or IP  
 - **Database:** target database name (optional at first)  
 - **Authentication:**  
   - **Windows** (recommended in corporate environments)  
   - **SQL Server** (username/password)  
-
 4. Click **Sign In**
-
-After connecting, Tableau shows the available databases and tables on the **Data Source** page.
+5. After connecting, use the **Data Source** page to choose tables, views, or custom SQL
 
 ![Connecting To SQL Server]({{< meta image_path >}}/w2_connect_sql_server.png)
 
+
 ---
 
-## Choosing the Right Objects: Tables, Views, or Stored Procedures
+## Choosing the Right Objects: Tables, Views, or Custom SQL
 
-### Custom SQL Query
-Tableau allows you to write custom SQL queries directly in the connection interface and do all aggregation and modeling in SQL.
+When connecting Tableau to a database, you can work with several object types.
 
 ### Tables
-Using raw tables gives you maximum flexibility in Tableau, but it can lead to performance issues and incorrect results if the data model is not designed carefully.
+
+Use raw tables when:
+
+- You need maximum flexibility
+- You understand the grain of the data
+- You will model logic directly in Tableau
+
+Risks:
+
+- Incorrect joins
+- Duplicated rows
+- Repeated business logic
 
 ### Views
+
 Views are often better when:
-- Business logic is already defined in SQL  
-- You want consistent definitions of KPIs  
-- You want to hide complexity from Tableau  
+
+- Business logic is already defined in SQL
+- KPI definitions must be standardized
+- Tableau users should not manage underlying complexity
+
+Advantages:
+
+- Cleaner Tableau layer
+- Better governance
+- Less repeated logic
+
+### Custom SQL
+
+Custom SQL allows you to write your own SQL query directly in Tableau.
+
+Use it when:
+
+- You need a targeted query
+- You want to pre-aggregate or reshape data
+- You need logic that is easier to express in SQL than in Tableau
+
+Caution:
+
+- Overly complex custom SQL can hurt performance
+- It may be harder to maintain than trusted warehouse views
 
 ### Stored Procedures
-Tableau can connect to stored procedures, but behavior depends on how the procedure returns the result set.
 
-Stored procedures are useful when:
-- The dataset is expensive to compute and already optimized in SQL  
-- You need parameterized logic inside SQL  
+Stored procedures can be useful when:
+
+- The result set is pre-optimized
+- Expensive computation already exists in SQL
+- Controlled logic is required
+
+Behavior depends on how the procedure returns data.
 
 ![Connecting To a Database]({{< meta image_path >}}/w2_connect_to_database.png)
 
 ::: {.callout-note}
 
-Trusted views or stored procedures are preferable over raw tables.  
-This reduces duplication of business logic and improves consistency.
+In enterprise environments, trusted views are usually preferable to raw tables because they centralize business logic and reduce inconsistencies across dashboards.
 
 :::
 
 
-## Creating Extracts 
+---
 
-Extracts can be created on the web or on Tableau Desktop to improve data source performance and support additional analytical functions. When you extract your data source, Tableau copies the data from your remote data store to **Tableau Server** or **Tableau Cloud**.
+### Example: Simple SQL View for Tableau
 
-![Creating an Extract]({{< meta image_path >}}/w2_create_extract.png)
+The following example shows a warehouse view that prepares clean sales data for Tableau.
+
+```sql
+CREATE VIEW dbo.vw_sales_summary AS
+SELECT
+    o.order_id,
+    o.order_date,
+    c.customer_id,
+    c.region,
+    p.category,
+    od.quantity,
+    od.unit_price,
+    od.quantity * od.unit_price AS line_revenue
+FROM dbo.orders o
+JOIN dbo.order_details od
+    ON o.order_id = od.order_id
+JOIN dbo.customers c
+    ON o.customer_id = c.customer_id
+JOIN dbo.products p
+    ON od.product_id = p.product_id;
+```
+
+
+---
+
+### Creating Extracts
+
+Extracts can be created in Tableau Desktop or on the web. Tableau copies data from the remote source into an optimized local structure (.hyper file), which is stored on disk either locally or on Tableau Server or Tableau Cloud.
+
+![Creating an Extract]({{< meta image_path >}}/w2_extract.png)
+
+![Extract Saved Locally]({{< meta image_path >}}/w2_extract_save.png)
+
+When creating an extract, Tableau allows you to control:
+
+- Storage structure
+- Filters
+- Aggregation
+- Sampling
+- Incremental refresh settings
 
 ::: {.callout-tip}
 
-It’s recommended to finalize your data model **before** you create the extract.  
-Extract creation may take a long time, and changes to your data model (such as adding new logical tables) can invalidate the extract.
+It is better to finalize the data model before creating an **extract**. Structural changes later may invalidate the extract and require rebuilding it.
 
 :::
 
-## Extract Properties
 
-When creating an extract, you can configure the following properties:
+---
+
+### Extract Properties
+
+When creating an extract, you can configure:
+
+- How the extract stores data
+- Which rows are included
+- Whether data is aggregated
+- Whether incremental refresh is used
 
 ![Extract Properties]({{< meta image_path >}}/w2_extract_properties.png)
 
-## Decide How the Extract Data Should Be Stored
+### Decide How the Extract Data Should Be Stored
 
-You can choose one of two storage structures (schemas):
+You can choose between:
 
 - **Logical Tables (denormalized schema)**
 - **Physical Tables (normalized schema)**
 
-This choice affects how data is *stored* in the extract—not how tables appear on the **Data Source** page.
+#### Logical Tables
 
----
+Logical tables store one extract table per logical table in the data model.
 
-### Logical Tables
+This works well when:
 
-Logical Tables store data using **one extract table per logical table** in the data source.
+- Relationships are used
+- Tables should remain conceptually separate
+- Tableau should resolve combinations dynamically
 
-- Physical tables that define a logical table are merged and stored with that logical table.
-- If the data source has:
-  - **1 logical table** → stored as **1 extract table**
-  - **3 logical tables** → stored as **3 extract tables** (one per logical table)
-- If the data source has **1 logical table** with 3 physical tables → stored as **1 extract table** (physical tables are merged)
+#### Physical Tables
 
-### Physical Tables
+Physical tables store one extract table per physical table.
 
-Physical Tables store data using **one extract table per physical table** in the data source.
+This can be useful when:
 
-Select **Physical Tables** when:
-
-- The extract is comprised of tables combined with **one or more equality joins**
-- Joins performed **at query time**, not during extract creation
-
-Potential benefits:
-
-- Can improve performance
-- Can reduce extract file size
-
-In some cases, this can be used as a workaround for **row-level security**.
-
+- Equality joins are used
+- You want tighter control over storage
+- You want to reduce extract size in some scenarios
 
 ### Extract Filters
 
-Select **Add** to define one or more filters to limit how much data gets extracted based on fields and their values.
+Extract filters limit the data before it is stored in the extract.
 
----
+Use them to:
 
-### Aggregate the Data in the Extract
+- Reduce file size
+- Improve performance
+- Limit historical range
 
-Select **Aggregate data for visible dimensions** to aggregate measures using their default aggregation.
+### Aggregate Data for Visible Dimensions
+
+This option aggregates measures at the visible dimension level.
 
 Benefits:
 
-- Consolidates rows
-- Minimizes extract size
-- Improves performance
+- Fewer rows
+- Smaller extract size
+- Better performance
 
-Optional:
+### Choose the Rows to Extract
 
-- Select **Roll up dates** to a specific level (Year, Month, etc.)
+You can select:
 
+- All rows
+- Top N rows where supported
 
-### Choose the Rows to Extract (Sampling / Top N)
+Tableau applies filters and aggregation before sampling.
 
-Select the number of rows you want to extract:
+### Incremental Refresh
 
-- **All rows**
-- **Top N rows** (where supported)
+Incremental refresh adds only new rows since the previous refresh.
 
-Notes:
+Benefits:
 
-- Tableau applies filters and aggregation first, then extracts the selected number of rows from the results.
-- Not all data sources support sampling, so you may not see this option.
-- Hidden fields (hidden in Data Source page or Sheet) are excluded from the extract.
+- Faster refreshes
+- Less load on source systems
 
----
+Risk:
 
-## Configure Incremental Refresh Settings
-
-Most data sources support incremental refresh.
-
-Instead of rebuilding the entire extract, incremental refresh can:
-
-- Add only the rows that are new since the last extract
-- Optionally refresh a recent window of historical data to capture changes
-
-Example:
-
-If the sales data is updated daily, incremental refresh can add only the new daily transactions rather than rebuilding the full extract.
+- Schema changes usually require a full refresh
 
 ::: {.callout-note}
 
@@ -289,20 +436,7 @@ If the structure of the source data changes (e.g., a new column is added), you m
 
 :::
 
-## Considerations When Refreshing Extracts
-
-### Editing an Extract
-
-When editing an existing extract, Tableau shows the **last refresh** so you can confirm you’re updating the correct extract.
-
-### Full Refresh
-
-A Full Refresh replaces all rows in the extract with data from the original source.
-
-- Can take longer
-- Can be expensive on the database
-
-### Date/Time Precision and Extracts
+### Date/Time Precision Consideration
 
 The Tableau data engine stores time values with precision up to **3 decimal places**.
 
@@ -320,100 +454,191 @@ This can result in duplicate rows after refresh.
 
 ---
 
-
 ## Tableau Data Model
+
+Tableau separates data modeling into two layers:
+
+- Logical layer
+- Physical layer
 
 ![Data Model]({{< meta image_path >}}/w2_data_model.png)
 
-Tableau separates data modeling into **two layers**, allowing flexibility without sacrificing correctness.
+### Logical Layer
 
-### Logical Layer (Relationships)
+The logical layer uses **relationships**.
 
-- Default view in the Data Source page
+Characteristics:
+
 - Tables remain separate
-- Combined dynamically per visualization
-- Aggregation-aware
-- Prevents row duplication
+- Tableau combines them at query time based on the view
+- Reduces duplication risk
+- Recommended for most analytical models
 
-### Physical Layer (Joins & Unions)
+### Physical Layer
 
-- Accessed by double-clicking a logical table
-- Tables are merged into a single structure
-- Fixed behavior
-- Higher risk of duplicated rows
+The physical layer uses **joins** and **unions**.
+
+Characteristics:
+
+- Tables are merged into a single physical structure
+- Behavior is fixed
+- Row duplication risk is higher
+- Useful when exact row-level structure is required
+
 
 ---
 
 ## Relationships vs Joins vs Unions vs Blending
 
-### Relationships (Recommended)
+### Relationships
 
-Relationships connect tables **logically**, not physically.
+Relationships connect tables logically rather than physically.
 
-Key characteristics:
-- Tables stay independent
-- Tableau decides how to query based on the view
-- Safe for one-to-many and many-to-many relationships
-- Best for fact + dimension models
+Use relationships when:
+
+- Queries are done based on the view
+- Fact and dimension tables should remain separate
+- One-to-many or many-to-many structures exist
+
+Benefits:
+
+- More flexible querying
+- Lower duplication risk
+- Better default behavior for analytics
 
 ![Relationship Schema]({{< meta image_path >}}/w2_Relationship_Schema.png)
 
----
+![Relationship]({{< meta image_path >}}/w2_Relationship.png)
+
+
+### Steps to Create Relationships (Based on Example)
+
+1. Open the **Data Source** page  
+2. Drag `orders.csv` to the canvas  
+3. Drag `order_details.csv` next to it  
+4. Tableau creates a relationship line between tables  
+5. Click on the relationship line  
+6. Set condition:  
+   - `Order ID = OrderID (order_details)`  
+7. Validate that no duplication appears in aggregated view  
+
 
 ### Joins
 
-Joins combine tables **horizontally** using keys.
+Joins combine tables horizontally using matching keys.
 
-Join types:
+Common join types:
+
 - **Inner Join** returns only records that have matching keys in both tables, excluding any rows that do not exist on both sides.
 - **Left Join** keeps all records from the left table and adds matching data from the right table, inserting `NULL` values when no match exists.
 - **Right Join** keeps all records from the right table and adds matching data from the left table, inserting `NULL` values when no match exists.
 - **Full Outer Join** keeps all records from both tables, returning matched rows where possible and `NULL` values where matches are missing.
 
-Important considerations:
-- Joins can duplicate rows
-- Aggregations may inflate if not handled carefully
+Use joins when:
+
+- You need a fixed row-level structure
+- Tables share a clear grain
+
+Risks:
+
+- Duplicated rows if grains do not match
+- Inflated aggregations
 
 ![Join Schema]({{< meta image_path >}}/w2_Join_Schema.png)
 
----
+![Join]({{< meta image_path >}}/w2_Join.png)
+
+
+### Steps to Create Joins (Based on Example)
+
+1. Double-click `orders.csv` to enter physical layer  
+2. Drag `order_details.csv` into the canvas  
+3. Choose **Left Join**  
+4. Set join condition:  
+   - `Order ID = OrderID`  
+5. Review preview → notice duplicated rows due to multiple order lines  
+6. Validate aggregation issues using `SUM(Order Total)`  
+
 
 ### Unions
 
-Unions combine tables **vertically** by stacking rows.
+Unions stack tables vertically.
 
-Use cases:
-- Monthly or yearly files
-- Identical column structure
+Use unions when:
+
+- Tables have the same structure
+- Files are split by month, year, or source
 
 Rules:
-- Matching column names and types
-- Missing columns result in NULLs
-- Increases rows, not columns
+
+- Columns should align by name and type
+- Missing columns create `NULL`s
 
 ![Union]({{< meta image_path >}}/w2_Union.png)
 
----
+
+### Steps to Create Manual Union (Specific)
+
+1. Drag `orders_2023_Q1.csv` to canvas  
+2. Drag `orders_2023_Q2.csv` below it  
+3. Repeat for all quarterly files  
+4. Tableau creates a union step-by-step  
+5. Click the union object to review included tables  
+6. Validate column consistency and data types  
+
+
+### Steps to Create Wildcard Union (Automatic)
+
+1. Drag one file (e.g., `orders_2023_Q1.csv`) to canvas  
+2. Click the dropdown → choose **New Union**  
+3. Select **Wildcard (automatic)**  
+4. Define pattern:
+   - Example: `orders_*.csv`  
+5. Tableau automatically includes all matching files  
+6. Validate that all expected files are included  
+7. Check for schema consistency across files  
+
 
 ### Blending
 
-Blending combines **multiple data sources** at the visualization level.
+Blending combines multiple data sources at the visualization level.
 
 Characteristics:
-- One primary data source
-- Secondary sources aggregated independently
-- Joined via common dimensions
-- Occurs after aggregation
+
+- One primary source
+- One or more secondary sources
+- Aggregation happens before linking
+
+Use blending when:
+
+- Multiple independent data sources must appear in one view
+- A direct relational model is not available
 
 ![Blend]({{< meta image_path >}}/w2_Blend.png)
 
----
 
-### Differences in Action
+### Steps to Create Blending (Based on Example)
 
-| ![Relationship]({{< meta image_path >}}/w2_Relationship.png) | ![Join]({{< meta image_path >}}/w2_Join.png) | ![Blend]({{< meta image_path >}}/w2_Blend.png) |
-|:--:|:--:|:--:|
-| Relationship | Join | Blend |
+1. Connect to `orders.csv` as primary source  
+2. Add `returns.csv` as secondary source  
+3. Open a worksheet  
+4. Drag `Order ID` from primary  
+5. Drag `Order ID` from secondary  
+6. Ensure linking icon appears  
+7. Observe `NULL` values where no match exists  
+
+
+### Comparison Summary
+
+| Method | Layer | Adds Rows | Adds Columns | Multiple Sources |
+|---|---|---|---|---|
+| Relationship | Logical | No | No | No |
+| Join | Physical | No | Yes | No |
+| Union | Physical | Yes | No | No |
+| Blend | Visualization level | No | No | Yes |
+
+![Relationship]({{< meta image_path >}}/w2_Relationship.png) 
+![Join]({{< meta image_path >}}/w2_Join.png) 
 
 *Note: When using joins, the same row may appear multiple times.  
 This can inflate aggregated values such as `SUM([Order Total])`.*
@@ -423,241 +648,392 @@ This can inflate aggregated values such as `SUM([Order Total])`.*
 
 ---
 
-### Comparison Summary
+#### Final Data Model Explanation
 
-| Method | Layer | Adds Rows | Adds Columns | Multiple Sources |
-|------|------|-----------|--------------|------------------|
-| Relationship | Logical | No | No | No |
-| Join | Physical | No | Yes | No |
-| Union | Physical | Yes | No | No |
-| Blend | Viz-level | No | No | Yes |
+The final data model is built using **relationships in the logical layer**, not joins.
+
+The central table in this model is `orders.csv`, which acts as the **fact table**. All other tables are connected to it or through it using appropriate keys.
+
+This structure allows Tableau to dynamically determine how tables should be combined based on the visualization.
+
+#### Why Relationships Are Used
+
+Relationships are preferred in this model because the dataset contains tables with different levels of granularity.
+
+For example:
+
+- `orders.csv` contains one row per order
+- `order_details.csv` contains multiple rows per order (one row per product in the order)
+
+If these tables were joined directly:
+
+- Each order would be duplicated for every product line
+- Measures such as `Order Total` would be repeated
+- Aggregations like `SUM(Order Total)` would become incorrect
+
+Relationships solve this problem by:
+
+- Keeping tables logically separate
+- Aggregating data at the correct level before combining
+- Preventing duplication and inflated results
+
+#### How Tables Are Connected
+
+The relationships in the final model are defined as follows:
+
+- `orders.csv` ↔ `customers.csv`
+  - `Customer ID = Customer ID`
+
+- `customers.csv` ↔ `customer_addresses.csv`
+  - `Customer ID = Customer ID`
+
+- `orders.csv` ↔ `order_details.csv`
+  - `Order ID = Order ID`
+
+- `order_details.csv` ↔ `products.csv`
+  - `Product ID = Product ID`
+
+- `orders.csv` ↔ `returns.csv`
+  - `Order ID = Order ID`
+
+- `orders.csv` ↔ `salespeople.csv`
+  - `Salesperson ID = Salesperson ID`
+
+#### Important Behavior of Relationships
+
+Unlike joins, relationships do not merge tables into a single dataset.
+
+Instead:
+
+- Tableau queries each table separately
+- Combines results only when needed for the visualization
+- Adapts aggregation depending on the fields used in the view
+
+```{mermaid}
+flowchart LR
+A[Orders - Fact Table] --> B[Customers]
+A --> C[Order Details]
+C --> D[Products]
+A --> E[Returns]
+A --> F[Salespeople]
+B --> G[Customer Addresses]
+```
 
 ---
 
-## Types of Filters
+## Filters and Order of Operations
 
-Tableau applies filters in a specific **order of operations**, which affects both performance and results.
+Tableau applies filters in a specific sequence. This order affects both performance and results.
 
-The order is as follows:
-1. Extract Filters  
-2. Data Source Filters  
-3. Context Filters  
-4. Dimension Filters  
-5. Measure Filters  
+The simplified order discussed in this session is:
 
----
+1. Extract Filters
+2. Data Source Filters
+3. Context Filters
+4. Dimension Filters
+5. Measure Filters
+
+
+Table calculations are applied later and depend on the visible data.
+
+```{mermaid}
+flowchart TD
+A[Extract Filters] --> B[Data Source Filters]
+B --> C[Context Filters]
+C --> D[Dimension Filters]
+D --> E[Measure Filters]
+E --> F[Table Calculations]
+F --> G[Rendered View]
+```
 
 ### Extract Filters
 
-Extract filters limit data **before** it is loaded into Tableau.
+Extract filters limit data before it is stored in Tableau.
 
-- Reduce data volume early
+Use them to:
+
+- Reduce volume
 - Improve performance
-- Apply only to extract-based data sources
+- Restrict historical scope
 
-**Example:**
-- Filter `Year = 2023` so only 2023 records are loaded
+Steps:
 
----
+- Go to Data Source tab
+- Click Extract → Edit
+- Under Filters click Add
+- Select a field (e.g. State)
+- Choose values or exclude values
+- Click OK and refresh extract
+
+Types:
+
+- Dimension-based (e.g. State, City)
+- Measure-based (aggregated filtering before extract)
+- Date-based (relative or range filtering)
+
+![Extract Filter]({{< meta image_path >}}/w2_extract_filter.png)
 
 ### Data Source Filters
 
-Data source filters restrict data for **all users** of a data source.
+Data source filters restrict the data available to all sheets using that data source.
 
-- Applied at the data connection level
-- Persist when the data source is published
+Use them when:
 
-**Example:**
-- `[Region] = "West"` ensures all users only see West region data
+- A published source must be globally restricted
+- Sensitive or irrelevant data should be hidden
 
-![Data Source Filter]({{< meta image_path >}}/w2_datasource_filter.png)
+Steps:
 
----
+- Go to Data Source tab
+- Click Filters (top right)
+- Click Add
+- Select a field (e.g. City)
+- Define filter logic (include/exclude values)
+- Click OK
+
+Types:
+
+- Dimension filters (categorical restriction)
+- Measure filters (aggregated restriction)
+- Extract filters (applied at extract level but part of data source setup)
+
+![Data Source Filter]({{< meta image_path >}}/w2_data_source_filter.png)
 
 ### Context Filters
 
-Context filters define the **primary filtering context**.
+Context filters create the primary subset used by later filters.
 
-- Applied before other dimension and measure filters
-- Improve performance in complex dashboards
+Use them when:
 
-**Example:**
-- Set `[Year] = 2023` as a context filter
-- Then filter `[Quarter]`
+- You need dependent filters
+- You want a `FIXED` LOD to respect a filter
+- You want performance improvements in some complex cases
 
-| ![Year]({{< meta image_path >}}/w2_context_filter.png) | ![Quarter]({{< meta image_path >}}/w2_context_filter1.png) |
-|:--:|:--:|
-| Year | Quarter |
+Steps:
 
----
+- Add a filter to Filters shelf
+- Right-click the filter
+- Select Add to Context
+- Filter turns grey (context applied)
+
+![Context Filter]({{< meta image_path >}}/w2_context_filter.png)
 
 ### Dimension Filters
 
-Dimension filters limit **categorical fields**, such as:
+Dimension filters limit categorical values such as:
+
 - Region
-- Product Category
-- Customer Name
+- Category
+- Customer name
 
-**Example:**
-- Filter by `[Customer Name]`
+Steps:
 
----
+- Drag a dimension (e.g. State) to Filters shelf
+- Choose filter type:
+  - General (select values)
+  - Wildcard (pattern match)
+  - Condition (formula-based)
+  - Top (ranking)
+- Select or exclude values
+- Click OK
+
+Filter modes (from screenshot):
+
+- Select from list
+- Custom value list
+- Use all
+- Include / Exclude
+
+![Dimension Filter]({{< meta image_path >}}/w2_category_filter.png)
 
 ### Measure Filters
 
-Measure filters limit **aggregated numerical values**.
+Measure filters limit aggregated numeric values such as:
 
-- Order Total
-- Quantity
-- Unit Price
-- Discount
+- `SUM([Sales])`
+- `AVG([Discount])`
+- `COUNTD([Customer ID])`
 
-**Example:**
-- Filter `[Unit Price] >= 100` to focus on high-value purchases
+Steps:
 
-![Measure Filter]({{< meta image_path >}}/w2_measure_filter.png)
+- Drag a measure to Filters shelf
+- Choose aggregation (SUM, AVG, COUNTD etc.)
+- Select filter type
 
----
+Types:
+
+- Range of values (min–max slider)
+- At least (greater than or equal)
+- At most (less than or equal)
+- Special (null/non-null handling)
+
+![Context Filter]({{< meta image_path >}}/w2_measure_filter.png)
 
 ### Date Filters
 
-Date filters limit data based on time.
+Date filters allow time-based slicing such as:
 
-**Examples:**
-- Show orders from the **last quarter**
-- View orders **between Jan 1 and Mar 31, 2023**
-- Compare **Q1 vs Q2 2023** using dashboard filter actions
+- Last quarter
+- Between two dates
+- Relative periods
 
----
+Steps:
+
+- Drag date field to Filters shelf
+- Choose filter type
+
+Types:
+
+- Relative date (e.g. last 1 quarter)
+- Range of dates
+- Starting date
+- Ending date
+- Discrete date parts (year, month, quarter)
+
+![Date Filter]({{< meta image_path >}}/w2_date_filter.png)
 
 ### Top N Filters
 
-Top N filters display only the highest or lowest performers.
+Top N filters allow ranking by a chosen measure.
 
-**Examples:**
-- Top 10 Customers by `SUM(OrderTotal)`
-- Bottom 5 Products by Quantity Sold
+Example use cases:
 
-**How to:**
-- Right-click `[CustomerName]`
-- Filter → Top → By field → `SUM(OrderTotal)` → Top 10
+- Top 10 customers by revenue
+- Bottom 5 products by quantity
 
----
+Steps:
 
-### Interactive (Quick) Filters
+- Drag dimension (e.g. Customer ID) to Filters shelf
+- Go to Top tab
+- Select By field
+- Define Top N (e.g. Top 10 by COUNT(Order ID))
+- Click OK
 
-Interactive filters allow dashboard users to control the analysis.
+![Date Filter]({{< meta image_path >}}/w2_top_n_filter.png)
 
-**Example:**
-- Right-click `[Region]` → Show Filter
-- Choose Dropdown or Single Value List
-- Users dynamically update views by selecting regions such as “West” or “South”
+### Interactive Filters
 
-## Tableau Advanced Chart Types
+Interactive filters allow dashboard users to control the visible data.
 
-The following advanced chart types allow you to represent multiple datasets using categorical dimensions and numerical measures:
+Common UI forms include:
 
-- Area Chart 
-- Stacked Bar Chart  
-- Bullet Chart  
-- Spark Lines  
-- Bar-In-Bar Chart  
-- Box Plot  
-- Pareto Chart  
+- Single value dropdown
+- Multiple values list
+- Slider
+- Wildcard match
 
----
+Steps:
 
-## Tableau Area Chart
+- Right-click a filter on Filters shelf
+- Click Show Filter
+- Choose display type:
+  - Single value (list/dropdown/slider)
+  - Multiple values (list/dropdown/custom list)
+  - Wildcard match
 
-### Purpose
+![Show Filter]({{< meta image_path >}}/w2_show_filter.png)
 
-An **Area Chart** shows the relationship between variables by visualizing cumulative values over time. It highlights both overall trends and category contributions.
-
-
-### Steps to Create an Area Chart
-
-1. Drag **Order Date** to the Columns shelf and set it to **Month**.  
-2. Drag **Customer ID** to the Rows shelf, right click and choose Measure to **Count(Distinct)**.  
-3. Change the Marks type to **Area**.  
-4. Drag **City** to the Color shelf.  
-
-![Area Chart]({{< meta image_path >}}/w2_area_chart.png)
+![Filter UI]({{< meta image_path >}}/w2_filter_ui.png)
 
 ---
 
-## Tableau Stacked Bar Chart
+## Advanced Chart Types
 
-### Purpose
+This session covers several advanced chart types commonly used in analytical dashboards.
 
-A **Stacked Bar Chart** divides each bar into segments to show category composition while preserving total values.
+Charts include:
+
+- Area chart
+- Stacked bar chart
+- Bullet chart
+- Bar-in-bar chart
+- Box plot
+- Dual-axis chart
+- Histogram
+- Heatmap
+- Highlight table
+- Treemap
+
+---
+
+### Tableau Area Chart
+
+#### Purpose
+
+An area chart shows trends over time while emphasizing cumulative magnitude and contribution.
 
 ### Steps to Create
 
-1. Drag **Order Date** to the Columns shelf and set it to **Year**.  
-2. Drag **Measure Names** to Color.  
-3. Filter Measure Names to keep only **Order Total** and **Refund Amount**.  
-4. Drag **Measure Values** to Rows.  
-5. Change Marks type to **Bar**.  
+1. Drag **Order Date** to **Columns** and set it to **Month**
 
-### Enhancement
+2. Drag **Customer ID** to **Rows** and change it to **Count (Distinct)**
 
-7. Move **Measure Names** from Detail to Color.  
-8. Drag **Measure Values** to Label (hold Ctrl).  
-9. Adjust colors and bar size.
+3. Change **Marks** type to **Area**
+
+4. Drag **City** to **Color**
+
+![Area Chart]({{< meta image_path >}}/w2_area_chart.png)
+
+#### Best Use Cases
+
+Use an area chart when:
+
+- Time is the primary axis
+- Category contribution matters
+- Trend magnitude should be emphasized
+
+---
+
+### Tableau Stacked Bar Chart
+
+#### Purpose
+
+A stacked bar chart shows total size and internal composition at the same time.
+
+### Steps to Create
+
+1. Drag **Order Date** to **Columns** and set it to **Year**
+2. Drag **Measure Values** to **Rows**
+3. Drag **Measure Names** to **Color**
+4. Filter **Measure Names** to keep only relevant measures
+5. Set the marks type to **Bar**
+6. Drag **Measure Values** to Label (hold Ctrl).  
+7. Adjust colors and bar size.
 
 ![Stacked Bar Chart]({{< meta image_path >}}/w2_stacked_bar_chart.png)
 
----
+#### Best Use Cases
 
-## Tableau Bullet Chart
+Use a stacked bar chart when:
 
-### Purpose
-
-A **Bullet Chart** is used to compare an **actual value** against one or more **benchmarks** (such as averages, targets, or thresholds) while conserving space.
-
-In this view, the bullet chart compares **Category-level Total Quantity** against a **reference benchmark derived from the overall average quantity**.
+- You need part-to-whole comparison
+- Total values must remain visible
+- Category composition is important
 
 ---
 
-### Business Context 
+### Tableau Bullet Chart
 
-In this example:
+#### Purpose
 
-- **Blue bars** represent the **actual total quantity** per Category  
-- **Background bands** represent **performance ranges** based on the overall average  
-- **Vertical reference lines** indicate benchmark values (e.g. average or percentage of average)
+A bullet chart compares actual performance against one or more benchmarks while conserving space.
 
-This allows quick identification of:
-- Categories performing **below average**
-- Categories performing **near or above benchmark**
-- Relative performance without comparing categories directly
+#### Business Context
 
----
+Typical usage includes:
 
-### Measures Used
+- Actual vs target
+- Category value vs average benchmark
+- Performance band analysis
 
-- **Actual value:**  
-  `SUM([Total Quantity])`
-
-- **Benchmark / Reference:**  
-  Average of total quantity across all categories  
-  (e.g. *60% of Average Total Quantity = 2,874*, as shown in the tooltip)
-
----
-
-### Steps to Create This Bullet Chart
+#### Steps to Create
 
 1. Drag **Category** to the **Rows** shelf.  
 2. Drag **SUM([Total Quantity])** to the **Columns** shelf.  
 3. Open **Show Me** and select **Bullet Graph**.  
 4. Tableau automatically:
    - Creates the bullet bar
-   - Adds a reference line based on aggregation  
-
----
-
-### Customization 
-
+   - Adds a reference line based on aggregation 
 5. Right-click the axis → **Add Reference Line**  
 6. Set the reference line to:
    - **Scope:** Entire Table  
@@ -667,232 +1043,74 @@ This allows quick identification of:
 8. Adjust:
    - Bar color (actual values)
    - Band opacity (performance ranges)
-   - Tooltip text for clarity
+   - Tooltip text for clarity 
 
 ![Bullet Chart]({{< meta image_path >}}/w2_bullet_chart.png)
+
+In this example:
+
+- Blue bars represent the **actual total quantity** per Category  
+- Background bands represent **performance ranges** based on the overall average  
+- Vertical reference lines indicate benchmark values (e.g. average or percentage of average)
+
+This allows quick identification of:
+- Categories performing **below average**
+- Categories performing **near or above benchmark** (e.g. *60% of Average Total Quantity = 2,874*, as shown in the tooltip)
+- Relative performance without comparing categories directly
+
+#### Best Use Cases
+
+Use a bullet chart when:
+
+- You need compact benchmark comparison
+- Dashboards have limited space
+- Performance against a target matters
 
 ---
 
 ### Tableau Bar-In-Bar Chart
 
-### Purpose
+#### Purpose
 
-A **Bar-in-Bar Chart** is used to compare **two related measures** for the same dimension by displaying one bar inside another.  
-It emphasizes **context and relationship** rather than ranking.
+A bar-in-bar chart compares two related measures for the same dimension.
 
-Typical use cases include:
-- Returned vs Total Quantity
-- Actual vs Target
-- Defective vs Produced Units
+#### Method 1: Shared Axis
 
----
+Use when:
 
-### Business Context
+- Measures are on a similar scale
+- One measure is conceptually part of the other
 
-In this analysis:
+#### Method 2: Separate Axes
 
-- **Outer bars (teal)** represent **Total Quantity** by Region  
-- **Inner bars (red)** represent **Returned Quantity** by Region  
-- Both measures are evaluated **within the same category**
+Use when:
 
-This allows analysts to quickly identify:
-- Regions with **high return volume**
-- Regions where returns are **disproportionately high** relative to volume
-- Differences between absolute volume and problem intensity
-
----
-
-### Measures and Dimension Used
-
-- **Dimension:**  
-  `Region`
-
-- **Measures:**  
-  - `SUM([Total Quantity])`  
-  - `SUM([Quantity (returns.csv)])`
-
----
-
-## Two Ways to Build a Bar-In-Bar Chart in Tableau
-
-Tableau does **not have a native Bar-in-Bar chart type**, so there are **two common construction methods**.  
-Both are valid — the choice depends on **data scale and analytical intent**.
-
----
-
-### Method 1: Measure Names / Measure Values (Shared Axis)
-
-**How it works:**
-- Both measures share the **same axis**
-- One bar is resized to sit inside the other
-
-**Characteristics:**
-- Preserves **true proportional comparison**
-- Makes it easy to visually assess part-to-whole relationships
-- Best when measures are **on a similar scale**
-
-**Use this when:**
-- One measure is a **subset** of the other
-- You want to show **relative contribution**
-- Values are not extremely different in magnitude
-
-**Limitation:**
-- Smaller measures may become hard to see if the scale difference is large
-
----
-
-### Method 2: Dual Measure Axes (Separate Axes)
-
-**How it works:**
-- Each measure has its **own axis**
-- Bars are aligned by category but scaled independently
-
-**Characteristics:**
-- Preserves **readability** when values differ greatly
-- Avoids compressing small measures
-- Focuses on **trend comparison**, not proportion
-
-**Use this when:**
 - Measures differ significantly in size
-- Accuracy and visibility are more important than proportionality
-- You want to compare patterns across categories
-
-**Limitation:**
-- Part-to-whole relationships are less visually precise
-- Requires clear labeling to avoid confusion
-
----
-
-### How to Read a Bar-In-Bar Chart
-
-- The **outer bar** provides overall context  
-- The **inner bar** shows a related or dependent metric  
-- Large inner bars relative to the outer bar signal **potential issues**
-- Categories should be evaluated **independently**, not ranked
-
----
+- Visibility is more important than strict proportionality
 
 ![Bar In Bar Chart:Method 1 (Shared Axis)]({{< meta image_path >}}/w2_bar_in_bar_chart.png)
 
 ![Bar In Bar Chart:Method 2 (Separate Axis)]({{< meta image_path >}}/w2_bar_in_bar_chart_2.png)
 
----
-
-## Tableau Box and Whisker Plot (Whisker Plot)
-
-### Purpose
-
-A **Box-and-Whisker Plot** is used to analyze the **distribution of a measure**, showing how values are spread, where the typical value lies, and whether **outliers** exist.
-
-Unlike bar charts, box plots focus on **variability and distribution**, not totals.
 
 ---
 
-### Business Context
+### Tableau Box Plot
 
-In this example, the chart shows the **distribution of Discounts** across different **Regions**.
+#### Purpose
 
-For each Region, the box plot reveals:
-- Typical discount levels
-- How widely discounts vary
-- Whether extreme or unusual discounts occur
+A box plot shows the distribution of a measure, including spread, center, and outliers.
 
-This helps answer questions such as:
-- Which regions apply **more aggressive discounting**?
-- Where is discount behavior **inconsistent or risky**?
-- Are there **outliers** that require investigation?
+#### What It Shows
 
----
+For each category, a box plot reveals:
 
-### Fields Used
+- Median
+- Interquartile range
+- Whiskers
+- Outliers
 
-- **Dimension:**  
-  `Region`
-
-- **Measure:**  
-  `SUM([Discount])`
-
-- **Additional Detail:**  
-  Individual records shown as points to highlight outliers
-
----
-
-### How This Chart Is Built
-
-1. Drag **Region** to the **Rows** shelf.  
-2. Drag **SUM([Discount])** to the **Columns** shelf.  
-3. Open **Show Me** and select **Box-and-Whisker Plot**.  
-4. (Optional) Drag a dimension (e.g. Category or Order ID) to **Detail** to display individual data points.  
-
----
-
-### How to Read a Box-and-Whisker Plot
-
-For each Region:
-
-- **Median (line inside the box):**  
-  The typical discount value
-
-- **Box (Interquartile Range):**  
-  Middle 50% of discount values (from Q1 to Q3)
-
-- **Whiskers:**  
-  The range of discounts excluding extreme outliers
-
-- **Dots outside whiskers:**  
-  **Outliers** — unusually high or low discounts
-
-Wider boxes indicate **greater variability** in discounting behavior.
-
----
-
-### Insights from This View
-
-- Regions with **wide boxes** apply discounts inconsistently  
-- Regions with **long whiskers** have a broad discount range  
-- Isolated points far from the box indicate **exceptional discounts** that may require review  
-- Similar medians but different spreads suggest **different pricing strategies**
-
-![Box and Whisker Plot ]({{< meta image_path >}}/w2_box_and_whisker_plot.png)
-
----
-
-## Tableau Dual-Axis Chart
-
-### Purpose
-
-A **Dual-Axis Chart** is used to display **two related measures** on the same view while allowing each measure to retain its own visual encoding.  
-It is especially effective for combining **absolute values** with **trend-based or calculated metrics**.
-
----
-
-### Business Context
-
-In this example, the chart analyzes **monthly sales performance**:
-
-- **Blue bars** represent the **monthly Order Total**
-- **Red line** represents a **trend-based calculation** (e.g. moving sum or running total of Order Total)
-- Both measures are aligned by **Month of Order Date**
-
-This combination allows analysts to:
-- See **month-by-month performance**
-- Understand the **overall sales trend**
-- Detect momentum, slowdowns, or seasonal patterns
-
----
-
-### Fields Used
-
-- **Dimension:**  
-  `MONTH([Order Date])`
-
-- **Measures:**  
-  - `SUM([Order Total])` → displayed as **bars**
-  - `SUM([Order Total])` with a **table calculation** → displayed as a **line**
-
----
-
-### How This Chart Is Built
+#### Steps to Create
 
 1. Drag **MONTH([Order Date])** to the **Columns** shelf.  
 2. Drag **SUM([Order Total])** to the **Rows** shelf (this creates the bar chart).  
@@ -903,69 +1121,59 @@ This combination allows analysts to:
 5. Right-click the second axis and select **Dual Axis**.  
 6. Synchronize axes if necessary and adjust colors.
 
+![Box and Whisker Plot]({{< meta image_path >}}/w2_box_and_whisker_plot.png)
+
+#### Best Use Cases
+
+Use a box plot when:
+
+- Variability matters more than totals
+- You need to detect outliers
+- Category-level distributions should be compared
+
 ---
 
-### How to Read This Dual-Axis Chart
+### Tableau Dual-Axis Chart
 
-- **Bars** show the exact sales value for each month  
-- **Line** shows the direction and strength of the trend  
-- Divergence between bars and line indicates:
-  - Acceleration or deceleration in performance
-  - Temporary spikes or drops
-- Peaks and valleys help identify **seasonality**
+#### Purpose
 
----
+A dual-axis chart overlays two measures in a single view.
 
-### Why Use a Dual-Axis Here
+#### Example Usage
 
-Using a single chart allows:
-- Trend and volume to be analyzed **together**
-- Faster insight compared to separate charts
-- Better storytelling for time-based performance
+- Bars for monthly sales
+- Line for running total or moving average
+
+#### Steps to Create
+
+1. Drag **MONTH([Order Date])** to the **Columns** shelf.  
+2. Drag **SUM([Order Total])** to the **Rows** shelf (this creates the bar chart).  
+3. Drag **SUM([Order Total])** to the **Rows** shelf a second time.  
+4. On the second measure:
+   - Change **Marks type** to **Line**
+   - Apply a **table calculation** (e.g. Moving Sum or Running Total)  
+5. Right-click the second axis and select **Dual Axis**.  
+6. Synchronize axes if necessary and adjust colors.
 
 ![Dual Axis Chart]({{< meta image_path >}}/w2_dual_axis_chart.png)
----
 
-## Tableau Histogram
+#### Best Use Cases
 
-### Purpose
-**Histogram** is used to analyze the **distribution of a continuous numeric variable** by grouping values into ranges (bins) and counting how many records fall into each range.
+Use a dual-axis chart when:
 
-Unlike bar charts, histograms focus on **frequency and shape of data**, not category comparison.
-
----
-
-### Business Context 
-
-In this example, the histogram shows the **distribution of Order Total values**.
-
-Each bar represents:
-
-- A **range of Order Total values** (bin)
-- The **number of orders** that fall within that range
-
-This view helps answer questions such as:
-
-- What is the **typical order value range**?
-- Are most orders **small, medium, or large**?
-- Is the distribution **skewed**, and in which direction?
-- Do extremely large orders exist, and how frequent are they?
+- Two related measures should be analyzed together
+- Time-based trend comparison is needed
+- One measure provides context for the other
 
 ---
 
-### Fields Used
+### Tableau Histogram
 
-- **Binned Dimension:**  
-  `Order Total (bin)`
+#### Purpose
 
-- **Measure:**  
-  `COUNT([Order Total])`
+A histogram analyzes the distribution of a continuous numeric variable.
 
-Bins group continuous values into equal-sized intervals, making patterns visible.
-
----
-
-### How This Histogram Is Built
+#### Steps to Create
 
 1. Right-click **Order Total** → **Create → Bins**  
 2. Choose an appropriate **bin size** (based on data range and analysis goal)  
@@ -973,75 +1181,33 @@ Bins group continuous values into equal-sized intervals, making patterns visible
 4. Drag **COUNT([Order Total])** to the **Rows** shelf  
 5. Set Marks type to **Bar**
 
----
-
-### How to Read This Histogram
-
-- **X-axis (bins):** ranges of Order Total values  
-- **Y-axis:** number of orders in each range  
-- Taller bars indicate **more frequent order values**
-- Short bars at the far right indicate **rare, high-value orders**
-
-In this chart, the distribution is **right-skewed**, meaning:
-- Most orders have relatively **low Order Totals**
-- A small number of orders have **very high values**
-
----
-
-### Insights from This View
-
-- The majority of orders cluster in **lower value bins**
-- High-value orders exist but are **infrequent**
-- Average Order Total may be **pulled upward** by extreme values
-- Median Order Total is likely a **better representation** of a typical order
-
-
 ![Histogram]({{< meta image_path >}}/w2_histogram.png)
 
----
+#### Interpretation
 
-## Tableau Heatmap
+A histogram helps answer:
 
-### Purpose
+- Where most values cluster
+- Whether the distribution is symmetric or skewed
+- Whether extreme values exist
 
-A **Heatmap** is used to compare **magnitude and intensity across two categorical dimensions** using color.  
-It is especially effective for identifying **patterns, clusters, and anomalies** that are hard to see in bar or line charts.
+#### Best Use Cases
 
----
+Use a histogram when:
 
-### Business Context (This Chart)
-
-In this example, the heatmap shows **Order Total performance by City across Years**.
-
-- **Rows:** City  
-- **Columns:** Year of Order Date  
-- **Color intensity:** `SUM([Order Total])`
-
-Each cell represents the **total order value** for a given **City–Year** combination.
-
-This view helps answer questions such as:
-- Which cities consistently generate **higher revenue**?
-- How does city performance **change year over year**?
-- Are there cities with **growth, decline, or volatility** over time?
+- Distribution shape matters
+- Numeric ranges matter more than categories
+- Outliers or skewness should be detected
 
 ---
 
-### Fields Used
+### Tableau Heatmap
 
-- **Row Dimension:**  
-  `City`
+#### Purpose
 
-- **Column Dimension:**  
-  `YEAR([Order Date])`
+A heatmap compares magnitude across two categorical dimensions using color intensity.
 
-- **Measure (Color):**  
-  `SUM([Order Total])`
-
-Color encodes magnitude, allowing fast comparison across the grid.
-
----
-
-### How This Heatmap Is Built
+#### Steps to Create
 
 1. Drag **City** to the **Rows** shelf.  
 2. Drag **YEAR([Order Date])** to the **Columns** shelf.  
@@ -1051,66 +1217,25 @@ Color encodes magnitude, allowing fast comparison across the grid.
    - Light colors → lower values  
    - Dark colors → higher values  
 
----
-
-### How to Read This Heatmap
-
-- **Darker cells** indicate **higher total order value**
-- **Lighter cells** indicate **lower total order value**
-- Scan **horizontally** to see how a city changes over time
-- Scan **vertically** to compare cities within the same year
-
-Patterns emerge quickly:
-- Consistently dark rows → strong-performing cities
-- Sudden color changes → growth or decline
-- Uneven intensity → volatility
-
 ![Heatmap]({{< meta image_path >}}/w2_heatmap.png)
 
-## Tableau Highlight Table
+#### Best Use Cases
 
-### Purpose
+Use a heatmap when:
 
-A **Highlight Table** combines the structure of a table with **color encoding** to show magnitude, allowing users to see **exact values** while still perceiving **patterns and intensity**.
-
-It is best used when both **comparison** and **precision** are required.
-
----
-
-### Business Context (This Chart)
-
-In this example, the highlight table shows **Order Total by City and Year**.
-
-- **Rows:** City  
-- **Columns:** Year of Order Date  
-- **Color + Label:** `SUM([Order Total])`
-
-Each cell displays:
-- The **exact Order Total value**
-- A **color intensity** indicating relative magnitude
-
-This view helps answer questions such as:
-- Which cities generated the **highest revenue** each year?
-- How does revenue **change year over year** for each city?
-- Which cities experienced **growth or decline**?
+- Pattern discovery matters
+- You need fast comparison across a matrix
+- Magnitude can be encoded visually
 
 ---
 
-### Fields Used
+### Tableau Highlight Table
 
-- **Row Dimension:**  
-  `City`
+#### Purpose
 
-- **Column Dimension:**  
-  `YEAR([Order Date])`
+A highlight table combines a table structure with color encoding so that users can see both exact values and relative intensity.
 
-- **Measure:**  
-  `SUM([Order Total])`  
-  (used for both **Color** and **Label**)
-
----
-
-### How This Highlight Table Is Built
+#### Steps to Create
 
 1. Drag **City** to the **Rows** shelf.  
 2. Drag **YEAR([Order Date])** to the **Columns** shelf.  
@@ -1119,80 +1244,34 @@ This view helps answer questions such as:
 5. Set Marks type to **Square**.  
 6. Adjust the color palette to reflect low → high values.
 
----
 
-### How to Read a Highlight Table
-
-- **Darker cells** indicate **higher Order Totals**
-- **Lighter cells** indicate **lower Order Totals**
-- Scan **across a row** to evaluate a city’s performance over time
-- Scan **down a column** to compare cities within the same year
-- Labels provide **exact values** for precise comparison
-
----
-
-### Insights from This View
-
-- Cities with consistently dark cells are **top revenue contributors**
-- Sudden color changes highlight **growth or decline**
-- Comparing years side by side makes **trends immediately visible**
-- Unlike heatmaps, this view supports **exact numeric reporting**
-
----
+![Highlight Table]({{< meta image_path >}}/w2_highlight_table.png)
 
 ### Highlight Table vs Heatmap
 
 | Feature | Highlight Table | Heatmap |
-|------|----------------|---------|
-| Shows exact values | ✅ Yes | ❌ No |
-| Emphasizes patterns | ✅ Yes | ✅ Yes |
-| Best for dashboards | Reporting + Analysis | Pattern discovery |
-| Precision | High | Low |
+|---|---|---|
+| Exact values visible | Yes | No |
+| Pattern emphasis | Yes | Yes |
+| Precision | High | Lower |
 
-![Highlight Table]({{< meta image_path >}}/w2_highlight_table.png)
+#### Best Use Cases
 
----
+Use a highlight table when:
 
-## Tableau Treemap
-
-### Purpose
-
-A **Treemap** is used to visualize **part-to-whole relationships** across **hierarchical dimensions** using area and color.  
-It is especially effective when you need to compare **many categories at once** and understand **relative contribution**.
-
-### Business Context 
-
-In this example, the treemap shows the **distribution of unique customers** across **States and Cities**.
-
-- **Hierarchy:** State → City  
-- **Size:** `COUNTD([Customer ID])`  
-- **Color intensity:** `COUNTD([Customer ID])`
-
-Each rectangle represents a **City**, grouped within its **State**, where:
-- **Larger areas** indicate more unique customers
-- **Darker colors** indicate higher customer concentration
-
-This view helps answer questions such as:
-- Which states contribute the **largest share of customers**?
-- Which cities dominate **within each state**?
-- Is customer distribution **concentrated or fragmented** geographically?
+- Exact values matter
+- Color should support quick comparison
+- The view functions as both report and analysis
 
 ---
 
-### Fields Used
+### Tableau Treemap
 
-- **Hierarchical Dimensions:**  
-  - `State`  
-  - `City`
+#### Purpose
 
-- **Measure:**  
-  `COUNTD([Customer ID])`
+A treemap shows part-to-whole relationships across many categories using area and color.
 
-The distinct count ensures each customer is counted **once**, avoiding duplication.
-
----
-
-### How This Treemap Is Built
+#### Steps to Create
 
 1. Drag **State** to **Label** (or first level in hierarchy).  
 2. Drag **City** to **Label** (nested under State).  
@@ -1201,323 +1280,219 @@ The distinct count ensures each customer is counted **once**, avoiding duplicati
 5. Set Marks type to **Treemap**.  
 6. Drag `COUNTD([Customer ID])` to **Label**, right-click choose quick table qalqulations → percent of total. 
 
----
-
-### How to Read This Treemap
-
-- **Large rectangles** represent cities with many customers  
-- **Small rectangles** represent cities with fewer customers  
-- Cities are visually grouped by **State**
-- Percent labels show **relative contribution** to the total customer base
-
-Scan the chart to quickly identify:
-- Dominant cities within a state
-- States with diversified vs concentrated customer bases
-- Cities that may warrant targeted marketing or expansion
-
----
-
-### Insights from This View
-
-- A few cities contribute a **disproportionately large share** of customers
-- Some states show **balanced city distribution**, others are city-dominated
-- Customer concentration patterns may reflect:
-  - Population density
-  - Market maturity
-  - Sales coverage or logistics reach
-
-Treemaps are ideal for **high-level composition analysis**, not exact comparison.
-
----
-
-### When to Use (and When Not to Use) a Treemap
-
-**Use a Treemap when:**
-- You need to show **part-to-whole** relationships
-- Categories are **many and hierarchical**
-- Relative importance matters more than precision
-
-**Avoid Treemaps when:**
-- Exact value comparison is required
-- Only a few categories exist (use bars instead)
-- Small differences must be detected precisely
-
 ![Treemap]({{< meta image_path >}}/w2_treemap.png)
 
-## Calculated Fields (Row-Level vs Aggregate)
+#### Best Use Cases
 
-Calculated fields allow you to **create new logic from existing data**.  
-They are one of the most powerful features in Tableau and are used to control **how data is classified, transformed, and analyzed**.
+Use a treemap when:
 
-### Why Use Calculated Fields?
+- There are many categories
+- Relative contribution matters
+- Exact comparison is not the primary goal
+
+---
+
+## Calculated Fields
+
+Calculated fields allow you to create new logic from existing data.
+
+They are one of Tableau’s most important analytical features.
 
 Calculated fields can be used to:
 
-- Segment data into meaningful groups  
-- Convert or standardize data types (e.g. text to date)  
-- Create new metrics from existing fields  
-- Filter or conditionally include data  
-- Calculate ratios, percentages, or performance indicators  
+- Create new metrics
+- Transform data
+- Segment records
+- Build KPI logic
+- Control dashboard behavior
 
-In practice, calculated fields help translate **raw data into analytical insight**.
+### Creating a Calculated Field
+
+1. Go to **Analysis → Create Calculated Field**
+2. Enter a name
+3. Write the formula
+4. Validate and save
+
+![Calculated Field]({{< meta image_path >}}/w2_calculated_field.png)
 
 ---
 
-## Types of Calculations in Tableau
+### Calculation Evaluation Flow
 
-Tableau supports three main types of calculations.  
-The choice depends on **when** and **at what level** the calculation should be evaluated.
-
----
-
-## Types of Calculations in Tableau
-
-Calculations in Tableau allow analysts to transform data, apply business logic, and create analytical metrics directly within the visualization environment.
-
-Tableau calculations can be evaluated at different stages of the data processing pipeline. The most fundamental distinction is between **row-level calculations** and **aggregate calculations**.
-
-Level of Detail (LOD) expressions extend this concept by allowing analysts to explicitly control the **granularity of calculations** independent of the visualization.
+Tableau calculations are evaluated at different stages.
 
 ```{mermaid}
 flowchart LR
 A[Raw Data Rows] --> B[Row-Level Calculations]
 B --> C[Aggregation Based on View]
 C --> D[Aggregate Calculations]
-D --> E[Visualization]
+D --> E[LOD Override if Defined]
+E --> F[Visualization]
 ```
+
 
 ---
 
-## Calculated Fields
+### Row-Level Calculations
 
-A **calculated field** is a new field created using existing data fields and formulas.
+Row-level calculations operate on each individual record before aggregation.
 
-Calculated fields allow analysts to:
+Use row-level calculations when you need to:
 
-  
-- Create new metrics  
-- Apply business logic  
-- Categorize data  
-- Perform mathematical operations  
-- Transform or combine columns  
+- Create line-level revenue
+- Standardize raw fields
+- Build record-level flags
+- Classify rows
 
-To create a calculated field in Tableau:
+#### Example: Order Line Revenue
 
-  
-1. Go to **Analysis → Create Calculated Field**  
-2. Enter a name for the calculation  
-3. Write the formula  
-4. Validate and save  
-
-![Calculated Field]({{< meta image_path >}}/w2_calculated_field.png)
-
----
-
-## Row-Level Calculations
-
-Row-level calculations operate on **individual records before aggregation occurs**.
-
-This means the formula is applied to **each row in the dataset independently**.
-
-Row-level calculations are commonly used for:
-
-  
-- Creating derived measures  
-- Transforming numeric values  
-- Creating categorical classifications  
-- Performing arithmetic operations between fields  
-
-### Example: Order Line Revenue
-
-```
+```sql
 [Quantity] * [Unit Price]
 ```
 
-Each record calculates the revenue of that specific order line.
+Each row calculates its own revenue value.
 
 ![Revenue calculation]({{< meta image_path >}}/w2_revenue_calculation.png)
 
-When this calculated field is placed in the view, Tableau will **automatically aggregate the results**.
-
 ![Revenue]({{< meta image_path >}}/w2_revenue.png)
+
+#### Example: Revenue Banding
+
+```sql
+IF [Quantity] * [Unit Price] >= 1000 THEN "High Value"
+ELSE "Standard"
+END
+```
+
 
 ---
 
-## Aggregate Calculations
+### Aggregate Calculations
 
-Aggregate calculations operate **after Tableau groups data based on the dimensions present in the view**.
+Aggregate calculations operate after Tableau groups data according to the dimensions in the view.
 
-Instead of evaluating individual rows, aggregate calculations summarize multiple records into a **single value per group**.
+Common aggregate functions include:
 
-Common aggregation functions include:
+- `SUM()`
+- `AVG()`
+- `COUNT()`
+- `COUNTD()`
+- `MIN()`
+- `MAX()`
 
-  
-- `SUM()`  
-- `AVG()`  
-- `COUNT()`  
-- `COUNTD()`  
-- `MIN()`  
-- `MAX()`  
-
-Aggregate calculations depend on:
-
-  
-- The dimensions placed in the view  
-- Filters applied to the data  
-- The level of aggregation in the visualization  
-
-### Example: Average Order Value
+#### Example: Average Order Value
 
 ```sql
 SUM([Order Total]) / COUNTD([Order ID])
 ```
 
-This calculation returns the **average revenue generated per order**.
+This formula returns average revenue per order at the current level of aggregation.
 
 ![Average Order Value]({{< meta image_path >}}/w2_average_order_value.png)
 
-If additional dimensions such as **Region** or **Year** are added to the view, the aggregation level changes and the result will update accordingly.
+::: {.callout-important}
+Tableau does not allow incorrect mixing of row-level and aggregate fields in the same expression.
+For example, this is invalid:
+
+```sql
+SUM([Sales]) / [ORDER ID]
+```
+
+A corrected version would aggregate both sides:
+
+```sql
+SUM([Sales]) / COUNT([ORDER ID])
+```
+:::
+
 
 ---
 
-## Row-Level vs Aggregate Calculations
+### Level of Detail (LOD) Expressions
 
-| Calculation Type | Evaluation Stage | Granularity |
-|---|---|---|
-| Row-Level | Before aggregation | Individual records |
-| Aggregate | After aggregation | Groups defined in the view |
+LOD expressions explicitly control the granularity of a calculation independently of the view.
 
-Understanding this distinction is essential because Tableau does not allow **mixing row-level fields and aggregate fields incorrectly in the same calculation**.
+There are three main types:
 
----
-
-## Level of Detail (LOD) Expressions
-
-Level of Detail expressions allow analysts to **explicitly define the granularity of a calculation**, independent of the fields used in the visualization.
-
-Normally, Tableau determines aggregation based on the **dimensions present in the view**.
-
-LOD expressions override this behavior by specifying the exact level at which a calculation should be computed.
-
-There are three types of LOD expressions:
-
-  
-- **FIXED**  
-- **INCLUDE**  
-- **EXCLUDE**  
+- `FIXED`
+- `INCLUDE`
+- `EXCLUDE`
 
 ```{mermaid}
-flowchart LR
-A[Visualization Level] --> B[Default Aggregation]
-B --> C[LOD Override]
+flowchart TD
+A[View Level of Detail] --> B[Default Aggregation]
+B --> C[LOD Expression]
 C --> D[FIXED]
 C --> E[INCLUDE]
 C --> F[EXCLUDE]
 ```
 
----
+### FIXED
 
-## FIXED — Define a Fixed Granularity
+`FIXED` calculates at a specified level regardless of view dimensions.
 
-`FIXED` calculations compute values at a **specified level of detail**, regardless of the dimensions used in the view.
-
-This makes them useful for calculations that must remain **stable across different visualizations**.
-
-### Example: Customer Lifetime Value
+Example: Customer Lifetime Value
 
 ```sql
 { FIXED [Customer ID] : SUM([Order Total]) }
 ```
 
-This calculation computes the **total revenue generated by each customer**, even if the view only displays Region or Year.
+Use `FIXED` when:
+
+- A metric must remain stable across sheets
+- A KPI should be defined at a business entity level
+- The calculation should ignore most view-level dimensional changes
 
 ![Customer Lifetime Value]({{< meta image_path >}}/w2_customer_lifetime_value.png)
 
----
-
-### Example: Minimum Order Date per Customer
+Example: Minimum Order Date per Customer
 
 ```sql
 { FIXED [Customer ID] : MIN([Order Date]) }
 ```
 
-This calculation returns the **first purchase date for each customer**.
+This calculation returns the first purchase date for each customer.
 
 ![Minimum Order Date per Customer]({{< meta image_path >}}/w2_customer_min_order_date.png)
 
-`FIXED` is typically used when:
+### INCLUDE
 
-  
-- The calculation must ignore the dimensions in the view  
-- A metric should remain stable across dashboards  
-- Metrics must be calculated at a specific business entity level  
+`INCLUDE` adds detail to the calculation level even if that dimension is not in the view.
 
----
-
-## INCLUDE — Add Granularity
-
-`INCLUDE` expressions add **additional dimensions to the calculation level**, even if those dimensions are not present in the view.
-
-This allows the calculation to consider **more detailed data than the visualization displays**.
-
-### Example: Average Sales by Region-Year
+Example:
 
 ```sql
 { INCLUDE [Region] : AVG([Order Total]) }
 ```
 
-Without `INCLUDE`, the calculation would compute the average sales **only at the year level**.
+Use `INCLUDE` when:
 
-With `INCLUDE`, Tableau first calculates the average **per region**, then aggregates those results to the year level.
+- Extra detail should influence the result
+- The view is less granular than the analytical logic
 
 ![Average Sales by Region-Year]({{< meta image_path >}}/w2_average_sales_include.png)
 
-Use **INCLUDE** when:
+### EXCLUDE
 
-  
-- A calculation must consider additional detail not visible in the view  
-- The calculation should still respond to filters  
+`EXCLUDE` removes a dimension from the calculation level even if it appears in the view.
 
----
-
-## EXCLUDE — Remove Granularity
-
-`EXCLUDE` removes a dimension from the level of detail of the calculation, even if that dimension appears in the view.
-
-This allows the calculation to be performed at a **higher level of aggregation** than the visualization.
-
-### Example: Sales Ignoring Region
+Example:
 
 ```sql
 { EXCLUDE [Region] : AVG([Order Total]) }
 ```
 
+Use `EXCLUDE` when:
+
+- A dimension is needed visually
+- But should not affect the aggregation logic
+
 Even if **Region** appears in the view, this calculation computes the average as if the Region dimension did not exist.
 
-![Average Sales by Region/Excude]({{< meta image_path >}}/w2_average_sales_exclude.png)
+![Average Sales by Region/Exclude]({{< meta image_path >}}/w2_average_sales_exclude.png)
 
-Use **EXCLUDE** when:
+### Comparison Example
 
-  
-- A dimension is necessary for display  
-- But should not affect the aggregation logic  
-
----
-
-## Differences Between LOD Expressions
-
-![Differences of LOD expressions]({{< meta image_path >}}/w2_LOD_differences.png)
-
-In the visualization:
-
-  
-- **Region** is used as a category  
-- **Year** is used as a dimension  
-- Multiple calculations appear as measures  
-
-Interpretation of the calculations:
-
-  
 - `AVG([Order Total])`  
   → Calculates average sales **per Region and Year**
 
@@ -1530,295 +1505,219 @@ Interpretation of the calculations:
 - `{ FIXED [Region] : AVG([Order Total]) }`  
   → Calculates average sales **per Region regardless of Year**
 
----
+![Differences of LOD expressions]({{< meta image_path >}}/w2_LOD_differences.png)
 
-## When to Use LOD Expressions
+::: {.callout-important}
 
-LOD expressions are useful when calculations must be performed at **specific levels of granularity independent of the view**.
+LOD expressions are essential for building consistent KPIs, customer-level metrics, cohort logic, and benchmark calculations.
 
-Common use cases include:
-
-  
-- Customer lifetime value  
-- First purchase date calculations  
-- Cohort analysis  
-- Benchmark metrics  
-- Consistent KPIs across dashboards  
-
-LOD expressions are a powerful tool that allow Tableau to behave more like a **data modeling engine**, enabling complex analytical logic directly inside the visualization layer.
-
+:::
 
 ---
 
-## Tableau Basic Functions
+## Tableau Functions
 
-Tableau provides a set of **basic built-in functions** that allow analysts to perform calculations, transform data, and create analytical logic within calculated fields.
+Tableau provides many built-in functions that can be used in calculated fields.
 
-These functions are used to manipulate data values, perform mathematical operations, categorize information, and convert data types when necessary.
+Main categories include:
 
-Functions are written inside **calculated fields** and typically follow the structure:
+- Aggregate functions
+- Number functions
+- String functions
+- Logical functions
+- Type conversion functions
 
+### Aggregate Functions
+
+Aggregate functions perform calculations on multiple rows and return a single value.
+
+Examples:
+
+- `SUM([Order Total])` → total revenue from orders dataset
+- `AVG([Unit Price])` → average product price from products.csv
+- `COUNT([Order ID])` → total number of orders
+- `COUNTD([Customer ID])` → number of unique customers
+
+Use case with dataset:
+
+- Calculate total sales:
 ```sql
-FUNCTION_NAME(argument1, argument2, ...)
+SUM([Order Total])
 ```
 
-Example:
-
+- Count unique customers placing orders:
 ```sql
-SUM([Sales])
+COUNTD([Customer ID])
 ```
 
-In this expression:
+### Number Functions
 
-- `SUM` is the function  
-- `[Sales]` is the argument  
-- The result is the total value of the field
+Number functions perform mathematical operations on numeric fields.
 
-Functions can also be combined with **logical conditions and operators** to create more complex calculations.
+Examples:
 
----
+- `ROUND([Order Total], 2)` → rounds order value to 2 decimal places
+- `ABS([Discount])` → removes negative sign from discount values
+- `CEILING([Unit Price])` → rounds price up to nearest integer
+- `FLOOR([Unit Price])` → rounds price down
 
-## Categories of Basic Tableau Functions
+Use case with dataset:
 
-Basic Tableau functions can be grouped into several categories based on their purpose.
-
-  
-- Aggregate Functions  
-- Number Functions  
-- String Functions  
-- Logical Functions  
-- Type Conversion Functions  
-
-```{mermaid}
-flowchart TD
-A[Tableau Basic Functions] --> B[Aggregate Functions]
-A --> C[Number Functions]
-A --> D[String Functions]
-A --> E[Logical Functions]
-A --> F[Type Conversion Functions]
+- Round order totals:
+```sql
+ROUND([Order Total], 0)
 ```
 
----
-
-## Aggregate Functions
-
-Aggregate functions summarize multiple records into a **single aggregated value**.  
-They are commonly used to calculate totals, averages, and counts within a dataset.
-
-These functions operate based on the **level of detail present in the visualization**.
-
-Common aggregate functions include:
-
-  
-- `SUM()` – calculates the total value of a numeric field  
-- `AVG()` – calculates the average value  
-- `MIN()` – returns the smallest value  
-- `MAX()` – returns the largest value  
-- `COUNT()` – counts the number of rows  
-- `COUNTD()` – counts distinct values  
-- `MEDIAN()` – returns the median value
-
-Example:
-
+- Convert negative discounts to positive values:
 ```sql
-SUM([Sales])
+ABS([Discount])
 ```
 
-This function returns the **total sales value** within the current view.
+### String Functions
 
----
+String functions manipulate text fields.
 
-## Number Functions
+Examples:
 
-Number functions perform **mathematical operations** on numeric data.
+- `UPPER([Customer Name])` → converts names to uppercase
+- `LOWER([City])` → converts city names to lowercase
+- `LEFT([Product ID], 3)` → extracts first 3 characters of product ID
+- `TRIM([Customer Name])` → removes extra spaces
 
-They are used to modify numeric values, apply rounding, or perform mathematical transformations.
+Use case with dataset:
 
-Common number functions include:
-
-  
-- `ABS()` – returns the absolute value of a number  
-- `ROUND()` – rounds a number to a specified number of digits  
-- `CEILING()` – rounds a number up to the nearest integer  
-- `FLOOR()` – rounds a number down to the nearest integer  
-- `SQRT()` – calculates the square root of a number  
-- `POWER()` – raises a number to a specified power
-
-Example:
-
+- Standardize city names:
 ```sql
-ROUND([Revenue], 2)
+UPPER([City])
 ```
 
-This function rounds the revenue value to **two decimal places**.
-
----
-
-## String Functions
-
-String functions manipulate **text values** within a dataset.
-
-They are useful when cleaning, formatting, or extracting parts of textual data.
-
-Common string functions include:
-
-  
-- `LEFT()` – extracts characters from the left side of a string  
-- `RIGHT()` – extracts characters from the right side of a string  
-- `MID()` – extracts characters from the middle of a string  
-- `LEN()` – returns the length of a string  
-- `UPPER()` – converts text to uppercase  
-- `LOWER()` – converts text to lowercase  
-- `TRIM()` – removes leading and trailing spaces  
-- `REPLACE()` – replaces text within a string
-
-Example:
-
+- Extract product category prefix:
 ```sql
-UPPER([Customer Name])
+LEFT([Product ID], 3)
 ```
 
-This converts the customer name to **uppercase text**.
+### Logical Functions
 
----
+Logical functions apply conditional logic to create categories or flags.
 
-## Logical Functions
+Use case with dataset:
 
-Logical functions evaluate **conditions** and return results based on whether those conditions are **true or false**.
-
-They are frequently used for classification, filtering logic, and conditional calculations.
-
-Common logical functions include:
-
-  
-- `IF / THEN / ELSE` – evaluates a condition and returns values accordingly  
-- `CASE` – evaluates multiple possible conditions  
-- `IIF()` – shorthand conditional function  
-- `AND` – checks if multiple conditions are true  
-- `OR` – checks if at least one condition is true  
-- `NOT` – reverses a logical condition
-
-Example:
-
+- Segment orders based on value:
 ```sql
-IF [Sales] > 1000 THEN "High Sales"
-ELSE "Low Sales"
+IF [Order Total] >= 500 THEN "Large Order"
+ELSE "Small Order"
 END
 ```
 
-This categorizes sales values into **High Sales** and **Low Sales**.
+- Categorize products:
+```sql
+CASE [Category]
+WHEN "Beauty" THEN "Personal Care"
+WHEN "Clothing" THEN "Apparel"
+ELSE "Other"
+END
+```
 
----
+### Type Conversion Functions
 
-## Type Conversion Functions
+Type conversion functions change data types between string, number, and date.
 
-Type conversion functions change the **data type** of a field.
+Examples:
 
-These functions are useful when performing calculations that require compatible data types.
+- `STR([Customer ID])` → convert numeric ID to text
+- `INT([Unit Price])` → convert price to integer
+- `DATE([Order Date])` → ensure field is treated as date
+- `FLOAT([Discount])` → convert value to decimal
 
-Common type conversion functions include:
+Use case with dataset:
 
-  
-- `INT()` – converts a value to an integer  
-- `FLOAT()` – converts a value to a floating-point number  
-- `STR()` – converts a numeric value to text  
-- `DATE()` – converts a value to a date  
-- `DATETIME()` – converts a value to datetime format
-
-Example:
-
+- Convert Customer ID to string for concatenation:
 ```sql
 STR([Customer ID])
 ```
 
-This converts the customer ID from a **numeric value to text**.
+- Convert price to integer:
+```sql
+INT([Unit Price])
+```
+
+
+Date functions and spatial functions will be explored in the next session.
 
 ---
-
-## Summary
-
-Basic Tableau functions allow analysts to transform raw data into useful analytical outputs.
-
-They enable:
-
-  
-- Aggregating and summarizing data  
-- Performing mathematical operations  
-- Manipulating text values  
-- Creating conditional logic  
-- Converting between different data types  
-
-These functions form the **foundation of calculated fields in Tableau** and are essential for building analytical dashboards and visualizations.
 
 ## Parameters
 
-Parameters behave differently from filters.
+A parameter is a workbook variable that can store a value chosen by the user.
 
-- Parameters do **NOT** filter data automatically  
-- They must be used inside calculated fields  
-- They do **NOT** follow order of operations  
-- They do **NOT** affect LOD expressions unless referenced  
+Parameters can be used in:
 
-### Example
+- Calculations
+- Filters
+- Reference lines
+- Axis logic
 
-`IF [Sales] > [Sales Threshold Parameter] THEN "High"
-ELSE "Low"
-END`
+### Key Characteristics
 
-`IF [Sales] > [Sales Threshold Parameter] THEN "High"
-ELSE "Low"
-END`
-The parameter value controls logic dynamically.
+Parameters:
 
----
+- Do not filter data automatically
+- Must be referenced in logic
+- Do not follow filter order of operations
+- Can store numbers, strings, dates, or booleans
 
-## Filters and Table Calculations
-
-Table calculations are applied **after dimension and measure filters**.
-
-They are influenced by:
-
-- Sorting  
-- Layout  
-- Visible data  
-- Filters applied to the view  
-
-
-### Parameters  
-Parameters are **not filters** and do not automatically affect calculated fields. They must be **explicitly referenced** in calculations to have an effect.
-A **parameter** is a workbook variable (number, date, or string) that can replace a constant value in:
-
-- A calculation  
-- A filter  
-- A reference line  
-
-Parameters allow you to make dashboards **dynamic and interactive**.
+```{mermaid}
+flowchart LR
+A[Parameter Value] --> B[Calculated Field]
+B --> C[View Logic]
+C --> D[Displayed Result]
+```
 
 ---
 
-## To Use a Parameter, You Must:
+### To Use a Parameter
 
-1. **Create the parameter**
-2. **Use it** in a calculation, filter, or reference line
-3. **Provide a way to change its value** 
+1. Create the parameter  
+2. Use it in a calculated field, filter, or reference line  
+3. Show the parameter control to the user  
 
-If users cannot modify the parameter value, it does not provide value.
+#### Step-by-step
 
----
-
-## Cases where parameters are used
-
-### Metric Swapping
-
-One of Tableau’s most common forms of parameter usage is inside of calculated fields. This is beneficial if there are several different metrics and want to allow a dashboard end-user change the metrics in the view. 
-
-To start choose **Create Parameter** from the Data Pane and create a parameter with the following properties:
+- In the Data pane, click the dropdown menu  
+- Select **Create Parameter…**  
+- Configure:
+  - Name  
+  - Data type  
+  - Allowable values (List / Range / All)  
+- Click **OK**  
+- Right-click the parameter → **Show Parameter**
 
 ![Create Parameter]({{< meta image_path >}}/w2_create_parameter.png)
 
-![Parameter Properties]({{< meta image_path >}}/w2_create_parameter_properties.png)
+### Metric Switching
 
-You can then call this parameter in a calculated field using a case statement:
+A parameter can let users switch between metrics.
+
+Example parameter-driven calculation:
+
+```sql
+CASE [Metric]
+WHEN 1 THEN SUM([Revenue])
+WHEN 2 THEN SUM([Quantity])
+ELSE SUM([Profit])
+END
+```
+
+#### Steps
+
+- Create parameter:
+  - Name: Metric
+  - Data type: Integer
+  - Values:
+    - 1 → Revenue  
+    - 2 → Quantity  
+
+- Create calculated field:
 
 ```sql
 CASE [Metric]
@@ -1827,29 +1726,25 @@ ELSE SUM([Quantity])
 END
 ```
 
-![Metric Swapping Calculation]({{< meta image_path >}}/w2_metric_swapping_calc.png)
+- Drag the calculated field into the view  
+- Right-click parameter → Show Parameter  
+- Use dropdown to switch metrics  
 
+![Parameter Properties]({{< meta image_path >}}/w2_create_parameter_properties.png)
+
+![Metric Swapping Calculation]({{< meta image_path >}}/w2_metric_swapping_calc.png)
 
 ::: {.callout-note}
 
 Name of the calculated field should be identical to the parameter name and can include **p.** in the name to make it clear that it is a calculation for the parameter.
-This is a common convention to make it clear that the calculation is related to the parameter.
 
 :::
 
-Right cick to the parameter and choose **Show Parameter**, drag **p.Metric** and `[Order Date]` to the view and you will see that the values in the view change based on the value of the parameter.
+### Dimension Switching
 
-![Parameter View]({{< meta image_path >}}/w2_metric_swapping_view.png)
+A parameter can switch dimensions in the view.
 
-### Dimension Swapping
-
-Like the first example, you can also use parameters in calculated fields to return strings and dates, not just numeric values.
-
-In this example parameter allows swapping between **Categories** `[State]` and `[Region]`.
-
-![Dimension Swapping]({{< meta image_path >}}/w2_dimension_swapping.png)
-
-The calculation:
+Example:
 
 ```sql
 CASE [Location Category]
@@ -1858,170 +1753,261 @@ ELSE [City]
 END
 ```
 
-![Dimension Swapping Calculation]({{< meta image_path >}}/w2_dimension_swapping_calculation.png)
+#### Steps
 
+- Create parameter:
+  - Name: Location Category
+  - Data type: String  
+  - Values: State, City  
 
-Drag **p.Location Category** to the existing view, **Rows** shelf. Play around with the parameter to see it changes between the two different dimensions.
-
-![Parameter View]({{< meta image_path >}}/w2_dimension_swapping_view.png)
-
-
-### Boolean Parameters
-
-Parameters can also be used to return boolean values (True/False) which can be used in calculated fields to control logic. For example, you can create a parameter that allows users to toggle between showing or customers who are from the **state** Florida.
-
-![Bollean Parameter]({{< meta image_path >}}/w2_boolean_parameter.png)
-
-The calculation:
+- Create calculated field:
 
 ```sql
-IF [Is Florida] THEN 
+CASE [Location Category]
+WHEN 'State' THEN [State]
+ELSE [City]
+END
+```
+
+- Drag calculated field to Rows or Columns  
+- Show parameter  
+- Switch between State and City  
+
+
+![Dimension Swapping]({{< meta image_path >}}/w2_dimension_swapping.png)
+
+![Dimension Swapping Calculation]({{< meta image_path >}}/w2_dimension_swapping_calculation.png)
+
+### Boolean Parameter Logic
+
+A boolean-style parameter can toggle analysis behavior.
+
+Example:
+
+```sql
+IF [Is Florida] THEN
     [State] = 'FL'
-ELSE 
+ELSE
     [State] <> 'FL'
 END
 ```
 
-![Bollean Parameter]({{< meta image_path >}}/w2_boolean_parameter_calc.png)
+#### Steps
 
-This calculation will return `TRUE` only for records where the state is Florida when the parameter is set to `1` and others when the parameter is set to `0`. 
-Drag this calculation to the **Filters** shelf and set it to `True` to filter the view based on the parameter value.
+- Create parameter:
+  - Name: Is Florida
+  - Data type: Boolean  
 
-![Boolean Parameter View]({{< meta image_path >}}/w2_boolean_parameter_view.png)
+- Create calculated field:
 
-### Parameters in Filtering
+```sql
+IF [Is Florida] THEN
+    [State] = 'FL'
+ELSE
+    [State] <> 'FL'
+END
+```
 
-Another use case for parameters is to control the view by allowing users to select Top N customers based on their revenue.
+- Drag calculation to Filters  
+- Select True  
+- Show parameter to toggle  
 
-To do this, create a parameter with the following properties:
+![Boolean Parameter]({{< meta image_path >}}/w2_boolean_parameter.png)
+
+![Boolean Parameter Calculation]({{< meta image_path >}}/w2_boolean_parameter_calc.png)
+
+
+### Top N with Parameter
+
+A numeric parameter can drive Top N analysis.
+
+Common workflow:
+
+- Create parameter Top Values
+- Use it in a Top tab filter
+- Let the user choose how many values to show
+
+#### Steps
+
+- Create parameter:
+  - Name: Top values
+  - Data type: Integer  
+
+- Drag dimension (Customer Name) to Filters  
+- Go to Top tab  
+- Select:
+  - By field  
+  - Top [Top values] by SUM(Revenue)  
+
+- Show parameter  
 
 ![Parameter Filter]({{< meta image_path >}}/w2_create_parameter_filter.png)
 
-Then, drag `[Customer Name]` to the view and `SUM([Revenue])` to the **Marks** card. Right click on the `[Customer Name]` field on the view and choose **Filter** and then choose the **Top** tab. Choose **By Field** and then **by** choose the parameter you just created `Top values`. Choose the aggregation `Sum` and the field `Revenue`.
-
 ![Top N Filter]({{< meta image_path >}}/w2_top_n_param_filter.png)
 
-This will allow users to toggle between showing the top N customers and all customers based on their revenue.
 
-![Top Values Parameter View]({{< meta image_path >}}/w2_top_n_param_view.png)
+### Date Parameter Logic
 
-### Parameters in Date Calculations
+Parameters can also support date-based filtering.
 
-In Date calculations, parameters can be used to allow users to select a date range or a specific date to filter the view. For example, you can create a parameter that allows users to filter the view in a specific date range based on date column.
-
-![Date Filtering]({{< meta image_path >}}/w2_date_filtering.png)
-
-By clicking **Add values from** we can select the column which should be used for filter values, in our case that is `[Return Date]`.
-
-The calculation:
+Example:
 
 ```sql
 [Order Date] <= [Select Return Date]
 ```
 
+#### Steps
+
+- Create parameter:
+  - Name: Select Return Date
+  - Data type: Date  
+  - Add values from Return Date  
+
+- Create calculated field:
+
+```sql
+[Order Date] <= [Select Return Date]
+```
+
+- Drag calculation to Filters  
+- Keep True  
+- Show parameter  
+
+![Date Filtering]({{< meta image_path >}}/w2_date_filtering.png)
+
 ![Date Filtering Calculation]({{< meta image_path >}}/w2_date_filtering_calculation.png)
 
-Drag the calculated field to the **Filters Shelf** and set it to **TRUE**.
-
-Add the following fields to the **Rows** shelf:
-   - `[Order ID]`
-   - `DAY([Order Date])`
-   - `DAY([Return Date])`
-
-The view will display the orders placed **before the selected refund date**, along with their corresponding order dates.
-
-![Date Filtering View]({{< meta image_path >}}/w2_date_filtering_view.png)
-
-
+---
 
 ::: {.callout-tip}
 
-You can set the difault value of the date parameter to a specific date or to a dynamic value such as `TODAY()` for live data or `MAX([ORDER DATE])` for the extract data to always show data up to the current date when the dashboard is opened.
-Ticking **When workbook opens, set value to** and choosing `MAX([ORDER DATE])` will ensure that the view always shows data up to the most recent order date when the dashboard is opened.
-This is a common practice to ensure that the dashboard remains relevant and up-to-date without requiring manual updates to the parameter value.
+You can set the default value of the date parameter to a dynamic value such as:
 
+- TODAY()  
+- MAX([ORDER DATE])  
 
-![The Latest Date for Parameters]({{< meta image_path >}}/w2_latest_date_for_parameter.png)
+Set **When workbook opens → MAX(Order Date)** to always show the latest data.
 
 :::
 
 ---
 
-## The Impact of Filters and Parameters on Calculated Fields
+## Filters, Parameters, and Calculated Fields
 
-Filters can change the result of calculated fields depending on **where they are applied in the order of operations**.
+Understanding how filters and parameters affect calculations is essential for correct results.
 
 ### Dimension Filters
 
-Dimension filters are applied **after FIXED LOD expressions** but before table calculations.
+Dimension filters are applied after `FIXED` LOD expressions but before table calculations.
 
-This means:
+Implications:
 
-- They **do NOT affect FIXED calculations**
-- They **DO affect INCLUDE / EXCLUDE**
-- They **DO affect table calculations**
+- They do not affect `FIXED` by default
+- They do affect `INCLUDE` and `EXCLUDE`
+- They affect table calculations because they change the visible data
 
 Example:
 
-` {FIXED [Customer ID] : SUM([Sales]) }`
+```sql
+{ FIXED [Customer ID] : SUM([Sales]) }
+```
 
-If you filter by **Region** (dimension filter), this **FIXED** value will not change.
+If you add a regular dimension filter on `[Region]`, the `FIXED` result does not automatically change.
 
----
+### Measure Filters
 
-## Measure Filters
-
-Measure filters are applied **after aggregation**.
+Measure filters are applied after aggregation.
 
 They affect:
 
-- Table calculations  
-- Aggregated results  
-- Visual output  
+- Aggregated results
+- Visible marks
+- Table calculations
 
-They do **not** recompute FIXED LOD expressions.
+They do not recompute `FIXED` LOD expressions.
+
+### Context Filters
+
+Context filters change the evaluation path by creating a subset earlier in the pipeline.
+
+Implications:
+
+- Context filters do affect `FIXED`
+- They can improve performance in some cases
+- They support dependent filters
+
+Example:
+
+```sql
+{ FIXED [Customer ID] : SUM([Sales]) }
+```
+
+If `[Region]` is placed in context, the calculation is now evaluated only for the selected region.
+
+### Table Calculations
+
+Table calculations are applied after most filters and depend on the displayed marks.
+
+They are influenced by:
+
+- Sorting
+- Layout
+- Partitioning
+- Addressing
+- Visible data
+
+```{mermaid}
+flowchart TD
+A[Source Data] --> B[LOD and Aggregations]
+B --> C[Filters]
+C --> D[Visible Marks]
+D --> E[Table Calculations]
+```
+
+::: {.callout-note}
+
+Parameters change logic only when they are explicitly referenced. Filters change the actual subset of data being evaluated.
+
+:::
+
 
 ---
 
-## Context Filters
+## Example: Comparing SQL Logic with Tableau Logic
 
-Context filters change the **order of operations**.
+Some logic can be prepared in SQL before Tableau, while other logic can be built directly inside Tableau.
 
-When you add a filter to **Context**, Tableau processes it earlier in the pipeline.
+### SQL Example: Precompute Revenue
 
-This means:
+```sql
+SELECT
+    order_id,
+    quantity,
+    unit_price,
+    quantity * unit_price AS revenue
+FROM dbo.order_details;
+```
 
-- Context filters **DO affect FIXED LOD expressions**
-- They create a temporary data subset
-- Other filters are applied after the context filter
+### Tableau Example: Same Logic in a Calculated Field
 
-### Example
+```sql
+[Quantity] * [Unit Price]
+```
 
-`{ FIXED [Customer ID] : SUM([Sales]) }`
+### When to Prefer SQL
 
-If **Region** is placed in **Context**, the FIXED result will now be calculated only for the selected Region.
+Prefer SQL when:
+
+- Logic should be standardized
+- Data should be reshaped before Tableau
+- Performance depends on pre-aggregation
+
+### When to Prefer Tableau
+
+Prefer Tableau when:
+
+- Logic is view-specific
+- Analysts need flexibility
+- Interactivity or parameterization is required
 
 ---
-
-## When to Use Context Filters
-
-Use context filters when:
-
-- You need a FIXED LOD to respect a filter  
-- You want to improve performance with large datasets  
-- You need dependent filters  
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
