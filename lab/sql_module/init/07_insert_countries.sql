@@ -85,3 +85,6 @@ SELECT
   point_id,
   ST_GeomFromText(wkt, 4326)
 FROM analytics._stg_points;
+
+
+
