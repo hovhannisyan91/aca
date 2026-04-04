@@ -1,0 +1,679 @@
+---
+title: "Session 10: A/B Testing"
+categories: [Multivariate Analysis, Biviate Analysis, Hypothesis Testing, Statistics, Design of Experiments]
+image_path: "/img/python/10"
+---
+
+## Outline
+
+**In this session we will cover the following topics:**
+
+-   What is A/B testing?
+-   A/B testing steps
+-   Statistics Review
+-   Hypothesis testing with Python
+-   Multivariate testing
+
+
+::: {.callout-tip}
+Before you start, make sure to read the [Statistics Session 6](../statistics/session6.qmd) materials, as we will be using the concepts of hypothesis testing and p-value in this session.
+:::
+
+## What is A/B Testing?
+
+A/B Testing is a simplified term for **randomized controlled experiment**,
+where two samples (A and B) of a single **object** (product/service) are
+compared.
+
+
+Have you ever seen the same website with multiple designs during a certain
+period of time?
+
+![]({{< meta image_path >}}/ab-testing.png)
+
+### Applications of A/B Testing
+
+-   **User Experience (UX):** Testing Software Navigation, Color, Shape of the components
+-   **Marketing:** Testing the content of a campaign
+-   **Drug Development:** measuring the effect of the drug compared with
+    either its *competitors* or *placebo*
+
+$$\downarrow$$
+
+**practically everywhere**
+
+::: {.callout-important}
+In order to give an answer, we need to run an experiment!
+
+**Remember the Zen of Python:** *"In the face of ambiguity, refuse the temptaticon to guess."*
+:::
+
+
+## A/B Testing Steps
+
+In general, A/B testing is done with **four** sequential steps:
+
+1.  **Choose and characterize metrics to evaluate your experiments:**
+    -   What do you care about?
+    -   How do you want to measure the effect?
+2.  **Power Analysis:**
+    -   Significance level ($\alpha$)
+    -   Statistical power ($1-\beta$)
+    -   Practical Significance level
+    -   Calculate the required sample size
+3.  **Sample for control/treatment groups and run the test**
+4.  **Analyze the results and draw valid conclusions**
+
+
+### Choosing metrics  | Step 1
+
+**We have two types of metrics:**
+
+- **Invariant metrics** - do not change from control to treatment groups
+- **Evaluation metrics** - the ones in the change of which we are interested.
+
+**Four categories of metrics:**
+
+-   Sums and counts
+-   Distribution (mean, median, percentiles)
+-   Probability and rates (e.g. Click-through probability, Click-through
+    rate)
+-   **Ratios:** Return on Investment (RoI)
+
+<!-- Deep Dive -->
+
+### Power Analysis | Step 2
+
+The power of the test ($1-\beta$) is the probability of rejecting the $H_0$ when it is False.
+
+![]({{< meta image_path >}}/power.png)
+
+#### Statistical Power
+
+We use power to calculate the **sample size** we need. In general, we have
+the following parameters:
+
+-   Power of the test ($1-\beta$)
+-   Significance level ($\alpha$)
+-   Effect size ($\delta$)
+-   Sample size ($n$)
+
+
+::: {.callout-note}
+*If you determine any three, the forth will be calculated and derived naturally *
+
+The rule of thumb for $1-\beta$ is **0.8**, which means that we have 80% chance of rejecting the $H_0$ when it is False.
+
+:::
+
+
+#### Effect Size
+
+**Effect size:**
+
+$$H_0: \mu_1=\mu_2$$ $$H_1: \mu_1\ne\mu_2$$
+
+Sometimes we want to reject the $H_0$ with a certain effect, for example when $|\mu_1-\mu_2|>\delta$
+
+<!-- TODO -->
+
+
+
+#### Effect size use case
+
+The news broadcasting company is testing whether users stay longer on their website with the new website design. The *control* group consists
+of visits to the old website, while the *treatment* group consists of
+visits to the new website. The new design will be considered effective if the difference in the average duration of the stay is more
+than 5.5 minutes; thus $\mu_t-\mu_c >5.5$, the 5.5 here is the effect.
+
+The effect that we want to detect is 5.5, while the effect size is
+standardized by the standard deviation: $$d = \frac{|\mu_t-\mu_c|}{\sigma}$$
+
+#### T-Value
+
+
+The degree of difference relative to the variation in our data groups.\
+Large `t-values` indicate a higher degree of difference between the
+groups.
+
+#### P-Value
+
+`P-value` measures the probability that the results would occur by random
+chance. Therefore, the smaller the p-value is, the more statistically
+significant difference there will be between the two groups.
+
+
+#### Sample size
+
+**Sample size will be determined by the below formula:**
+
+$$n= \left( \frac{Z_{1-\alpha/2}+Z_{1-\beta/2}}{Effect \text{ }Size} \right)^2$$
+
+**where**
+
+-   $Z_{1-\alpha/2}$ is the z-score corresponding to the desired confidence level (e.g., for a 95% confidence level, $Z_{1-\alpha/2} \approx 1.96$)
+-   $Z_{1-\beta/2}$ is the z-score corresponding to the desired power level (e.g., for 80% power, $Z_{1-\beta/2} \approx 0.84$)
+-   $Effect \text{ }Size$ is the standardized effect size, calculated as the difference in means divided by the standard deviation.
+-   $n$ is the required sample size per group.
+
+### Random Sampling | Step 3
+
+Once we have determined the required sample size, we can **randomly assign users** to either the `control` or `treatment` group. 
+
+This randomization helps to ensure that any differences observed between the groups can be attributed to the treatment effect rather than confounding variables.
+
+```{python}
+# | echo : False
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(42)
+
+df_sampling = pd.DataFrame(
+    {
+        "user_id": np.arange(1, 101),
+        "category": rng.choice(["A", "B", "C"], size=100, p=[0.5, 0.3, 0.2]),
+        "score": rng.normal(loc=75, scale=10, size=100).round(2),
+    }
+)
+```
+
+
+**Let's say we have the following `DataFrame`:**
+
+```{python}
+print(f'The shape of the Dataframe: {df_sampling.shape}' )
+print(f'The columns of the Dataframe: {df_sampling.columns}' )
+df_sampling.head()
+```
+
+
+#### Summary statistics of the `score` column:
+
+```{python}
+df_sampling['score'].describe()[['mean', 'std', 'min', 'max']]
+```
+
+```{python}
+df_sampling['category'].value_counts().sort_index()
+```
+
+```{python}
+df_sampling.groupby('category')['score'].describe()[['mean', 'std', 'min', 'max']]
+```
+
+#### Random Sampling
+
+Suppose we want to take a random sample of `20 users` from this `DataFrame` for our A/B test. We can use the `sample` method from pandas to do this:
+
+```{python}
+random_sample = df_sampling.sample(n=20, random_state=42)
+random_sample.shape
+```
+
+
+```{python}
+random_sample.groupby('category')['score'].describe()[['mean', 'std', 'min', 'max']]
+```
+
+```{python}
+random_sample['category'].value_counts().sort_index()
+```
+
+#### Stratified Sampling | proportional to the category distribution
+
+```{python}
+stratified_sample = (
+    df_sampling
+    .groupby("category", group_keys=False)
+    .sample(frac=0.2, random_state=42)
+    .reset_index(drop=True)
+)
+```
+
+
+::: {.callout-important title = "Line by line explanation"}
+
+```python
+.groupby("category", group_keys=False)
+```
+
+- Splits data into strata (A, B, C…)
+- Each group is processed independently
+
+---
+
+```python
+.sample(frac=0.2, random_state=42)
+```
+
+- Takes 20% from each category
+- Preserves distribution
+- Deterministic due to seed
+
+:::
+
+```{python}
+stratified_sample.head()
+```
+
+**Summary statistics of the `score` column for the stratified sample:**
+
+```{python}
+stratified_sample.groupby('category')['score'].describe()[['mean', 'std', 'min', 'max']]
+```
+
+
+```{python}
+stratified_sample['category'].value_counts().sort_index()
+```
+
+Checking the distribution of the `category` column in the original `DataFrame` and the stratified sample:
+
+**Original DataFrame category distribution:**
+```{python}
+df_sampling['category'].value_counts(normalize=True).sort_index()
+```
+
+**Stratified Sample category distribution:**
+```{python}
+
+stratified_sample['category'].value_counts(normalize=True).sort_index()
+```
+
+#### Stratified Sampling | Equal number of samples from each category
+
+There might be situations where we want to ensure an equal number of samples from each category.
+
+```{python}
+stratified_sample = (
+    df_sampling
+    .groupby("category", group_keys=False)
+    .sample(n=10, random_state=42)
+    .reset_index(drop=True)
+)
+```
+
+::: {.callout-important}
+`n` must be less than or equal to the smallest group size in the original DataFrame. 
+In this case, since category C has only 14 samples, we can sample at most 20 from each category. 
+
+```{python}
+df_sampling['category'].value_counts()
+```
+
+:::
+
+
+#### Splitting the data into control and treatment groups
+
+##### Pure Random Splitting
+
+- Completely random
+- Does NOT preserve category distribution
+- Can introduce bias 
+
+```{python}
+rng = np.random.default_rng(42)
+
+df_random_split = df_sampling.assign(
+    group=rng.choice(["control", "treatment"], size=len(df_sampling))
+)
+```
+
+```{python}
+df_random_split['group'].value_counts()
+```
+
+
+##### Stratified Splitting
+
+
+```{python}
+df_stratified_split = (
+    df_sampling
+    .assign(
+        group=lambda x: (
+            x.groupby("category")["user_id"]
+            .transform(
+                lambda g: rng.permutation(
+                    ["control"] * (len(g)//2) + 
+                    ["treatment"] * (len(g) - len(g)//2)
+                )
+            )
+        )
+    )
+)
+
+```
+
+
+```{python}
+df_stratified_split[['group', 'category']].value_counts()
+```
+
+### Analyzing the results | Step 4
+
+Recall the decision rules for hypothesis testing fro **Statistics Session 6:**
+
+<!-- TODO -->
+@hypothesis-testing-decision-rules
+
+@visual-representation-hypothesis-testing
+
+## Power Analysis With Python
+
+### Loading Packages
+
+```{python}
+import numpy as np
+import pandas as pd
+import math
+from statsmodels.stats.power import TTestIndPower
+from statsmodels.stats.multitest import multipletests
+from scipy.stats import ttest_ind
+import scipy
+import matplotlib.pyplot as plt
+```
+
+::: {.callout-tip}
+Do not forget to install the required packages before running the code.
+
+Make sure that you are in the correct virtual environment, and run the following command in your terminal:
+
+```bash
+bash
+pip install statsmodels scipy
+```
+
+**NOTE:** you must run the above command in your terminal, given the fact that the your virtual environment is activated.
+:::
+
+### Calculating Sample Size
+
+How much sample do you need to take, if you want to detect effect size of
+$0.4$, with the power of $0.8$ and significance level of $0.05$ ?
+
+**You will do two independent samples t-test.**
+
+```{python}
+N = TTestIndPower().solve_power(effect_size = 0.4, power = 0.8,
+                            alpha = 0.05)
+
+N
+```
+
+
+**Note, sample size is per group `{python} N`
+
+### Sampling distributions
+
+Sampling distribution of the means for two groups (control and treatment):
+
+$$H_0: \mu_c=\mu_t$$ $$H_1: \mu_c\ne\mu_t$$
+
+![]({{< meta image_path >}}/p1.png)
+
+---
+
+![]({{< meta image_path >}}/p2.png)
+
+### Power
+
+**Relationship between power and effect size:** There is a **direct relationship** between power and effect size: Increasing
+the effect size will increase power.
+
+![]({{< meta image_path >}}/p3.png)
+
+
+```{python, out.height = '65%'}
+TTestIndPower().plot_power(dep_var='nobs', 
+                            nobs=np.array(range(5, 100)), 
+                            effect_size=np.array([0.2, 0.5, 0.8]),
+                            title='Power of t-Test')
+```
+
+
+
+**Plot power and effect size using python, sample size = 100**
+
+
+```{python, out.height = '65%'}
+TTestIndPower().plot_power(dep_var='effect_size', nobs= [100],
+                                 effect_size=np.arange(0.1, 1, 0.05),
+                                 title='Power of t-Test')
+```
+
+
+Increasing sample size will also increase the power, as with the higher
+sample size the sampling distribution of the mean becomes narrower.
+Recall, the standard deviation of the sampling distribution (Standard
+Error) of the mean is calculated as: $$SE = \frac{\sigma}{\sqrt{n}}$$
+
+![]({{< meta image_path >}}/p4.png)
+
+
+
+## Hypothesis Testing
+
+::: {.callout-tip title = "Use case"}
+
+The news streaming company is adding a new feature to the website. The effect the company is trying to detect is **equal to 5 minutes.**
+
+-   It is a randomized experiment, meaning that every visitor to the
+    site will have 0.5 probability of being in *the treatment* (new feature)
+    group and 0.5 probability of being in *control* group (old design).
+-   The minimum effect they want to detect is *an increase by 5 minutes*.
+-   From the historical data they have estimated the *standard deviation
+    to be 13.7 minutes*.
+
+:::
+
+
+**The hypothesis:**
+
+$$H_0: \mu_t = \mu_c$$ $$H_1: \mu_t\ne\mu_c$$
+
+#### Sample Size
+
+**Specifications:**
+
+-   $\sigma = 13.7$
+-   Power: $(1-\beta) = 0.8$
+-   Significance level: $\alpha = 0.05$
+-   Effect size: $\frac{|\mu_t-\mu_c|}{\sigma} = \frac{5}{13.7} = 0.365$
+
+**Determine the sample size for each group:**
+
+```{python}
+TTestIndPower().solve_power(effect_size = 0.365, power = 0.8,
+                            alpha = 0.05, alternative = 'larger')
+```
+
+#### Loading the data
+
+Load the data
+
+```{python}
+# | echo : False
+expr = pd.read_csv('../../lab/python/data/ab_testing/experiment.csv')
+expr.head()
+```
+
+
+```python
+expr = pd.read_csv('../data/ab_testing/experiment.csv')
+expr.head()
+```
+
+```{python}
+expr.groupby('Group')['viewing_time'].mean()
+```
+
+#### T-test
+
+**T-test with `scipy`:**
+
+```{python}
+ctrl = expr[expr['Group'] == 'control']['viewing_time']
+treatment = expr[expr['Group'] == 'treatment']['viewing_time']
+```
+
+```{python}
+test_res = ttest_ind(treatment, ctrl)
+tstat, pvalue=test_res
+
+```
+
+```{python}
+f"t-statistics: {tstat:.4f}"
+```
+
+```{python}
+f"p-value: {pvalue:.4f}"
+```
+
+
+
+### Interpretation
+
+We failed to reject the $H_0$ where $\alpha = 0.05$. We haven't seen the anticipated improvement! 
+
+**How much improvement is there ?**
+
+```{python}
+diff=treatment.mean() - ctrl.mean()
+sd_pooled=math.sqrt((treatment.std()**2+ ctrl.std()**2)/2)
+```
+
+To find the detected effect size, calculate **Cohen's d.**
+
+$$\frac{\bar{x_t}-\bar{x_c}}{pooled \; SD}$$
+
+$$\downarrow$$
+
+$$\frac{\bar{x_t}-\bar{x_c}}{\sqrt{(s_t^2+s_c^2)/2}}$$
+
+```{python}
+f"The detected Effect: {diff/sd_pooled:.4f}"
+```
+
+## Practical Significance
+
+
+There could be cases, where statistical tests show significnce while in the reality the difference is not that actual.
+
+Such effects might happen in bellow cases:
+
+1. low variance between two samples
+2. the sample size is huge
+
+
+
+**Recall:**
+
+$$t_{value}=\frac{\bar{x_1}-\bar{x_1}}{\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}}$$
+
+
+### Case 1 | low variance
+
+
+```python
+case1=pd.read_csv("../data/ab_testing/case1.csv")
+case1.head()
+```
+
+```{python}
+# | echo : False
+case1=pd.read_csv("../../lab/python/data/ab_testing/case1.csv")
+case1.head()
+```
+
+
+```{python}
+case1.describe().loc[['count','mean','std']]
+```
+
+
+### Case 2 | huge sample size
+
+
+
+```python
+case2=pd.read_csv("../data/ab_testing/case2.csv")
+case2.head()
+```
+```{python}
+# | echo : False
+case2=pd.read_csv("../../lab/python/data/ab_testing/case2.csv")
+case2.head()
+```
+
+```{python}
+case2.describe().loc[['count','mean','std']]
+```
+
+
+
+### Utils Functions
+
+```{python}
+def measures(data):
+    x1=data.describe().loc['mean','score1']
+    x2=data.describe().loc['mean','score2']
+    s1=data.describe().loc['std','score1']
+    s2=data.describe().loc['std','score2']
+    return x1,x2,s1,s2
+```
+
+
+```{python}
+def ttest(x1,x2,s1,s2,n):
+    t_value=(x1-x2)/math.sqrt(s1**2/n+s2**2/n)
+    p_value=scipy.stats.t.sf(abs(t_value), df=n-1)*2
+    return f't-value: {t_value:.4f}', f'p-value: {p_value:.4f}'
+```
+
+
+### Case 1 | Experiment
+
+```{python}
+# t-test for case 1
+c1=measures(case1)
+ttest(*c1,20)
+```
+
+
+### Case 2 | Experiment
+
+#### `N=200`
+
+```{python}
+c2=measures(case2)
+ttest(*c2,200)
+```
+#### `N=200`
+
+```{python}
+c2=measures(case2)
+ttest(*c2,200)
+```
+
+#### `N=2000`
+
+```{python}
+c2=measures(case2)
+ttest(*c2,2000)
+```
+
+#### `N=20000`
+
+```{python}
+c2=measures(case2)
+ttest(*c2,20000)
+```
+
+## A/A Testing
+
+`A/A` testing is a type of experiment where two identical versions of a product or service are compared to each other. 
+The purpose of `A/A` testing is to validate the experimental setup and ensure that there are no biases or confounding factors that could affect the results of future `A/B` tests.
