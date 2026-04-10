@@ -362,8 +362,8 @@ Recall the decision rules for hypothesis testing fro **Statistics Session 6:**
 
 See
 
--  @sec-hypothesis-testing-decision-rules
--  @sec-visual-representation-hypothesis-testing
+-  @materials/statistics/session6.qmd#sec-hypothesis-testing-decision-rules
+-  @materials/statistics/session6.qmdsec-visual-representation-hypothesis-testing
 
 ## Power Analysis With Python
 
@@ -391,6 +391,7 @@ pip install statsmodels scipy
 ```
 
 **NOTE:** you must run the above command in your terminal, given the fact that the your virtual environment is activated.
+
 :::
 
 ### Calculating Sample Size
@@ -408,7 +409,7 @@ N
 ```
 
 
-**Note, sample size is per group `{python} N`
+**Note, sample size is per group `{python} int(N)+1`**
 
 ### Sampling distributions
 
@@ -579,6 +580,40 @@ Such effects might happen in bellow cases:
 $$t_{value}=\frac{\bar{x_1}-\bar{x_1}}{\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}}$$
 
 
+
+### Utils Functions
+
+First, lets define some helper functions to compute the t-statistic and p-value for two independent samples.
+
+The function below computes key statistical measures from a dataset and extracts:
+
+- Mean of `score1`
+- Mean of `score2`
+- Standard deviation of `score1`
+- Standard deviation of `score2`
+
+```{python}
+def measures(data):
+    desc = data.describe()
+    x1 = desc.loc['mean', 'score1']
+    x2 = desc.loc['mean', 'score2']
+    s1 = desc.loc['std', 'score1']
+    s2 = desc.loc['std', 'score2']
+    return x1, x2, s1, s2
+```
+
+
+The Function below computes the t-value and p-value for two independent samples using the formula for the t-statistic and the survival function from the `scipy.stats` module to calculate the p-value.
+
+```{python}
+def ttest(x1,x2,s1,s2,n):
+    t_value = (x1-x2)/math.sqrt(s1**2/n+s2**2/n)
+    p_value = scipy.stats.t.sf(abs(t_value), df=n-1)*2
+    return f't-value: {t_value:.4f}', f'p-value: {p_value:.4f}'
+```
+
+
+
 ### Case 1 | low variance
 
 
@@ -599,9 +634,23 @@ case1.describe().loc[['count','mean','std']]
 ```
 
 
+
+#### Experiment
+
+```{python}
+# t-test for case 1
+c1=measures(case1)
+ttest(*c1,20)
+```
+
+
+
+::: {.callout-important}
+However, the t-test shows that there is a significant difference between the two groups, with a t-value of 2.8284 and a p-value of 0.0050. This is because the low variance in the data makes it easier to detect even small differences between the groups, leading to a statistically significant result.
+:::
+
+
 ### Case 2 | huge sample size
-
-
 
 ```python
 case2=pd.read_csv("../data/ab_testing/case2.csv")
@@ -617,335 +666,54 @@ case2.head()
 case2.describe().loc[['count','mean','std']]
 ```
 
+#### Experiment
 
+Now we will apply the t-test to case 2, which has a huge sample size of 20,000, however at first will will start with smaller sample size to see how the results change with the increase of the sample size.
 
-### Utils Functions
-
-```{python}
-def measures(data):
-    x1=data.describe().loc['mean','score1']
-    x2=data.describe().loc['mean','score2']
-    s1=data.describe().loc['std','score1']
-    s2=data.describe().loc['std','score2']
-    return x1,x2,s1,s2
-```
-
-
-```{python}
-def ttest(x1,x2,s1,s2,n):
-    t_value=(x1-x2)/math.sqrt(s1**2/n+s2**2/n)
-    p_value=scipy.stats.t.sf(abs(t_value), df=n-1)*2
-    return f't-value: {t_value:.4f}', f'p-value: {p_value:.4f}'
-```
-
-
-### Case 1 | Experiment
-
-```{python}
-# t-test for case 1
-c1=measures(case1)
-ttest(*c1,20)
-```
-
-
-### Case 2 | Experiment
-
-#### `N=200`
+##### `N=200`
 
 ```{python}
 c2=measures(case2)
 ttest(*c2,200)
 ```
-#### `N=200`
+##### `N=200`
 
 ```{python}
 c2=measures(case2)
 ttest(*c2,200)
 ```
 
-#### `N=2000`
+##### `N=2000`
 
 ```{python}
 c2=measures(case2)
 ttest(*c2,2000)
 ```
 
-#### `N=20000`
+##### `N=20000`
 
 ```{python}
 c2=measures(case2)
 ttest(*c2,20000)
 ```
 
+
+::: {.callout-important}
+As we can see, as the sample size increases, the t-value increases and the p-value decreases, leading to a statistically significant result. This is because with a huge sample size, even very small differences between the groups can become statistically significant, which may not be practically significant in real-world terms.
+:::
+
+
 ## A/A Testing
 
 `A/A` testing is a type of experiment where two identical versions of a product or service are compared to each other. 
 The purpose of `A/A` testing is to validate the experimental setup and ensure that there are no biases or confounding factors that could affect the results of future `A/B` tests.
 
+![]({{< meta image_path >}}/aa-testing.png)
 
-## Multivariate Testing
+<!-- TODO: -->
 
-In real life, we often have more than two groups to compare. For example, we might want to test multiple versions of a website design or several different marketing campaigns.
+## Multiariate Testing
 
-![]({{< meta image_path >}}/multivariate-testing.png){fig-align="center" }
-
-### Infinite Monkey Theorem
-
-The *Infinite Monkey Theorem* says that if random typing continues for long enough, even very unlikely strings will eventually appear.
-
-This is a useful analogy for hypothesis testing.
-
-- when we run one test, the probability of a false positive is controlled at $\alpha$
-- when we run many tests, the chance of seeing at least one false positive increases
-- so, with enough tests, some apparently significant results may appear purely by chance
-
-![]({{< meta image_path >}}/imt.jpg)
-
-### Why multiple testing is a problem
-
-For a single hypothesis test:
-
-$$P(\text{Type I error}) = \alpha$$
-
-$$P(\text{No Type I error}) = 1 - \alpha$$
-
-If we perform $m$ independent hypothesis tests, then:
-
-$$P(\text{No Type I error in all } m \text{ tests}) = (1-\alpha)^m$$
-
-Therefore, the probability of making **at least one** Type I error becomes:
-
-$$P(\text{At least one Type I error}) = 1 - (1-\alpha)^m$$
-
-This means that even if each test looks safe on its own, the overall analysis becomes riskier as the number of tests grows.
-
-*Type I error* means a **false positive**: rejecting the null hypothesis when it is actually true.
-
-### Libraries
-
-```{python}
-#| echo: true
-
-import matplotlib.pyplot as plt
-from scipy import stats
-from statsmodels.stats.multitest import multipletests
-```
-
-
-
-```{python}
-#| echo: false
-
-def markdown_table(df, decimals=4, index=False):
-    out = df.copy()
-
-    if index:
-        out = out.reset_index()
-
-    for col in out.columns:
-        if pd.api.types.is_numeric_dtype(out[col]):
-            out[col] = out[col].map(
-                lambda x: "" if pd.isna(x) else f"{x:.{decimals}f}"
-            )
-        else:
-            out[col] = out[col].fillna("").astype(str)
-
-    header = "| " + " | ".join(map(str, out.columns)) + " |"
-    separator = "| " + " | ".join(["---"] * len(out.columns)) + " |"
-
-    rows = []
-    for row in out.to_numpy():
-        rows.append("| " + " | ".join(map(str, row)) + " |")
-
-    return "\n".join([header, separator] + rows)
-
-
-def pairwise_ttests(data, value_col, group_col):
-    groups = sorted(data[group_col].dropna().unique())
-    rows = []
-
-    for g1, g2 in combinations(groups, 2):
-        x = data.loc[data[group_col] == g1, value_col].dropna()
-        y = data.loc[data[group_col] == g2, value_col].dropna()
-
-        t_stat, raw_p = stats.ttest_ind(
-            x, y,
-            equal_var=False,
-            nan_policy="omit"
-        )
-
-        rows.append({
-            "group_1": g1,
-            "group_2": g2,
-            "t_statistic": t_stat,
-            "raw_p_value": raw_p
-        })
-
-    return pd.DataFrame(rows)
-
-
-def pairwise_matrix(results, value_col, groups):
-    matrix = pd.DataFrame("", index=groups, columns=groups)
-
-    for g in groups:
-        matrix.loc[g, g] = "—"
-
-    for _, row in results.iterrows():
-        value = row[value_col]
-        value_str = f"{value:.4f}" if pd.notna(value) else ""
-        matrix.loc[row["group_1"], row["group_2"]] = value_str
-        matrix.loc[row["group_2"], row["group_1"]] = value_str
-
-    return matrix
-```
-
-### Type I error curve
-
-The following plot shows how quickly the probability of observing at least one false positive grows as the number of hypothesis tests increases when $\alpha = 0.05$.
-
-```{python}
-
-#| fig-width: 18
-#| fig-height: 5
-#| out-width: 100%
-#| out-height: auto
-#| fig-align: center
-
-m_tests = np.arange(0, 101)
-prob_at_least_one_error = 1 - (1 - 0.05) ** m_tests
-
-plt.figure()
-plt.plot(m_tests, prob_at_least_one_error)
-plt.xlabel("Number of hypotheses")
-plt.ylabel("Probability of at least 1 Type I error")
-plt.title("Family-level risk grows as the number of tests increases")
-plt.show()
-```
-
-### Multiple hypotheses
-
-Assume we are testing $H^1, H^2, \ldots, H^m$.
-
-- $m$ is the total number of hypotheses
-- $m_0$ is the number of truly null hypotheses
-- $R$ is the number of rejected hypotheses
-- $V$ is the number of Type I errors among the rejected hypotheses
-
-![]({{< meta image_path >}}/p5.png){fig-align="center" width="55%"}
-
-$V$ is the number of false positives.
-
-### Controlling the Type I error
-
-There are several ways to summarize error rates when multiple tests are performed.
-
-- **Per comparison error rate (PCER):** the expected number of Type I errors divided by the number of hypotheses
-
-  $$PCER = \mathbb{E}[V]/m$$
-
-- **Per-family error rate (PFER):** the expected number of Type I errors
-
-  $$PFER = \mathbb{E}[V]$$
-
-- **Family-wise error rate (FWER):** the probability of making at least one Type I error
-
-  $$FWER = P(V \ge 1)$$
-
-- **False discovery rate (FDR):** the expected proportion of Type I errors among the rejected hypotheses
-
-  $$FDR = \mathbb{E}\left(\frac{V}{R} \mid R > 0\right) P(R > 0)$$
-
-**The main difference is the target being controlled.**
-
-- FWER is very strict because it tries to protect against even a single false positive
-- FDR is more flexible because it focuses on the proportion of false discoveries among the reported discoveries
-
-### Loading the data
-
-We now use the `experiment_m.csv` data set.
-
-
-```{python}
-
-experiment_m = pd.read_csv("../../lab/python/data/ab_testing/experiment_m.csv")
-groups = sorted(experiment_m["group"].dropna().unique())
-```
-
-```python
-#| echo: true
-
-experiment_m = pd.read_csv("../data/ab_testing/experiment_m.csv")
-groups = sorted(experiment_m["group"].dropna().unique())
-
-```
-
-
-
-```{python}
-group_counts = (
-    experiment_m.groupby("group", as_index=False)
-    .size()
-    .rename(columns={"size": "n"})
-)
-
-group_counts
-```
-
-```{python}
-#| echo: false
-#| output: asis
-
-print(markdown_table(group_counts, decimals=0))
-```
-
-This table helps us verify the sample size in each group before starting the pairwise tests.
-
-### Pairwise t-test without adjustment
-
-We first compute all pairwise t-tests with **no correction**.
-
-We use **Welch’s t-test** rather than the equal-variance version because this matches the logic of the original R code with `pooled.sd = FALSE`.
-
-```{python}
-#| echo: true
-
-pairwise_results = pairwise_ttests(
-    experiment_m,
-    value_col="viewing_time",
-    group_col="group"
-)
-
-pairwise_results.head()
-```
-
-The next table shows the raw pairwise p-values before any adjustment is applied.
-
-```{python}
-#| echo: false
-#| output: asis
-
-raw_results = pairwise_results[["group_1", "group_2", "raw_p_value"]].copy()
-raw_results = raw_results.sort_values("raw_p_value").reset_index(drop=True)
-
-print(markdown_table(raw_results))
-```
-
-### Raw p-value matrix
-
-A matrix view is often easier to scan when many group comparisons are involved.
-
-::: {.smaller}
-```{python}
-#| echo: false
-#| output: asis
-
-raw_matrix = pairwise_matrix(pairwise_results, "raw_p_value", groups)
-print(markdown_table(raw_matrix, decimals=4, index=True))
-```
-:::
-
-At this stage, every p-value is interpreted as if it were the only test being performed.  
-That is exactly why multiple testing corrections are needed.
 
 
 ## Case Study | Fast Food Chain 
@@ -1138,6 +906,7 @@ store_level = (
 ```
 
 #### Comparing Promotion 1 vs Promotion 2 in an A/B Test
+
 
 ```{python}
 t,p = stats.ttest_ind(
