@@ -163,30 +163,214 @@ coordinates
 
 ## Set
 
-A **set** stores unique values.
+A **set** is a collection data structure that stores **unique, unordered elements**. It is highly optimized for **membership testing** and **set algebra operations**, making it extremely useful in analytical workflows.
 
 ```{python}
 customer_ids = {1, 2, 3, 3, 4}
 customer_ids
 ```
 
-**Properties:**
+::: {.callout-important}
+Notice that duplicate values are automatically removed.
+:::
+---
 
-- Unordered  
-- No duplicates  
-- Fast membership checking  
+### Key Properties
 
-**Analytical use case:**
+- **Unordered:** Elements do not have a fixed position (no indexing like lists).
+- **Unique values only:** Duplicate entries are automatically eliminated.
+- **Mutable container:** You can add or remove elements after creation.
+- **Fast membership checking:** Checking `x in set` is typically **O(1)** due to hashing.
+- **Heterogeneous (with restriction):** Can contain multiple data types, but **all elements must be hashable** (e.g., no lists or dicts).
 
-- Removing duplicates  
-- Comparing segments  
+### Creating Sets
+
+```{python}
+# Using curly braces
+s1 = {1, 2, 3}
+
+# Using set() constructor
+s2 = set([1, 2, 2, 3])
+
+# Empty set (IMPORTANT: {} creates a dict!)
+empty_set = set()
+```
+
+### Basic Operations
+
+#### Handling elements
+
+```{python}
+s = {1, 2, 3}
+
+s.add(4)        # Add element
+s.remove(2)     # Remove element (error if not found)
+s.discard(10)   # Safe remove (no error)
+s.pop()         # Remove random element
+```
+
+#### Membership Check
+
+```{python}
+3 in s   # True
+10 in s  # False
+```
+
+### Set Algebra
+
+These operations are the **main reason sets are powerful in analytics**.
 
 ```{python}
 segment_a = {1, 2, 3}
 segment_b = {3, 4, 5}
-
-segment_a.intersection(segment_b)
 ```
+
+#### Intersection (common elements)
+
+```{python}
+segment_a.intersection(segment_b)
+# or
+segment_a & segment_b
+```
+
+**Result:** `{3}`
+
+---
+
+#### Union (all unique elements)
+
+```{python}
+segment_a.union(segment_b)
+# or
+segment_a | segment_b
+```
+
+**Result:** `{1, 2, 3, 4, 5}`
+
+---
+
+#### Difference 
+
+>elements in A but not in B
+
+```{python}
+segment_a.difference(segment_b)
+# or
+segment_a - segment_b
+```
+
+**Result:** `{1, 2}`
+
+---
+
+#### Symmetric Difference
+
+>non-overlapping elements
+
+```{python}
+segment_a.symmetric_difference(segment_b)
+# or
+segment_a ^ segment_b
+```
+
+**Result:** `{1, 2, 4, 5}`
+
+---
+
+### Analytical Use Cases
+
+#### Removing Duplicates
+
+```{python}
+transactions = [101, 102, 102, 103, 104]
+unique_transactions = set(transactions)
+unique_transactions
+```
+
+#### Customer Overlap Between Campaigns
+
+```{python}
+campaign_a = {1, 2, 3, 4}
+campaign_b = {3, 4, 5, 6}
+
+overlap = campaign_a & campaign_b
+overlap
+```
+
+**Used for:**
+
+- Cross-sell analysis  
+- Audience overlap measurement  
+
+#### Finding New Customers
+
+```{python}
+new_customers = campaign_b - campaign_a
+new_customers
+```
+
+
+#### Data Validation / Integrity Checks
+
+```{python}
+valid_ids = {1, 2, 3, 4, 5}
+incoming_ids = {2, 3, 6}
+
+invalid_ids = incoming_ids - valid_ids
+```
+
+
+### Limitations
+
+- No indexing → `s[0]` 
+- No guaranteed order
+- Elements must be **immutable (hashable)**
+
+```{python}
+# This will fail
+s = {[1, 2], [3, 4]}
+
+```
+
+
+### When to Use Sets
+
+Use a set when:
+
+- You **don’t care about order**
+- You need **unique values**
+- You need **fast lookups**
+- You are doing **comparisons between groups**
+
+---
+
+### Comparison with Lists
+
+| Feature              | List        | Set          |
+|--------------------|------------|-------------|
+| Order              | Yes        | No          |
+| Duplicates         | Allowed    | Not allowed |
+| Indexing           | Yes        | No          |
+| **Membership speed**   | **O(n)**       | **O(1)**        |
+| Use case           | Sequence   | Uniqueness / logic |
+
+
+
+A **set** is not just a container, it is a **mathematical tool** embedded in Python that enables:
+
+- Efficient deduplication  
+- Fast membership checks  
+- Powerful group comparisons  
+
+In data analytics, sets are especially valuable when working with:
+
+- Customer segments  
+- Campaign overlaps  
+- Data validation  
+- Feature engineering logic  
+
+>Think of sets as your **go-to structure for “who is in / who is not in” problems**.
+
 
 ---
 
@@ -458,7 +642,7 @@ coordinates = (40.18, 44.51)
 
 ### Why This Matters in Data Analytics
 
-Mutability affects:
+**Mutability affects:**
 
   
 - Function behavior  
