@@ -145,7 +145,7 @@ $$
 
 This is called **Least Squares**.
 
-To understand it:
+**To understand it:**
 
 - $y_i$ is the actual value
 - $\hat{y}_i$ is the predicted value
@@ -268,6 +268,14 @@ Now let us build the same model using `scikit-learn`.
 ```bash
 pip install -U scikit-learn
 ```
+
+
+::: {.callout-important}
+
+Make sure to be in the right environment. In our case it is `aca`
+
+:::
+
 
 ### Importing `LinearRegression`
 
@@ -428,7 +436,7 @@ This is exactly why the hours-studied image should stay in the lesson. The datas
 
 Now we move from a classroom-style example to a more business-oriented dataset.
 
-Here we have advertising data with:
+**Here we have advertising data with:**
 
 - `tv`
 - `radio`
@@ -436,11 +444,22 @@ Here we have advertising data with:
 - `influencer`
 - `sales`
 
-```{python}
+```python
 import pandas as pd
 
-path = '../../lab/python/data/regression/advertising_and_sales.csv'
-ads = pd.read_csv(path)
+ads = pd.read_csv('../data/regression/advertising_and_sales.csv')
+ads
+```
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+import pandas as pd
+
+
+ads = pd.read_csv('../../lab/python/data/regression/advertising_and_sales.csv')
 ads
 ```
 
@@ -452,6 +471,7 @@ ads
 - Introduce multiple regression with a categorical feature
 
 :::
+
 
 #### Try each channel separately
 
@@ -503,9 +523,15 @@ pd.DataFrame(channel_results).round(4)
   - RMSE $\approx 36036.68$
   - Social media alone is also positively associated with sales
 
-**Important note:**
+
+::: {.callout-important}
 
 Do **not** compare slope sizes blindly across channels, because the channels are on different scales. A slope of 40 for social media does not automatically mean social media is “better” than TV. The unit sizes differ, and the variables also move together.
+
+
+:::
+
+
 
 #### Check how strongly the channels move together
 
@@ -514,6 +540,35 @@ ads[["tv", "radio", "social_media", "sales"]].corr().round(3)
 ```
 
 You should notice that the spend variables are **strongly correlated** with one another.
+
+
+#### Check how strongly the channels move together
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+import plotly.express as px
+
+# Compute correlation
+corr = ads[["tv", "radio", "social_media", "sales"]].corr().round(3)
+
+# Plot
+fig = px.imshow(
+    corr,
+    text_auto=True,
+    aspect="auto",
+)
+
+# Improve layout
+fig.update_layout(
+    title="Correlation Matrix",
+    xaxis_title="",
+    yaxis_title="",
+)
+
+fig.show()
+```
 
 
 #### Multiple regression using all numeric channels
@@ -767,7 +822,17 @@ Not every time series contains all three clearly, but this framework helps us re
 Amazon stock prices
 
 ```{python}
+#| echo: false
+#| eval: true
+#| output: true
+
 ts = pd.read_csv('../../lab/python/data/regression/time_series/AMZN.csv', parse_dates = ['date'])
+
+```
+
+
+```python
+ts = pd.read_csv('../data/regression/time_series/AMZN.csv', parse_dates = ['date'])
 ```
 
 ```{python}
@@ -1015,4 +1080,13 @@ plt.show()
 - Estimate future complaint or support ticket volume
 - Model churn trends over time
 - Improve staffing and operations planning
-- 
+
+
+## Extra
+
+::: {.callout-tip}
+
+- Whatch [this video](https://www.youtube.com/watch?v=Xm2C_gTAl8c) for regularization
+- Read [this](https://www.geeksforgeeks.org/machine-learning/ridge-regression-vs-lasso-regression/) for regularization
+
+:::
