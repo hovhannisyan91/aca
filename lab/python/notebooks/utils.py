@@ -107,3 +107,76 @@ def naming(df):
         return "Requires Attention"
     else:
         return "Demands Activation"
+
+
+def my_date_diff(
+    df: pd.DataFrame, target_column: str, start_date: str, end_date: str, by: str = "M"
+) -> pd.DataFrame:
+    """
+    Compute month difference between two datetime columns.
+
+    Adds a 'month_diff' column to the DataFrame.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+    start_date : str
+    end_date : str
+    by : str, default 'M'
+
+    Returns
+    -------
+    pd.DataFrame
+    """
+
+    if by == "M":
+        df[target_column] = (df[end_date].dt.year - df[start_date].dt.year) * 12 + (
+            df[end_date].dt.month - df[start_date].dt.month
+        )
+    elif by == "Y":
+        df[target_column] = df[end_date].dt.year - df[start_date].dt.year
+    else:
+        print("Goodbye")
+
+    return df
+
+
+def rsquered(y, y_hat):
+
+    rsquered = 1 - np.sum((y - y_hat) ** 2) / np.sum((y - y.mean()) ** 2)
+
+    return rsquered
+
+
+def rmse(y, y_hat):
+
+    rmse = np.sqrt(np.mean((y - y_hat) ** 2))
+
+    return rmse
+
+
+if __name__ == "__main__":
+    import pandas as pd
+    import numpy as np
+
+    np.random.seed(42)
+
+    n = 10
+
+    df = pd.DataFrame(
+        {
+            "start_date": pd.to_datetime("2024-01-01")
+            + pd.to_timedelta(np.random.randint(0, 100, n), unit="D"),
+            "end_date": pd.to_datetime("2024-01-01")
+            + pd.to_timedelta(np.random.randint(50, 150, n), unit="D"),
+        }
+    )
+
+    df = my_date_diff(
+        df=df,
+        target_column="target_column",
+        start_date="start_date",
+        end_date="end_date",
+        by="Y",
+    )
+    print(df.head())
