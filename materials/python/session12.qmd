@@ -3,7 +3,6 @@ title: "Session 12: Simple Linear Regression and Forecasting"
 categories: [Simple Linear Regression]
 image_path: "/img/python/12"
 ---
-
 ## Overview
 
 This module introduces one of the most important concepts in data analytics: **understanding relationships and forecasting trends**.
@@ -19,7 +18,7 @@ This module introduces one of the most important concepts in data analytics: **u
 
 ## Learning Objectives
 
-After this session, students will be able to:
+After this session, you will be able to:
 
 - Understand what linear regression is conceptually
 - Manually compute regression coefficients
@@ -157,13 +156,13 @@ So the model is searching for the line that leaves the **smallest total squared 
 
 ### Coefficient Formula
 
-Slope:
+**Slope:**
 
 $$
 \beta_1 = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sum (x_i - \bar{x})^2}
 $$
 
-Intercept:
+**Intercept:**
 
 $$
 \beta_0 = \bar{y} - \beta_1 \bar{x}
@@ -210,7 +209,7 @@ $$
 \hat{Y} = 55.04 + 4.74X
 $$
 
-This means:
+**This means:**
 
 - the baseline predicted grade is about **55.04**
 - each extra study hour adds about **4.74 grade points**
@@ -302,7 +301,7 @@ You should see values very close to the manual calculation above.
 ### Visualization
 
 ```{python}
-#| echo: false
+#| echo: true
 #| fig-width: 18
 #| fig-height: 5
 #| fig-align: center
@@ -321,9 +320,9 @@ plt.show()
 The scatter plot shows the observed data, and the line shows the model’s predicted trend.
 
 
-## R-Squared (Model Quality)
+## Model Evaluation
 
-This section is the **model evaluation** section for the simple regression example.
+Under the **model evaluation** section for the simple regression example.
 
 In practice, we usually want to answer two questions:
 
@@ -335,7 +334,7 @@ For that reason, we will compute **both**:
 - $R^2$
 - RMSE
 
-### Python
+### Manual Calculation of $R^2$ and RMSE
 
 First, compute the predictions and residuals.
 
@@ -355,12 +354,6 @@ print(f"R-squared: {r2:.4f}")
 print(f"RMSE: {rmse:.4f}")
 ```
 
-For this example, the values are approximately:
-
-- $SS_{res} = 79.1213$
-- $SS_{tot} = 1599.6000$
-- $R^2 = 0.9505$
-- $RMSE = 2.8129$
 
 **Manual formula for $R^2$:**
 
@@ -386,13 +379,12 @@ RMSE is simply the square root of the average squared residual.
 
 **R-Squared**
 
-- $R^2$ tells us how much of the variation in the target is explained by the model
-- In this example, $R^2 \approx 0.9505$
+$R^2$ tells us how much of the variation in the target is explained by the model: 
 
 That means:
 
-- about **95.05%** of the variation in exam grades is explained by hours studied
-- about **4.95%** is due to other factors the model does not include
+- about **`{python} f"{float(r2):.2%}"`** of the variation in exam grades is explained by hours studied
+- about **`{python} f"{float(1 - r2):.2%}"`** is due to other factors the model does not include
 
 Those other factors might include:
 
@@ -408,11 +400,7 @@ Those other factors might include:
 - It uses the **same unit as the target**
 - Here the target is **grade points**
 
-So:
-
-- RMSE $\approx 2.81$
-
-This means the model’s predictions are off by about **2.81 grade points on average**
+RMSE $\approx$ **`{python} f"{float(rmse):.2f}"`**, which means the model’s predictions are off by about **`{python} f"{float(rmse):.2f}"`** grade points on average**
 
 **Why both metrics matter**
 
@@ -420,14 +408,44 @@ This means the model’s predictions are off by about **2.81 grade points on ave
 - RMSE is useful for understanding practical error size
 - A model can have a high $R^2$ and still have prediction errors that matter in practice
 
-**Why your picture is useful here**
 
-This is exactly why the hours-studied image should stay in the lesson. The dataset is small enough that students can:
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| fig-align: center
 
-- compute the fitted line by hand
-- compute the residuals by hand
-- compute $R^2$ and RMSE by hand
-- understand what “good fit” really means
+x_line = np.linspace(hours.min(), hours.max(), 100).reshape(-1, 1)
+y_line = hours_model.predict(x_line)
+
+plt.scatter(hours, grades)
+plt.plot(x_line, y_line)
+plt.title("Linear Regression Fit")
+plt.xlabel("Hours Studied")
+plt.ylabel("Grade on Exam")
+plt.show()
+```
+
+### Calculation with `Scikit-learn` 
+
+We can also compute $R^2$ and RMSE using `scikit-learn` functions.
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+from sklearn.metrics import r2_score, mean_squared_error
+r2_sklearn = r2_score(y, y_pred)
+rmse_sklearn = np.sqrt(mean_squared_error(y, y_pred))
+```
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+print(f"R-squared (sklearn): {r2_sklearn:.4f}")
+print(f"RMSE (sklearn): {rmse_sklearn:.4f}")
+```
 
 
 ## Business Applications
@@ -448,7 +466,7 @@ Now we move from a classroom-style example to a more business-oriented dataset.
 import pandas as pd
 
 ads = pd.read_csv('../data/regression/advertising_and_sales.csv')
-ads
+ads.head()
 ```
 
 
@@ -460,7 +478,7 @@ import pandas as pd
 
 
 ads = pd.read_csv('../../lab/python/data/regression/advertising_and_sales.csv')
-ads
+ads.head()
 ```
 
 ::: {.callout-important title = "Use case"}
@@ -505,23 +523,10 @@ pd.DataFrame(channel_results).round(4)
 
 **Interpretation of the channel-by-channel models:**
 
-- **TV $\rightarrow$ Sales**
-  - slope $\approx 3.5805$
-  - $R^2 \approx 0.9991$
-  - RMSE $\approx 2535.84$
-  - TV is the strongest single-channel predictor in this sample
+- **TV $\rightarrow$ Sales:** TV is the **strongest** single-channel predictor in this sample
+- **Radio $\rightarrow$ Sales:** Radio alone still shows a positive relationship with sales
+- **Social Media $\rightarrow$ Sales:** Social media alone is also positively associated with sales
 
-- **Radio $\rightarrow$ Sales**
-  - slope $\approx 9.2207$
-  - $R^2 \approx 0.8829$
-  - RMSE $\approx 29007.62$
-  - Radio alone still shows a positive relationship with sales
-
-- **Social Media $\rightarrow$ Sales**
-  - slope $\approx 40.1691$
-  - $R^2 \approx 0.8192$
-  - RMSE $\approx 36036.68$
-  - Social media alone is also positively associated with sales
 
 
 ::: {.callout-important}
@@ -532,8 +537,9 @@ Do **not** compare slope sizes blindly across channels, because the channels are
 :::
 
 
-
 #### Check how strongly the channels move together
+
+
 
 ```{python}
 ads[["tv", "radio", "social_media", "sales"]].corr().round(3)
@@ -542,7 +548,6 @@ ads[["tv", "radio", "social_media", "sales"]].corr().round(3)
 You should notice that the spend variables are **strongly correlated** with one another.
 
 
-#### Check how strongly the channels move together
 
 ```{python}
 #| echo: true
@@ -589,26 +594,55 @@ multi_num_results = pd.DataFrame({
     "coefficient": [multi_num_model.intercept_] + list(multi_num_model.coef_)
 }).round(4)
 
-multi_num_r2 = 1 - np.sum((y_sales - y_hat_multi_num) ** 2) / np.sum((y_sales - y_sales.mean()) ** 2)
-multi_num_rmse = np.sqrt(np.mean((y_sales - y_hat_multi_num) ** 2))
+multi_num_r2 = r2_score(y_sales, y_hat_multi_num)
+multi_num_rmse = np.sqrt(mean_squared_error(y_sales, y_hat_multi_num))
 
-multi_num_results
+
 print(f"R-squared: {multi_num_r2:.4f}")
 print(f"RMSE: {multi_num_rmse:.2f}")
 ```
 
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+multi_num_results
+```
+
 **Interpretation:**
 
-The fitted numeric-only multiple regression is approximately:
+**The fitted numeric-only multiple regression is approximately:**
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+multi_num_model.intercept_
+```
+
 
 $$
-\hat{Sales} = 1040.43 + 3.67(TV) - 0.06(Radio) - 0.94(SocialMedia)
+\hat{Sales} = \beta_0 + \beta_1(TV) + \beta_2(Radio) + \beta_3(SocialMedia)
 $$
 
-And the model fit is:
 
-- $R^2 \approx 0.9992$
-- RMSE $\approx 2428.32$
+$$\downarrow$$
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+intercept = f"{float(multi_num_model.intercept_):.2f}"
+tv_coef = f"{float(multi_num_model.coef_[0]):.2f}"
+radio_coef = f"{float(multi_num_model.coef_[1]):.2f}"
+social_media_coef = f"{float(multi_num_model.coef_[2]):.2f}"
+```
+
+
+Sales = `{python} intercept` + `{python} tv_coef`(TV) + `{python} radio_coef`(Radio) + `{python} social_media_coef`(SocialMedia)
+
 
 **What does this mean?**
 
@@ -662,10 +696,10 @@ The fitted model is approximately:
 
 $$
 \hat{Sales} =
-21.65
-+ 3.77(TV)
-- 0.42(Radio)
-- 0.38(SocialMedia)
+{intercept}
++ {tv_coef}(TV)
+- {radio_coef}(Radio)
+- {social_media_coef}(SocialMedia)
 - 3562.83(Macro)
 + 3596.86(Micro)
 + 1501.38(Nano)
@@ -733,16 +767,8 @@ print(f"R-squared: {price_r2:.4f}")
 print(f"RMSE: {price_rmse:.4f}")
 ```
 
-**Interpretation:**
 
-This model produces approximately:
-
-- intercept $\approx 1209.37$
-- slope $\approx -8.31$
-- $R^2 \approx 0.9797$
-- RMSE $\approx 31.88$
-
-Business meaning:
+**Business meaning:**
 
 - each \$1 increase in price reduces demand by about **8.31 units**
 - the relationship is strong
@@ -775,16 +801,7 @@ print(f"R-squared: {age_r2:.4f}")
 print(f"RMSE: {age_rmse:.4f}")
 ```
 
-**Interpretation:**
-
-This model produces approximately:
-
-- intercept $\approx 18.60$
-- slope $\approx 2.38$
-- $R^2 \approx 0.8834$
-- RMSE $\approx 12.86$
-
-Business meaning:
+**Business meaning:**
 
 - each additional year of age is associated with about **2.38 more revenue units**
 - this kind of model is useful for segmentation and value analysis
@@ -814,97 +831,237 @@ The main components of a time series are:
 
 Not every time series contains all three clearly, but this framework helps us reason about the data.
 
+### Gold Dataset
 
-### Example Dataset
+
+::: {.callout-important}
+
+Remember to download the dataset from the Github repository and place it in the correct folder before running the code.
+
+- Dataset: `gold_prices_2022_2023.csv` [URL](https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/regression/time_series/gold_prices_2022_2023.csv)
+- Dataset: `gold_prices_2023_2024.csv` [URL](https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/regression/time_series/gold_prices_2023_2024.csv)
+- Dataset: `gold_prices_2024_2025.csv` [URL](https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/regression/time_series/gold_prices_2024_2025.csv)
+- Dataset: `gold_prices_2025_2026.csv` [URL](https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/regression/time_series/gold_prices_2025_2026.csv)
+:::
+
+
+
+> Source: [Market Watch](https://www.marketwatch.com/investing/future/gc00/download-data?startDate=4/24/2025&endDate=4/24/2026)
 
 **Data cleaning note:**
 
-Amazon stock prices
+Gold price data often has missing values on weekends and holidays. The dataset we are using has been cleaned to include only business days, so there are no missing dates. This allows us to focus on the modeling aspect without needing to handle missing data in this example.
+
 
 ```{python}
 #| echo: false
 #| eval: true
 #| output: true
 
-ts = pd.read_csv('../../lab/python/data/regression/time_series/AMZN.csv', parse_dates = ['date'])
+import pandas as pd
+from os.path import join
+PATH = '../../lab/python/data/regression/time_series'
+```
 
+```python
+import pandas as pd
+from os.path import join
+PATH = '../data/regression/time_series'
+```
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+
+ts = pd.read_csv(join(PATH, 'gold_prices_2022_2023.csv'), parse_dates=['Date'])
+print(ts.shape)
+ts.head()
 ```
 
 
 ```python
-ts = pd.read_csv('../data/regression/time_series/AMZN.csv', parse_dates = ['date'])
+ts = pd.read_csv(join(PATH, 'gold_prices_2022_2023.csv'), parse_dates=['Date'])
+print(ts.shape)
+ts.head()
+```
+
+### Reading and Concatenating Multiple Files
+
+The website provides data in `1-year` chunks, so we will read and concatenate multiple files to get a longer time series.
+
+Using `glob` and `os`, we can read all the CSV files in the folder and combine them into one DataFrame.
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+import glob
+import os
+file_paths = glob.glob(join(PATH, "*.csv"))
+file_paths
+
+
+```
+
+
+If we are interested in just the file names without the full paths, we can extract them using `os.path.basename()`.
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+file_names = [os.path.basename(file) for file in file_paths]
+file_names
+```
+
+
+Combining the files into a single DataFrame can be done using `pd.concat()`.
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+dataframes = [pd.read_csv(file, parse_dates=['Date']) for file in file_paths]
+ts_combined = pd.concat(dataframes, ignore_index=True)
+print(ts_combined.shape)
+ts_combined.head()
+```
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+ts_combined.dtypes
+```
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+ts_combined["Close"] = (
+    ts_combined["Close"]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+    .str.strip()
+)
+
+ts_combined["Close"] = pd.to_numeric(ts_combined["Close"], errors="coerce")
+```
+
+
+### Visualization
+
+Befor visualizing, we should sort the combined DataFrame by date to ensure the time series is in the correct order.
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+ts_combined = ts_combined.sort_values(by='Date')
 ```
 
 ```{python}
-#| echo: false
+#| echo: true
 #| fig-width: 18
 #| fig-height: 5
 #| fig-align: center
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
-plt.plot(ts["date"], ts["adj_close"], marker="o")
-plt.title("Adj Close Over Time")
-plt.xlabel("Date")
-plt.ylabel("Adj Close")
+
+plt.plot(
+    ts_combined["Date"],
+    ts_combined["Close"],
+    linewidth=2,
+    marker="o",
+    markersize=3,
+    alpha=0.85
+)
+
+plt.title("Close Price Over Time", fontsize=18, pad=15)
+plt.xlabel("Date", fontsize=13)
+plt.ylabel("Close", fontsize=13)
+
+# Improve x-axis date formatting
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+
+# Reduce number of y-axis labels
+plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=8))
+
 plt.xticks(rotation=45)
+plt.grid(True, alpha=0.3)
+
 plt.tight_layout()
 plt.show()
 ```
 
-The series shows a generally increasing short-run movement, but it is still noisy.
+>As you can see, the gold price data shows a clear upward trend over the two-year period, with some fluctuations along the way. This kind of pattern is common in financial time series, where we often see a combination of trend and noise. In the next sections, we will explore how to model this time series and make forecasts based on it.
 
 
-## Trend Analysis (Regression on Time)
 
-### Idea
+### Trend Analysis (Regression on Time)
 
-Treat time as `X`:
+#### Idea
+
+**Treat time as `X`:**
 
 $$
-AdjClose = \beta_0 + \beta_1 \cdot Time
+Close = \beta_0 + \beta_1 \cdot Time
 $$
 
 This is not yet a full time-series model, but it is a very useful bridge from regression to forecasting.
 
-
 ### Python Example
 
-```{python}
-ts["time_index"] = np.arange(1, len(ts) + 1)
+1. Create a time index variable that counts the business days from the start of the series
+2. Fit a linear regression model using this time index as the predictor
+3. Evaluate the model fit using $R^2$ and RMSE
 
-X_time = ts[["time_index"]]
-y_time = ts["adj_close"]
+```{python}
+ts_combined["time_index"] = np.arange(1, len(ts_combined) + 1)
+
+X_time = ts_combined[["time_index"]]
+y_time = ts_combined["Close"]
 
 trend_model = LinearRegression()
 trend_model.fit(X_time, y_time)
 
 trend_pred = trend_model.predict(X_time)
 
-trend_r2 = 1 - np.sum((y_time - trend_pred) ** 2) / np.sum((y_time - y_time.mean()) ** 2)
-trend_rmse = np.sqrt(np.mean((y_time - trend_pred) ** 2))
+trend_r2 = r2_score(y_time, trend_pred)
+trend_rmse = np.sqrt(mean_squared_error(y_time, trend_pred))
 
-print(f"Intercept: {trend_model.intercept_:.4f}")
-print(f"Slope: {trend_model.coef_[0]:.4f}")
-print(f"R-squared: {trend_r2:.4f}")
-print(f"RMSE: {trend_rmse:.4f}")
 ```
 
 **Interpretation:**
 
 **For this short sample:**
 
-- intercept $\approx 26.1793$
-- slope $\approx 0.0665$
-- $R^2 \approx 0.7061$
-- RMSE $\approx 0.1605$
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+print(f"Intercept: {trend_model.intercept_:.2f}")
+print(f"Slope: {trend_model.coef_[0]:.4f}")
+print(f"R-squared: {trend_r2:.4f}")
+print(f"RMSE: {trend_rmse:.4f}")
+```
 
-Meaning:
 
-- on average, the adjusted close increases by about **0.0665 per business-day step**
+
+**Meaning:**
+
+- on average, the adjusted close increases by about **`{python} f"{trend_model.coef_[0]:.4f}"`** per business-day step**
 - the upward trend is present, but not all variation is explained by a straight line
 - this is expected, because market prices are noisy and time dependence matters
 
 
-## ARIMA (Applied View)
+## ARIMA
 
 ARIMA is a classic forecasting model for ordered data.
 
@@ -918,16 +1075,182 @@ ARIMA is a classic forecasting model for ordered data.
 - differencing helps stabilize a series when the level changes over time
 - the model can then be used for short-run forecasting
 
+**The model is written as:**
 
-### ARIMA Concept
+$$
+ARIMA(p, d, q)
+$$
 
-The notation `ARIMA(p, d, q)` means:
+where:
 
-- `p` = number of autoregressive lags
-- `d` = number of differences
-- `q` = number of moving-average lags
+- $p$ controls how many past values are used.
+- $d$ controls how many times the series is differenced.
+- $q$ controls how many past forecast errors are used.
 
-In this lesson we use `ARIMA(1, 1, 1)` as a practical demonstration model.
+**So, an ARIMA model combines three ideas:**
+
+1. Use past values of the series.
+2. Transform the series into a more stable form.
+3. Use past forecast errors to improve future predictions.
+
+#### The $p$ Parameter: AutoRegressive Lags
+
+The first parameter, $p$, represents the number of **autoregressive lags**.
+
+This means the model uses previous values of the time series to predict the current value.
+
+For example, if we use an `AR` model with one lag, the model assumes that today’s value depends partly on yesterday’s value:
+
+$$
+y_t = c + \phi_1 y_{t-1} + \varepsilon_t
+$$
+
+Here:
+
+- $y_t$ is the value at time $t$.
+- $y_{t-1}$ is the value one period before.
+- $\phi_1$ measures how strongly the previous value influences the current value.
+- $\varepsilon_t$ is the remaining unexplained error.
+
+If $p = 1$, the model uses one previous value.
+
+If $p = 2$, the model uses two previous values:
+
+$$
+y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \varepsilon_t
+$$
+
+In simple terms, $p$ answers the question:
+
+> How many previous observations should the model remember?
+
+
+
+#### The $d$ Parameter: Differencing
+
+The second parameter, $d$, represents the number of times the series is **differenced**.
+
+Many real-world time series are not stationary. A stationary series has a relatively stable mean and variance over time. However, stock prices, sales, revenue, population, and website traffic often have trends.
+
+`ARIMA` works best when the series is stationary, so we often transform the original series before modeling it.
+
+Differencing means subtracting the previous value from the current value:
+
+$$
+\Delta y_t = y_t - y_{t-1}
+$$
+
+Instead of modeling the original values, the model uses the change from one period to the next.
+
+**For example, suppose we have this series:**
+
+| Time | Value |
+|---:|---:|
+| 1 | 100 |
+| 2 | 110 |
+| 3 | 125 |
+| 4 | 140 |
+
+**The first difference is:**
+
+| Time | Difference |
+|---:|---:|
+| 2 | 10 |
+| 3 | 15 |
+| 4 | 15 |
+
+
+
+::: {.columns}
+
+::: {.column}
+
+So instead of asking:
+
+> What will the next value be?
+
+
+
+:::
+
+::: {.column}
+
+the differenced model asks:
+
+> What will the next change be?
+
+:::
+
+:::
+
+
+If $d = 0$, the model uses the original series.
+
+If $d = 1$, the model uses first differences.
+
+If $d = 2$, the model differences the series twice, meaning it models the change in the changes.
+
+In simple terms, $d$ answers the question:
+
+> How many times do we need to remove trend from the data?
+
+
+#### The $q$ Parameter: Moving-Average Lags
+
+The third parameter, $q$, represents the number of **moving-average lags**.
+
+This part of the model uses past forecast errors.
+
+A forecast error is the difference between the actual value and the predicted value:
+
+$$
+\varepsilon_t = y_t - \hat{y}_t
+$$
+
+If the model made a mistake yesterday, that mistake may contain useful information for today’s forecast.
+
+For example, an MA(1) model can be written as:
+
+$$
+y_t = c + \varepsilon_t + \theta_1 \varepsilon_{t-1}
+$$
+
+*This means today’s value depends partly on today’s random shock and yesterday’s forecast error.*
+
+If $q = 1$, the model uses one previous forecast error.
+
+If $q = 2$, the model uses two previous forecast errors.
+
+**In simple terms, $q$ answers the question:**
+
+> How many previous forecast mistakes should the model use to correct itself?
+
+
+### Interpreting ARIMA(1, 1, 1)
+
+In this lesson, we use:
+
+$$
+ARIMA(1, 1, 1)
+$$
+
+**This means:**
+
+| Component | Meaning | Interpretation |
+|---|---|---|
+| $p = 1$ | One autoregressive lag | The model uses the previous value. |
+| $d = 1$ | One difference | The model models changes rather than raw values. |
+| $q = 1$ | One moving-average lag | The model uses the previous forecast error. |
+
+So `ARIMA(1, 1, 1)` means:
+
+> First, difference the series once to remove trend. Then model the differenced series using one lag of the series and one lag of the forecast error.
+
+Conceptually, the model says:
+
+> The next change in the series depends on the previous change and the previous forecasting mistake.
+
+This is why `ARIMA(1, 1, 1)` is often a useful practical demonstration model. It is simple enough to explain, but it already contains all three main ARIMA ideas: memory, differencing, and error correction.
 
 
 ### Python Example
@@ -935,20 +1258,20 @@ In this lesson we use `ARIMA(1, 1, 1)` as a practical demonstration model.
 ```{python}
 from statsmodels.tsa.arima.model import ARIMA
 
-ts_arima = ts.set_index("date").asfreq("B")
+ts_arima = ts_combined.set_index("Date").asfreq("B")
 
-arima_model = ARIMA(ts_arima["adj_close"], order=(1, 1, 1))
+arima_model = ARIMA(ts_arima["Close"], order=(1, 1, 1))
 arima_fit = arima_model.fit()
 
 arima_forecast = arima_fit.forecast(steps=3)
-arima_forecast
+
 ```
 
-For this short dataset, the next 3 business-day forecasts are approximately:
+**For this short dataset, the next 3 business-day forecasts are approximately:**
 
-- 2012-08-23 → 26.6695
-- 2012-08-24 → 26.7292
-- 2012-08-27 → 26.7015
+```{python}
+arima_forecast
+```
 
 
 ::: {.callout-note}
@@ -958,36 +1281,14 @@ The `statsmodels` package is often preinstalled in many environments, but if you
 ```bash
 pip install statsmodels
 ```
-
 :::
-
-
-### Business Use Case
-
-ARIMA is useful when:
-
-- the data is sequential
-- recent past behavior helps predict near-future behavior
-- the goal is short-run forecasting
-
-Typical business uses include:
-
-- monthly sales forecasting
-- inventory planning
-- call center demand forecasting
-- website traffic forecasting
-- short-horizon financial series modeling
-
-**Important caution for this example:**
-
-Our stock-price snippet is very short, so this ARIMA fit should be treated as a **workflow demonstration**, not a production forecast.
 
 
 ## Prophet
 
-`Prophet` is a forecasting package for Python and R.
+`Prophet` is a forecasting package for Python and R developed by `Facebook`.
 
-It is popular because:
+**It is popular because:**
 
 - it is easy to use
 - it works naturally with date-based data
@@ -1003,12 +1304,13 @@ For this very short dataset, we use Prophet mainly to demonstrate the workflow c
 ```{python}
 from prophet import Prophet
 
-df_prophet = ts.rename(columns={"date": "ds", "adj_close": "y"})
+df_prophet = ts_combined.rename(columns={"Date": "ds", "Close": "y"})
 
 prophet_model = Prophet()
 prophet_model.fit(df_prophet)
 
 future = prophet_model.make_future_dataframe(periods=3, freq="B")
+
 forecast = prophet_model.predict(future)
 
 forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(3)
@@ -1036,8 +1338,19 @@ pip install prophet
 #| fig-align: center
 
 prophet_model.plot(forecast)
+plt.title("Gold Futures (GC00) - Close Price Forecast")
+plt.xlabel("Date")
+plt.ylabel("Close Price")
 plt.show()
 
+```
+
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
 prophet_model.plot_components(forecast)
 plt.show()
 ```
@@ -1049,37 +1362,6 @@ plt.show()
 - with this short business-day sample, the **trend** is the most useful part to discuss
 - with a longer history, Prophet becomes much more useful for storytelling around trend changes and seasonal patterns
 
-
-## Analytics Use Cases 
-
-### 1. Sales Forecasting
-
-- Predict future revenue
-- Support budget planning
-- Plan production and inventory
-- Estimate expected business growth
-
-### 2. Marketing Trend Analysis
-
-- Measure how marketing spend relates to sales
-- Compare channels one at a time
-- Use multiple regression to estimate joint effects
-- Identify overlap and multicollinearity across channels
-
-### 3. User Growth
-
-- Forecast DAU and MAU
-- Estimate signup trends after campaigns
-- Model retention-related patterns over time
-- Support capacity planning for product teams
-
-### 4. Telecom Example
-
-- Forecast call volume
-- Predict network load
-- Estimate future complaint or support ticket volume
-- Model churn trends over time
-- Improve staffing and operations planning
 
 
 ## Extra
