@@ -1,0 +1,904 @@
+---
+title: "Session 13: Logistic Regression"
+categories: [Classification, Logistic Regression]
+image_path: "/img/python/13"
+---
+
+## Session Goal
+
+In this session, we develop a complete understanding of **logistic regression**, starting from intuition and building up to implementation.
+
+The focus is not only on the model itself, but on how it is used in real-world decision-making.
+
+**The key idea is:**
+
+> Logistic regression connects **data → probability → decision**
+
+**Think of it as a pipeline:**
+
+- We start with **data** about customers, users, or transactions  
+- The model converts that data into a **probability**  
+- That probability is then used to make a **decision**  
+
+**For example:**
+
+- A customer has a 0.82 probability of purchasing  
+- Do we contact them or not?  
+
+*This is where analytics meets business.*
+
+
+## Introduction and Motivation
+
+### Regression vs Classification
+
+Before introducing logistic regression, we must clearly distinguish between two types of problems.
+
+As we already know the **Regression** is used when the output is a continuous number:
+
+- predicting revenue  
+- estimating house prices  
+- forecasting demand  
+
+**Example:**
+
+> A customer is expected to spend \$120 next month  
+
+---
+
+**Classification** is used when the output is a category:
+
+- purchase vs not purchase  
+- churn vs not churn  
+- approve vs reject  
+
+**Example:**
+
+> Will the customer purchase? → `Yes` or `No`  
+
+---
+
+This distinction is critical.
+
+
+::: {.callout-important title = "Why Regression is Misleading"}
+
+Logistic regression is called “regression”, but it is actually used for **classification problems**.
+
+$$\downarrow$$
+
+Because it predicts **probabilities**, not categories directly.
+
+:::
+
+
+### Real Business Problems
+
+
+**Marketing Campaign**
+
+**You have 1,000 customers** $\rightarrow$ **You want to send an offer** $\rightarrow$ **Each contact costs money**  
+
+
+
+Question/Problem:
+
+> Who should we contact?
+
+---
+
+**Telecom Churn**
+
+- Customers may leave the service  
+- Retention campaigns are expensive  
+
+Question/Problem:
+
+> Which customers are at risk of churning?
+
+---
+
+**Loan Approval**
+
+- Bank gives loans to customers  
+- Some customers default  
+
+Question/Problem:
+
+> Should we approve this loan?
+
+---
+
+
+::: {.callout-important}
+All these problems are not just predictions, as they are **decisions with consequences**.
+:::
+
+
+### Binary Target Variable
+
+In all these examples, the outcome has only two possible values.
+
+$$
+y \in \{0, 1\}
+$$
+
+We encode outcomes as:
+
+- $1$ → event happens (purchase, churn, default)  
+- $0$ → event does not happen  
+
+*Example dataset:*
+
+| Customer | Purchase |
+|---|---:|
+| A | 1 |
+| B | 0 |
+| C | 1 |
+
+This encoding is essential because it allows us to work mathematically with classification.
+
+---
+
+## Why Not Linear Regression?
+
+### The Problem
+
+At first glance, you might think:
+
+> Why not just use linear regression?
+
+We can try:
+
+$$
+\hat{y} = \beta_0 + \beta_1x
+$$
+
+But here is the issue:
+
+Linear regression can produce **any** value:
+
+$$
+-\infty < \hat{y} < +\infty
+$$
+
+
+### Why This Breaks for Classification
+
+**Suppose we predict:**
+
+- $-0.3$ → does this make sense as probability?  
+- $1.4$ → can probability be greater than 1?  $\rightarrow$ No!
+
+
+**Probabilities must always satisfy:**
+
+$$
+0 \leq p \leq 1
+$$
+
+---
+
+
+Imagine a marketing model predicts:
+
+- Customer A → 1.25 probability  
+- Customer B → -0.15 probability  
+
+These outputs are meaningless.
+
+This is why linear regression is not suitable for classification.
+
+
+### The Need for Transformation
+
+We need a function that:
+
+1. accepts any number from $-\infty$ to $+\infty$  
+2. always outputs a value between 0 and 1  
+
+This is exactly what the **sigmoid function** does.
+
+
+![]({{< meta image_path >}}/sigmoid.png)
+
+
+## From Probability to Decision
+
+### Predicting Probability
+
+Logistic regression does not directly say:
+
+> “This customer will purchase”
+
+Instead, it says:
+
+$$
+P(y = 1 \mid X)
+$$
+
+Example:
+
+> Customer A → 0.82 probability of purchase  
+
+---
+
+
+The probability gives us **flexibility**.
+
+We can:
+
+- rank customers  
+- prioritize actions  
+- control risk  
+
+
+### Threshold-Based Decision
+
+To make a final decision, we use a threshold.
+
+$$
+\hat{y} =
+\begin{cases}
+1, & p \geq 0.5 \\
+0, & p < 0.5
+\end{cases}
+$$
+
+---
+
+### Example
+
+| Customer | Probability | Decision |
+|---|---:|---:|
+| A | 0.82 | 1 |
+| B | 0.63 | 1 |
+| C | 0.47 | 0 |
+| D | 0.12 | 0 |
+
+---
+
+### Important Insight
+
+The threshold **does not have to be 0.5**.
+
+- In marketing → lower threshold (more aggressive)  
+- In banking → higher threshold (more conservative)  
+
+
+### Business Interpretation
+
+- Probability → level of confidence  
+- Threshold → business strategy  
+
+This is where the model becomes actionable.
+
+
+
+## Logistic Regression Core Idea
+
+### Linear Score
+
+Logistic regression starts similarly to linear regression.
+
+**We compute a score:**
+
+$$
+z = \beta_0 + \beta_1x_1 + \cdots + \beta_kx_k
+$$
+
+This is a **weighted combination of features**.
+
+---
+
+### Example
+
+Suppose:
+
+$$
+z = -2 + 0.6 \cdot \text{support calls} - 0.05 \cdot \text{tenure}
+$$
+
+**Interpretation:**
+
+- more support calls → increases score  
+- longer tenure → decreases score  
+
+
+::: {.callout-important}
+
+This score $z$ is **not yet a probability**.
+
+**It is just a position on a scale:**
+
+- very negative → unlikely  
+- around zero → uncertain  
+- very positive → likely  
+
+
+:::
+
+
+
+---
+
+### Transition to Probability
+
+To convert this score into a probability, we apply the sigmoid function:
+
+$$
+p = \frac{1}{1 + e^{-z}}
+$$
+
+---
+
+### Intuition
+
+**Think of it like a decision system:**
+
+- raw score → internal evaluation  
+- sigmoid → converts into probability  
+- threshold → converts into decision  
+
+---
+
+### Mini Example
+
+**If:**
+
+$$
+z = 0
+$$
+
+**then:**
+
+$$
+p = 0.5
+$$
+
+---
+
+**If:**
+
+$$
+z = 2
+$$
+
+**then:**
+
+$$
+p \approx 0.88
+$$
+
+---
+
+**If:**
+
+$$
+z = -2
+$$
+
+**then:**
+
+$$
+p \approx 0.12
+$$
+
+
+::: {.callout-important}
+
+**Logistic regression works in three steps:**
+
+1. Compute a score $z$  
+2. Convert score into probability $p$  
+3. Apply threshold to make decision  
+
+:::
+
+
+>This completes the conceptual foundation before moving into implementation.
+
+
+
+
+### Storytelling Perspective
+
+Imagine a telecom company evaluating customers for churn.
+
+Each customer gets a score:
+
+- many complaints → increases score  
+- long tenure → decreases score  
+- high monthly charges → increases score  
+
+So:
+
+- Customer A → $z = -3.2$ → very unlikely to churn  
+- Customer B → $z = 0.4$ → uncertain  
+- Customer C → $z = 2.1$ → very likely to churn  
+
+But these are just **scores**, not probabilities.
+
+---
+
+
+
+### Intuition Through Examples
+
+Let’s examine how different values of $z$ behave.
+
+```{python}
+import numpy as np
+import pandas as pd
+
+z_values = [-5, -2, -1, 0, 1, 2, 5]
+p_values = 1 / (1 + np.exp(-np.array(z_values)))
+
+df_sigmoid = pd.DataFrame({
+    "score_z": z_values,
+    "probability": p_values
+})
+
+df_sigmoid
+```
+
+---
+
+### Interpretation
+
+| Score ($z$) | Probability |
+|---|---|
+| very negative | close to 0 |
+| 0 | 0.5 |
+| very positive | close to 1 |
+
+
+
+> Logistic regression is not linear in probability — it is linear in **log-odds**
+
+
+## Understanding Odds
+
+### From Probability to Odds
+
+Instead of working directly with probability, logistic regression uses **odds**:
+
+$$
+\text{odds} = \frac{p}{1-p}
+$$
+
+---
+
+### Example
+
+If:
+
+$$
+p = 0.75
+$$
+
+then:
+
+$$
+\text{odds} = \frac{0.75}{0.25} = 3
+$$
+
+Interpretation:
+
+> The event is 3 times more likely to happen than not happen
+
+---
+
+### Odds Table
+
+```{python}
+probabilities = [0.1, 0.3, 0.5, 0.7, 0.9]
+
+odds_table = pd.DataFrame({
+    "probability": probabilities
+})
+
+odds_table["odds"] = odds_table["probability"] / (1 - odds_table["probability"])
+
+odds_table
+```
+
+---
+
+### Important Observation
+
+- probability increases linearly  
+- odds increase non-linearly  
+
+This makes odds more suitable for modeling.
+
+### From Odds to Log-Odds
+
+>Why Take the Log?
+
+**Odds are always positive:**
+
+$$
+0 < \text{odds} < \infty
+$$
+
+But we want a model that can handle:
+
+$$
+-\infty < \text{value} < +\infty
+$$
+
+So we take the logarithm:
+
+$$
+\log\left(\frac{p}{1-p}\right)
+$$
+
+---
+
+### Logistic Regression Equation
+
+Now we connect everything:
+
+$$
+\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \cdots + \beta_kx_k
+$$
+
+---
+
+### Critical Interpretation
+
+This equation tells us:
+
+> Each feature changes the **log-odds**, not the probability directly
+
+---
+
+## Interpreting Coefficients Properly
+
+### Direction of Effect
+
+- $\beta > 0$ → increases probability  
+- $\beta < 0$ → decreases probability  
+
+---
+
+### Magnitude via Odds Ratio
+
+To interpret magnitude, we use:
+
+$$
+e^{\beta}
+$$
+
+>sometimes called the **odds ratio** or exp($\beta$).
+
+---
+
+### Example
+
+If:
+
+$$
+\beta = 0.7
+$$
+
+then:
+
+$$
+e^{0.7} \approx 2.01
+$$
+
+
+$$\downarrow$$
+
+> A one-unit increase in this feature **doubles the odds** of the event
+
+---
+
+### Business Translation
+
+**Suppose:**
+
+- `feature` = number of support calls  
+- `coefficient` = 0.7  
+
+**Then:**
+
+> Each additional support call doubles the odds of churn
+
+
+
+## Bringing Everything Together
+
+Logistic regression works as a pipeline:
+
+### Step 1 | Linear Score
+
+$$
+z = \beta_0 + \beta_1x_1 + \cdots
+$$
+
+---
+
+### Step 2 | Convert to Probability
+
+$$
+p = \frac{1}{1 + e^{-z}}
+$$
+
+---
+
+### Step 3 | Make Decision
+
+$$
+\hat{y} =
+\begin{cases}
+1, & p \geq \text{threshold} \\
+0, & p < \text{threshold}
+\end{cases}
+$$
+
+
+
+
+### Test your understanding | Odds
+
+
+#### Question 1 | Probability to Odds
+
+A customer has a **60% probability** of churn.
+
+- What are the odds of churn?  
+- Interpret the result  
+
+---
+
+### Question 2 | Log-Odds to Probability
+
+A model gives:
+
+$$
+\log(\text{odds}) = 2
+$$
+
+- Convert to odds  
+- Convert to probability  
+- Interpret the result  
+
+
+### Question 1 | Solution
+
+Recall:
+
+$$
+\text{odds} = \frac{p}{1-p}
+$$
+
+$$
+p = 0.6
+$$
+
+$$
+\text{odds} = \frac{0.6}{0.4} = 1.5
+$$
+
+**Interpretation:**
+
+- The event is **1.5 times more likely to happen than not happen**  
+- Churn is more likely than staying, but not extremely strong  
+
+---
+
+### Question 2 | Solution
+
+Recall:
+
+$$
+\text{odds} = e^{\text{log-odds}}
+$$
+
+$$
+\text{odds} = e^2 \approx 7.39
+$$
+
+Now convert to probability:
+
+$$
+p = \frac{7.39}{1 + 7.39} \approx 0.88
+$$
+
+**Interpretation:**
+
+- The probability is approximately **88%**  
+- This represents a **very high likelihood** of the event  
+
+
+::: {.callout-important}
+
+### Final Intuition
+
+- The model builds a score  
+- The sigmoid converts it into probability  
+- The threshold converts it into action  
+
+
+> Logistic regression is not about predicting 0 or 1  
+> It is about estimating **how likely** something is to happen  
+
+This is what makes it powerful for real-world decision systems.
+
+:::
+
+
+## Synthetic Customer Churn Dataset and End-to-End Logistic Regression Case
+
+**In this section, we will:**
+
+- create a **realistic synthetic churn dataset**
+- define **true underlying coefficients (betas)**
+- simulate churn using the **logistic function**
+- train a logistic regression model
+- interpret results using:
+  - coefficients and $e^{\beta}$
+  - confusion matrix
+  - revenue matrix  
+
+
+
+### Creating Synthetic Customer Data
+
+```{python}
+import numpy as np
+import pandas as pd
+
+np.random.seed(42)
+
+n = 1000
+
+df = pd.DataFrame({
+    "tenure": np.random.randint(1, 36, n),
+    "monthly_charges": np.random.uniform(20, 120, n),
+    "support_calls": np.random.randint(0, 10, n),
+    "contract_type": np.random.choice([0, 1], n)
+})
+```
+
+
+### Defining True Relationship (Betas)
+
+```{python}
+beta_0 = -3
+beta_tenure = -0.05
+beta_monthly = 0.02
+beta_calls = 0.5
+beta_contract = -1.0
+```
+
+
+
+### Generating Churn Probability
+
+```{python}
+z = (
+    beta_0
+    + beta_tenure * df["tenure"]
+    + beta_monthly * df["monthly_charges"]
+    + beta_calls * df["support_calls"]
+    + beta_contract * df["contract_type"]
+)
+
+p = 1 / (1 + np.exp(-z))
+
+df["churn"] = (np.random.rand(n) < p).astype(int)
+
+df.head()
+```
+
+
+### Train Logistic Regression Model
+
+```{python}
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X = df.drop(columns=["churn"])
+y = df["churn"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+probs = model.predict_proba(X_test)[:, 1]
+preds = (probs >= 0.5).astype(int)
+```
+
+
+
+### Interpreting Coefficients
+
+```{python}
+import numpy as np
+
+coef_df = pd.DataFrame({
+    "feature": X.columns,
+    "beta": model.coef_[0],
+    "exp_beta": np.exp(model.coef_[0])
+})
+
+coef_df
+```
+
+### Interpretation
+- Tenure reduces churn odds by a factor of `{python} round(coef_df.loc[coef_df.feature=="tenure","exp_beta"].values[0], 2)`  
+- Monthly charges change churn odds by a factor of `{python} round(coef_df.loc[coef_df.feature=="monthly_charges","exp_beta"].values[0], 2)`  
+- Each additional support call multiplies churn odds by `{python} round(coef_df.loc[coef_df.feature=="support_calls","exp_beta"].values[0], 2)`  
+- Contract type (long-term) multiplies churn odds by `{python} round(coef_df.loc[coef_df.feature=="contract_type","exp_beta"].values[0], 2)`  
+
+
+
+### Confusion Matrix
+
+```{python}
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test, preds)
+tn, fp, fn, tp = cm.ravel()
+
+cm
+```
+
+
+
+### Interpretation
+
+- Correctly predicted churn (TP): `{python} tp`  
+- Incorrectly predicted churn (FP): `{python} fp`  
+- Missed churn (FN): `{python} fn`  
+- Correctly predicted non-churn (TN): `{python} tn`  
+
+---
+
+### Revenue Matrix (Retention Strategy)
+
+#### Business Assumptions
+
+Let's assume some dummy values for `cost` and `benefit`:
+
+```{python}
+cost = 10
+benefit = 50
+```
+
+
+
+#### Profit Calculation
+
+```{python}
+profit = (
+    tp * (benefit - cost)
+    - fp * cost
+)
+
+profit
+```
+
+
+
+#### Interpretation
+
+- Customers correctly saved: `{python} tp` generating `{python} tp * (benefit - cost)` revenue  
+- Unnecessary contacts: `{python} fp` costing `{python} fp * cost`  
+- Net profit from strategy: `{python} profit`  
+
+
+### Final Insight
+
+- Features with `{python} ">1"` odds ratio increase churn risk  
+- Features with `{python} "<1"` odds ratio reduce churn risk  
+- Model decisions directly translate into `{python} profit` business outcome  
+
+> Logistic regression is not just predictive , it is **decision-driven analytics**
