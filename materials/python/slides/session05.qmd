@@ -1,199 +1,332 @@
----
-title: "Data Analyst"
-subtitle: "Python"
-author: "Karen Hovhannisyan"
-date: last-modified
-image_path: "/img/python/05"
-format:
-  revealjs: 
-    touch: false
-    slide-number: false
-    chalkboard: true
+# Grammar of Graphics
 
-    preview-links: auto
-    width: 1500
-    transition: slide
-    logo: https://bootcamps.aca.am/favicon.ico
-    # css: ../../../reveal_styles.css
-    include-in-header:
-      - text: |
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-          <style>
-            .icon-xxl { font-size: 84px; }
-            .icon-xl  { font-size: 64px; }
-            .icon-lg  { font-size: 48px; }
-            .muted { opacity: .8 }
-            .pill { border-radius: 10px; }
-            .circle { border-radius: 50%; }
-          </style>
+**Grammar of Graphics** is a systematic way to build visualizations by combining several independent components.
 
----
+Instead of thinking only in chart names such as **bar chart**, **scatter plot**, or **line chart**, the Grammar of Graphics helps us understand the structure behind a visualization.
 
+A chart is created by combining:
 
-## Why Do We Visualize Data? {.smaller}
+- data
+- variables
+- visual mappings
+- geometric objects
+- statistical transformations
+- scales
+- coordinate systems
+- facets
+- themes
 
-**Visualizations help us do the following:**
+In simple words:
 
+$$
+\text{Chart} = \text{Data} + \text{Mapping} + \text{Geometry} + \text{Layers}
+$$
 
-::: {.fragment}
+## Why Do We Need Grammar of Graphics?
 
-- summarize large amounts of information
-- identify patterns quickly
-- compare categories
-- detect trends over time
-- notice unusual values or outliers
-- communicate findings to others
+When students start learning data visualization, they often memorize chart types:
 
+- bar chart
+- line chart
+- scatter plot
+- histogram
+- box plot
 
-:::
+However, this is not enough.
 
+A better approach is to understand **how data becomes a visual object**.
 
+For example, when we create a scatter plot, we are not simply choosing a chart type. We are making several decisions:
 
->A table is often precise, but a chart is often more effective for seeing structure.
+- which variable goes to the x-axis
+- which variable goes to the y-axis
+- whether color should represent a category
+- whether size should represent a numeric value
+- whether we need a trend line
+- whether we need separate charts for different groups
 
-## Starts with a Question {.smaller}
+This is the main idea behind the Grammar of Graphics.
 
-**Before selecting a chart, we must ask:**
+## Main Components of Grammar of Graphics
 
+| Component | Meaning | Example |
+|---|---|---|
+| Data | The dataset used for visualization | customers, sales, transactions |
+| Aesthetics | Mapping variables to visual properties | x-axis, y-axis, color, size |
+| Geometry | The visual object used in the chart | points, bars, lines |
+| Statistics | Data transformation before plotting | count, mean, regression line |
+| Scales | How data values are shown visually | axis scale, color scale |
+| Coordinates | The coordinate system | Cartesian, polar |
+| Facets | Splitting one chart into smaller charts | one chart per region |
+| Theme | Non-data design elements | title, font, gridlines |
 
-::: {.fragment}
+## Example: Scatter Plot
 
-- What exactly am I trying to show?
-- Am I comparing categories?
-- Am I showing a trend over time?
-- Am I showing a distribution?
-- Am I showing a relationship between variables?
-- Am I highlighting part-to-whole structure?
+Suppose we have a customer dataset with the following variables:
 
-:::
-
-
-
->The chart type must match the analytical question.
-
-## Matching the Question to the Visualization {.smaller}
-
-| Analytical Question | Recommended Visualization |
+| Variable | Description |
 |---|---|
-| Compare categories | bar chart |
-| Show trend over time | line chart |
-| Show distribution of one variable | histogram |
-| Show relationship between two numeric variables | scatter plot |
-| Show proportions or shares | bar chart, stacked bar chart |
-| Show ranking | sorted bar chart |
-| Show matrix-like comparisons | heatmap |
-| Show exact numbers only | table |
+| age | Customer age |
+| income | Customer income |
+| segment | Customer segment |
+| monthly_spend | Monthly spending |
+| region | Customer region |
 
-> **Note:** Choosing the right chart type is crucial for effectively communicating your data insights. Always consider the story you want to tell with your data and select the visualization that best supports that narrative. [This website](https://public.tableau.com/app/profile/glowbyte.consulting/viz/ChartChooser_15550897459460/ChartChooser) can help you choose the right chart type. 
+We want to visualize the relationship between **age** and **income**.
 
+Using the Grammar of Graphics, we can describe the chart as follows:
 
+| Grammar Component | Choice |
+|---|---|
+| Data | customer dataset |
+| x-axis | age |
+| y-axis | income |
+| color | customer segment |
+| size | monthly spend |
+| facet | region |
+| geometry | points |
 
-## Principles of Effective Data Visualization {.smaller}
-
-
-
-::: {.fragment}
-
-1. **Clarity over decoration**
-   - The main goal is communication, **not** visual effects.
-   - A chart should reduce cognitive effort, **not** increase it.
-2. **Show the data, not the software:** A visualization is not a place to demonstrate all formatting options. Extra effects often distract from the message.
-3. **Use the simplest chart that answers the question:** If a bar chart communicates the message, there is no reason to use a more complicated chart.
-4. **Keep comparisons easy:** The reader should be able to compare values quickly.
-5. **Labels, scales, and titles matter** A chart without clear labeling is difficult to interpret, even if the graph itself is correct.
-
-:::
-
-
-## Data-Ink Ration {.smaller}
-
-**The idea is simple:**
+So the chart can be described as:
 
 $$
-\text{Data-Ink Ratio} = \frac{\text{Ink used to show data}}{\text{Total ink used in the graphic}}
+\text{Scatter Plot} = \text{Customers Data} + x(\text{age}) + y(\text{income}) + color(\text{segment}) + geom\_point()
 $$
 
+## Plotly Example
 
+```{python}
+#| echo: false
 
+import pandas as pd
+import numpy as np
 
->A good chart should maximize the amount of visual space used to communicate the data and minimize unnecessary visual elements.
+np.random.seed(42)
+n = 300
 
+df = pd.DataFrame({
+    "customer_id": range(1, n + 1),
+    "age": np.random.randint(18, 70, size=n),
+    "region": np.random.choice(["North", "South", "East", "West"], size=n),
+    "segment": np.random.choice(
+        ["Low Value", "Medium Value", "High Value"],
+        size=n,
+        p=[0.45, 0.35, 0.20]
+    )
+})
 
-##
+df["income"] = (
+    15000
+    + df["age"] * 850
+    + np.random.normal(0, 10000, size=n)
+)
 
-![.]({{< meta image_path >}}/0.png)
+segment_spend_multiplier = {
+    "Low Value": 0.025,
+    "Medium Value": 0.040,
+    "High Value": 0.060
+}
 
+df["monthly_spend"] = df.apply(
+    lambda row: row["income"] * segment_spend_multiplier[row["segment"]],
+    axis=1
+)
 
+df["monthly_spend"] = df["monthly_spend"] + np.random.normal(0, 150, size=n)
+df["income"] = df["income"].clip(lower=10000).round(0)
+df["monthly_spend"] = df["monthly_spend"].clip(lower=50).round(0)
 
-##
+sales_by_region = (
+    df
+    .groupby("region", as_index=False)
+    .agg(
+        total_sales=("monthly_spend", "sum"),
+        avg_sales=("monthly_spend", "mean"),
+        number_of_customers=("customer_id", "count")
+    )
+)
 
+daily_sales = (
+    df
+    .assign(
+        date=pd.date_range(
+            start="2026-01-01",
+            periods=len(df),
+            freq="D"
+        )
+    )
+    .groupby("date", as_index=False)
+    .agg(
+        sales=("monthly_spend", "sum"),
+        number_of_customers=("customer_id", "count"),
+        avg_sales=("monthly_spend", "mean")
+    )
+)
 
-![.]({{< meta image_path >}}/1.png)
+daily_sales["sales"] = daily_sales["sales"].round(0)
+daily_sales["avg_sales"] = daily_sales["avg_sales"].round(2)
+```
 
-##
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
 
+import plotly.express as px
 
+fig = px.scatter(
+    data_frame=df,
+    x="age",
+    y="income",
+    color="segment",
+    size="monthly_spend",
+    facet_col="region",
+    trendline="ols",
+    title="Relationship Between Customer Age and Income"
+)
 
-![.]({{< meta image_path >}}/2.png)
+fig.show()
+```
 
+## How Plotly Arguments Match Grammar of Graphics
 
+| Grammar Concept | Plotly Argument |
+|---|---|
+| Data | `data_frame=df` |
+| x aesthetic | `x="age"` |
+| y aesthetic | `y="income"` |
+| color aesthetic | `color="segment"` |
+| size aesthetic | `size="monthly_spend"` |
+| facet | `facet_col="region"` |
+| statistical layer | `trendline="ols"` |
+| geometry | scatter points |
 
-##
+## Example: Bar Chart
 
-![.]({{< meta image_path >}}/3.png)
+Suppose we want to compare total sales by region.
 
-##
-![.]({{< meta image_path >}}/4.png)
+In Grammar of Graphics terms:
 
+| Component | Choice |
+|---|---|
+| Data | sales dataset |
+| x-axis | region |
+| y-axis | total sales |
+| geometry | bars |
+| statistic | sum |
 
-##
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
 
+fig = px.bar(
+    data_frame=sales_by_region,
+    x="region",
+    y="total_sales",
+    title="Total Sales by Region"
+)
 
-![.]({{< meta image_path >}}/5.png)
+fig.show()
+```
 
+This chart can be described as:
 
-##
+$$
+\text{Bar Chart} = \text{Sales Data} + x(\text{region}) + y(\text{total sales}) + geom\_bar()
+$$
 
-![.]({{< meta image_path >}}/6.png)
+## Example: Line Chart
 
-##
+Suppose we want to show how sales changed over time.
 
-![.]({{< meta image_path >}}/7.png)
+| Component | Choice |
+|---|---|
+| Data | sales dataset |
+| x-axis | date |
+| y-axis | sales |
+| geometry | line |
 
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
 
-##
+fig = px.line(
+    data_frame=daily_sales,
+    x="date",
+    y="sales",
+    title="Sales Trend Over Time"
+)
 
-![.]({{< meta image_path >}}/8.png)
+fig.show()
+```
 
+The chart can be described as:
 
-##
+$$
+\text{Line Chart} = \text{Sales Data} + x(\text{date}) + y(\text{sales}) + geom\_line()
+$$
 
+## Choosing the Right Geometry
 
-![.]({{< meta image_path >}}/9.png)
+Different analytical questions require different geometries.
 
+| Analytical Question | Recommended Geometry | Common Chart |
+|---|---|---|
+| Compare categories | Bars | Bar chart |
+| Show trend over time | Lines | Line chart |
+| Show relationship | Points | Scatter plot |
+| Show distribution | Bars or boxes | Histogram, box plot |
+| Show composition | Stacked bars or areas | Stacked bar, area chart |
+| Compare groups | Facets or color | Small multiples, grouped charts |
 
-##
+## Key Teaching Point
 
-![.]({{< meta image_path >}}/10.png)
+The most important lesson is:
 
+> A visualization is not just a chart type.  
+> A visualization is a structured mapping between data and visual elements.
 
-##
+Students should not only ask:
 
-![.]({{< meta image_path >}}/11.png)
+> Which chart should I use?
 
-##
+They should also ask:
 
-![.]({{< meta image_path >}}/12.png)
+> Which variables should be mapped to which visual features?
 
-##
+## Practical Rule
 
-![.]({{< meta image_path >}}/13.png)
+Before creating a chart, answer three questions:
 
-##
+1. What data do I have?
+2. Which variables are important?
+3. Which visual encoding communicates the message best?
 
-![.]({{< meta image_path >}}/14.gif)
+## Summary
 
+Grammar of Graphics gives us a structured way to think about visualization.
 
-##
+It helps us understand that every chart is built from several components:
 
-![.]({{< meta image_path >}}/data-ink.png)
+- data
+- aesthetics
+- geometry
+- statistics
+- scales
+- coordinates
+- facets
+- theme
+
+This approach is useful because it makes data visualization more analytical and less mechanical.
+
+Instead of memorizing chart types, we learn how to build charts logically.
