@@ -1,35 +1,191 @@
 ---
 title: "Tableau Session 03: Advanced Analytics"
-categories: [ADVANCED CALCULATIONS, LOD EXPRESSIONS, DATE FUNCTIONS, COHORT ANALYSIS, SPATIAL ANALYTICS, DATA MODELING, TABLEAU PREP]
+categories: [ADVANCED CALCULATIONS, DATE FUNCTIONS, COHORT ANALYSIS, SPATIAL ANALYTICS, DATA MODELING, TABLEAU PREP]
 image_path: "/img/tableau/03"
 ---
 
 ## Learning Goals
-
 - Use advanced Tableau functions for analytical modeling  
 - Build complex calculated fields  
-- Apply table calculations (running totals, percent of total, ranking)  
+- Apply table calculations (running totals, percent of total, ranking, differences, moving averages)  
 - Work with advanced date logic and date parameters  
-- Understand and apply Level of Detail (LOD) expressions  
 - Build cohort and retention analysis views  
 - Perform spatial analysis and spatial joins  
 - Connect and visualize geographic data  
-- Understand Tableau data modeling (relationships vs joins)  
-- Prepare and clean data using Tableau Prep  
+- Apply Tableau data modeling concepts from Session 2 in more complex use cases  
 - Build advanced KPI dashboards and analytical heatmaps  
-- Work with telecom, finance, and marketing datasets  
-
-
 
 ## Introduction
+In previous sessions, we focused on building visualizations, working with filters and parameters, and creating calculated fields. We also introduced key concepts such as relationships, joins, and Level of Detail expressions, which form the foundation of analytical work in Tableau.
 
-In previous sessions, we focused on:
+In this session, we move from **building charts** to **building analytical logic inside Tableau**. Instead of focusing only on how data is displayed, we focus on how calculations are performed, how different components interact, and how to ensure that results remain accurate across different analytical scenarios.
 
-- Building visualizations  
-- Using filters and parameters  
-- Creating basic calculated fields  
+This shift allows us to move from simple dashboards to more advanced analytical systems, where calculations, date logic, and data modeling work together to answer more complex business questions.
 
-Now we move from **building charts** to **building analytical logic inside Tableau**.
+## Advanced Table Calculations
+
+In real analytical scenarios, calculations rarely rely on a single function. Instead, they combine multiple layers of logic, including aggregation, table calculations, conditional expressions, and sometimes date logic. These are referred to as **complex calculations**.
+
+Complex calculations are used when simple aggregations such as `SUM` or `AVG` are not sufficient to answer analytical questions. They allow analysts to model behavior such as growth rates, comparisons across time, cumulative metrics, and conditional ranking.
+
+A key characteristic of complex calculations is that they often combine **multiple computation stages**, where:
+
+- Some parts are calculated at the row or aggregate level  
+- Other parts are computed as table calculations after aggregation  
+
+Understanding this layered computation is essential for building correct analytical models.
+
+---
+
+### Combining Aggregation with Table Calculations
+
+One of the most common patterns in complex calculations is combining aggregation with table calculations.
+
+For example, calculating the **percentage contribution of each category over time**:
+
+```sql
+RUNNING_SUM(SUM([Order Total])) / WINDOW_SUM(SUM([Order Total]))
+```
+
+This calculation combines:
+
+- Aggregation: `SUM([Order Total])`  
+- Running accumulation: `RUNNING_SUM`  
+- Total window comparison: `WINDOW_SUM`  
+
+This type of calculation is often used to understand cumulative contribution.
+
+---
+
+### Nested Table Calculations
+
+Tableau allows nesting of table calculations, where one table calculation is used inside another.
+
+For example, calculating **percent difference between consecutive running totals**:
+
+```sql
+RUNNING_SUM(SUM([Order Total])) - LOOKUP(RUNNING_SUM(SUM([Order Total])), -1)
+```
+
+This calculation combines:
+
+- A running total  
+- A lookup to the previous value  
+
+Nested calculations like this are powerful but require careful configuration of partitioning and addressing.
+
+---
+
+### Conditional Table Calculations
+
+Complex calculations often include conditional logic to control behavior dynamically.
+
+For example, showing only positive growth:
+
+```sql
+IF SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1) > 0 THEN
+    SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)
+END
+```
+
+This type of logic allows analysts to highlight specific patterns such as growth periods.
+
+---
+
+### Window Functions
+
+Window functions perform calculations across a defined range of data within a partition.
+
+These are essential for complex analytics.
+
+#### Moving Average
+
+```sql
+WINDOW_AVG(SUM([Order Total]), -3, 0)
+```
+
+Calculates average over the last 4 periods.
+
+---
+
+#### Window Sum
+
+```sql
+WINDOW_SUM(SUM([Order Total]))
+```
+
+Calculates total within the partition.
+
+---
+
+#### Window Max
+
+```sql
+WINDOW_MAX(SUM([Order Total]))
+```
+
+Finds the maximum value within a window.
+
+---
+
+### Difference and Percent Difference
+
+Complex calculations often involve comparing values across time or categories.
+
+#### Difference
+
+```sql
+SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)
+```
+
+#### Percent Difference
+
+```sql
+(SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)) 
+/ LOOKUP(SUM([Order Total]), -1)
+```
+
+These calculations are used for:
+
+- Growth analysis  
+- Trend comparison  
+- Performance tracking  
+
+---
+
+### Multi-Level Calculations
+
+Complex calculations often operate across multiple levels of detail within the same view.
+
+For example:
+
+- Category-level aggregation  
+- Within-region ranking  
+- Across-time accumulation  
+
+This requires careful control of partitioning and addressing to ensure that calculations are applied correctly at each level.
+
+---
+
+### Interaction with View Structure
+
+One of the most important aspects of complex table calculations is that they are highly dependent on the structure of the view.
+
+Changes such as:
+
+- Adding a dimension  
+- Changing sort order  
+- Modifying layout  
+
+can significantly alter the result.
+
+Because of this, it is important to always validate:
+
+- Partitioning fields  
+- Addressing fields  
+- Compute Using configuration  
+
+---
 
 ## Table Calculations
 
@@ -69,18 +225,58 @@ In short, addressing controls *how the calculation progresses*.
 
 ### How Partitioning and Addressing Work Together
 
-1. Partitioning fields split the view into multiple sub-views (sub-tables).
-2. The table calculation is applied independently inside each partition.
-3. The addressing fields determine the direction in which the calculation moves through the marks within each partition.
+1. Partitioning fields split the view into multiple sub-views (sub-tables).  
+2. The table calculation is applied independently inside each partition.  
+3. The addressing fields determine the direction in which the calculation moves through the marks within each partition.  
 
 For example:
 
-- In a running total, addressing determines the order of accumulation.
-- In a difference calculation, addressing determines which value is compared to which.
+- In a running total, addressing determines the order of accumulation.  
+- In a difference calculation, addressing determines which value is compared to which.  
 
 ![Running Total Example]({{< meta image_path >}}/w3_running_total.png)
 
 ![Difference Caalculation Example]({{< meta image_path >}}/w3_difference_calculation.png)
+
+---
+
+### Common Table Calculations
+
+Table calculations are widely used in analytical dashboards to understand trends, comparisons, and rankings.
+
+#### Running Total
+
+Running totals accumulate values across a defined direction.
+
+```sql
+RUNNING_SUM(SUM([Order Total]))
+```
+
+This is commonly used to track cumulative metrics such as revenue growth over time.
+
+---
+
+#### Percent of Total
+
+Percent of total calculates each value’s contribution relative to the total.
+
+```sql
+SUM([Order Total]) / TOTAL(SUM([Order Total]))
+```
+
+This is useful for understanding share distribution across categories or regions.
+
+---
+
+#### Rank
+
+Ranking assigns a position to values based on a selected measure.
+
+```sql
+RANK(SUM([Order Total]))
+```
+
+This is often used for identifying top or bottom performers.
 
 ---
 
@@ -102,8 +298,8 @@ However, when selecting **Specific Dimensions**, you must manually decide:
 
 In the *Specific Dimensions* section of the Table Calculation dialog:
 
-- The order of fields determines the **direction of movement** through the marks: `Pane (Down)`
-- Checked dimensions define how Tableau computes the table calculation across the view: `Year of Order Date`, `Region`.
+- The order of fields determines the **direction of movement** through the marks: `Pane (Down)`  
+- Checked dimensions define how Tableau computes the table calculation across the view: `Year of Order Date`, `Region`  
 
 ---
 
@@ -111,40 +307,50 @@ In the *Specific Dimensions* section of the Table Calculation dialog:
 
 A helpful mental model:
 
-- **Partitioning = Where does the calculation reset?**
-- **Addressing = In what order does it move?**
+- **Partitioning = Where does the calculation reset?**  
+- **Addressing = In what order does it move?**  
 
 Understanding this distinction is essential for correctly configuring running totals, rankings, percent differences, and other table calculations.
 
 :::
 
+---
 
 ### More Examples of Table Calculations
 
-## Using Table Calculations on *Marks card* fields
+#### Using Table Calculations on *Marks card* fields
 
-When you place a table calculation on the **Marks card** Color, the table will be colored based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Color `SUM(Total Quantity)` will color the Revenue values based on the quantity values.
+When you place a table calculation on the **Marks card** Color, the table will be colored based on the measure on the view `SUM(Revenue)`, while the table calculation on Color `SUM(Total Quantity)` will determine how those values are visually encoded.
 
 ![Marks Card Table Calculation]({{< meta image_path >}}/w3_marks_card_calculation.png)
 
-Year over year growth is another common use case for table calculations on the Marks card. For example, if you have `SUM(Revenue)` on the view and you add a table calculation that calculates the year-over-year growth of Revenue by Region.
+Year-over-year growth is another common use case. If you place `SUM(Revenue)` on the view and apply a table calculation for year-over-year growth, Tableau will compute the change in revenue across periods based on the addressing direction.
 
 ![Year over Year Growth Calculation]({{< meta image_path >}}/w3_year_over_year_growth_cal.png)
 
 ![Year over Year Growth]({{< meta image_path >}}/w3_year_over_year_growth.png)
 
-## Using Table Calculations on *Rows or Columns* fields
+---
 
-When you place a table calculation on the **Rows or Columns** shelf, the table will be calculated based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Rows or Columns `Moving Average` will add a moving average line to the view based on the Revenue values.
+#### Using Table Calculations on *Rows or Columns* fields
+
+When you place a table calculation on the **Rows or Columns** shelf, Tableau modifies the structure of the visualization.
+
+For example, adding a moving average to `SUM(Revenue)` introduces a smoothed trend line that helps identify patterns over time.
 
 ![Moving Average Example]({{< meta image_path >}}/w3_moving_average.png)
 
+---
 
-When you place a table calculation on the **Filters** shelf, the table will be filtered based on the Measure you have on the view `SUM(Revenue)` and the table calculation you have on the Filters `Rank` will filter the view to show only the top N values based on the Revenue values.
+#### Using Table Calculations on *Filters*
 
-## Influence of Filters, Parameters, and Context Filters on Calculated Fields
+When you place a table calculation on the **Filters** shelf, Tableau filters the results after aggregation.
 
-Understanding how filters and parameters interact with calculated fields is critical for building accurate dashboards in Tableau.
+For example, applying a ranking calculation allows you to filter the view to show only the Top N values based on a measure such as Revenue.
+
+This is commonly used in scenarios where users want to focus on the highest-performing categories, customers, or regions.
+
+---
 
 ## Date Functions
 
@@ -629,8 +835,6 @@ This allows you to:
 
 >This will be further explored in the KPI section.
 
-
-
 ### Dynamic Time Aggregation
 
 One advanced use of Date Parameters is dynamically controlling the level of date aggregation.
@@ -742,216 +946,71 @@ This creates a seamless and consistent experience across multi-source dashboards
 
 ## Spatial Analytics (spatial relationships, spatial joins, spatial functions)
 
-Spatial analytics involves analyzing data that has a geographic or spatial component.
+Spatial analytics focuses on analyzing data that contains a geographic component. Unlike traditional visualizations, spatial analysis allows us to understand how data behaves in relation to location, distance, and geographic structures. It enables answering questions such as where events occur, how locations interact, how movement happens across space, and how metrics vary across regions.
 
-It allows you to answer questions related to location, distance, and spatial relationships between geographic entities.
-
-**Why Put The Data on a Map?**
-
-Maps answer **spatial questions** that cannot be easily answered with traditional charts or tables.
-
-They help us understand:
-
-- Where is something happening?  
-- What overlaps with what?  
-- How far apart are locations?  
-- How do locations interact?  
-- How does something move over time?  
-- How metrics change over time on then specific territories in the map?  
-
-Map is used when geography is essential to understanding the pattern.
-
-**Gographic Data Format**
-
-Geographic data can come in various formats, including:
-
-- Spatial files (Shapefile, GeoJSON, KML)  
-- Excel files  
-- CSV files  
-- Databases  
-
-**Spatial Files**
-
-Spatial files are specifically designed to store geographic information. They contain both:
-- **Geometry** (the shape and location of geographic features)
-- **Attributes** (descriptive information about those features)
-
-Geometry can be in the form of points, lines, or polygons, and it allows Tableau to render these features on a map accurately.
-
-When connected, Tableau recognizes the geometry field and treats it as spatial data, enabling mapping and spatial analysis capabilities.
-
-**Location-Based Data**
-
-Location-based data contains fields that represent geographic locations, such as:
-
-- Latitude / Longitude  
-- Country  
-- State  
-- City  
-- Postal Code  
-
-Tableau can geocode these fields to plot them on a map, but they do not contain the actual geometry of shapes or boundaries. They are typically used for point-based mapping (e.g., plotting store locations, customer addresses).
-
-
-## Datasets for Spatial Analytics Example  
-
-In this session, we will use **Citi Bike System Data** to explore spatial analytics and mobility patterns. 
-Additionally, we will use **NY_Community_District_Tabulation_Area.geojson** file to analyze the trips by district and build maps showing the distribution of the trips across New York city.
-
-**Citi Bike Trip History (NYC)** is a public dataset of bike share trips in New York City, including start/end locations (lat/long), timestamps, and user types.
-
-The dataset helps answer questions such as:
-
-- Where do Citi Bike users ride?  
-- When are rides most frequent?  
-- How far do riders travel?  
-- Which stations are the most popular?  
-- When are rides highest?  
-
-Data is provided in multiple CSV files, each containing a month's worth of trip data. Each file has the same structure, allowing us to combine them for analysis.
-
-**Data fields include:**
-
-Core Trip Information
-
-- Ride ID  
-- Rideable Type  
-- Started At (timestamp)  
-- Ended At (timestamp)  
-- Member or Casual Ride  
-
-Start Station Information
-
-- Start Station Name  
-- Start Station ID  
-- Start Latitude  
-- Start Longitude  
-
-End Station Information
-
-
-
-**Community_District_Tabulation_Area (NYC)** is a GeoJSON file containing the boundaries of community districts in New York City. Each district is represented as a polygon geometry, allowing us to analyze spatial relationships between bike trips and district boundaries.
-
-This is a common format for storing geographic shapes (boundaries, districts, zones, etc.).
-
-In this file, each record represents a community district with:
-
-GeoJSON Structure
-
-**Top-Level Object**
-
-`type`
-
-- **Description:** Identifies the GeoJSON container type  
-- **Expected value:** `FeatureCollection`  
-- **Meaning:** This file contains multiple geographic objects (features)  
-
-`features`
-
-- **Description:** A list (array) of individual geographic records  
-- **Each item:** One `Feature` (one district/zone/polygon, etc.)  
-
-**Feature-Level Fields (Each Record)**
-
-Each item in `features` usually contains:
-
-`type`
-
-- **Description:** Identifies the object type  
-- **Expected value:** `Feature`  
-- **Meaning:** A single geographic object (one row)  
-
-`geometry`
-
-- **Description:** Stores the spatial shape itself (polygon, multipolygon, line, point)  
-
-`geometry.type`
-
-- **Description:** The geometry shape type  
-- **Your value:** `MultiPolygon`  
-- **Meaning:** One feature can contain **multiple polygons** (for example: islands, separated areas, holes)  
-
-`geometry.coordinates`
-
-- **Description:** The actual coordinate arrays that define the shape  
-- **Coordinate order:** `[longitude, latitude]`  
-- **Example:** `[-73.9240590965993, 40.71411156014706]`  
+Maps are powerful because they allow patterns to be understood visually. They are especially useful when geography is not just a visual element, but a key part of the analysis.
 
 ---
 
-## Spatial Relationships 
+## Geographic Data Formats
 
-Spatial relationships define how two spatial objects relate to each other.  
-Here are the main steps to make the relationship work between the spatial file and the tabular file and make the resulting visualisations work properly.  
-As the spatial file and the tabular file do not have any common fields, we will create dummy fields in both tables with the same value to make the relationship work.
+Geographic data can exist in multiple formats, and understanding these formats is essential for correct analysis.
 
-### How to Create a Spatial Relationship
+- Spatial files such as **Shapefile, GeoJSON, KML**
+- Flat files such as **Excel or CSV**
+- Databases with spatial or location-based fields
 
-Here are the steps to create a spatial relationship between the Citi Bike trip data and the NYC district polygons:
+Spatial files store both:
 
-**Step 1:** Load The Data
+- **Geometry** → the shape (point, line, polygon)
+- **Attributes** → descriptive data
 
-- Open Tableau Public  
-- Click Text File  
-- Choose one of the files of the folder and click **open** and all the **csv** files will apper on the Tableu workspace  
+When a spatial file is connected, Tableau automatically creates a **Geometry field**, which can be directly used for mapping.
 
-You land on the **Data Source page**.
+Location-based data (like City, Country, Latitude, Longitude) does not contain shapes. Tableau uses **geocoding** to convert these values into map coordinates.
 
+---
 
-**Step 2:** Union The Data
+## Dataset for Spatial Analysis
 
-As the data in in multiple sheets the union should be done. Make sure that all the columns are identical in all files.
+In this session, we use:
 
-If they share a common columns, we can **Union** them.
+- **Citi Bike dataset** (trip-level data with coordinates)
+- **NYC District GeoJSON file** (polygon-level data)
 
-- Drag one of the files to the workspace  
-- Right click then **convert to union**  
-- Add all the files left to the union  
+The Citi Bike dataset contains:
 
-![Union]({{< meta image_path >}}/w3_union.png)
+- Start and End coordinates  
+- Time information  
+- Station details  
 
-![Union Details]({{< meta image_path >}}/w3_union_details.png)
+Since the dataset is split across multiple CSV files, we combine them using **Union**.
 
-When combining multiple files or tables in Tableau, you can use either:
+The GeoJSON dataset contains:
 
-- **Specific (Manual) Union**  
-- **Wildcard (Automatic) Union**  
+- District boundaries (MultiPolygon)  
+- Geographic shapes for mapping  
 
-They both stack data vertically (row-wise), but the way files are selected is different.
+---
 
-In case of **Specific (Manual) Union** you should manually select and add each table or file that should be combined.
+## Spatial Relationships
 
-You explicitly define:
+Spatial relationships are used when datasets do not share a common key but still need to be analyzed together.
 
-- Which tables to include  
-- In what order they are stacked  
-This is useful when you have a small number of files or when files do not follow a consistent naming pattern.
+### Steps to Create Spatial Relationship
 
-**Wildcard (Automatic) Union** automatically unions multiple files based on a **common naming pattern**.
+1. Load the **Citi Bike dataset**  
+2. Combine all CSV files using **Union**  
+3. Add the **GeoJSON file** to the data model  
+4. Create a calculated field in both datasets:
 
-Instead of selecting each file, you define a pattern or the folder with the files:
+```sql
+'New York'
+```
 
-- city_bike_trip  
+5. Use this field to create a **relationship** between the datasets  
 
-Tableau then automatically includes all matching files.
-
-
-**Step 3** Defining a Spatial Relationship
-
-The next step is bringing shape file of New York city to the view. In order to do that
-
-- Click to **Add**  
-- Choose **Spatial file**  
-- Add **NY_Community_District_Tabulation_Area.geojson**  
-- Bring the table to the view.  
-
-Tableau will automatically define that there is no relationship between the two tables. So will create dummy columns in each table to make relationship work.
-
-- Click on **Select a filed** on the newly created **city bike rides** unioned table  
-- Choose **Create relationship calculation**  
-- When **Relationship Calculations** opens write `'New York'` and Tableau will create a column with the string **New York**  
-- Do the same steps for **NY_Community_District_Tabulation_Area.geojson**  
+This approach allows Tableau to connect the datasets logically without physically joining them, preserving flexibility and avoiding duplication.
 
 ![Relationship Calculations]({{< meta image_path >}}/w3_relationship_calculation.png)
 
@@ -961,45 +1020,36 @@ Now we have a working relationship between two tables.
 
 ---
 
-## Spatial Joins   
+## Spatial Joins
 
-Spatial joins combine spatial data based on their geographic relationship.  
-For example, you can join Citi Bike trip data (with lat/long) to NYC district polygons.  
-This allows you to analyze trips by district, even though the two datasets do not share a common key.
+Spatial joins combine datasets based on geographic relationships rather than keys.
 
-In Tableau spatial joins are performed at the physical layer, which means they are executed before any aggregations or calculations. This allows you to join data based on spatial relationships directly in the data source, enabling more efficient analysis and visualization of geographic data. The function for spatial join is **Intersects** which checks if the geometry of one dataset intersects with the geometry of another dataset.
+The most common spatial join is:
 
-In our example, as the Citi Bike trip data contains latitude and longitude points of trip start and end locations, and the NYC district data contains polygon geometries of districts, we can use an **Intersects** spatial join to determine which trips started or ended in which districts. We will choose **Left Join** to include all trips and only match those that intersect with the district polygons. 
+- **INTERSECTS** → checks if two geometries overlap  
 
-### How to Create a Spatial Join
+---
 
-Here are the steps to create a spatial join between the Citi Bike trip data and the NYC district polygons:
+### Steps to Create Spatial Join
 
-**Step 1** 
+1. In the data source tab, switch to the **physical layer**  
+2. Add the Citi Bike dataset  
+3. Create calculated fields:
 
-Go to the Data Source page and drag the city bike trip data to the workspace.
+```sql
+MAKEPOINT([Start Lat], [Start Lng])
+```
 
-**Step 2** 
+```sql
+MAKEPOINT([End Lat], [End Lng])
+```
 
-Make the union of the files as explained in relation to spatial relationships section. This will create a single table with all the trip data combined, which we can then join to the spatial file.
+4. Drag the GeoJSON dataset next to the Citi Bike dataset  
+5. Choose **Left Join**  
+6. Set join condition:
+   - Spatial field (point) **INTERSECTS** polygon geometry  
 
-**Step 3** 
-
-Right click on the unioned table and open the physical layer.
-Click on **Add** and choose **Spatial file** and add the spatial file of New York city.
-
-**Step 4** 
-
-Drag the new table to the workspace and choose **Left Join**.
-In the join configuration, select the spatial relationship as **Intersects** between the geometry fields.  
-
-**Step 5** 
-
-As we don't have spatial objects in the city bike trip data, we will use the latitude and longitude fields to create spatial points using MAKEPOINT function and then use these points to perform the spatial join with the district polygons. 
-To create spatial points, we will create a calculated field in the city bike trip data with the following formula: `MAKEPOINT([Start Lat], [Start Lng])`.  
-Now the same should be done for the end latitude and longitude to create another spatial point for the end location of the trip: `MAKEPOINT([End Lat], [End Lng])`.  
-
-Now we can use these spatial points to perform the spatial join with the district polygons using the INTERSECTS function. The join condition will be: `INTERSECTS([District Geometry], [Starting Point])` for the start location and `INTERSECTS([District Geometry], [Ending Point])` for the end location.
+This will match each trip to a district based on location.
 
 ![Spatial Join]({{< meta image_path >}}/w3_spatial_join.png)
 
@@ -1007,50 +1057,69 @@ Now we can use these spatial points to perform the spatial join with the distric
 
 ### Troubleshooting Spatial Joins
 
-When working with spatial joins in Tableau, you may encounter errors related to geometry compatibility. One common error is:
+Common issue:
 
-**SQL Server Error: Geometry is incompatible with geography**
+- **Geometry is incompatible with geography**
 
-::: {.callout-warning}
-**Error Message:** Geometry is incompatible with geography
-:::
+Solution:
 
-When working with spatial data from SQL Server, this error usually appears when Tableau cannot interpret the spatial field correctly.
+- Convert geometry to geography  
+- Use coordinate system **EPSG:4326**  
+- Ensure coordinates follow **Longitude, Latitude** order  
 
-This is because SQL Server supports two spatial data types: `geometry` and `geography`, but Tableau only supports the `geography` data type for spatial analysis.
-
-- If your spatial column is stored as `geometry`, Tableau will not be able to process it, resulting in the error message above.
-- Additionally, if the spatial data uses an unsupported Spatial Reference System Identifier (SRID), Tableau will also fail to process it.
-
-::: {.callout-tip}
-Tableau supports only the following EPSG codes from SQL Server:
-
-- **EPSG:4326** → WGS84  
-- **EPSG:4269** → NAD83  
-- **EPSG:4258** → ETRS89  
-:::
-
-If your spatial data uses projected coordinates (e.g., UTM) instead of geographic coordinates (latitude/longitude), Tableau will also have trouble interpreting it, leading to errors in spatial joins and map rendering.
-
-**How to Fix:**
-In SQL Server, you can convert your spatial data to the `geography` type and ensure it uses a supported SRID (preferably 4326 for latitude/longitude).
-
-::: {.callout-important}
-To ensure compatibility with Tableau:
-
-- Convert `geometry` to `geography` in SQL Server  
-- Set SRID to 4326 (recommended)  
-- Ensure coordinates are stored as longitude/latitude 
-- Validate spatial fields before connecting to Tableau   
-:::
-
+---
 
 ## Spatial Functions
 
-The table below summarizes the main spatial functions available in Tableau and their purpose.
+Spatial functions enable advanced geographic calculations directly within Tableau. They allow you to create, transform, and analyze spatial objects such as points, lines, and polygons. These functions are especially important when working with coordinate-based datasets, as they convert raw latitude and longitude values into map-ready objects and allow analytical operations such as distance measurement, movement analysis, and spatial comparison.
+
+Spatial functions are commonly used together with mapping and spatial joins. They help bridge the gap between raw data and geographic insight, making it possible to answer questions about proximity, interaction, and movement.
+
+---
+
+### Common Use Cases
+
+- Converting latitude and longitude into spatial points  
+- Visualizing movement between two locations  
+- Measuring distance between locations  
+- Creating service or coverage areas  
+- Identifying overlapping or interacting regions  
+
+---
+
+### Examples
+
+Creating a spatial point from coordinates:
+
+```sql
+MAKEPOINT([Latitude], [Longitude])
+```
+
+Visualizing movement between two locations:
+
+```sql
+MAKELINE(
+    MAKEPOINT([Start Lat], [Start Lng]),
+    MAKEPOINT([End Lat], [End Lng])
+)
+```
+
+Calculating distance between two points:
+
+```sql
+DISTANCE(
+    MAKEPOINT([Start Lat], [Start Lng]),
+    MAKEPOINT([End Lat], [End Lng]),
+    'km'
+)
+```
+
+---
+
+### Spatial Functions Reference
 
 | Function | Description | Typical Use Case |
-|-----------|-------------|------------------|
+|----------|-------------|------------------|
 | MAKEPOINT | Converts latitude and longitude columns into a spatial point. | Enabling spatial joins for coordinate-based datasets. |
 | MAKELINE | Creates a line between two spatial points. | Origin–destination maps, mobility analysis, route visualization. |
 | DISTANCE | Calculates the distance between two spatial points using specified units. | Nearest branch analysis, trip distance calculation, proximity analysis. |
@@ -1064,7 +1133,6 @@ The table below summarizes the main spatial functions available in Tableau and t
 | OUTLINE | Converts polygon geometry into boundary lines. | Styling borders separately from polygon fill. |
 | SHAPETYPE | Returns the geometry structure as text (Point, Polygon, etc.). | Debugging spatial data issues. |
 | VALIDATE | Confirms whether spatial geometry is topologically correct. | Cleaning corrupted spatial files and preventing join errors. |
-
 ---
 
 ## Mapping in Tableau (Map Layers, Map Styling & Configuration)
@@ -1510,7 +1578,7 @@ Each of these groups becomes a **cohort**.
 Traditional aggregation mixes users with different histories.
 
 For example:
- 
+
 - Some customers joined yesterday  
 - Some customers joined one year ago  
 
@@ -1519,17 +1587,46 @@ If we calculate overall metrics like revenue or retention, the results can be mi
 Cohort analysis solves this problem by aligning users based on **their starting point**.
 
 This allows analysts to answer questions such as:
-  
+
 - Do newer users retain better than older users?
 - How long does customer engagement last?
 - Which acquisition month produced the most loyal users?
 
 ---
 
+## Cohort Analysis in Tableau
+
+Cohort Analysis is a technique used to analyze the behavior of groups of users that share a common characteristic over time.
+
+Instead of analyzing all users together, cohort analysis groups users based on a **shared starting event**, allowing to observe how behavior changes across time for each group.
+
+Common cohort grouping criteria include:
+
+- First purchase date  
+- First login date  
+- First subscription date  
+- First product activation  
+
+This method is widely used in:
+
+- Customer retention analysis  
+- Product usage analysis  
+- Marketing performance evaluation  
+- Telecom subscriber lifecycle analysis  
+
+For example:
+
+- Customers who made their **first purchase in January**
+- Customers who made their **first purchase in February**
+
+Each of these groups becomes a **cohort**.
+
+---
+
 ### Cohort Analysis Concept
 
 A cohort analysis typically consists of three components:
- 
+
 - **Period**
 - **Start Date**
 - **Metric Being Measured**
@@ -1537,16 +1634,16 @@ A cohort analysis typically consists of three components:
 Example:
 
 | Start Date | Period 0 | Period 1 | Period 2 | Period 3 |
-|---------------|--------|--------|--------|--------|
-| Jan 2024 | 100% | 70% | 55% | 40% |
-| Feb 2024 | 100% | 75% | 60% | 45% |
-| Mar 2024 | 100% | 72% | 58% | 44% |
+|------------|----------|----------|----------|----------|
+| Jan 2024   | 100%     | 70%      | 55%      | 40%      |
+| Feb 2024   | 100%     | 75%      | 60%      | 45%      |
+| Mar 2024   | 100%     | 72%      | 58%      | 44%      |
 
 Interpretation:
 
-- Month 0 → when users first appeared
-- Month 1 → one month after acquisition
-- Month 2 → two months after acquisition
+- Month 0 → when users first appeared  
+- Month 1 → one month after acquisition  
+- Month 2 → two months after acquisition  
 
 This structure allows us to analyze **retention or activity decay** over time.
 
@@ -1561,27 +1658,29 @@ Steps include:
 - Calculate **time elapsed since the cohort start**
 - Aggregate metrics by cohort and time period
 
+---
+
 ### Cohort Analysis Example
 
-Let's explore Cohort Analysis in Tableau Using the Online Retail Dataset
+Let's explore Cohort Analysis in Tableau using the Online Retail Dataset :contentReference[oaicite:0]{index=0}
 
 Cohort analysis becomes very practical with the **Online Retail** dataset because the table contains transactional data at the invoice line level.
 
-From the, we can see the following important fields:
+From the dataset, we can see the following important fields:
 
-- **Customer ID** identifies the customer
-- **Invoice Date** identifies when the transaction happened
-- **Quantity** and **Unit Price** can be used to calculate sales
-- multiple rows can belong to the same invoice because one invoice may contain several products
+- **Customer ID** identifies the customer  
+- **Invoice Date** identifies when the transaction happened  
+- **Quantity** and **Unit Price** can be used to calculate sales  
+- Multiple rows can belong to the same invoice because one invoice may contain several products  
 
 In cohort analysis, we usually group customers based on the date of their **first purchase** and then track their later activity.
 
 In this dataset:
- 
-- each row is a product line within an invoice
-- one customer can have many invoices
-- one invoice can contain many products
-- customers purchase at different times
+
+- Each row is a product line within an invoice  
+- One customer can have many invoices  
+- One invoice can contain many products  
+- Customers purchase at different times  
 
 This allows us to answer questions such as:
 
@@ -1590,21 +1689,22 @@ This allows us to answer questions such as:
 - Which cohort has better retention?
 - Which cohort generates more revenue over time?
 
+---
 
-For this dataset, the cohort can be defined as:
+### Cohort Definition
+
+For this dataset, the cohort is defined as:
 
 **Customers grouped by the month of their first invoice date**
 
 So:
-  
-- customers whose first order was in **January 2011** belong to the **January 2011 cohort**
-- customers whose first order was in **February 2011** belong to the **February 2011 cohort**
 
-Then we compare how active those customers remain in later months.
+- Customers whose first order was in **January 2011** belong to the **January 2011 cohort**  
+- Customers whose first order was in **February 2011** belong to the **February 2011 cohort**  
+
+---
 
 ### Cohort Analysis Logic
-
-The cohort analysis process in Tableau will follow this logic:
 
 ```{mermaid}
 flowchart LR
@@ -1617,11 +1717,7 @@ E --> F[Build Cohort Heatmap]
 
 ---
 
-**Step 1:** Find the First Purchase Date per Customer
-
-We first need to identify when each customer made their very first purchase.
-
-Create a calculated field:
+**Step 1: Find the First Purchase Date per Customer**
 
 ```sql
 { FIXED [Customer ID] : MIN([Invoice Date]) }
@@ -1629,21 +1725,13 @@ Create a calculated field:
 
 Name: **First Purchase Date**
 
-**Explanation**
+This calculation:
 
-This LOD expression tells Tableau:
+- Identifies the earliest purchase per customer  
+- Returns the same value for all rows of that customer  
 
-- look at each **Customer ID**
-- find the earliest **Invoice Date**
-- return that same first purchase date for all rows of that customer
 
-So if Customer 17850 first purchased on **2010-12-01**, every row for Customer 17850 will carry that first purchase date.
-
----
-
-**Step 2:** Create the Cohort Month
-
-Cohorts are usually analyzed by month, so we truncate the first purchase date to month level.
+**Step 2: Create the Cohort Month**
 
 ```sql
 DATETRUNC('month', [First Purchase Date])
@@ -1651,25 +1739,8 @@ DATETRUNC('month', [First Purchase Date])
 
 Name: **Cohort Month**
 
-**Explanation**
 
-If a customer's first purchase date is:
-
-- 2011-01-20 18:08:00
-
-then the cohort month becomes:
-
-- 2011-01-01
-
-In Tableau it will usually be displayed as **January 2011**.
-
-This is the cohort to which the customer belongs.
-
----
-
-**Step 3:** Calculate Purchase Month of Each Transaction
-
-Now we need to identify the month of each transaction row.
+**Step 3: Create Invoice Month**
 
 ```sql
 DATETRUNC('month', [Invoice Date])
@@ -1677,13 +1748,8 @@ DATETRUNC('month', [Invoice Date])
 
 Name: **Invoice Month**
 
-This gives the monthly bucket of every purchase activity.
 
----
-
-**Step 4:** Calculate Months Since First Purchase
-
-Now calculate how many months passed between the customer's first purchase and each later transaction.
+**Step 4: Calculate Period**
 
 ```sql
 DATEDIFF('month', [Cohort Month], [Invoice Month])
@@ -1691,112 +1757,113 @@ DATEDIFF('month', [Cohort Month], [Invoice Month])
 
 Name: **Period**
 
-**Explanation**
-
-This field shows the position of the transaction relative to the first purchase month.
-
----
-
-**Step 5:** Calculate Active Customers
-
-To measure retention, count how many distinct customers are active in each cohort period.
+**Step 5: Calculate Active Customers**
 
 ```sql
 COUNTD([Customer ID])
 ```
+
 Name: **Active Customers**
 
-When this field is placed in a view with:
+**Step 6: Build the Heatmap**
 
-- **MONTH(Cohort Month)**
-- **Period**
-
-it returns the number of distinct customers from that cohort who made a purchase in that month offset.
+- Drag `MONTH([Cohort Month])` → Rows  
+- Drag `[Period]` → Columns  
+- Set both as **Discrete Dimensions**  
+- Set Marks type → **Square**  
+- Drag `COUNTD([Customer ID])` → Color  
+- Drag `COUNTD([Customer ID])` → Label  
 
 ---
 
-**Step 6:** Build the Heatmap
+### Retention Rate Calculation (Important)
 
-- Drag the field `MONTH([Cohort Month])` and `[Period]` to the view and make them **descrete, dimension**.
-- Choose **Square** from the **Marks card**.
-- Drag `COUNTD([Customer ID])` to the **Label** from the **Marks card**.
-- Drag `COUNTD([Customer ID])` to the **Color** from the **Marks card**.
-- In order to show **Retention Rate** as well, drag `COUNTD([Customer ID])` to the **Label** again, from **Quick table calculations** choose **Calculation Type - Percent From**, **Campute Using - Table(accross)** and **Relative to - First**. This will allow to show percent of active customers relative to the first period.
+Retention rate is calculated using a **table calculation**.
+
+- Duplicate `COUNTD([Customer ID])` on Label  
+- Apply **Quick Table Calculation → Percent From**  
+- Compute Using → **Table (Across)**  
+- Relative to → **First**
+
+This means:
+
+- Each value is divided by the value in **Period 0**  
+- Period 0 becomes **100% baseline**  
+- All other periods show **retention relative to cohort size**
 
 ![Retention Rate Calculation]({{< meta image_path >}}/w3_retention_rate_calculation.png)
+
+---
+
+::: {.callout-important}
+Retention Rate is a **table calculation**, not a basic aggregation.  
+It depends on the view layout and uses **Percent From First** logic.
+:::
+
+---
 
 ![Cohort Initial View]({{< meta image_path >}}/w3_cohort_initial_view.png)
 
 ---
 
-**Step 7:** Control the View
+**Step 7: Clean the View**
 
-In order to show only the blocks with values we should filter the view:
-
-- Drag the calculation of **Retention Rate** from Marks Card to the Data Pane and name it `[Retention Rate]`.
-- Then drag the newly calculated field to the filters shelf, choose **At least** values from **0.01%** and the **0%** values will be filtered.
+- Create field `[Retention Rate]` from table calculation  
+- Drag to Filters  
+- Filter values **>= 0.01%**
 
 ![Cohort Final View]({{< meta image_path >}}/w3_cohort_final_view.png)
 
 ---
 
-### Example Interpretation 
+### Example Interpretation
 
-Suppose the **December 2010 cohort** contains customers whose first order happened in January.
+If a cohort shows:
 
-If retention for that cohort is:
+- Month 0 = 100%  
+- Month 1 = 38%  
+- Month 2 = 33%  
 
-- Month 0 = 100%
-- Month 1 = 38.19%
-- Month 2 = 33.44%
+This means:
 
-this means:
- 
-- all customers in the cohort purchased in their first month
-- 38% of them returned and purchased again one month later
-- 33% of them were still purchasing two months later
-
-This helps identify whether customer engagement is improving or declining across acquisition periods.
+- All users were active in first month  
+- 38% returned next month  
+- 33% remained active after two months  
 
 ---
 
-### Additional Analysis 
+### Additional Analysis
 
-Because this dataset also has **Country**, **Stock Code**, and **Description**, we can extend cohort analysis further.
+#### Cohort by Country
 
-### 1. Cohort by Country
+- Add **Country** to Filters  
 
-Add **Country** as a filter or detail to compare retention across markets.
+Questions:
 
-Questions answered:
- 
-- Do customers from the United Kingdom retain better than others?
-- Which countries have stronger repeat purchasing?
+- Which countries retain better?
+- Which markets are stronger?
 
 ---
 
-### 2. Product-Based Cohort Analysis
+#### Product-Based Cohort
 
-We can analyze cohorts of customers based on the first product category they bought.
+Group customers by first product category.
 
-Questions answered:
+Questions:
 
-  
-- Do customers who first bought decorative items retain differently from customers who first bought gift items?
-- Which first-purchase products lead to stronger repeat behavior?
+- Which products drive retention?
+- Which products lead to repeat purchases?
 
 ---
 
-### 3. Revenue Cohorts
+#### Revenue Cohort
 
-Instead of customer retention, focus on monetary value.
+Analyze revenue instead of user count.
 
-Questions answered:
+Questions:
 
-  
-- Which acquisition month generated the highest long-term revenue?
-- Do newer cohorts spend more or less than older ones?
-
+- Which cohort generates highest revenue?
+- Do newer cohorts spend more?
 ## Cleaning and Reshaping Data in 
 
 Before building visualizations or dashboards, data must often be cleaned and reshaped.  
