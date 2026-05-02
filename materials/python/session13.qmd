@@ -22,19 +22,19 @@ The focus is not only on the model itself, but on how it is used in real-world d
 
 **For example:**
 
-- A customer has a 0.82 probability of purchasing  
+- A customer has a `0.82` probability of purchasing  
 - Do we contact them or not?  
 
 *This is where analytics meets business.*
 
 
-## Introduction and Motivation
+## Introduction
 
 ### Regression vs Classification
 
 Before introducing logistic regression, we must clearly distinguish between two types of problems.
 
-As we already know the **Regression** is used when the output is a continuous number:
+As we already know the **Regression** is used when the output is a **continuous** number:
 
 - predicting revenue  
 - estimating house prices  
@@ -81,7 +81,7 @@ Because it predicts **probabilities**, not categories directly.
 
 
 
-Question/Problem:
+**Question/Problem:**
 
 > Who should we contact?
 
@@ -92,7 +92,7 @@ Question/Problem:
 - Customers may leave the service  
 - Retention campaigns are expensive  
 
-Question/Problem:
+**Question/Problem:**
 
 > Which customers are at risk of churning?
 
@@ -103,7 +103,7 @@ Question/Problem:
 - Bank gives loans to customers  
 - Some customers default  
 
-Question/Problem:
+**Question/Problem:**
 
 > Should we approve this loan?
 
@@ -123,7 +123,7 @@ $$
 y \in \{0, 1\}
 $$
 
-We encode outcomes as:
+**We encode outcomes as:**
 
 - $1$ → event happens (purchase, churn, default)  
 - $0$ → event does not happen  
@@ -168,7 +168,11 @@ $$
 **Suppose we predict:**
 
 - $-0.3$ → does this make sense as probability?  
-- $1.4$ → can probability be greater than 1?  $\rightarrow$ No!
+- $1.4$ → can probability be greater than 1?  
+
+$\downarrow$ 
+
+**No!**
 
 
 **Probabilities must always satisfy:**
@@ -180,19 +184,21 @@ $$
 ---
 
 
-Imagine a marketing model predicts:
+**Imagine a marketing model predicts:**
 
 - Customer A → 1.25 probability  
 - Customer B → -0.15 probability  
 
+$$\downarrow$$
+
 These outputs are meaningless.
 
-This is why linear regression is not suitable for classification.
+>This is why linear regression is not suitable for classification.
 
 
 ### The Need for Transformation
 
-We need a function that:
+Thus, we need a function that:
 
 1. accepts any number from $-\infty$ to $+\infty$  
 2. always outputs a value between 0 and 1  
@@ -217,7 +223,7 @@ $$
 P(y = 1 \mid X)
 $$
 
-Example:
+
 
 > Customer A → 0.82 probability of purchase  
 
@@ -226,7 +232,7 @@ Example:
 
 The probability gives us **flexibility**.
 
-We can:
+**We can:**
 
 - rank customers  
 - prioritize actions  
@@ -247,7 +253,7 @@ $$
 
 ---
 
-### Example
+**Example table**
 
 | Customer | Probability | Decision |
 |---|---:|---:|
@@ -256,24 +262,26 @@ $$
 | C | 0.47 | 0 |
 | D | 0.12 | 0 |
 
----
 
-### Important Insight
+
+
+::: {.callout-important title = "Important to know"}
 
 The threshold **does not have to be 0.5**.
 
 - In marketing → lower threshold (more aggressive)  
 - In banking → higher threshold (more conservative)  
 
+---
 
-### Business Interpretation
+**Business translation:**
 
 - Probability → level of confidence  
 - Threshold → business strategy  
 
-This is where the model becomes actionable.
+This is where the model becomes **actionable.**
 
-
+:::
 
 ## Logistic Regression Core Idea
 
@@ -289,21 +297,18 @@ $$
 
 This is a **weighted combination of features**.
 
----
-
 ### Example
 
-Suppose:
+**Suppose:**
 
 $$
 z = -2 + 0.6 \cdot \text{support calls} - 0.05 \cdot \text{tenure}
 $$
 
-**Interpretation:**
+**Interpretation (pay attention to signs):**
 
 - more support calls → increases score  
 - longer tenure → decreases score  
-
 
 ::: {.callout-important}
 
@@ -315,22 +320,16 @@ This score $z$ is **not yet a probability**.
 - around zero → uncertain  
 - very positive → likely  
 
-
 :::
-
-
-
----
 
 ### Transition to Probability
 
-To convert this score into a probability, we apply the sigmoid function:
+To convert this score into a probability, we apply the `sigmoid` function:
 
 $$
 p = \frac{1}{1 + e^{-z}}
 $$
 
----
 
 ### Intuition
 
@@ -340,7 +339,137 @@ $$
 - sigmoid → converts into probability  
 - threshold → converts into decision  
 
----
+
+```{python}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+#| out-width: 100%
+#| fig-align: center
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+raw_scores = np.linspace(-8, 8, 300)
+
+
+probabilities = 1 / (1 + np.exp(-raw_scores))
+
+threshold = 0.5
+decisions = np.where(probabilities >= threshold, 1, 0)
+
+
+example_customers = pd.DataFrame({
+    "customer": ["Customer A", "Customer B", "Customer C", "Customer D", "Customer E"],
+    "raw_score": [-4, -1.5, 0, 1.5, 4]
+})
+
+example_customers["probability"] = 1 / (1 + np.exp(-example_customers["raw_score"]))
+example_customers["decision"] = np.where(
+    example_customers["probability"] >= threshold,
+    "Churn",
+    "No Churn"
+)
+
+example_customers
+```
+
+```{python}
+#| echo: false
+#| fig-width: 14
+#| fig-height: 7
+#| out-width: 100%
+#| fig-align: center
+
+fig = go.Figure()
+
+# Sigmoid curve
+fig.add_trace(
+    go.Scatter(
+        x=raw_scores,
+        y=probabilities,
+        mode="lines",
+        name="Sigmoid probability",
+        line=dict(width=4)
+    )
+)
+
+# Threshold line
+fig.add_trace(
+    go.Scatter(
+        x=[raw_scores.min(), raw_scores.max()],
+        y=[threshold, threshold],
+        mode="lines",
+        name="Decision threshold = 0.5",
+        line=dict(width=3, dash="dash")
+    )
+)
+
+# Vertical line at raw score = 0
+fig.add_trace(
+    go.Scatter(
+        x=[0, 0],
+        y=[0, 1],
+        mode="lines",
+        name="Raw score = 0",
+        line=dict(width=2, dash="dot")
+    )
+)
+
+# Example customers
+fig.add_trace(
+    go.Scatter(
+        x=example_customers["raw_score"],
+        y=example_customers["probability"],
+        mode="markers+text",
+        text=example_customers["customer"],
+        textposition="top center",
+        marker=dict(
+            size=14,
+            line=dict(width=1)
+        ),
+        name="Example customers"
+    )
+)
+
+fig.update_layout(
+    title="From Raw Score to Probability to Decision",
+    xaxis_title="Raw score / logit",
+    yaxis_title="Predicted probability",
+    yaxis=dict(range=[-0.05, 1.05]),
+    template="plotly_white",
+    height=650,
+    annotations=[
+        dict(
+            x=-5.5,
+            y=0.15,
+            text="Low raw score<br>Low probability<br>Decision: No Churn",
+            showarrow=False,
+            font=dict(size=13)
+        ),
+        dict(
+            x=5.3,
+            y=0.85,
+            text="High raw score<br>High probability<br>Decision: Churn",
+            showarrow=False,
+            font=dict(size=13)
+        ),
+        dict(
+            x=0.8,
+            y=0.52,
+            text="At raw score = 0,<br>sigmoid gives probability = 0.5",
+            showarrow=True,
+            arrowhead=2,
+            ax=80,
+            ay=-60
+        )
+    ]
+)
+
+fig.show()
+```
+
 
 ### Mini Example
 
@@ -405,13 +534,13 @@ $$
 
 Imagine a telecom company evaluating customers for churn.
 
-Each customer gets a score:
+**Each customer gets a score:**
 
 - many complaints → increases score  
 - long tenure → decreases score  
 - high monthly charges → increases score  
 
-So:
+**So:**
 
 - Customer A → $z = -3.2$ → very unlikely to churn  
 - Customer B → $z = 0.4$ → uncertain  
@@ -467,27 +596,40 @@ $$
 \text{odds} = \frac{p}{1-p}
 $$
 
----
 
-### Example
+### Example 1: 
 
-If:
+<!-- todo: add proper example -->
+
+**If:**
 
 $$
 p = 0.75
 $$
 
-then:
+**then:**
 
 $$
 \text{odds} = \frac{0.75}{0.25} = 3
 $$
 
-Interpretation:
+**Interpretation:**
 
 > The event is 3 times more likely to happen than not happen
 
----
+### Example 2: Winning Game
+
+Sayin that the odds in favor of my team (FC Barcelona) winning a game are **4 to 1** means:
+
+- 4 of 5 times they win
+- 1 of 5 times they lose.
+
+### Example 3: Lossing Game
+
+Sayin that the odds in favor of my team (Real Madrid) winning a game are **1 to 4** means:
+
+- 1 of 5 times they win
+- 4 of 5 times they lose.
 
 ### Odds Table
 
@@ -503,14 +645,18 @@ odds_table["odds"] = odds_table["probability"] / (1 - odds_table["probability"])
 odds_table
 ```
 
----
 
-### Important Observation
+
+
+::: {.callout-important}
 
 - probability increases linearly  
 - odds increase non-linearly  
 
-This makes odds more suitable for modeling.
+**This makes odds more suitable for modeling.**
+
+
+:::
 
 ### From Odds to Log-Odds
 
@@ -522,68 +668,64 @@ $$
 0 < \text{odds} < \infty
 $$
 
-But we want a model that can handle:
+**But we want a model that can handle:**
 
 $$
 -\infty < \text{value} < +\infty
 $$
 
-So we take the logarithm:
+**So we take the logarithm:**
 
 $$
 \log\left(\frac{p}{1-p}\right)
 $$
 
----
+>This is called the **log-odds** or **logit**.
 
-### Logistic Regression Equation
+## Logistic Regression Equation
 
-Now we connect everything:
+**Now we connect everything:** Logistic regression models the log-odds as a linear function of features:
 
 $$
 \log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \cdots + \beta_kx_k
 $$
 
----
 
-### Critical Interpretation
-
-This equation tells us:
+**This equation tells us:**
 
 > Each feature changes the **log-odds**, not the probability directly
 
----
 
-## Interpreting Coefficients Properly
+### Interpreting Coefficients Properly
 
-### Direction of Effect
+#### Direction of Effect
 
 - $\beta > 0$ → increases probability  
 - $\beta < 0$ → decreases probability  
 
----
 
-### Magnitude via Odds Ratio
 
-To interpret magnitude, we use:
+#### Magnitude via Odds Ratio
+
+**To interpret magnitude, we use:**
 
 $$
 e^{\beta}
 $$
 
->sometimes called the **odds ratio** or exp($\beta$).
+>sometimes called the **odds ratio** or `exp($\beta$)`.
 
 ---
 
 ### Example
 
-If:
+**If:**
 
 $$
 \beta = 0.7
 $$
 
-then:
+**then:**
 
 $$
 e^{0.7} \approx 2.01
@@ -602,6 +744,7 @@ $$\downarrow$$
 
 - `feature` = number of support calls  
 - `coefficient` = 0.7  
+- $e^{0.7} \approx 2$
 
 **Then:**
 
@@ -611,7 +754,7 @@ $$\downarrow$$
 
 ## Bringing Everything Together
 
-Logistic regression works as a pipeline:
+**Logistic regression works as a pipeline:**
 
 ### Step 1 | Linear Score
 
@@ -638,9 +781,6 @@ $$
 0, & p < \text{threshold}
 \end{cases}
 $$
-
-
-
 
 ### Test your understanding | Odds
 
@@ -731,121 +871,603 @@ This is what makes it powerful for real-world decision systems.
 :::
 
 
-## Synthetic Customer Churn Dataset and End-to-End Logistic Regression Case
 
-**In this section, we will:**
 
-- create a **realistic synthetic churn dataset**
-- define **true underlying coefficients (betas)**
-- simulate churn using the **logistic function**
+::: {.callout-tip}
+
+### Video Explanation
+
+Check out this video for a visual explanation of logistic regression:
+
+[Odd Ratios and Log-Odds Explained | Logistic Regression Intuition](https://www.youtube.com/watch?v=ARfXDSkQf1Y)
+
+:::
+
+
+## Case Study 1: Customer Churn Prediction 
+
+In this section, we will use **sythetic data** to illustrate the entire logistic regression pipeline.
+
+
 - train a logistic regression model
-- interpret results using:
+- **interpret results using:**
   - coefficients and $e^{\beta}$
   - confusion matrix
   - revenue matrix  
 
 
-
-### Creating Synthetic Customer Data
+### Download the Dataset
 
 ```{python}
+import pandas as pd
+
 import numpy as np
 import pandas as pd
 
-np.random.seed(42)
-
-n = 1000
-
-df = pd.DataFrame({
-    "tenure": np.random.randint(1, 36, n),
-    "monthly_charges": np.random.uniform(20, 120, n),
-    "support_calls": np.random.randint(0, 10, n),
-    "contract_type": np.random.choice([0, 1], n)
-})
-```
-
-
-### Defining True Relationship (Betas)
-
-```{python}
-beta_0 = -3
-beta_tenure = -0.05
-beta_monthly = 0.02
-beta_calls = 0.5
-beta_contract = -1.0
-```
-
-
-
-### Generating Churn Probability
-
-```{python}
-z = (
-    beta_0
-    + beta_tenure * df["tenure"]
-    + beta_monthly * df["monthly_charges"]
-    + beta_calls * df["support_calls"]
-    + beta_contract * df["contract_type"]
-)
-
-p = 1 / (1 + np.exp(-z))
-
-df["churn"] = (np.random.rand(n) < p).astype(int)
-
-df.head()
-```
-
-
-### Train Logistic Regression Model
-
-```{python}
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
+df = pd.read_csv("https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/regression/logistic_regression/synthetic_churn_data.csv")
+print(f"Dataset shape: {df.shape}")
+df.head()
+
+
+df.to_csv("../../lab/python/data/regression/logistic_regression/synthetic_churn_data.csv", index=False)
+```
+
+### Observing the Dataframe
+
+
+Before modeling, we should always inspect the dataset.
+
+```{python}
+df.info()
+```
+
+The dataset now contains both numeric and categorical variables.
+
+| Column | Meaning |
+|---|---|
+| `tenure` | Number of months the customer has stayed with the company |
+| `monthly_charges` | Monthly amount paid by the customer |
+| `support_calls` | Number of support calls made by the customer |
+| `contract_type` | Contract type, where 0 = prepaid and 1 = postpaid |
+| `education_level` | Customer education category |
+| `churn` | Target variable, where 1 = churn and 0 = no churn |
+
+**The target variable is:**
+
+$$
+y = \text{churn}
+$$
+
+**where:**
+
+`1:` customer churned (left the service)  
+`0:` customer did not churn (stayed with the service)
+
+### Exploratory Data Analysis
+
+
+#### Target Variable Distribution
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+
+df['churn'].value_counts(normalize=True)
+```
+
+#### Churn Rate by Contract Type
+
+```{python} 
+
+churn_rate_by_contract = df.groupby('contract_type')['churn'].mean().reset_index()
+import plotly.express as px
+fig = px.bar(churn_rate_by_contract, x='contract_type', y='churn', title='Churn Rate by Contract Type')
+fig.update_layout(
+    xaxis_title='Contract Type (0 = Prepaid, 1 = Postpaid',
+    yaxis_title='Churn Rate',
+    template='plotly_white'
+)   
+fig.show()
+```
+
+As it was expected, the churn rate is lower for postpaid customers (contract_type = 1) compared to prepaid customers (contract_type = 0).
+
+
+::: {.callout-tip}
+
+>Think about why this might be the case. What are the possible reasons for this difference in churn rates between prepaid and postpaid customers?
+
+:::
+
+
+#### Churn Rate by Education Level
+
+```{python} 
+churn_rate_by_education = df.groupby('education_level')['churn'].mean().reset_index()
+import plotly.express as px
+fig = px.bar(churn_rate_by_education, x='education_level', y='churn', title='Churn Rate by Education Level')
+fig.update_layout(
+    xaxis_title='Education Level',
+    yaxis_title='Churn Rate',
+    template='plotly_white'
+)   
+fig.show()
+```
+
+
+---
+
+- The lowest observed churn rate is `{python} f"{churn_rate_by_education['churn'].min() * 100:.2f}"`%.
+- The highest observed churn rate is `{python} f"{churn_rate_by_education['churn'].max() * 100:.2f}"`%.
+
+
+### Data Preprocessing
+
+We now separate the dataset into input variables and the target variable.
+
+```{python}
 X = df.drop(columns=["churn"])
 y = df["churn"]
+```
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+
+- `X:` contains all the features that we will use to predict churn
+- `y` contains the target variable indicating whether a customer churned or not.
+
+
+#### Encoding Categorical Variables
+
+Logistic regression (basically all the ML models) requires numeric input.
+
+The column `education_level` contains text categories, so we convert it into dummy variables.
+
+Beofre encoding, the `education_level` column has 4 categories: and we will create 3 new binary columns to represent these categories (dropping one to avoid multicollinearity). As a base category, we will use `education_level = "High School"`.
+
+In ordert to make sure that the baseiline category is we will enforce the category using `pd.Categorical` before encoding. 
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+education_order = ["High School", "Bachelor", "Master", "PhD"]
+
+df["education_level"] = pd.Categorical(
+    df["education_level"],
+    categories=education_order,
+    ordered=True
 )
 
-model = LogisticRegression()
-model.fit(X_train, y_train)
+education_dummies = pd.get_dummies(
+    df["education_level"],
+    prefix="education",
+    drop_first=True,
+    dtype=int
+)
 
-probs = model.predict_proba(X_test)[:, 1]
-preds = (probs >= 0.5).astype(int)
+education_dummies.head()
+```
+
+
+The remaining dummy variables compare each education level against that baseline.
+
+For example, if the baseline is `High School`, then:
+
+| Dummy Variable | Interpretation |
+|---|---|
+| `education_level_Bachelor` | Bachelor compared with High School |
+| `education_level_Master` | Master compared with High School |
+| `education_level_PhD` | PhD compared with High School |
+
+
+Once we have the dummy variables, we can concatenate them back to the original dataframe and drop the original `education_level` column. Pay attention to the `axis=1`, which indicates that we are concatenating columns (not rows).
+
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+X_encoded = pd.concat([X.drop(columns=["education_level"]), education_dummies], axis=1)
+
+X_encoded.head()
+```
+
+
+#### Checking the final set of features
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+print("Final set of features:")
+print(X_encoded.dtypes)
+
+
+```
+
+>Making sure that all the features are numeric is crucial for the logistic regression model to work properly. If there were any remaining categorical variables, we would need to encode them as well before proceeding with modeling.
+
+
+### Train-Test Split
+
+
+Before training the model, we divide the data into two parts:
+
+1. **Training set**
+2. **Test set**
+
+The training set is used to `teach` the model.  
+The test set is used to evaluate whether the model can make good predictions on new, unseen data
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(
+    X_encoded,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
 ```
 
 
 
-### Interpreting Coefficients
+In machine learning, we should not evaluate the model on the same data that was used for training.
+
+If we train and test the model on the same dataset, the model may appear to perform very well simply because it has already seen those examples. This does not tell us whether the model can generalize to new customers.
+
+The train-test split helps us answer the following question:
+
+> Can the model make accurate predictions for customers it has not seen before?
+
+For example, if we have 1,000 customers, using `test_size=0.2` means:
+
+| Dataset Part | Percentage | Number of Customers |
+|---|---:|---:|
+| Training set | 80% | 800 |
+| Test set | 20% | 200 |
+
+The model learns from the training set and is evaluated on the test set.
+
+
+#### `random_state=42`
+
+The train-test split is random by default.
+
+This means that every time we run the code, Python may select different rows for the training and test sets.
+
+As a result, the model results may slightly change every time we run the notebook.
+
+By setting:
+
+```python
+random_state=42
+```
+
+we make the split reproducible.
+
+This means that every time we run the code, we get the same training and testing sets.
+
+The number `42` is not mathematically special. It is simply a commonly used fixed number.
+
+
+### `stratify=y`
+
+The argument `stratify=y` is very important for classification problems.
+
+It tells Python to preserve the same class distribution in both the training set and the test set.
+
+For example, suppose the full dataset has the following churn distribution:
+
+| Class | Meaning | Percentage |
+|---:|---|---:|
+| 0 | Did not churn | 80% |
+| 1 | Churned | 20% |
+
+With `stratify=y`, the training and test sets will keep approximately the same balance:
+
+| Dataset Part | Did Not Churn | Churned |
+|---|---:|---:|
+| Training set | 80% | 20% |
+| Test set | 80% | 20% |
+
+This is especially important when the target variable is imbalanced.
+
+In churn prediction, the number of customers who churn is usually much smaller than the number of customers who do not churn.
+
+Without stratification, the test set may accidentally contain too few churned customers or too many churned customers.
+
+That would make the model evaluation unreliable.
+
+For example, if the test set contains very few churned customers, the model may look better than it really is.
+
+
+
+#### Output of `train_test_split()`
+
+**The function returns four objects:**
+
+```python
+X_train, X_test, y_train, y_test
+```
+
+Each one has a specific purpose.
+
+- **`X_train:`** contains the input features for the training data. This is the data the model uses to learn patterns.
+- **`X_test:`** contains the input features for the test data. This allows us to test how well the model performs on unseen customers.
+- **`y_train:`** contains the true target values for the training data. This is what the model tries to predict during training.
+- **`y_test:`** contains the true target values for the test data. This is what we use to evaluate the model's predictions on the test set.
+
+Let's check the shapes of these objects to confirm that the split was done correctly.   
 
 ```{python}
-import numpy as np
+train_size = len(X_train)
+test_size = len(X_test)
 
+train_churn_rate = y_train.mean()
+test_churn_rate = y_test.mean()
+
+print("Training rows:", train_size)
+print("Test rows:", test_size)
+print("Training churn rate:", round(train_churn_rate, 3))
+print("Test churn rate:", round(test_churn_rate, 3))
+```
+
+
+
+>Thus , the train-test split is used to check whether the model can generalize.
+
+
+The training set contains `{python} train_size` customers.
+
+The test set contains `{python} test_size` customers.
+
+The churn rate in the training set is `{python} round(train_churn_rate * 100, 2)`%, while the churn rate in the test set is `{python} round(test_churn_rate * 100, 2)`%.
+
+Because we used `stratification`, these two percentages should be close.
+
+
+### Training the Logistic Regression Model
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+model = LogisticRegression(max_iter=1000)
+
+model.fit(X_train, y_train)
+```
+
+>`max_iter=1000` is used to ensure that the optimization algorithm has enough iterations to converge to a solution. Logistic regression uses an iterative process to find the best coefficients, and sometimes it may require more iterations than the default (which is usually 100) to find the optimal solution, especially if the dataset is complex or has many features.
+
+The model estimates coefficients for each feature.
+
+Internally, logistic regression models the `log-odds` of churn:
+
+$$
+\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \cdots + \beta_kx_k
+$$
+
+where $p$ is the probability of churn.
+
+
+### Predicting Probabilities on the Test Set
+
+```{python}
+probs = model.predict_proba(X_test)
+probs[:5]
+```
+
+
+
+The output `probs` contains the predicted probability of churn for each customer in the test set.
+
+We use `[:, 1]` because class `1` represents churn.
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+probs = probs[:, 1]
+probs[:5]
+```
+
+
+### Converting the Probabilities into Binary Predictions
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+threshold = 0.5
+preds = (probs >= threshold).astype(int)
+preds[:5]
+```
+
+
+The threshold converts probabilities into class predictions.
+
+$$
+\hat{y} =
+\begin{cases}
+1, & p \geq 0.5 \\
+0, & p < 0.5
+\end{cases}
+$$
+
+
+### Previewing the Predictions
+
+```{python}
+prediction_results = X_test.copy()
+
+prediction_results["actual_churn"] = y_test.values
+prediction_results["predicted_probability"] = probs
+prediction_results["predicted_churn"] = preds
+
+prediction_results.head()
+```
+
+
+
+### Coefficient Interpretation with Exponentiated Betas
+
+The raw coefficients are log-odds coefficients.
+
+To make them easier to interpret, we exponentiate them.
+
+```{python}
 coef_df = pd.DataFrame({
-    "feature": X.columns,
+    "feature": X_encoded.columns,
     "beta": model.coef_[0],
     "exp_beta": np.exp(model.coef_[0])
 })
 
+coef_df = coef_df.sort_values("exp_beta", ascending=False)
+
 coef_df
 ```
 
-### Interpretation
-- Tenure reduces churn odds by a factor of `{python} round(coef_df.loc[coef_df.feature=="tenure","exp_beta"].values[0], 2)`  
-- Monthly charges change churn odds by a factor of `{python} round(coef_df.loc[coef_df.feature=="monthly_charges","exp_beta"].values[0], 2)`  
-- Each additional support call multiplies churn odds by `{python} round(coef_df.loc[coef_df.feature=="support_calls","exp_beta"].values[0], 2)`  
-- Contract type (long-term) multiplies churn odds by `{python} round(coef_df.loc[coef_df.feature=="contract_type","exp_beta"].values[0], 2)`  
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+
+best_positive_feature = coef_df.iloc[0]["feature"]
+best_positive_feature = coef_df.iloc[0]["exp_beta"]
+
+```
+
+#### Interpretation
+
+The table contains two important values:
+
+| Column | Meaning |
+|---|---|
+| `beta` | Effect on log-odds |
+| `exp_beta` | Odds multiplier, calculated as $e^{\beta}$ |
+
+Rules for interpretation:
+
+- If `exp_beta > 1`, the feature increases the odds of churn  
+- If `exp_beta < 1`, the feature decreases the odds of churn  
+- If `exp_beta = 1`, the feature has almost no effect on churn odds  
+
+
+##### Support Calls
+
+- `exp_beta = 1.77`
+- Each additional support call multiplies churn odds by **1.77**
+- This means churn odds increase by approximately **77%**
+- This is the strongest churn-increasing factor
+
+>Business meaning: frequent support calls are an early warning signal
+
+
+
+##### Education: Bachelor
+
+- `exp_beta = 1.13`
+- Bachelor customers have **1.13 times** the odds of churn compared with the baseline education group
+- This means approximately **13% higher odds of churn**
+
+>The effect is positive but relatively small
+
+
+##### Education: Master
+
+- `exp_beta = 1.12`
+- Master customers have **1.12 times** the odds of churn compared with the baseline education group
+- This means approximately **12% higher odds of churn**
+
+>The effect is also positive but relatively small
+
+##### Education: PhD
+
+- `exp_beta = 0.80`
+- PhD customers have **0.80 times** the odds of churn compared with the baseline education group
+- This means approximately **20% lower odds of churn**
+- This result goes against the original assumption that higher education should always increase churn risk
+  
+>Possible reason: other variables may explain churn better, or the synthetic relationship may not be strong enough
+
+
+##### Monthly Charges
+
+- `exp_beta = 1.02`
+- Each one-unit increase in monthly charges multiplies churn odds by **1.02**
+- This means approximately **2% higher odds of churn per unit**
+- The single-unit effect is small, but larger price differences can matter
+
+Example:
+
+$$
+1.02^{10} \approx 1.22
+$$
+
+>A 10-unit increase in monthly charges is associated with roughly **22% higher odds of churn**.
+
+
+
+##### Tenure
+
+- `exp_beta = 0.95`
+- Each additional month of tenure multiplies churn odds by **0.95**
+- This means churn odds decrease by approximately **5% per month**
+
+>Business meaning: longer-tenure customers are more stable
+
+##### Contract Type
+
+- `exp_beta = 0.29`
+- Postpaid contract customers have **0.29 times** the odds of churn compared with prepaid customers
+- This means approximately **71% lower odds of churn**
+- This is the strongest churn-reducing factor
+
+>Business meaning: long-term contracts strongly reduce churn risk
+
+
+
+### Retention Strategy
+
+**The company should prioritize customers who:**
+
+- have many support calls  
+- pay higher monthly charges  
+- have short tenure  
+- are on postpaid contracts  
+
+>These customers are more likely to churn and are good candidates for retention campaigns.
 
 
 
 ### Confusion Matrix
 
-```{python}
-from sklearn.metrics import confusion_matrix
 
+One of the most common ways to evaluate classification models is through the **confusion matrix**.
+
+The confusion matrix compares actual churn outcomes with predicted churn outcomes.
+
+| Outcome | Meaning |
+|---|---|
+| True Positive | Customer churned and model predicted churn |
+| False Positive | Customer did not churn but model predicted churn |
+| False Negative | Customer churned but model missed it |
+| True Negative | Customer did not churn and model predicted no churn |
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
 cm = confusion_matrix(y_test, preds)
+
 tn, fp, fn, tp = cm.ravel()
 
 cm
@@ -853,52 +1475,132 @@ cm
 
 
 
-### Interpretation
+### Classification Metrics
 
-- Correctly predicted churn (TP): `{python} tp`  
-- Incorrectly predicted churn (FP): `{python} fp`  
-- Missed churn (FN): `{python} fn`  
-- Correctly predicted non-churn (TN): `{python} tn`  
+
+```{python}
+accuracy = accuracy_score(y_test, preds)
+precision = precision_score(y_test, preds)
+recall = recall_score(y_test, preds)
+
+print("Accuracy:", round(accuracy, 3))
+print("Precision:", round(precision, 3))
+print("Recall:", round(recall, 3))
+```
+
+
+::: {.callout-tip title = "Accuracy"}
+
+The model accuracy is `{python} round(accuracy * 100, 2)`%.
+
+:::
 
 ---
 
-### Revenue Matrix (Retention Strategy)
 
-#### Business Assumptions
 
-Let's assume some dummy values for `cost` and `benefit`:
+::: {.callout-tip title = "Precision"}
+
+The precision is `{python} round(precision * 100, 2)`%.
+
+This means that among customers predicted as churners, `{python} round(precision * 100, 2)`% actually churned.
+
+:::
+
+
+
+::: {.callout-tip title = "Recall"}
+
+The recall is `{python} round(recall * 100, 2)`%.
+
+This means that among all actual churners, the model identified `{python} round(recall * 100, 2)`%.
+:::
+
+
+### Revenue Matrix
+
+There is a cost associated with contacting customers and a cost associated with losing customers. Usally from Data Analytics perspective, we want to maximize revenue, not just accuracy. Revenue matrix allows us to evaluate the model based on the financial impact of its predictions.
+
+
+Assume the company contacts customers predicted as likely to churn.
 
 ```{python}
-cost = 10
-benefit = 50
+retention_cost = 10
+retention_benefit = 50
+
+revenue_from_saved_customers = tp * (retention_benefit - retention_cost)
+cost_from_unnecessary_contacts = fp * retention_cost
+
+net_profit = revenue_from_saved_customers - cost_from_unnecessary_contacts
+
+print("Revenue from saved customers:", revenue_from_saved_customers)
+print("Cost from unnecessary contacts:", cost_from_unnecessary_contacts)
+print("Net profit:", net_profit)
+```
+
+---
+
+| Prediction Outcome | Business Meaning | Financial Effect |
+|---|---|---:|
+| True Positive | Correctly targeted churner | `retention_benefit - retention_cost` |
+| False Positive | Contacted non-churner unnecessarily | `-retention_cost` |
+| False Negative | Missed churner | `0` |
+| True Negative | Correctly ignored non-churner | `0` |
+
+---
+
+
+The model correctly targeted `{python} tp` churners.
+
+These customers generated `{python} revenue_from_saved_customers` units of value after subtracting campaign cost.
+
+The model also contacted `{python} fp` customers unnecessarily, creating a cost of `{python} cost_from_unnecessary_contacts`.
+
+The final estimated campaign profit is `{python} net_profit`.
+
+## Homework: Customer Churn Prediction
+
+>Use the same steps to build a logistic regression model on the `customer_churn_data.csv` dataset.
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+df = pd.read_csv("https://raw.githubusercontent.com/hovhannisyan91/data_analytics_with_python/refs/heads/main/data/regression/logistic_regression/Telco_Customer_Churn.csv")
+df.head()
 ```
 
 
+**We have customer information for a Telecommunications company:**
 
-#### Profit Calculation
+We've got `customer IDs`, general customer info, the servies they've subscribed too, type of contract and monthly charges.
+This is a historic customer information so we have a field stating whether that customer has **churned** 
 
-```{python}
-profit = (
-    tp * (benefit - cost)
-    - fp * cost
-)
+**Field Descriptions:**
 
-profit
-```
+- `customerID` - Customer ID
+- `gender` - Whether the customer is a male or a female
+- `SeniorCitizen` - Whether the customer is a senior citizen or not (1, 0)
+- `Partner` - Whether the customer has a partner or not (Yes, No)
+- `Dependents` - Whether the customer has dependents or not (Yes, No)
+- `tenure` - Number of months the customer has stayed with the company
+- `PhoneService` - Whether the customer has a phone service or not (Yes, No)
+- `MultipleLines` - Whether the customer has multiple lines or not (Yes, No, No phone service)
+- `InternetService` - Customer’s internet service provider (DSL, Fiber optic, No)
+- `OnlineSecurity` - Whether the customer has online security or not (Yes, No, No internet service)
+- `OnlineBackup` - Whether the customer has online backup or not (Yes, No, No internet service)
+- `DeviceProtection` - Whether the customer has device protection or not (Yes, No, No internet service)
+- `TechSupport` - Whether the customer has tech support or not (Yes, No, No internet service)
+- `StreamingTV` - Whether the customer has streaming TV or not (Yes, No, No internet service)
+- `StreamingMovies` - Whether the customer has streaming movies or not (Yes, No, No internet service)
+- `Contract` - The contract term of the customer (Month-to-month, One year, Two year)
+- `PaperlessBilling` - Whether the customer has paperless billing or not (Yes, No)
+- `PaymentMethod` - The customer’s payment method (Electronic check, Mailed check Bank transfer (automatic), Credit card (automatic))
+- `MonthlyCharges` - The amount charged to the customer monthly
+- `TotalCharges` - The total amount charged to the customer
+- `Churn` - Whether the customer churned or not (Yes or No)
 
 
 
-#### Interpretation
 
-- Customers correctly saved: `{python} tp` generating `{python} tp * (benefit - cost)` revenue  
-- Unnecessary contacts: `{python} fp` costing `{python} fp * cost`  
-- Net profit from strategy: `{python} profit`  
-
-
-### Final Insight
-
-- Features with `{python} ">1"` odds ratio increase churn risk  
-- Features with `{python} "<1"` odds ratio reduce churn risk  
-- Model decisions directly translate into `{python} profit` business outcome  
-
-> Logistic regression is not just predictive , it is **decision-driven analytics**
