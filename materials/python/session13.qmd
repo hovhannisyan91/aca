@@ -1516,6 +1516,138 @@ The recall is `{python} round(recall * 100, 2)`%.
 This means that among all actual churners, the model identified `{python} round(recall * 100, 2)`%.
 :::
 
+### ROC Curve and AUC
+
+After using the confusion matrix, we can also evaluate the logistic regression (all the available classification models) model using the **ROC curve** (Receiver Operating Characteristic) and the **AUC** (Area Under the Curve).
+
+#### ROC Intuition
+
+The confusion matrix depends on **one** selected threshold.
+
+**For example:**
+
+```python
+threshold = 0.5
+```
+
+But in business problems, the threshold may change depending on the strategy.
+
+**For churn prediction:**
+
+- lower threshold → contact more customers
+- higher threshold → contact fewer customers
+- lower threshold may increase recall
+- higher threshold may increase precision
+
+The `ROC` curve helps us understand how the model behaves across different threshold values.
+
+
+::: {.callout-important title = "**ROC Curve**"}
+
+**The ROC curve compares two quantities:**
+
+| Metric | Meaning |
+|---|---|
+| True Positive Rate | How many actual churners we correctly identify |
+| False Positive Rate | How many non-churners we incorrectly classify as churners |
+
+**The formulas are:**
+
+$$
+TPR = \frac{TP}{TP + FN}
+$$
+
+$$
+FPR = \frac{FP}{FP + TN}
+$$
+
+**In churn language:**
+
+- **TPR** answers: among customers who actually churned, how many did we detect?
+- **FPR** answers: among customers who did not churn, how many did we incorrectly target?
+
+
+:::
+
+#### ROC Curve Code
+
+```{python}
+from sklearn.metrics import roc_curve, roc_auc_score
+import matplotlib.pyplot as plt
+
+fpr, tpr, thresholds = roc_curve(y_test, probs)
+
+auc_score = roc_auc_score(y_test, probs)
+
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, label=f"ROC Curve (AUC = {auc_score:.3f})")
+plt.plot([0, 1], [0, 1], linestyle="--", label="Random Model")
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve for Logistic Regression Model")
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+
+>The model AUC is `{python} round(auc_score, 3)`.
+
+This means that the model has a `{python} round(auc_score * 100, 2)`% ability to rank a randomly selected churner higher than a randomly selected non-churner.
+
+---
+
+#### How to Interpret AUC
+
+| AUC Value | Interpretation |
+|---:|---|
+| 0.50 | No better than random guessing |
+| 0.60–0.70 | Weak model |
+| 0.70–0.80 | Acceptable model |
+| 0.80–0.90 | Strong model |
+| 0.90+ | Very strong model |
+
+
+#### Business Interpretation
+
+- If AUC is close to `0.5`, the model cannot separate churners from non-churners well
+- If AUC is high, the model is good at ranking customers by churn risk
+- A high AUC does not automatically mean the campaign is profitable
+
+>We still need the confusion matrix and revenue matrix to choose the best threshold
+
+---
+
+#### Threshold Table from ROC Curve
+
+The ROC curve gives many possible thresholds.
+
+We can inspect some of them:
+
+```{python}
+roc_threshold_table = pd.DataFrame({
+    "threshold": thresholds,
+    "false_positive_rate": fpr,
+    "true_positive_rate": tpr
+})
+
+roc_threshold_table.head(10)
+```
+
+---
+
+#### Summary
+
+- The ROC curve evaluates model ranking ability.
+- The revenue matrix evaluates business value.
+
+$$\downarrow$$
+
+- **`ROC/AUC`** tells us whether the model separates churners from non-churners
+- **`Confusion matrix`** tells us the classification results at one threshold
+- **`Revenue matrix`** tells us whether the classification strategy creates profit
+
 
 ### Revenue Matrix
 
@@ -1557,6 +1689,9 @@ These customers generated `{python} revenue_from_saved_customers` units of value
 The model also contacted `{python} fp` customers unnecessarily, creating a cost of `{python} cost_from_unnecessary_contacts`.
 
 The final estimated campaign profit is `{python} net_profit`.
+
+
+
 
 ## Homework: Customer Churn Prediction
 
@@ -1600,7 +1735,4 @@ This is a historic customer information so we have a field stating whether that 
 - `MonthlyCharges` - The amount charged to the customer monthly
 - `TotalCharges` - The total amount charged to the customer
 - `Churn` - Whether the customer churned or not (Yes or No)
-
-
-
 
