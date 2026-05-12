@@ -1,6 +1,90 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from os.path import join
+from datetime import date
+
+def create_campaign(
+    campaign_id: int = 1,
+    campaign_name: str = "campaign_1",
+    campaign_description: str = "",
+    start_date=None,
+    end_date=None,
+) -> dict:
+    campaign_day = date.today()
+    return {
+        "campaign_id": campaign_id,
+        "campaign_name": campaign_name,
+        "campaign_description": campaign_description,
+        "start_date": start_date or campaign_day,
+        "end_date": end_date or campaign_day,
+    }
+
+def csv_dowloader(csv_files:list, source:str, destination: str, type:str = 'csv')->list:
+    """
+    Read multiple `CSV` files from a source directory, save them to a destination
+    directory in the selected format, and return them as a list of DataFrames.
+
+    Parameters
+    ----------
+    csv_files : list
+        A list of CSV file names without the `.csv` extension.
+        Example: ["orders", "customers", "products"]
+
+    source : str
+        Path to the directory where the original CSV files are stored.
+
+    destination : str
+        Path to the directory where the converted files will be saved.
+
+    type : str, default="csv"
+        Output file format. Supported values are:
+        - "csv"
+        - "xlsx"
+        - "parquet"
+
+    Returns
+    -------
+    list
+        A list containing all loaded DataFrames in the same order as `csv_files`.
+
+    Examples
+    --------
+    >>> csv_files = ["orders", "customers", "products"]
+    >>> source = "data/raw"
+    >>> destination = "data/processed"
+    >>> dfs = csv_dowloader(
+    ...     csv_files=csv_files,
+    ...     source=source,
+    ...     destination=destination,
+    ...     type="parquet"
+    ... )
+    """
+    
+    l = []
+    for i in csv_files:
+        print(f"trying to read: {i}")
+        print(f"source: {source}")
+        print(f"destination: {destination}")
+
+        df = pd.read_csv(f"{join(source,i)}.csv")
+        print(f"{i} shape: {df.shape}")
+        
+        print("appending to the list:")
+        
+        l.append(df)
+
+        file_name = join(destination,f"{i}.{type}")
+        print(file_name)
+        if type == 'xlsx':
+            df.to_excel(file_name,index= False)
+        elif type == 'parquet':
+            df.to_parquet(file_name, index= False)
+        else:
+            df.to_csv(file_name,index= False)
+        print(10*"=")
+    
+    return l
 
 
 def my_bar_plot(
@@ -58,7 +142,7 @@ def csv_downloader(url: str, name: str, path: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    url : str
+    url : strx
         Source path or url to the CSV file.
     name : str
         Output file name (e.g., "data.csv").
