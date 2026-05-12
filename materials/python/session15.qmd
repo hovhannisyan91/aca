@@ -1,0 +1,1182 @@
+---
+title: "Session 15: Geoanalytics"
+categories: [Geoanalytics, Folium, KaplerGl]
+image_path: "/img/python/15"
+---
+
+## Session Goal
+
+In this session, we move from classical data analysis to **geospatial analytics**.
+
+Instead of analyzing only *what happened* and *when it happened*, we also analyze **where it happened**.
+
+We will use **Citi Bike trip data** as a real-world case study.
+
+**By the end of this session, students will be able to:**
+
+- understand basic geographic vocabulary
+- work with latitude and longitude
+- download real-world trip data
+- clean and aggregate large datasets
+- create station-level and route-level summaries
+- apply stratified sampling
+- test whether sample-based insights are stable
+- visualize geographic patterns using Folium and Kepler.gl
+
+The official Citi Bike system data page publishes downloadable trip history files, including ride ID, ride type, start and end times, station names, station IDs, coordinates, and membership type. The data is available through the Citi Bike system data page and public trip-data bucket.
+
+
+
+## Why Geospatial Analytics?
+
+**Traditional analysis usually answers questions like:**
+
+- how many rides happened?
+- when did rides happen?
+- which customer type used the service more?
+- how did volume change by month?
+
+**Geospatial analysis adds another layer:**
+
+- where did rides start?
+- where did rides end?
+- which stations are most active?
+- which areas are connected by frequent trips?
+- how does movement change by season?
+
+**In simple terms:**
+
+> Geospatial analytics connects data with location.
+
+For Citi Bike, every ride has both a **time dimension** and a **location dimension**.
+
+| Dimension | Example Columns | Analytical Question |
+|---|---|---|
+| Time | `started_at`, `ended_at` | When do people ride? |
+| Location | `start_lat`, `start_lng`, `end_lat`, `end_lng` | Where do rides happen? |
+| Station | `start_station_name`, `end_station_name` | Which stations are important? |
+| User Type | `member_casual` | Who uses the service? |
+| Bike Type | `rideable_type` | What type of bike is used? |
+
+**The full session has two parts:**
+
+- Geographic Foundations
+- Citi Bike End to End Analysis
+
+### Part 1: Geographic Foundations
+
+Before downloading large data, we first understand the geographic building blocks.
+
+**We will cover:**
+
+- latitude and longitude
+- points
+- lines
+- flows
+- bounding boxes
+- distance
+- spatial aggregation
+- station-level summaries
+- route-level summaries
+
+### Part 2: Citi Bike End-to-End Analysis 
+
+Then we move to the real project workflow.
+
+**We will:**
+
+- install required packages
+- create project folders
+- download Citi Bike monthly data
+- load and clean the data
+- aggregate daily and monthly volumes
+- create seasonal variables
+- build station-level datasets
+- build route-level datasets
+- create stratified samples
+- test different random seeds
+- visualize data with Plotly, Folium, and Kepler.gl
+- save reusable datasets for future analysis
+
+## Installing Required Packages
+
+We will use the following packages.
+
+| Package | Purpose |
+|---|---|
+| `folium` | interactive maps |
+| `keplergl` | advanced geospatial visualization |
+| `tqdm` | progress bars |
+
+Install them from the terminal:
+
+```bash
+pip install pandas numpy requests  plotly folium keplergl tqdm
+```
+
+## Import Libraries
+
+```{python}
+#| echo: true
+
+import os
+import zipfile
+import requests
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import folium
+
+from tqdm import tqdm
+from pathlib import Path
+```
+
+## Part 1: Geographic Foundations
+
+### Latitude and Longitude
+
+**A geographic location is usually represented by two numbers:**
+
+| Term | Meaning |
+|---|---|
+| Latitude | North-south position |
+| Longitude | East-west position |
+
+**For example:**
+
+| City | Latitude | Longitude |
+|---|---:|---:|
+| New York City | 40.7128 | -74.0060 |
+| Yerevan | 40.1872 | 44.5152 |
+
+- **Latitude:** tells us how far north or south a point is
+- **Longitude** tells us how far east or west a point is.
+
+### Demo Trip DF
+
+```{python}
+trip_demo = pd.DataFrame({
+    "ride_id": list(range(1, 21)),
+
+    "start_station": [
+        "Station A", "Station A", "Station A", "Station A", "Station A",
+        "Station B", "Station B", "Station B", "Station B",
+        "Station C", "Station C", "Station C",
+        "Station D", "Station D", "Station D",
+        "Station E", "Station E",
+        "Station A", "Station B", "Station C"
+    ],
+
+    "end_station": [
+        "Station B", "Station B", "Station B", "Station C", "Station C",
+        "Station A", "Station A", "Station C", "Station D",
+        "Station A", "Station B", "Station E",
+        "Station A", "Station C", "Station E",
+        "Station A", "Station D",
+        "Station E", "Station E", "Station D"
+    ],
+
+    "started_at": pd.to_datetime([
+        "2025-01-01 08:00", "2025-01-01 08:15", "2025-01-01 08:30",
+        "2025-01-01 09:00", "2025-01-01 09:20",
+        "2025-01-01 10:00", "2025-01-01 10:15", "2025-01-01 10:40",
+        "2025-01-01 11:00",
+        "2025-01-01 11:30", "2025-01-01 12:00", "2025-01-01 12:20",
+        "2025-01-01 13:00", "2025-01-01 13:30", "2025-01-01 14:00",
+        "2025-01-01 14:30", "2025-01-01 15:00",
+        "2025-01-01 15:30", "2025-01-01 16:00", "2025-01-01 16:30"
+    ]),
+
+    "ended_at": pd.to_datetime([
+        "2025-01-01 08:10", "2025-01-01 08:28", "2025-01-01 08:42",
+        "2025-01-01 09:18", "2025-01-01 09:35",
+        "2025-01-01 10:12", "2025-01-01 10:30", "2025-01-01 10:55",
+        "2025-01-01 11:18",
+        "2025-01-01 11:48", "2025-01-01 12:14", "2025-01-01 12:45",
+        "2025-01-01 13:20", "2025-01-01 13:48", "2025-01-01 14:20",
+        "2025-01-01 14:55", "2025-01-01 15:22",
+        "2025-01-01 15:58", "2025-01-01 16:25", "2025-01-01 16:50"
+    ]),
+
+    "member_casual": [
+        "member", "member", "casual", "member", "casual",
+        "member", "member", "casual", "member",
+        "casual", "member", "casual",
+        "member", "casual", "member",
+        "casual", "member",
+        "member", "casual", "member"
+    ]
+})
+
+trip_demo
+```
+
+#### Add Station Coordinates
+
+Instead of manually repeating coordinates inside every row, we create a separate station table.
+
+This is cleaner because each station has one fixed latitude and longitude.
+
+```{python}
+station_coordinates = pd.DataFrame({
+    "station": [
+        "Station A",
+        "Station B",
+        "Station C",
+        "Station D",
+        "Station E"
+    ],
+    "lat": [
+        40.735,
+        40.751,
+        40.742,
+        40.728,
+        40.760
+    ],
+    "lng": [
+        -73.991,
+        -73.977,
+        -73.985,
+        -73.970,
+        -73.995
+    ]
+})
+
+station_coordinates
+```
+
+Now we attach coordinates to the ride-level dataset.
+
+We join the station table twice:
+
+1. once for the start station
+2. once for the end station
+
+```{python}
+trip_demo = (
+    trip_demo
+    .merge(
+        station_coordinates,
+        left_on="start_station",
+        right_on="station",
+        how="left"
+    )
+    .rename(columns={
+        "lat": "start_lat",
+        "lng": "start_lng"
+    })
+    .drop(columns="station")
+    .merge(
+        station_coordinates,
+        left_on="end_station",
+        right_on="station",
+        how="left"
+    )
+    .rename(columns={
+        "lat": "end_lat",
+        "lng": "end_lng"
+    })
+    .drop(columns="station")
+)
+
+trip_demo.head()
+```
+
+#### Map Center
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+map_center = [
+    pd.concat([trip_demo["start_lat"], trip_demo["end_lat"]]).mean(),
+    pd.concat([trip_demo["start_lng"], trip_demo["end_lng"]]).mean()
+]
+
+map_center
+```
+
+#### Adding Duration
+
+Duration is the difference between `ended_at` and `started_at`.
+
+```{python}
+trip_demo["duration_min"] = (
+    trip_demo["ended_at"] - trip_demo["started_at"]
+).dt.total_seconds() / 60
+
+trip_demo[[
+    "ride_id",
+    "start_station",
+    "end_station",
+    "started_at",
+    "ended_at",
+    "duration_min"
+]].head()
+```
+
+#### Adding Time Features
+
+```{python}
+trip_demo["date"] = trip_demo["started_at"].dt.date
+trip_demo["hour"] = trip_demo["started_at"].dt.hour
+trip_demo["day_name"] = trip_demo["started_at"].dt.day_name()
+trip_demo["month_name"] = trip_demo["started_at"].dt.month_name()
+
+trip_demo.head()
+```
+
+### Point Data
+
+A **point** is a single location.
+
+In `Citi Bike` data, each station can be represented as a point.
+
+**Example:**
+
+| Station | Latitude | Longitude |
+|---|---:|---:|
+| Station A | 40.735 | -73.991 |
+| Station B | 40.751 | -73.977 |
+
+In `Python`, we can create a small example.
+
+#### Visualizing Points with Folium
+
+`Folium` allows us to create interactive maps.
+
+```{python}
+#| echo: true
+
+m = folium.Map(
+    location=[40.74, -73.99],
+    zoom_start=13
+)
+
+for _, row in station_coordinates.iterrows():
+    folium.Marker(
+        location=[row["lat"], row["lng"]],
+        popup=row["station"]
+    ).add_to(m)
+
+m
+```
+
+
+
+### Line Data
+
+A **line** connects two locations.
+
+In Citi Bike data, one ride can be represented as a line:
+
+- `start station`
+- `end station`
+
+#### Visualizing One Trip as a Line
+
+```{python}
+#| echo: true
+
+m = folium.Map(
+    location=[40.74, -73.99],
+    zoom_start=13
+)
+
+start_point = [trip_demo.loc[0, "start_lat"], trip_demo.loc[0, "start_lng"]]
+end_point = [trip_demo.loc[0, "end_lat"], trip_demo.loc[0, "end_lng"]]
+
+folium.Marker(start_point, popup="Start").add_to(m)
+folium.Marker(end_point, popup="End").add_to(m)
+
+folium.PolyLine(
+    locations=[start_point, end_point],
+    weight=5,
+    opacity=0.8
+).add_to(m)
+
+m
+```
+
+
+
+
+### Flow Data
+
+A **flow** shows movement from one place to another.
+
+In Citi Bike data, the most important flow is:
+
+$$
+\text{Start Station} \rightarrow \text{End Station}
+$$
+
+If many rides happen between the same two stations, we can aggregate them.
+
+| Start Station | End Station | Number of Rides |
+|---|---|---:|
+| Station A | Station B | 120 |
+| Station A | Station C | 85 |
+| Station B | Station C | 60 |
+
+>This is more useful than plotting every individual ride.
+
+
+#### Flow Data
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+flow_data = (
+    trip_demo
+    .groupby(
+        ["start_station", "end_station"],
+        as_index=False
+    )
+    .agg(
+        number_of_rides=("ride_id", "count"),
+        avg_duration_min=("duration_min", "mean"),
+        start_lat=("start_lat", "mean"),
+        start_lng=("start_lng", "mean"),
+        end_lat=("end_lat", "mean"),
+        end_lng=("end_lng", "mean")
+    )
+    .sort_values("number_of_rides", ascending=False)
+)
+
+flow_data
+```
+
+
+#### Visualizing Flows
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+flow_map = folium.Map(
+    location=map_center,
+    zoom_start=13,
+    tiles="CartoDB positron"
+)
+
+for _, row in station_coordinates.iterrows():
+    folium.CircleMarker(
+        location=[row["lat"], row["lng"]],
+        radius=6,
+        popup=row["station"],
+        tooltip=row["station"],
+        fill=True
+    ).add_to(flow_map)
+
+max_rides = flow_data["number_of_rides"].max()
+
+for _, row in flow_data.iterrows():
+
+    start_point = [row["start_lat"], row["start_lng"]]
+    end_point = [row["end_lat"], row["end_lng"]]
+
+    line_width = 1 + 7 * row["number_of_rides"] / max_rides
+
+    popup_text = (
+        f"<b>{row['start_station']} → {row['end_station']}</b><br>"
+        f"Number of rides: {row['number_of_rides']}<br>"
+        f"Average duration: {row['avg_duration_min']:.1f} minutes"
+    )
+
+    folium.PolyLine(
+        locations=[start_point, end_point],
+        weight=line_width,
+        opacity=0.7,
+        popup=popup_text,
+        tooltip=f"{row['start_station']} → {row['end_station']}"
+    ).add_to(flow_map)
+
+flow_map
+```
+
+
+### Bounding Box
+
+A bounding box shows the spatial coverage of the dataset.
+
+It is defined by the minimum and maximum latitude and longitude.
+
+```{python}
+min_lat = min(trip_demo["start_lat"].min(), trip_demo["end_lat"].min())
+max_lat = max(trip_demo["start_lat"].max(), trip_demo["end_lat"].max())
+
+min_lng = min(trip_demo["start_lng"].min(), trip_demo["end_lng"].min())
+max_lng = max(trip_demo["start_lng"].max(), trip_demo["end_lng"].max())
+
+bounding_box = pd.DataFrame({
+    "metric": ["min_lat", "max_lat", "min_lng", "max_lng"],
+    "value": [min_lat, max_lat, min_lng, max_lng]
+})
+
+bounding_box
+```
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+bbox_map = folium.Map(
+    location=map_center,
+    zoom_start=13,
+    tiles="CartoDB positron"
+)
+
+for _, row in station_coordinates.iterrows():
+    folium.CircleMarker(
+        location=[row["lat"], row["lng"]],
+        radius=6,
+        popup=row["station"],
+        tooltip=row["station"],
+        fill=True
+    ).add_to(bbox_map)
+
+bbox_coordinates = [
+    [min_lat, min_lng],
+    [min_lat, max_lng],
+    [max_lat, max_lng],
+    [max_lat, min_lng],
+    [min_lat, min_lng]
+]
+
+folium.PolyLine(
+    locations=bbox_coordinates,
+    weight=4,
+    opacity=0.8,
+    popup="Bounding Box"
+).add_to(bbox_map)
+
+bbox_map
+```
+
+
+### Why Aggregation Matters
+
+Raw `Citi Bike` data contains one row per ride.
+
+For geographic analysis, this can become very large.
+
+Instead of plotting all rides, we often aggregate.
+
+| Raw Level | Aggregated Level |
+|---|---|
+| one row per ride | one row per station per day |
+| one row per ride | one row per route per month |
+| one row per ride | one row per season |
+| one row per ride | one row per station pair |
+
+**Aggregation makes the data:**
+
+- smaller
+- faster
+- easier to visualize
+- easier to reuse later
+
+### Distance
+
+`Duration` tells us how long the ride took.
+`Distance` tells us approximately how far the rider traveled.
+
+We will calculate straight-line distance using the Haversine formula.
+
+We are going to use `geopandas` package to calculate the distance!
+
+
+::: {.callout-tip}
+
+remember to install geopandas:
+
+```bash
+pip install geopandas
+```
+
+:::
+
+
+We create one GeoDataFrame for start points and another one for end points.
+
+```{python}
+start_points = gpd.GeoDataFrame(
+    trip_demo.copy(),
+    geometry=gpd.points_from_xy(
+        trip_demo["start_lng"],
+        trip_demo["start_lat"]
+    ),
+    crs="EPSG:4326"
+)
+
+end_points = gpd.GeoDataFrame(
+    trip_demo.copy(),
+    geometry=gpd.points_from_xy(
+        trip_demo["end_lng"],
+        trip_demo["end_lat"]
+    ),
+    crs="EPSG:4326"
+)
+```
+
+>At this stage, the coordinates are still latitude and longitude.
+
+
+```{python}
+start_points[[
+    "ride_id",
+    "start_station",
+    "end_station",
+    "geometry"
+]].head()
+```
+
+For Jersey City and New York, we can use UTM Zone 18N.
+```{python}
+projected_crs = "EPSG:32618"
+
+start_points_projected = start_points.to_crs(projected_crs)
+end_points_projected = end_points.to_crs(projected_crs)
+```
+
+GeoPandas can calculate distance between geometries.
+
+```{python}
+trip_demo["distance_m"] = start_points_projected.geometry.distance(
+    end_points_projected.geometry
+)
+
+trip_demo["distance_km"] = trip_demo["distance_m"] / 1000
+
+trip_demo[[
+    "ride_id",
+    "start_station",
+    "end_station",
+    "duration_min",
+    "distance_m",
+    "distance_km"
+]].head()
+```
+
+#### Distance Summary
+
+```{python}
+trip_demo[["distance_m", "distance_km"]].describe()
+```
+
+```{python}
+route_summary = (
+    trip_demo
+    .groupby(
+        ["start_station", "end_station"],
+        as_index=False
+    )
+    .agg(
+        number_of_rides=("ride_id", "count"),
+        avg_duration_min=("duration_min", "mean"),
+        median_duration_min=("duration_min", "median"),
+        avg_distance_km=("distance_km", "mean"),
+        median_distance_km=("distance_km", "median"),
+        start_lat=("start_lat", "mean"),
+        start_lng=("start_lng", "mean"),
+        end_lat=("end_lat", "mean"),
+        end_lng=("end_lng", "mean")
+    )
+    .sort_values("number_of_rides", ascending=False)
+)
+
+route_summary
+```
+
+
+#### Projection
+
+
+::: {.callout-important}
+
+GeoPandas distance is only meaningful after projection.
+
+This is not correct:
+
+```{python}
+#| eval: false
+
+start_points.geometry.distance(end_points.geometry)
+```
+
+The reason is that both geometries are still in `EPSG:4326`, where coordinates are measured in degrees.
+
+This is correct:
+
+```{python}
+trip_demo["distance_m"] = start_points_projected.geometry.distance(
+    end_points_projected.geometry
+)
+```
+
+Because after projection to `EPSG:32618`, the coordinates are measured in meters.
+
+The [documentation](https://geopandas.org/en/stable/docs/user_guide/data_structures.html)
+:::
+
+
+
+
+## Citi Bike | Jersey
+
+### Step 1: Define the Data Source
+
+Citi Bike trip data is stored in a public file index.
+
+```python
+#| echo: true
+CITIBIKE_INDEX_URL = "https://s3.amazonaws.com/tripdata"
+OUTPUT_DIR = "../data/citibike"
+PERIOD = "202510"
+```
+
+```{python}
+#| echo: false
+CITIBIKE_INDEX_URL = "https://s3.amazonaws.com/tripdata"
+OUTPUT_DIR = "../../lab/python/data/citibike"
+PERIOD = "202510"
+```
+
+<!-- todo -->
+
+![]({{< meta image_path >}}/url.png)
+
+### Step 2: Download Jersey Data
+
+The file index contains many `.zip` files.
+
+Each file usually represents one month.
+
+```{python}
+# eval: false
+from pathlib import Path
+from urllib.request import urlretrieve
+from zipfile import ZipFile
+
+file_name = f"JC-{PERIOD}-citibike-tripdata.zip"
+
+output_dir = Path(OUTPUT_DIR)
+output_dir.mkdir(exist_ok=True)
+
+zip_path = output_dir / file_name
+
+
+## Dowloading the Zip file
+url = f"{CITIBIKE_INDEX_URL}/{file_name}"
+
+print(f"Downloading: {url}")
+urlretrieve(url, zip_path)
+
+print(f"Saved ZIP file to: {zip_path}")
+
+
+with ZipFile(zip_path, "r") as zip_ref:
+    zip_ref.extractall(output_dir)
+
+print(f"Extracted files into: {output_dir}")
+```
+
+
+
+::: {.callout-important title = "remove the zip file"}
+
+Once we get it we can remove the `zip` file
+
+```{python}
+#| echo: true
+#| eval: false
+#| output: true
+zip_path.unlink()
+print("ZIP file removed.")
+```
+:::
+
+
+### Step 3: Read the Data
+
+Once we downloaded and effectively extracted the `zip` file, now we can read the data
+
+
+```python
+file_name  = 'JC-202510-citibike-tripdata.csv'
+citibike_202510 = pd.reada_csv(f'{output_dir}/{file_name}')
+citibike_202510.head()
+```
+
+```{python}
+#| echo: false
+file_name  = 'JC-202510-citibike-tripdata.csv'
+citibike_202510 = pd.read_csv(f'{output_dir}/{file_name}')
+citibike_202510.head()
+```
+
+
+### Step 4: Downloading year 2025
+
+Here we need one function which will help as to create an iterator
+
+
+```{python}
+def period_iterator(year:list,start_m:int, stop_m:int)->list:
+    """
+    
+    """
+    YEAR = year
+    MONTH =  [str(i+1) if i+1>9 else "0" + str(i+1) for i in range(start_m, stop_m)]
+
+    periods = []
+
+    for i in YEAR:
+        for j in MONTH:
+            k = i+j
+            periods.append(k)
+    # print(periods)
+    return periods
+```
+
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+periods  = period_iterator(year = ['2025'],start_m = 1, stop_m = 12)
+
+periods
+```
+
+Once we have the `iterator`, we can now go over the loop and try to:
+
+1. donload each period
+2. extract
+3. remove the zip file
+
+```python
+#| echo: true
+#| eval: true
+#| output: true
+from pathlib import Path
+from urllib.request import urlretrieve
+from zipfile import ZipFile
+
+BASE_URL = "https://s3.amazonaws.com/tripdata"
+OUTPUT_DIR = "../data/citibike"
+output_dir = Path(OUTPUT_DIR)
+output_dir.mkdir(exist_ok=True)
+
+periods = download_periods(['2025'],10,12)
+
+print(periods)
+for  period in periods:
+    file_name = f"JC-{period}-citibike-tripdata.csv.zip"
+
+
+    zip_path = output_dir / file_name
+    url = f"{BASE_URL}/{file_name}"
+
+    print("downloading form:  ", url)
+    
+    urlretrieve(url,zip_path)
+    
+    print("saving into:  ", zip_path)
+
+
+    with ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(output_dir)
+
+
+    print(f"Extracted files into: {output_dir}")
+
+    zip_path.unlink()
+    print("ZIP file removed.")
+
+
+```
+
+::: {.callout-important}
+There might be inconsistant labeling in one or two files, think about how can we handle them!
+:::
+
+### Step 5: Concatinating
+
+Once we have all the `csv` files we can appending:
+
+1. we need to check all the filenames which are in the `../data/citibike/*.csv`
+2. read those csv files
+3. store it the list object named `dfs`
+4. use `pd.concat()` to append them
+
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+import glob
+import numpy as np
+import pandas as pd
+
+file_names = glob.glob(f'{output_dir}/*.csv')
+
+
+
+dfs = []
+cols = []
+for file_name in file_names:
+    df = pd.read_csv(file_name)
+    print(df.columns, 2*"||",len(df.columns))
+
+    cols.append(list(df.columns))
+    dfs.append(df)
+
+```
+
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+#| 
+citibike_df = pd.concat(dfs)
+citibike_df.head()
+
+```
+
+### Step 6: Setting Dates
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+
+citibike_df['started_at'] = pd.to_datetime(df['started_at'])
+citibike_df['ended_at'] = pd.to_datetime(df['ended_at'])
+```
+
+### Step 7: `df` overview
+
+The available columns are:
+
+```{python}
+#| echo: true
+
+citibike_df.columns
+```
+
+The dataset contains three important groups of variables:
+
+| Variable Group | Columns | Meaning |
+|---|---|---|
+| Trip identifiers | `ride_id`, `rideable_type`, `member_casual` | ride ID, bike type, and user type |
+| Time variables | `started_at`, `ended_at` | when the ride started and ended |
+| Start location | `start_station_name`, `start_station_id`, `start_lat`, `start_lng` | where the ride started |
+| End location | `end_station_name`, `end_station_id`, `end_lat`, `end_lng` | where the ride ended |
+
+### Step 8: Missing Values
+
+```{python}
+#| echo: true
+
+missing_values = (
+    citibike_df
+    .isna()
+    .sum()
+    .reset_index()
+)
+
+missing_values.columns = ["column", "missing_count"]
+
+missing_values["missing_share"] = (
+    missing_values["missing_count"] / len(citibike_df)
+)
+
+missing_values.sort_values("missing_count", ascending=False)
+```
+
+
+### Step 9: Ride Duration
+
+
+Now we create ride duration.
+
+```{python}
+#| echo: true
+
+citibike_df["ride_duration_minutes"] = (
+    citibike_df["ended_at"] - citibike_df["started_at"]
+).dt.total_seconds() / 60
+```
+
+We remove records with missing time values or invalid ride duration.
+
+
+::: {.callout-important}
+
+Since, our goal is geographical analysis, we must drop the missing values or invalid ride durations
+
+:::
+
+
+```{python}
+#| echo: true
+
+citibike_df = citibike_df.dropna(
+    subset=[
+        "ride_id",
+        "started_at",
+        "ended_at",
+        "start_lat",
+        "start_lng",
+        "end_lat",
+        "end_lng"
+    ]
+)
+
+citibike_df = citibike_df[
+    (citibike_df["ride_duration_minutes"] > 1) &
+    (citibike_df["ride_duration_minutes"] <= 24 * 60)
+].copy()
+```
+
+
+::: {.callout-important}
+
+- The lower bound removes **extremely short** trips.
+- The upper bound removes **trips longer than one day**.
+
+>These values may represent docking issues, testing behavior, or unusual cases.
+:::
+
+
+
+### Step 10: TIem Based Variables
+
+
+For later aggregation, we create useful time columns.
+
+```{python}
+#| echo: true
+
+citibike_df["date"] = citibike_df["started_at"].dt.date
+citibike_df["month"] = citibike_df["started_at"].dt.to_period("M").astype(str)
+citibike_df["month_name"] = citibike_df["started_at"].dt.month_name()
+citibike_df["day_of_week"] = citibike_df["started_at"].dt.day_name()
+citibike_df["hour"] = citibike_df["started_at"].dt.hour
+```
+
+```{python}
+#| echo: true
+
+def assign_season(month_number):
+    if month_number in [12, 1, 2]:
+        return "Winter"
+    elif month_number in [3, 4, 5]:
+        return "Spring"
+    elif month_number in [6, 7, 8]:
+        return "Summer"
+    else:
+        return "Autumn"
+
+
+citibike_df["season"] = (
+    citibike_df["started_at"]
+    .dt.month
+    .apply(assign_season)
+)
+```
+
+```{python}
+#| echo: true
+
+citibike_df[
+    [
+        "started_at",
+        "date",
+        "month",
+        "month_name",
+        "day_of_week",
+        "hour",
+        "season"
+    ]
+].head()
+```
+
+
+### Step 11: Getting Weather Data
+
+USA government provides an `API`
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+import pandas as pd
+import requests
+
+lat = 40.7178
+lng = -74.0431
+
+start_date = "2025-01-01"
+end_date = "2025-12-31"
+
+url = "https://archive-api.open-meteo.com/v1/archive"
+
+params = {
+    "latitude": lat,
+    "longitude": lng,
+    "start_date": start_date,
+    "end_date": end_date,
+    "daily": [
+        "temperature_2m_max",
+        "temperature_2m_min",
+        "temperature_2m_mean",
+        "precipitation_sum",
+        "rain_sum",
+        "snowfall_sum",
+        "wind_speed_10m_max"
+    ],
+    "timezone": "America/New_York"
+}
+
+response = requests.get(url, params=params)
+response.raise_for_status()
+
+data = response.json()
+
+weather_daily = pd.DataFrame(data["daily"])
+weather_daily["date"] = pd.to_datetime(weather_daily["time"])
+weather_daily = weather_daily.drop(columns="time")
+
+weather_daily.head()
+```
+
+
+### Step 11: Homework
+
+1. Create `Line Chart` number of rides per months
+2. Create `bar-plot` number of rides per season
+3. Bar Plot top 10 stations:
+   1.  start station
+   2.  end station
+4. Merge with the weather data to see some patterns
+5. Create Points
+6. Top Lines
+   
+
+
+
+## Extra
+
+- [Folium Documentation](https://python-visualization.github.io/folium/latest/getting_started.html)
+- Keplergl Documentation
