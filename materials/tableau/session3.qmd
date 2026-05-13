@@ -15,7 +15,6 @@ image_path: "/img/tableau/03"
 - Apply Tableau data modeling concepts from Session 2 in more complex use cases  
 - Build advanced KPI dashboards and analytical heatmaps  
 
-## Introduction
 In previous sessions, we focused on building visualizations, working with filters and parameters, and creating calculated fields. We also introduced key concepts such as relationships, joins, and Level of Detail expressions, which form the foundation of analytical work in Tableau.
 
 In this session, we move from **building charts** to **building analytical logic inside Tableau**. Instead of focusing only on how data is displayed, we focus on how calculations are performed, how different components interact, and how to ensure that results remain accurate across different analytical scenarios.
@@ -104,7 +103,7 @@ These are essential for complex analytics.
 WINDOW_AVG(SUM([Order Total]), -3, 0)
 ```
 
-Calculates average over the last 4 periods.
+Calculates average over the last 4 periods (offset -3 to 0 means the current period plus 3 previous periods = 4 total).
 
 ---
 
@@ -236,7 +235,7 @@ For example:
 
 ![Running Total Example]({{< meta image_path >}}/w3_running_total.png)
 
-![Difference Caalculation Example]({{< meta image_path >}}/w3_difference_calculation.png)
+![Difference Calculation Example]({{< meta image_path >}}/w3_difference_calculation.png)
 
 ---
 
@@ -439,7 +438,7 @@ Optional parameter:
 
 **Example:** Time to First Order
 
-Objective: Measure when customers place their first order after signing up or before it.
+Objective: Measure when customers place their first order after signing up.
 
 First order date per customer:
 
@@ -487,7 +486,7 @@ Objective: Build yearly trend charts, create custom year filters
 DATEPART('year', [Order Date])
 ```
 
-When used in the view, make the calcuated field discrete dimension to group by year.
+When used in the view, make the calculated field discrete dimension to group by year.
 
 ![Year Grouping]({{< meta image_path >}}/w3_year_grouping.png) 
 
@@ -719,8 +718,6 @@ A Date parameter:
 This distinction is important. Filters limit data directly. Parameters influence calculations that then determine what to display.
 
 
-### Common Use Cases
-
 ### Custom N Date Part Selection
 
 This type of date parameter is flexible because it allows users to simultaneously choose:
@@ -760,7 +757,7 @@ This parameter controls the time unit.
 
 **Step 2**
 
-Create another parameter named: **N Value**
+Create another parameter named: **N Values**
 
 Configuration:
 
@@ -797,6 +794,10 @@ We are doing this way beacause
 **Step 4**
 
 Create a calculated field named: **p. Date Part**
+
+::: {.callout-note}
+The `p.` prefix is a naming convention used throughout this course to indicate that a calculated field is **parameter-driven** — its value depends on a parameter rather than raw data. This makes it easy to identify parameter-linked fields in the Data pane at a glance.
+:::
 
 ```sql
 IF [Date Part] = 'day' then ([Order Date]) > DATEADD('day', -[N Values], [Latest Order Date])
@@ -952,7 +953,7 @@ Maps are powerful because they allow patterns to be understood visually. They ar
 
 ---
 
-## Geographic Data Formats
+### Geographic Data Formats
 
 Geographic data can exist in multiple formats, and understanding these formats is essential for correct analysis.
 
@@ -1430,7 +1431,7 @@ To make the map more readable, we can also change the background map style by ri
 
 **Step 1**  
 
-As we have already did the join between the spatial file and the tabular file, we can now build a map using the geometry field from the spatial file. To do that:
+As we have already done the join between the spatial file and the tabular file, we can now build a map using the geometry field from the spatial file. To do that:
 
 - First make sure that the fields with geographic roles are correctly assigned
 - Double click on the geometry field and it will be added to the view
@@ -1502,7 +1503,7 @@ This analysis can help identify which districts have the highest demand for Citi
 
 ### Density Map
 
-Dencity maps use color intensity to represent the concentration of points in a given area. They are useful for visualizing patterns of activity across a geographic space.
+Density maps use color intensity to represent the concentration of points in a given area. They are useful for visualizing patterns of activity across a geographic space.
 
 **Step 1**
 
@@ -1543,55 +1544,8 @@ Use aggregation for **regional summaries**.
 Turn it off for **raw spatial events and clustering analysis**.
 :::
 
-## Cohort Analysis in Tableau
-
-Cohort Analysis is a technique used to analyze the behavior of groups of users that share a common characteristic over time.
-
-Instead of analyzing all users together, cohort analysis groups users based on a **shared starting event**, allowing to observe how behavior changes across time for each group.
-
-Common cohort grouping criteria include:
-
-- First purchase date  
-- First login date  
-- First subscription date  
-- First product activation  
-
-This method is widely used in:
- 
-- Customer retention analysis  
-- Product usage analysis  
-- Marketing performance evaluation  
-- Telecom subscriber lifecycle analysis  
-
-For example:
- 
-- Customers who made their **first purchase in January**
-- Customers who made their **first purchase in February**
-
-Each of these groups becomes a **cohort**.
-
 ---
 
-### Why Cohort Analysis is Important
-
-Traditional aggregation mixes users with different histories.
-
-For example:
-
-- Some customers joined yesterday  
-- Some customers joined one year ago  
-
-If we calculate overall metrics like revenue or retention, the results can be misleading.
-
-Cohort analysis solves this problem by aligning users based on **their starting point**.
-
-This allows analysts to answer questions such as:
-
-- Do newer users retain better than older users?
-- How long does customer engagement last?
-- Which acquisition month produced the most loyal users?
-
----
 
 ## Cohort Analysis in Tableau
 
@@ -1648,7 +1602,7 @@ This structure allows us to analyze **retention or activity decay** over time.
 
 ---
 
-## Cohort Analysis Workflow in Tableau
+### Cohort Analysis Workflow in Tableau
 
 Steps include:
 
@@ -1863,6 +1817,9 @@ Questions:
 
 - Which cohort generates highest revenue?
 - Do newer cohorts spend more?
+
+---
+
 ## Cleaning and Reshaping Data in Tableau
 
 Before building visualizations or dashboards, data must often be cleaned and reshaped.  
@@ -2244,32 +2201,6 @@ Pivoting therefore helps transform datasets into a structure that is **more flex
 
 ---
 
-### Using Tableau Prep for Advanced Data Preparation
-
-When datasets become more complex, **Tableau Prep** provides a visual workflow for preparing and reshaping data.
-
-Tableau Prep allows:
-
-- Joining multiple datasets
-- Removing duplicates
-- Standardizing values
-- Pivoting and unpivoting columns
-- Aggregating datasets
-- Cleaning inconsistent values
-
-```{mermaid}
-flowchart LR
-A[Raw Sources] --> B[Tableau Prep Flow]
-B --> C[Cleaning Steps]
-C --> D[Reshaped Dataset]
-D --> E[Tableau Visualization]
-```
-
-Prep uses a **visual flow interface**, allowing analysts to inspect transformations step by step before publishing the final dataset.
-
----
-
-
 ### Tableau Prep vs Tableau Desktop
 
 Both **Tableau Prep** and **Tableau Desktop** support data preparation tasks, but they are designed for different stages of the analytics workflow.
@@ -2293,29 +2224,6 @@ In practice, analysts often use **both tools together**:
 
 1. **Tableau Prep** to prepare and structure the dataset  
 2. **Tableau Desktop** to explore, analyze, and visualize the data
-
----
-
-### When Data Cleaning Should Be Done Outside Tableau
-
-Although Tableau supports many data preparation operations, some transformations are better performed upstream.
-
-Typical tools include:
-
-
-- SQL databases
-- ETL pipelines
-- Python data pipelines
-- Data warehouses
-
-Reasons include:
-
-- Better performance for large datasets
-- Centralized transformation logic
-- Reusable data pipelines
-- Improved data governance
-
-In production environments, Tableau often connects to **pre-cleaned analytical datasets**.
 
 ---
 
