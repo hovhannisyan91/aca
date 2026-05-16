@@ -739,8 +739,6 @@ The [documentation](https://geopandas.org/en/stable/docs/user_guide/data_structu
 :::
 
 
-
-
 ## Citi Bike | Jersey
 
 ### Step 1: Define the Data Source
@@ -748,7 +746,6 @@ The [documentation](https://geopandas.org/en/stable/docs/user_guide/data_structu
 Citi Bike trip data is stored in a public file index.
 
 ```python
-#| echo: true
 CITIBIKE_INDEX_URL = "https://s3.amazonaws.com/tripdata"
 OUTPUT_DIR = "../data/citibike"
 PERIOD = "202510"
@@ -757,10 +754,15 @@ PERIOD = "202510"
 ```{python}
 #| echo: false
 CITIBIKE_INDEX_URL = "https://s3.amazonaws.com/tripdata"
-cPERIOD = "202510"
+OUTPUT_DIR = "../../lab/python/data/citibike"
+PERIOD = "202510"
 ```
 
-<!-- todo -->
+```python
+file_name = f"JC-{PERIOD}-citibike-tripdata.zip"
+url = f"{CITIBIKE_INDEX_URL}/{file_name}"
+url
+```
 
 ![]({{< meta image_path >}}/url.png)
 
@@ -838,7 +840,6 @@ citibike_202510.head()
 
 Here we need one function which will help as to create an iterator
 
-
 ```{python}
 def period_iterator(year:list,start_m:int, stop_m:int)->list:
     """
@@ -875,9 +876,6 @@ Once we have the `iterator`, we can now go over the loop and try to:
 3. remove the zip file
 
 ```python
-#| echo: true
-#| eval: true
-#| output: true
 from pathlib import Path
 from urllib.request import urlretrieve
 from zipfile import ZipFile
@@ -974,7 +972,7 @@ Once we have concatinated the yearly data, we can also save it properly in the r
 We need this in order not to rerun the steps
 
 ```python
-citibike_df.to_csv("../data/citibike/JC2025.csv")
+citibike_df.to_csv("../data/citibike/JC2025.csv", index = False)
 ```
 
 :::
@@ -1140,6 +1138,23 @@ citibike_df[
     ]
 ].head()
 ```
+
+
+Once we have created all the required derived columns we can save the data again as `JC2025_Enriched.csv` file
+
+```python
+citibike_df.to_csv("../data/citibike/JC/JC2025_Enriched.csv", index = False)
+```
+
+
+::: {.callout-important}
+
+Pay attention to location you must save the data in seperate folder in order to avoid problems during the `re-run`
+
+:::
+
+
+![]({{< meta image_path >}}/files.png)
 
 
 ### Step 11: Getting Weather Data
@@ -1579,7 +1594,7 @@ top_end_stations
 ```
 
 ```{python}
-#| echo: false
+#| echo: true
 #| fig-width: 18
 #| fig-height: 6
 #| out-width: 100%
@@ -1811,39 +1826,16 @@ fig.show()
 ```
 
 
-<!-- 
+
 ### Step 13: Geopandas
 
-
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
+```python
 import geopandas as gpd
 from urllib.parse import urlencode
 from pathlib import Path
 
 
-url = '../data/citibike/jersey-city-neighborhoods.geojson'
-
-jersey_city = gpd.read_file(url)
-
-jersey_city.head()
-```
-
-
-
-
-```{python}
-#| echo: true
-#| eval: false
-#| output: true
-import geopandas as gpd
-from urllib.parse import urlencode
-from pathlib import Path
-
-
-url = '../data/citibike/jersey-city-neighborhoods.geojson'
+url = '../data/citibike/JC/jersey-city-neighborhoods.geojson'
 
 jersey_city = gpd.read_file(url)
 
@@ -1859,9 +1851,21 @@ from urllib.parse import urlencode
 from pathlib import Path
 
 
-url = f'{OUTPUT_DIR}/jersey-city-neighborhoods.geojson'
+
+
+url = f'{output_dir}/JC/jersey-city-neighborhoods.geojson'
 
 jersey_city = gpd.read_file(url)
 
 jersey_city.head()
-``` -->
+```
+
+
+We can also plot 
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+jersey_city.plot()
+```

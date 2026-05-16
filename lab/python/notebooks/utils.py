@@ -4,6 +4,7 @@ import plotly.express as px
 from os.path import join
 from datetime import date
 
+
 def create_campaign(
     campaign_id: int = 1,
     campaign_name: str = "campaign_1",
@@ -20,7 +21,10 @@ def create_campaign(
         "end_date": end_date or campaign_day,
     }
 
-def csv_dowloader(csv_files:list, source:str, destination: str, type:str = 'csv')->list:
+
+def csv_dowloader(
+    csv_files: list, source: str, destination: str, type: str = "csv"
+) -> list:
     """
     Read multiple `CSV` files from a source directory, save them to a destination
     directory in the selected format, and return them as a list of DataFrames.
@@ -60,7 +64,7 @@ def csv_dowloader(csv_files:list, source:str, destination: str, type:str = 'csv'
     ...     type="parquet"
     ... )
     """
-    
+
     l = []
     for i in csv_files:
         print(f"trying to read: {i}")
@@ -69,21 +73,21 @@ def csv_dowloader(csv_files:list, source:str, destination: str, type:str = 'csv'
 
         df = pd.read_csv(f"{join(source,i)}.csv")
         print(f"{i} shape: {df.shape}")
-        
+
         print("appending to the list:")
-        
+
         l.append(df)
 
-        file_name = join(destination,f"{i}.{type}")
+        file_name = join(destination, f"{i}.{type}")
         print(file_name)
-        if type == 'xlsx':
-            df.to_excel(file_name,index= False)
-        elif type == 'parquet':
-            df.to_parquet(file_name, index= False)
+        if type == "xlsx":
+            df.to_excel(file_name, index=False)
+        elif type == "parquet":
+            df.to_parquet(file_name, index=False)
         else:
-            df.to_csv(file_name,index= False)
-        print(10*"=")
-    
+            df.to_csv(file_name, index=False)
+        print(10 * "=")
+
     return l
 
 
@@ -136,7 +140,7 @@ def my_bar_plot(
     return fig
 
 
-def csv_downloader(url: str, name: str, path: str) -> pd.DataFrame:
+def csv_downloader_url(url: str, name: str, path: str) -> pd.DataFrame:
     """
     Download a CSV from a url, save it locally, and return it as a DataFrame.
 
@@ -163,7 +167,7 @@ def csv_downloader(url: str, name: str, path: str) -> pd.DataFrame:
     ... )
     >>> df.head()
     """
-    df = pd.read_csv(url)
+    df = pd.read_csv()
     df.to_csv(f"{path}/{name}.csv", index=False)
     print(f"{name} saved in {path} | shape: {df.shape}")
     return df
