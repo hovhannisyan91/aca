@@ -108,11 +108,25 @@ We will use the following packages.
 | `keplergl` | advanced geospatial visualization |
 | `tqdm` | progress bars |
 
-Install them from the terminal:
+**Install them from the terminal:**
 
 ```bash
 pip install pandas numpy requests  plotly folium keplergl tqdm
 ```
+
+
+::: {.callout-important title = "In case of error"}
+
+
+**Install them from the terminal using conda:**
+
+```bash
+conda install pandas numpy requests  plotly folium keplergl tqdm
+```
+
+
+:::
+
 
 ## Import Libraries
 
@@ -953,6 +967,21 @@ citibike_df.head()
 
 ```
 
+
+::: {.callout-important}
+
+Once we have concatinated the yearly data, we can also save it properly in the respective folder. 
+
+We need this in order not to rerun the steps
+
+```python
+citibike_df.to_csv("../data/citibike/JC2025.csv")
+```
+
+:::
+
+
+
 ### Step 6: Setting Dates
 
 
@@ -961,8 +990,8 @@ citibike_df.head()
 #| eval: true
 #| output: true
 
-citibike_df['started_at'] = pd.to_datetime(df['started_at'])
-citibike_df['ended_at'] = pd.to_datetime(df['ended_at'])
+citibike_df['started_at'] = pd.to_datetime(citibike_df['started_at'],errors="coerce")
+citibike_df['ended_at'] = pd.to_datetime(citibike_df['ended_at'],errors="coerce")
 ```
 
 ### Step 7: `df` overview
@@ -1061,7 +1090,7 @@ citibike_df = citibike_df[
 
 
 
-### Step 10: TIem Based Variables
+### Step 10: Time Based Variables
 
 
 For later aggregation, we create useful time columns.
@@ -1116,7 +1145,7 @@ citibike_df[
 
 ### Step 11: Getting Weather Data
 
-USA government provides an `API`
+USA government provides an `API` to download and analyze the weather data
 
 ```{python}
 #| echo: true
@@ -1163,6 +1192,193 @@ weather_daily.head()
 ```
 
 
+
+::: {.callout-important}
+
+Again, likewise with the citibike data
+
+:::
+
+
+#### Weather Time Series Visualization
+
+Now that we have selected the main daily weather columns, we can create simple time series visualizations.
+
+We will focus on two variables:
+
+- daily average temperature
+- maximum daily wind speed
+
+
+Before creating a time series plot, the `date` column should be in datetime format.
+
+```{python}
+#| echo: true
+
+weather_daily["date"] = pd.to_datetime(weather_daily["date"])
+
+weather_daily.dtypes
+```
+
+
+::: {.callout-important}
+
+As you can see the date column type is `datetime64[us]`. 
+:::
+
+
+##### Daily Average Temperature Time Series
+
+The column `temperature_2m_mean` represents the daily average temperature.
+
+A line chart is useful here because we want to see how temperature changes over time.
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    weather_daily,
+    x="date",
+    y="temperature_2m_mean",
+    title="Daily Average Temperature Over Time",
+    markers=False
+)
+
+fig.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Average Temperature",
+    hovermode="x unified"
+)
+
+fig.show()
+```
+
+This chart helps us see the seasonal pattern of temperature.
+
+Usually, we expect lower temperatures in winter and higher temperatures in summer and the above chart shows exaclty that!
+
+
+::: {.callout-important}
+
+Here we can use different appraches doing the way as we used to do previously: adding lines one by line, however we can make this even more efficient by converting the dataframe **from wind format** into **long format**
+
+
+```{mermaid}
+flowchart LR
+
+    A["Wide Format<br><br>One row per date<br>Each measurement has its own column"] --> B["pd.melt()"]
+
+    B --> C["Long Format<br><br>One row per date-variable pair<br>Variable names become values"]
+
+    A1["date"] --> A
+    A2["temperature_2m_max"] --> A
+    A3["temperature_2m_min"] --> A
+    A4["temperature_2m_mean"] --> A
+
+    C --> C1["date"]
+    C --> C2["temperature_type"]
+    C --> C3["temperature"]
+
+```
+
+:::
+
+##### Daily Min/Max/Mean Tempreture
+
+```{python}
+#| echo: true
+
+temperature_long = weather_daily.melt(
+    id_vars="date",
+    value_vars=[
+        "temperature_2m_max",
+        "temperature_2m_min",
+        "temperature_2m_mean"
+    ],
+    var_name="temperature_type",
+    value_name="temperature"
+)
+
+temperature_long.head()
+```
+
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    temperature_long,
+    x="date",
+    y="temperature",
+    color="temperature_type",
+    title="Daily Temperature: Maximum, Minimum, and Average",
+    markers=False
+)
+
+fig.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Temperature",
+    hovermode="x unified"
+)
+
+fig.show()
+```
+
+This chart shows the daily temperature range.
+
+The gap between maximum and minimum temperature shows how much temperature changes within a day.
+
+
+::: {.callout-tip}
+
+`hovermode="x unified"` means to show all the values for each line.
+
+:::
+
+
+##### Daily Wind Speed Time Series
+
+The column `wind_speed_10m_max` represents the maximum daily wind speed.
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.line(
+    weather_daily,
+    x="date",
+    y="wind_speed_10m_max",
+    title="Daily Maximum Wind Speed Over Time",
+    markers=False
+)
+
+fig.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Maximum Wind Speed",
+    hovermode="x unified"
+)
+
+fig.show()
+```
+
+This chart helps us identify windy periods.
+
+>Later, we can check whether high wind speed is associated with lower Citi Bike usage.
+
+
 ### Step 11: Homework
 
 1. Create `Line Chart` number of rides per months
@@ -1174,10 +1390,479 @@ weather_daily.head()
 5. Create Points
 6. Top Lines
    
+### Step 12: Homework Solution
+
+#### Number of rides per monhts
+
+First, we create a monthly aggregation.
+
+Each row will represent one month.
+
+```{python}
+#| echo: true
+
+monthly_rides = (
+    citibike_df
+    .groupby("month", as_index=False)
+    .agg(
+        number_of_rides=("ride_id", "count")
+    )
+)
+
+monthly_rides
+```
+
+Now let's try to visualize visualize the number of rides per month.
+
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    monthly_rides,
+    x="month",
+    y="number_of_rides",
+    title="Number of Citi Bike Rides per Month"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Number of Rides",
+)
+
+fig.show()
+```
+
+
+::: {.callout-tip}
+Try to highlight the top month
+:::
+
+
+#### Number of Rides per Season
+
+
+Now we aggregate the data by season.
+
+```{python}
+#| echo: true
+
+season_rides = (
+    citibike_df
+    .groupby("season", as_index=False)
+    .agg(
+        number_of_rides=("ride_id", "count")
+    )
+)
+
+season_order = ["Winter", "Spring", "Summer", "Autumn"]
+
+season_rides["season"] = pd.Categorical(
+    season_rides["season"],
+    categories=season_order,
+    ordered=True
+)
+
+season_rides = season_rides.sort_values("season")
+
+season_rides
+```
+
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    season_rides,
+    x="season",
+    y="number_of_rides",
+    title="Number of Citi Bike Rides per Season",
+    text_auto=True
+)
+
+fig.update_layout(
+    xaxis_title="Season",
+    yaxis_title="Number of Rides"
+)
+
+fig.show()
+```
+
+
+This chart compares total ride activity across seasons.
+
+>Usually, warmer seasons are expected to have more rides, while winter may have fewer rides due to colder weather, snow, wind, and shorter daylight hours.
+
+
+#### Top 10 Start Stations
+
+First, we calculate the `top 10` stations by number of departures.
+
+```{python}
+#| echo: true
+
+top_start_stations = (
+    citibike_df
+    .dropna(subset=["start_station_name"])
+    .groupby("start_station_name", as_index=False)
+    .agg(
+        number_of_departures=("ride_id", "count")
+    )
+    .sort_values("number_of_departures", ascending=False)
+    .head(10)
+)
+
+top_start_stations
+```
+
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    top_start_stations.sort_values("number_of_departures"),
+    x="number_of_departures",
+    y="start_station_name",
+    orientation="h",
+    title="Top 10 Start Stations by Number of Departures",
+    text_auto=True
+)
+
+fig.update_layout(
+    xaxis_title="Number of Departures",
+    yaxis_title="Start Station"
+)
+
+fig.show()
+```
+
+**Interpretation**
+
+These stations are the most common origins of Citi Bike rides.
+
+>High departure volume may indicate stations near residential areas, transit hubs, offices, universities, or busy public locations.
+
+>REMEMBER to check them during the next session.
+
+---
+
+#### Top 10 End Stations
+
+Now we calculate the top 10 stations by number of arrivals.
+
+```{python}
+#| echo: true
+
+top_end_stations = (
+    citibike_df
+    .dropna(subset=["end_station_name"])
+    .groupby("end_station_name", as_index=False)
+    .agg(
+        number_of_arrivals=("ride_id", "count")
+    )
+    .sort_values("number_of_arrivals", ascending=False)
+    .head(10)
+)
+
+top_end_stations
+```
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 6
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.bar(
+    top_end_stations.sort_values("number_of_arrivals"),
+    x="number_of_arrivals",
+    y="end_station_name",
+    orientation="h",
+    title="Top 10 End Stations by Number of Arrivals",
+    text_auto=True
+)
+
+fig.update_layout(
+    xaxis_title="Number of Arrivals",
+    yaxis_title="End Station"
+)
+
+fig.show()
+```
+
+**Interpretation**
+
+These stations are the most common destinations of Citi Bike rides.
+
+High arrival volume may indicate stations near workplaces, shopping areas, public transportation, parks, or popular city destinations.
+
+---
+
+#### Merge with Weather Data to See Patterns
+
+```{python}
+#| echo: true
+
+
+daily_rides = (
+    citibike_df
+    .groupby("date", as_index=False)
+    .agg(
+        number_of_rides=("ride_id", "count")
+    )
+)
+daily_rides["date"] = pd.to_datetime(daily_rides["date"])
+daily_rides.head()
+```
+
+Now let's recall we prepare the weather date column.
+
+```{python}
+#| echo: true
+
+weather_daily.head()
+
+```
+
+Now we merge the two datasets.
+
+```{python}
+#| echo: true
+
+bike_weather_daily = daily_rides.merge(
+    weather_daily,
+    on="date",
+    how="left"
+)
+
+bike_weather_daily.head()
+
+
+```
+
+
+>Check missing values after the merge.
+
+```{python}
+#| echo: true
+
+bike_weather_daily.isna().sum()
+```
+
+##### Rides and Average Temperature
+
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.scatter(
+    bike_weather_daily,
+    x="temperature_2m_mean",
+    y="number_of_rides",
+    trendline="ols",
+    title="Daily Rides vs Average Temperature"
+)
+
+fig.update_layout(
+    xaxis_title="Average Daily Temperature",
+    yaxis_title="Number of Rides"
+)
+
+fig.show()
+```
 
 
 
-## Extra
 
-- [Folium Documentation](https://python-visualization.github.io/folium/latest/getting_started.html)
-- Keplergl Documentation
+
+##### Rides and Wind Speed
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.scatter(
+    bike_weather_daily,
+    x="wind_speed_10m_max",
+    y="number_of_rides",
+    trendline="ols",
+    title="Daily Rides vs Maximum Wind Speed"
+)
+
+fig.update_layout(
+    xaxis_title="Maximum Wind Speed",
+    yaxis_title="Number of Rides"
+)
+
+fig.show()
+```
+
+
+##### Rides and Precipitation
+
+```{python}
+#| echo: false
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+fig = px.scatter(
+    bike_weather_daily,
+    x="precipitation_sum",
+    y="number_of_rides",
+    trendline="ols",
+    title="Daily Rides vs Precipitation"
+)
+
+fig.update_layout(
+    xaxis_title="Daily Precipitation",
+    yaxis_title="Number of Rides"
+)
+
+fig.show()
+```
+
+
+#### Dual `y` axis | rides vs temperature
+
+Here we need to use more complex graph using plotly's `graph objects`
+
+```{python}
+#| echo: true
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+import plotly.graph_objects as go
+
+
+fig = go.Figure()
+
+fig.add_trace(
+    go.Scatter(
+        x=bike_weather_daily["date"],
+        y=bike_weather_daily["number_of_rides"],
+        mode="lines",
+        name="Daily Rides",
+        yaxis="y1"
+    )
+)
+
+fig.add_trace(
+    go.Scatter(
+        x=bike_weather_daily["date"],
+        y=bike_weather_daily["temperature_2m_mean"],
+        mode="lines",
+        name="Daily Average Temperature",
+        yaxis="y2"
+    )
+)
+
+fig.update_layout(
+    title="Daily Rides and Daily Average Temperature",
+    xaxis=dict(
+        title="Day"
+    ),
+    yaxis=dict(
+        title="Daily Rides",
+        side="left"
+    ),
+    yaxis2=dict(
+        title="Daily Average Temperature",
+        overlaying="y",
+        side="right"
+    ),
+    hovermode="x unified",
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    )
+)
+
+fig.show()
+```
+
+
+
+### Step 13: Geopandas
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+import geopandas as gpd
+from urllib.parse import urlencode
+from pathlib import Path
+
+
+url = '../data/citibike/jersey-city-neighborhoods.geojson'
+
+jersey_city = gpd.read_file(url)
+
+jersey_city.head()
+```
+
+
+
+
+```{python}
+#| echo: true
+#| eval: false
+#| output: true
+import geopandas as gpd
+from urllib.parse import urlencode
+from pathlib import Path
+
+
+url = '../data/citibike/jersey-city-neighborhoods.geojson'
+
+jersey_city = gpd.read_file(url)
+
+jersey_city.head()
+```
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+import geopandas as gpd
+from urllib.parse import urlencode
+from pathlib import Path
+
+
+url = f'{OUTPUT_DIR}/jersey-city-neighborhoods.geojson'
+
+jersey_city = gpd.read_file(url)
+
+jersey_city.head()
+```
