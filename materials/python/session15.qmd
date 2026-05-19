@@ -145,7 +145,7 @@ from tqdm import tqdm
 from pathlib import Path
 ```
 
-## Part 1: Geographic Foundations
+## Geographic Foundations
 
 ### Latitude and Longitude
 
@@ -1209,7 +1209,11 @@ weather_daily.head()
 
 ::: {.callout-important}
 
-Again, likewise with the citibike data
+Again, likewise with the citibike data we can try to save it:
+
+```python
+weather_daily.to_csv('jersey_weather.csv', index = False)
+```
 
 :::
 
@@ -1218,7 +1222,7 @@ Again, likewise with the citibike data
 
 Now that we have selected the main daily weather columns, we can create simple time series visualizations.
 
-We will focus on two variables:
+**We will focus on two variables:**
 
 - daily average temperature
 - maximum daily wind speed
@@ -1860,12 +1864,943 @@ jersey_city = gpd.read_file(url)
 jersey_city.head()
 ```
 
+After reading a spatial file, always check the basic structure.
 
-We can also plot 
+```{python}
+#| echo: true
+
+jersey_city.info()
+```
+
+
+```{python}
+#| echo: true
+
+jersey_city.crs
+```
+
+
+::: {.callout-important}
+Our geojson file has `EPSG:4326` `WGS 84`.
+
+This is good because `EPSG:4326` is the standard latitude-longitude coordinate system used by:
+
+- GPS coordinates
+- GeoJSON files
+- Folium maps
+- most web mapping tools
+
+:::
+
+```{python}
+#| echo: true
+
+jersey_city = jersey_city.to_crs("EPSG:4326")
+```
+
+
+We can also plot the map by simply applying `plot()` method :)
 
 ```{python}
 #| echo: true
 #| eval: true
 #| output: true
 jersey_city.plot()
+```
+
+
+
+#### Citibike Points
+
+
+
+in GeoPandas and Shapely, coordinates are stored as:
+
+$$
+(x, y) = (\text{longitude}, \text{latitude})
+$$
+
+So when creating points manually, the correct order is:
+
+
+
+#### Station Level Summary
+
+
+Now we create a station-level summary from `citibike_df`. The goal is to move **from trip-level data** to **station-level data**.
+
+Each row in the final table will represent one station.
+
+The final station summary will include:
+
+| Column | Meaning |
+|---|---|
+| `station_id` | unique station identifier |
+| `station_name` | station name |
+| `lat` | station latitude |
+| `lng` | station longitude |
+| `total_departures` | number of rides starting from the station |
+| `total_arrivals` | number of rides ending at the station |
+| `total_activity` | departures plus arrivals |
+| `net_departures` | departures minus arrivals |
+
+
+In order to do so we need to create to dataframees and later **merge** them:
+
+1. **departures:** where each row in `station_departures` represents a station where rides started.
+2. **arrivals:** where each row in `station_arrivals` represents a station where rides ended.
+
+$$\downarrow$$
+
+$$\text{merge departures and arrivals}$$
+
+##### `station_departures`
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+start_stations = citibike_df[
+    [
+        "ride_id",
+        "start_station_id",
+        "start_station_name",
+        "start_lat",
+        "start_lng"
+    ]
+].copy()
+```
+
+
+
+
+
+::: {.callout-important}
+`.copy()` is used to create an independent dataframe from the selected columns.
+
+Without `.copy()`, pandas may treat `start_stations` as a view of the original dataframe rather than a fully independent dataframe.
+
+That can create warnings or unexpected behavior when we later modify it.
+
+> We use `.copy()` to avoid accidental modification issues and to make sure `start_stations` is a clean independent dataframe.
+
+For example, after selecting the columns, we rename columns and add a new column as shown bellow.
+:::
+
+
+```{python}
+start_stations = start_stations.rename(
+    columns={
+        "start_station_id": "station_id",
+        "start_station_name": "station_name",
+        "start_lat": "lat",
+        "start_lng": "lng"
+    }
+)
+
+start_stations["activity_type"] = "departure"
+```
+
+##### `station_arrivals `
+
+```{python}
+#| echo: true
+
+end_stations = citibike_df[
+    [
+        "ride_id",
+        "end_station_id",
+        "end_station_name",
+        "end_lat",
+        "end_lng"
+    ]
+].copy()
+
+end_stations = end_stations.rename(
+    columns={
+        "end_station_id": "station_id",
+        "end_station_name": "station_name",
+        "end_lat": "lat",
+        "end_lng": "lng"
+    }
+)
+
+end_stations["activity_type"] = "arrival"
+
+end_stations.head()
+```
+
+
+##### Concatenate Departures and Arrivals
+
+Now we combine both summaries.
+
+This is similar to `UNION ALL` in SQL.
+
+```{python}
+#| echo: true
+
+station_activity_long = pd.concat(
+    [
+        start_stations,
+        end_stations
+    ],
+    ignore_index=True
+)
+
+station_activity_long = station_activity_long.dropna(
+    subset=[
+        "station_id",
+        "station_name",
+        "lat",
+        "lng"
+    ]
+)
+
+station_activity_long.head()
+```
+
+##### Cleaning and Aggregating
+
+At this point, the data is still not aggregated.
+
+It has many rows per station.
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+station_activity_agg = (
+    station_activity_long
+    .groupby(
+        [
+            "station_id",
+            "station_name",
+            "lat",
+            "lng",
+            "activity_type"
+        ],
+        as_index=False
+    )
+    .agg(
+        number_of_rides=("ride_id", "count")
+    )
+)
+
+station_activity_agg.head()
+```
+
+##### Pivot the Data
+
+Pivot to One Row per Station
+
+Now we convert `departure` and `arrival` into separate columns.
+
+```{python}
+#| echo: true
+
+station_summary = (
+    station_activity_agg
+    .pivot_table(
+        index=[
+            "station_id",
+            "station_name",
+            "lat",
+            "lng"
+        ],
+        columns="activity_type",
+        values="number_of_rides",
+        fill_value=0
+    )
+    .reset_index()
+)
+
+station_summary.head()
+```
+
+
+##### Rename and Create Final Metrics
+
+```{python}
+#| echo: true
+
+station_summary = station_summary.rename(
+    columns={
+        "departure": "total_departures",
+        "arrival": "total_arrivals"
+    }
+)
+
+station_summary["total_activity"] = (
+    station_summary["total_departures"] +
+    station_summary["total_arrivals"]
+)
+
+station_summary["net_departures"] = (
+    station_summary["total_departures"] -
+    station_summary["total_arrivals"]
+)
+
+station_summary = station_summary.sort_values(
+    "total_activity",
+    ascending=False
+).reset_index(drop=True)
+
+station_summary.head()
+```
+
+
+```python
+gpd.points_from_xy(longitude, latitude)
+```
+
+**For Citi Bike stations, this means:**
+
+
+```{python}
+#| echo: true
+
+station_gdf = gpd.GeoDataFrame(
+    station_summary,
+    geometry=gpd.points_from_xy(
+        station_summary["lng"],
+        station_summary["lat"]
+    ),
+    crs="EPSG:4326"
+)
+
+station_gdf.head()
+```
+
+
+## Top Lines and Neighborhood-Level Spatial Aggregation
+
+**At this point, we already have:**
+
+- `citibike_df`: trip-level Citi Bike data
+- `jersey_city`: Jersey City neighborhood polygons
+- `station_summary`: station-level summary table
+- `station_gdf`: station-level GeoDataFrame with point geometry
+
+The previous section created `station_gdf` from `station_summary` by using *longitude* and *latitude* correctly. :contentReference[oaicite:0]{index=0}
+
+Now we will continue with two main directions:
+
+1. Draw top ride lines using `Folium`
+2. Conduct spatial joins to aggregate station activity by neighborhood and create choropleth maps
+
+---
+
+### Why This Step Matters
+
+So far, we have station-level points.
+
+Now we want to connect those points to neighborhood polygons.
+
+**This allows us to move from:**
+
+$$
+\text{Station-Level Analysis}
+$$
+
+**to:**
+
+$$
+\text{Neighborhood-Level Analysis}
+$$
+
+This is useful because dashboards and business reports usually need **area-level** insights, not only individual station-level details.
+
+---
+
+### Creating Top Ride Lines
+
+A ride line connects a start station to an end station.
+
+In Citi Bike data, a route is defined as:
+
+$$
+\text{Start Station} \rightarrow \text{End Station}
+$$
+
+Instead of plotting every individual ride, we aggregate rides by route.
+
+This gives us one row per station-to-station connection.
+
+---
+
+### Create Route-Level Summary
+
+```{python}
+#| echo: true
+
+route_summary = (
+    citibike_df
+    .dropna(
+        subset=[
+            "start_station_id",
+            "start_station_name",
+            "end_station_id",
+            "end_station_name",
+            "start_lat",
+            "start_lng",
+            "end_lat",
+            "end_lng"
+        ]
+    )
+    .groupby(
+        [
+            "start_station_id",
+            "start_station_name",
+            "end_station_id",
+            "end_station_name",
+            "start_lat",
+            "start_lng",
+            "end_lat",
+            "end_lng"
+        ],
+        as_index=False
+    )
+    .agg(
+        number_of_rides=("ride_id", "count")
+    )
+    .sort_values("number_of_rides", ascending=False)
+)
+
+route_summary["route"] = (
+    route_summary["start_station_name"] +
+    " → " +
+    route_summary["end_station_name"]
+)
+
+route_summary.head()
+```
+
+
+### Inspect Top Routes
+
+```{python}
+#| echo: true
+
+top_routes = route_summary.head(20)
+
+top_routes[
+    [
+        "route",
+        "number_of_rides"
+    ]
+]
+```
+
+
+
+### Drawing Top Lines with Folium
+
+We visualize only the top routes.
+
+If we draw all routes, the map becomes too crowded.
+
+```{python}
+#| echo: true
+
+import folium
+
+top_lines = route_summary.head(100).copy()
+
+center_lat = station_gdf["lat"].mean()
+center_lng = station_gdf["lng"].mean()
+
+line_map = folium.Map(
+    location=[center_lat, center_lng],
+    zoom_start=12
+)
+
+max_rides = top_lines["number_of_rides"].max()
+
+for _, row in top_lines.iterrows():
+
+    start_point = [
+        row["start_lat"],
+        row["start_lng"]
+    ]
+
+    end_point = [
+        row["end_lat"],
+        row["end_lng"]
+    ]
+
+    line_weight = 1 + (row["number_of_rides"] / max_rides) * 8
+
+    folium.PolyLine(
+        locations=[start_point, end_point],
+        weight=line_weight,
+        opacity=0.5,
+        popup=f"""
+        <b>{row['route']}</b><br>
+        Number of Rides: {row['number_of_rides']}
+        """
+    ).add_to(line_map)
+
+line_map
+```
+
+
+::: {.callout-tip title  = "Interpretation"}
+
+
+This map shows the most frequent station-to-station movements.
+
+- thicker lines represent more rides
+- shorter lines may represent local neighborhood movement
+- longer lines may represent cross-neighborhood or cross-city trips
+- dense line clusters may show important mobility corridors
+
+>This is more useful than plotting **every ride** because the map focuses on repeated patterns.
+
+:::
+
+
+
+### Spatial Join Between Stations and Neighborhoods
+
+Now we connect station points with neighborhood polygons.
+
+The spatial question is:
+
+$$
+\text{Which neighborhood contains each station?}
+$$
+
+This is done using a **spatial join**.
+
+---
+
+### Check `CRS` Before Spatial Join
+
+Before a `spatial join`, both GeoDataFrames must have the same `CRS`.
+
+
+::: {.callout-note}
+
+We have already checked above, however it is a recommended to check the projects everytime.
+
+:::
+
+
+```{python}
+#| echo: true
+
+print("Station CRS:", station_gdf.crs)
+print("Neighborhood CRS:", jersey_city.crs)
+```
+
+Since both are already in `EPSG:4326`, we can keep them aligned.
+
+```{python}
+#| echo: true
+
+station_gdf = station_gdf.to_crs("EPSG:4326")
+jersey_city = jersey_city.to_crs("EPSG:4326")
+```
+
+---
+
+### Inspect Neighborhood Columns
+
+Before joining and aggregating, we need to know which column contains the neighborhood name.
+
+```{python}
+#| echo: true
+
+jersey_city.columns
+```
+
+
+### Spatial Join: Assign Stations to Neighborhoods
+
+```{python}
+#| echo: true
+
+station_neighborhood = gpd.sjoin(
+    station_gdf,
+    jersey_city,
+    how="inner",
+    predicate="within"
+)
+
+station_neighborhood.head()
+```
+
+**We use:**
+
+```python
+predicate="within"
+```
+
+because we want stations that are located **inside** neighborhood polygons.
+
+**We use:**
+
+```python
+how="inner"
+```
+
+because we want to keep **only stations** that are inside Jersey City neighborhood polygons.
+
+>This is important because some Citi Bike rides may connect to stations outside Jersey City.
+
+---
+
+### Check How Many Stations Are Inside Jersey City
+
+```{python}
+#| echo: true
+
+print("All stations:", len(station_gdf))
+print("Stations inside Jersey City neighborhoods:", len(station_neighborhood))
+```
+
+If the number of stations decreases, that means some stations were outside the Jersey City neighborhood polygons.
+
+That is expected if the dataset includes trips ending outside Jersey City.
+
+
+
+###  Neighborhood-Level Summary
+
+Now each station has neighborhood information.
+
+We can aggregate station activity by neighborhood.
+
+
+```{python}
+#| echo: true
+
+neighborhood_activity = (
+    station_neighborhood
+    .groupby('neighborhood', as_index=False)
+    .agg(
+        number_of_stations=("station_id", "nunique"),
+        total_departures=("total_departures", "sum"),
+        total_arrivals=("total_arrivals", "sum"),
+        total_activity=("total_activity", "sum"),
+        net_departures=("net_departures", "sum")
+    )
+)
+
+neighborhood_activity["avg_activity_per_station"] = (
+    neighborhood_activity["total_activity"] /
+    neighborhood_activity["number_of_stations"]
+)
+
+neighborhood_activity = neighborhood_activity.sort_values(
+    "total_activity",
+    ascending=False
+)
+
+neighborhood_activity.head()
+```
+
+
+
+### Interpretation of Neighborhood Metrics
+
+| Metric | Meaning |
+|---|---|
+| `number_of_stations` | number of Citi Bike stations in the neighborhood |
+| `total_departures` | rides starting from stations in the neighborhood |
+| `total_arrivals` | rides ending at stations in the neighborhood |
+| `total_activity` | departures plus arrivals |
+| `net_departures` | departures minus arrivals |
+| `avg_activity_per_station` | average station usage intensity |
+
+The metric `total_activity` is useful, but it can be misleading.
+
+A neighborhood with many stations may naturally have more activity.
+
+That is why we also calculate:
+
+$$
+\text{Average Activity per Station} =
+\frac{\text{Total Activity}}{\text{Number of Stations}}
+$$
+
+
+
+### Create Center Point for the Map
+
+```{python}
+#| echo: true
+
+center_lat = station_gdf.geometry.y.mean()
+center_lng = station_gdf.geometry.x.mean()
+
+center_lat, center_lng
+```
+
+In GeoPandas point geometry:
+
+$$
+x = \text{longitude}
+$$
+
+$$
+y = \text{latitude}
+$$
+
+So for Folium we use:
+
+```python
+location=[row.geometry.y, row.geometry.x]
+```
+
+because Folium expects:
+
+```python
+[latitude, longitude]
+```
+
+---
+
+### Visualize Each Station as a Point
+
+```{python}
+#| echo: true
+
+station_point_map = folium.Map(
+    location=[center_lat, center_lng],
+    zoom_start=12
+)
+
+for _, row in station_gdf.iterrows():
+
+    folium.CircleMarker(
+        location=[
+            row.geometry.y,
+            row.geometry.x
+        ],
+        radius=5,
+        popup=f"""
+        <b>{row['station_name']}</b><br>
+        Station ID: {row['station_id']}<br>
+        Departures: {row['total_departures']:.0f}<br>
+        Arrivals: {row['total_arrivals']:.0f}<br>
+        Total Activity: {row['total_activity']:.0f}<br>
+        Net Departures: {row['net_departures']:.0f}
+        """,
+        tooltip=row["station_name"],
+        fill=True,
+        fill_opacity=0.6,
+        opacity=0.8
+    ).add_to(station_point_map)
+
+station_point_map
+```
+
+
+### Merge Neighborhood Metrics Back to Polygons
+
+To create a choropleth map, the metrics must be attached to the neighborhood polygons.
+
+```{python}
+#| echo: true
+
+neighborhood_choropleth_gdf = jersey_city.merge(
+    neighborhood_activity,
+    on='neighborhood',
+    how="left"
+)
+
+neighborhood_choropleth_gdf.head()
+```
+
+Some neighborhoods may not have Citi Bike stations.
+
+For those neighborhoods, the activity values will be missing.
+
+We replace missing values with zero.
+
+```{python}
+#| echo: true
+
+activity_columns = [
+    "number_of_stations",
+    "total_departures",
+    "total_arrivals",
+    "total_activity",
+    "net_departures",
+    "avg_activity_per_station"
+]
+
+neighborhood_choropleth_gdf[activity_columns] = (
+    neighborhood_choropleth_gdf[activity_columns]
+    .fillna(0)
+)
+
+neighborhood_choropleth_gdf[
+    [
+        'neighborhood',
+        "number_of_stations",
+        "total_departures",
+        "total_arrivals",
+        "total_activity",
+        "avg_activity_per_station"
+    ]
+].head()
+```
+
+
+
+## Choropleth Map with Folium
+
+Now we create a choropleth map.
+
+We start with `total_activity`.
+
+![]({{< meta image_path >}}/coropleth.png)
+
+
+[Simple example](https://python-visualization.github.io/folium/latest/user_guide/geojson/choropleth.html)
+
+### Helper Function for Folium Choropleth
+
+To avoid repeating code, we create a small helper function.
+
+```{python}
+#| echo: true
+
+def create_neighborhood_choropleth(
+    gdf,
+    metric,
+    legend_name,
+    neighborhood_col="neighborhood"
+):
+    choropleth_map = folium.Map(
+        location=[center_lat, center_lng],
+        zoom_start=12
+    )
+
+    folium.Choropleth(
+        geo_data=gdf,
+        data=gdf,
+        columns=[neighborhood_col, metric],
+        key_on=f"feature.properties.{neighborhood_col}",
+        fill_opacity=0.7,
+        line_opacity=0.4,
+        legend_name=legend_name,
+        nan_fill_opacity=0.1
+    ).add_to(choropleth_map)
+
+    folium.GeoJson(
+        gdf,
+        name="Neighborhood Boundaries",
+        tooltip=folium.GeoJsonTooltip(
+            fields=[
+                neighborhood_col,
+                metric
+            ],
+            aliases=[
+                "Neighborhood:",
+                f"{legend_name}:"
+            ],
+            localize=True
+        ),
+        style_function=lambda feature: {
+            "fillOpacity": 0,
+            "color": "black",
+            "weight": 1
+        }
+    ).add_to(choropleth_map)
+
+    folium.LayerControl().add_to(choropleth_map)
+
+    return choropleth_map
+```
+
+
+### Choropleth: Total Activity by Neighborhood
+
+
+This choropleth shows which neighborhoods have the highest total Citi Bike station activity. However, neighborhoods with more stations may naturally appear more active.
+So this map should be interpreted together with the number of stations.
+
+
+```{python}
+#| echo: true
+
+total_activity_map = create_neighborhood_choropleth(
+    gdf=neighborhood_choropleth_gdf,
+    metric="total_activity",
+    legend_name="Total Citi Bike Activity",
+    neighborhood_col="neighborhood"
+)
+
+total_activity_map
+```
+
+
+### Choropleth by Number of Stations
+
+```{python}
+#| echo: true
+
+station_count_map = create_neighborhood_choropleth(
+    gdf=neighborhood_choropleth_gdf,
+    metric="number_of_stations",
+    legend_name="Number of Citi Bike Stations",
+    neighborhood_col="neighborhood"
+)
+
+station_count_map
+```
+
+---
+
+### Choropleth by Average Activity per Station
+
+```{python}
+#| echo: true
+
+avg_activity_map = create_neighborhood_choropleth(
+    gdf=neighborhood_choropleth_gdf,
+    metric="avg_activity_per_station",
+    legend_name="Average Activity per Station",
+    neighborhood_col="neighborhood"
+)
+
+avg_activity_map
+```
+
+---
+
+### Choropleth by Total Departures
+
+```{python}
+#| echo: true
+
+departures_map = create_neighborhood_choropleth(
+    gdf=neighborhood_choropleth_gdf,
+    metric="total_departures",
+    legend_name="Total Departures",
+    neighborhood_col="neighborhood"
+)
+
+departures_map
+```
+
+---
+
+### Choropleth by Total Arrivals
+
+```{python}
+#| echo: true
+
+arrivals_map = create_neighborhood_choropleth(
+    gdf=neighborhood_choropleth_gdf,
+    metric="total_arrivals",
+    legend_name="Total Arrivals",
+    neighborhood_col="neighborhood"
+)
+
+arrivals_map
 ```
