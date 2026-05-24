@@ -514,6 +514,7 @@ Once we have the retention table ready, we can visualize it in different ways. G
 
 ### Retention Line Plots | Gender Level
 
+#### Aggregate by Gender and Month of Churn
 ```{python}
 #| echo: true
 #| eval: true
@@ -524,13 +525,21 @@ gender_data = (
     .agg(churned_users=("user_id", "count"))
     .reset_index()
 )
+gender_data.head()
+```
 
+
+#### Merge Total Users
+```{python}
 gender_base = (
     df.groupby("gender")
     .agg(total_users=("user_id", "count"))
     .reset_index()
 )
+```
 
+#### Merge and Calculate Churn Rate
+```{python}
 gender_data = gender_data.merge(
     gender_base,
     on="gender",
