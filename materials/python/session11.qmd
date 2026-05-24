@@ -508,6 +508,81 @@ cohort_data.head(15)
 
 This table is the analytical foundation for both the heatmap and the line plots.
 
+## Retention by Cohort 
+
+Once we have the retention table ready, we can visualize it in different ways. Going over the line plots and heatmap will help us understand the strengths and weaknesses of each visualization method. Using Line plots will help us to estimate cohort performance per gender, marital status, income segment, country, channel, campaign, device type, and plan type. Using heatmap will help us to estimate the overall retention pattern across cohorts.
+
+### Retention Line Plots | Gender Level
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+gender_data = (
+    df[df["month_churned"].notna()]
+    .groupby(["gender", "month_churned"])
+    .agg(churned_users=("user_id", "count"))
+    .reset_index()
+)
+
+gender_base = (
+    df.groupby("gender")
+    .agg(total_users=("user_id", "count"))
+    .reset_index()
+)
+
+gender_data = gender_data.merge(
+    gender_base,
+    on="gender",
+    how="left"
+)
+
+gender_data["churn_rate"] = (
+    gender_data["churned_users"] / gender_data["total_users"]
+)
+
+gender_data.head()
+```
+
+
+### Gender Retention Line Plot
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+fig = px.line(
+    gender_data,
+    x="month_churned",
+    y="churn_rate",
+    color="gender",
+    markers=True,
+    title="Monthly Churn Rate by Gender",
+    labels={
+        "month_churned": "Month Since Acquisition",
+        "churn_rate": "Churn Rate",
+        "gender": "Gender"
+    }
+)
+
+fig.update_layout(
+    yaxis_tickformat=".0%",
+    xaxis=dict(dtick=1),
+    hovermode="x unified"
+)
+
+fig.show()
+```
+
+## Homework
+
+**Create similar line plots for the following variables:**
+
+- marital status
+- income segment
+- country
+- channel
+- campaign    
 
 ## Cohort Retention Heatmap
 
