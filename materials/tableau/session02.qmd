@@ -7,7 +7,7 @@ image_path: "/img/tableau/02"
 ## Learning Goals
 
 
-- Connect Tableau to relational databases such as PostgreSQL and Microsoft SQL Server
+- Connect Tableau to relational databases such as `PostgreSQL`
 - Understand the difference between live and extract connections
 - Combine data using relationships, joins, unions, and blending
 - Understand Tableau’s logical and physical data model
@@ -20,13 +20,11 @@ image_path: "/img/tableau/02"
 - Design interactive dashboards with actions, filters, and tooltips
 
 
----
-
 ## Overview
 
-This session moves from basic chart building to analytical modeling and interactive dashboard design.
+This session moves from **basic chart building** to **analytical modeling** and **interactive dashboard design.**
 
-You will learn how Tableau:
+**You will learn how Tableau:**
 
 - Connects to relational databases
 - Combines data from multiple tables and sources
@@ -43,13 +41,13 @@ By the end of this class, you should be able to model multi-table data correctly
 :::
 
 
----
 
-## Introduction: From Flat Tables to Analytical Models
+
+### From Flat Tables to Analytical Models
 
 In real-world analytics, data rarely exists in a single flat file.
 
-Business questions usually span multiple entities such as:
+**Business questions usually span multiple entities such as:**
 
 - Customers
 - Orders
@@ -81,26 +79,26 @@ F --> G[Interactive Dashboard]
 
 ### Dataset Used in This Session
 
-For this session, we use a multi-table retail dataset consisting of:
+**For this session, we use a multi-table retail dataset consisting of:**
 
-- customers.csv
-- customer_addresses.csv
-- orders.csv and quarterly order files
-- order_details.csv
-- products.csv
-- returns.csv
-- salespeople.csv
+- `customers.csv`
+- `customer_addresses.csv`
+- `orders.csv` and quarterly order files
+- `order_details.csv`
+- `products.csv`
+- `returns.csv`
+- `salespeople.csv`
 
 This dataset represents a real-world analytical scenario where multiple tables must be combined to answer business questions.
 
 
 ---
 
-## Connecting to Databases
+### Connecting to Databases
 
-Beyond Excel and CSV files, Tableau can connect directly to relational databases.
+Beyond `Excel`, `CSV` `and JSON` files, Tableau can connect directly to relational databases.
 
-Common enterprise sources include:
+**Common enterprise sources include:**
 
 - PostgreSQL
 - Microsoft SQL Server
@@ -113,7 +111,7 @@ Tableau Desktop and Tableau Cloud support these connectors. Tableau Public does 
 
 ### Why Use Database Connections
 
-Connecting Tableau to a database allows you to:
+**Connecting Tableau to a database allows you to:**
 
 - Query data without exporting it into flat files
 - Reuse existing warehouse tables, views, and SQL logic
@@ -130,52 +128,29 @@ For production dashboards, direct database connectivity usually provides better 
 :::
 
 
----
 
-### Tableau Desktop Connectors to SQL Server
+### Connection Types
 
-Tableau Desktop can connect directly to Microsoft SQL Server for both exploratory analysis and production reporting.
+**Tableau supports two main connection modes:** 
 
-SQL Server is widely used because it supports:
-
-- Large relational schemas
-- Strong authentication options
-- Views and stored procedures
-- Live querying and extract workflows
-- Enterprise-grade data governance
-
-### Why Use a SQL Server Connector
-
-A SQL Server connection is useful when you want to:
-
-- Query large datasets directly
-- Build dashboards on top of trusted data models
-- Reuse business logic defined in SQL views
-- Control performance using indexing and database optimization
-- Reduce duplication of transformation logic in Tableau
-
-
----
-
-## Connection Types: Live vs Extract
-
-Tableau supports two main connection modes:
 
 - Live connection
 - Extract connection
 
-### Live Connection
+>Both options have advantages and trade-offs. The best choice depends on the specific use case, data characteristics, and performance requirements.
+
+#### Live Connection
 
 A live connection queries the underlying database every time the user interacts with the dashboard.
 
-Use it when:
+**Use it when:**
 
 - Data must be up-to-date
 - The database is well optimized
 - Dashboard queries are not excessively heavy
 - Freshness is more important than speed
 
-Considerations:
+**Considerations:**
 
 - Performance depends on database speed, network, and query complexity
 - Complex dashboards may become slow
@@ -183,18 +158,18 @@ Considerations:
 
 ![Live Connection Schema]({{< meta image_path >}}/w2_live_connection_schema.png)
 
-### Extract Connection
+#### Extract Connection
 
 An extract copies data into Tableau’s `.hyper` format.
 
-Use it when:
+**Use it when:**
 
 - Dashboard performance is critical
 - Data does not need real-time updates
 - Dashboards contain complex calculations
 - Many users will access the dashboard
 
-Considerations:
+**Considerations:**
 
 - Data can become outdated between refreshes
 - Refresh schedules must be managed
@@ -209,130 +184,20 @@ For exploratory work and many production dashboards, extracts are often the best
 :::
 
 
----
 
-### Step-by-Step: Connect Tableau to SQL Server
-
-1. Open **Tableau Desktop**
-2. Under **Connect**, choose **Microsoft SQL Server**
-3. Enter the connection details:
-- **Server:** SQL Server hostname or IP  
-- **Database:** target database name (optional at first)  
-- **Authentication:**  
-  - **Windows** (recommended in corporate environments)  
-  - **SQL Server** (username/password)  
-4. Click **Sign In**
-5. After connecting, use the **Data Source** page to choose tables, views, or custom SQL
-
-![Connecting To SQL Server]({{< meta image_path >}}/w2_connect_sql_server.png)
+## Connect Tableau to `PostgreSQL` 
 
 
----
 
-## Choosing the Right Objects: Tables, Views, or Custom SQL
+## Creating Extracts
 
-When connecting Tableau to a database, you can work with several object types.
-
-### Tables
-
-Use raw tables when:
-
-- You need maximum flexibility
-- You understand the grain of the data
-- You will model logic directly in Tableau
-
-Risks:
-
-- Incorrect joins
-- Duplicated rows
-- Repeated business logic
-
-### Views
-
-Views are often better when:
-
-- Business logic is already defined in SQL
-- KPI definitions must be standardized
-- Tableau users should not manage underlying complexity
-
-Advantages:
-
-- Cleaner Tableau layer
-- Better governance
-- Less repeated logic
-
-### Custom SQL
-
-Custom SQL allows you to write your own SQL query directly in Tableau.
-
-Use it when:
-
-- You need a targeted query
-- You want to pre-aggregate or reshape data
-- You need logic that is easier to express in SQL than in Tableau
-
-Caution:
-
-- Overly complex custom SQL can hurt performance
-- It may be harder to maintain than trusted warehouse views
-
-### Stored Procedures
-
-Stored procedures can be useful when:
-
-- The result set is pre-optimized
-- Expensive computation already exists in SQL
-- Controlled logic is required
-
-Behavior depends on how the procedure returns data.
-
-![Connecting To a Database]({{< meta image_path >}}/w2_connect_to_database.png)
-
-::: {.callout-note}
-
-In enterprise environments, trusted views are usually preferable to raw tables because they centralize business logic and reduce inconsistencies across dashboards.
-
-:::
-
-
----
-
-### Example: Simple SQL View for Tableau
-
-The following example shows a warehouse view that prepares clean sales data for Tableau.
-
-```sql
-CREATE VIEW dbo.vw_sales_summary AS
-SELECT
-    o.order_id,
-    o.order_date,
-    c.customer_id,
-    c.region,
-    p.category,
-    od.quantity,
-    od.unit_price,
-    od.quantity * od.unit_price AS line_revenue
-FROM dbo.orders o
-JOIN dbo.order_details od
-    ON o.order_id = od.order_id
-JOIN dbo.customers c
-    ON o.customer_id = c.customer_id
-JOIN dbo.products p
-    ON od.product_id = p.product_id;
-```
-
-
----
-
-### Creating Extracts
-
-Extracts can be created in Tableau Desktop or on the web. Tableau copies data from the remote source into an optimized local structure (.hyper file), which is stored on disk either locally or on Tableau Server or Tableau Cloud.
+Extracts can be created in Tableau Desktop or on the web. Tableau copies data from the remote source into an optimized local structure (`.hyper` file), which is stored on disk either locally or on Tableau Server or Tableau Cloud.
 
 ![Creating an Extract]({{< meta image_path >}}/w2_extract.png)
 
 ![Extract Saved Locally]({{< meta image_path >}}/w2_extract_save.png)
 
-When creating an extract, Tableau allows you to control:
+**When creating an extract, Tableau allows you to control:**
 
 - Storage structure
 - Filters
@@ -346,12 +211,9 @@ It is better to finalize the data model before creating an **extract**. Structur
 
 :::
 
-
----
-
 ### Extract Properties
 
-When creating an extract, you can configure:
+**When creating an extract, you can configure:**
 
 - How the extract stores data
 - Which rows are included
@@ -360,38 +222,46 @@ When creating an extract, you can configure:
 
 ![Extract Properties]({{< meta image_path >}}/w2_extract_properties.png)
 
-### Decide How the Extract Data Should Be Stored
 
-You can choose between:
+::: {.callout-important title = "how to store"}
+
+To decide how the extract data should be stored
+
+**You can choose between:**
 
 - **Logical Tables (denormalized schema)**
 - **Physical Tables (normalized schema)**
+
+
+:::
 
 #### Logical Tables
 
 Logical tables store one extract table per logical table in the data model.
 
-This works well when:
+**This works well when:**
 
 - Relationships are used
 - Tables should remain conceptually separate
 - Tableau should resolve combinations dynamically
 
+
 #### Physical Tables
 
 Physical tables store one extract table per physical table.
 
-This can be useful when:
+**This can be useful when:**
 
 - Equality joins are used
 - You want tighter control over storage
 - You want to reduce extract size in some scenarios
 
+
 ### Extract Filters
 
 Extract filters limit the data before it is stored in the extract.
 
-Use them to:
+**Use them to:**
 
 - Reduce file size
 - Improve performance
@@ -401,7 +271,7 @@ Use them to:
 
 This option aggregates measures at the visible dimension level.
 
-Benefits:
+**Benefits:**
 
 - Fewer rows
 - Smaller extract size
@@ -409,23 +279,23 @@ Benefits:
 
 ### Choose the Rows to Extract
 
-You can select:
+**You can select:**
 
 - All rows
-- Top N rows where supported
+- Top `N` rows where supported
 
-Tableau applies filters and aggregation before sampling.
+>Tableau applies filters and aggregation before sampling.
 
 ### Incremental Refresh
 
 Incremental refresh adds only new rows since the previous refresh.
 
-Benefits:
+**Benefits:**
 
 - Faster refreshes
 - Less load on source systems
 
-Risk:
+**Risk:**
 
 - Schema changes usually require a full refresh
 
@@ -451,7 +321,6 @@ Example:
 
 This can result in duplicate rows after refresh.
 
----
 
 ## Tableau Data Model
 
@@ -466,7 +335,7 @@ Tableau separates data modeling into two layers:
 
 The logical layer uses **relationships**.
 
-Characteristics:
+**Characteristics:**
 
 - Tables remain separate
 - Tableau combines them at query time based on the view
@@ -477,7 +346,7 @@ Characteristics:
 
 The physical layer uses **joins** and **unions**.
 
-Characteristics:
+**Characteristics:**
 
 - Tables are merged into a single physical structure
 - Behavior is fixed
@@ -485,7 +354,6 @@ Characteristics:
 - Useful when exact row-level structure is required
 
 
----
 
 ## Relationships vs Joins vs Unions vs Blending
 
@@ -2008,9 +1876,9 @@ Prefer Tableau when:
 - Analysts need flexibility
 - Interactivity or parameterization is required
 
----
 
-## Task — Session 02
+
+## Homework 
 
 Using the **retail dataset**, complete the following:
 
