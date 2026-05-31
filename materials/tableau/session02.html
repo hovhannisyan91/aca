@@ -112,6 +112,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
 <link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -962,10 +991,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#creating-a-calculated-field" id="toc-creating-a-calculated-field" class="nav-link" data-scroll-target="#creating-a-calculated-field">Creating a Calculated Field</a></li>
   <li><a href="#row-level-calculations" id="toc-row-level-calculations" class="nav-link" data-scroll-target="#row-level-calculations">Row-Level Calculations</a></li>
   <li><a href="#aggregate-calculations" id="toc-aggregate-calculations" class="nav-link" data-scroll-target="#aggregate-calculations">Aggregate Calculations</a></li>
-  <li><a href="#level-of-detail-lod-expressions" id="toc-level-of-detail-lod-expressions" class="nav-link" data-scroll-target="#level-of-detail-lod-expressions">Level of Detail (LOD) Expressions</a></li>
-  <li><a href="#fixed" id="toc-fixed" class="nav-link" data-scroll-target="#fixed">FIXED</a></li>
-  <li><a href="#include" id="toc-include" class="nav-link" data-scroll-target="#include">INCLUDE</a></li>
-  <li><a href="#exclude" id="toc-exclude" class="nav-link" data-scroll-target="#exclude">EXCLUDE</a></li>
+  <li><a href="#lod-expressions" id="toc-lod-expressions" class="nav-link" data-scroll-target="#lod-expressions"><code>LOD</code> Expressions</a></li>
   <li><a href="#comparison-example" id="toc-comparison-example" class="nav-link" data-scroll-target="#comparison-example">Comparison Example</a></li>
   </ul></li>
   <li><a href="#tableau-functions" id="toc-tableau-functions" class="nav-link" data-scroll-target="#tableau-functions">Tableau Functions</a>
@@ -978,29 +1004,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a>
   <ul class="collapse">
-  <li><a href="#key-characteristics" id="toc-key-characteristics" class="nav-link" data-scroll-target="#key-characteristics">Key Characteristics</a></li>
-  <li><a href="#to-use-a-parameter" id="toc-to-use-a-parameter" class="nav-link" data-scroll-target="#to-use-a-parameter">To Use a Parameter</a></li>
+  <li><a href="#steps-to-create-a-parameter" id="toc-steps-to-create-a-parameter" class="nav-link" data-scroll-target="#steps-to-create-a-parameter">Steps to create a parameter</a></li>
   <li><a href="#metric-switching" id="toc-metric-switching" class="nav-link" data-scroll-target="#metric-switching">Metric Switching</a></li>
   <li><a href="#dimension-switching" id="toc-dimension-switching" class="nav-link" data-scroll-target="#dimension-switching">Dimension Switching</a></li>
   <li><a href="#boolean-parameter-logic" id="toc-boolean-parameter-logic" class="nav-link" data-scroll-target="#boolean-parameter-logic">Boolean Parameter Logic</a></li>
-  <li><a href="#top-n-with-parameter" id="toc-top-n-with-parameter" class="nav-link" data-scroll-target="#top-n-with-parameter">Top N with Parameter</a></li>
+  <li><a href="#top-n-with-parameter" id="toc-top-n-with-parameter" class="nav-link" data-scroll-target="#top-n-with-parameter">Top <code>N</code> with Parameter</a></li>
   <li><a href="#date-parameter-logic" id="toc-date-parameter-logic" class="nav-link" data-scroll-target="#date-parameter-logic">Date Parameter Logic</a></li>
+  <li><a href="#naming-conventions" id="toc-naming-conventions" class="nav-link" data-scroll-target="#naming-conventions">Naming Conventions</a></li>
   </ul></li>
-  <li><a href="#filters-parameters-and-calculated-fields" id="toc-filters-parameters-and-calculated-fields" class="nav-link" data-scroll-target="#filters-parameters-and-calculated-fields">Filters, Parameters, and Calculated Fields</a>
+  <li><a href="#filters-vs-parameters-vs-calculated-fields" id="toc-filters-vs-parameters-vs-calculated-fields" class="nav-link" data-scroll-target="#filters-vs-parameters-vs-calculated-fields"><code>Filters</code> vs <code>Parameters</code> vs <code>Calculated Fields</code></a>
   <ul class="collapse">
   <li><a href="#dimension-filters-1" id="toc-dimension-filters-1" class="nav-link" data-scroll-target="#dimension-filters-1">Dimension Filters</a></li>
   <li><a href="#measure-filters-1" id="toc-measure-filters-1" class="nav-link" data-scroll-target="#measure-filters-1">Measure Filters</a></li>
   <li><a href="#context-filters-1" id="toc-context-filters-1" class="nav-link" data-scroll-target="#context-filters-1">Context Filters</a></li>
   <li><a href="#table-calculations" id="toc-table-calculations" class="nav-link" data-scroll-target="#table-calculations">Table Calculations</a></li>
   </ul></li>
-  <li><a href="#example-comparing-sql-logic-with-tableau-logic" id="toc-example-comparing-sql-logic-with-tableau-logic" class="nav-link" data-scroll-target="#example-comparing-sql-logic-with-tableau-logic">Example: Comparing SQL Logic with Tableau Logic</a>
-  <ul class="collapse">
-  <li><a href="#sql-example-precompute-revenue" id="toc-sql-example-precompute-revenue" class="nav-link" data-scroll-target="#sql-example-precompute-revenue">SQL Example: Precompute Revenue</a></li>
-  <li><a href="#tableau-example-same-logic-in-a-calculated-field" id="toc-tableau-example-same-logic-in-a-calculated-field" class="nav-link" data-scroll-target="#tableau-example-same-logic-in-a-calculated-field">Tableau Example: Same Logic in a Calculated Field</a></li>
-  <li><a href="#when-to-prefer-sql" id="toc-when-to-prefer-sql" class="nav-link" data-scroll-target="#when-to-prefer-sql">When to Prefer SQL</a></li>
-  <li><a href="#when-to-prefer-tableau" id="toc-when-to-prefer-tableau" class="nav-link" data-scroll-target="#when-to-prefer-tableau">When to Prefer Tableau</a></li>
-  </ul></li>
   <li><a href="#homework" id="toc-homework" class="nav-link" data-scroll-target="#homework">Homework</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a>
+  <ul class="collapse">
+  <li><a href="#articles" id="toc-articles" class="nav-link" data-scroll-target="#articles">Articles</a></li>
+  <li><a href="#videos" id="toc-videos" class="nav-link" data-scroll-target="#videos">Videos</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1124,7 +1148,7 @@ F --&gt; G[Interactive Dashboard]
 </div>
 <div class="callout-body-container callout-body">
 <p>You can download the dataset using Python with the following code:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>URL <span class="op">=</span> https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>hovhannisyan91<span class="op">/</span>tableau<span class="op">-</span>analytics<span class="op">-</span>portfolio<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>session2<span class="op">/</span>data</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>URL <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/hovhannisyan91/tableau-analytics-portfolio/refs/heads/main/session2/data"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>tables <span class="op">=</span> [</span>
@@ -1148,7 +1172,7 @@ F --&gt; G[Interactive Dashboard]
 <h4 class="anchored" data-anchor-id="dowloading-the-datasets-part-2">Dowloading the Datasets Part 2</h4>
 <p>Now, we will download the quarterly order files using <code>Python</code>. We have <code>2023_Q1</code> - <code>2023_Q5</code> order files.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>URL <span class="op">=</span> https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>hovhannisyan91<span class="op">/</span>tableau<span class="op">-</span>analytics<span class="op">-</span>portfolio<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>session2<span class="op">/</span>data<span class="op">/</span>quarters</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>URL <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/hovhannisyan91/tableau-analytics-portfolio/refs/heads/main/session2/data/quarters"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tables <span class="op">=</span> [</span>
@@ -2448,7 +2472,7 @@ F --&gt; G[Rendered View]
 </section>
 <section id="row-level-calculations" class="level3">
 <h3 class="anchored" data-anchor-id="row-level-calculations">Row-Level Calculations</h3>
-<p>Row-level calculations operate on each individual record before aggregation.</p>
+<p><code>Row-level</code>calculations operate on each individual record before aggregation.</p>
 <p><strong>Use row-level calculations when you need to:</strong></p>
 <ul>
 <li>Create line-level revenue</li>
@@ -2524,15 +2548,29 @@ Important
 </div>
 </section>
 </section>
-<section id="level-of-detail-lod-expressions" class="level3">
-<h3 class="anchored" data-anchor-id="level-of-detail-lod-expressions">Level of Detail (LOD) Expressions</h3>
-<p>LOD expressions explicitly control the granularity of a calculation independently of the view.</p>
+<section id="lod-expressions" class="level3">
+<h3 class="anchored" data-anchor-id="lod-expressions"><code>LOD</code> Expressions</h3>
+<p>Level of Detail <code>LOD</code> expressions explicitly control the granularity of a calculation independently of the view.</p>
 <p><strong>There are three main types:</strong></p>
 <ul>
 <li><code>FIXED</code></li>
 <li><code>INCLUDE</code></li>
 <li><code>EXCLUDE</code></li>
 </ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>LOD expressions are essential for building consistent KPIs, customer-level metrics, cohort logic, and benchmark calculations.</p>
+<p>It is very Similar to <code>WINDOW</code> functions in <code>SQL</code> but with more flexibility and control over the level of aggregation.</p>
+</div>
+</div>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
@@ -2550,13 +2588,12 @@ C --&gt; F[EXCLUDE]
 </div>
 </div>
 </div>
-</section>
-<section id="fixed" class="level3">
-<h3 class="anchored" data-anchor-id="fixed">FIXED</h3>
+<section id="fixed" class="level4">
+<h4 class="anchored" data-anchor-id="fixed">FIXED</h4>
 <p><code>FIXED</code> calculates at a specified level regardless of view dimensions.</p>
-<p><strong>Example:</strong> Customer Lifetime Value</p>
+<p><strong>Example 1:</strong> <code>Customer Lifetime Value</code></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">SUM</span>([<span class="kw">Order</span> Total]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Use <code>FIXED</code> when:</p>
+<p><strong>Use <code>FIXED</code> when:</strong></p>
 <ul>
 <li>A metric must remain stable across sheets</li>
 <li>A KPI should be defined at a business entity level</li>
@@ -2568,7 +2605,7 @@ C --&gt; F[EXCLUDE]
 <figcaption>Customer Lifetime Value</figcaption>
 </figure>
 </div>
-<p><strong>Example:</strong> Minimum Order Date per Customer</p>
+<p><strong>Example 2:</strong> <code>Minimum Order Date per Customer</code> aka <code>Starting Cohort</code></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">MIN</span>([<span class="kw">Order</span> <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This calculation returns the first purchase date for each customer.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -2577,13 +2614,32 @@ C --&gt; F[EXCLUDE]
 <figcaption>Minimum Order Date per Customer</figcaption>
 </figure>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="SQL Comparison">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>SQL Comparison
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- LOD equivalent in SQL</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  CustomerID,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">SUM</span>(OrderTotal) <span class="kw">AS</span> LifetimeValue,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">MIN</span>(OrderDate) <span class="kw">AS</span> FirstPurchaseDate</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> Orders</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> CustomerID </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
 </section>
-<section id="include" class="level3">
-<h3 class="anchored" data-anchor-id="include">INCLUDE</h3>
+<section id="include" class="level4">
+<h4 class="anchored" data-anchor-id="include">INCLUDE</h4>
 <p><code>INCLUDE</code> adds detail to the calculation level even if that dimension is not in the view.</p>
-<p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>{ INCLUDE [Region] : <span class="fu">AVG</span>([<span class="kw">Order</span> Total]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Use <code>INCLUDE</code> when:</p>
+<p><strong>Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>{ INCLUDE [Region] : <span class="fu">AVG</span>([<span class="kw">Order</span> Total]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Use <code>INCLUDE</code> when:</strong></p>
 <ul>
 <li>Extra detail should influence the result</li>
 <li>The view is less granular than the analytical logic</li>
@@ -2595,12 +2651,12 @@ C --&gt; F[EXCLUDE]
 </figure>
 </div>
 </section>
-<section id="exclude" class="level3">
-<h3 class="anchored" data-anchor-id="exclude">EXCLUDE</h3>
+<section id="exclude" class="level4">
+<h4 class="anchored" data-anchor-id="exclude">EXCLUDE</h4>
 <p><code>EXCLUDE</code> removes a dimension from the calculation level even if it appears in the view.</p>
 <p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>{ EXCLUDE [Region] : <span class="fu">AVG</span>([<span class="kw">Order</span> Total]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Use <code>EXCLUDE</code> when:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>{ EXCLUDE [Region] : <span class="fu">AVG</span>([<span class="kw">Order</span> Total]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Use <code>EXCLUDE</code> when:</strong></p>
 <ul>
 <li>A dimension is needed visually</li>
 <li>But should not affect the aggregation logic</li>
@@ -2613,17 +2669,14 @@ C --&gt; F[EXCLUDE]
 </figure>
 </div>
 </section>
+</section>
 <section id="comparison-example" class="level3">
 <h3 class="anchored" data-anchor-id="comparison-example">Comparison Example</h3>
 <ul>
-<li><p><code>AVG([Order Total])</code><br>
-→ Calculates average sales <strong>per Region and Year</strong></p></li>
-<li><p><code>{ INCLUDE [Region] : AVG([Order Total]) }</code><br>
-→ Calculates average sales <strong>per Region</strong>, then aggregates to Year</p></li>
-<li><p><code>{ EXCLUDE [Region] : AVG([Order Total]) }</code><br>
-→ Calculates average sales <strong>per Year ignoring Region</strong></p></li>
-<li><p><code>{ FIXED [Region] : AVG([Order Total]) }</code><br>
-→ Calculates average sales <strong>per Region regardless of Year</strong></p></li>
+<li><code>AVG([Order Total])</code> <span class="math inline">\(\rightarrow\)</span> Calculates average sales <strong>per Region and Year</strong></li>
+<li><code>{ INCLUDE [Region] : AVG([Order Total]) }</code> <span class="math inline">\(\rightarrow\)</span> Calculates average sales <strong>per Region</strong>, then aggregates to Year</li>
+<li><code>{ EXCLUDE [Region] : AVG([Order Total]) }</code> <span class="math inline">\(\rightarrow\)</span> Calculates average sales <strong>per Year ignoring Region</strong></li>
+<li><code>{ FIXED [Region] : AVG([Order Total]) }</code> <span class="math inline">\(\rightarrow\)</span> Calculates average sales <strong>per Region regardless of Year</strong></li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -2641,15 +2694,21 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>LOD expressions are essential for building consistent KPIs, customer-level metrics, cohort logic, and benchmark calculations.</p>
+<p><strong><code>LOD</code> expressions are essential for building consistent:</strong></p>
+<ul>
+<li>KPIs</li>
+<li>customer-level metrics</li>
+<li>cohort logic</li>
+<li>benchmark calculations</li>
+</ul>
 </div>
 </div>
 </section>
 </section>
 <section id="tableau-functions" class="level2">
 <h2 class="anchored" data-anchor-id="tableau-functions">Tableau Functions</h2>
-<p>Tableau provides many built-in functions that can be used in calculated fields.</p>
-<p>Main categories include:</p>
+<p>Tableau provides many built-in functions that can be used in <code>calculated fields</code>.</p>
+<p><strong>Main categories include:</strong></p>
 <ul>
 <li>Aggregate functions</li>
 <li>Number functions</li>
@@ -2657,118 +2716,85 @@ Important
 <li>Logical functions</li>
 <li>Type conversion functions</li>
 </ul>
+<blockquote class="blockquote">
+<p>Similar to <code>SQL functions</code> and <code>Python functions</code>, but with Tableau-specific behavior and syntax.</p>
+</blockquote>
 <section id="aggregate-functions" class="level3">
 <h3 class="anchored" data-anchor-id="aggregate-functions">Aggregate Functions</h3>
 <p>Aggregate functions perform calculations on multiple rows and return a single value.</p>
-<p>Examples:</p>
+<p><strong>Examples:</strong></p>
 <ul>
-<li><code>SUM([Order Total])</code> → total revenue from orders dataset</li>
-<li><code>AVG([Unit Price])</code> → average product price from products.csv</li>
-<li><code>COUNT([Order ID])</code> → total number of orders</li>
-<li><code>COUNTD([Customer ID])</code> → number of unique customers</li>
+<li><code>SUM([Order Total])</code> <span class="math inline">\(\rightarrow\)</span> total revenue from orders dataset</li>
+<li><code>AVG([Unit Price])</code> <span class="math inline">\(\rightarrow\)</span> average product price from products.csv</li>
+<li><code>COUNT([Order ID])</code> <span class="math inline">\(\rightarrow\)</span> total number of orders</li>
+<li><code>COUNTD([Customer ID])</code> <span class="math inline">\(\rightarrow\)</span> number of unique customers</li>
 </ul>
-<p>Use case with dataset:</p>
-<ul>
-<li>Calculate total sales:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">SUM</span>([<span class="kw">Order</span> Total])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Count unique customers placing orders:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>COUNTD([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="number-functions" class="level3">
 <h3 class="anchored" data-anchor-id="number-functions">Number Functions</h3>
 <p>Number functions perform mathematical operations on numeric fields.</p>
-<p>Examples:</p>
+<p><strong>Examples:</strong></p>
 <ul>
-<li><code>ROUND([Order Total], 2)</code> → rounds order value to 2 decimal places</li>
-<li><code>ABS([Discount])</code> → removes negative sign from discount values</li>
-<li><code>CEILING([Unit Price])</code> → rounds price up to nearest integer</li>
-<li><code>FLOOR([Unit Price])</code> → rounds price down</li>
+<li><code>ROUND([Order Total], 2)</code> <span class="math inline">\(\rightarrow\)</span> rounds order value to 2 decimal places</li>
+<li><code>ABS([Discount])</code> <span class="math inline">\(\rightarrow\)</span> removes negative sign from discount values</li>
+<li><code>CEILING([Unit Price])</code> <span class="math inline">\(\rightarrow\)</span> rounds price up to nearest integer</li>
+<li><code>FLOOR([Unit Price])</code> <span class="math inline">\(\rightarrow\)</span> rounds price down</li>
 </ul>
-<p>Use case with dataset:</p>
-<ul>
-<li>Round order totals:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ROUND</span>([<span class="kw">Order</span> Total], <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Convert negative discounts to positive values:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ABS</span>([Discount])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="string-functions" class="level3">
 <h3 class="anchored" data-anchor-id="string-functions">String Functions</h3>
 <p>String functions manipulate text fields.</p>
-<p>Examples:</p>
+<p><strong>Examples:</strong></p>
 <ul>
-<li><code>UPPER([Customer Name])</code> → converts names to uppercase</li>
-<li><code>LOWER([City])</code> → converts city names to lowercase</li>
-<li><code>LEFT([Product ID], 3)</code> → extracts first 3 characters of product ID</li>
-<li><code>TRIM([Customer Name])</code> → removes extra spaces</li>
+<li><code>UPPER([Customer Name])</code> <span class="math inline">\(\rightarrow\)</span> converts names to uppercase</li>
+<li><code>LOWER([City])</code> <span class="math inline">\(\rightarrow\)</span> converts city names to lowercase</li>
+<li><code>LEFT([Product ID], 3)</code> <span class="math inline">\(\rightarrow\)</span> extracts first 3 characters of product ID</li>
+<li><code>TRIM([Customer Name])</code> <span class="math inline">\(\rightarrow\)</span> removes extra spaces</li>
 </ul>
-<p>Use case with dataset:</p>
-<ul>
-<li>Standardize city names:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">UPPER</span>([City])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Extract product category prefix:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span>([Product <span class="kw">ID</span>], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="logical-functions" class="level3">
 <h3 class="anchored" data-anchor-id="logical-functions">Logical Functions</h3>
 <p>Logical functions apply conditional logic to create categories or flags.</p>
-<p>Use case with dataset: - Segment orders based on value:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Order</span> Total] <span class="op">&gt;=</span> <span class="dv">500</span> <span class="cf">THEN</span> <span class="ot">"Large Order"</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="ot">"Small Order"</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Logical functions include:</strong></p>
 <ul>
-<li>Categorize products:</li>
+<li><code>IF</code> statements</li>
+<li><code>CASE</code> statements</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [<span class="kw">Category</span>]</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="ot">"Beauty"</span> <span class="cf">THEN</span> <span class="ot">"Personal Care"</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="ot">"Clothing"</span> <span class="cf">THEN</span> <span class="ot">"Apparel"</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="ot">"Other"</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Use case with dataset:</strong></p>
+<section id="segment-orders-based-on-value" class="level4">
+<h4 class="anchored" data-anchor-id="segment-orders-based-on-value">Segment orders based on value</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Order</span> Total] <span class="op">&gt;=</span> <span class="dv">500</span> <span class="cf">THEN</span> <span class="ot">"Large Order"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="ot">"Small Order"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="categorize-products" class="level4">
+<h4 class="anchored" data-anchor-id="categorize-products">Categorize products</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [<span class="kw">Category</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="ot">"Beauty"</span> <span class="cf">THEN</span> <span class="ot">"Personal Care"</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="ot">"Clothing"</span> <span class="cf">THEN</span> <span class="ot">"Apparel"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="ot">"Other"</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
 </section>
 <section id="type-conversion-functions" class="level3">
 <h3 class="anchored" data-anchor-id="type-conversion-functions">Type Conversion Functions</h3>
-<p>Type conversion functions change data types between string, number, and date.</p>
-<p>Examples:</p>
+<p>Type conversion functions change data types between <code>string</code>, <code>number</code>, and <code>date</code>.</p>
 <ul>
-<li><code>STR([Customer ID])</code> → convert numeric ID to text</li>
-<li><code>INT([Unit Price])</code> → convert price to integer</li>
-<li><code>DATE([Order Date])</code> → ensure field is treated as date</li>
-<li><code>FLOAT([Discount])</code> → convert value to decimal</li>
+<li><code>STR([Customer ID])</code> <span class="math inline">\(\rightarrow\)</span> convert numeric ID to text</li>
+<li><code>INT([Unit Price])</code> <span class="math inline">\(\rightarrow\)</span> convert price to integer</li>
+<li><code>DATE([Order Date])</code> <span class="math inline">\(\rightarrow\)</span> ensure field is treated as date</li>
+<li><code>FLOAT([Discount])</code> <span class="math inline">\(\rightarrow\)</span> convert value to decimal</li>
 </ul>
-<p>Use case with dataset:</p>
-<ul>
-<li>Convert Customer ID to string for concatenation:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>STR([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Convert price to integer:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="dt">INT</span>([Unit Price])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
 <p>Date functions and spatial functions will be explored in the next session.</p>
-<hr>
+</blockquote>
 </section>
 </section>
 <section id="parameters" class="level2">
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<p>A parameter is a workbook variable that can store a value chosen by the user.</p>
-<p>Parameters can be used in:</p>
-<ul>
-<li>Calculations</li>
-<li>Filters</li>
-<li>Reference lines</li>
-<li>Axis logic</li>
-</ul>
-<section id="key-characteristics" class="level3">
-<h3 class="anchored" data-anchor-id="key-characteristics">Key Characteristics</h3>
-<p>Parameters:</p>
+<p><strong>A parameter</strong> is a workbook variable that can store a value chosen by the user. Thanks to the parameter, users can interact with the view and control calculations, filters, reference lines, and more.</p>
+<p>Basically parameters are <strong>dynamic values</strong> that can be used to make your dashboards interactive and customizable for end-users.</p>
+<p><strong>Key Characteristics:</strong></p>
 <ul>
 <li>Do not filter data automatically</li>
 <li>Must be referenced in logic</li>
@@ -2790,10 +2816,7 @@ C --&gt; D[Displayed Result]
 </div>
 </div>
 </div>
-<hr>
-</section>
-<section id="to-use-a-parameter" class="level3">
-<h3 class="anchored" data-anchor-id="to-use-a-parameter">To Use a Parameter</h3>
+<p><strong>In order to use a parameter, we need</strong></p>
 <ol type="1">
 <li>Create the parameter<br>
 </li>
@@ -2801,14 +2824,17 @@ C --&gt; D[Displayed Result]
 </li>
 <li>Show the parameter control to the user</li>
 </ol>
-<section id="step-by-step" class="level4">
-<h4 class="anchored" data-anchor-id="step-by-step">Step-by-step</h4>
-<ul>
+<section id="steps-to-create-a-parameter" class="level3">
+<h3 class="anchored" data-anchor-id="steps-to-create-a-parameter">Steps to create a parameter</h3>
+<div class="columns">
+<div class="column">
+<p><br><br><br><br><br><br></p>
+<ol type="1">
 <li>In the Data pane, click the dropdown menu<br>
 </li>
 <li>Select <strong>Create Parameter…</strong><br>
 </li>
-<li>Configure:
+<li><strong>Configure:</strong>
 <ul>
 <li>Name<br>
 </li>
@@ -2820,56 +2846,65 @@ C --&gt; D[Displayed Result]
 <li>Click <strong>OK</strong><br>
 </li>
 <li>Right-click the parameter → <strong>Show Parameter</strong></li>
-</ul>
+</ol>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_create_parameter.png" class="img-fluid figure-img"></p>
 <figcaption>Create Parameter</figcaption>
 </figure>
 </div>
-</section>
+</div>
+</div>
 </section>
 <section id="metric-switching" class="level3">
 <h3 class="anchored" data-anchor-id="metric-switching">Metric Switching</h3>
-<p>A parameter can let users switch between metrics.</p>
-<p>Example parameter-driven calculation:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Metric]</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="fu">SUM</span>([Revenue])</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="dv">2</span> <span class="cf">THEN</span> <span class="fu">SUM</span>([Quantity])</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="fu">SUM</span>([Profit])</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="steps" class="level4">
-<h4 class="anchored" data-anchor-id="steps">Steps</h4>
+<p>A parameter can let users <strong>switch</strong> between metrics.</p>
+<p><strong>Example <code>parameter-driven</code> calculation:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Metric]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="fu">SUM</span>([Revenue])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="dv">2</span> <span class="cf">THEN</span> <span class="fu">SUM</span>([Quantity])</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="fu">SUM</span>([Profit])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="columns">
+<div class="column">
+<p><strong>Create parameter:</strong></p>
 <ul>
-<li>Create parameter:
+<li><strong>Name:</strong> <code>Metric</code></li>
+<li><strong>Data type:</strong> <code>Integer</code></li>
+<li><strong>Values:</strong>
 <ul>
-<li>Name: Metric</li>
-<li>Data type: Integer</li>
-<li>Values:
-<ul>
-<li>1 → Revenue<br>
+<li><code>1</code> → <code>Revenue</code><br>
 </li>
-<li>2 → Quantity</li>
+<li><code>2</code> → <code>Quantity</code></li>
 </ul></li>
-</ul></li>
-<li>Create calculated field:</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Metric]</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="fu">SUM</span>([Revenue])</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="fu">SUM</span>([Quantity])</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Drag the calculated field into the view<br>
-</li>
-<li>Right-click parameter → Show Parameter<br>
-</li>
-<li>Use dropdown to switch metrics</li>
-</ul>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_create_parameter_properties.png" class="img-fluid figure-img"></p>
 <figcaption>Parameter Properties</figcaption>
 </figure>
+</div>
+</div>
+</div>
+<div class="columns">
+<div class="column">
+<p><strong>Create calculated field:</strong> <code>p. Metric</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Metric]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="dv">1</span> <span class="cf">THEN</span> <span class="fu">SUM</span>([Revenue])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> <span class="fu">SUM</span>([Quantity])</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column">
+<p><strong>Applying the Parameter:</strong></p>
+<ol type="1">
+<li>Drag the calculated field into the view<br>
+</li>
+<li>Right-click parameter → Show Parameter<br>
+</li>
+<li>Use dropdown to switch metrics</li>
+</ol>
+</div>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -2877,13 +2912,13 @@ C --&gt; D[Displayed Result]
 <figcaption>Metric Swapping Calculation</figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -2891,43 +2926,47 @@ Note
 </div>
 </div>
 </section>
-</section>
 <section id="dimension-switching" class="level3">
 <h3 class="anchored" data-anchor-id="dimension-switching">Dimension Switching</h3>
-<p>A parameter can switch dimensions in the view.</p>
-<p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Location <span class="kw">Category</span>]</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'State'</span> <span class="cf">THEN</span> [State]</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> [City]</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="steps-1" class="level4">
-<h4 class="anchored" data-anchor-id="steps-1">Steps</h4>
+<p><strong>A parameter can switch dimensions in the view.</strong></p>
+<div class="columns">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Location <span class="kw">Category</span>]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'State'</span> <span class="cf">THEN</span> [State]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> [City]</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Create parameter:</strong></p>
 <ul>
-<li>Create parameter:
-<ul>
-<li>Name: Location Category</li>
-<li>Data type: String<br>
-</li>
-<li>Values: State, City</li>
-</ul></li>
-<li>Create calculated field:</li>
+<li><strong>Name:</strong> <code>Location Category</code></li>
+<li><strong>Data type:</strong> <code>String</code></li>
+<li><strong>Values:</strong> <code>State</code>, <code>City</code></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Location <span class="kw">Category</span>]</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'State'</span> <span class="cf">THEN</span> [State]</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> [City]</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Drag calculated field to Rows or Columns<br>
-</li>
-<li>Show parameter<br>
-</li>
-<li>Switch between State and City</li>
-</ul>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_dimension_swapping.png" class="img-fluid figure-img"></p>
 <figcaption>Dimension Swapping</figcaption>
 </figure>
+</div>
+</div>
+</div>
+<div class="columns">
+<div class="column">
+<p><strong>Create calculated field:</strong> <code>p. Location Category</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [Location <span class="kw">Category</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'State'</span> <span class="cf">THEN</span> [State]</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> [City]</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column">
+<p><strong>Applying the Parameter:</strong></p>
+<ol type="1">
+<li>Drag calculated field to Rows or Columns<br>
+</li>
+<li>Show parameter<br>
+</li>
+<li>Switch between State and City</li>
+</ol>
+</div>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -2936,69 +2975,82 @@ Note
 </figure>
 </div>
 </section>
-</section>
 <section id="boolean-parameter-logic" class="level3">
 <h3 class="anchored" data-anchor-id="boolean-parameter-logic">Boolean Parameter Logic</h3>
-<p>A boolean-style parameter can toggle analysis behavior.</p>
-<p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Is</span> Florida] <span class="cf">THEN</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    [State] <span class="op">=</span> <span class="st">'FL'</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    [State] <span class="op">&lt;&gt;</span> <span class="st">'FL'</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="steps-2" class="level4">
-<h4 class="anchored" data-anchor-id="steps-2">Steps</h4>
+<p>A <code>boolean-style</code> parameter can toggle analysis behavior.</p>
+<div class="columns">
+<div class="column">
+<p><br><br><br><br><br></p>
+<p><strong>Create parameter:</strong></p>
 <ul>
-<li>Create parameter:
-<ul>
-<li>Name: Is Florida</li>
-<li>Data type: Boolean</li>
-</ul></li>
-<li>Create calculated field:</li>
+<li><strong>Name:</strong> <code>Is Florida</code></li>
+<li><strong>Data type:</strong> <code>Boolean</code></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Is</span> Florida] <span class="cf">THEN</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    [State] <span class="op">=</span> <span class="st">'FL'</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    [State] <span class="op">&lt;&gt;</span> <span class="st">'FL'</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Drag calculation to Filters<br>
-</li>
-<li>Select True<br>
-</li>
-<li>Show parameter to toggle</li>
-</ul>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_boolean_parameter.png" class="img-fluid figure-img"></p>
 <figcaption>Boolean Parameter</figcaption>
 </figure>
 </div>
-<div class="quarto-figure quarto-figure-center">
+</div>
+</div>
+<hr>
+<div class="columns">
+<div class="column">
+<p><strong>Create calculated field:</strong> <code>p. Is Florida</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Is</span> Florida] <span class="cf">THEN</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    [State] <span class="op">=</span> <span class="st">'FL'</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    [State] <span class="op">&lt;&gt;</span> <span class="st">'FL'</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column">
+<p><br><br></p>
+<ol type="1">
+<li>Drag calculation to Filters<br>
+</li>
+<li>Select True<br>
+</li>
+<li>Show parameter to toggle</li>
+</ol>
+</div><div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_boolean_parameter_calc.png" class="img-fluid figure-img"></p>
 <figcaption>Boolean Parameter Calculation</figcaption>
 </figure>
 </div>
-</section>
+</div>
 </section>
 <section id="top-n-with-parameter" class="level3">
-<h3 class="anchored" data-anchor-id="top-n-with-parameter">Top N with Parameter</h3>
-<p>A numeric parameter can drive Top N analysis.</p>
-<p>Common workflow:</p>
+<h3 class="anchored" data-anchor-id="top-n-with-parameter">Top <code>N</code> with Parameter</h3>
+<p>A numeric parameter can drive <code>Top N</code> analysis.</p>
+<p><strong>Common workflow:</strong></p>
 <ul>
-<li>Create parameter Top Values</li>
-<li>Use it in a Top tab filter</li>
+<li>Create parameter <code>Top Values</code></li>
+<li>Use it in a Top tab <strong>filter</strong></li>
 <li>Let the user choose how many values to show</li>
 </ul>
-<section id="steps-3" class="level4">
-<h4 class="anchored" data-anchor-id="steps-3">Steps</h4>
+<div class="columns">
+<div class="column">
+<p><strong>Create parameter:</strong> <br><br><br><br></p>
 <ul>
-<li>Create parameter:
-<ul>
-<li>Name: Top values</li>
-<li>Data type: Integer</li>
-</ul></li>
+<li><strong>Name:</strong> <code>Top values</code></li>
+<li><strong>Data type:</strong> <code>Integer</code></li>
+</ul>
+</div><div class="column">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../img/tableau/02/w2_create_parameter_filter.png" class="img-fluid figure-img"></p>
+<figcaption>Parameter Filter</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="columns">
+<div class="column">
+<p><br><br></p>
+<p><strong>Apply the parameter in a filter:</strong></p>
+<ol type="1">
 <li>Drag dimension (Customer Name) to Filters<br>
 </li>
 <li>Go to Top tab<br>
@@ -3007,62 +3059,65 @@ Note
 <ul>
 <li>By field<br>
 </li>
-<li>Top [Top values] by SUM(Revenue)</li>
+<li>Top [Top values] by SUM(Revenue)<br>
+</li>
 </ul></li>
 <li>Show parameter</li>
-</ul>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../img/tableau/02/w2_create_parameter_filter.png" class="img-fluid figure-img"></p>
-<figcaption>Parameter Filter</figcaption>
-</figure>
-</div>
+</ol>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_top_n_param_filter.png" class="img-fluid figure-img"></p>
 <figcaption>Top N Filter</figcaption>
 </figure>
 </div>
-</section>
+</div>
+</div>
 </section>
 <section id="date-parameter-logic" class="level3">
 <h3 class="anchored" data-anchor-id="date-parameter-logic">Date Parameter Logic</h3>
 <p>Parameters can also support date-based filtering.</p>
-<p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>[<span class="kw">Order</span> <span class="dt">Date</span>] <span class="op">&lt;=</span> [<span class="kw">Select</span> <span class="kw">Return</span> <span class="dt">Date</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="steps-4" class="level4">
-<h4 class="anchored" data-anchor-id="steps-4">Steps</h4>
+<!-- todo: add context -->
+<div class="columns">
+<div class="column">
+<p><strong>Create parameter:</strong></p>
 <ul>
-<li>Create parameter:
-<ul>
-<li>Name: Select Return Date</li>
-<li>Data type: Date<br>
+<li><strong>Name:</strong> <code>Select Return Date</code></li>
+<li><strong>Data type:</strong> <code>Date</code><br>
 </li>
-<li>Add values from Return Date</li>
-</ul></li>
-<li>Create calculated field:</li>
+<li><strong>Add values from <code>Return Date</code></strong></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>[<span class="kw">Order</span> <span class="dt">Date</span>] <span class="op">&lt;=</span> [<span class="kw">Select</span> <span class="kw">Return</span> <span class="dt">Date</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Drag calculation to Filters<br>
-</li>
-<li>Keep True<br>
-</li>
-<li>Show parameter</li>
-</ul>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_date_filtering.png" class="img-fluid figure-img"></p>
 <figcaption>Date Filtering</figcaption>
 </figure>
 </div>
+</div>
+</div>
+<hr>
+<div class="columns">
+<div class="column">
+<p><strong>Create calculated field:</strong></p>
+<ol type="1">
+<li><strong>name:</strong> <code>p. Select Return Date</code></li>
+<li><code>[Order Date] &lt;= [Select Return Date]</code></li>
+<li>Drag calculation to Filters<br>
+</li>
+<li>Keep True<br>
+</li>
+<li>Show parameter</li>
+</ol>
+</div><div class="column">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/02/w2_date_filtering_calculation.png" class="img-fluid figure-img"></p>
 <figcaption>Date Filtering Calculation</figcaption>
 </figure>
 </div>
-<hr>
+</div>
+</div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -3073,39 +3128,71 @@ Tip
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>You can set the default value of the date parameter to a dynamic value such as:</p>
+<p><strong>You can set the default value of the date parameter to a dynamic value such as:</strong></p>
 <ul>
-<li>TODAY()<br>
-</li>
-<li>MAX([ORDER DATE])</li>
+<li><code>TODAY()</code></li>
+<li><code>MAX([ORDER DATE])</code></li>
 </ul>
+<blockquote class="blockquote">
 <p>Set <strong>When workbook opens → MAX(Order Date)</strong> to always show the latest data.</p>
+</blockquote>
 </div>
 </div>
-<hr>
+<!-- TODO: screenshot showing the recent date -->
+</section>
+<section id="naming-conventions" class="level3">
+<h3 class="anchored" data-anchor-id="naming-conventions">Naming Conventions</h3>
+<p>As you have seen in the examples, we recommend using a <strong>clear naming convention</strong> for calculated fields that reference parameters. It is best practice to include the parameter name in the calculated field name to make it clear that the calculation is driven by that parameter. This helps with organization and makes it easier for other users to understand the purpose of the calculated field.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Recommended convention:</strong> <code>p. &lt;Parameter Name&gt;</code></p>
+</div>
+</div>
 </section>
 </section>
-</section>
-<section id="filters-parameters-and-calculated-fields" class="level2">
-<h2 class="anchored" data-anchor-id="filters-parameters-and-calculated-fields">Filters, Parameters, and Calculated Fields</h2>
+<section id="filters-vs-parameters-vs-calculated-fields" class="level2">
+<h2 class="anchored" data-anchor-id="filters-vs-parameters-vs-calculated-fields"><code>Filters</code> vs <code>Parameters</code> vs <code>Calculated Fields</code></h2>
 <p>Understanding how filters and parameters affect calculations is essential for correct results.</p>
 <section id="dimension-filters-1" class="level3">
 <h3 class="anchored" data-anchor-id="dimension-filters-1">Dimension Filters</h3>
 <p>Dimension filters are applied after <code>FIXED</code> LOD expressions but before table calculations.</p>
-<p>Implications:</p>
+<p><strong>Thus:</strong></p>
 <ul>
 <li>They do not affect <code>FIXED</code> by default</li>
 <li>They do affect <code>INCLUDE</code> and <code>EXCLUDE</code></li>
 <li>They affect table calculations because they change the visible data</li>
 </ul>
-<p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">SUM</span>([Sales]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">SUM</span>([Sales]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
 <p>If you add a regular dimension filter on <code>[Region]</code>, the <code>FIXED</code> result does not automatically change.</p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Try it out!">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Try it out!
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Try adding <code>[Region]</code> as a filter and see how the <code>FIXED</code> calculation behaves. It will still compute the total sales per customer across all regions, regardless of the region filter applied.</p>
+</div>
+</div>
 </section>
 <section id="measure-filters-1" class="level3">
 <h3 class="anchored" data-anchor-id="measure-filters-1">Measure Filters</h3>
-<p>Measure filters are applied after aggregation.</p>
-<p>They affect:</p>
+<p>Measure filters are applied <strong>after</strong> aggregation.</p>
+<p><strong>They affect:</strong></p>
 <ul>
 <li>Aggregated results</li>
 <li>Visible marks</li>
@@ -3116,14 +3203,14 @@ Tip
 <section id="context-filters-1" class="level3">
 <h3 class="anchored" data-anchor-id="context-filters-1">Context Filters</h3>
 <p>Context filters change the evaluation path by creating a subset earlier in the pipeline.</p>
-<p>Implications:</p>
+<p><strong>Thus:</strong></p>
 <ul>
 <li>Context filters do affect <code>FIXED</code></li>
 <li>They can improve performance in some cases</li>
 <li>They support dependent filters</li>
 </ul>
-<p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">SUM</span>([Sales]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">SUM</span>([Sales]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>If <code>[Region]</code> is placed in context, the calculation is now evaluated only for the selected region.</p>
 </section>
 <section id="table-calculations" class="level3">
@@ -3166,104 +3253,74 @@ Note
 <p>Parameters change logic only when they are explicitly referenced. Filters change the actual subset of data being evaluated.</p>
 </div>
 </div>
-<hr>
-</section>
-</section>
-<section id="example-comparing-sql-logic-with-tableau-logic" class="level2">
-<h2 class="anchored" data-anchor-id="example-comparing-sql-logic-with-tableau-logic">Example: Comparing SQL Logic with Tableau Logic</h2>
-<p>Some logic can be prepared in SQL before Tableau, while other logic can be built directly inside Tableau.</p>
-<section id="sql-example-precompute-revenue" class="level3">
-<h3 class="anchored" data-anchor-id="sql-example-precompute-revenue">SQL Example: Precompute Revenue</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    order_id,</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    quantity,</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    unit_price,</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    quantity <span class="op">*</span> unit_price <span class="kw">AS</span> revenue</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> dbo.order_details;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="tableau-example-same-logic-in-a-calculated-field" class="level3">
-<h3 class="anchored" data-anchor-id="tableau-example-same-logic-in-a-calculated-field">Tableau Example: Same Logic in a Calculated Field</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>[Quantity] <span class="op">*</span> [Unit Price]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="when-to-prefer-sql" class="level3">
-<h3 class="anchored" data-anchor-id="when-to-prefer-sql">When to Prefer SQL</h3>
-<p>Prefer SQL when:</p>
-<ul>
-<li>Logic should be standardized</li>
-<li>Data should be reshaped before Tableau</li>
-<li>Performance depends on pre-aggregation</li>
-</ul>
-</section>
-<section id="when-to-prefer-tableau" class="level3">
-<h3 class="anchored" data-anchor-id="when-to-prefer-tableau">When to Prefer Tableau</h3>
-<p>Prefer Tableau when:</p>
-<ul>
-<li>Logic is view-specific</li>
-<li>Analysts need flexibility</li>
-<li>Interactivity or parameterization is required</li>
-</ul>
 </section>
 </section>
 <section id="homework" class="level2">
 <h2 class="anchored" data-anchor-id="homework">Homework</h2>
 <p>Using the <strong>retail dataset</strong>, complete the following:</p>
 <ol type="1">
-<li><p><strong>Model the data</strong> using relationships:</p>
+<li><strong>Model the data</strong> using relationships:
 <ul>
 <li>Orders ↔︎ Customers</li>
 <li>Orders ↔︎ Order Details</li>
 <li>Order Details ↔︎ Products</li>
 </ul></li>
-<li><p><strong>Create three calculated fields:</strong></p>
+<li><strong>Create three calculated fields:</strong>
 <ul>
 <li>Discount Impact: <code>[Unit Price] * [Discount]</code></li>
 <li>High Value Order: <code>IF [Order Total] &gt;= 1000 THEN "High" ELSE "Standard" END</code></li>
 <li>Full Name: <code>[First Name] + " " + [Last Name]</code></li>
 </ul></li>
-<li><p><strong>Create one LOD expression:</strong></p>
+<li><strong>Create one LOD expression:</strong>
 <ul>
 <li>Average Order Value per City: <code>{ FIXED [City] : AVG([Order Total]) }</code></li>
 </ul></li>
-<li><p><strong>Add three filters:</strong></p>
+<li><strong>Add three filters:</strong>
 <ul>
 <li>Product Category filter (Dimension filter)</li>
 <li>Order Date filter (Relative date → last 2 years)</li>
 <li>City as a Context filter</li>
 </ul></li>
-<li><p><strong>Create two parameters:</strong></p>
+<li><strong>Create two parameters:</strong>
 <ul>
 <li>Dimension switch (State / City)</li>
 <li>Top N Products by SUM(Quantity)</li>
 </ul></li>
-<li><p><strong>Create four charts:</strong></p>
+<li><strong>Create four charts:</strong>
 <ul>
 <li>Area chart → Orders over time by Category</li>
 <li>Bar chart → Top products by Quantity</li>
 <li>Highlight table → City vs Category by Order Total</li>
 <li>Scatter plot → Discount vs Order Total</li>
 </ul></li>
-<li><p><strong>Build a dashboard</strong> — combine all charts with parameter controls and filters</p></li>
-<li><p><strong>Publish</strong> to Tableau Public and submit your public link</p></li>
+<li><strong>Build a dashboard:</strong> combine all charts with parameter controls and filters</li>
+<li><strong>Publish</strong> to Tableau Public and submit your public link</li>
 </ol>
-<hr>
 <blockquote class="blockquote">
 <p><strong>Deliverable:</strong> A published Tableau Public dashboard link.</p>
 </blockquote>
 <hr>
-<p><strong>Articles</strong></p>
+</section>
+<section id="resources" class="level2">
+<h2 class="anchored" data-anchor-id="resources">Resources</h2>
+<section id="articles" class="level3">
+<h3 class="anchored" data-anchor-id="articles">Articles</h3>
 <ol type="1">
 <li><a href="https://help.tableau.com/current/pro/desktop/en-us/calculations_calculatedfields_lod.htm">Level of Detail Expressions — Tableau Official Docs</a></li>
 <li><a href="https://www.tableau.com/blog/LOD-expressions">Top 15 LOD Expressions with Practical Examples — Tableau Blog</a></li>
 <li><a href="https://www.datacamp.com/tutorial/lod-expressions-in-tableau-a-tutorial-with-examples">LOD Expressions in Tableau — DataCamp</a></li>
 <li><a href="https://www.datacamp.com/tutorial/tableau-parameters-an-introductory-guide-and-how-to-use-them">Parameters in Tableau — DataCamp</a></li>
 </ol>
-<p><strong>Videos</strong></p>
+</section>
+<section id="videos" class="level3">
+<h3 class="anchored" data-anchor-id="videos">Videos</h3>
 <ol type="1">
 <li><a href="https://www.youtube.com/watch?v=j6j_Lxx3ndM">Tableau LOD Expressions — Top 15 Practical Examples</a></li>
 <li><a href="https://www.youtube.com/watch?v=0Uar_D57QhU">Tableau Parameters — Complete Introduction with 10 Use Cases</a></li>
 </ol>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
