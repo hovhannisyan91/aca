@@ -88,7 +88,7 @@ You can download the dataset using Python with the following code:
 
 
 ```python
-URL = https://raw.githubusercontent.com/hovhannisyan91/tableau-analytics-portfolio/refs/heads/main/session2/data
+URL = "https://raw.githubusercontent.com/hovhannisyan91/tableau-analytics-portfolio/refs/heads/main/session2/data"
 
 import pandas as pd
 tables = [
@@ -117,7 +117,7 @@ order files.
 
 ```python
 
-URL = https://raw.githubusercontent.com/hovhannisyan91/tableau-analytics-portfolio/refs/heads/main/session2/data/quarters
+URL = "https://raw.githubusercontent.com/hovhannisyan91/tableau-analytics-portfolio/refs/heads/main/session2/data/quarters"
 
 import pandas as pd
 tables = [
@@ -1118,7 +1118,7 @@ They are one of Tableau’s most important analytical features.
 
 ### Row-Level Calculations
 
-Row-level calculations operate on each individual record before aggregation.
+`Row-level `calculations operate on each individual record before aggregation.
 
 **Use row-level calculations when you need to:**
 
@@ -1190,15 +1190,24 @@ SUM([Sales]) / COUNT([ORDER ID])
 ```
 :::
 
-### Level of Detail (LOD) Expressions
+### `LOD` Expressions
 
-LOD expressions explicitly control the granularity of a calculation independently of the view.
+Level of Detail `LOD` expressions explicitly control the granularity of a calculation independently of the view.
 
 **There are three main types:**
 
 - `FIXED`
 - `INCLUDE`
 - `EXCLUDE`
+
+
+
+::: {.callout-important}
+LOD expressions are essential for building consistent KPIs, customer-level metrics, cohort logic, and benchmark calculations.
+
+It is very Similar to `WINDOW` functions in `SQL` but with more flexibility and control over the level of aggregation.
+
+:::
 
 ```{mermaid}
 flowchart TD
@@ -1209,17 +1218,17 @@ C --> E[INCLUDE]
 C --> F[EXCLUDE]
 ```
 
-### FIXED
+#### FIXED
 
 `FIXED` calculates at a specified level regardless of view dimensions.
 
-**Example:**  Customer Lifetime Value
+**Example 1:**  `Customer Lifetime Value`
 
 ```sql
 { FIXED [Customer ID] : SUM([Order Total]) }
 ```
 
-Use `FIXED` when:
+**Use `FIXED` when:**
 
 - A metric must remain stable across sheets
 - A KPI should be defined at a business entity level
@@ -1227,7 +1236,7 @@ Use `FIXED` when:
 
 ![Customer Lifetime Value]({{< meta image_path >}}/w2_customer_lifetime_value.png)
 
-**Example:** Minimum Order Date per Customer
+**Example 2:** `Minimum Order Date per Customer` aka `Starting Cohort`
 
 ```sql
 { FIXED [Customer ID] : MIN([Order Date]) }
@@ -1237,24 +1246,42 @@ This calculation returns the first purchase date for each customer.
 
 ![Minimum Order Date per Customer]({{< meta image_path >}}/w2_customer_min_order_date.png)
 
-### INCLUDE
+
+
+::: {.callout-tip title = "SQL Comparison"}
+
+```sql
+-- LOD equivalent in SQL
+SELECT
+  CustomerID,
+  SUM(OrderTotal) AS LifetimeValue,
+  MIN(OrderDate) AS FirstPurchaseDate
+FROM Orders
+GROUP BY CustomerID 
+```
+
+
+:::
+
+
+#### INCLUDE
 
 `INCLUDE` adds detail to the calculation level even if that dimension is not in the view.
 
-Example:
+**Example:**
 
 ```sql
 { INCLUDE [Region] : AVG([Order Total]) }
 ```
 
-Use `INCLUDE` when:
+**Use `INCLUDE` when:**
 
 - Extra detail should influence the result
 - The view is less granular than the analytical logic
 
 ![Average Sales by Region-Year]({{< meta image_path >}}/w2_average_sales_include.png)
 
-### EXCLUDE
+#### EXCLUDE
 
 `EXCLUDE` removes a dimension from the calculation level even if it appears in the view.
 
@@ -1264,7 +1291,7 @@ Example:
 { EXCLUDE [Region] : AVG([Order Total]) }
 ```
 
-Use `EXCLUDE` when:
+**Use `EXCLUDE` when:**
 
 - A dimension is needed visually
 - But should not affect the aggregation logic
@@ -1275,32 +1302,29 @@ Even if **Region** appears in the view, this calculation computes the average as
 
 ### Comparison Example
 
-- `AVG([Order Total])`  
-  → Calculates average sales **per Region and Year**
-
-- `{ INCLUDE [Region] : AVG([Order Total]) }`  
-  → Calculates average sales **per Region**, then aggregates to Year
-
-- `{ EXCLUDE [Region] : AVG([Order Total]) }`  
-  → Calculates average sales **per Year ignoring Region**
-
-- `{ FIXED [Region] : AVG([Order Total]) }`  
-  → Calculates average sales **per Region regardless of Year**
+- `AVG([Order Total])` $\rightarrow$ Calculates average sales **per Region and Year**
+- `{ INCLUDE [Region] : AVG([Order Total]) }` $\rightarrow$ Calculates average sales **per Region**, then aggregates to Year
+- `{ EXCLUDE [Region] : AVG([Order Total]) }` $\rightarrow$ Calculates average sales **per Year ignoring Region**
+- `{ FIXED [Region] : AVG([Order Total]) }` $\rightarrow$ Calculates average sales **per Region regardless of Year**
 
 ![Differences of LOD expressions]({{< meta image_path >}}/w2_LOD_differences.png)
 
 ::: {.callout-important}
 
-LOD expressions are essential for building consistent KPIs, customer-level metrics, cohort logic, and benchmark calculations.
+**`LOD` expressions are essential for building consistent:** 
+
+- KPIs 
+- customer-level metrics
+- cohort logic
+- benchmark calculations
 
 :::
 
-
 ## Tableau Functions
 
-Tableau provides many built-in functions that can be used in calculated fields.
+Tableau provides many built-in functions that can be used in `calculated fields`.
 
-Main categories include:
+**Main categories include:**
 
 - Aggregate functions
 - Number functions
@@ -1308,88 +1332,66 @@ Main categories include:
 - Logical functions
 - Type conversion functions
 
+>Similar to `SQL functions` and `Python functions`, but with Tableau-specific behavior and syntax.
+
 ### Aggregate Functions
 
 Aggregate functions perform calculations on multiple rows and return a single value.
 
-Examples:
+**Examples:**
 
-- `SUM([Order Total])` → total revenue from orders dataset
-- `AVG([Unit Price])` → average product price from products.csv
-- `COUNT([Order ID])` → total number of orders
-- `COUNTD([Customer ID])` → number of unique customers
+- `SUM([Order Total])` $\rightarrow$ total revenue from orders dataset
+- `AVG([Unit Price])` $\rightarrow$ average product price from products.csv
+- `COUNT([Order ID])` $\rightarrow$ total number of orders
+- `COUNTD([Customer ID])` $\rightarrow$ number of unique customers
 
-Use case with dataset:
-
-- Calculate total sales:
-```sql
-SUM([Order Total])
-```
-
-- Count unique customers placing orders:
-```sql
-COUNTD([Customer ID])
-```
 
 ### Number Functions
 
 Number functions perform mathematical operations on numeric fields.
 
-Examples:
+**Examples:**
 
-- `ROUND([Order Total], 2)` → rounds order value to 2 decimal places
-- `ABS([Discount])` → removes negative sign from discount values
-- `CEILING([Unit Price])` → rounds price up to nearest integer
-- `FLOOR([Unit Price])` → rounds price down
+- `ROUND([Order Total], 2)` $\rightarrow$ rounds order value to 2 decimal places
+- `ABS([Discount])` $\rightarrow$ removes negative sign from discount values
+- `CEILING([Unit Price])` $\rightarrow$ rounds price up to nearest integer
+- `FLOOR([Unit Price])` $\rightarrow$ rounds price down
 
-Use case with dataset:
-
-- Round order totals:
-```sql
-ROUND([Order Total], 0)
-```
-
-- Convert negative discounts to positive values:
-```sql
-ABS([Discount])
-```
 
 ### String Functions
 
 String functions manipulate text fields.
 
-Examples:
+**Examples:**
 
-- `UPPER([Customer Name])` → converts names to uppercase
-- `LOWER([City])` → converts city names to lowercase
-- `LEFT([Product ID], 3)` → extracts first 3 characters of product ID
-- `TRIM([Customer Name])` → removes extra spaces
+- `UPPER([Customer Name])` $\rightarrow$ converts names to uppercase
+- `LOWER([City])` $\rightarrow$ converts city names to lowercase
+- `LEFT([Product ID], 3)` $\rightarrow$ extracts first 3 characters of product ID
+- `TRIM([Customer Name])` $\rightarrow$ removes extra spaces
 
-Use case with dataset:
 
-- Standardize city names:
-```sql
-UPPER([City])
-```
-
-- Extract product category prefix:
-```sql
-LEFT([Product ID], 3)
-```
 
 ### Logical Functions
 
 Logical functions apply conditional logic to create categories or flags.
 
-Use case with dataset:
-- Segment orders based on value:
+**Logical functions include:**
+
+- `IF` statements
+- `CASE` statements
+
+**Use case with dataset:**
+
+#### Segment orders based on value
+
 ```sql
 IF [Order Total] >= 500 THEN "Large Order"
 ELSE "Small Order"
 END
 ```
 
-- Categorize products:
+#### Categorize products
+
 ```sql
 CASE [Category]
 WHEN "Beauty" THEN "Personal Care"
@@ -1400,46 +1402,28 @@ END
 
 ### Type Conversion Functions
 
-Type conversion functions change data types between string, number, and date.
-
-Examples:
-
-- `STR([Customer ID])` → convert numeric ID to text
-- `INT([Unit Price])` → convert price to integer
-- `DATE([Order Date])` → ensure field is treated as date
-- `FLOAT([Discount])` → convert value to decimal
-
-Use case with dataset:
-
-- Convert Customer ID to string for concatenation:
-```sql
-STR([Customer ID])
-```
-
-- Convert price to integer:
-```sql
-INT([Unit Price])
-```
+Type conversion functions change data types between `string`, `number`, and `date`.
 
 
-Date functions and spatial functions will be explored in the next session.
 
----
+- `STR([Customer ID])` $\rightarrow$ convert numeric ID to text
+- `INT([Unit Price])` $\rightarrow$ convert price to integer
+- `DATE([Order Date])` $\rightarrow$ ensure field is treated as date
+- `FLOAT([Discount])` $\rightarrow$ convert value to decimal
+
+
+>Date functions and spatial functions will be explored in the next session.
+
+
 
 ## Parameters
 
-A parameter is a workbook variable that can store a value chosen by the user.
+**A parameter** is a workbook variable that can store a value chosen by the user. Thanks to the parameter, users can interact with the view and control calculations, filters, reference lines, and more.
 
-Parameters can be used in:
+Basically parameters are **dynamic values** that can be used to make your dashboards interactive and customizable for end-users.
 
-- Calculations
-- Filters
-- Reference lines
-- Axis logic
 
-### Key Characteristics
-
-Parameters:
+**Key Characteristics:**
 
 - Do not filter data automatically
 - Must be referenced in logic
@@ -1453,32 +1437,50 @@ B --> C[View Logic]
 C --> D[Displayed Result]
 ```
 
----
 
-### To Use a Parameter
+**In order to use a parameter, we need**
 
 1. Create the parameter  
 2. Use it in a calculated field, filter, or reference line  
 3. Show the parameter control to the user  
 
-#### Step-by-step
+### Steps to create a parameter
 
-- In the Data pane, click the dropdown menu  
-- Select **Create Parameter…**  
-- Configure:
-  - Name  
-  - Data type  
-  - Allowable values (List / Range / All)  
-- Click **OK**  
-- Right-click the parameter → **Show Parameter**
+
+::: {.columns}
+
+::: {.column}
+
+<br><br><br><br><br><br>
+
+1. In the Data pane, click the dropdown menu  
+2. Select **Create Parameter…**  
+3. **Configure:**
+   - Name  
+   - Data type  
+   - Allowable values (List / Range / All)  
+4. Click **OK**  
+5. Right-click the parameter → **Show Parameter**
+
+:::
+
+::: {.column}
 
 ![Create Parameter]({{< meta image_path >}}/w2_create_parameter.png)
 
+
+:::
+
+:::
+
+
+
+
 ### Metric Switching
 
-A parameter can let users switch between metrics.
+A parameter can let users **switch** between metrics.
 
-Example parameter-driven calculation:
+**Example `parameter-driven` calculation:**
 
 ```sql
 CASE [Metric]
@@ -1488,16 +1490,33 @@ ELSE SUM([Profit])
 END
 ```
 
-#### Steps
+::: {.columns}
 
-- Create parameter:
-  - Name: Metric
-  - Data type: Integer
-  - Values:
-    - 1 → Revenue  
-    - 2 → Quantity  
+::: {.column}
 
-- Create calculated field:
+**Create parameter:**
+
+- **Name:** `Metric`
+- **Data type:** `Integer`
+- **Values:**
+  - `1` → `Revenue`  
+  - `2` → `Quantity`  
+
+
+:::
+
+::: {.column}
+
+![Parameter Properties]({{< meta image_path >}}/w2_create_parameter_properties.png)
+
+:::
+
+:::
+::: {.columns}
+
+::: {.column}
+
+**Create calculated field:** `p. Metric`
 
 ```sql
 CASE [Metric]
@@ -1506,15 +1525,25 @@ ELSE SUM([Quantity])
 END
 ```
 
-- Drag the calculated field into the view  
-- Right-click parameter → Show Parameter  
-- Use dropdown to switch metrics  
+:::
 
-![Parameter Properties]({{< meta image_path >}}/w2_create_parameter_properties.png)
+::: {.column}
+
+**Applying the Parameter:**
+
+1. Drag the calculated field into the view  
+2. Right-click parameter → Show Parameter  
+3. Use dropdown to switch metrics  
+
+
+:::
+
+:::
+
 
 ![Metric Swapping Calculation]({{< meta image_path >}}/w2_metric_swapping_calc.png)
 
-::: {.callout-note}
+::: {.callout-important}
 
 Name of the calculated field should be identical to the parameter name and can include **p.** in the name to make it clear that it is a calculation for the parameter.
 
@@ -1522,25 +1551,13 @@ Name of the calculated field should be identical to the parameter name and can i
 
 ### Dimension Switching
 
-A parameter can switch dimensions in the view.
+**A parameter can switch dimensions in the view.**
 
-Example:
 
-```sql
-CASE [Location Category]
-WHEN 'State' THEN [State]
-ELSE [City]
-END
-```
 
-#### Steps
+::: {.columns}
 
-- Create parameter:
-  - Name: Location Category
-  - Data type: String  
-  - Values: State, City  
-
-- Create calculated field:
+::: {.column}
 
 ```sql
 CASE [Location Category]
@@ -1549,130 +1566,261 @@ ELSE [City]
 END
 ```
 
-- Drag calculated field to Rows or Columns  
-- Show parameter  
-- Switch between State and City  
+**Create parameter:**
+
+- **Name:** `Location Category`
+- **Data type:** `String ` 
+- **Values:** `State`, `City`  
+
+:::
+
+::: {.column}
 
 
 ![Dimension Swapping]({{< meta image_path >}}/w2_dimension_swapping.png)
+
+:::
+
+:::
+
+
+::: {.columns}
+
+::: {.column}
+
+**Create calculated field:** `p. Location Category`
+
+```sql
+CASE [Location Category]
+WHEN 'State' THEN [State]
+ELSE [City]
+END
+```
+
+:::
+
+::: {.column}
+
+**Applying the Parameter:**
+
+1. Drag calculated field to Rows or Columns  
+2. Show parameter  
+3. Switch between State and City  
+
+
+:::
+
+:::
+
+
 
 ![Dimension Swapping Calculation]({{< meta image_path >}}/w2_dimension_swapping_calculation.png)
 
 ### Boolean Parameter Logic
 
-A boolean-style parameter can toggle analysis behavior.
+A `boolean-style` parameter can toggle analysis behavior.
 
-Example:
+::: {.columns}
 
-```sql
-IF [Is Florida] THEN
-    [State] = 'FL'
-ELSE
-    [State] <> 'FL'
-END
-```
+::: {.column}
 
-#### Steps
+<br><br><br><br><br>
 
-- Create parameter:
-  - Name: Is Florida
-  - Data type: Boolean  
+**Create parameter:**
 
-- Create calculated field:
+- **Name:** `Is Florida`
+- **Data type:** `Boolean`  
 
-```sql
-IF [Is Florida] THEN
-    [State] = 'FL'
-ELSE
-    [State] <> 'FL'
-END
-```
+:::
 
-- Drag calculation to Filters  
-- Select True  
-- Show parameter to toggle  
+::: {.column}
 
 ![Boolean Parameter]({{< meta image_path >}}/w2_boolean_parameter.png)
 
+
+:::
+
+:::
+
+
+---
+
+::: {.columns}
+
+::: {.column}
+**Create calculated field:** `p. Is Florida`
+
+```sql
+IF [Is Florida] THEN
+    [State] = 'FL'
+ELSE
+    [State] <> 'FL'
+END
+```
+
+:::
+
+::: {.column}
+
+<br><br>
+
+1. Drag calculation to Filters  
+2. Select True  
+3. Show parameter to toggle  
+  
+:::
+
 ![Boolean Parameter Calculation]({{< meta image_path >}}/w2_boolean_parameter_calc.png)
 
+:::
 
-### Top N with Parameter
 
-A numeric parameter can drive Top N analysis.
 
-Common workflow:
+### Top `N` with Parameter
 
-- Create parameter Top Values
-- Use it in a Top tab filter
+A numeric parameter can drive `Top N` analysis.
+
+**Common workflow:**
+
+- Create parameter `Top Values`
+- Use it in a Top tab **filter**
 - Let the user choose how many values to show
 
-#### Steps
 
-- Create parameter:
-  - Name: Top values
-  - Data type: Integer  
 
-- Drag dimension (Customer Name) to Filters  
-- Go to Top tab  
-- Select:
-  - By field  
-  - Top [Top values] by SUM(Revenue)  
+::: {.columns}
 
-- Show parameter  
+::: {.column}
+
+**Create parameter:**
+<br><br><br><br>
+
+  - **Name:** `Top values`
+  - **Data type:** `Integer`
+
+
+:::
+
+::: {.column}
 
 ![Parameter Filter]({{< meta image_path >}}/w2_create_parameter_filter.png)
 
+:::
+
+:::
+
+
+
+
+::: {.columns}
+
+::: {.column}
+<br><br>
+
+**Apply the parameter in a filter:**
+
+1. Drag dimension (Customer Name) to Filters  
+2. Go to Top tab  
+3. Select:
+   - By field  
+   - Top [Top values] by SUM(Revenue)  
+4. Show parameter  
+
+
+:::
+
+::: {.column}
+
 ![Top N Filter]({{< meta image_path >}}/w2_top_n_param_filter.png)
+
+
+:::
+
+:::
 
 
 ### Date Parameter Logic
 
 Parameters can also support date-based filtering.
 
-Example:
+<!-- todo: add context -->
 
-```sql
-[Order Date] <= [Select Return Date]
-```
 
-#### Steps
+::: {.columns}
 
-- Create parameter:
-  - Name: Select Return Date
-  - Data type: Date  
-  - Add values from Return Date  
+::: {.column}
 
-- Create calculated field:
+**Create parameter:**
 
-```sql
-[Order Date] <= [Select Return Date]
-```
-
-- Drag calculation to Filters  
-- Keep True  
-- Show parameter  
-
-![Date Filtering]({{< meta image_path >}}/w2_date_filtering.png)
-
-![Date Filtering Calculation]({{< meta image_path >}}/w2_date_filtering_calculation.png)
-
----
-
-::: {.callout-tip}
-
-You can set the default value of the date parameter to a dynamic value such as:
-
-- TODAY()  
-- MAX([ORDER DATE])  
-
-Set **When workbook opens → MAX(Order Date)** to always show the latest data.
+- **Name:** `Select Return Date`
+- **Data type:** `Date`  
+- **Add values from `Return Date`**  
 
 :::
 
+::: {.column}
+
+![Date Filtering]({{< meta image_path >}}/w2_date_filtering.png)
+
+:::
+
+:::
+
+
 ---
 
-## Filters, Parameters, and Calculated Fields
+::: {.columns}
+
+::: {.column}
+
+**Create calculated field:** 
+
+1. **name:** `p. Select Return Date`
+2. `[Order Date] <= [Select Return Date]`
+3. Drag calculation to Filters  
+4. Keep True  
+5. Show parameter  
+
+
+:::
+
+::: {.column}
+
+![Date Filtering Calculation]({{< meta image_path >}}/w2_date_filtering_calculation.png)
+
+:::
+
+:::
+
+
+
+
+::: {.callout-tip}
+
+**You can set the default value of the date parameter to a dynamic value such as:**
+
+- `TODAY()  `
+- `MAX([ORDER DATE])  `
+
+>Set **When workbook opens → MAX(Order Date)** to always show the latest data.
+
+:::
+
+<!-- TODO: screenshot showing the recent date -->
+
+### Naming Conventions
+
+As you have seen in the examples, we recommend using a **clear naming convention** for calculated fields that reference parameters. It is best practice to include the parameter name in the calculated field name to make it clear that the calculation is driven by that parameter. This helps with organization and makes it easier for other users to understand the purpose of the calculated field.
+
+
+::: {.callout-important}
+
+**Recommended convention:** `p. <Parameter Name>`
+
+:::
+
+
+## `Filters` vs `Parameters` vs `Calculated Fields`
 
 Understanding how filters and parameters affect calculations is essential for correct results.
 
@@ -1680,25 +1828,33 @@ Understanding how filters and parameters affect calculations is essential for co
 
 Dimension filters are applied after `FIXED` LOD expressions but before table calculations.
 
-Implications:
+**Thus:**
 
 - They do not affect `FIXED` by default
 - They do affect `INCLUDE` and `EXCLUDE`
 - They affect table calculations because they change the visible data
 
-Example:
+**Example:**
 
 ```sql
 { FIXED [Customer ID] : SUM([Sales]) }
 ```
 
-If you add a regular dimension filter on `[Region]`, the `FIXED` result does not automatically change.
+>If you add a regular dimension filter on `[Region]`, the `FIXED` result does not automatically change.
+
+
+::: {.callout-tip title = "Try it out!"}
+
+Try adding `[Region]` as a filter and see how the `FIXED` calculation behaves. It will still compute the total sales per customer across all regions, regardless of the region filter applied.
+
+:::
+
 
 ### Measure Filters
 
-Measure filters are applied after aggregation.
+Measure filters are applied **after** aggregation.
 
-They affect:
+**They affect:**
 
 - Aggregated results
 - Visible marks
@@ -1710,13 +1866,13 @@ They do not recompute `FIXED` LOD expressions.
 
 Context filters change the evaluation path by creating a subset earlier in the pipeline.
 
-Implications:
+**Thus:**
 
 - Context filters do affect `FIXED`
 - They can improve performance in some cases
 - They support dependent filters
 
-Example:
+**Example:**
 
 ```sql
 { FIXED [Customer ID] : SUM([Sales]) }
@@ -1751,47 +1907,6 @@ Parameters change logic only when they are explicitly referenced. Filters change
 :::
 
 
----
-
-## Example: Comparing SQL Logic with Tableau Logic
-
-Some logic can be prepared in SQL before Tableau, while other logic can be built directly inside Tableau.
-
-### SQL Example: Precompute Revenue
-
-```sql
-SELECT
-    order_id,
-    quantity,
-    unit_price,
-    quantity * unit_price AS revenue
-FROM dbo.order_details;
-```
-
-### Tableau Example: Same Logic in a Calculated Field
-
-```sql
-[Quantity] * [Unit Price]
-```
-
-### When to Prefer SQL
-
-Prefer SQL when:
-
-- Logic should be standardized
-- Data should be reshaped before Tableau
-- Performance depends on pre-aggregation
-
-### When to Prefer Tableau
-
-Prefer Tableau when:
-
-- Logic is view-specific
-- Analysts need flexibility
-- Interactivity or parameterization is required
-
-
-
 ## Homework 
 
 Using the **retail dataset**, complete the following:
@@ -1800,48 +1915,44 @@ Using the **retail dataset**, complete the following:
    - Orders ↔ Customers
    - Orders ↔ Order Details
    - Order Details ↔ Products
-
 2. **Create three calculated fields:**
    - Discount Impact: `[Unit Price] * [Discount]`
    - High Value Order: `IF [Order Total] >= 1000 THEN "High" ELSE "Standard" END`
    - Full Name: `[First Name] + " " + [Last Name]`
-
 3. **Create one LOD expression:**
    - Average Order Value per City: `{ FIXED [City] : AVG([Order Total]) }`
-
 4. **Add three filters:**
    - Product Category filter (Dimension filter)
    - Order Date filter (Relative date → last 2 years)
    - City as a Context filter
-
 5. **Create two parameters:**
    - Dimension switch (State / City)
    - Top N Products by SUM(Quantity)
-
 6. **Create four charts:**
    - Area chart → Orders over time by Category
    - Bar chart → Top products by Quantity
    - Highlight table → City vs Category by Order Total
    - Scatter plot → Discount vs Order Total
-
-7. **Build a dashboard** — combine all charts with parameter controls and filters
-
+7. **Build a dashboard:** combine all charts with parameter controls and filters
 8. **Publish** to Tableau Public and submit your public link
 
----
+
 
 > **Deliverable:** A published Tableau Public dashboard link.
 
 ---
 
-**Articles**
+## Resources
+
+### Articles
 
 1. [Level of Detail Expressions — Tableau Official Docs](https://help.tableau.com/current/pro/desktop/en-us/calculations_calculatedfields_lod.htm)
 2. [Top 15 LOD Expressions with Practical Examples — Tableau Blog](https://www.tableau.com/blog/LOD-expressions)
 3. [LOD Expressions in Tableau — DataCamp](https://www.datacamp.com/tutorial/lod-expressions-in-tableau-a-tutorial-with-examples)
 4. [Parameters in Tableau — DataCamp](https://www.datacamp.com/tutorial/tableau-parameters-an-introductory-guide-and-how-to-use-them)
 
-**Videos**
+### Videos
+
 
 1. [Tableau LOD Expressions — Top 15 Practical Examples](https://www.youtube.com/watch?v=j6j_Lxx3ndM)
 2. [Tableau Parameters — Complete Introduction with 10 Use Cases](https://www.youtube.com/watch?v=0Uar_D57QhU)
