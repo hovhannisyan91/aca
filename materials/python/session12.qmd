@@ -59,7 +59,7 @@ We will use the **hours studied vs grade** example from the picture you provided
 | 2 | 64 |
 
 ```{python}
-#| echo: false
+#| echo: true
 #| fig-width: 18
 #| fig-height: 5
 #| fig-align: center
@@ -434,7 +434,7 @@ We can also compute $R^2$ and RMSE using `scikit-learn` functions.
 #| echo: true
 #| eval: true
 #| output: true
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, root_mean_squared_error
 r2_sklearn = r2_score(y, y_pred)
 rmse_sklearn = np.sqrt(mean_squared_error(y, y_pred))
 ```
@@ -507,8 +507,8 @@ for channel in ["tv", "radio", "social_media"]:
 
     y_hat = channel_model.predict(X_channel)
 
-    r2_channel = 1 - np.sum((y_sales - y_hat) ** 2) / np.sum((y_sales - y_sales.mean()) ** 2)
-    rmse_channel = np.sqrt(np.mean((y_sales - y_hat) ** 2))
+    r2_channel = r2_score(y_sales, y_hat) 
+    rmse_channel = root_mean_squared_error(y_sales, y_hat)
 
     channel_results.append({
         "channel": channel,
@@ -595,7 +595,7 @@ multi_num_results = pd.DataFrame({
 }).round(4)
 
 multi_num_r2 = r2_score(y_sales, y_hat_multi_num)
-multi_num_rmse = np.sqrt(mean_squared_error(y_sales, y_hat_multi_num))
+multi_num_rmse = root_mean_squared_error(y_sales, y_hat_multi_num)
 
 
 print(f"R-squared: {multi_num_r2:.4f}")
@@ -682,8 +682,8 @@ multi_results = pd.DataFrame({
     "coefficient": [multi_model.intercept_] + list(multi_model.coef_)
 }).round(4)
 
-multi_r2 = 1 - np.sum((y_sales - y_hat_multi) ** 2) / np.sum((y_sales - y_sales.mean()) ** 2)
-multi_rmse = np.sqrt(np.mean((y_sales - y_hat_multi) ** 2))
+multi_r2 = r2_score(y_sales, y_hat_multi)
+multi_rmse = root_mean_squared_error(y_sales, y_hat_multi)
 
 multi_results
 print(f"R-squared: {multi_r2:.4f}")
@@ -758,8 +758,8 @@ price_model.fit(X_price, demand)
 
 demand_pred = price_model.predict(X_price)
 
-price_r2 = 1 - np.sum((demand - demand_pred) ** 2) / np.sum((demand - demand.mean()) ** 2)
-price_rmse = np.sqrt(np.mean((demand - demand_pred) ** 2))
+price_r2 = r2_score(demand, demand_pred)
+price_rmse = root_mean_squared_error(demand, demand_pred)
 
 print(f"Intercept: {price_model.intercept_:.4f}")
 print(f"Slope: {price_model.coef_[0]:.4f}")
@@ -792,8 +792,8 @@ age_model.fit(X_age, revenue)
 
 revenue_pred = age_model.predict(X_age)
 
-age_r2 = 1 - np.sum((revenue - revenue_pred) ** 2) / np.sum((revenue - revenue.mean()) ** 2)
-age_rmse = np.sqrt(np.mean((revenue - revenue_pred) ** 2))
+age_r2 = r2_score(revenue, revenue_pred)
+age_rmse = root_mean_squared_error(revenue, revenue_pred)
 
 print(f"Intercept: {age_model.intercept_:.4f}")
 print(f"Slope: {age_model.coef_[0]:.4f}")
