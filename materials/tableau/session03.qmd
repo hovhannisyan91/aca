@@ -16,17 +16,45 @@ image_path: "/img/tableau/03"
 - Apply Tableau data modeling concepts from Session 2 in more complex use cases  
 - Build advanced KPI dashboards and analytical heatmaps  
 
-In previous sessions, we focused on building visualizations, working with filters and parameters, and creating calculated fields. We also introduced key concepts such as relationships, joins, and Level of Detail expressions, which form the foundation of analytical work in Tableau.
+In previous sessions, we focused on building visualizations, working with filters and parameters, and creating calculated fields. We also introduced key concepts such as `relationships`, `joins`, and `Level of Detail` expressions, which form the foundation of analytical work in Tableau.
 
-In this session, we move from **building charts** to **building analytical logic inside Tableau**. Instead of focusing only on how data is displayed, we focus on how calculations are performed, how different components interact, and how to ensure that results remain accurate across different analytical scenarios.
+In this session, we move from **building charts** to **building analytical logic inside Tableau**. 
+
+>Instead of focusing only on how data is displayed, we focus on how calculations are performed, how different components interact, and how to ensure that results remain accurate across different analytical scenarios.
 
 This shift allows us to move from simple dashboards to more advanced analytical systems, where calculations, date logic, and data modeling work together to answer more complex business questions.
 
 ## Advanced Table Calculations
 
-In real analytical scenarios, calculations rarely rely on a single function. Instead, they combine multiple layers of logic, including aggregation, table calculations, conditional expressions, and sometimes date logic. These are referred to as **complex calculations**.
+In real analytical scenarios, calculations rarely rely on a single function. Instead, they combine multiple layers of logic including:
 
-Complex calculations are used when simple aggregations such as `SUM` or `AVG` are not sufficient to answer analytical questions. They allow analysts to model behavior such as growth rates, comparisons across time, cumulative metrics, and conditional ranking.
+
+::: {.columns}
+
+::: {.column}
+
+1. aggregation 
+2. table calculations
+3. conditional expressions
+4. sometimes date logic
+
+
+:::
+
+::: {.column}
+
+<br>
+
+$\rightarrow$ **complex calculations**.
+
+
+:::
+
+:::
+
+
+
+Complex calculations are used when simple aggregations such as `SUM` or `AVG` are not sufficient to answer analytical questions.  They allow analysts to model behavior such as `growth rates`, `comparisons across time`, `cumulative metrics`, and `conditional ranking.`
 
 A key characteristic of complex calculations is that they often combine **multiple computation stages**, where:
 
@@ -34,6 +62,7 @@ A key characteristic of complex calculations is that they often combine **multip
 - Other parts are computed as table calculations after aggregation  
 
 Understanding this layered computation is essential for building correct analytical models.
+
 
 ---
 
@@ -47,7 +76,7 @@ For example, calculating the **percentage contribution of each category over tim
 RUNNING_SUM(SUM([Order Total])) / WINDOW_SUM(SUM([Order Total]))
 ```
 
-This calculation combines:
+**This calculation combines:**
 
 - Aggregation: `SUM([Order Total])`  
 - Running accumulation: `RUNNING_SUM`  
@@ -67,7 +96,7 @@ For example, calculating **percent difference between consecutive running totals
 RUNNING_SUM(SUM([Order Total])) - LOOKUP(RUNNING_SUM(SUM([Order Total])), -1)
 ```
 
-This calculation combines:
+**This calculation combines:**
 
 - A running total  
 - A lookup to the previous value  
@@ -88,7 +117,7 @@ IF SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1) > 0 THEN
 END
 ```
 
-This type of logic allows analysts to highlight specific patterns such as growth periods.
+>This type of logic allows analysts to highlight specific patterns such as growth periods.
 
 ---
 
@@ -100,21 +129,25 @@ These are essential for complex analytics.
 
 #### Moving Average
 
+Calculates average over the last `4` periods (offset `-3` to `0` means the current period plus `3` previous periods = `4` total).
+
+
 ```sql
 WINDOW_AVG(SUM([Order Total]), -3, 0)
 ```
 
-Calculates average over the last 4 periods (offset -3 to 0 means the current period plus 3 previous periods = 4 total).
 
 ---
 
 #### Window Sum
 
+Calculates total within the partition.
+
 ```sql
 WINDOW_SUM(SUM([Order Total]))
 ```
 
-Calculates total within the partition.
+
 
 ---
 
@@ -140,28 +173,28 @@ SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)
 
 #### Percent Difference
 
-```sql
-(SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)) 
-/ LOOKUP(SUM([Order Total]), -1)
-```
 
-These calculations are used for:
+**These calculations are used for:**
 
 - Growth analysis  
 - Trend comparison  
 - Performance tracking  
 
----
+```sql
+(SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)) 
+/ LOOKUP(SUM([Order Total]), -1)
+```
+
 
 ### Multi-Level Calculations
 
 Complex calculations often operate across multiple levels of detail within the same view.
 
-For example:
+**For example:**
 
-- Category-level aggregation  
-- Within-region ranking  
-- Across-time accumulation  
+- `Category-level `aggregation  
+- `Within-region `ranking  
+- `Across-time` accumulation  
 
 This requires careful control of partitioning and addressing to ensure that calculations are applied correctly at each level.
 
@@ -190,10 +223,7 @@ Because of this, it is important to always validate:
 ### Table Calculations
 
 When you add a **table calculation**, you must account for **all dimensions in the level of detail**.  
-Each dimension must be used either for:
-
-- **Partitioning (scoping)**, or  
-- **Addressing (direction)**  
+Each dimension must be used either for: **Partitioning (scoping)** or **Addressing (direction)**  
 
 ---
 
@@ -1819,7 +1849,7 @@ Questions:
 - Which cohort generates highest revenue?
 - Do newer cohorts spend more?
 
----
+
 
 ## Cleaning and Reshaping Data in Tableau
 
@@ -1853,9 +1883,8 @@ Data cleaning focuses on improving **data quality** before performing analysis.
 
 Tableau allows several cleaning operations directly inside the **Data Source page** or through **Calculated Fields**.
 
----
 
-### Handling Missing Values (NULL Values)
+#### Handling Missing Values (NULL Values)
 
 Missing values are one of the most common problems in datasets.  
 NULL values may represent missing records, unavailable information, or incomplete data collection.
@@ -2015,72 +2044,14 @@ This hierarchy allows users to:
 3. Rename the hierarchy if needed
 4. Use the hierarchy in visualizations for **drill-down analysis**
 
----
 
-### Using Tableau Prep for Advanced Data Preparation
 
-When datasets become more complex, **Tableau Prep** provides a visual workflow for preparing and reshaping data.
 
-Tableau Prep allows:
 
-- Joining multiple datasets
-- Removing duplicates
-- Standardizing values
-- Pivoting and unpivoting columns
-- Aggregating datasets
-- Cleaning inconsistent values
-
-```{mermaid}
-flowchart LR
-A[Raw Sources] --> B[Tableau Prep Flow]
-B --> C[Cleaning Steps]
-C --> D[Reshaped Dataset]
-D --> E[Tableau Visualization]
-```
-
-Prep uses a **visual flow interface**, allowing analysts to inspect transformations step by step before publishing the final dataset.
-
----
-
-### When Data Cleaning Should Be Done Outside Tableau
-
-Although Tableau supports many data preparation operations, some transformations are better performed upstream.
-
-Typical tools include:
-
-- SQL databases
-- ETL pipelines
-- Python data pipelines
-- Data warehouses
-
-Reasons include:
-
-- Better performance for large datasets
-- Centralized transformation logic
-- Reusable data pipelines
-- Improved data governance
-
-In production environments, Tableau often connects to **pre-cleaned analytical datasets**.
-
----
-
-### Data Reshaping in Tableau
-
-Data reshaping changes the **structure of a dataset** so that it fits analytical needs.
-
-Many datasets are stored in **wide format**, while Tableau analysis works better with **long format**.
-
-```{mermaid}
-flowchart LR
-A[Wide Data Format] --> B[Pivot Operation]
-B --> C[Long/Tidy Data Format]
-```
-
----
-
-### Pivoting Data in Tableau
+### Wide to Long Format (Pivoting)
 
 Pivoting is a data reshaping technique used to convert **columns into rows**.  
+
 This transformation is particularly useful when datasets store similar measures in multiple columns instead of a single column.
 
 Many analytical workflows and visualization tools work better with **long (tidy) data structures**, where:
@@ -2106,6 +2077,7 @@ D --> F[Medal Count]
 
 ### Example Dataset: Olympic Medals
 
+
 For this example we use a dataset containing **Olympic medal counts by country and year**.  
 The dataset contains the following columns:
 
@@ -2128,114 +2100,3 @@ In this structure:
 
 However, comparing medal types dynamically in Tableau becomes easier when the dataset is reshaped.
 
----
-
-### Pivoting Medal Columns
-
-To reshape the dataset, we pivot the following columns:
-
-- `Gold`
-- `Silver`
-- `Bronze`
-
-### Steps in Tableau
-
-1. Open the dataset in **Tableau**
-2. Navigate to the **Data Source page**
-3. Select the columns:
-
-   - Gold  
-   - Silver  
-   - Bronze  
-
-4. Right-click the selected columns
-5. Choose **Pivot**
-
-Tableau automatically creates two new fields:
-
-- `Pivot Field Names`
-- `Pivot Field Values`
-
-Rename these fields:
-
-| Default Name | New Name |
-|--------------|----------|
-| Pivot Field Names | Medal Type |
-| Pivot Field Values | Medal Count |
-
-
-Dataset after pivoting:
-
-![Pivot]({{< meta image_path >}}/w3_dataset_after_pivoting.png)
-
----
-
-### Benefits of Pivoting
-
-Pivoting provides several advantages for analysis and visualization:
-
-- Enables comparison of **multiple measures within one chart**
-- Simplifies dataset structure
-- Allows filtering by **measure type**
-- Supports dynamic dashboards and parameter-driven visualizations
-
-Example visualization setup:
-
-| Columns | Rows | Color |
-|--------|------|------|
-| Year | SUM(Medal Count) | Medal Type |
-
-This visualization shows **Gold, Silver, and Bronze medals over time in a single chart**.
-
----
-
-### Analytical Questions Enabled by Pivoting
-
-After reshaping the dataset, it becomes easier to answer questions such as:
-
-- How do **Gold, Silver, and Bronze medals change over time**?
-- Which countries win the **most gold medals**?
-- How do medal distributions differ between **Summer and Winter Olympics**?
-- Which countries have the **highest total medal counts** across seasons?
-
-Pivoting therefore helps transform datasets into a structure that is **more flexible for exploration and analysis in Tableau**.
-
----
-
-### Tableau Prep vs Tableau Desktop
-
-Both **Tableau Prep** and **Tableau Desktop** support data preparation tasks, but they are designed for different stages of the analytics workflow.
-
-Tableau Desktop is primarily used for **data exploration and visualization**, while Tableau Prep is designed for **building reusable data preparation pipelines**.
-
----
-
-### Summary
-
-| Task Type | Tableau Desktop | Tableau Prep |
-|----------|----------------|--------------|
-| Quick data fixes | ✓ | |
-| Calculated fields | ✓ | |
-| Simple pivots | ✓ | |
-| Complex joins | | ✓ |
-| Large dataset cleaning | | ✓ |
-| Reusable data pipelines | | ✓ |
-
-In practice, analysts often use **both tools together**:
-
-1. **Tableau Prep** to prepare and structure the dataset  
-2. **Tableau Desktop** to explore, analyze, and visualize the data
-
----
-
-### Best Practices for Data Cleaning and Reshaping
-
-- Inspect datasets before building visualizations
-- Verify data types and formats
-- Handle NULL values explicitly
-- Convert wide datasets into tidy structures when needed
-- Document data transformations
-
-Properly cleaned and reshaped data leads to **more reliable analysis and better-performing dashboards**.
-
----
