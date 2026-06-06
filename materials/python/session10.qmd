@@ -365,7 +365,7 @@ See
 -  @materials/statistics/session6.qmd#sec-hypothesis-testing-decision-rules
 -  @materials/statistics/session6.qmdsec-visual-representation-hypothesis-testing
 
-## Power Analysis With Python
+## A/B Testing With Python
 
 ### Loading Packages
 
@@ -714,6 +714,267 @@ The purpose of `A/A` testing is to validate the experimental setup and ensure th
 
 ## Multiariate Testing
 
+In real life, we often have more than two groups to compare. For example, we might want to test multiple versions of a website design or several different marketing campaigns.
+
+![]({{< meta image_path >}}/multivariate-testing.png){fig-align="center" }
+
+### Infinite Monkey Theorem
+
+The *Infinite Monkey Theorem* says that if random typing continues for long enough, even very unlikely strings will eventually appear.
+
+This is a useful analogy for hypothesis testing.
+
+- when we run one test, the probability of a false positive is controlled at $\alpha$
+- when we run many tests, the chance of seeing at least one false positive increases
+- so, with enough tests, some apparently significant results may appear purely by chance
+
+![]({{< meta image_path >}}/imt.jpg)
+
+### Why multiple testing is a problem
+
+**For a single hypothesis test:**
+
+$$P(\text{Type I error}) = \alpha$$
+
+$$P(\text{No Type I error}) = 1 - \alpha$$
+
+**If we perform `m` independent hypothesis tests, then:**
+
+$$P(\text{No Type I error in all } m \text{ tests}) = (1-\alpha)^m$$
+
+Therefore, the probability of making **at least one** Type I error becomes:
+
+$$P(\text{At least one Type I error}) = 1 - (1-\alpha)^m$$
+
+This means that even if each test looks safe on its own, the overall analysis becomes riskier as the number of tests grows.
+
+>*Type I error* means a **false positive**: rejecting the null hypothesis when it is actually true.
+
+### Loading packages
+
+```{python}
+#| echo: true
+
+import matplotlib.pyplot as plt
+from scipy import stats
+from statsmodels.stats.multitest import multipletests
+```
+
+
+```{python}
+#| echo: false
+
+def markdown_table(df, decimals=4, index=False):
+    out = df.copy()
+
+    if index:
+        out = out.reset_index()
+
+    for col in out.columns:
+        if pd.api.types.is_numeric_dtype(out[col]):
+            out[col] = out[col].map(
+                lambda x: "" if pd.isna(x) else f"{x:.{decimals}f}"
+            )
+        else:
+            out[col] = out[col].fillna("").astype(str)
+
+    header = "| " + " | ".join(map(str, out.columns)) + " |"
+    separator = "| " + " | ".join(["---"] * len(out.columns)) + " |"
+
+    rows = []
+    for row in out.to_numpy():
+        rows.append("| " + " | ".join(map(str, row)) + " |")
+
+    return "\n".join([header, separator] + rows)
+
+
+def pairwise_ttests(data, value_col, group_col):
+    groups = sorted(data[group_col].dropna().unique())
+    rows = []
+
+    for g1, g2 in combinations(groups, 2):
+        x = data.loc[data[group_col] == g1, value_col].dropna()
+        y = data.loc[data[group_col] == g2, value_col].dropna()
+
+        t_stat, raw_p = stats.ttest_ind(
+            x, y,
+            equal_var=False,
+            nan_policy="omit"
+        )
+
+        rows.append({
+            "group_1": g1,
+            "group_2": g2,
+            "t_statistic": t_stat,
+            "raw_p_value": raw_p
+        })
+
+    return pd.DataFrame(rows)
+
+
+def pairwise_matrix(results, value_col, groups):
+    matrix = pd.DataFrame("", index=groups, columns=groups)
+
+    for g in groups:
+        matrix.loc[g, g] = "—"
+
+    for _, row in results.iterrows():
+        value = row[value_col]
+        value_str = f"{value:.4f}" if pd.notna(value) else ""
+        matrix.loc[row["group_1"], row["group_2"]] = value_str
+        matrix.loc[row["group_2"], row["group_1"]] = value_str
+
+    return matrix
+```
+
+### Type I error curve
+
+The following plot shows how quickly the probability of observing at least one false positive grows as the number of hypothesis tests increases when $\alpha = 0.05$.
+
+```{python}
+
+#| fig-width: 18
+#| fig-height: 5
+#| out-width: 100%
+#| out-height: auto
+#| fig-align: center
+
+m_tests = np.arange(0, 101)
+prob_at_least_one_error = 1 - (1 - 0.05) ** m_tests
+
+plt.figure()
+plt.plot(m_tests, prob_at_least_one_error)
+plt.xlabel("Number of hypotheses")
+plt.ylabel("Probability of at least 1 Type I error")
+plt.title("Family-level risk grows as the number of tests increases")
+plt.show()
+```
+
+### Multiple hypotheses
+
+Assume we are testing $H^1, H^2, \ldots, H^m$.
+
+- $m$ is the total number of hypotheses
+- $m_0$ is the number of truly null hypotheses
+- $R$ is the number of rejected hypotheses
+- $V$ is the number of Type I errors among the rejected hypotheses
+
+![]({{< meta image_path >}}/p5.png){fig-align="center" width="55%"}
+
+$V$ is the number of false positives.
+
+### Controlling the Type I error
+
+There are several ways to summarize error rates when multiple tests are performed.
+
+- **Per comparison error rate (PCER):** the expected number of Type I errors divided by the number of hypotheses
+
+  $$PCER = \mathbb{E}[V]/m$$
+
+- **Per-family error rate (PFER):** the expected number of Type I errors
+
+  $$PFER = \mathbb{E}[V]$$
+
+- **Family-wise error rate (FWER):** the probability of making at least one Type I error
+
+  $$FWER = P(V \ge 1)$$
+
+- **False discovery rate (FDR):** the expected proportion of Type I errors among the rejected hypotheses
+
+  $$FDR = \mathbb{E}\left(\frac{V}{R} \mid R > 0\right) P(R > 0)$$
+
+**The main difference is the target being controlled.**
+
+- FWER is very strict because it tries to protect against even a single false positive
+- FDR is more flexible because it focuses on the proportion of false discoveries among the reported discoveries
+
+### Loading the data
+
+We now use the `experiment_m.csv` data set.
+
+
+```{python}
+
+experiment_m = pd.read_csv("../../lab/python/data/ab_testing/experiment_m.csv")
+groups = sorted(experiment_m["group"].dropna().unique())
+```
+
+```python
+#| echo: true
+
+experiment_m = pd.read_csv("../data/ab_testing/experiment_m.csv")
+groups = sorted(experiment_m["group"].dropna().unique())
+
+```
+
+ 
+
+```{python}
+group_counts = (
+    experiment_m.groupby("group", as_index=False)
+    .size()
+    .rename(columns={"size": "n"})
+)
+
+group_counts
+```
+
+```{python}
+#| echo: false
+#| output: asis
+
+print(markdown_table(group_counts, decimals=0))
+```
+
+This table helps us verify the sample size in each group before starting the pairwise tests.
+
+### Pairwise `t-test` without adjustment
+
+We first compute all pairwise t-tests with **no correction**.
+
+We use **Welch’s t-test** rather than the equal-variance version because this matches the logic of the original R code with `pooled.sd = FALSE`.
+
+```{python}
+#| echo: true
+
+pairwise_results = pairwise_ttests(
+    experiment_m,
+    value_col="viewing_time",
+    group_col="group"
+)
+
+pairwise_results.head()
+```
+
+The next table shows the raw pairwise p-values before any adjustment is applied.
+
+```{python}
+#| echo: false
+#| output: asis
+
+raw_results = pairwise_results[["group_1", "group_2", "raw_p_value"]].copy()
+raw_results = raw_results.sort_values("raw_p_value").reset_index(drop=True)
+
+print(markdown_table(raw_results))
+```
+
+### Raw p-value matrix
+
+
+A matrix view is often easier to scan when many group comparisons are involved.
+
+::: {.smaller}
+```{python}
+#| echo: false
+#| output: asis
+
+raw_matrix = pairwise_matrix(pairwise_results, "raw_p_value", groups)
+print(markdown_table(raw_matrix, decimals=4, index=True))
+```
+:::
+
+At this stage, every p-value is interpreted as if it were the only test being performed.  
+That is exactly why multiple testing corrections are needed.
 
 
 ## Case Study | Fast Food Chain 
