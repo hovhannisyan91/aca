@@ -13,16 +13,16 @@ image_path: "/img/tableau/03"
 - Build cohort and retention analysis views  
 - Perform spatial analysis and spatial joins  
 - Connect and visualize geographic data  
-- Apply Tableau data modeling concepts from Session 2 in more complex use cases  
+- Apply Tableau data modeling concepts from `Session 2` in more complex use cases  
 - Build advanced KPI dashboards and analytical heatmaps  
 
-In previous sessions, we focused on building visualizations, working with filters and parameters, and creating calculated fields. We also introduced key concepts such as `relationships`, `joins`, and `Level of Detail` expressions, which form the foundation of analytical work in Tableau.
+In previous sessions, we focused on building visualizations, working with filters and parameters, and creating calculated fields. We also introduced key concepts such as `relationships`, `joins`, and `Level of Detail (LOD)` expressions, which form the foundation of analytical work in Tableau.
 
 In this session, we move from **building charts** to **building analytical logic inside Tableau**. 
 
 >Instead of focusing only on how data is displayed, we focus on how calculations are performed, how different components interact, and how to ensure that results remain accurate across different analytical scenarios.
 
-This shift allows us to move from simple dashboards to more advanced analytical systems, where calculations, date logic, and data modeling work together to answer more complex business questions.
+This shift allows us to move **from simple dashboards to more advanced analytical systems**, where calculations, date logic, and data modeling work together to answer more complex business questions.
 
 ## Advanced Table Calculations
 
@@ -45,21 +45,20 @@ In real analytical scenarios, calculations rarely rely on a single function. Ins
 
 <br>
 
-$\rightarrow$ **complex calculations**.
+$\rightarrow$ **complex calculations**
 
 
 :::
 
 :::
-
 
 
 Complex calculations are used when simple aggregations such as `SUM` or `AVG` are not sufficient to answer analytical questions.  They allow analysts to model behavior such as `growth rates`, `comparisons across time`, `cumulative metrics`, and `conditional ranking.`
 
 A key characteristic of complex calculations is that they often combine **multiple computation stages**, where:
 
-- Some parts are calculated at the row or aggregate level  
-- Other parts are computed as table calculations after aggregation  
+- Some parts are calculated at **the row or aggregate level ** 
+- Other parts are computed as table calculations **after aggregation**  
 
 Understanding this layered computation is essential for building correct analytical models.
 
@@ -83,7 +82,8 @@ RUNNING_SUM(SUM([Order Total])) / WINDOW_SUM(SUM([Order Total]))
 - Total window comparison: `WINDOW_SUM`  
 
 This type of calculation is often used to understand cumulative contribution.
-
+<!-- TODO -->
+<!-- ![]({{< meta image_path >}}/w3_running_sum_percent_total.png) -->
 ---
 
 ### Nested Table Calculations
@@ -103,6 +103,9 @@ RUNNING_SUM(SUM([Order Total])) - LOOKUP(RUNNING_SUM(SUM([Order Total])), -1)
 
 Nested calculations like this are powerful but require careful configuration of partitioning and addressing.
 
+<!-- TODO -->
+<!-- ![]({{< meta image_path >}}/w3_nested_calculation.png) -->
+
 ---
 
 ### Conditional Table Calculations
@@ -119,6 +122,9 @@ END
 
 >This type of logic allows analysts to highlight specific patterns such as growth periods.
 
+<!-- TODO -->
+<!-- ![]({{< meta image_path >}}/w3_conditional_calculation.png) -->
+
 ---
 
 ### Window Functions
@@ -126,6 +132,11 @@ END
 Window functions perform calculations across a defined range of data within a partition.
 
 These are essential for complex analytics.
+
+
+- Moving averages
+- Window sum
+- Window max
 
 #### Moving Average
 
@@ -136,6 +147,7 @@ Calculates average over the last `4` periods (offset `-3` to `0` means the curre
 WINDOW_AVG(SUM([Order Total]), -3, 0)
 ```
 
+<!--  -->
 
 ---
 
@@ -146,8 +158,6 @@ Calculates total within the partition.
 ```sql
 WINDOW_SUM(SUM([Order Total]))
 ```
-
-
 
 ---
 
@@ -976,9 +986,11 @@ As a result:
 
 This creates a seamless and consistent experience across multi-source dashboards.
 
-## Spatial Analytics (spatial relationships, spatial joins, spatial functions)
+## Spatial Analytics
 
-Spatial analytics focuses on analyzing data that contains a geographic component. Unlike traditional visualizations, spatial analysis allows us to understand how data behaves in relation to location, distance, and geographic structures. It enables answering questions such as where events occur, how locations interact, how movement happens across space, and how metrics vary across regions.
+**Spatial analytics** focuses on analyzing data that contains a geographic component. 
+
+Unlike traditional visualizations, spatial analysis allows us to understand how data behaves in relation to location, distance, and geographic structures. It enables answering questions such as where events occur, how locations interact, how movement happens across space, and how metrics vary across regions.
 
 Maps are powerful because they allow patterns to be understood visually. They are especially useful when geography is not just a visual element, but a key part of the analysis.
 
@@ -988,31 +1000,31 @@ Maps are powerful because they allow patterns to be understood visually. They ar
 
 Geographic data can exist in multiple formats, and understanding these formats is essential for correct analysis.
 
-- Spatial files such as **Shapefile, GeoJSON, KML**
-- Flat files such as **Excel or CSV**
+- Spatial files such as **Shapefile (`.shp`), GeoJSON, KML**
+- Flat files such as **`Excel` or `CSV`**
 - Databases with spatial or location-based fields
 
-Spatial files store both:
+**Spatial files store both:**
 
 - **Geometry** → the shape (point, line, polygon)
 - **Attributes** → descriptive data
 
 When a spatial file is connected, Tableau automatically creates a **Geometry field**, which can be directly used for mapping.
 
-Location-based data (like City, Country, Latitude, Longitude) does not contain shapes. Tableau uses **geocoding** to convert these values into map coordinates.
+**Location-based** data (like `City`, `Country`, `Latitude`, `Longitude`) does not contain shapes. Tableau uses **geocoding** to convert these values into map coordinates.
 
 ---
 
-## Dataset for Spatial Analysis
+### Dataset for Spatial Analysis
 
-In this session, we use:
+**In this session, we use:**
 
 - **Citi Bike dataset** (trip-level data with coordinates)
 - **NYC District GeoJSON file** (polygon-level data)
 
-The Citi Bike dataset contains:
+**The Citi Bike dataset contains:**
 
-- Start and End coordinates  
+- `Start` and `End` coordinates  
 - Time information  
 - Station details  
 
@@ -1023,13 +1035,15 @@ The GeoJSON dataset contains:
 - District boundaries (MultiPolygon)  
 - Geographic shapes for mapping  
 
+<!-- TODO: Add more details about the datasets -->
+
 ---
 
-## Spatial Relationships
+### Spatial Relationships
 
-Spatial relationships are used when datasets do not share a common key but still need to be analyzed together.
+We have already seen how spacial relationships work during the `SQL` and `Python` sessions. Spatial relationships are used when datasets do not share a common key but still need to be analyzed together.
 
-### Steps to Create Spatial Relationship
+#### Steps to Create Spatial Relationship
 
 1. Load the **Citi Bike dataset**  
 2. Combine all CSV files using **Union**  
@@ -1052,7 +1066,7 @@ Now we have a working relationship between two tables.
 
 ---
 
-## Spatial Joins
+### Spatial Joins
 
 Spatial joins combine datasets based on geographic relationships rather than keys.
 
@@ -1061,7 +1075,7 @@ The most common spatial join is:
 - **INTERSECTS** → checks if two geometries overlap  
 
 
-### Steps to Create Spatial Join
+#### **Steps to Create Spatial Join:**
 
 1. In the data source tab, switch to the **physical layer**  
 2. Add the Citi Bike dataset  
@@ -1086,21 +1100,27 @@ This will match each trip to a district based on location.
 
 ---
 
-### Troubleshooting Spatial Joins
 
-Common issue:
+::: {.callout-important}
 
-- **Geometry is incompatible with geography**
+#### Troubleshooting Spatial Joins
 
-Solution:
+**Common issue:**
 
-- Convert geometry to geography  
-- Use coordinate system **EPSG:4326**  
-- Ensure coordinates follow **Longitude, Latitude** order  
+>Geometry is incompatible with geography
+
+**Solution:**
+
+- Convert `geometry` to `geography`  
+- Use coordinate system **`EPSG:4326`**  
+- Ensure coordinates follow **`Longitude`, `Latitude`** order  
+
+:::
+
 
 ---
 
-## Spatial Functions
+### Spatial Functions
 
 Spatial functions enable advanced geographic calculations directly within Tableau. They allow you to create, transform, and analyze spatial objects such as points, lines, and polygons. These functions are especially important when working with coordinate-based datasets, as they convert raw latitude and longitude values into map-ready objects and allow analytical operations such as distance measurement, movement analysis, and spatial comparison.
 
@@ -1108,7 +1128,7 @@ Spatial functions are commonly used together with mapping and spatial joins. The
 
 ---
 
-### Common Use Cases
+#### Common Use Cases
 
 - Converting latitude and longitude into spatial points  
 - Visualizing movement between two locations  
@@ -1118,15 +1138,15 @@ Spatial functions are commonly used together with mapping and spatial joins. The
 
 ---
 
-### Examples
+#### Examples
 
-Creating a spatial point from coordinates:
+**Creating a spatial point from coordinates:**
 
 ```sql
 MAKEPOINT([Latitude], [Longitude])
 ```
-
-Visualizing movement between two locations:
+**
+Visualizing movement between two locations:**
 
 ```sql
 MAKELINE(
@@ -1135,7 +1155,7 @@ MAKELINE(
 )
 ```
 
-Calculating distance between two points:
+**Calculating distance between two points:**
 
 ```sql
 DISTANCE(
@@ -1145,9 +1165,8 @@ DISTANCE(
 )
 ```
 
----
 
-### Spatial Functions Reference
+#### Spatial Functions Summary
 
 | Function | Description | Typical Use Case |
 |----------|-------------|------------------|
@@ -1166,17 +1185,18 @@ DISTANCE(
 | VALIDATE | Confirms whether spatial geometry is topologically correct. | Cleaning corrupted spatial files and preventing join errors. |
 ---
 
-## Mapping in Tableau (Map Layers, Map Styling & Configuration)
+### Geographic Data Visualization
 
 Mapping in Tableau is not only about placing marks on a geographic background.  
-It is a combination of:
+
+**It is a combination of:**
 
 - Data modeling  
 - Geocoding  
 - Aggregation logic  
 - Visual design  
 
-For a map to function correctly — analytically and visually — four foundational components must be configured properly:
+For a map to function correctly both analytically and visually, we need **four** foundational components to be configured properly:
 
 1. Data Type  
 2. Data Role  
@@ -1191,11 +1211,8 @@ If any of these elements are misconfigured, you may encounter:
 - Broken drill-down behavior  
 - Spatial joins that do not work as expected  
 
-### Geographical data configuration
 
-Mapping accuracy begins with proper data configuration.
-
-**Data Type — Structural Foundation**
+#### Data Type | Structural Foundation**
 
 The **Data Type** determines how Tableau stores and interprets the raw values.
 
@@ -1219,17 +1236,19 @@ Incorrect data types can cause:
 - Tableau not recognizing geographic information  
 - Failure in map rendering  
 
-Example:
 
 If Postal Code is stored as Number:
+
 - `01234` becomes `1234`
 - Geocoding fails
 
-**Data Role — Analytical Behavior**
+---
+
+#### Data Role | Analytical Behavior
 
 The **Data Role** defines how Tableau treats the field in analysis.
 
-Two primary roles:
+**Two primary roles:**
 
 - **Dimension** → categorical grouping  
 - **Measure** → numeric aggregation  
@@ -1245,19 +1264,20 @@ Two primary roles:
 | City | Dimension |
 | Geometry | Measure |
 
-If Latitude/Longitude are set as Dimensions:
+If `Latitude`/`Longitude` are set as **Dimensions:**
+
 - Points may not render correctly  
 - Aggregation logic may break  
 
 
-**Geographic Role — Geocoding Layer**
+#### Geographic Role | Geocoding Layer
 
 The **Geographic Role** connects a field to Tableau’s geocoding engine.
 
-This tells Tableau:
+
 > “This field represents a real-world geographic level.”
 
-Common Geographic Roles
+**Common Geographic Roles:**
 
 - Country/Region  
 - State/Province  
@@ -1294,18 +1314,14 @@ To resolve:
 - Correct spelling inconsistencies  
 
 
-**Geographic Hierarchy — Drill-Down Structure**
+#### Geographic Hierarchy | Drill-Down Structure
 
 A **Hierarchy** defines the logical order of geographic levels.
 
-Example:
 
-- Country  
-  - State  
-    - City  
-      - Postal Code  
+Country  $\rightarrow$  State  $\rightarrow$  City  $\rightarrow$  Postal Code  
 
-Hierarchies allow:
+**Hierarchies allow:**
 
 - Drill-down navigation  
 - Controlled aggregation  
@@ -1323,31 +1339,36 @@ Benefits
 - Maintains geographic logic  
 - Improves dashboard interactivity  
 
+<!-- TODO: add screenshots -->
+
 ### Mapping
 
 **Mapping with Raw Coordinates**
 
-If your dataset contains Latitude and Longitude:
+If your dataset contains `Latitude` and `Longitude`:
 
-Required Configuration
+**Required Configuration:**
 
 - Data Type → Number (Decimal)  
 - Data Role → Measure  
 - Geographic Role → Latitude / Longitude  
 
-Validation Rules
+**Validation Rules:**
 
-- Longitude range: -180 to 180  
-- Latitude range: -90 to 90  
+- Longitude range: `-180` to `180`  
+- Latitude range: `-90` to `90`  
 - Coordinates must be decimal degrees  
 
-Longitude always goes to:
 
-- Columns (X-axis)
 
-Latitude always goes to:
+::: {.callout-important}
 
-- Rows (Y-axis)
+- Longitude always goes to: Columns (`X-axis`)
+- Latitude always goes to: Rows (`Y-axis`)
+
+
+:::
+
 
 If properly configured:
 
@@ -1389,40 +1410,39 @@ Enables:
 - Spatial joins  
 - Spatial calculations  
 
-### Map Styling and Layering
 
-**Map Styles**
+### Map Styles
 
 Once configuration is correct, map styling enhances interpretability.
 
-Background Map Styles are
+**Background Map Styles are:**
 
 - Light  
 - Normal  
 - Streets  
 - Satellite  
 
-Choose style based on:
+**Choose style based on:**
 
 - Analytical clarity  
 - Contrast with marks  
 - Density visualization  
 
-**Map Layers**
+### Map Layers
 
-Tableau allows multiple layers:
+**Tableau allows multiple layers:**
 
 - Polygon layer (district boundaries)  
 - Point layer (stations)  
 - Line layer (routes)  
 
-Multi-layer maps enable:
+**Multi-layer maps enable:**
 
 - Territory + event visualization  
 - Origin–destination flows  
 - Hotspot analysis  
 
-Each layer can have:
+**Each layer can have:**
 
 - Independent mark type  
 - Independent color  
@@ -1434,33 +1454,33 @@ Each layer can have:
 
 Now let's create a simple map showing the distribution of the trips across New York city using the geometry field from the spatial file.
 
-**Step 1**
+#### **Step 1**
 
 As we do not have a column with states we will make a calculated field `'New York'` and assign it as a geographic role with the level of **State/Province**. This will allow us to use the geometry field from the spatial file to plot the map of New York city.
 
-**Step 2**
+#### **Step 2**
 
 Now we can make a hierarchy by right clicking on the newly created field, `[State]` and choosing **Hierarchy** → **Create Hierarchy** and then dragging the `[Boroname]` field (NYC borough) to the hierarchy. This will allow us to drill down from the state level to the geometry level and see the different districts of New York city which are available in our spatial file.
 
 ![Location Hierarchy]({{< meta image_path >}}/w3_location_hierarchy.png)
 
-**Step 3**
+#### **Step 3**
 
 In order to count rides by district, we will drag the `Ride ID` field to the view and change the aggregation to **Count**. To show the distribution we can place the `Count of Ride ID` on the color mark and we will have a **choropleth map** showing the distribution of the rides across the different districts of New York city.
 
-**Step 4**
+#### **Step 4**
 
 To make districts more visible drag and drop `[Boroname]` field to the label mark and we will have the name of the district on the map.
 
-**Step 5**
+#### **Step 5**
 
 To make the map more readable, we can also change the background map style by right clicking on the map and choosing **Background Layers** and then choosing the style that we like. In this case, we will choose the **Light** style to make the districts more visible and add **Background Map Layer** by ticked prefferences such as **Land Cover** and **Labels** to make the map more informative.
 
 ![Simple Map]({{< meta image_path >}}/w3_simple_map.png)
 
-### Map with layers, polygons, points, and lines
+### Advanced Map Creation
 
-**Step 1**  
+#### **Step 1**  
 
 As we have already done the join between the spatial file and the tabular file, we can now build a map using the geometry field from the spatial file. To do that:
 
@@ -1478,18 +1498,18 @@ The result is a map of New York City with its districts.
 ![Polygons]({{< meta image_path >}}/w3_polygons.png)
 
 
-**Step 2**
+#### **Step 2**
 
 Now we can add the trips data to the map. To do that let's create calculated fields for the start and end locations of the trips using `MAKEPOINT()` function as explained in the spatial joins section. Then we can add these calculated fields to the view to show the trip start and end locations on the map.
 
 
-**Step 3**
+#### **Step 3**
 
 Having the trip start and end locations we can now make a flow map to show the movement of the trips between the start and end locations. To do that we will use `MAKELINE()` function to create a line between the start and end points of each trip. Then we can add this line to the view to visualize the flow of trips across the city.
 
 ![Lines]({{< meta image_path >}}/w3_lines.png)
 
-**Step 4**
+#### **Step 4**
 
 In map visualizations, we can use different geometry types adding map layers to show different aspects of the data. For example, we can draw routes to the polygon layer by dragging the line geometry to the view and we can also show the start and end points of the trips by dragging the point geometry to the view. This allows us to create a multi-layered map that shows both the routes and the locations of trip starts and ends.
 
@@ -1679,9 +1699,9 @@ This allows us to answer questions such as:
 
 For this dataset, the cohort is defined as:
 
-**Customers grouped by the month of their first invoice date**
+>**Customers grouped by the month of their first invoice date**
 
-So:
+$$\downarrow$$
 
 - Customers whose first order was in **January 2011** belong to the **January 2011 cohort**  
 - Customers whose first order was in **February 2011** belong to the **February 2011 cohort**  
@@ -1816,22 +1836,19 @@ This means:
 
 ---
 
-### Additional Analysis
+### Cohort by Country
 
-#### Cohort by Country
+Let's try to add **Country** to Filters  and answer the following questions:
 
-- Add **Country** to Filters  
-
-Questions:
 
 - Which countries retain better?
 - Which markets are stronger?
 
 ---
 
-#### Product-Based Cohort
+### Product-Based Cohort
 
-Group customers by first product category.
+Group customers by first product category and answer the following questions:
 
 Questions:
 
@@ -1842,9 +1859,8 @@ Questions:
 
 #### Revenue Cohort
 
-Analyze revenue instead of user count.
+Analyze revenue instead of user count and answer the following questions:
 
-Questions:
 
 - Which cohort generates highest revenue?
 - Do newer cohorts spend more?
