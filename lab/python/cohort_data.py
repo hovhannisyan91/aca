@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 
@@ -24,7 +25,9 @@ df["acquisition_month"] = df["acquisition_date"].dt.to_period("M")
 # ---------------------------
 df["gender"] = np.random.choice(["Male", "Female"], n_users)
 
-df["marital_status"] = np.random.choice(["Single", "Married"], n_users, p=[0.6, 0.4])
+df["marital_status"] = np.random.choice(
+    ["Single", "Married"], n_users, p=[0.6, 0.4]
+)
 
 df["age"] = np.random.normal(35, 10, n_users).astype(int)
 df["age"] = df["age"].clip(18, 65)
@@ -39,18 +42,9 @@ df["income_segment"] = pd.cut(
 # 3. COUNTRY
 # ---------------------------
 countries = [
-    "Germany",
-    "France",
-    "Italy",
-    "Spain",
-    "Poland",
-    "Netherlands",
-    "Belgium",
-    "Sweden",
-    "Austria",
-    "Switzerland",
-    "Portugal",
-    "Czech Republic",
+    "Germany", "France", "Italy", "Spain", "Poland",
+    "Netherlands", "Belgium", "Sweden", "Austria",
+    "Switzerland", "Portugal", "Czech Republic",
 ]
 
 df["country"] = np.random.choice(countries, n_users)
@@ -85,7 +79,7 @@ df["plan_type"] = np.where(
 )
 
 # ---------------------------
-# 7. COHORT EFFECT (STRONGER + REALISTIC)
+# 7. COHORT EFFECT
 # ---------------------------
 cohort_behavior = {
     "2024-01": "good",
@@ -100,33 +94,48 @@ cohort_behavior = {
 
 df["cohort_type"] = df["acquisition_month"].astype(str).map(cohort_behavior)
 
-
-def generate_tenure(row):
-    ctype = row["cohort_type"]
-
-    if ctype == "good":
-        probs = [0.1, 0.2, 0.3, 0.4]
-    elif ctype == "moderate":
-        probs = [0.2, 0.3, 0.3, 0.2]
+# ---------------------------
+# 8. HAZARD CURVES
+# ---------------------------
+def get_hazard_curve(cohort_type):
+    if cohort_type == "bad":
+        return [0.35, 0.25, 0.15, 0.10, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.02]
+    elif cohort_type == "moderate":
+        return [0.25, 0.20, 0.15, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02]
     else:
-        probs = [0.4, 0.3, 0.2, 0.1]
+        return [0.10, 0.08, 0.07, 0.06, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.02, 0.02]
 
-    bucket = np.random.choice(["early", "mid", "late", "no_churn"], p=probs)
+# optional business adjustments
+def adjust_hazard(hazards, row):
+    hazards = np.array(hazards)
 
-    if bucket == "early":
-        return np.random.randint(1, 4)
-    elif bucket == "mid":
-        return np.random.randint(4, 8)
-    elif bucket == "late":
-        return np.random.randint(8, 13)
-    else:
-        return None
+    # premium users churn less
+    if row["plan_type"] == "Premium":
+        hazards *= 0.7
 
+    # paid users churn more
+    if row["channel"] == "Paid Ads":
+        hazards *= 1.2
 
-df["tenure"] = df.apply(generate_tenure, axis=1)
+    return np.clip(hazards, 0, 1)
 
 # ---------------------------
-# 8. CANCELLATION MONTH
+# 9. SIMULATE TENURE
+# ---------------------------
+def simulate_tenure(row):
+    hazards = get_hazard_curve(row["cohort_type"])
+    hazards = adjust_hazard(hazards, row)
+
+    for month in range(1, 13):
+        if np.random.rand() < hazards[month - 1]:
+            return month
+
+    return None
+
+df["tenure"] = df.apply(simulate_tenure, axis=1)
+
+# ---------------------------
+# 10. CANCELLATION DATE
 # ---------------------------
 df["cancellation_month"] = df.apply(
     lambda row: (
@@ -138,14 +147,14 @@ df["cancellation_month"] = df.apply(
 )
 
 # ---------------------------
-# 9. APPLY OBSERVATION WINDOW (CRITICAL FIX)
+# 11. OBSERVATION WINDOW (FULL 12 MONTHS)
 # ---------------------------
-max_observation = pd.to_datetime("2024-12-01")
+max_observation = pd.to_datetime("2025-08-01")
 
 df.loc[df["cancellation_month"] > max_observation, "cancellation_month"] = pd.NaT
 
 # ---------------------------
-# 10. FINAL CLEANING
+# 12. FINAL CLEANING
 # ---------------------------
 df = df.drop(columns=["cohort_type", "tenure", "acquisition_month"])
 
@@ -166,7 +175,8 @@ df = df[
     ]
 ]
 
-print(df.head())
-
-
+# ---------------------------
+# 13. SAVE
+# ---------------------------
 df.to_csv("data/cohort/cohort_analysis.csv", index=False)
+
