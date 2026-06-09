@@ -65,11 +65,30 @@ Understanding this layered computation is essential for building correct analyti
 
 ---
 
-### Combining Aggregation with Table Calculations
+### Percentage Contribution Over Time
 
 One of the most common patterns in complex calculations is combining aggregation with table calculations.
 
 For example, calculating the **percentage contribution of each category over time**:
+
+
+#### Input
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525 | 101,223 | 39,734 |
+| Boston | 64,750 | 72,224 | 35,047 |
+| Chicago | 71,936 | 63,697 | 35,247 |
+| Dallas | 57,267 | 54,628 | 30,285 |
+| Denver | 76,488 | 73,585 | 29,613 |
+| Los Angeles | 64,674 | 106,570 | 11,326 |
+| Miami | 47,172 | 62,693 | 37,028 |
+| New York | 75,898 | 87,916 | 29,039 |
+| San Francisco | 50,098 | 68,662 | 29,742 |
+| Seattle | 73,588 | 78,309 | 26,954 |
+
+
+#### Function
 
 ```sql
 RUNNING_SUM(SUM([Order Total])) / WINDOW_SUM(SUM([Order Total]))
@@ -82,15 +101,81 @@ RUNNING_SUM(SUM([Order Total])) / WINDOW_SUM(SUM([Order Total]))
 - Total window comparison: `WINDOW_SUM`  
 
 This type of calculation is often used to understand cumulative contribution.
-<!-- TODO -->
-<!-- ![]({{< meta image_path >}}/w3_running_sum_percent_total.png) -->
----
 
-### Nested Table Calculations
+#### Execution
+
+| City | Year | Revenue | Running Sum | Window Sum | Calculation | Result |
+|---|---:|---:|---:|---:|---:|---:|
+| Atlanta | 2023 | 94,525 | 94,525 | 235,482 | 94,525 / 235,482 | 40.14% |
+| Atlanta | 2024 | 101,223 | 195,748 | 235,482 | 195,748 / 235,482 | 83.13% |
+| Atlanta | 2025 | 39,734 | 235,482 | 235,482 | 235,482 / 235,482 | 100.00% |
+| Boston | 2023 | 64,750 | 64,750 | 172,021 | 64,750 / 172,021 | 37.64% |
+| Boston | 2024 | 72,224 | 136,974 | 172,021 | 136,974 / 172,021 | 79.63% |
+| Boston | 2025 | 35,047 | 172,021 | 172,021 | 172,021 / 172,021 | 100.00% |
+| Chicago | 2023 | 71,936 | 71,936 | 170,880 | 71,936 / 170,880 | 42.10% |
+| Chicago | 2024 | 63,697 | 135,633 | 170,880 | 135,633 / 170,880 | 79.37% |
+| Chicago | 2025 | 35,247 | 170,880 | 170,880 | 170,880 / 170,880 | 100.00% |
+| Dallas | 2023 | 57,267 | 57,267 | 142,180 | 57,267 / 142,180 | 40.28% |
+| Dallas | 2024 | 54,628 | 111,895 | 142,180 | 111,895 / 142,180 | 78.70% |
+| Dallas | 2025 | 30,285 | 142,180 | 142,180 | 142,180 / 142,180 | 100.00% |
+| Denver | 2023 | 76,488 | 76,488 | 179,686 | 76,488 / 179,686 | 42.57% |
+| Denver | 2024 | 73,585 | 150,073 | 179,686 | 150,073 / 179,686 | 83.52% |
+| Denver | 2025 | 29,613 | 179,686 | 179,686 | 179,686 / 179,686 | 100.00% |
+| Los Angeles | 2023 | 64,674 | 64,674 | 182,570 | 64,674 / 182,570 | 35.42% |
+| Los Angeles | 2024 | 106,570 | 171,244 | 182,570 | 171,244 / 182,570 | 93.80% |
+| Los Angeles | 2025 | 11,326 | 182,570 | 182,570 | 182,570 / 182,570 | 100.00% |
+| Miami | 2023 | 47,172 | 47,172 | 146,893 | 47,172 / 146,893 | 32.11% |
+| Miami | 2024 | 62,693 | 109,865 | 146,893 | 109,865 / 146,893 | 74.79% |
+| Miami | 2025 | 37,028 | 146,893 | 146,893 | 146,893 / 146,893 | 100.00% |
+| New York | 2023 | 75,898 | 75,898 | 192,853 | 75,898 / 192,853 | 39.36% |
+| New York | 2024 | 87,916 | 163,814 | 192,853 | 163,814 / 192,853 | 84.94% |
+| New York | 2025 | 29,039 | 192,853 | 192,853 | 192,853 / 192,853 | 100.00% |
+| San Francisco | 2023 | 50,098 | 50,098 | 148,502 | 50,098 / 148,502 | 33.74% |
+| San Francisco | 2024 | 68,662 | 118,760 | 148,502 | 118,760 / 148,502 | 79.97% |
+| San Francisco | 2025 | 29,742 | 148,502 | 148,502 | 148,502 / 148,502 | 100.00% |
+| Seattle | 2023 | 73,588 | 73,588 | 178,851 | 73,588 / 178,851 | 41.14% |
+| Seattle | 2024 | 78,309 | 151,897 | 178,851 | 151,897 / 178,851 | 84.93% |
+| Seattle | 2025 | 26,954 | 178,851 | 178,851 | 178,851 / 178,851 | 100.00% |
+
+#### Output
+
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 40.14% | 83.13% | 100.00% |
+| Boston | 37.64% | 79.63% | 100.00% |
+| Chicago | 42.10% | 79.37% | 100.00% |
+| Dallas | 40.28% | 78.70% | 100.00% |
+| Denver | 42.57% | 83.52% | 100.00% |
+| Los Angeles | 35.42% | 93.80% | 100.00% |
+| Miami | 32.11% | 74.79% | 100.00% |
+| New York | 39.36% | 84.94% | 100.00% |
+| San Francisco | 33.74% | 79.97% | 100.00% |
+| Seattle | 41.14% | 84.93% | 100.00% |
+
+
+### Percent Difference Between Consecutive Running Totals
 
 Tableau allows nesting of table calculations, where one table calculation is used inside another.
 
-For example, calculating **percent difference between consecutive running totals**:
+Strictly speaking, the calculation below returns the **absolute difference between consecutive running totals**, not the percent difference.
+
+#### Input
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525 | 101,223 | 39,734 |
+| Boston | 64,750 | 72,224 | 35,047 |
+| Chicago | 71,936 | 63,697 | 35,247 |
+| Dallas | 57,267 | 54,628 | 30,285 |
+| Denver | 76,488 | 73,585 | 29,613 |
+| Los Angeles | 64,674 | 106,570 | 11,326 |
+| Miami | 47,172 | 62,693 | 37,028 |
+| New York | 75,898 | 87,916 | 29,039 |
+| San Francisco | 50,098 | 68,662 | 29,742 |
+| Seattle | 73,588 | 78,309 | 26,954 |
+
+#### Function
 
 ```sql
 RUNNING_SUM(SUM([Order Total])) - LOOKUP(RUNNING_SUM(SUM([Order Total])), -1)
@@ -98,13 +183,61 @@ RUNNING_SUM(SUM([Order Total])) - LOOKUP(RUNNING_SUM(SUM([Order Total])), -1)
 
 **This calculation combines:**
 
-- A running total  
-- A lookup to the previous value  
+- Aggregation: `SUM([Order Total])`  
+- Running accumulation: `RUNNING_SUM`  
+- Previous value lookup: `LOOKUP(..., -1)`  
 
-Nested calculations like this are powerful but require careful configuration of partitioning and addressing.
+This calculation compares the current running total with the previous running total.
 
-<!-- TODO -->
-<!-- ![]({{< meta image_path >}}/w3_nested_calculation.png) -->
+#### Execution
+
+| City | Year | Revenue | Running Sum | Previous Running Sum | Calculation | Result |
+|---|---:|---:|---:|---:|---:|---:|
+| Atlanta | 2023 | 94,525 | 94,525 | NULL | 94,525 - NULL | NULL |
+| Atlanta | 2024 | 101,223 | 195,748 | 94,525 | 195,748 - 94,525 | 101,223 |
+| Atlanta | 2025 | 39,734 | 235,482 | 195,748 | 235,482 - 195,748 | 39,734 |
+| Boston | 2023 | 64,750 | 64,750 | NULL | 64,750 - NULL | NULL |
+| Boston | 2024 | 72,224 | 136,974 | 64,750 | 136,974 - 64,750 | 72,224 |
+| Boston | 2025 | 35,047 | 172,021 | 136,974 | 172,021 - 136,974 | 35,047 |
+| Chicago | 2023 | 71,936 | 71,936 | NULL | 71,936 - NULL | NULL |
+| Chicago | 2024 | 63,697 | 135,633 | 71,936 | 135,633 - 71,936 | 63,697 |
+| Chicago | 2025 | 35,247 | 170,880 | 135,633 | 170,880 - 135,633 | 35,247 |
+| Dallas | 2023 | 57,267 | 57,267 | NULL | 57,267 - NULL | NULL |
+| Dallas | 2024 | 54,628 | 111,895 | 57,267 | 111,895 - 57,267 | 54,628 |
+| Dallas | 2025 | 30,285 | 142,180 | 111,895 | 142,180 - 111,895 | 30,285 |
+| Denver | 2023 | 76,488 | 76,488 | NULL | 76,488 - NULL | NULL |
+| Denver | 2024 | 73,585 | 150,073 | 76,488 | 150,073 - 76,488 | 73,585 |
+| Denver | 2025 | 29,613 | 179,686 | 150,073 | 179,686 - 150,073 | 29,613 |
+| Los Angeles | 2023 | 64,674 | 64,674 | NULL | 64,674 - NULL | NULL |
+| Los Angeles | 2024 | 106,570 | 171,244 | 64,674 | 171,244 - 64,674 | 106,570 |
+| Los Angeles | 2025 | 11,326 | 182,570 | 171,244 | 182,570 - 171,244 | 11,326 |
+| Miami | 2023 | 47,172 | 47,172 | NULL | 47,172 - NULL | NULL |
+| Miami | 2024 | 62,693 | 109,865 | 47,172 | 109,865 - 47,172 | 62,693 |
+| Miami | 2025 | 37,028 | 146,893 | 109,865 | 146,893 - 109,865 | 37,028 |
+| New York | 2023 | 75,898 | 75,898 | NULL | 75,898 - NULL | NULL |
+| New York | 2024 | 87,916 | 163,814 | 75,898 | 163,814 - 75,898 | 87,916 |
+| New York | 2025 | 29,039 | 192,853 | 163,814 | 192,853 - 163,814 | 29,039 |
+| San Francisco | 2023 | 50,098 | 50,098 | NULL | 50,098 - NULL | NULL |
+| San Francisco | 2024 | 68,662 | 118,760 | 50,098 | 118,760 - 50,098 | 68,662 |
+| San Francisco | 2025 | 29,742 | 148,502 | 118,760 | 148,502 - 118,760 | 29,742 |
+| Seattle | 2023 | 73,588 | 73,588 | NULL | 73,588 - NULL | NULL |
+| Seattle | 2024 | 78,309 | 151,897 | 73,588 | 151,897 - 73,588 | 78,309 |
+| Seattle | 2025 | 26,954 | 178,851 | 151,897 | 178,851 - 151,897 | 26,954 |
+
+#### Output
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | NULL | 101,223 | 39,734 |
+| Boston | NULL | 72,224 | 35,047 |
+| Chicago | NULL | 63,697 | 35,247 |
+| Dallas | NULL | 54,628 | 30,285 |
+| Denver | NULL | 73,585 | 29,613 |
+| Los Angeles | NULL | 106,570 | 11,326 |
+| Miami | NULL | 62,693 | 37,028 |
+| New York | NULL | 87,916 | 29,039 |
+| San Francisco | NULL | 68,662 | 29,742 |
+| Seattle | NULL | 78,309 | 26,954 |
 
 ---
 
@@ -114,87 +247,343 @@ Complex calculations often include conditional logic to control behavior dynamic
 
 For example, showing only positive growth:
 
+#### Input
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525 | 101,223 | 39,734 |
+| Boston | 64,750 | 72,224 | 35,047 |
+| Chicago | 71,936 | 63,697 | 35,247 |
+| Dallas | 57,267 | 54,628 | 30,285 |
+| Denver | 76,488 | 73,585 | 29,613 |
+| Los Angeles | 64,674 | 106,570 | 11,326 |
+| Miami | 47,172 | 62,693 | 37,028 |
+| New York | 75,898 | 87,916 | 29,039 |
+| San Francisco | 50,098 | 68,662 | 29,742 |
+| Seattle | 73,588 | 78,309 | 26,954 |
+
+#### Function
+
 ```sql
 IF SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1) > 0 THEN
     SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)
 END
 ```
 
->This type of logic allows analysts to highlight specific patterns such as growth periods.
+**This calculation combines:**
 
-<!-- TODO -->
-<!-- ![]({{< meta image_path >}}/w3_conditional_calculation.png) -->
+- Aggregation: `SUM([Order Total])`  
+- Previous value lookup: `LOOKUP(..., -1)`  
+- Conditional logic: `IF ... THEN ... END`  
+
+This type of logic allows analysts to highlight specific patterns such as growth periods.
+
+#### Execution
+
+| City | Year | Revenue | Previous Revenue | Calculation | Difference | Positive? | Result |
+|---|---:|---:|---:|---:|---:|:---:|---:|
+| Atlanta | 2023 | 94,525 | NULL | 94,525 - NULL | NULL | NULL | NULL |
+| Atlanta | 2024 | 101,223 | 94,525 | 101,223 - 94,525 | 6,698 | Yes | 6,698 |
+| Atlanta | 2025 | 39,734 | 101,223 | 39,734 - 101,223 | -61,489 | No | NULL |
+| Boston | 2023 | 64,750 | NULL | 64,750 - NULL | NULL | NULL | NULL |
+| Boston | 2024 | 72,224 | 64,750 | 72,224 - 64,750 | 7,474 | Yes | 7,474 |
+| Boston | 2025 | 35,047 | 72,224 | 35,047 - 72,224 | -37,177 | No | NULL |
+| Chicago | 2023 | 71,936 | NULL | 71,936 - NULL | NULL | NULL | NULL |
+| Chicago | 2024 | 63,697 | 71,936 | 63,697 - 71,936 | -8,239 | No | NULL |
+| Chicago | 2025 | 35,247 | 63,697 | 35,247 - 63,697 | -28,450 | No | NULL |
+| Dallas | 2023 | 57,267 | NULL | 57,267 - NULL | NULL | NULL | NULL |
+| Dallas | 2024 | 54,628 | 57,267 | 54,628 - 57,267 | -2,639 | No | NULL |
+| Dallas | 2025 | 30,285 | 54,628 | 30,285 - 54,628 | -24,343 | No | NULL |
+| Denver | 2023 | 76,488 | NULL | 76,488 - NULL | NULL | NULL | NULL |
+| Denver | 2024 | 73,585 | 76,488 | 73,585 - 76,488 | -2,903 | No | NULL |
+| Denver | 2025 | 29,613 | 73,585 | 29,613 - 73,585 | -43,972 | No | NULL |
+| Los Angeles | 2023 | 64,674 | NULL | 64,674 - NULL | NULL | NULL | NULL |
+| Los Angeles | 2024 | 106,570 | 64,674 | 106,570 - 64,674 | 41,896 | Yes | 41,896 |
+| Los Angeles | 2025 | 11,326 | 106,570 | 11,326 - 106,570 | -95,244 | No | NULL |
+| Miami | 2023 | 47,172 | NULL | 47,172 - NULL | NULL | NULL | NULL |
+| Miami | 2024 | 62,693 | 47,172 | 62,693 - 47,172 | 15,521 | Yes | 15,521 |
+| Miami | 2025 | 37,028 | 62,693 | 37,028 - 62,693 | -25,665 | No | NULL |
+| New York | 2023 | 75,898 | NULL | 75,898 - NULL | NULL | NULL | NULL |
+| New York | 2024 | 87,916 | 75,898 | 87,916 - 75,898 | 12,018 | Yes | 12,018 |
+| New York | 2025 | 29,039 | 87,916 | 29,039 - 87,916 | -58,877 | No | NULL |
+| San Francisco | 2023 | 50,098 | NULL | 50,098 - NULL | NULL | NULL | NULL |
+| San Francisco | 2024 | 68,662 | 50,098 | 68,662 - 50,098 | 18,564 | Yes | 18,564 |
+| San Francisco | 2025 | 29,742 | 68,662 | 29,742 - 68,662 | -38,920 | No | NULL |
+| Seattle | 2023 | 73,588 | NULL | 73,588 - NULL | NULL | NULL | NULL |
+| Seattle | 2024 | 78,309 | 73,588 | 78,309 - 73,588 | 4,721 | Yes | 4,721 |
+| Seattle | 2025 | 26,954 | 78,309 | 26,954 - 78,309 | -51,355 | No | NULL |
+
+#### Output
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | NULL | 6,698 | NULL |
+| Boston | NULL | 7,474 | NULL |
+| Chicago | NULL | NULL | NULL |
+| Dallas | NULL | NULL | NULL |
+| Denver | NULL | NULL | NULL |
+| Los Angeles | NULL | 41,896 | NULL |
+| Miami | NULL | 15,521 | NULL |
+| New York | NULL | 12,018 | NULL |
+| San Francisco | NULL | 18,564 | NULL |
+| Seattle | NULL | 4,721 | NULL |
 
 ---
 
-### Window Functions
+### Moving Average
 
 Window functions perform calculations across a defined range of data within a partition.
 
-These are essential for complex analytics.
+The moving average below calculates the average over the last `4` periods. In this example, there are only three years, so Tableau uses the available years in the partition.
 
+#### Input
 
-- Moving averages
-- Window sum
-- Window max
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525 | 101,223 | 39,734 |
+| Boston | 64,750 | 72,224 | 35,047 |
+| Chicago | 71,936 | 63,697 | 35,247 |
+| Dallas | 57,267 | 54,628 | 30,285 |
+| Denver | 76,488 | 73,585 | 29,613 |
+| Los Angeles | 64,674 | 106,570 | 11,326 |
+| Miami | 47,172 | 62,693 | 37,028 |
+| New York | 75,898 | 87,916 | 29,039 |
+| San Francisco | 50,098 | 68,662 | 29,742 |
+| Seattle | 73,588 | 78,309 | 26,954 |
 
-#### Moving Average
-
-Calculates average over the last `4` periods (offset `-3` to `0` means the current period plus `3` previous periods = `4` total).
-
+#### Function
 
 ```sql
 WINDOW_AVG(SUM([Order Total]), -3, 0)
 ```
 
-<!--  -->
+**This calculation combines:**
+
+- Aggregation: `SUM([Order Total])`  
+- Window calculation: `WINDOW_AVG`  
+- Relative window range: from `-3` to `0`  
+
+This calculation is often used to smooth short-term fluctuations and reveal broader trends.
+
+#### Execution
+
+| City | Year | Revenue | Window Values | Calculation | Result |
+|---|---:|---:|---|---:|---:|
+| Atlanta | 2023 | 94,525 | 94,525 | (94,525) / 1 | 94,525.00 |
+| Atlanta | 2024 | 101,223 | 94,525, 101,223 | (94,525 + 101,223) / 2 | 97,874.00 |
+| Atlanta | 2025 | 39,734 | 94,525, 101,223, 39,734 | (94,525 + 101,223 + 39,734) / 3 | 78,494.00 |
+| Boston | 2023 | 64,750 | 64,750 | (64,750) / 1 | 64,750.00 |
+| Boston | 2024 | 72,224 | 64,750, 72,224 | (64,750 + 72,224) / 2 | 68,487.00 |
+| Boston | 2025 | 35,047 | 64,750, 72,224, 35,047 | (64,750 + 72,224 + 35,047) / 3 | 57,340.33 |
+| Chicago | 2023 | 71,936 | 71,936 | (71,936) / 1 | 71,936.00 |
+| Chicago | 2024 | 63,697 | 71,936, 63,697 | (71,936 + 63,697) / 2 | 67,816.50 |
+| Chicago | 2025 | 35,247 | 71,936, 63,697, 35,247 | (71,936 + 63,697 + 35,247) / 3 | 56,960.00 |
+| Dallas | 2023 | 57,267 | 57,267 | (57,267) / 1 | 57,267.00 |
+| Dallas | 2024 | 54,628 | 57,267, 54,628 | (57,267 + 54,628) / 2 | 55,947.50 |
+| Dallas | 2025 | 30,285 | 57,267, 54,628, 30,285 | (57,267 + 54,628 + 30,285) / 3 | 47,393.33 |
+| Denver | 2023 | 76,488 | 76,488 | (76,488) / 1 | 76,488.00 |
+| Denver | 2024 | 73,585 | 76,488, 73,585 | (76,488 + 73,585) / 2 | 75,036.50 |
+| Denver | 2025 | 29,613 | 76,488, 73,585, 29,613 | (76,488 + 73,585 + 29,613) / 3 | 59,895.33 |
+| Los Angeles | 2023 | 64,674 | 64,674 | (64,674) / 1 | 64,674.00 |
+| Los Angeles | 2024 | 106,570 | 64,674, 106,570 | (64,674 + 106,570) / 2 | 85,622.00 |
+| Los Angeles | 2025 | 11,326 | 64,674, 106,570, 11,326 | (64,674 + 106,570 + 11,326) / 3 | 60,856.67 |
+| Miami | 2023 | 47,172 | 47,172 | (47,172) / 1 | 47,172.00 |
+| Miami | 2024 | 62,693 | 47,172, 62,693 | (47,172 + 62,693) / 2 | 54,932.50 |
+| Miami | 2025 | 37,028 | 47,172, 62,693, 37,028 | (47,172 + 62,693 + 37,028) / 3 | 48,964.33 |
+| New York | 2023 | 75,898 | 75,898 | (75,898) / 1 | 75,898.00 |
+| New York | 2024 | 87,916 | 75,898, 87,916 | (75,898 + 87,916) / 2 | 81,907.00 |
+| New York | 2025 | 29,039 | 75,898, 87,916, 29,039 | (75,898 + 87,916 + 29,039) / 3 | 64,284.33 |
+| San Francisco | 2023 | 50,098 | 50,098 | (50,098) / 1 | 50,098.00 |
+| San Francisco | 2024 | 68,662 | 50,098, 68,662 | (50,098 + 68,662) / 2 | 59,380.00 |
+| San Francisco | 2025 | 29,742 | 50,098, 68,662, 29,742 | (50,098 + 68,662 + 29,742) / 3 | 49,500.67 |
+| Seattle | 2023 | 73,588 | 73,588 | (73,588) / 1 | 73,588.00 |
+| Seattle | 2024 | 78,309 | 73,588, 78,309 | (73,588 + 78,309) / 2 | 75,948.50 |
+| Seattle | 2025 | 26,954 | 73,588, 78,309, 26,954 | (73,588 + 78,309 + 26,954) / 3 | 59,617.00 |
+
+#### Output
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525.00 | 97,874.00 | 78,494.00 |
+| Boston | 64,750.00 | 68,487.00 | 57,340.33 |
+| Chicago | 71,936.00 | 67,816.50 | 56,960.00 |
+| Dallas | 57,267.00 | 55,947.50 | 47,393.33 |
+| Denver | 76,488.00 | 75,036.50 | 59,895.33 |
+| Los Angeles | 64,674.00 | 85,622.00 | 60,856.67 |
+| Miami | 47,172.00 | 54,932.50 | 48,964.33 |
+| New York | 75,898.00 | 81,907.00 | 64,284.33 |
+| San Francisco | 50,098.00 | 59,380.00 | 49,500.67 |
+| Seattle | 73,588.00 | 75,948.50 | 59,617.00 |
 
 ---
 
-#### Window Sum
+### Window Sum
 
-Calculates total within the partition.
+Window sum calculates the total value within the partition.
+
+In this example, the partition is each city, and the calculation is computed across years.
+
+#### Input
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525 | 101,223 | 39,734 |
+| Boston | 64,750 | 72,224 | 35,047 |
+| Chicago | 71,936 | 63,697 | 35,247 |
+| Dallas | 57,267 | 54,628 | 30,285 |
+| Denver | 76,488 | 73,585 | 29,613 |
+| Los Angeles | 64,674 | 106,570 | 11,326 |
+| Miami | 47,172 | 62,693 | 37,028 |
+| New York | 75,898 | 87,916 | 29,039 |
+| San Francisco | 50,098 | 68,662 | 29,742 |
+| Seattle | 73,588 | 78,309 | 26,954 |
+
+#### Function
 
 ```sql
 WINDOW_SUM(SUM([Order Total]))
 ```
 
+**This calculation combines:**
+
+- Aggregation: `SUM([Order Total])`  
+- Window-level total: `WINDOW_SUM`  
+- Partition-based calculation across years  
+
+The result is the same for each year because Tableau calculates the total across the full city-level window.
+
+#### Execution
+
+| City | Year | Revenue | Window Values | Calculation | Result |
+|---|---:|---:|---|---:|---:|
+| Atlanta | 2023 | 94,525 | 94,525, 101,223, 39,734 | 94,525 + 101,223 + 39,734 | 235,482 |
+| Atlanta | 2024 | 101,223 | 94,525, 101,223, 39,734 | 94,525 + 101,223 + 39,734 | 235,482 |
+| Atlanta | 2025 | 39,734 | 94,525, 101,223, 39,734 | 94,525 + 101,223 + 39,734 | 235,482 |
+| Boston | 2023 | 64,750 | 64,750, 72,224, 35,047 | 64,750 + 72,224 + 35,047 | 172,021 |
+| Boston | 2024 | 72,224 | 64,750, 72,224, 35,047 | 64,750 + 72,224 + 35,047 | 172,021 |
+| Boston | 2025 | 35,047 | 64,750, 72,224, 35,047 | 64,750 + 72,224 + 35,047 | 172,021 |
+| Chicago | 2023 | 71,936 | 71,936, 63,697, 35,247 | 71,936 + 63,697 + 35,247 | 170,880 |
+| Chicago | 2024 | 63,697 | 71,936, 63,697, 35,247 | 71,936 + 63,697 + 35,247 | 170,880 |
+| Chicago | 2025 | 35,247 | 71,936, 63,697, 35,247 | 71,936 + 63,697 + 35,247 | 170,880 |
+| Dallas | 2023 | 57,267 | 57,267, 54,628, 30,285 | 57,267 + 54,628 + 30,285 | 142,180 |
+| Dallas | 2024 | 54,628 | 57,267, 54,628, 30,285 | 57,267 + 54,628 + 30,285 | 142,180 |
+| Dallas | 2025 | 30,285 | 57,267, 54,628, 30,285 | 57,267 + 54,628 + 30,285 | 142,180 |
+| Denver | 2023 | 76,488 | 76,488, 73,585, 29,613 | 76,488 + 73,585 + 29,613 | 179,686 |
+| Denver | 2024 | 73,585 | 76,488, 73,585, 29,613 | 76,488 + 73,585 + 29,613 | 179,686 |
+| Denver | 2025 | 29,613 | 76,488, 73,585, 29,613 | 76,488 + 73,585 + 29,613 | 179,686 |
+| Los Angeles | 2023 | 64,674 | 64,674, 106,570, 11,326 | 64,674 + 106,570 + 11,326 | 182,570 |
+| Los Angeles | 2024 | 106,570 | 64,674, 106,570, 11,326 | 64,674 + 106,570 + 11,326 | 182,570 |
+| Los Angeles | 2025 | 11,326 | 64,674, 106,570, 11,326 | 64,674 + 106,570 + 11,326 | 182,570 |
+| Miami | 2023 | 47,172 | 47,172, 62,693, 37,028 | 47,172 + 62,693 + 37,028 | 146,893 |
+| Miami | 2024 | 62,693 | 47,172, 62,693, 37,028 | 47,172 + 62,693 + 37,028 | 146,893 |
+| Miami | 2025 | 37,028 | 47,172, 62,693, 37,028 | 47,172 + 62,693 + 37,028 | 146,893 |
+| New York | 2023 | 75,898 | 75,898, 87,916, 29,039 | 75,898 + 87,916 + 29,039 | 192,853 |
+| New York | 2024 | 87,916 | 75,898, 87,916, 29,039 | 75,898 + 87,916 + 29,039 | 192,853 |
+| New York | 2025 | 29,039 | 75,898, 87,916, 29,039 | 75,898 + 87,916 + 29,039 | 192,853 |
+| San Francisco | 2023 | 50,098 | 50,098, 68,662, 29,742 | 50,098 + 68,662 + 29,742 | 148,502 |
+| San Francisco | 2024 | 68,662 | 50,098, 68,662, 29,742 | 50,098 + 68,662 + 29,742 | 148,502 |
+| San Francisco | 2025 | 29,742 | 50,098, 68,662, 29,742 | 50,098 + 68,662 + 29,742 | 148,502 |
+| Seattle | 2023 | 73,588 | 73,588, 78,309, 26,954 | 73,588 + 78,309 + 26,954 | 178,851 |
+| Seattle | 2024 | 78,309 | 73,588, 78,309, 26,954 | 73,588 + 78,309 + 26,954 | 178,851 |
+| Seattle | 2025 | 26,954 | 73,588, 78,309, 26,954 | 73,588 + 78,309 + 26,954 | 178,851 |
+
+#### Output
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 235,482 | 235,482 | 235,482 |
+| Boston | 172,021 | 172,021 | 172,021 |
+| Chicago | 170,880 | 170,880 | 170,880 |
+| Dallas | 142,180 | 142,180 | 142,180 |
+| Denver | 179,686 | 179,686 | 179,686 |
+| Los Angeles | 182,570 | 182,570 | 182,570 |
+| Miami | 146,893 | 146,893 | 146,893 |
+| New York | 192,853 | 192,853 | 192,853 |
+| San Francisco | 148,502 | 148,502 | 148,502 |
+| Seattle | 178,851 | 178,851 | 178,851 |
+
 ---
 
-#### Window Max
+### Window Max
+
+Window max finds the maximum value within a window.
+
+In this example, Tableau finds the highest yearly revenue for each city.
+
+#### Input
+
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 94,525 | 101,223 | 39,734 |
+| Boston | 64,750 | 72,224 | 35,047 |
+| Chicago | 71,936 | 63,697 | 35,247 |
+| Dallas | 57,267 | 54,628 | 30,285 |
+| Denver | 76,488 | 73,585 | 29,613 |
+| Los Angeles | 64,674 | 106,570 | 11,326 |
+| Miami | 47,172 | 62,693 | 37,028 |
+| New York | 75,898 | 87,916 | 29,039 |
+| San Francisco | 50,098 | 68,662 | 29,742 |
+| Seattle | 73,588 | 78,309 | 26,954 |
+
+#### Function
 
 ```sql
 WINDOW_MAX(SUM([Order Total]))
 ```
 
-Finds the maximum value within a window.
+**This calculation combines:**
 
----
+- Aggregation: `SUM([Order Total])`  
+- Window-level maximum: `WINDOW_MAX`  
+- Partition-based comparison across years  
 
-### Difference and Percent Difference
+The result is repeated across years because the maximum is calculated over the full city-level window.
 
-Complex calculations often involve comparing values across time or categories.
+#### Execution
 
-#### Difference
+| City | Year | Revenue | Window Values | Calculation | Result |
+|---|---:|---:|---|---:|---:|
+| Atlanta | 2023 | 94,525 | 94,525, 101,223, 39,734 | MAX(94,525, 101,223, 39,734) | 101,223 |
+| Atlanta | 2024 | 101,223 | 94,525, 101,223, 39,734 | MAX(94,525, 101,223, 39,734) | 101,223 |
+| Atlanta | 2025 | 39,734 | 94,525, 101,223, 39,734 | MAX(94,525, 101,223, 39,734) | 101,223 |
+| Boston | 2023 | 64,750 | 64,750, 72,224, 35,047 | MAX(64,750, 72,224, 35,047) | 72,224 |
+| Boston | 2024 | 72,224 | 64,750, 72,224, 35,047 | MAX(64,750, 72,224, 35,047) | 72,224 |
+| Boston | 2025 | 35,047 | 64,750, 72,224, 35,047 | MAX(64,750, 72,224, 35,047) | 72,224 |
+| Chicago | 2023 | 71,936 | 71,936, 63,697, 35,247 | MAX(71,936, 63,697, 35,247) | 71,936 |
+| Chicago | 2024 | 63,697 | 71,936, 63,697, 35,247 | MAX(71,936, 63,697, 35,247) | 71,936 |
+| Chicago | 2025 | 35,247 | 71,936, 63,697, 35,247 | MAX(71,936, 63,697, 35,247) | 71,936 |
+| Dallas | 2023 | 57,267 | 57,267, 54,628, 30,285 | MAX(57,267, 54,628, 30,285) | 57,267 |
+| Dallas | 2024 | 54,628 | 57,267, 54,628, 30,285 | MAX(57,267, 54,628, 30,285) | 57,267 |
+| Dallas | 2025 | 30,285 | 57,267, 54,628, 30,285 | MAX(57,267, 54,628, 30,285) | 57,267 |
+| Denver | 2023 | 76,488 | 76,488, 73,585, 29,613 | MAX(76,488, 73,585, 29,613) | 76,488 |
+| Denver | 2024 | 73,585 | 76,488, 73,585, 29,613 | MAX(76,488, 73,585, 29,613) | 76,488 |
+| Denver | 2025 | 29,613 | 76,488, 73,585, 29,613 | MAX(76,488, 73,585, 29,613) | 76,488 |
+| Los Angeles | 2023 | 64,674 | 64,674, 106,570, 11,326 | MAX(64,674, 106,570, 11,326) | 106,570 |
+| Los Angeles | 2024 | 106,570 | 64,674, 106,570, 11,326 | MAX(64,674, 106,570, 11,326) | 106,570 |
+| Los Angeles | 2025 | 11,326 | 64,674, 106,570, 11,326 | MAX(64,674, 106,570, 11,326) | 106,570 |
+| Miami | 2023 | 47,172 | 47,172, 62,693, 37,028 | MAX(47,172, 62,693, 37,028) | 62,693 |
+| Miami | 2024 | 62,693 | 47,172, 62,693, 37,028 | MAX(47,172, 62,693, 37,028) | 62,693 |
+| Miami | 2025 | 37,028 | 47,172, 62,693, 37,028 | MAX(47,172, 62,693, 37,028) | 62,693 |
+| New York | 2023 | 75,898 | 75,898, 87,916, 29,039 | MAX(75,898, 87,916, 29,039) | 87,916 |
+| New York | 2024 | 87,916 | 75,898, 87,916, 29,039 | MAX(75,898, 87,916, 29,039) | 87,916 |
+| New York | 2025 | 29,039 | 75,898, 87,916, 29,039 | MAX(75,898, 87,916, 29,039) | 87,916 |
+| San Francisco | 2023 | 50,098 | 50,098, 68,662, 29,742 | MAX(50,098, 68,662, 29,742) | 68,662 |
+| San Francisco | 2024 | 68,662 | 50,098, 68,662, 29,742 | MAX(50,098, 68,662, 29,742) | 68,662 |
+| San Francisco | 2025 | 29,742 | 50,098, 68,662, 29,742 | MAX(50,098, 68,662, 29,742) | 68,662 |
+| Seattle | 2023 | 73,588 | 73,588, 78,309, 26,954 | MAX(73,588, 78,309, 26,954) | 78,309 |
+| Seattle | 2024 | 78,309 | 73,588, 78,309, 26,954 | MAX(73,588, 78,309, 26,954) | 78,309 |
+| Seattle | 2025 | 26,954 | 73,588, 78,309, 26,954 | MAX(73,588, 78,309, 26,954) | 78,309 |
 
-```sql
-SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)
-```
+#### Output
 
-#### Percent Difference
-
-
-**These calculations are used for:**
-
-- Growth analysis  
-- Trend comparison  
-- Performance tracking  
-
-```sql
-(SUM([Order Total]) - LOOKUP(SUM([Order Total]), -1)) 
-/ LOOKUP(SUM([Order Total]), -1)
-```
-
+| City | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|
+| Atlanta | 101,223 | 101,223 | 101,223 |
+| Boston | 72,224 | 72,224 | 72,224 |
+| Chicago | 71,936 | 71,936 | 71,936 |
+| Dallas | 57,267 | 57,267 | 57,267 |
+| Denver | 76,488 | 76,488 | 76,488 |
+| Los Angeles | 106,570
 
 ### Multi-Level Calculations
 
