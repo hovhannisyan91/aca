@@ -940,11 +940,12 @@ window.Quarto = {
   <li><a href="#learning-goals" id="toc-learning-goals" class="nav-link active" data-scroll-target="#learning-goals">Learning Goals</a></li>
   <li><a href="#advanced-table-calculations" id="toc-advanced-table-calculations" class="nav-link" data-scroll-target="#advanced-table-calculations">Advanced Table Calculations</a>
   <ul class="collapse">
-  <li><a href="#combining-aggregation-with-table-calculations" id="toc-combining-aggregation-with-table-calculations" class="nav-link" data-scroll-target="#combining-aggregation-with-table-calculations">Combining Aggregation with Table Calculations</a></li>
-  <li><a href="#nested-table-calculations" id="toc-nested-table-calculations" class="nav-link" data-scroll-target="#nested-table-calculations">Nested Table Calculations</a></li>
+  <li><a href="#percentage-contribution-over-time" id="toc-percentage-contribution-over-time" class="nav-link" data-scroll-target="#percentage-contribution-over-time">Percentage Contribution Over Time</a></li>
+  <li><a href="#percent-difference-between-consecutive-running-totals" id="toc-percent-difference-between-consecutive-running-totals" class="nav-link" data-scroll-target="#percent-difference-between-consecutive-running-totals">Percent Difference Between Consecutive Running Totals</a></li>
   <li><a href="#conditional-table-calculations" id="toc-conditional-table-calculations" class="nav-link" data-scroll-target="#conditional-table-calculations">Conditional Table Calculations</a></li>
-  <li><a href="#window-functions" id="toc-window-functions" class="nav-link" data-scroll-target="#window-functions">Window Functions</a></li>
-  <li><a href="#difference-and-percent-difference" id="toc-difference-and-percent-difference" class="nav-link" data-scroll-target="#difference-and-percent-difference">Difference and Percent Difference</a></li>
+  <li><a href="#moving-average" id="toc-moving-average" class="nav-link" data-scroll-target="#moving-average">Moving Average</a></li>
+  <li><a href="#window-sum" id="toc-window-sum" class="nav-link" data-scroll-target="#window-sum">Window Sum</a></li>
+  <li><a href="#window-max" id="toc-window-max" class="nav-link" data-scroll-target="#window-max">Window Max</a></li>
   <li><a href="#multi-level-calculations" id="toc-multi-level-calculations" class="nav-link" data-scroll-target="#multi-level-calculations">Multi-Level Calculations</a></li>
   <li><a href="#interaction-with-view-structure" id="toc-interaction-with-view-structure" class="nav-link" data-scroll-target="#interaction-with-view-structure">Interaction with View Structure</a></li>
   <li><a href="#table-calculations" id="toc-table-calculations" class="nav-link" data-scroll-target="#table-calculations">Table Calculations</a></li>
@@ -1083,10 +1084,87 @@ window.Quarto = {
 </ul>
 <p>Understanding this layered computation is essential for building correct analytical models.</p>
 <hr>
-<section id="combining-aggregation-with-table-calculations" class="level3">
-<h3 class="anchored" data-anchor-id="combining-aggregation-with-table-calculations">Combining Aggregation with Table Calculations</h3>
+<section id="percentage-contribution-over-time" class="level3">
+<h3 class="anchored" data-anchor-id="percentage-contribution-over-time">Percentage Contribution Over Time</h3>
 <p>One of the most common patterns in complex calculations is combining aggregation with table calculations.</p>
 <p>For example, calculating the <strong>percentage contribution of each category over time</strong>:</p>
+<section id="input" class="level4">
+<h4 class="anchored" data-anchor-id="input">Input</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="function" class="level4">
+<h4 class="anchored" data-anchor-id="function">Function</h4>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>RUNNING_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total])) <span class="op">/</span> WINDOW_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>This calculation combines:</strong></p>
 <ul>
@@ -1096,86 +1174,2622 @@ window.Quarto = {
 </li>
 <li>Total window comparison: <code>WINDOW_SUM</code></li>
 </ul>
-<p>This type of calculation is often used to understand cumulative contribution. <!-- TODO --> <!-- ![](/img/tableau/03/w3_running_sum_percent_total.png) --> —</p>
+<p>This type of calculation is often used to understand cumulative contribution.</p>
 </section>
-<section id="nested-table-calculations" class="level3">
-<h3 class="anchored" data-anchor-id="nested-table-calculations">Nested Table Calculations</h3>
+<section id="execution" class="level4">
+<h4 class="anchored" data-anchor-id="execution">Execution</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Revenue</th>
+<th style="text-align: right;">Running Sum</th>
+<th style="text-align: right;">Window Sum</th>
+<th style="text-align: right;">Calculation</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">94,525 / 235,482</td>
+<td style="text-align: right;">40.14%</td>
+</tr>
+<tr class="even">
+<td>Atlanta</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">195,748</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">195,748 / 235,482</td>
+<td style="text-align: right;">83.13%</td>
+</tr>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">39,734</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">235,482 / 235,482</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">64,750 / 172,021</td>
+<td style="text-align: right;">37.64%</td>
+</tr>
+<tr class="odd">
+<td>Boston</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">136,974</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">136,974 / 172,021</td>
+<td style="text-align: right;">79.63%</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,047</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">172,021 / 172,021</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">71,936 / 170,880</td>
+<td style="text-align: right;">42.10%</td>
+</tr>
+<tr class="even">
+<td>Chicago</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">135,633</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">135,633 / 170,880</td>
+<td style="text-align: right;">79.37%</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,247</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">170,880 / 170,880</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">57,267 / 142,180</td>
+<td style="text-align: right;">40.28%</td>
+</tr>
+<tr class="odd">
+<td>Dallas</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">111,895</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">111,895 / 142,180</td>
+<td style="text-align: right;">78.70%</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">30,285</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">142,180 / 142,180</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">76,488 / 179,686</td>
+<td style="text-align: right;">42.57%</td>
+</tr>
+<tr class="even">
+<td>Denver</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">150,073</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">150,073 / 179,686</td>
+<td style="text-align: right;">83.52%</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,613</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">179,686 / 179,686</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">64,674 / 182,570</td>
+<td style="text-align: right;">35.42%</td>
+</tr>
+<tr class="odd">
+<td>Los Angeles</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">171,244</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">171,244 / 182,570</td>
+<td style="text-align: right;">93.80%</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">11,326</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">182,570 / 182,570</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">47,172 / 146,893</td>
+<td style="text-align: right;">32.11%</td>
+</tr>
+<tr class="even">
+<td>Miami</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">109,865</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">109,865 / 146,893</td>
+<td style="text-align: right;">74.79%</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">37,028</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">146,893 / 146,893</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">75,898 / 192,853</td>
+<td style="text-align: right;">39.36%</td>
+</tr>
+<tr class="odd">
+<td>New York</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">163,814</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">163,814 / 192,853</td>
+<td style="text-align: right;">84.94%</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,039</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">192,853 / 192,853</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">50,098 / 148,502</td>
+<td style="text-align: right;">33.74%</td>
+</tr>
+<tr class="even">
+<td>San Francisco</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">118,760</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">118,760 / 148,502</td>
+<td style="text-align: right;">79.97%</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,742</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">148,502 / 148,502</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">73,588 / 178,851</td>
+<td style="text-align: right;">41.14%</td>
+</tr>
+<tr class="odd">
+<td>Seattle</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">151,897</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">151,897 / 178,851</td>
+<td style="text-align: right;">84.93%</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">26,954</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">178,851 / 178,851</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output" class="level4">
+<h4 class="anchored" data-anchor-id="output">Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">40.14%</td>
+<td style="text-align: right;">83.13%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">37.64%</td>
+<td style="text-align: right;">79.63%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">42.10%</td>
+<td style="text-align: right;">79.37%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">40.28%</td>
+<td style="text-align: right;">78.70%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">42.57%</td>
+<td style="text-align: right;">83.52%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">35.42%</td>
+<td style="text-align: right;">93.80%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">32.11%</td>
+<td style="text-align: right;">74.79%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">39.36%</td>
+<td style="text-align: right;">84.94%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">33.74%</td>
+<td style="text-align: right;">79.97%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">41.14%</td>
+<td style="text-align: right;">84.93%</td>
+<td style="text-align: right;">100.00%</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="percent-difference-between-consecutive-running-totals" class="level3">
+<h3 class="anchored" data-anchor-id="percent-difference-between-consecutive-running-totals">Percent Difference Between Consecutive Running Totals</h3>
 <p>Tableau allows nesting of table calculations, where one table calculation is used inside another.</p>
-<p>For example, calculating <strong>percent difference between consecutive running totals</strong>:</p>
+<p>Strictly speaking, the calculation below returns the <strong>absolute difference between consecutive running totals</strong>, not the percent difference.</p>
+<section id="input-1" class="level4">
+<h4 class="anchored" data-anchor-id="input-1">Input</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="function-1" class="level4">
+<h4 class="anchored" data-anchor-id="function-1">Function</h4>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>RUNNING_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total])) <span class="op">-</span> LOOKUP(RUNNING_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total])), <span class="op">-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>This calculation combines:</strong></p>
 <ul>
-<li>A running total<br>
+<li>Aggregation: <code>SUM([Order Total])</code><br>
 </li>
-<li>A lookup to the previous value</li>
+<li>Running accumulation: <code>RUNNING_SUM</code><br>
+</li>
+<li>Previous value lookup: <code>LOOKUP(..., -1)</code></li>
 </ul>
-<p>Nested calculations like this are powerful but require careful configuration of partitioning and addressing.</p>
-<!-- TODO -->
-<!-- ![](/img/tableau/03/w3_nested_calculation.png) -->
+<p>This calculation compares the current running total with the previous running total.</p>
+</section>
+<section id="execution-1" class="level4">
+<h4 class="anchored" data-anchor-id="execution-1">Execution</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Revenue</th>
+<th style="text-align: right;">Running Sum</th>
+<th style="text-align: right;">Previous Running Sum</th>
+<th style="text-align: right;">Calculation</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">94,525 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Atlanta</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">195,748</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">195,748 - 94,525</td>
+<td style="text-align: right;">101,223</td>
+</tr>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">39,734</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">195,748</td>
+<td style="text-align: right;">235,482 - 195,748</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">64,750 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Boston</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">136,974</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">136,974 - 64,750</td>
+<td style="text-align: right;">72,224</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,047</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">136,974</td>
+<td style="text-align: right;">172,021 - 136,974</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">71,936 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Chicago</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">135,633</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">135,633 - 71,936</td>
+<td style="text-align: right;">63,697</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,247</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">135,633</td>
+<td style="text-align: right;">170,880 - 135,633</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">57,267 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Dallas</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">111,895</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">111,895 - 57,267</td>
+<td style="text-align: right;">54,628</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">30,285</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">111,895</td>
+<td style="text-align: right;">142,180 - 111,895</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">76,488 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Denver</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">150,073</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">150,073 - 76,488</td>
+<td style="text-align: right;">73,585</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,613</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">150,073</td>
+<td style="text-align: right;">179,686 - 150,073</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">64,674 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Los Angeles</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">171,244</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">171,244 - 64,674</td>
+<td style="text-align: right;">106,570</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">11,326</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">171,244</td>
+<td style="text-align: right;">182,570 - 171,244</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">47,172 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Miami</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">109,865</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">109,865 - 47,172</td>
+<td style="text-align: right;">62,693</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">37,028</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">109,865</td>
+<td style="text-align: right;">146,893 - 109,865</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">75,898 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>New York</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">163,814</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">163,814 - 75,898</td>
+<td style="text-align: right;">87,916</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,039</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">163,814</td>
+<td style="text-align: right;">192,853 - 163,814</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">50,098 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>San Francisco</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">118,760</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">118,760 - 50,098</td>
+<td style="text-align: right;">68,662</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,742</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">118,760</td>
+<td style="text-align: right;">148,502 - 118,760</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">73,588 - NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Seattle</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">151,897</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">151,897 - 73,588</td>
+<td style="text-align: right;">78,309</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">26,954</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">151,897</td>
+<td style="text-align: right;">178,851 - 151,897</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output-1" class="level4">
+<h4 class="anchored" data-anchor-id="output-1">Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
 <hr>
+</section>
 </section>
 <section id="conditional-table-calculations" class="level3">
 <h3 class="anchored" data-anchor-id="conditional-table-calculations">Conditional Table Calculations</h3>
 <p>Complex calculations often include conditional logic to control behavior dynamically.</p>
 <p>For example, showing only positive growth:</p>
+<section id="input-2" class="level4">
+<h4 class="anchored" data-anchor-id="input-2">Input</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="function-2" class="level4">
+<h4 class="anchored" data-anchor-id="function-2">Function</h4>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> <span class="fu">SUM</span>([<span class="kw">Order</span> Total]) <span class="op">-</span> LOOKUP(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]), <span class="op">-</span><span class="dv">1</span>) <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Order</span> Total]) <span class="op">-</span> LOOKUP(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]), <span class="op">-</span><span class="dv">1</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<blockquote class="blockquote">
+<p><strong>This calculation combines:</strong></p>
+<ul>
+<li>Aggregation: <code>SUM([Order Total])</code><br>
+</li>
+<li>Previous value lookup: <code>LOOKUP(..., -1)</code><br>
+</li>
+<li>Conditional logic: <code>IF ... THEN ... END</code></li>
+</ul>
 <p>This type of logic allows analysts to highlight specific patterns such as growth periods.</p>
-</blockquote>
-<!-- TODO -->
-<!-- ![](/img/tableau/03/w3_conditional_calculation.png) -->
+</section>
+<section id="execution-2" class="level4">
+<h4 class="anchored" data-anchor-id="execution-2">Execution</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 15%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Revenue</th>
+<th style="text-align: right;">Previous Revenue</th>
+<th style="text-align: right;">Calculation</th>
+<th style="text-align: right;">Difference</th>
+<th style="text-align: center;">Positive?</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">94,525 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Atlanta</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223 - 94,525</td>
+<td style="text-align: right;">6,698</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">6,698</td>
+</tr>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">39,734</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734 - 101,223</td>
+<td style="text-align: right;">-61,489</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">64,750 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Boston</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224 - 64,750</td>
+<td style="text-align: right;">7,474</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">7,474</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,047</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047 - 72,224</td>
+<td style="text-align: right;">-37,177</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">71,936 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Chicago</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697 - 71,936</td>
+<td style="text-align: right;">-8,239</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,247</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247 - 63,697</td>
+<td style="text-align: right;">-28,450</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">57,267 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Dallas</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628 - 57,267</td>
+<td style="text-align: right;">-2,639</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">30,285</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285 - 54,628</td>
+<td style="text-align: right;">-24,343</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">76,488 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Denver</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585 - 76,488</td>
+<td style="text-align: right;">-2,903</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,613</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613 - 73,585</td>
+<td style="text-align: right;">-43,972</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">64,674 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Los Angeles</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570 - 64,674</td>
+<td style="text-align: right;">41,896</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">41,896</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">11,326</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326 - 106,570</td>
+<td style="text-align: right;">-95,244</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">47,172 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Miami</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693 - 47,172</td>
+<td style="text-align: right;">15,521</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">15,521</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">37,028</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028 - 62,693</td>
+<td style="text-align: right;">-25,665</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">75,898 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>New York</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916 - 75,898</td>
+<td style="text-align: right;">12,018</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">12,018</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,039</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039 - 87,916</td>
+<td style="text-align: right;">-58,877</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">50,098 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>San Francisco</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662 - 50,098</td>
+<td style="text-align: right;">18,564</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">18,564</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,742</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742 - 68,662</td>
+<td style="text-align: right;">-38,920</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">73,588 - NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: center;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Seattle</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309 - 73,588</td>
+<td style="text-align: right;">4,721</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: right;">4,721</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">26,954</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954 - 78,309</td>
+<td style="text-align: right;">-51,355</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output-2" class="level4">
+<h4 class="anchored" data-anchor-id="output-2">Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">6,698</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">7,474</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">41,896</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">15,521</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">12,018</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">18,564</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">NULL</td>
+<td style="text-align: right;">4,721</td>
+<td style="text-align: right;">NULL</td>
+</tr>
+</tbody>
+</table>
 <hr>
 </section>
-<section id="window-functions" class="level3">
-<h3 class="anchored" data-anchor-id="window-functions">Window Functions</h3>
+</section>
+<section id="moving-average" class="level3">
+<h3 class="anchored" data-anchor-id="moving-average">Moving Average</h3>
 <p>Window functions perform calculations across a defined range of data within a partition.</p>
-<p>These are essential for complex analytics.</p>
-<ul>
-<li>Moving averages</li>
-<li>Window sum</li>
-<li>Window max</li>
-</ul>
-<section id="moving-average" class="level4">
-<h4 class="anchored" data-anchor-id="moving-average">Moving Average</h4>
-<p>Calculates average over the last <code>4</code> periods (offset <code>-3</code> to <code>0</code> means the current period plus <code>3</code> previous periods = <code>4</code> total).</p>
+<p>The moving average below calculates the average over the last <code>4</code> periods. In this example, there are only three years, so Tableau uses the available years in the partition.</p>
+<section id="input-3" class="level4">
+<h4 class="anchored" data-anchor-id="input-3">Input</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="function-3" class="level4">
+<h4 class="anchored" data-anchor-id="function-3">Function</h4>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>WINDOW_AVG(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]), <span class="op">-</span><span class="dv">3</span>, <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<!--  -->
-<hr>
-</section>
-<section id="window-sum" class="level4">
-<h4 class="anchored" data-anchor-id="window-sum">Window Sum</h4>
-<p>Calculates total within the partition.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>WINDOW_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="window-max" class="level4">
-<h4 class="anchored" data-anchor-id="window-max">Window Max</h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>WINDOW_MAX(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Finds the maximum value within a window.</p>
-<hr>
-</section>
-</section>
-<section id="difference-and-percent-difference" class="level3">
-<h3 class="anchored" data-anchor-id="difference-and-percent-difference">Difference and Percent Difference</h3>
-<p>Complex calculations often involve comparing values across time or categories.</p>
-<section id="difference" class="level4">
-<h4 class="anchored" data-anchor-id="difference">Difference</h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">SUM</span>([<span class="kw">Order</span> Total]) <span class="op">-</span> LOOKUP(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]), <span class="op">-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="percent-difference" class="level4">
-<h4 class="anchored" data-anchor-id="percent-difference">Percent Difference</h4>
-<p><strong>These calculations are used for:</strong></p>
+<p><strong>This calculation combines:</strong></p>
 <ul>
-<li>Growth analysis<br>
+<li>Aggregation: <code>SUM([Order Total])</code><br>
 </li>
-<li>Trend comparison<br>
+<li>Window calculation: <code>WINDOW_AVG</code><br>
 </li>
-<li>Performance tracking</li>
+<li>Relative window range: from <code>-3</code> to <code>0</code></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]) <span class="op">-</span> LOOKUP(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]), <span class="op">-</span><span class="dv">1</span>)) </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="op">/</span> LOOKUP(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]), <span class="op">-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This calculation is often used to smooth short-term fluctuations and reveal broader trends.</p>
+</section>
+<section id="execution-3" class="level4">
+<h4 class="anchored" data-anchor-id="execution-3">Execution</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Revenue</th>
+<th>Window Values</th>
+<th style="text-align: right;">Calculation</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">94,525</td>
+<td>94,525</td>
+<td style="text-align: right;">(94,525) / 1</td>
+<td style="text-align: right;">94,525.00</td>
+</tr>
+<tr class="even">
+<td>Atlanta</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">101,223</td>
+<td>94,525, 101,223</td>
+<td style="text-align: right;">(94,525 + 101,223) / 2</td>
+<td style="text-align: right;">97,874.00</td>
+</tr>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">39,734</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">(94,525 + 101,223 + 39,734) / 3</td>
+<td style="text-align: right;">78,494.00</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,750</td>
+<td>64,750</td>
+<td style="text-align: right;">(64,750) / 1</td>
+<td style="text-align: right;">64,750.00</td>
+</tr>
+<tr class="odd">
+<td>Boston</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">72,224</td>
+<td>64,750, 72,224</td>
+<td style="text-align: right;">(64,750 + 72,224) / 2</td>
+<td style="text-align: right;">68,487.00</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,047</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">(64,750 + 72,224 + 35,047) / 3</td>
+<td style="text-align: right;">57,340.33</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">71,936</td>
+<td>71,936</td>
+<td style="text-align: right;">(71,936) / 1</td>
+<td style="text-align: right;">71,936.00</td>
+</tr>
+<tr class="even">
+<td>Chicago</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">63,697</td>
+<td>71,936, 63,697</td>
+<td style="text-align: right;">(71,936 + 63,697) / 2</td>
+<td style="text-align: right;">67,816.50</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,247</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">(71,936 + 63,697 + 35,247) / 3</td>
+<td style="text-align: right;">56,960.00</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">57,267</td>
+<td>57,267</td>
+<td style="text-align: right;">(57,267) / 1</td>
+<td style="text-align: right;">57,267.00</td>
+</tr>
+<tr class="odd">
+<td>Dallas</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">54,628</td>
+<td>57,267, 54,628</td>
+<td style="text-align: right;">(57,267 + 54,628) / 2</td>
+<td style="text-align: right;">55,947.50</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">30,285</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">(57,267 + 54,628 + 30,285) / 3</td>
+<td style="text-align: right;">47,393.33</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">76,488</td>
+<td>76,488</td>
+<td style="text-align: right;">(76,488) / 1</td>
+<td style="text-align: right;">76,488.00</td>
+</tr>
+<tr class="even">
+<td>Denver</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">73,585</td>
+<td>76,488, 73,585</td>
+<td style="text-align: right;">(76,488 + 73,585) / 2</td>
+<td style="text-align: right;">75,036.50</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,613</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">(76,488 + 73,585 + 29,613) / 3</td>
+<td style="text-align: right;">59,895.33</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,674</td>
+<td>64,674</td>
+<td style="text-align: right;">(64,674) / 1</td>
+<td style="text-align: right;">64,674.00</td>
+</tr>
+<tr class="odd">
+<td>Los Angeles</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">106,570</td>
+<td>64,674, 106,570</td>
+<td style="text-align: right;">(64,674 + 106,570) / 2</td>
+<td style="text-align: right;">85,622.00</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">11,326</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">(64,674 + 106,570 + 11,326) / 3</td>
+<td style="text-align: right;">60,856.67</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">47,172</td>
+<td>47,172</td>
+<td style="text-align: right;">(47,172) / 1</td>
+<td style="text-align: right;">47,172.00</td>
+</tr>
+<tr class="even">
+<td>Miami</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">62,693</td>
+<td>47,172, 62,693</td>
+<td style="text-align: right;">(47,172 + 62,693) / 2</td>
+<td style="text-align: right;">54,932.50</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">37,028</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">(47,172 + 62,693 + 37,028) / 3</td>
+<td style="text-align: right;">48,964.33</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">75,898</td>
+<td>75,898</td>
+<td style="text-align: right;">(75,898) / 1</td>
+<td style="text-align: right;">75,898.00</td>
+</tr>
+<tr class="odd">
+<td>New York</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">87,916</td>
+<td>75,898, 87,916</td>
+<td style="text-align: right;">(75,898 + 87,916) / 2</td>
+<td style="text-align: right;">81,907.00</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,039</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">(75,898 + 87,916 + 29,039) / 3</td>
+<td style="text-align: right;">64,284.33</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">50,098</td>
+<td>50,098</td>
+<td style="text-align: right;">(50,098) / 1</td>
+<td style="text-align: right;">50,098.00</td>
+</tr>
+<tr class="even">
+<td>San Francisco</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">68,662</td>
+<td>50,098, 68,662</td>
+<td style="text-align: right;">(50,098 + 68,662) / 2</td>
+<td style="text-align: right;">59,380.00</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,742</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">(50,098 + 68,662 + 29,742) / 3</td>
+<td style="text-align: right;">49,500.67</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">73,588</td>
+<td>73,588</td>
+<td style="text-align: right;">(73,588) / 1</td>
+<td style="text-align: right;">73,588.00</td>
+</tr>
+<tr class="odd">
+<td>Seattle</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">78,309</td>
+<td>73,588, 78,309</td>
+<td style="text-align: right;">(73,588 + 78,309) / 2</td>
+<td style="text-align: right;">75,948.50</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">26,954</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">(73,588 + 78,309 + 26,954) / 3</td>
+<td style="text-align: right;">59,617.00</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output-3" class="level4">
+<h4 class="anchored" data-anchor-id="output-3">Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525.00</td>
+<td style="text-align: right;">97,874.00</td>
+<td style="text-align: right;">78,494.00</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750.00</td>
+<td style="text-align: right;">68,487.00</td>
+<td style="text-align: right;">57,340.33</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936.00</td>
+<td style="text-align: right;">67,816.50</td>
+<td style="text-align: right;">56,960.00</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267.00</td>
+<td style="text-align: right;">55,947.50</td>
+<td style="text-align: right;">47,393.33</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488.00</td>
+<td style="text-align: right;">75,036.50</td>
+<td style="text-align: right;">59,895.33</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674.00</td>
+<td style="text-align: right;">85,622.00</td>
+<td style="text-align: right;">60,856.67</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172.00</td>
+<td style="text-align: right;">54,932.50</td>
+<td style="text-align: right;">48,964.33</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898.00</td>
+<td style="text-align: right;">81,907.00</td>
+<td style="text-align: right;">64,284.33</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098.00</td>
+<td style="text-align: right;">59,380.00</td>
+<td style="text-align: right;">49,500.67</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588.00</td>
+<td style="text-align: right;">75,948.50</td>
+<td style="text-align: right;">59,617.00</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="window-sum" class="level3">
+<h3 class="anchored" data-anchor-id="window-sum">Window Sum</h3>
+<p>Window sum calculates the total value within the partition.</p>
+<p>In this example, the partition is each city, and the calculation is computed across years.</p>
+<section id="input-4" class="level4">
+<h4 class="anchored" data-anchor-id="input-4">Input</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="function-4" class="level4">
+<h4 class="anchored" data-anchor-id="function-4">Function</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>WINDOW_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>This calculation combines:</strong></p>
+<ul>
+<li>Aggregation: <code>SUM([Order Total])</code><br>
+</li>
+<li>Window-level total: <code>WINDOW_SUM</code><br>
+</li>
+<li>Partition-based calculation across years</li>
+</ul>
+<p>The result is the same for each year because Tableau calculates the total across the full city-level window.</p>
+</section>
+<section id="execution-4" class="level4">
+<h4 class="anchored" data-anchor-id="execution-4">Execution</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Revenue</th>
+<th>Window Values</th>
+<th style="text-align: right;">Calculation</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">94,525</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">94,525 + 101,223 + 39,734</td>
+<td style="text-align: right;">235,482</td>
+</tr>
+<tr class="even">
+<td>Atlanta</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">101,223</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">94,525 + 101,223 + 39,734</td>
+<td style="text-align: right;">235,482</td>
+</tr>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">39,734</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">94,525 + 101,223 + 39,734</td>
+<td style="text-align: right;">235,482</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,750</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">64,750 + 72,224 + 35,047</td>
+<td style="text-align: right;">172,021</td>
+</tr>
+<tr class="odd">
+<td>Boston</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">72,224</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">64,750 + 72,224 + 35,047</td>
+<td style="text-align: right;">172,021</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,047</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">64,750 + 72,224 + 35,047</td>
+<td style="text-align: right;">172,021</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">71,936</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">71,936 + 63,697 + 35,247</td>
+<td style="text-align: right;">170,880</td>
+</tr>
+<tr class="even">
+<td>Chicago</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">63,697</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">71,936 + 63,697 + 35,247</td>
+<td style="text-align: right;">170,880</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,247</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">71,936 + 63,697 + 35,247</td>
+<td style="text-align: right;">170,880</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">57,267</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">57,267 + 54,628 + 30,285</td>
+<td style="text-align: right;">142,180</td>
+</tr>
+<tr class="odd">
+<td>Dallas</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">54,628</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">57,267 + 54,628 + 30,285</td>
+<td style="text-align: right;">142,180</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">30,285</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">57,267 + 54,628 + 30,285</td>
+<td style="text-align: right;">142,180</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">76,488</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">76,488 + 73,585 + 29,613</td>
+<td style="text-align: right;">179,686</td>
+</tr>
+<tr class="even">
+<td>Denver</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">73,585</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">76,488 + 73,585 + 29,613</td>
+<td style="text-align: right;">179,686</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,613</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">76,488 + 73,585 + 29,613</td>
+<td style="text-align: right;">179,686</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,674</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">64,674 + 106,570 + 11,326</td>
+<td style="text-align: right;">182,570</td>
+</tr>
+<tr class="odd">
+<td>Los Angeles</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">106,570</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">64,674 + 106,570 + 11,326</td>
+<td style="text-align: right;">182,570</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">11,326</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">64,674 + 106,570 + 11,326</td>
+<td style="text-align: right;">182,570</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">47,172</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">47,172 + 62,693 + 37,028</td>
+<td style="text-align: right;">146,893</td>
+</tr>
+<tr class="even">
+<td>Miami</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">62,693</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">47,172 + 62,693 + 37,028</td>
+<td style="text-align: right;">146,893</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">37,028</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">47,172 + 62,693 + 37,028</td>
+<td style="text-align: right;">146,893</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">75,898</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">75,898 + 87,916 + 29,039</td>
+<td style="text-align: right;">192,853</td>
+</tr>
+<tr class="odd">
+<td>New York</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">87,916</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">75,898 + 87,916 + 29,039</td>
+<td style="text-align: right;">192,853</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,039</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">75,898 + 87,916 + 29,039</td>
+<td style="text-align: right;">192,853</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">50,098</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">50,098 + 68,662 + 29,742</td>
+<td style="text-align: right;">148,502</td>
+</tr>
+<tr class="even">
+<td>San Francisco</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">68,662</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">50,098 + 68,662 + 29,742</td>
+<td style="text-align: right;">148,502</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,742</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">50,098 + 68,662 + 29,742</td>
+<td style="text-align: right;">148,502</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">73,588</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">73,588 + 78,309 + 26,954</td>
+<td style="text-align: right;">178,851</td>
+</tr>
+<tr class="odd">
+<td>Seattle</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">78,309</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">73,588 + 78,309 + 26,954</td>
+<td style="text-align: right;">178,851</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">26,954</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">73,588 + 78,309 + 26,954</td>
+<td style="text-align: right;">178,851</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output-4" class="level4">
+<h4 class="anchored" data-anchor-id="output-4">Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">235,482</td>
+<td style="text-align: right;">235,482</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">172,021</td>
+<td style="text-align: right;">172,021</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">170,880</td>
+<td style="text-align: right;">170,880</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">142,180</td>
+<td style="text-align: right;">142,180</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">179,686</td>
+<td style="text-align: right;">179,686</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">182,570</td>
+<td style="text-align: right;">182,570</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">146,893</td>
+<td style="text-align: right;">146,893</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">192,853</td>
+<td style="text-align: right;">192,853</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">148,502</td>
+<td style="text-align: right;">148,502</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">178,851</td>
+<td style="text-align: right;">178,851</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="window-max" class="level3">
+<h3 class="anchored" data-anchor-id="window-max">Window Max</h3>
+<p>Window max finds the maximum value within a window.</p>
+<p>In this example, Tableau finds the highest yearly revenue for each city.</p>
+<section id="input-5" class="level4">
+<h4 class="anchored" data-anchor-id="input-5">Input</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">94,525</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">39,734</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">64,750</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">35,047</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">63,697</td>
+<td style="text-align: right;">35,247</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">54,628</td>
+<td style="text-align: right;">30,285</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">73,585</td>
+<td style="text-align: right;">29,613</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">64,674</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;">11,326</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">47,172</td>
+<td style="text-align: right;">62,693</td>
+<td style="text-align: right;">37,028</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">75,898</td>
+<td style="text-align: right;">87,916</td>
+<td style="text-align: right;">29,039</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">50,098</td>
+<td style="text-align: right;">68,662</td>
+<td style="text-align: right;">29,742</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">73,588</td>
+<td style="text-align: right;">78,309</td>
+<td style="text-align: right;">26,954</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="function-5" class="level4">
+<h4 class="anchored" data-anchor-id="function-5">Function</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>WINDOW_MAX(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>This calculation combines:</strong></p>
+<ul>
+<li>Aggregation: <code>SUM([Order Total])</code><br>
+</li>
+<li>Window-level maximum: <code>WINDOW_MAX</code><br>
+</li>
+<li>Partition-based comparison across years</li>
+</ul>
+<p>The result is repeated across years because the maximum is calculated over the full city-level window.</p>
+</section>
+<section id="execution-5" class="level4">
+<h4 class="anchored" data-anchor-id="execution-5">Execution</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Revenue</th>
+<th>Window Values</th>
+<th style="text-align: right;">Calculation</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">94,525</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">MAX(94,525, 101,223, 39,734)</td>
+<td style="text-align: right;">101,223</td>
+</tr>
+<tr class="even">
+<td>Atlanta</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">101,223</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">MAX(94,525, 101,223, 39,734)</td>
+<td style="text-align: right;">101,223</td>
+</tr>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">39,734</td>
+<td>94,525, 101,223, 39,734</td>
+<td style="text-align: right;">MAX(94,525, 101,223, 39,734)</td>
+<td style="text-align: right;">101,223</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,750</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">MAX(64,750, 72,224, 35,047)</td>
+<td style="text-align: right;">72,224</td>
+</tr>
+<tr class="odd">
+<td>Boston</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">72,224</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">MAX(64,750, 72,224, 35,047)</td>
+<td style="text-align: right;">72,224</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,047</td>
+<td>64,750, 72,224, 35,047</td>
+<td style="text-align: right;">MAX(64,750, 72,224, 35,047)</td>
+<td style="text-align: right;">72,224</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">71,936</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">MAX(71,936, 63,697, 35,247)</td>
+<td style="text-align: right;">71,936</td>
+</tr>
+<tr class="even">
+<td>Chicago</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">63,697</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">MAX(71,936, 63,697, 35,247)</td>
+<td style="text-align: right;">71,936</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">35,247</td>
+<td>71,936, 63,697, 35,247</td>
+<td style="text-align: right;">MAX(71,936, 63,697, 35,247)</td>
+<td style="text-align: right;">71,936</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">57,267</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">MAX(57,267, 54,628, 30,285)</td>
+<td style="text-align: right;">57,267</td>
+</tr>
+<tr class="odd">
+<td>Dallas</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">54,628</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">MAX(57,267, 54,628, 30,285)</td>
+<td style="text-align: right;">57,267</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">30,285</td>
+<td>57,267, 54,628, 30,285</td>
+<td style="text-align: right;">MAX(57,267, 54,628, 30,285)</td>
+<td style="text-align: right;">57,267</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">76,488</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">MAX(76,488, 73,585, 29,613)</td>
+<td style="text-align: right;">76,488</td>
+</tr>
+<tr class="even">
+<td>Denver</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">73,585</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">MAX(76,488, 73,585, 29,613)</td>
+<td style="text-align: right;">76,488</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,613</td>
+<td>76,488, 73,585, 29,613</td>
+<td style="text-align: right;">MAX(76,488, 73,585, 29,613)</td>
+<td style="text-align: right;">76,488</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">64,674</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">MAX(64,674, 106,570, 11,326)</td>
+<td style="text-align: right;">106,570</td>
+</tr>
+<tr class="odd">
+<td>Los Angeles</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">106,570</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">MAX(64,674, 106,570, 11,326)</td>
+<td style="text-align: right;">106,570</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">11,326</td>
+<td>64,674, 106,570, 11,326</td>
+<td style="text-align: right;">MAX(64,674, 106,570, 11,326)</td>
+<td style="text-align: right;">106,570</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">47,172</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">MAX(47,172, 62,693, 37,028)</td>
+<td style="text-align: right;">62,693</td>
+</tr>
+<tr class="even">
+<td>Miami</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">62,693</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">MAX(47,172, 62,693, 37,028)</td>
+<td style="text-align: right;">62,693</td>
+</tr>
+<tr class="odd">
+<td>Miami</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">37,028</td>
+<td>47,172, 62,693, 37,028</td>
+<td style="text-align: right;">MAX(47,172, 62,693, 37,028)</td>
+<td style="text-align: right;">62,693</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">75,898</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">MAX(75,898, 87,916, 29,039)</td>
+<td style="text-align: right;">87,916</td>
+</tr>
+<tr class="odd">
+<td>New York</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">87,916</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">MAX(75,898, 87,916, 29,039)</td>
+<td style="text-align: right;">87,916</td>
+</tr>
+<tr class="even">
+<td>New York</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,039</td>
+<td>75,898, 87,916, 29,039</td>
+<td style="text-align: right;">MAX(75,898, 87,916, 29,039)</td>
+<td style="text-align: right;">87,916</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">50,098</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">MAX(50,098, 68,662, 29,742)</td>
+<td style="text-align: right;">68,662</td>
+</tr>
+<tr class="even">
+<td>San Francisco</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">68,662</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">MAX(50,098, 68,662, 29,742)</td>
+<td style="text-align: right;">68,662</td>
+</tr>
+<tr class="odd">
+<td>San Francisco</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">29,742</td>
+<td>50,098, 68,662, 29,742</td>
+<td style="text-align: right;">MAX(50,098, 68,662, 29,742)</td>
+<td style="text-align: right;">68,662</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">73,588</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">MAX(73,588, 78,309, 26,954)</td>
+<td style="text-align: right;">78,309</td>
+</tr>
+<tr class="odd">
+<td>Seattle</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">78,309</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">MAX(73,588, 78,309, 26,954)</td>
+<td style="text-align: right;">78,309</td>
+</tr>
+<tr class="even">
+<td>Seattle</td>
+<td style="text-align: right;">2025</td>
+<td style="text-align: right;">26,954</td>
+<td>73,588, 78,309, 26,954</td>
+<td style="text-align: right;">MAX(73,588, 78,309, 26,954)</td>
+<td style="text-align: right;">78,309</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output-5" class="level4">
+<h4 class="anchored" data-anchor-id="output-5">Output</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>City</th>
+<th style="text-align: right;">2023</th>
+<th style="text-align: right;">2024</th>
+<th style="text-align: right;">2025</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Atlanta</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">101,223</td>
+<td style="text-align: right;">101,223</td>
+</tr>
+<tr class="even">
+<td>Boston</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">72,224</td>
+<td style="text-align: right;">72,224</td>
+</tr>
+<tr class="odd">
+<td>Chicago</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">71,936</td>
+<td style="text-align: right;">71,936</td>
+</tr>
+<tr class="even">
+<td>Dallas</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">57,267</td>
+<td style="text-align: right;">57,267</td>
+</tr>
+<tr class="odd">
+<td>Denver</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">76,488</td>
+<td style="text-align: right;">76,488</td>
+</tr>
+<tr class="even">
+<td>Los Angeles</td>
+<td style="text-align: right;">106,570</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 <section id="multi-level-calculations" class="level3">
@@ -1286,21 +3900,21 @@ Each dimension must be used either for: <strong>Partitioning (scoping)</strong> 
 <section id="running-total" class="level4">
 <h4 class="anchored" data-anchor-id="running-total">Running Total</h4>
 <p>Running totals accumulate values across a defined direction.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>RUNNING_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>RUNNING_SUM(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is commonly used to track cumulative metrics such as revenue growth over time.</p>
 <hr>
 </section>
 <section id="percent-of-total" class="level4">
 <h4 class="anchored" data-anchor-id="percent-of-total">Percent of Total</h4>
 <p>Percent of total calculates each value’s contribution relative to the total.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">SUM</span>([<span class="kw">Order</span> Total]) <span class="op">/</span> TOTAL(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">SUM</span>([<span class="kw">Order</span> Total]) <span class="op">/</span> TOTAL(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is useful for understanding share distribution across categories or regions.</p>
 <hr>
 </section>
 <section id="rank" class="level4">
 <h4 class="anchored" data-anchor-id="rank">Rank</h4>
 <p>Ranking assigns a position to values based on a selected measure.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RANK</span>(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RANK</span>(<span class="fu">SUM</span>([<span class="kw">Order</span> Total]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is often used for identifying top or bottom performers.</p>
 <hr>
 </section>
@@ -1452,16 +4066,16 @@ If a field contains recognizable dates, Tableau automatically assigns it a <stro
 <section id="date" class="level4">
 <h4 class="anchored" data-anchor-id="date">DATE</h4>
 <p>Date converts a string to a date. It can also be used to truncate a datetime to a date.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DATE</span>(string) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DATE</span>(string) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="dateadd" class="level4">
 <h4 class="anchored" data-anchor-id="dateadd">DATEADD</h4>
 <p>DateAdd adds a specified time interval to a date.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>DATEADD(date_part, <span class="dt">interval</span>, <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>DATEADD(date_part, <span class="dt">interval</span>, <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Example:</strong> Calculate Expected Delivery Date</p>
 <p>Objective: Add 5 days to Order Date to estimate delivery.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>DATEADD(<span class="st">'day'</span>, <span class="dv">5</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>DATEADD(<span class="st">'day'</span>, <span class="dv">5</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/03/w3_expected_delivery_date.png" class="img-fluid figure-img"></p>
@@ -1470,7 +4084,7 @@ If a field contains recognizable dates, Tableau automatically assigns it a <stro
 </div>
 <p><strong>Example:</strong> Rolling 12-Months Window</p>
 <p>Objective: Filter records from the last 12 months dynamically.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>[<span class="kw">Order</span> <span class="dt">Date</span>] <span class="op">&gt;=</span> DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">12</span>, TODAY())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>[<span class="kw">Order</span> <span class="dt">Date</span>] <span class="op">&gt;=</span> DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">12</span>, TODAY())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/03/w3_filtering_last_12_months.png" class="img-fluid figure-img"></p>
@@ -1482,15 +4096,15 @@ If a field contains recognizable dates, Tableau automatically assigns it a <stro
 <section id="datediff" class="level4">
 <h4 class="anchored" data-anchor-id="datediff">DATEDIFF</h4>
 <p>Datediff calculates the difference between two dates in specified date parts.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(date_part, start_date, end_date, [start_of_week])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(date_part, start_date, end_date, [start_of_week])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Optional parameter:<br>
 <code>[start_of_week]</code> defines week beginning (Sunday, Monday, etc.)</p>
 <p><strong>Example:</strong> Time to First Order</p>
 <p>Objective: Measure when customers place their first order after signing up.</p>
 <p>First order date per customer:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">MIN</span>([<span class="kw">Order</span> <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">MIN</span>([<span class="kw">Order</span> <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Months between signup and first order:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(<span class="st">'month'</span>, [Signup <span class="dt">Date</span>], [<span class="fu">First</span> <span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(<span class="st">'month'</span>, [Signup <span class="dt">Date</span>], [<span class="fu">First</span> <span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/03/w3_sign_up_first_order.png" class="img-fluid figure-img"></p>
@@ -1502,12 +4116,12 @@ If a field contains recognizable dates, Tableau automatically assigns it a <stro
 <section id="datename" class="level4">
 <h4 class="anchored" data-anchor-id="datename">DATENAME</h4>
 <p>DateName returns the name of a date part as a string. For example, if you want to extract the month from a date, DATENAME will return the name of the month (e.g., “January”, “February”, etc.).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>DATENAME(date_part, <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>DATENAME(date_part, <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="datepart" class="level4">
 <h4 class="anchored" data-anchor-id="datepart">DATEPART</h4>
 <p>Datepart returns the integer value of a date part. For example, if you want to extract the month from a date, DATEPART will return a number between 1 and 12, while DATENAME would return the name of the month (e.g., “January”, “February”, etc.).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>DATEPART(date_part, <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>DATEPART(date_part, <span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1523,7 +4137,7 @@ Note
 </div>
 <p><strong>Example:</strong> Extract Year for Grouping</p>
 <p>Objective: Build yearly trend charts, create custom year filters</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>DATEPART(<span class="st">'year'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>DATEPART(<span class="st">'year'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>When used in the view, make the calculated field discrete dimension to group by year.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1536,14 +4150,14 @@ Note
 <section id="dateparse" class="level4">
 <h4 class="anchored" data-anchor-id="dateparse">DATEPARSE</h4>
 <p>Converts a specifically formatted string into a date.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>DATEPARSE(format, string)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>DATEPARSE(format, string)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Use case: When DATE cannot recognize custom format</p>
 <hr>
 </section>
 <section id="datetrunc" class="level4">
 <h4 class="anchored" data-anchor-id="datetrunc">DATETRUNC</h4>
 <p>Truncates a date to a specified level.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(date_part, <span class="dt">date</span>, [start_of_week])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(date_part, <span class="dt">date</span>, [start_of_week])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1577,7 +4191,7 @@ DATETRUNC affects the data itself.</p>
 <h3 class="anchored" data-anchor-id="what-is-start_of_week">What Is [start_of_week]?</h3>
 <p>This optional parameter defines which day is considered the first day of the week. The further calculations will be based on this definition of a week.</p>
 <p><strong>Example:</strong> Calculate week based on ISO standard (week starts on Monday) and week starting on Sunday.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'week'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>], <span class="st">'sunday'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'week'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>], <span class="st">'sunday'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/03/w3_order_week.png" class="img-fluid figure-img"></p>
@@ -1589,7 +4203,7 @@ DATETRUNC affects the data itself.</p>
 <section id="day-month-quarter-year-week" class="level4">
 <h4 class="anchored" data-anchor-id="day-month-quarter-year-week">DAY / MONTH / QUARTER / YEAR / WEEK</h4>
 <p>These functions extract specific parts of a date as integers.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DAY</span>(<span class="kw">Order</span> <span class="dt">Date</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DAY</span>(<span class="kw">Order</span> <span class="dt">Date</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/03/w3_order_day.png" class="img-fluid figure-img"></p>
@@ -1601,21 +4215,21 @@ DATETRUNC affects the data itself.</p>
 <section id="today" class="level4">
 <h4 class="anchored" data-anchor-id="today">TODAY</h4>
 <p>Returns the current system date (without time).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>TODAY()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>TODAY()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="now" class="level4">
 <h4 class="anchored" data-anchor-id="now">NOW</h4>
 <p>Returns the current system date and time.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>NOW()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>NOW()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="makedate" class="level4">
 <h4 class="anchored" data-anchor-id="makedate">MAKEDATE</h4>
 <p>Constructs a date from numeric year, month, and day.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>MAKEDATE(<span class="dt">year</span>, <span class="dt">month</span>, <span class="dt">day</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>MAKEDATE(<span class="dt">year</span>, <span class="dt">month</span>, <span class="dt">day</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Example:</strong> Create Date for 01.01.2026 as <code>[Reporting Date]</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>MAKEDATE(<span class="dv">2026</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>MAKEDATE(<span class="dv">2026</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../img/tableau/03/w3_reporting_date.png" class="img-fluid figure-img"></p>
@@ -1627,13 +4241,13 @@ DATETRUNC affects the data itself.</p>
 <section id="makedatetime" class="level4">
 <h4 class="anchored" data-anchor-id="makedatetime">MAKEDATETIME</h4>
 <p>Combines date and time into datetime.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>MAKEDATETIME(<span class="dt">date</span>, <span class="dt">time</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>MAKEDATETIME(<span class="dt">date</span>, <span class="dt">time</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="maketime" class="level4">
 <h4 class="anchored" data-anchor-id="maketime">MAKETIME</h4>
 <p>Constructs time using hour, minute, second.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>MAKETIME(<span class="kw">hour</span>, <span class="kw">minute</span>, <span class="dt">second</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>MAKETIME(<span class="kw">hour</span>, <span class="kw">minute</span>, <span class="dt">second</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1652,16 +4266,16 @@ Note
 <section id="isdate" class="level4">
 <h4 class="anchored" data-anchor-id="isdate">ISDATE</h4>
 <p>Checks whether a string is a valid date.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>ISDATE(string)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>ISDATE(string)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Use case is data validation and cleaning messy datasets.</p>
 <hr>
 </section>
 <section id="max-and-min-with-dates" class="level4">
 <h4 class="anchored" data-anchor-id="max-and-min-with-dates">MAX and MIN (with Dates)</h4>
 <p>Most recent date:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">MAX</span>(<span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">MAX</span>(<span class="dt">date</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Earliest date:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">MIN</span>(<span class="dt">date</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">MIN</span>(<span class="dt">date</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 </section>
@@ -1792,7 +4406,7 @@ Note
 <p>Create an Anchor Date (Recommended)</p>
 <p>We will <strong>anchor</strong> the calculation to the latest available Order Date in the dataset.</p>
 <p>Create a calculated field: <strong>Latest Order Date</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>{ FIXED : <span class="fu">MAX</span>([<span class="kw">Order</span> <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>{ FIXED : <span class="fu">MAX</span>([<span class="kw">Order</span> <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We are doing this way beacause</p>
 <ul>
 <li><code>TODAY()</code> → depends on the system date<br>
@@ -1816,10 +4430,10 @@ Note
 <p>REMEMBER: The <code>p.</code> prefix is a naming convention used throughout this course to indicate that a calculated field is <strong>parameter-driven</strong> , as its value depends on a parameter rather than raw data. This makes it easy to identify parameter-linked fields in the Data pane at a glance.</p>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="dt">Date</span> Part] <span class="op">=</span> <span class="st">'day'</span> <span class="cf">then</span> ([<span class="kw">Order</span> <span class="dt">Date</span>]) <span class="op">&gt;</span> DATEADD(<span class="st">'day'</span>, <span class="op">-</span>[N <span class="kw">Values</span>], [Latest <span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [<span class="dt">Date</span> Part] <span class="op">=</span> <span class="st">'month'</span> <span class="cf">THEN</span> ([<span class="kw">Order</span> <span class="dt">Date</span>]) <span class="op">&gt;</span> DATEADD(<span class="st">'month'</span>, <span class="op">-</span>[N <span class="kw">Values</span>], [Latest <span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> ([<span class="kw">Order</span> <span class="dt">Date</span>]) <span class="op">&gt;</span> DATEADD(<span class="st">'year'</span>, <span class="op">-</span>[N <span class="kw">Values</span>], [Latest <span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="dt">Date</span> Part] <span class="op">=</span> <span class="st">'day'</span> <span class="cf">then</span> ([<span class="kw">Order</span> <span class="dt">Date</span>]) <span class="op">&gt;</span> DATEADD(<span class="st">'day'</span>, <span class="op">-</span>[N <span class="kw">Values</span>], [Latest <span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [<span class="dt">Date</span> Part] <span class="op">=</span> <span class="st">'month'</span> <span class="cf">THEN</span> ([<span class="kw">Order</span> <span class="dt">Date</span>]) <span class="op">&gt;</span> DATEADD(<span class="st">'month'</span>, <span class="op">-</span>[N <span class="kw">Values</span>], [Latest <span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> ([<span class="kw">Order</span> <span class="dt">Date</span>]) <span class="op">&gt;</span> DATEADD(<span class="st">'year'</span>, <span class="op">-</span>[N <span class="kw">Values</span>], [Latest <span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Step 5</strong></p>
 <ul>
 <li>Drag <strong>p.&nbsp;Date Part</strong> to filters shelf</li>
@@ -1890,15 +4504,15 @@ Note
 </div>
 <p><strong>Step 2</strong></p>
 <p>Create a calculated field named <strong>p.&nbsp;Date Granularity</strong> with the following calculation:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DATE</span>(</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [<span class="dt">Date</span> Granularity]</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'day'</span> <span class="cf">THEN</span> [<span class="kw">Order</span> <span class="dt">Date</span>]</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'week'</span> <span class="cf">THEN</span> DATETRUNC(<span class="st">'week'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'month'</span> <span class="cf">THEN</span> DATETRUNC(<span class="st">'month'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'quarter'</span> <span class="cf">THEN</span> DATETRUNC(<span class="st">'quarter'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> DATETRUNC(<span class="st">'year'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DATE</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="cf">CASE</span> [<span class="dt">Date</span> Granularity]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'day'</span> <span class="cf">THEN</span> [<span class="kw">Order</span> <span class="dt">Date</span>]</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'week'</span> <span class="cf">THEN</span> DATETRUNC(<span class="st">'week'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'month'</span> <span class="cf">THEN</span> DATETRUNC(<span class="st">'month'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="st">'quarter'</span> <span class="cf">THEN</span> DATETRUNC(<span class="st">'quarter'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span> DATETRUNC(<span class="st">'year'</span>, [<span class="kw">Order</span> <span class="dt">Date</span>])</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Step 3</strong></p>
 <ul>
 <li>Drag <strong>p.&nbsp;Date Granularity</strong> to the <strong>Columns</strong> shelf<br>
@@ -2136,7 +4750,7 @@ E --&gt; F[Build Cohort Heatmap]
 </div>
 <hr>
 <p><strong>Step 1: Find the First Purchase Date per Customer</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">MIN</span>([Invoice <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>{ FIXED [Customer <span class="kw">ID</span>] : <span class="fu">MIN</span>([Invoice <span class="dt">Date</span>]) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Name: <strong>First Purchase Date</strong></p>
 <p>This calculation:</p>
 <ul>
@@ -2145,16 +4759,16 @@ E --&gt; F[Build Cohort Heatmap]
 <li>Returns the same value for all rows of that customer</li>
 </ul>
 <p><strong>Step 2: Create the Cohort Month</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'month'</span>, [<span class="fu">First</span> Purchase <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'month'</span>, [<span class="fu">First</span> Purchase <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Name: <strong>Cohort Month</strong></p>
 <p><strong>Step 3: Create Invoice Month</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'month'</span>, [Invoice <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>DATETRUNC(<span class="st">'month'</span>, [Invoice <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Name: <strong>Invoice Month</strong></p>
 <p><strong>Step 4: Calculate Period</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(<span class="st">'month'</span>, [Cohort <span class="dt">Month</span>], [Invoice <span class="dt">Month</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>DATEDIFF(<span class="st">'month'</span>, [Cohort <span class="dt">Month</span>], [Invoice <span class="dt">Month</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Name: <strong>Period</strong></p>
 <p><strong>Step 5: Calculate Active Customers</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>COUNTD([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>COUNTD([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Name: <strong>Active Customers</strong></p>
 <p><strong>Step 6: Build the Heatmap</strong></p>
 <ul>
@@ -2354,9 +4968,9 @@ D --&gt; E[Visualization &amp; Analysis]
 <li>Changing dimensions to measures</li>
 </ul>
 <p>Example converting a field to a date:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DATE</span>([<span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="dt">DATE</span>([<span class="kw">Order</span> <span class="dt">Date</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Example converting a string to a number:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="dt">INT</span>([Customer Age])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="dt">INT</span>([Customer Age])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ensuring the correct data type improves calculation accuracy and visualization behavior.</p>
 <hr>
 </section>
@@ -2365,7 +4979,7 @@ D --&gt; E[Visualization &amp; Analysis]
 <p>Duplicate rows can distort metrics such as totals, averages, or counts.</p>
 <p>Instead of counting all records, analysts often count <strong>distinct entities</strong>.</p>
 <p>Example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>COUNTD([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>COUNTD([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This ensures that each customer is counted only once.</p>
 <hr>
 </section>
