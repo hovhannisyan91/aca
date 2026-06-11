@@ -191,6 +191,7 @@ $$minimize(\sum_{k=1}^k W(C_k))$$
 
 ::: {.column width="40%"}
 
+
 ![]({{< meta image_path >}}/kmeans_steps.png)
 
 :::
@@ -926,7 +927,7 @@ plt.show()
 #| eval: true
 #| output: true
 
-km = KMeans(n_clusters=2, max_iter=300, random_state=None)
+km = KMeans(n_clusters=4, max_iter=300, random_state=None)
 df_clustering_std['cluster'] = km.fit_predict(df_clustering_std[features_to_explore])
 
 pca = decomposition.PCA(n_components=2, whiten=True)
@@ -939,185 +940,6 @@ plt.scatter(df_clustering_std['x'], df_clustering_std['y'], c=df_clustering_std[
 plt.show()
 ```
 
-### Optimal Number of Clusers
-
-Two find the optimal number of clusters we can user below two methods:
-
-- Elbow Method
-- Silhouette Coefficient
-
-#### Elbow Method
-
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
-from sklearn.cluster import KMeans
-
-Sum_of_squared_distances = []
-
-# Use k from 1 to 15
-K = range(2,10)
-for k in K:
-    km = KMeans(n_clusters=k, max_iter=300, random_state=None)
-    km = km.fit(df_clustering_std[features_to_explore])
-    # Get sum of square distances by applying km.inertia_ 
-    Sum_of_squared_distances.append(km.inertia_)
-
-# Plot Results
-plt.plot(K, Sum_of_squared_distances, marker='o')
-plt.xlabel('k')
-plt.ylabel('Sum_of_squared_distances')
-plt.title('Elbow Method For Optimal k')
-plt.show()
-```
-
->From the elbow we can say that the optimal number of clusters are most likely the `6`. The curve decreases strongly from $k = 2$ to $k = 6$, meaning each additional cluster gives a meaningful improvement. After $k = 6$, the decrease becomes much smaller and flatter, so adding more clusters gives only limited extra benefit. That point is the “elbow,” where improvement starts slowing down.
-
-#### Silhouette Coefficient
-
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
-from sklearn.metrics import silhouette_samples,silhouette_score
-
-for n_cluster in range(2, 11):
-    kmeans = KMeans(n_clusters=n_cluster).fit(df_clustering_std[features_to_explore])
-    label = kmeans.labels_
-    sil_coeff = silhouette_score(df_clustering_std[features_to_explore], label, metric='euclidean')
-    print("For n_clusters={}, The Silhouette Coefficient is {}".format(n_cluster, sil_coeff))
-```
-
->Which is the optimal number?
-
-
-### Profiling the Segments
-
-Let's stick with the 3 clusters
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
-
-km = KMeans(n_clusters=3, max_iter=300, random_state=None)
-df_clustering_std['cluster'] = km.fit_predict(df_clustering_std[features_to_explore])
-
-pca = decomposition.PCA(n_components=2, whiten=True)
-pca_results = pca.fit_transform(df_clustering_std[features_to_explore])
-
-df_clustering_std['x'] = pca_results[:,0]
-df_clustering_std['y'] = pca_results[:,1]
-
-plt.scatter(df_clustering_std['x'], df_clustering_std['y'], c=df_clustering_std['cluster'])
-plt.show()
-```
-
-We will merge the two dataframes based on a common column `user_location_city`
-
-
-Tthe **average characteristics of each cluster**.  
-Each row represents the typical behavior of customers/searches that belong to that cluster.
-
-K-Means groups observations around cluster centers, also called **centroids**. Therefore, these values can be interpreted as the average profile of each cluster.
-
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
-df_clustering.merge(df_clustering_std[['user_location_city', 'cluster']]).groupby('cluster').mean() # for every column
-```
-
-#### Summary of Clusters
-
-| Cluster | Suggested Name | Main Interpretation |
-|---:|---|---|
-| 0 | Shorter nearby trips | Shorter duration, shorter planning window, lower package usage |
-| 1 | Long-distance early planners | Farthest destinations and longest booking window |
-| 2 | Package-oriented travelers | Highest package usage and relatively longer trips |
-
-#### Cluster 0: Shorter Nearby Trips
-
-`Cluster 0` represents customers who usually take **shorter trips** and book relatively closer to the travel date.
-
-**Main characteristics:**
-
-- Average trip duration is around **3.17 days**
-- Average booking window is around **52 days in advance**
-- Average destination distance is around **1,813**
-- Package usage is around **22.5%**
-- Mobile usage is around **13.7%**
-
-This cluster can be interpreted as customers who are planning shorter and relatively closer trips. They are less likely to book travel packages compared with Cluster 2.
-
-#### Cluster 1: Long-Distance Early Planners
-
-Cluster 1 represents customers who travel the **longest distances** and plan their trips earlier.
-
-Main characteristics:
-
-- Average trip duration is around **4.27 days**
-- Average booking window is around **89 days in advance**
-- Average destination distance is around **4,816**
-- Package usage is around **19.4%**
-- Mobile usage is around **10.3%**
-
-This cluster can be interpreted as customers who plan long-distance trips well in advance. They are not strongly package-oriented, but their travel distance and planning horizon clearly separate them from the other clusters.
-
-#### Cluster 2: Package-Oriented Travelers
-
-Cluster 2 represents customers who are much more likely to book **package deals**.
-
-Main characteristics:
-
-- Average trip duration is around **4.33 days**
-- Average booking window is around **74 days in advance**
-- Average destination distance is around **1,936**
-- Package usage is around **50.5%**
-- Mobile usage is around **15.6%**
-
-This cluster can be interpreted as customers who prefer package-based travel. They stay slightly longer on average and plan moderately in advance.
-
-### Key Differences Between Clusters
-
-The strongest differences between the clusters are observed in:
-
-- `orig_destination_distance`
-- `days_in_advance`
-- `is_package`
-- `duration`
-
-The variables below do not strongly differentiate the clusters because their averages are very similar:
-
-- `srch_adults_cnt`
-- `srch_children_cnt`
-- `srch_rm_cnt`
-
-The clustering mainly separates customers based on **travel distance**, **planning behavior**, and **package preference**.
-
-- **Cluster 0**: shorter, closer, mostly non-package trips.
-- **Cluster 1**: long-distance travelers who book far in advance.
-- **Cluster 2**: package-oriented travelers with relatively longer stays.
-
-Overall, Cluster 1 is mainly defined by distance and early planning, while Cluster 2 is mainly defined by package usage.
-
-
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
-df_clustering_std['cluster'].unique()
-```
-
-
-
-```{python}
-#| echo: true
-#| eval: true
-#| output: true
-# Plot our Cluster Counts
-df_clustering_std.groupby('cluster')['user_location_city'].agg('count').plot(kind='bar')
-```
 
 
 
