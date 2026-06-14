@@ -23,7 +23,9 @@ We will use **Citi Bike trip data** as a real-world case study.
 - test whether sample-based insights are stable
 - visualize geographic patterns using Folium and Kepler.gl
 
-The official Citi Bike system data page publishes downloadable trip history files, including ride ID, ride type, start and end times, station names, station IDs, coordinates, and membership type. The data is available through the Citi Bike system data page and public trip-data bucket.
+The official Citi Bike system data page publishes downloadable trip history files, including `ride ID`, `ride type`, `start` and `end times`, `station names`, `station IDs`, `coordinates`, and `membership type`. 
+
+The data is available through the Citi Bike system data page and public trip-data bucket.
 
 
 
@@ -261,7 +263,7 @@ station_coordinates
 
 Now we attach coordinates to the ride-level dataset.
 
-We join the station table twice:
+**We join the station table twice:**
 
 1. once for the start station
 2. once for the end station
@@ -377,6 +379,16 @@ for _, row in station_coordinates.iterrows():
 m
 ```
 
+
+
+
+::: {.callout-important}
+
+`for _, row in station_coordinates.iterrows():`  assumes that we do not need the row index, as the `iterrows()` function returns both the index and the row data. By using `_` for the index, we indicate that we are intentionally ignoring it in our loop.
+
+*“I do not need the row index, so ignore it.”*
+
+:::
 
 
 ### Line Data
@@ -1258,7 +1270,7 @@ The column `temperature_2m_mean` represents the daily average temperature.
 A line chart is useful here because we want to see how temperature changes over time.
 
 ```{python}
-#| echo: false
+#| echo: true
 #| fig-width: 18
 #| fig-height: 5
 #| out-width: 100%
@@ -1720,7 +1732,7 @@ fig.show()
 ##### Rides and Wind Speed
 
 ```{python}
-#| echo: false
+#| echo: true
 #| fig-width: 18
 #| fig-height: 5
 #| out-width: 100%
@@ -2179,7 +2191,7 @@ station_gdf.head()
 ```
 
 
-## Top Lines and Neighborhood-Level Spatial Aggregation
+### Step 14: Top Lines and Spatial Aggregation
 
 **At this point, we already have:**
 
@@ -2197,7 +2209,7 @@ Now we will continue with two main directions:
 
 ---
 
-### Why This Step Matters
+#### Why This Step Matters
 
 So far, we have station-level points.
 
@@ -2219,7 +2231,7 @@ This is useful because dashboards and business reports usually need **area-level
 
 ---
 
-### Creating Top Ride Lines
+#### Creating Top Ride Lines
 
 A ride line connects a start station to an end station.
 
@@ -2235,7 +2247,7 @@ This gives us one row per station-to-station connection.
 
 ---
 
-### Create Route-Level Summary
+#### Create Route-Level Summary
 
 ```{python}
 #| echo: true
@@ -2283,7 +2295,7 @@ route_summary.head()
 ```
 
 
-### Inspect Top Routes
+#### Inspect Top Routes
 
 ```{python}
 #| echo: true
@@ -2299,8 +2311,7 @@ top_routes[
 ```
 
 
-
-### Drawing Top Lines with Folium
+#### Drawing Top Lines with Folium
 
 We visualize only the top routes.
 
@@ -2367,7 +2378,7 @@ This map shows the most frequent station-to-station movements.
 
 
 
-### Spatial Join Between Stations and Neighborhoods
+#### Spatial Join Between Stations and Neighborhoods
 
 Now we connect station points with neighborhood polygons.
 
@@ -2381,7 +2392,7 @@ This is done using a **spatial join**.
 
 ---
 
-### Check `CRS` Before Spatial Join
+#### Check `CRS` Before Spatial Join
 
 Before a `spatial join`, both GeoDataFrames must have the same `CRS`.
 
@@ -2411,7 +2422,7 @@ jersey_city = jersey_city.to_crs("EPSG:4326")
 
 ---
 
-### Inspect Neighborhood Columns
+#### Inspect Neighborhood Columns
 
 Before joining and aggregating, we need to know which column contains the neighborhood name.
 
@@ -2422,7 +2433,7 @@ jersey_city.columns
 ```
 
 
-### Spatial Join: Assign Stations to Neighborhoods
+#### Spatial Join: Assign Stations to Neighborhoods
 
 ```{python}
 #| echo: true
@@ -2457,7 +2468,7 @@ because we want to keep **only stations** that are inside Jersey City neighborho
 
 ---
 
-### Check How Many Stations Are Inside Jersey City
+#### Check How Many Stations Are Inside Jersey City
 
 ```{python}
 #| echo: true
@@ -2472,7 +2483,7 @@ That is expected if the dataset includes trips ending outside Jersey City.
 
 
 
-###  Neighborhood-Level Summary
+####  Neighborhood-Level Summary
 
 Now each station has neighborhood information.
 
@@ -2509,7 +2520,7 @@ neighborhood_activity.head()
 
 
 
-### Interpretation of Neighborhood Metrics
+#### Interpretation of Neighborhood Metrics
 
 | Metric | Meaning |
 |---|---|
@@ -2533,7 +2544,7 @@ $$
 
 
 
-### Create Center Point for the Map
+#### Create Center Point for the Map
 
 ```{python}
 #| echo: true
@@ -2568,7 +2579,7 @@ because Folium expects:
 
 ---
 
-### Visualize Each Station as a Point
+#### Visualize Each Station as a Point
 
 ```{python}
 #| echo: true
@@ -2604,7 +2615,7 @@ station_point_map
 ```
 
 
-### Merge Neighborhood Metrics Back to Polygons
+#### Merge Neighborhood Metrics Back to Polygons
 
 To create a choropleth map, the metrics must be attached to the neighborhood polygons.
 
@@ -2657,7 +2668,7 @@ neighborhood_choropleth_gdf[
 
 
 
-## Choropleth Map with Folium
+### Step 15: Choropleth Map
 
 Now we create a choropleth map.
 
@@ -2668,7 +2679,7 @@ We start with `total_activity`.
 
 [Simple example](https://python-visualization.github.io/folium/latest/user_guide/geojson/choropleth.html)
 
-### Helper Function for Folium Choropleth
+#### Helper Function for Folium Choropleth
 
 To avoid repeating code, we create a small helper function.
 
@@ -2724,7 +2735,7 @@ def create_neighborhood_choropleth(
 ```
 
 
-### Choropleth: Total Activity by Neighborhood
+#### Choropleth: Total Activity by Neighborhood
 
 
 This choropleth shows which neighborhoods have the highest total Citi Bike station activity. However, neighborhoods with more stations may naturally appear more active.
@@ -2745,7 +2756,7 @@ total_activity_map
 ```
 
 
-### Choropleth by Number of Stations
+#### Choropleth by Number of Stations
 
 ```{python}
 #| echo: true
@@ -2762,7 +2773,7 @@ station_count_map
 
 ---
 
-### Choropleth by Average Activity per Station
+#### Choropleth by Average Activity per Station
 
 ```{python}
 #| echo: true
@@ -2779,7 +2790,7 @@ avg_activity_map
 
 ---
 
-### Choropleth by Total Departures
+#### Choropleth by Total Departures
 
 ```{python}
 #| echo: true
@@ -2796,7 +2807,7 @@ departures_map
 
 ---
 
-### Choropleth by Total Arrivals
+#### Choropleth by Total Arrivals
 
 ```{python}
 #| echo: true
