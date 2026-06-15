@@ -892,36 +892,33 @@ from pathlib import Path
 from urllib.request import urlretrieve
 from zipfile import ZipFile
 
-BASE_URL = "https://s3.amazonaws.com/tripdata"
+CITIBIKE_INDEX_URL = "https://s3.amazonaws.com/tripdata"
 OUTPUT_DIR = "../data/citibike"
 output_dir = Path(OUTPUT_DIR)
 output_dir.mkdir(exist_ok=True)
 
-periods = download_periods(['2025'],10,12)
 
-print(periods)
-for  period in periods:
-    file_name = f"JC-{period}-citibike-tripdata.csv.zip"
+for i in PERIODS:
 
+    try:
+        file_name = f"JC-{i}-citibike-tripdata.csv.zip"
+        url = f"{CITIBIKE_INDEX_URL}/{file_name}"
 
-    zip_path = output_dir / file_name
-    url = f"{BASE_URL}/{file_name}"
+        zip_path = output_dir / file_name
+        urlretrieve(url, zip_path)
 
-    print("downloading form:  ", url)
-    
-    urlretrieve(url,zip_path)
-    
-    print("saving into:  ", zip_path)
+    except (HTTPError, URLError, FileNotFoundError):
+        file_name = f"JC-{i}-citibike-tripdata.zip"
+        url = f"{CITIBIKE_INDEX_URL}/{file_name}"
 
+        zip_path = output_dir / file_name
+        urlretrieve(url, zip_path)
 
     with ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(output_dir)
-
-
-    print(f"Extracted files into: {output_dir}")
-
+    print(f'{file_name}  Extracted')
     zip_path.unlink()
-    print("ZIP file removed.")
+    print(f"{file_name} removed.")
 
 
 ```
@@ -930,7 +927,32 @@ for  period in periods:
 There might be inconsistant labeling in one or two files, think about how can we handle them!
 :::
 
-### Step 5: Concatinating
+
+
+### Step 5: Removing `__MACOSX`
+
+Once we downloaded and extracted the files, we can remove the `__MACOSX` folder if it exists.
+
+
+In order to remove the `__MACOSX` folder we can use `shutil` package and `rmtree()` function
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+import shutil
+
+shutil.rmtree(output_dir / "__MACOSX")
+```
+
+
+::: {.callout-note}
+`__MACOSX` file is a cache file which is created by the `MAC` operating system, it is not needed for our analysis, so we can remove it.
+:::
+
+
+### Step 6: Concatinating
 
 Once we have all the `csv` files we can appending:
 
@@ -991,7 +1013,7 @@ citibike_df.to_csv("../data/citibike/JC2025.csv", index = False)
 
 
 
-### Step 6: Setting Dates
+### Step 7: Setting Dates
 
 
 ```{python}
@@ -1003,7 +1025,7 @@ citibike_df['started_at'] = pd.to_datetime(citibike_df['started_at'],errors="coe
 citibike_df['ended_at'] = pd.to_datetime(citibike_df['ended_at'],errors="coerce")
 ```
 
-### Step 7: `df` overview
+### Step 8: `df` overview
 
 The available columns are:
 
@@ -1022,7 +1044,7 @@ The dataset contains three important groups of variables:
 | Start location | `start_station_name`, `start_station_id`, `start_lat`, `start_lng` | where the ride started |
 | End location | `end_station_name`, `end_station_id`, `end_lat`, `end_lng` | where the ride ended |
 
-### Step 8: Missing Values
+### Step 9: Missing Values
 
 ```{python}
 #| echo: true
@@ -1044,7 +1066,7 @@ missing_values.sort_values("missing_count", ascending=False)
 ```
 
 
-### Step 9: Ride Duration
+### Step 10: Ride Duration
 
 
 Now we create ride duration.
@@ -1099,7 +1121,7 @@ citibike_df = citibike_df[
 
 
 
-### Step 10: Time Based Variables
+### Step 11: Time Based Variables
 
 
 For later aggregation, we create useful time columns.
@@ -1169,7 +1191,7 @@ Pay attention to location you must save the data in seperate folder in order to 
 ![]({{< meta image_path >}}/files.png)
 
 
-### Step 11: Getting Weather Data
+### Step 12: Getting Weather Data
 
 USA government provides an `API` to download and analyze the weather data
 
@@ -1415,7 +1437,7 @@ This chart helps us identify windy periods.
 >Later, we can check whether high wind speed is associated with lower Citi Bike usage.
 
 
-### Step 11: Homework
+### Step 13: Homework
 
 1. Create `Line Chart` number of rides per months
 2. Create `bar-plot` number of rides per season
@@ -1426,7 +1448,7 @@ This chart helps us identify windy periods.
 5. Create Points
 6. Top Lines
    
-### Step 12: Homework Solution
+### Step 14: Homework Solution
 
 #### Number of rides per monhts
 
@@ -1849,7 +1871,7 @@ fig.show()
 
 
 
-### Step 13: Geopandas
+### Step 15: Geopandas
 
 ```python
 import geopandas as gpd
@@ -2191,7 +2213,7 @@ station_gdf.head()
 ```
 
 
-### Step 14: Top Lines and Spatial Aggregation
+### Step 16: Top Lines and Spatial Aggregation
 
 **At this point, we already have:**
 
@@ -2668,7 +2690,7 @@ neighborhood_choropleth_gdf[
 
 
 
-### Step 15: Choropleth Map
+### Step 17: Choropleth Map
 
 Now we create a choropleth map.
 
