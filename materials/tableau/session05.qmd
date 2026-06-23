@@ -8,6 +8,8 @@ image_path: "/img/tableau/04"
 
 ## Retail Sales Analysis Dashboard | Tableau Build Guide
 
+In the comming two sessions we are going to build solid dashboard first to enrich our portfolio
+
 ### Dashboard Goal
 
 **The purpose of this dashboard is to analyze retail business performance using:**
@@ -15,8 +17,7 @@ image_path: "/img/tableau/04"
 - Sales trends
 - Customer behavior
 - Product performance
-- Retention analysis
-- RFM segmentation
+- Segmentation
 - Geographic analysis
 - Time-based purchasing behavior
 
@@ -24,11 +25,9 @@ image_path: "/img/tableau/04"
 
 - Are sales increasing over time?
 - Which products generate the highest revenue?
-- Which customers are most valuable?
-- How frequently do customers purchase?
-- Which customer segments are most important?
-- How strong is customer retention?
 - Which countries generate the most sales?
+- Which weekday and time hour generates the most sales?
+- Revenue vs Product
 
 **The dashboard should feel:**
 
@@ -42,9 +41,20 @@ image_path: "/img/tableau/04"
 
 ### Dataset Overview
 
+
+| InvoiceNo | StockCode | Description | Quantity | InvoiceDate | UnitPrice | CustomerID | Country |
+|---:|:---|:---|---:|:---|---:|---:|:---|
+| 536365 | 85123A | WHITE HANGING HEART T-LIGHT HOLDER | 6 | 1/12/10 8:26 | 2,55 | 17850 | United Kingdom |
+| 536365 | 71053 | WHITE METAL LANTERN | 6 | 1/12/10 8:26 | 3,39 | 17850 | United Kingdom |
+| 536365 | 84406B | CREAM CUPID HEARTS COAT HANGER | 8 | 1/12/10 8:26 | 2,75 | 17850 | United Kingdom |
+| 536365 | 84029G | KNITTED UNION FLAG HOT WATER BOTTLE | 6 | 1/12/10 8:26 | 3,39 | 17850 | United Kingdom |
+| 536365 | 84029E | RED WOOLLY HOTTIE WHITE HEART. | 6 | 1/12/10 8:26 | 3,39 | 17850 | United Kingdom |
+
 The Tableau workbook contains multiple analytical worksheets focused on retail performance analysis.
 
-Main analytical areas include:
+
+
+**Main analytical areas include:**
 
 | Analysis Area | Business Purpose |
 |---|---|
@@ -52,39 +62,16 @@ Main analytical areas include:
 | Sales Trend | Revenue trend analysis |
 | Geographic Analysis | Country-level sales analysis |
 | Product Performance | Best-selling product analysis |
-| Customer Analysis | Customer value analysis |
-| RFM Analysis | Customer segmentation |
-| Cohort Analysis | Retention analysis |
 | Time Analysis | Purchase behavior analysis |
 
 <!--  -->
+
+
+### Dashboard Structure
+
+
 ![]({{< meta image_path >}}/retail_sales_analysis_dashboard.png)
 
-### Recommended Dashboard Structure
-
-```{mermaid}
-flowchart TB
-
-A[KPI Section]
-
-B[Sales Trend]
-C[Sales by Country]
-D[Top Products]
-
-E[Customer Analysis]
-F[RFM Analysis]
-G[Cohort Retention]
-
-A --> B
-A --> C
-A --> D
-
-B --> E
-C --> F
-D --> G
-```
-
----
 
 ### Recommended Dashboard Size
 
@@ -96,7 +83,7 @@ D --> G
 | Outer Padding | 20–30 px |
 | Space Between Containers | 10–20 px |
 
-A fixed dashboard size helps maintain alignment consistency and improves presentation quality.
+>A fixed dashboard size helps maintain alignment consistency and improves presentation quality.
 
 ---
 
@@ -108,24 +95,24 @@ The user should first see:
 
 1. KPI Section
 2. Sales Trends
-3. Geographic and Product Analysis
-4. Customer Analysis
-5. Cohort and Retention Analysis
+3. Geographic Analysis 
+4. Product Analysis
+
 
 The layout should naturally guide the user from summary insights into deeper analytical exploration.
 
 
 ---
 
-### Step 0 | Calculated Fields and Parameters
+## Step 0 | Calculated Fields and Parameters
 
-#### `Period` | Parameter
+### `Period` | Parameter
 
 ![]({{< meta image_path >}}/period_parameter.png)
 
 ---
 
-#### `Valid Sale` | Calculated Field
+### `Valid Sale` | Calculated Field
 
 **Filter variable to test**
 
@@ -137,7 +124,7 @@ AND NOT ISNULL([Customer ID])
 ```
 ---
 
-#### `Current Period Sales` | Calculated Field
+### `Current Period Sales` | Calculated Field
 
 ```sql
 IF [Period] = "Last Week" THEN
@@ -168,7 +155,7 @@ END
 
 ---
 
-#### `Current Period Sales` | Calculated Field
+### `Current Period Sales` | Calculated Field
 
 ```sql
 IF SUM([Previous Period Sales]) = 0 THEN NULL
@@ -181,7 +168,7 @@ END
 
 ---
 
-#### `Sales PoP %` | Calculated Field
+### `Sales PoP %` | Calculated Field
 
 ```sql
 IF SUM([Previous Period Sales]) = 0 THEN NULL
@@ -194,7 +181,7 @@ END
 
 ---
 
-#### `Sales Icon` | Calculated Field
+### `Sales Icon` | Calculated Field
 
 ```sql
 IF ZN([Sales PoP % ]) = 0 THEN ""
@@ -209,9 +196,9 @@ END
 
 
 
-### Step 1 | Build KPI Section
+## Step 1 | Build KPI Section
 
-#### Purpose of KPI Section
+### Purpose of KPI Section
 
 The KPI section provides an instant overview of overall business health.
 
@@ -221,7 +208,7 @@ The KPI cards should be positioned at the top of the dashboard because they esta
 
 ---
 
-#### Recommended KPIs
+### Recommended KPIs
 
 | KPI | Business Meaning |
 |---|---|
@@ -233,7 +220,7 @@ The KPI cards should be positioned at the top of the dashboard because they esta
 
 ---
 
-#### Recommended KPI Layout
+### Recommended KPI Layout
 
 ```{mermaid}
 flowchart LR
@@ -249,7 +236,7 @@ flowchart LR
 
 ---
 
-#### KPI Card Design Rules
+### KPI Card Design Rules
 
 Each KPI card should contain:
 
@@ -263,7 +250,7 @@ The KPI value should always be visually dominant.
 
 ---
 
-#### KPI Color Rules
+### KPI Color Rules
 
 | Situation | Color |
 |---|---|
@@ -275,7 +262,7 @@ Use directional arrows to reinforce performance visually.
 
 ---
 
-#### KPI Card Size Recommendations
+### KPI Card Size Recommendations
 
 | Element | Recommendation |
 |---|---|
@@ -288,7 +275,7 @@ All KPI cards should maintain identical sizing for visual consistency.
 
 ---
 
-#### Recommended Typography Hierarchy
+### Recommended Typography Hierarchy
 
 | Element | Font Size | Weight |
 |---|---|---|
@@ -300,7 +287,7 @@ All KPI cards should maintain identical sizing for visual consistency.
 
 ---
 
-#### Recommended Tableau Fonts
+### Recommended Tableau Fonts
 
 | Font | Usage |
 |---|---|
@@ -311,7 +298,7 @@ All KPI cards should maintain identical sizing for visual consistency.
 
 ---
 
-#### Recommended Google Fonts
+### Recommended Google Fonts
 
 | Font | Style |
 |---|---|
@@ -323,9 +310,9 @@ All KPI cards should maintain identical sizing for visual consistency.
 
 ---
 
-### Step 2 | Build Sales Trend Analysis
+## Step 2 | Build Sales Trend Analysis
 
-#### Purpose of Sales Trend Chart
+### Purpose of Sales Trend Chart
 
 The Sales Trend chart helps users understand how business performance changes over time.
 
@@ -341,7 +328,7 @@ The chart should help users identify:
 
 ---
 
-#### Recommended Chart Type
+### Recommended Chart Type
 
 Use:
 
@@ -358,7 +345,7 @@ Optional enhancements:
 
 ---
 
-#### Recommended Sales Trend Layout
+### Recommended Sales Trend Layout
 
 ```{mermaid}
 flowchart TB
@@ -373,7 +360,7 @@ B --> C
 
 ---
 
-#### Sales Trend Design Rules
+### Sales Trend Design Rules
 
 Do:
 
@@ -392,7 +379,7 @@ Avoid:
 
 ---
 
-#### Recommended Sales Trend Styling
+### Recommended Sales Trend Styling
 
 | Element | Recommendation |
 |---|---|
@@ -403,9 +390,9 @@ Avoid:
 
 ---
 
-### Step 3 | Build Geographic Analysis
+## Step 3 | Build Geographic Analysis
 
-#### Purpose of Geographic Analysis
+### Purpose of Geographic Analysis
 
 The geographic analysis section helps users identify which countries or regions generate the highest revenue.
 
@@ -417,7 +404,7 @@ This analysis helps answer:
 
 ![]({{< meta image_path >}}/Sales_by_Country.png)
 
-#### Recommended Chart Types
+### Recommended Chart Types
 
 Use:
 
@@ -427,7 +414,7 @@ Use:
 
 ---
 
-#### Geographic Analysis Design Rules
+### Geographic Analysis Design Rules
 
 If using maps:
 
@@ -444,9 +431,9 @@ Maps should support analysis rather than decoration.
 
 ---
 
-### Step 4 | Build Product Performance Analysis
+## Step 4 | Build Product Performance Analysis
 
-#### Purpose of Product Analysis
+### Purpose of Product Analysis
 
 The product section identifies:
 
@@ -460,7 +447,7 @@ This section helps stakeholders identify opportunities and risks quickly.
 
 ---
 
-#### Recommended Chart Types
+### Recommended Chart Types
 
 Use:
 
@@ -470,7 +457,7 @@ Use:
 
 ![]({{< meta image_path >}}/Top_Products_by_Revenue.png)
 
-#### Product Analysis Design Rules
+### Product Analysis Design Rules
 
 Do:
 
@@ -487,9 +474,9 @@ Avoid:
 
 ---
 
-### Step 5 | Build Customer Analysis
+## Step 5 | Build Customer Analysis
 
-#### Purpose of Customer Analysis
+### Purpose of Customer Analysis
 
 The customer section helps explain customer behavior and customer value.
 
@@ -501,7 +488,7 @@ This analysis should help answer:
 
 ---
 
-#### Recommended Customer Metrics
+### Recommended Customer Metrics
 
 | Metric | Purpose |
 |---|---|
@@ -512,7 +499,7 @@ This analysis should help answer:
 
 ---
 
-#### Recommended Chart Types
+### Recommended Chart Types
 
 Use:
 
@@ -522,9 +509,9 @@ Use:
 
 ---
 
-### Step 6 | Build RFM Analysis
+## Step 6 | Build RFM Analysis
 
-#### Purpose of RFM Analysis
+### Purpose of RFM Analysis
 
 RFM stands for:
 
@@ -536,7 +523,7 @@ This analysis helps identify customer quality and engagement.
 
 ---
 
-#### RFM Definitions
+### RFM Definitions
 
 | Metric | Meaning |
 |---|---|
@@ -546,7 +533,7 @@ This analysis helps identify customer quality and engagement.
 
 ---
 
-#### Recommended RFM Visuals
+### Recommended RFM Visuals
 
 Use:
 
@@ -558,7 +545,7 @@ Use:
 
 ### Step 7 | Build Cohort Retention Analysis
 
-#### Purpose of Cohort Analysis
+### Purpose of Cohort Analysis
 
 The cohort section helps understand customer retention over time.
 
@@ -570,7 +557,7 @@ This analysis answers:
 
 ---
 
-#### Recommended Cohort Visual
+### Recommended Cohort Visual
 
 Use:
 
@@ -580,9 +567,9 @@ The heatmap should show retention percentage over time.
 
 ---
 
-### Step 8 | Build Time-Based Behavioral Analysis
+## Step 8 | Build Time-Based Behavioral Analysis
 
-#### Purpose of Time Analysis
+### Purpose of Time Analysis
 
 This section helps identify purchasing behavior patterns.
 
@@ -594,7 +581,7 @@ Possible analyses:
 
 ---
 
-#### Recommended Chart Types
+### Recommended Chart Types
 
 Use:
 
@@ -606,7 +593,7 @@ Use:
 
 ### Filter Design Rules
 
-#### Recommended Filters
+### Recommended Filters
 
 Use:
 
@@ -617,7 +604,7 @@ Use:
 
 ---
 
-#### Recommended Filter Placement
+### Recommended Filter Placement
 
 **Filters should appear:**
 
