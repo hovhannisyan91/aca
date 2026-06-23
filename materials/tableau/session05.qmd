@@ -1,6 +1,6 @@
 ---
 title: "Session 05: Sales Analysis Dashboard"
-subtitle: "Advanced Dashboards"
+subtitle: "Advanced Dashboards | 1"
 categories: [tableau]
 image_path: "/img/tableau/04"
 ---
@@ -8,7 +8,9 @@ image_path: "/img/tableau/04"
 
 ## Retail Sales Analysis Dashboard | Tableau Build Guide
 
-In the comming two sessions we are going to build solid dashboard first to enrich our portfolio
+In the comming two sessions we are going to build solid dashboards first of all to enrich our portfolio and obtain advanced dashboard development skills.
+
+
 
 ### Dashboard Goal
 
@@ -42,15 +44,35 @@ In the comming two sessions we are going to build solid dashboard first to enric
 ### Dataset Overview
 
 
-| InvoiceNo | StockCode | Description | Quantity | InvoiceDate | UnitPrice | CustomerID | Country |
-|---:|:---|:---|---:|:---|---:|---:|:---|
-| 536365 | 85123A | WHITE HANGING HEART T-LIGHT HOLDER | 6 | 1/12/10 8:26 | 2,55 | 17850 | United Kingdom |
-| 536365 | 71053 | WHITE METAL LANTERN | 6 | 1/12/10 8:26 | 3,39 | 17850 | United Kingdom |
-| 536365 | 84406B | CREAM CUPID HEARTS COAT HANGER | 8 | 1/12/10 8:26 | 2,75 | 17850 | United Kingdom |
-| 536365 | 84029G | KNITTED UNION FLAG HOT WATER BOTTLE | 6 | 1/12/10 8:26 | 3,39 | 17850 | United Kingdom |
-| 536365 | 84029E | RED WOOLLY HOTTIE WHITE HEART. | 6 | 1/12/10 8:26 | 3,39 | 17850 | United Kingdom |
-
 The Tableau workbook contains multiple analytical worksheets focused on retail performance analysis.
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+
+import pandas as pd
+from IPython.display import Markdown
+
+df = pd.DataFrame({
+    "InvoiceNo": [536365, 536365, 536365, 536365, 536365],
+    "StockCode": ["85123A", "71053", "84406B", "84029G", "84029E"],
+    "Description": [
+        "WHITE HANGING HEART T-LIGHT HOLDER",
+        "WHITE METAL LANTERN",
+        "CREAM CUPID HEARTS COAT HANGER",
+        "KNITTED UNION FLAG HOT WATER BOTTLE",
+        "RED WOOLLY HOTTIE WHITE HEART."
+    ],
+    "Quantity": [6, 6, 8, 6, 6],
+    "InvoiceDate": ["1/12/10 8:26"] * 5,
+    "UnitPrice": ["2,55", "3,39", "2,75", "3,39", "3,39"],
+    "CustomerID": [17850] * 5,
+    "Country": ["United Kingdom"] * 5
+})
+
+Markdown(df.to_markdown(index=False))
+```
 
 
 
@@ -64,7 +86,6 @@ The Tableau workbook contains multiple analytical worksheets focused on retail p
 | Product Performance | Best-selling product analysis |
 | Time Analysis | Purchase behavior analysis |
 
-<!--  -->
 
 
 ### Dashboard Structure
@@ -85,6 +106,8 @@ The Tableau workbook contains multiple analytical worksheets focused on retail p
 
 >A fixed dashboard size helps maintain alignment consistency and improves presentation quality.
 
+
+<!-- todo: add color pallete  -->
 ---
 
 ### Dashboard Visual Hierarchy
@@ -106,15 +129,29 @@ The layout should naturally guide the user from summary insights into deeper ana
 
 ## Step 0 | Calculated Fields and Parameters
 
-### `Period` | Parameter
+### `Period`
+
+We need this, order to be able effectively analyzie sales by any predifined period first we need to create a Parameter named `Period`
 
 ![]({{< meta image_path >}}/period_parameter.png)
 
+
+Once we have this, we can create the following metrics:
+
+
+- `Current Period Orders`
+- `Current Period AVG Invoice`
+- `Current Period Customers`
+- `Current Period Sales`
+
 ---
 
-### `Valid Sale` | Calculated Field
 
-**Filter variable to test**
+
+### `Valid Sale`
+
+**Filter variable to test:**
+
 
 ```sql
 NOT [Is Cancelled]
@@ -122,9 +159,24 @@ AND [Quantity] > 0
 AND [Unit Price] > 0
 AND NOT ISNULL([Customer ID])
 ```
+
+>We need this in order to clean the table
+
+
 ---
 
-### `Current Period Sales` | Calculated Field
+### `Max Order Date`
+
+We need this in order to figure out the latest invoice date. 
+
+```sql
+{ FIXED : MAX(DATE([Invoice Date])) }
+```
+
+>Remember the RFM analysis
+
+
+### `Current Period Sales`
 
 ```sql
 IF [Period] = "Last Week" THEN
@@ -153,9 +205,184 @@ ELSEIF [Period] = "Last Year" THEN
 END
 ```
 
+
+### `Current Period Orders`
+
+
+```sql
+INT(IF [Period] = "Last Week" THEN
+    IF DATETRUNC('week', DATE([Invoice Date])) =
+       DATEADD('week', -1, DATETRUNC('week', [Max Order Date]))
+    THEN [Invoice No]
+    END
+
+ELSEIF [Period] = "Last Month" THEN
+    IF DATETRUNC('month', DATE([Invoice Date])) =
+       DATEADD('month', -1, DATETRUNC('month', [Max Order Date]))
+    THEN [Invoice No]
+    END
+
+ELSEIF [Period] = "Last Quarter" THEN
+    IF DATETRUNC('quarter', DATE([Invoice Date])) =
+       DATEADD('quarter', -1, DATETRUNC('quarter', [Max Order Date]))
+    THEN [Invoice No]
+    END
+
+ELSEIF [Period] = "Last Year" THEN
+    IF DATETRUNC('year', DATE([Invoice Date])) =
+       DATEADD('year', -1, DATETRUNC('year', [Max Order Date]))
+    THEN [Invoice No]
+    END
+END)
+```
+
+
+### `Current Period Customers`
+
+```sql
+IF [Period] = "Last Week" THEN
+    IF DATETRUNC('week', DATE([Invoice Date])) =
+       DATEADD('week', -1, DATETRUNC('week', [Max Order Date]))
+    THEN [Customer ID]
+    END
+
+ELSEIF [Period] = "Last Month" THEN
+    IF DATETRUNC('month', DATE([Invoice Date])) =
+       DATEADD('month', -1, DATETRUNC('month', [Max Order Date]))
+    THEN [Customer ID]
+    END
+
+ELSEIF [Period] = "Last Quarter" THEN
+    IF DATETRUNC('quarter', DATE([Invoice Date])) =
+       DATEADD('quarter', -1, DATETRUNC('quarter', [Max Order Date]))
+    THEN [Customer ID]
+    END
+
+ELSEIF [Period] = "Last Year" THEN
+    IF DATETRUNC('year', DATE([Invoice Date])) =
+       DATEADD('year', -1, DATETRUNC('year', [Max Order Date]))
+    THEN [Customer ID]
+    END
+END
+```
+
 ---
 
-### `Current Period Sales` | Calculated Field
+### `Current Period AVG Invoice`
+
+```sql
+IF COUNTD([Current Period Orders]) = 0 THEN NULL
+ELSE
+    SUM([Current Period Sales]) / COUNTD([Current Period Orders])
+END
+```
+
+### `Previous Period Sales`
+
+```sql
+IF [Period] = "Last Week" THEN
+    IF DATETRUNC('week', DATE([Invoice Date])) =
+       DATEADD('week', -2, DATETRUNC('week', [Max Order Date]))
+    THEN [Sales]
+    END
+
+ELSEIF [Period] = "Last Month" THEN
+    IF DATETRUNC('month', DATE([Invoice Date])) =
+       DATEADD('month', -2, DATETRUNC('month', [Max Order Date]))
+    THEN [Sales]
+    END
+
+ELSEIF [Period] = "Last Quarter" THEN
+    IF DATETRUNC('quarter', DATE([Invoice Date])) =
+       DATEADD('quarter', -2, DATETRUNC('quarter', [Max Order Date]))
+    THEN [Sales]
+    END
+
+ELSEIF [Period] = "Last Year" THEN
+    IF DATETRUNC('year', DATE([Invoice Date])) =
+       DATEADD('year', -2, DATETRUNC('year', [Max Order Date]))
+    THEN [Sales]
+    END
+END
+```
+
+---
+
+### `Previous Period Orders`
+
+```sql
+FLOAT(IF [Period] = "Last Week" THEN
+    IF DATETRUNC('week', DATE([Invoice Date])) =
+       DATEADD('week', -2, DATETRUNC('week', [Max Order Date]))
+    THEN [Invoice No]
+    END
+
+ELSEIF [Period] = "Last Month" THEN
+    IF DATETRUNC('month', DATE([Invoice Date])) =
+       DATEADD('month', -2, DATETRUNC('month', [Max Order Date]))
+    THEN [Invoice No]
+    END
+
+ELSEIF [Period] = "Last Quarter" THEN
+    IF DATETRUNC('quarter', DATE([Invoice Date])) =
+       DATEADD('quarter', -2, DATETRUNC('quarter', [Max Order Date]))
+    THEN [Invoice No]
+    END
+
+ELSEIF [Period] = "Last Year" THEN
+    IF DATETRUNC('year', DATE([Invoice Date])) =
+       DATEADD('year', -2, DATETRUNC('year', [Max Order Date]))
+    THEN [Invoice No]
+    END
+END)
+
+```
+
+---
+
+### `Previous Period Customers`
+
+```sql
+IF [Period] = "Last Week" THEN
+    IF DATETRUNC('week', DATE([Invoice Date])) =
+       DATEADD('week', -2, DATETRUNC('week', [Max Order Date]))
+    THEN [Sales]
+    END
+
+ELSEIF [Period] = "Last Month" THEN
+    IF DATETRUNC('month', DATE([Invoice Date])) =
+       DATEADD('month', -2, DATETRUNC('month', [Max Order Date]))
+    THEN [Sales]
+    END
+
+ELSEIF [Period] = "Last Quarter" THEN
+    IF DATETRUNC('quarter', DATE([Invoice Date])) =
+       DATEADD('quarter', -2, DATETRUNC('quarter', [Max Order Date]))
+    THEN [Sales]
+    END
+
+ELSEIF [Period] = "Last Year" THEN
+    IF DATETRUNC('year', DATE([Invoice Date])) =
+       DATEADD('year', -2, DATETRUNC('year', [Max Order Date]))
+    THEN [Sales]
+    END
+END
+```
+
+---
+
+### `Previous Period AVG Invoice`
+
+```sql
+IF COUNTD([Previous Period Orders]) = 0 THEN NULL
+ELSE
+    SUM([Previous Period Sales]) / COUNTD([Previous Period Orders])
+END
+```
+
+---
+
+### `Sales PoP %`
 
 ```sql
 IF SUM([Previous Period Sales]) = 0 THEN NULL
@@ -163,12 +390,13 @@ ELSE
     (SUM([Current Period Sales]) - SUM([Previous Period Sales])) 
     / SUM([Previous Period Sales])
 END
-
 ```
+
 
 ---
 
-### `Sales PoP %` | Calculated Field
+
+### `Orders PoP %`
 
 ```sql
 IF SUM([Previous Period Sales]) = 0 THEN NULL
@@ -178,10 +406,37 @@ ELSE
 END
 ```
 
+---
+
+### `Customers PoP %`
+
+```sql
+IF COUNTD([Previous Period Customers]) = 0 THEN NULL
+ELSE
+    (COUNTD([Current Period Customers]) - COUNTD([Previous Period Customers]))
+    / COUNTD([Previous Period Customers])
+END
+```
 
 ---
 
-### `Sales Icon` | Calculated Field
+### `AVG invoice PoP %`
+
+```sql
+IF [Previous Period AVG Invoice] = 0 THEN NULL
+ELSE
+(
+    [Current Period AVG Invoice]
+    -
+    [Previous Period AVG Invoice]
+)
+/ [Previous Period AVG Invoice]
+END
+```
+
+
+
+### `Sales Icon`
 
 ```sql
 IF ZN([Sales PoP % ]) = 0 THEN ""
@@ -193,6 +448,38 @@ END
 
 ---
 
+### `Orders Icon`
+
+```sql
+IF ZN([Orders PoP %]) = 0 THEN ""
+ELSEIF [Orders PoP %] > 0 THEN "▲"
+ELSEIF [Orders PoP %] < 0 THEN "▼"
+END
+```
+
+
+---
+
+### `Customer Icon`
+
+```sql
+IF ZN([Customers PoP %  ]) = 0 THEN ""
+ELSEIF [Customers PoP %  ] > 0 THEN "▲"
+ELSEIF [Customers PoP %  ] < 0 THEN "▼"
+END
+```
+
+
+---
+
+### `AVG Invoice Icon`
+
+```sql
+IF ZN([AVG Invoice PoP %]) THEN ""
+ELSEIF [AVG Invoice PoP %] > 0 THEN "▲"
+ELSEIF [AVG Invoice PoP %] < 0 THEN "▼"
+END
+```
 
 
 
@@ -543,17 +830,12 @@ Use:
 
 ---
 
-### Step 7 | Build Cohort Retention Analysis
+## Step 7 | Clustering
 
-### Purpose of Cohort Analysis
+### Purpose of Clustering
 
-The cohort section helps understand customer retention over time.
+Automatically splits the data into multiple clusters
 
-This analysis answers:
-
-- How many customers return?
-- How quickly do customers churn?
-- Which acquisition periods perform best?
 
 ---
 
@@ -565,6 +847,12 @@ Use:
 
 The heatmap should show retention percentage over time.
 
+
+### Video
+
+Checkout the [following video](https://www.youtube.com/watch?v=nLFTAaHREt4)
+
+![]({{< meta image_path >}}/cluster.png)
 ---
 
 ## Step 8 | Build Time-Based Behavioral Analysis
