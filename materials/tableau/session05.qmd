@@ -2,7 +2,7 @@
 title: "Session 05: Sales Analysis Dashboard"
 subtitle: "Advanced Dashboards | 1"
 categories: [tableau]
-image_path: "/img/tableau/04"
+image_path: "/img/tableau/05"
 ---
 
 
@@ -144,8 +144,20 @@ Once we have this, we can create the following metrics:
 - `Current Period Customers`
 - `Current Period Sales`
 
+
 ---
 
+
+### Is Canceled
+
+This is useful because some invoice numbers may be stored as numbers, while cancelled invoices contain a letter such as `C536379`
+
+`C` means cancelled and we need to filter out them from further calculation, unless we are explicitly analyzing cancelled orders.
+
+
+```sql
+LEFT(STR([Invoice No]),1) = "C"
+```
 
 
 ### `Valid Sale`
@@ -175,8 +187,62 @@ We need this in order to figure out the latest invoice date.
 
 >Remember the RFM analysis
 
+### `Sales`
 
-### `Current Period Sales`
+
+```sql
+
+```
+
+## Step 1 | KPI Section
+
+### Purpose of KPI Section
+
+The KPI section provides an instant overview of overall business health.
+
+The KPI cards should be positioned at the top of the dashboard because they establish the business context before deeper analysis begins.
+
+![]({{< meta image_path >}}/KPIs.png)
+
+
+
+We need to create `16` new calculated fields in meaning that for `Sales`, `Customers`, `Orders`, `Avg Invoice` we need
+
+
+
+### Recommended KPIs
+
+| KPI | Business Meaning |
+|---|---|
+| Total Revenue | Total generated sales |
+| Total Orders | Number of transactions |
+| Total Customers | Unique customer count |
+| AVG Revenue per Customer | Customer value |
+| Growth % | Performance comparison |
+
+---
+
+### Recommended KPI Layout
+
+```{mermaid}
+flowchart LR
+    A[Revenue KPI]
+    B[Orders KPI]
+    C[Customers KPI]
+    D[AVG Revenue KPI]
+
+    A --> B
+    B --> C
+    C --> D
+```
+
+
+---
+
+### Related Calculated Fields
+
+
+#### `Current Period Sales`
 
 ```sql
 IF [Period] = "Last Week" THEN
@@ -206,7 +272,7 @@ END
 ```
 
 
-### `Current Period Orders`
+#### `Current Period Orders`
 
 
 ```sql
@@ -237,7 +303,7 @@ END)
 ```
 
 
-### `Current Period Customers`
+#### `Current Period Customers`
 
 ```sql
 IF [Period] = "Last Week" THEN
@@ -268,7 +334,7 @@ END
 
 ---
 
-### `Current Period AVG Invoice`
+#### `Current Period AVG Invoice`
 
 ```sql
 IF COUNTD([Current Period Orders]) = 0 THEN NULL
@@ -277,7 +343,7 @@ ELSE
 END
 ```
 
-### `Previous Period Sales`
+#### `Previous Period Sales`
 
 ```sql
 IF [Period] = "Last Week" THEN
@@ -308,7 +374,7 @@ END
 
 ---
 
-### `Previous Period Orders`
+#### `Previous Period Orders`
 
 ```sql
 FLOAT(IF [Period] = "Last Week" THEN
@@ -340,7 +406,7 @@ END)
 
 ---
 
-### `Previous Period Customers`
+#### `Previous Period Customers`
 
 ```sql
 IF [Period] = "Last Week" THEN
@@ -350,7 +416,7 @@ IF [Period] = "Last Week" THEN
     END
 
 ELSEIF [Period] = "Last Month" THEN
-    IF DATaETRUNC('month', DATE([Invoice Date])) =
+    IF DATETRUNC('month', DATE([Invoice Date])) =
        DATEADD('month', -2, DATETRUNC('month', [Max Order Date]))
     THEN [Customer ID]
     END
@@ -371,7 +437,7 @@ END
 
 ---
 
-### `Previous Period AVG Invoice`
+#### `Previous Period AVG Invoice`
 
 ```sql
 IF COUNTD([Previous Period Orders]) = 0 THEN NULL
@@ -382,7 +448,7 @@ END
 
 ---
 
-### `Sales PoP %`
+#### `Sales PoP %`
 
 ```sql
 IF SUM([Previous Period Sales]) = 0 THEN NULL
@@ -396,19 +462,19 @@ END
 ---
 
 
-### `Orders PoP %`
+#### `Orders PoP %`
 
 ```sql
-IF SUM([Previous Period Sales]) = 0 THEN NULL
+IF COUNT([Previous Period Orders]) = 0 THEN NULL
 ELSE
-    (SUM([Current Period Sales]) - SUM([Previous Period Sales])) 
-    / SUM([Previous Period Sales])
+    (COUNT([Current Period Orders]) - COUNT([Previous Period Orders]))
+    / COUNT([Previous Period Orders])
 END
 ```
 
 ---
 
-### `Customers PoP %`
+#### `Customers PoP %`
 
 ```sql
 IF COUNTD([Previous Period Customers]) = 0 THEN NULL
@@ -420,7 +486,7 @@ END
 
 ---
 
-### `AVG invoice PoP %`
+#### `AVG invoice PoP %`
 
 ```sql
 IF [Previous Period AVG Invoice] = 0 THEN NULL
@@ -436,7 +502,7 @@ END
 
 
 
-### `Sales Icon`
+#### `Sales Icon`
 
 ```sql
 IF ZN([Sales PoP % ]) = 0 THEN ""
@@ -448,7 +514,7 @@ END
 
 ---
 
-### `Orders Icon`
+#### `Orders Icon`
 
 ```sql
 IF ZN([Orders PoP %]) = 0 THEN ""
@@ -460,72 +526,31 @@ END
 
 ---
 
-### `Customer Icon`
+#### `Customer Icon`
 
 ```sql
-IF ZN([Customers PoP %  ]) = 0 THEN ""
-ELSEIF [Customers PoP %  ] > 0 THEN "▲"
-ELSEIF [Customers PoP %  ] < 0 THEN "▼"
+IF ZN([Customers PoP %]) = 0 THEN ""
+ELSEIF [Customers PoP %] > 0 THEN "▲"
+ELSEIF [Customers PoP %] < 0 THEN "▼"
 END
 ```
 
 
 ---
 
-### `AVG Invoice Icon`
+#### `AVG Invoice Icon`
 
 ```sql
-IF ZN([AVG Invoice PoP %]) THEN ""
+IF ZN([AVG Invoice PoP %]) = 0 THEN ""
 ELSEIF [AVG Invoice PoP %] > 0 THEN "▲"
 ELSEIF [AVG Invoice PoP %] < 0 THEN "▼"
 END
 ```
 
 
-
-## Step 1 | Build KPI Section
-
-### Purpose of KPI Section
-
-The KPI section provides an instant overview of overall business health.
-
-The KPI cards should be positioned at the top of the dashboard because they establish the business context before deeper analysis begins.
-
-![]({{< meta image_path >}}/KPIs.png)
-
----
-
-### Recommended KPIs
-
-| KPI | Business Meaning |
-|---|---|
-| Total Revenue | Total generated sales |
-| Total Orders | Number of transactions |
-| Total Customers | Unique customer count |
-| AVG Revenue per Customer | Customer value |
-| Growth % | Performance comparison |
-
----
-
-### Recommended KPI Layout
-
-```{mermaid}
-flowchart LR
-    A[Revenue KPI]
-    B[Orders KPI]
-    C[Customers KPI]
-    D[AVG Revenue KPI]
-
-    A --> B
-    B --> C
-    C --> D
-```
-
----
-
 ### KPI Card Design Rules
 
-Each KPI card should contain:
+**Each KPI card should contain:**
 
 - Large KPI value
 - KPI subtitle
@@ -534,6 +559,23 @@ Each KPI card should contain:
 - Directional indicator
 
 The KPI value should always be visually dominant.
+
+#### Entire View & Format
+
+Choose the Entire View and navigate to the format sellect borders and change everything into `None`, as shown in the file.
+
+![]({{< meta image_path >}}/format.png)
+
+#### Currency
+
+
+Right Click on the numbers choose the respective fields and choose the required currency.
+
+
+![]({{< meta image_path >}}/currency_format.png)
+
+
+
 
 ---
 
@@ -547,7 +589,6 @@ The KPI value should always be visually dominant.
 
 Use directional arrows to reinforce performance visually.
 
----
 
 ### KPI Card Size Recommendations
 
@@ -569,8 +610,11 @@ All KPI cards should maintain identical sizing for visual consistency.
 | Dashboard Title | 24–32 px | Bold |
 | Section Titles | 16–20 px | Semi-bold |
 | KPI Values | 28–40 px | Bold |
-| KPI Labels | 11–14 px | Regular |
+| KPI Labels | 10–14 px | Regular |
 | Growth % | 12–16 px | Semi-bold |
+
+
+>Try within the above mentioned sizing.
 
 ---
 
@@ -583,21 +627,9 @@ All KPI cards should maintain identical sizing for visual consistency.
 | Arial | Universal readability |
 | Verdana | Small dashboard labels |
 
----
 
-### Recommended Google Fonts
 
-| Font | Style |
-|---|---|
-| Inter | Modern KPI typography |
-| Roboto | Clean dashboard labels |
-| Open Sans | Professional readability |
-| Montserrat | Strong dashboard titles |
-| Source Sans 3 | Analytical styling |
-
----
-
-## Step 2 | Build Sales Trend Analysis
+## Step 2 | Sales Trend Analysis
 
 ### Purpose of Sales Trend Chart
 
@@ -613,43 +645,15 @@ The chart should help users identify:
 - Performance spikes
 - Long-term business direction
 
----
-
-### Recommended Chart Type
-
-Use:
-
-- Line Chart
-
-Optional enhancements:
-
-- Dual-axis line chart
-- Trend line
-- Moving average
 
 
 ![]({{< meta image_path >}}/Sales_Trend.png)
 
----
 
-### Recommended Sales Trend Layout
-
-```{mermaid}
-flowchart TB
-
-A[Date]
-B[Revenue Trend]
-C[Growth Analysis]
-
-A --> B
-B --> C
-```
-
----
 
 ### Sales Trend Design Rules
 
-Do:
+    Do:
 
 - Highlight latest point
 - Use minimal gridlines
@@ -675,15 +679,36 @@ Avoid:
 | Labels | Minimal |
 | Colors | Single dominant color |
 
+
+### Borders
+
+
+::: {.columns}
+
+::: {.column}
+
+![]({{< meta image_path >}}/sales_trend_row_format.png)
+
+:::
+
+::: {.column}
+
+![]({{< meta image_path >}}/sales_trend_column_format.png)
+
+:::
+
+:::
+
+
 ---
 
-## Step 3 | Build Geographic Analysis
+## Step 3 | Geographic Analysis
 
 ### Purpose of Geographic Analysis
 
 The geographic analysis section helps users identify which countries or regions generate the highest revenue.
 
-This analysis helps answer:
+**This analysis helps answer:**
 
 - Which markets perform best?
 - Which regions need attention?
@@ -691,34 +716,61 @@ This analysis helps answer:
 
 ![]({{< meta image_path >}}/Sales_by_Country.png)
 
-### Recommended Chart Types
-
-Use:
-
-- Filled Map
-- Symbol Map
-- Horizontal Bar Chart
-
----
 
 ### Geographic Analysis Design Rules
 
-If using maps:
+
+**If using maps:**
 
 - Use soft color gradients
 - Highlight key regions
 - Keep labels minimal
 
-If using bars:
+**If using bars:**
 
 - Sort descending
 - Show regional contribution %
 
 Maps should support analysis rather than decoration.
 
----
 
-## Step 4 | Build Product Performance Analysis
+### Calculated Fields
+
+
+#### `p.Period`
+
+
+To validate the filter
+
+
+```sql
+IF [Period] = "Last Week" THEN
+    DATEDIFF('week', [Invoice Date], { MAX([Invoice Date]) }) = 1
+
+ELSEIF [Period] = "Last Month" THEN
+    DATEDIFF('month', [Invoice Date], { MAX([Invoice Date]) }) = 1
+
+ELSEIF [Period] = "Last Quarter" THEN
+    DATEDIFF('quarter', [Invoice Date], { MAX([Invoice Date]) }) = 1
+
+ELSEIF [Period] = "Last Year" THEN
+    DATEDIFF('year', [Invoice Date], { MAX([Invoice Date]) }) = 1
+END
+```
+
+#### `Log Sales`
+
+In order to kind of zoom-in the differences there might be a need to use **logarithmic scale**
+
+```sql
+LOG(SUM([Sales]))
+```
+
+> AS we can see the highest generated sales belong to the United Kingdom
+
+
+
+## Step 4 | Product Performance Analysis
 
 ### Purpose of Product Analysis
 
@@ -731,16 +783,6 @@ The product section identifies:
 
 This section helps stakeholders identify opportunities and risks quickly.
 
-
----
-
-### Recommended Chart Types
-
-Use:
-
-- Horizontal Bar Charts
-- Highlight Tables
-- Treemaps
 
 ![]({{< meta image_path >}}/Top_Products_by_Revenue.png)
 
@@ -834,25 +876,23 @@ Use:
 
 ### Purpose of Clustering
 
-Automatically splits the data into multiple clusters
+Automatically splits the data into multiple clusters.
+
+Navigate to Analytic $\rightarrow$ Cluster $\rightarrow$ drag into cluster
 
 
----
+![]({{< meta image_path >}}/clustering.png)
 
-### Recommended Cohort Visual
 
-Use:
 
-- Heatmap
-
-The heatmap should show retention percentage over time.
+![]({{< meta image_path >}}/cluster_final.png)
 
 
 ### Video
 
 Checkout the [following video](https://www.youtube.com/watch?v=nLFTAaHREt4)
 
-![]({{< meta image_path >}}/cluster.png)
+
 
 ---
 
