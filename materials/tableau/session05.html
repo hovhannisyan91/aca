@@ -112,6 +112,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
 <link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -931,62 +960,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#step-0-calculated-fields-and-parameters" id="toc-step-0-calculated-fields-and-parameters" class="nav-link" data-scroll-target="#step-0-calculated-fields-and-parameters">Step 0 | Calculated Fields and Parameters</a>
   <ul class="collapse">
   <li><a href="#period" id="toc-period" class="nav-link" data-scroll-target="#period"><code>Period</code></a></li>
+  <li><a href="#is-canceled" id="toc-is-canceled" class="nav-link" data-scroll-target="#is-canceled">Is Canceled</a></li>
   <li><a href="#valid-sale" id="toc-valid-sale" class="nav-link" data-scroll-target="#valid-sale"><code>Valid Sale</code></a></li>
   <li><a href="#max-order-date" id="toc-max-order-date" class="nav-link" data-scroll-target="#max-order-date"><code>Max Order Date</code></a></li>
-  <li><a href="#current-period-sales" id="toc-current-period-sales" class="nav-link" data-scroll-target="#current-period-sales"><code>Current Period Sales</code></a></li>
-  <li><a href="#current-period-orders" id="toc-current-period-orders" class="nav-link" data-scroll-target="#current-period-orders"><code>Current Period Orders</code></a></li>
-  <li><a href="#current-period-customers" id="toc-current-period-customers" class="nav-link" data-scroll-target="#current-period-customers"><code>Current Period Customers</code></a></li>
-  <li><a href="#current-period-avg-invoice" id="toc-current-period-avg-invoice" class="nav-link" data-scroll-target="#current-period-avg-invoice"><code>Current Period AVG Invoice</code></a></li>
-  <li><a href="#previous-period-sales" id="toc-previous-period-sales" class="nav-link" data-scroll-target="#previous-period-sales"><code>Previous Period Sales</code></a></li>
-  <li><a href="#previous-period-orders" id="toc-previous-period-orders" class="nav-link" data-scroll-target="#previous-period-orders"><code>Previous Period Orders</code></a></li>
-  <li><a href="#previous-period-customers" id="toc-previous-period-customers" class="nav-link" data-scroll-target="#previous-period-customers"><code>Previous Period Customers</code></a></li>
-  <li><a href="#previous-period-avg-invoice" id="toc-previous-period-avg-invoice" class="nav-link" data-scroll-target="#previous-period-avg-invoice"><code>Previous Period AVG Invoice</code></a></li>
-  <li><a href="#sales-pop" id="toc-sales-pop" class="nav-link" data-scroll-target="#sales-pop"><code>Sales PoP %</code></a></li>
-  <li><a href="#orders-pop" id="toc-orders-pop" class="nav-link" data-scroll-target="#orders-pop"><code>Orders PoP %</code></a></li>
-  <li><a href="#customers-pop" id="toc-customers-pop" class="nav-link" data-scroll-target="#customers-pop"><code>Customers PoP %</code></a></li>
-  <li><a href="#avg-invoice-pop" id="toc-avg-invoice-pop" class="nav-link" data-scroll-target="#avg-invoice-pop"><code>AVG invoice PoP %</code></a></li>
-  <li><a href="#sales-icon" id="toc-sales-icon" class="nav-link" data-scroll-target="#sales-icon"><code>Sales Icon</code></a></li>
-  <li><a href="#orders-icon" id="toc-orders-icon" class="nav-link" data-scroll-target="#orders-icon"><code>Orders Icon</code></a></li>
-  <li><a href="#customer-icon" id="toc-customer-icon" class="nav-link" data-scroll-target="#customer-icon"><code>Customer Icon</code></a></li>
-  <li><a href="#avg-invoice-icon" id="toc-avg-invoice-icon" class="nav-link" data-scroll-target="#avg-invoice-icon"><code>AVG Invoice Icon</code></a></li>
+  <li><a href="#sales" id="toc-sales" class="nav-link" data-scroll-target="#sales"><code>Sales</code></a></li>
   </ul></li>
-  <li><a href="#step-1-build-kpi-section" id="toc-step-1-build-kpi-section" class="nav-link" data-scroll-target="#step-1-build-kpi-section">Step 1 | Build KPI Section</a>
+  <li><a href="#step-1-kpi-section" id="toc-step-1-kpi-section" class="nav-link" data-scroll-target="#step-1-kpi-section">Step 1 | KPI Section</a>
   <ul class="collapse">
   <li><a href="#purpose-of-kpi-section" id="toc-purpose-of-kpi-section" class="nav-link" data-scroll-target="#purpose-of-kpi-section">Purpose of KPI Section</a></li>
   <li><a href="#recommended-kpis" id="toc-recommended-kpis" class="nav-link" data-scroll-target="#recommended-kpis">Recommended KPIs</a></li>
   <li><a href="#recommended-kpi-layout" id="toc-recommended-kpi-layout" class="nav-link" data-scroll-target="#recommended-kpi-layout">Recommended KPI Layout</a></li>
+  <li><a href="#related-calculated-fields" id="toc-related-calculated-fields" class="nav-link" data-scroll-target="#related-calculated-fields">Related Calculated Fields</a></li>
   <li><a href="#kpi-card-design-rules" id="toc-kpi-card-design-rules" class="nav-link" data-scroll-target="#kpi-card-design-rules">KPI Card Design Rules</a></li>
   <li><a href="#kpi-color-rules" id="toc-kpi-color-rules" class="nav-link" data-scroll-target="#kpi-color-rules">KPI Color Rules</a></li>
   <li><a href="#kpi-card-size-recommendations" id="toc-kpi-card-size-recommendations" class="nav-link" data-scroll-target="#kpi-card-size-recommendations">KPI Card Size Recommendations</a></li>
   <li><a href="#recommended-typography-hierarchy" id="toc-recommended-typography-hierarchy" class="nav-link" data-scroll-target="#recommended-typography-hierarchy">Recommended Typography Hierarchy</a></li>
   <li><a href="#recommended-tableau-fonts" id="toc-recommended-tableau-fonts" class="nav-link" data-scroll-target="#recommended-tableau-fonts">Recommended Tableau Fonts</a></li>
-  <li><a href="#recommended-google-fonts" id="toc-recommended-google-fonts" class="nav-link" data-scroll-target="#recommended-google-fonts">Recommended Google Fonts</a></li>
   </ul></li>
-  <li><a href="#step-2-build-sales-trend-analysis" id="toc-step-2-build-sales-trend-analysis" class="nav-link" data-scroll-target="#step-2-build-sales-trend-analysis">Step 2 | Build Sales Trend Analysis</a>
+  <li><a href="#step-2-sales-trend-analysis" id="toc-step-2-sales-trend-analysis" class="nav-link" data-scroll-target="#step-2-sales-trend-analysis">Step 2 | Sales Trend Analysis</a>
   <ul class="collapse">
   <li><a href="#purpose-of-sales-trend-chart" id="toc-purpose-of-sales-trend-chart" class="nav-link" data-scroll-target="#purpose-of-sales-trend-chart">Purpose of Sales Trend Chart</a></li>
-  <li><a href="#recommended-chart-type" id="toc-recommended-chart-type" class="nav-link" data-scroll-target="#recommended-chart-type">Recommended Chart Type</a></li>
-  <li><a href="#recommended-sales-trend-layout" id="toc-recommended-sales-trend-layout" class="nav-link" data-scroll-target="#recommended-sales-trend-layout">Recommended Sales Trend Layout</a></li>
   <li><a href="#sales-trend-design-rules" id="toc-sales-trend-design-rules" class="nav-link" data-scroll-target="#sales-trend-design-rules">Sales Trend Design Rules</a></li>
   <li><a href="#recommended-sales-trend-styling" id="toc-recommended-sales-trend-styling" class="nav-link" data-scroll-target="#recommended-sales-trend-styling">Recommended Sales Trend Styling</a></li>
+  <li><a href="#borders" id="toc-borders" class="nav-link" data-scroll-target="#borders">Borders</a></li>
   </ul></li>
-  <li><a href="#step-3-build-geographic-analysis" id="toc-step-3-build-geographic-analysis" class="nav-link" data-scroll-target="#step-3-build-geographic-analysis">Step 3 | Build Geographic Analysis</a>
+  <li><a href="#step-3-geographic-analysis" id="toc-step-3-geographic-analysis" class="nav-link" data-scroll-target="#step-3-geographic-analysis">Step 3 | Geographic Analysis</a>
   <ul class="collapse">
   <li><a href="#purpose-of-geographic-analysis" id="toc-purpose-of-geographic-analysis" class="nav-link" data-scroll-target="#purpose-of-geographic-analysis">Purpose of Geographic Analysis</a></li>
-  <li><a href="#recommended-chart-types" id="toc-recommended-chart-types" class="nav-link" data-scroll-target="#recommended-chart-types">Recommended Chart Types</a></li>
   <li><a href="#geographic-analysis-design-rules" id="toc-geographic-analysis-design-rules" class="nav-link" data-scroll-target="#geographic-analysis-design-rules">Geographic Analysis Design Rules</a></li>
+  <li><a href="#calculated-fields" id="toc-calculated-fields" class="nav-link" data-scroll-target="#calculated-fields">Calculated Fields</a></li>
   </ul></li>
-  <li><a href="#step-4-build-product-performance-analysis" id="toc-step-4-build-product-performance-analysis" class="nav-link" data-scroll-target="#step-4-build-product-performance-analysis">Step 4 | Build Product Performance Analysis</a>
+  <li><a href="#step-4-product-performance-analysis" id="toc-step-4-product-performance-analysis" class="nav-link" data-scroll-target="#step-4-product-performance-analysis">Step 4 | Product Performance Analysis</a>
   <ul class="collapse">
   <li><a href="#purpose-of-product-analysis" id="toc-purpose-of-product-analysis" class="nav-link" data-scroll-target="#purpose-of-product-analysis">Purpose of Product Analysis</a></li>
-  <li><a href="#recommended-chart-types-1" id="toc-recommended-chart-types-1" class="nav-link" data-scroll-target="#recommended-chart-types-1">Recommended Chart Types</a></li>
   <li><a href="#product-analysis-design-rules" id="toc-product-analysis-design-rules" class="nav-link" data-scroll-target="#product-analysis-design-rules">Product Analysis Design Rules</a></li>
   </ul></li>
   <li><a href="#step-5-build-customer-analysis" id="toc-step-5-build-customer-analysis" class="nav-link" data-scroll-target="#step-5-build-customer-analysis">Step 5 | Build Customer Analysis</a>
   <ul class="collapse">
   <li><a href="#purpose-of-customer-analysis" id="toc-purpose-of-customer-analysis" class="nav-link" data-scroll-target="#purpose-of-customer-analysis">Purpose of Customer Analysis</a></li>
   <li><a href="#recommended-customer-metrics" id="toc-recommended-customer-metrics" class="nav-link" data-scroll-target="#recommended-customer-metrics">Recommended Customer Metrics</a></li>
-  <li><a href="#recommended-chart-types-2" id="toc-recommended-chart-types-2" class="nav-link" data-scroll-target="#recommended-chart-types-2">Recommended Chart Types</a></li>
+  <li><a href="#recommended-chart-types" id="toc-recommended-chart-types" class="nav-link" data-scroll-target="#recommended-chart-types">Recommended Chart Types</a></li>
   </ul></li>
   <li><a href="#step-6-build-rfm-analysis" id="toc-step-6-build-rfm-analysis" class="nav-link" data-scroll-target="#step-6-build-rfm-analysis">Step 6 | Build RFM Analysis</a>
   <ul class="collapse">
@@ -997,13 +1010,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#step-7-clustering" id="toc-step-7-clustering" class="nav-link" data-scroll-target="#step-7-clustering">Step 7 | Clustering</a>
   <ul class="collapse">
   <li><a href="#purpose-of-clustering" id="toc-purpose-of-clustering" class="nav-link" data-scroll-target="#purpose-of-clustering">Purpose of Clustering</a></li>
-  <li><a href="#recommended-cohort-visual" id="toc-recommended-cohort-visual" class="nav-link" data-scroll-target="#recommended-cohort-visual">Recommended Cohort Visual</a></li>
   <li><a href="#video" id="toc-video" class="nav-link" data-scroll-target="#video">Video</a></li>
   </ul></li>
   <li><a href="#step-8-build-time-based-behavioral-analysis" id="toc-step-8-build-time-based-behavioral-analysis" class="nav-link" data-scroll-target="#step-8-build-time-based-behavioral-analysis">Step 8 | Build Time-Based Behavioral Analysis</a>
   <ul class="collapse">
   <li><a href="#purpose-of-time-analysis" id="toc-purpose-of-time-analysis" class="nav-link" data-scroll-target="#purpose-of-time-analysis">Purpose of Time Analysis</a></li>
-  <li><a href="#recommended-chart-types-3" id="toc-recommended-chart-types-3" class="nav-link" data-scroll-target="#recommended-chart-types-3">Recommended Chart Types</a></li>
+  <li><a href="#recommended-chart-types-1" id="toc-recommended-chart-types-1" class="nav-link" data-scroll-target="#recommended-chart-types-1">Recommended Chart Types</a></li>
   <li><a href="#filter-design-rules" id="toc-filter-design-rules" class="nav-link" data-scroll-target="#filter-design-rules">Filter Design Rules</a></li>
   <li><a href="#recommended-filters" id="toc-recommended-filters" class="nav-link" data-scroll-target="#recommended-filters">Recommended Filters</a></li>
   <li><a href="#recommended-filter-placement" id="toc-recommended-filter-placement" class="nav-link" data-scroll-target="#recommended-filter-placement">Recommended Filter Placement</a></li>
@@ -1082,7 +1094,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="dataset-overview" class="level3">
 <h3 class="anchored" data-anchor-id="dataset-overview">Dataset Overview</h3>
 <p>The Tableau workbook contains multiple analytical worksheets focused on retail performance analysis.</p>
-<div id="2c8d8089" class="cell" data-execution_count="1">
+<div id="4ed1a1ee" class="cell" data-execution_count="1">
 <div class="cell-output cell-output-display cell-output-markdown" data-execution_count="1">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -1196,7 +1208,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="dashboard-structure" class="level3">
 <h3 class="anchored" data-anchor-id="dashboard-structure">Dashboard Structure</h3>
-<p><img src="../../img/tableau/04/retail_sales_analysis_dashboard.png" class="img-fluid"></p>
+<p><img src="../../img/tableau/05/retail_sales_analysis_dashboard.png" class="img-fluid"></p>
 </section>
 <section id="recommended-dashboard-size" class="level3">
 <h3 class="anchored" data-anchor-id="recommended-dashboard-size">Recommended Dashboard Size</h3>
@@ -1255,7 +1267,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="period" class="level3">
 <h3 class="anchored" data-anchor-id="period"><code>Period</code></h3>
 <p>We need this, order to be able effectively analyzie sales by any predifined period first we need to create a Parameter named <code>Period</code></p>
-<p><img src="../../img/tableau/04/period_parameter.png" class="img-fluid"></p>
+<p><img src="../../img/tableau/05/period_parameter.png" class="img-fluid"></p>
 <p>Once we have this, we can create the following metrics:</p>
 <ul>
 <li><code>Current Period Orders</code></li>
@@ -1265,13 +1277,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <hr>
 </section>
+<section id="is-canceled" class="level3">
+<h3 class="anchored" data-anchor-id="is-canceled">Is Canceled</h3>
+<p>This is useful because some invoice numbers may be stored as numbers, while cancelled invoices contain a letter such as <code>C536379</code></p>
+<p><code>C</code> means cancelled and we need to filter out them from further calculation, unless we are explicitly analyzing cancelled orders.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span>(STR([Invoice <span class="kw">No</span>]),<span class="dv">1</span>) <span class="op">=</span> <span class="ot">"C"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
 <section id="valid-sale" class="level3">
 <h3 class="anchored" data-anchor-id="valid-sale"><code>Valid Sale</code></h3>
 <p><strong>Filter variable to test:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">NOT</span> [<span class="kw">Is</span> Cancelled]</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">AND</span> [Quantity] <span class="op">&gt;</span> <span class="dv">0</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">AND</span> [Unit Price] <span class="op">&gt;</span> <span class="dv">0</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">AND</span> <span class="kw">NOT</span> ISNULL([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">NOT</span> [<span class="kw">Is</span> Cancelled]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">AND</span> [Quantity] <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">AND</span> [Unit Price] <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">AND</span> <span class="kw">NOT</span> ISNULL([Customer <span class="kw">ID</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
 <p>We need this in order to clean the table</p>
 </blockquote>
@@ -1280,271 +1298,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="max-order-date" class="level3">
 <h3 class="anchored" data-anchor-id="max-order-date"><code>Max Order Date</code></h3>
 <p>We need this in order to figure out the latest invoice date.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>{ FIXED : <span class="fu">MAX</span>(<span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>{ FIXED : <span class="fu">MAX</span>(<span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
 <p>Remember the RFM analysis</p>
 </blockquote>
 </section>
-<section id="current-period-sales" class="level3">
-<h3 class="anchored" data-anchor-id="current-period-sales"><code>Current Period Sales</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="current-period-orders" class="level3">
-<h3 class="anchored" data-anchor-id="current-period-orders"><code>Current Period Orders</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">INT</span>(<span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="current-period-customers" class="level3">
-<h3 class="anchored" data-anchor-id="current-period-customers"><code>Current Period Customers</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="current-period-avg-invoice" class="level3">
-<h3 class="anchored" data-anchor-id="current-period-avg-invoice"><code>Current Period AVG Invoice</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> COUNTD([<span class="kw">Current</span> Period Orders]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Current</span> Period Sales]) <span class="op">/</span> COUNTD([<span class="kw">Current</span> Period Orders])</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="previous-period-sales" class="level3">
-<h3 class="anchored" data-anchor-id="previous-period-sales"><code>Previous Period Sales</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="previous-period-orders" class="level3">
-<h3 class="anchored" data-anchor-id="previous-period-orders"><code>Previous Period Orders</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">FLOAT</span>(<span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="previous-period-customers" class="level3">
-<h3 class="anchored" data-anchor-id="previous-period-customers"><code>Previous Period Customers</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="previous-period-avg-invoice" class="level3">
-<h3 class="anchored" data-anchor-id="previous-period-avg-invoice"><code>Previous Period AVG Invoice</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> COUNTD([<span class="kw">Previous</span> Period Orders]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales]) <span class="op">/</span> COUNTD([<span class="kw">Previous</span> Period Orders])</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="sales-pop" class="level3">
-<h3 class="anchored" data-anchor-id="sales-pop"><code>Sales PoP %</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">SUM</span>([<span class="kw">Current</span> Period Sales]) <span class="op">-</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales])) </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales])</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="orders-pop" class="level3">
-<h3 class="anchored" data-anchor-id="orders-pop"><code>Orders PoP %</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">SUM</span>([<span class="kw">Current</span> Period Sales]) <span class="op">-</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales])) </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales])</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="customers-pop" class="level3">
-<h3 class="anchored" data-anchor-id="customers-pop"><code>Customers PoP %</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> COUNTD([<span class="kw">Previous</span> Period Customers]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    (COUNTD([<span class="kw">Current</span> Period Customers]) <span class="op">-</span> COUNTD([<span class="kw">Previous</span> Period Customers]))</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> COUNTD([<span class="kw">Previous</span> Period Customers])</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="avg-invoice-pop" class="level3">
-<h3 class="anchored" data-anchor-id="avg-invoice-pop"><code>AVG invoice PoP %</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Previous</span> Period <span class="fu">AVG</span> Invoice] <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    [<span class="kw">Current</span> Period <span class="fu">AVG</span> Invoice]</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    [<span class="kw">Previous</span> Period <span class="fu">AVG</span> Invoice]</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">/</span> [<span class="kw">Previous</span> Period <span class="fu">AVG</span> Invoice]</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="sales-icon" class="level3">
-<h3 class="anchored" data-anchor-id="sales-icon"><code>Sales Icon</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([Sales PoP % ]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [Sales PoP % ] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [Sales PoP % ] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="orders-icon" class="level3">
-<h3 class="anchored" data-anchor-id="orders-icon"><code>Orders Icon</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([Orders PoP %]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [Orders PoP %] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [Orders PoP %] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="customer-icon" class="level3">
-<h3 class="anchored" data-anchor-id="customer-icon"><code>Customer Icon</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([Customers PoP %  ]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [Customers PoP %  ] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [Customers PoP %  ] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="avg-invoice-icon" class="level3">
-<h3 class="anchored" data-anchor-id="avg-invoice-icon"><code>AVG Invoice Icon</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([<span class="fu">AVG</span> Invoice PoP %]) <span class="cf">THEN</span> <span class="ot">""</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [<span class="fu">AVG</span> Invoice PoP %] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [<span class="fu">AVG</span> Invoice PoP %] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sales" class="level3">
+<h3 class="anchored" data-anchor-id="sales"><code>Sales</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
-<section id="step-1-build-kpi-section" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-build-kpi-section">Step 1 | Build KPI Section</h2>
+<section id="step-1-kpi-section" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-kpi-section">Step 1 | KPI Section</h2>
 <section id="purpose-of-kpi-section" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-of-kpi-section">Purpose of KPI Section</h3>
 <p>The KPI section provides an instant overview of overall business health.</p>
 <p>The KPI cards should be positioned at the top of the dashboard because they establish the business context before deeper analysis begins.</p>
-<p><img src="../../img/tableau/04/KPIs.png" class="img-fluid"></p>
-<hr>
+<p><img src="../../img/tableau/05/KPIs.png" class="img-fluid"></p>
+<p>We need to create <code>16</code> new calculated fields in meaning that for <code>Sales</code>, <code>Customers</code>, <code>Orders</code>, <code>Avg Invoice</code> we need</p>
 </section>
 <section id="recommended-kpis" class="level3">
 <h3 class="anchored" data-anchor-id="recommended-kpis">Recommended KPIs</h3>
@@ -1604,9 +1375,263 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <hr>
 </section>
+<section id="related-calculated-fields" class="level3">
+<h3 class="anchored" data-anchor-id="related-calculated-fields">Related Calculated Fields</h3>
+<section id="current-period-sales" class="level4">
+<h4 class="anchored" data-anchor-id="current-period-sales"><code>Current Period Sales</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="current-period-orders" class="level4">
+<h4 class="anchored" data-anchor-id="current-period-orders"><code>Current Period Orders</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">INT</span>(<span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="current-period-customers" class="level4">
+<h4 class="anchored" data-anchor-id="current-period-customers"><code>Current Period Customers</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">1</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="current-period-avg-invoice" class="level4">
+<h4 class="anchored" data-anchor-id="current-period-avg-invoice"><code>Current Period AVG Invoice</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> COUNTD([<span class="kw">Current</span> Period Orders]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Current</span> Period Sales]) <span class="op">/</span> COUNTD([<span class="kw">Current</span> Period Orders])</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="previous-period-sales" class="level4">
+<h4 class="anchored" data-anchor-id="previous-period-sales"><code>Previous Period Sales</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Sales]</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="previous-period-orders" class="level4">
+<h4 class="anchored" data-anchor-id="previous-period-orders"><code>Previous Period Orders</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">FLOAT</span>(<span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Invoice <span class="kw">No</span>]</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="previous-period-customers" class="level4">
+<h4 class="anchored" data-anchor-id="previous-period-customers"><code>Previous Period Customers</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'week'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'week'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'week'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'month'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'month'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'month'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'quarter'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'quarter'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'quarter'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">IF</span> DATETRUNC(<span class="st">'year'</span>, <span class="dt">DATE</span>([Invoice <span class="dt">Date</span>])) <span class="op">=</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>       DATEADD(<span class="st">'year'</span>, <span class="op">-</span><span class="dv">2</span>, DATETRUNC(<span class="st">'year'</span>, [<span class="fu">Max</span> <span class="kw">Order</span> <span class="dt">Date</span>]))</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">THEN</span> [Customer <span class="kw">ID</span>]</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">END</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="previous-period-avg-invoice" class="level4">
+<h4 class="anchored" data-anchor-id="previous-period-avg-invoice"><code>Previous Period AVG Invoice</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> COUNTD([<span class="kw">Previous</span> Period Orders]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales]) <span class="op">/</span> COUNTD([<span class="kw">Previous</span> Period Orders])</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="sales-pop" class="level4">
+<h4 class="anchored" data-anchor-id="sales-pop"><code>Sales PoP %</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">SUM</span>([<span class="kw">Current</span> Period Sales]) <span class="op">-</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales])) </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Sales])</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="orders-pop" class="level4">
+<h4 class="anchored" data-anchor-id="orders-pop"><code>Orders PoP %</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> <span class="fu">COUNT</span>([<span class="kw">Previous</span> Period Orders]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">COUNT</span>([<span class="kw">Current</span> Period Orders]) <span class="op">-</span> <span class="fu">COUNT</span>([<span class="kw">Previous</span> Period Orders]))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> <span class="fu">COUNT</span>([<span class="kw">Previous</span> Period Orders])</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="customers-pop" class="level4">
+<h4 class="anchored" data-anchor-id="customers-pop"><code>Customers PoP %</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> COUNTD([<span class="kw">Previous</span> Period Customers]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    (COUNTD([<span class="kw">Current</span> Period Customers]) <span class="op">-</span> COUNTD([<span class="kw">Previous</span> Period Customers]))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> COUNTD([<span class="kw">Previous</span> Period Customers])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="avg-invoice-pop" class="level4">
+<h4 class="anchored" data-anchor-id="avg-invoice-pop"><code>AVG invoice PoP %</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [<span class="kw">Previous</span> Period <span class="fu">AVG</span> Invoice] <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="kw">NULL</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">ELSE</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    [<span class="kw">Current</span> Period <span class="fu">AVG</span> Invoice]</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    [<span class="kw">Previous</span> Period <span class="fu">AVG</span> Invoice]</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">/</span> [<span class="kw">Previous</span> Period <span class="fu">AVG</span> Invoice]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sales-icon" class="level4">
+<h4 class="anchored" data-anchor-id="sales-icon"><code>Sales Icon</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([Sales PoP % ]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [Sales PoP % ] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [Sales PoP % ] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="orders-icon" class="level4">
+<h4 class="anchored" data-anchor-id="orders-icon"><code>Orders Icon</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([Orders PoP %]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [Orders PoP %] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [Orders PoP %] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="customer-icon" class="level4">
+<h4 class="anchored" data-anchor-id="customer-icon"><code>Customer Icon</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([Customers PoP %]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [Customers PoP %] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [Customers PoP %] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="avg-invoice-icon" class="level4">
+<h4 class="anchored" data-anchor-id="avg-invoice-icon"><code>AVG Invoice Icon</code></h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> ZN([<span class="fu">AVG</span> Invoice PoP %]) <span class="op">=</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">""</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>ELSEIF [<span class="fu">AVG</span> Invoice PoP %] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▲"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>ELSEIF [<span class="fu">AVG</span> Invoice PoP %] <span class="op">&lt;</span> <span class="dv">0</span> <span class="cf">THEN</span> <span class="ot">"▼"</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
 <section id="kpi-card-design-rules" class="level3">
 <h3 class="anchored" data-anchor-id="kpi-card-design-rules">KPI Card Design Rules</h3>
-<p>Each KPI card should contain:</p>
+<p><strong>Each KPI card should contain:</strong></p>
 <ul>
 <li>Large KPI value</li>
 <li>KPI subtitle</li>
@@ -1615,7 +1640,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Directional indicator</li>
 </ul>
 <p>The KPI value should always be visually dominant.</p>
+<section id="entire-view-format" class="level4">
+<h4 class="anchored" data-anchor-id="entire-view-format">Entire View &amp; Format</h4>
+<p>Choose the Entire View and navigate to the format sellect borders and change everything into <code>None</code>, as shown in the file.</p>
+<p><img src="../../img/tableau/05/format.png" class="img-fluid"></p>
+</section>
+<section id="currency" class="level4">
+<h4 class="anchored" data-anchor-id="currency">Currency</h4>
+<p>Right Click on the numbers choose the respective fields and choose the required currency.</p>
+<p><img src="../../img/tableau/05/currency_format.png" class="img-fluid"></p>
 <hr>
+</section>
 </section>
 <section id="kpi-color-rules" class="level3">
 <h3 class="anchored" data-anchor-id="kpi-color-rules">KPI Color Rules</h3>
@@ -1642,7 +1677,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>Use directional arrows to reinforce performance visually.</p>
-<hr>
 </section>
 <section id="kpi-card-size-recommendations" class="level3">
 <h3 class="anchored" data-anchor-id="kpi-card-size-recommendations">KPI Card Size Recommendations</h3>
@@ -1703,7 +1737,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>KPI Labels</td>
-<td>11–14 px</td>
+<td>10–14 px</td>
 <td>Regular</td>
 </tr>
 <tr class="odd">
@@ -1713,6 +1747,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
+<blockquote class="blockquote">
+<p>Try within the above mentioned sizing.</p>
+</blockquote>
 <hr>
 </section>
 <section id="recommended-tableau-fonts" class="level3">
@@ -1743,45 +1780,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<hr>
-</section>
-<section id="recommended-google-fonts" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-google-fonts">Recommended Google Fonts</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Font</th>
-<th>Style</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Inter</td>
-<td>Modern KPI typography</td>
-</tr>
-<tr class="even">
-<td>Roboto</td>
-<td>Clean dashboard labels</td>
-</tr>
-<tr class="odd">
-<td>Open Sans</td>
-<td>Professional readability</td>
-</tr>
-<tr class="even">
-<td>Montserrat</td>
-<td>Strong dashboard titles</td>
-</tr>
-<tr class="odd">
-<td>Source Sans 3</td>
-<td>Analytical styling</td>
-</tr>
-</tbody>
-</table>
-<hr>
 </section>
 </section>
-<section id="step-2-build-sales-trend-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-build-sales-trend-analysis">Step 2 | Build Sales Trend Analysis</h2>
+<section id="step-2-sales-trend-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-sales-trend-analysis">Step 2 | Sales Trend Analysis</h2>
 <section id="purpose-of-sales-trend-chart" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-of-sales-trend-chart">Purpose of Sales Trend Chart</h3>
 <p>The Sales Trend chart helps users understand how business performance changes over time.</p>
@@ -1794,49 +1796,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Performance spikes</li>
 <li>Long-term business direction</li>
 </ul>
-<hr>
-</section>
-<section id="recommended-chart-type" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-chart-type">Recommended Chart Type</h3>
-<p>Use:</p>
-<ul>
-<li>Line Chart</li>
-</ul>
-<p>Optional enhancements:</p>
-<ul>
-<li>Dual-axis line chart</li>
-<li>Trend line</li>
-<li>Moving average</li>
-</ul>
-<p><img src="../../img/tableau/04/Sales_Trend.png" class="img-fluid"></p>
-<hr>
-</section>
-<section id="recommended-sales-trend-layout" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-sales-trend-layout">Recommended Sales Trend Layout</h3>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart TB
-
-A[Date]
-B[Revenue Trend]
-C[Growth Analysis]
-
-A --&gt; B
-B --&gt; C
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-<hr>
+<p><img src="../../img/tableau/05/Sales_Trend.png" class="img-fluid"></p>
 </section>
 <section id="sales-trend-design-rules" class="level3">
 <h3 class="anchored" data-anchor-id="sales-trend-design-rules">Sales Trend Design Rules</h3>
-<p>Do:</p>
+<pre><code>Do:</code></pre>
 <ul>
 <li>Highlight latest point</li>
 <li>Use minimal gridlines</li>
@@ -1881,51 +1845,77 @@ B --&gt; C
 </tr>
 </tbody>
 </table>
+</section>
+<section id="borders" class="level3">
+<h3 class="anchored" data-anchor-id="borders">Borders</h3>
+<div class="columns">
+<div class="column">
+<p><img src="../../img/tableau/05/sales_trend_row_format.png" class="img-fluid"></p>
+</div><div class="column">
+<p><img src="../../img/tableau/05/sales_trend_column_format.png" class="img-fluid"></p>
+</div>
+</div>
 <hr>
 </section>
 </section>
-<section id="step-3-build-geographic-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-build-geographic-analysis">Step 3 | Build Geographic Analysis</h2>
+<section id="step-3-geographic-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-geographic-analysis">Step 3 | Geographic Analysis</h2>
 <section id="purpose-of-geographic-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-of-geographic-analysis">Purpose of Geographic Analysis</h3>
 <p>The geographic analysis section helps users identify which countries or regions generate the highest revenue.</p>
-<p>This analysis helps answer:</p>
+<p><strong>This analysis helps answer:</strong></p>
 <ul>
 <li>Which markets perform best?</li>
 <li>Which regions need attention?</li>
 <li>Where are business opportunities concentrated?</li>
 </ul>
-<p><img src="../../img/tableau/04/Sales_by_Country.png" class="img-fluid"></p>
-</section>
-<section id="recommended-chart-types" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-chart-types">Recommended Chart Types</h3>
-<p>Use:</p>
-<ul>
-<li>Filled Map</li>
-<li>Symbol Map</li>
-<li>Horizontal Bar Chart</li>
-</ul>
-<hr>
+<p><img src="../../img/tableau/05/Sales_by_Country.png" class="img-fluid"></p>
 </section>
 <section id="geographic-analysis-design-rules" class="level3">
 <h3 class="anchored" data-anchor-id="geographic-analysis-design-rules">Geographic Analysis Design Rules</h3>
-<p>If using maps:</p>
+<p><strong>If using maps:</strong></p>
 <ul>
 <li>Use soft color gradients</li>
 <li>Highlight key regions</li>
 <li>Keep labels minimal</li>
 </ul>
-<p>If using bars:</p>
+<p><strong>If using bars:</strong></p>
 <ul>
 <li>Sort descending</li>
 <li>Show regional contribution %</li>
 </ul>
 <p>Maps should support analysis rather than decoration.</p>
-<hr>
+</section>
+<section id="calculated-fields" class="level3">
+<h3 class="anchored" data-anchor-id="calculated-fields">Calculated Fields</h3>
+<section id="p.period" class="level4">
+<h4 class="anchored" data-anchor-id="p.period"><code>p.Period</code></h4>
+<p>To validate the filter</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">IF</span> [Period] <span class="op">=</span> <span class="ot">"Last Week"</span> <span class="cf">THEN</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    DATEDIFF(<span class="st">'week'</span>, [Invoice <span class="dt">Date</span>], { <span class="fu">MAX</span>([Invoice <span class="dt">Date</span>]) }) <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Month"</span> <span class="cf">THEN</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    DATEDIFF(<span class="st">'month'</span>, [Invoice <span class="dt">Date</span>], { <span class="fu">MAX</span>([Invoice <span class="dt">Date</span>]) }) <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Quarter"</span> <span class="cf">THEN</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    DATEDIFF(<span class="st">'quarter'</span>, [Invoice <span class="dt">Date</span>], { <span class="fu">MAX</span>([Invoice <span class="dt">Date</span>]) }) <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>ELSEIF [Period] <span class="op">=</span> <span class="ot">"Last Year"</span> <span class="cf">THEN</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    DATEDIFF(<span class="st">'year'</span>, [Invoice <span class="dt">Date</span>], { <span class="fu">MAX</span>([Invoice <span class="dt">Date</span>]) }) <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="log-sales" class="level4">
+<h4 class="anchored" data-anchor-id="log-sales"><code>Log Sales</code></h4>
+<p>In order to kind of zoom-in the differences there might be a need to use <strong>logarithmic scale</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">LOG</span>(<span class="fu">SUM</span>([Sales]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>AS we can see the highest generated sales belong to the United Kingdom</p>
+</blockquote>
 </section>
 </section>
-<section id="step-4-build-product-performance-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-build-product-performance-analysis">Step 4 | Build Product Performance Analysis</h2>
+</section>
+<section id="step-4-product-performance-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-product-performance-analysis">Step 4 | Product Performance Analysis</h2>
 <section id="purpose-of-product-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-of-product-analysis">Purpose of Product Analysis</h3>
 <p>The product section identifies:</p>
@@ -1936,17 +1926,7 @@ B --&gt; C
 <li>Product demand</li>
 </ul>
 <p>This section helps stakeholders identify opportunities and risks quickly.</p>
-<hr>
-</section>
-<section id="recommended-chart-types-1" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-chart-types-1">Recommended Chart Types</h3>
-<p>Use:</p>
-<ul>
-<li>Horizontal Bar Charts</li>
-<li>Highlight Tables</li>
-<li>Treemaps</li>
-</ul>
-<p><img src="../../img/tableau/04/Top_Products_by_Revenue.png" class="img-fluid"></p>
+<p><img src="../../img/tableau/05/Top_Products_by_Revenue.png" class="img-fluid"></p>
 </section>
 <section id="product-analysis-design-rules" class="level3">
 <h3 class="anchored" data-anchor-id="product-analysis-design-rules">Product Analysis Design Rules</h3>
@@ -2009,8 +1989,8 @@ B --&gt; C
 </table>
 <hr>
 </section>
-<section id="recommended-chart-types-2" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-chart-types-2">Recommended Chart Types</h3>
+<section id="recommended-chart-types" class="level3">
+<h3 class="anchored" data-anchor-id="recommended-chart-types">Recommended Chart Types</h3>
 <p>Use:</p>
 <ul>
 <li>Bar Charts</li>
@@ -2074,21 +2054,14 @@ B --&gt; C
 <h2 class="anchored" data-anchor-id="step-7-clustering">Step 7 | Clustering</h2>
 <section id="purpose-of-clustering" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-of-clustering">Purpose of Clustering</h3>
-<p>Automatically splits the data into multiple clusters</p>
-<hr>
-</section>
-<section id="recommended-cohort-visual" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-cohort-visual">Recommended Cohort Visual</h3>
-<p>Use:</p>
-<ul>
-<li>Heatmap</li>
-</ul>
-<p>The heatmap should show retention percentage over time.</p>
+<p>Automatically splits the data into multiple clusters.</p>
+<p>Navigate to Analytic <span class="math inline">\(\rightarrow\)</span> Cluster <span class="math inline">\(\rightarrow\)</span> drag into cluster</p>
+<p><img src="../../img/tableau/05/clustering.png" class="img-fluid"></p>
+<p><img src="../../img/tableau/05/cluster_final.png" class="img-fluid"></p>
 </section>
 <section id="video" class="level3">
 <h3 class="anchored" data-anchor-id="video">Video</h3>
 <p>Checkout the <a href="https://www.youtube.com/watch?v=nLFTAaHREt4">following video</a></p>
-<p><img src="../../img/tableau/04/cluster.png" class="img-fluid"></p>
 <hr>
 </section>
 </section>
@@ -2105,8 +2078,8 @@ B --&gt; C
 </ul>
 <hr>
 </section>
-<section id="recommended-chart-types-3" class="level3">
-<h3 class="anchored" data-anchor-id="recommended-chart-types-3">Recommended Chart Types</h3>
+<section id="recommended-chart-types-1" class="level3">
+<h3 class="anchored" data-anchor-id="recommended-chart-types-1">Recommended Chart Types</h3>
 <p>Use:</p>
 <ul>
 <li>Heatmaps</li>
@@ -2204,12 +2177,12 @@ B --&gt; C
 <hr>
 <section id="growth-percentage-calculation" class="level4">
 <h4 class="anchored" data-anchor-id="growth-percentage-calculation">Growth Percentage Calculation</h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Current</span> Period Revenue]) <span class="op">-</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Revenue])</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="op">/</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">SUM</span>([<span class="kw">Previous</span> Period Revenue])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Current</span> Period Revenue]) <span class="op">-</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">SUM</span>([<span class="kw">Previous</span> Period Revenue])</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="op">/</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">SUM</span>([<span class="kw">Previous</span> Period Revenue])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 </section>
