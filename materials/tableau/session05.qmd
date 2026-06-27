@@ -629,13 +629,13 @@ All KPI cards should maintain identical sizing for visual consistency.
 
 
 
-## Step 2 | Sales Trend Analysis
+## Step 2 | Sales Trend Analysis    
 
 ### Purpose of Sales Trend Chart
 
 The Sales Trend chart helps users understand how business performance changes over time.
 
-This is usually the primary analytical chart after the KPI section.
+This is usually the primary analytical chart after the `KPI` section.
 
 The chart should help users identify:
 
@@ -653,7 +653,8 @@ The chart should help users identify:
 
 ### Sales Trend Design Rules
 
-    Do:
+
+**Do:**
 
 - Highlight latest point
 - Use minimal gridlines
@@ -661,7 +662,7 @@ The chart should help users identify:
 - Keep labels minimal
 - Maintain smooth visual flow
 
-Avoid:
+**Avoid:**
 
 - Too many colors
 - Heavy formatting
@@ -678,6 +679,18 @@ Avoid:
 | Gridlines | Soft |
 | Labels | Minimal |
 | Colors | Single dominant color |
+
+
+### Dual Axis Design
+
+Right click on the axis and choose **dual axis** 
+
+![]({{< meta image_path >}}/Sales_Trend_Steps.png)
+
+### Show Marks
+
+
+![]({{< meta image_path >}}/Sales_Trend_Min_Max.png)
 
 
 ### Borders
@@ -737,7 +750,7 @@ Maps should support analysis rather than decoration.
 ### Calculated Fields
 
 
-#### `p.Period`
+#### `valid_date`
 
 
 To validate the filter
@@ -758,6 +771,20 @@ ELSEIF [Period] = "Last Year" THEN
 END
 ```
 
+#### `valid_sale`
+
+
+To validate the filter
+
+
+```sql
+NOT [is canceled]
+AND [Quantity] > 0
+AND [Unit Price] > 0
+AND NOT ISNULL([Customer ID])
+```
+
+
 #### `Log Sales`
 
 In order to kind of zoom-in the differences there might be a need to use **logarithmic scale**
@@ -768,6 +795,18 @@ LOG(SUM([Sales]))
 
 > AS we can see the highest generated sales belong to the United Kingdom
 
+
+### Visualization Steps
+
+![]({{< meta image_path >}}/geographic.png)
+
+
+
+::: {.callout-note}
+
+Remember the effect of the logarithmic scale is to zoom in in order to see the difference more explicitly
+
+:::
 
 
 ## Step 4 | Product Performance Analysis
@@ -786,6 +825,18 @@ This section helps stakeholders identify opportunities and risks quickly.
 
 ![]({{< meta image_path >}}/Top_Products_by_Revenue.png)
 
+
+### Calculated Field
+
+
+#### Index
+
+Here we can also create an index column in order follow properly
+
+```sql
+INDEX()
+```
+
 ### Product Analysis Design Rules
 
 Do:
@@ -801,15 +852,30 @@ Avoid:
 - Tiny unreadable labels
 - Excessive color variations
 
+### Table Construction Steps
+
+#### Filters
+
+![]({{< meta image_path >}}/top_products_by_sale.png)
+
+
+#### Marks
+
+```sql
+SUM(Sales)
+```
+
+#### Format
+
+![]({{< meta image_path >}}/top_products_by_revenue_filter.png)
+
 ---
 
-## Step 5 | Build Customer Analysis
+## Step 5 | Sales By Weekday, Hour
 
-### Purpose of Customer Analysis
+### Purpose of Graph
 
-The customer section helps explain customer behavior and customer value.
-
-This analysis should help answer:
+**This analysis should help answer:**
 
 - Who are the most valuable customers?
 - How frequently do customers purchase?
@@ -838,65 +904,8 @@ Use:
 
 ---
 
-## Step 6 | Build RFM Analysis
 
-### Purpose of RFM Analysis
-
-RFM stands for:
-
-- Recency
-- Frequency
-- Monetary
-
-This analysis helps identify customer quality and engagement.
-
----
-
-### RFM Definitions
-
-| Metric | Meaning |
-|---|---|
-| Recency | How recently customer purchased |
-| Frequency | How often customer purchases |
-| Monetary | How much customer spends |
-
----
-
-### Recommended RFM Visuals
-
-Use:
-
-- Heatmaps
-- Scatter Plots
-- Segment Tables
-
----
-
-## Step 7 | Clustering
-
-### Purpose of Clustering
-
-Automatically splits the data into multiple clusters.
-
-Navigate to Analytic $\rightarrow$ Cluster $\rightarrow$ drag into cluster
-
-
-![]({{< meta image_path >}}/clustering.png)
-
-
-
-![]({{< meta image_path >}}/cluster_final.png)
-
-
-### Video
-
-Checkout the [following video](https://www.youtube.com/watch?v=nLFTAaHREt4)
-
-
-
----
-
-## Step 8 | Build Time-Based Behavioral Analysis
+## Step 6 | Build Time-Based Behavioral Analysis
 
 ### Purpose of Time Analysis
 
@@ -918,75 +927,143 @@ Use:
 - Line Charts
 - Bar Charts
 
----
+### Calculated Fields
+ 
+In order to be able to build the graph first wee need to create the following calculated fields:
 
-### Filter Design Rules
+- `Order Hour`
+- `Weekday`
 
-### Recommended Filters
-
-Use:
-
-- Date
-- Country
-- Product Category
-- Customer Segment
-
----
-
-### Recommended Filter Placement
-
-**Filters should appear:**
-
-- Left side
-- Top navigation area
-
-Filters should remain compact and easy to use.
-
----
-
-### Recommended Tableau Features
-
-#### Students Should Practice
-
-- Parameters
-- Dynamic Titles
-- Dashboard Actions
-- Highlight Actions
-- Filter Actions
-- Conditional Formatting
-- Tooltips
-- Containers
-- Calculated Fields
-
----
-
-### Important Tableau Functions
-
-| Function | Purpose |
-|---|---|
-| SUM() | Aggregation |
-| COUNTD() | Unique count |
-| IF | Conditional logic |
-| DATEADD() | Date shifting |
-| DATETRUNC() | Date grouping |
-| WINDOW_SUM() | Table calculations |
-| RANK() | Ranking |
-| FIXED LOD | Stable aggregation |
-
----
-
-#### Growth Percentage Calculation
+#### `Order Hour`
 
 ```sql
-(
-    SUM([Current Period Revenue]) -
-    SUM([Previous Period Revenue])
-)
-/
-SUM([Previous Period Revenue])
+DATEPART('hour',[Invoice Date])
+```
+
+#### `Order Hour`
+
+```sql
+DATENAME('weekday',[Invoice Date])
+```
+
+
+## Step 7 | Clustering
+
+### Purpose of Clustering
+
+Automatically splits the data into multiple clusters.
+
+Navigate to Analytic $\rightarrow$ Cluster $\rightarrow$ drag into cluster
+
+
+![]({{< meta image_path >}}/clustering.png)
+
+
+
+![]({{< meta image_path >}}/cluster_final.png)
+
+
+
+
+### Calculated Fields
+
+
+Here wee need to add RFM components in order to visualize, for the comming dashboard we will add a new representation for the calculated field.
+
+- `Product Orders`
+- `Product Revenue`
+- `Product Quantity Sold`
+  
+
+  
+#### `Product Orders`
+
+```sql
+{ FIXED [Stock Code]: COUNTD([Invoice No]) }
+```
+
+>Explain the decision for applying `COUNTD`
+
+---
+
+#### `Product Quantity Sold`
+
+```sql
+{ FIXED [Stock Code] : SUM([Quantity]) }
 ```
 
 ---
+
+#### `Product Revenue`
+
+```sql
+{ FIXED [Stock Code] : SUM([Sales]) }
+```
+
+### Visualzing 
+
+Drag Product Orders and Product Quantity Sold part into Columns and Rows
+
+```text
+right click on the column → dimansion
+```
+
+![]({{< meta image_path >}}/Cluster_Intermediate.png)
+
+
+
+### Video
+
+Checkout the [following video](https://www.youtube.com/watch?v=nLFTAaHREt4)
+
+
+
+## Step 8 | Return Value by Order Month
+
+![]({{< meta image_path >}}/return_value.png)
+
+
+### Calculated Fields
+
+- `Revenue`
+- `Return Value`
+
+
+::: {.callout-note}
+
+We have the same as filed named Sales as well, I did so simply to train yourself :)
+
+:::
+
+
+#### Revenue
+
+```sql
+[Quantity] * [Unit Price]
+```
+
+
+#### Return Value
+
+
+```sql
+IF [Quantity] < 0 THEN ABS([Quantity] * [Unit Price]) END
+```
+
+### Final Results
+
+
+![]({{< meta image_path >}}/return_value_by_product_final.png)
+
+## Step 9 | Retrun Value By Product
+
+
+Similar to the above  case
+
+
+![]({{< meta image_path >}}/return_value_by_product.png)
+
+## Step 10 | Dashboard Development 
 
 ### Container Structure
 
