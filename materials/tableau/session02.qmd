@@ -1261,11 +1261,14 @@ This calculation returns the first purchase date for each customer.
 ```sql
 -- LOD equivalent in SQL
 SELECT
-  CustomerID,
-  SUM(OrderTotal) AS LifetimeValue,
-  MIN(OrderDate) AS FirstPurchaseDate
-FROM Orders
-GROUP BY CustomerID 
+    order_id,
+    customer_id,
+    order_date,
+    order_total,
+    MIN(order_date) OVER (
+        PARTITION BY customer_id
+    ) AS first_order_date
+FROM orders;
 ```
 :::
 
