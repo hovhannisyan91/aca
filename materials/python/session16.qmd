@@ -1,6 +1,348 @@
 ---
-title: "Session 16: SQL Alchemy"
+title: "Session 16: SQLAlchemy with Dockerized PostGIS"
 categories: [SQL Alchemy, Databases, ORM]
 image_path: "/img/python/16"
 ---
 
+## Main Goal
+
+The goal of this session is to move **from** *file-based analysis* **into a** real *database-backed* workflow.
+
+We will create a PostGIS database and load three datasets:
+
+| Dataset | Source | Target Table |
+|---|---|---|
+| Citi Bike rides | CSV | `jc_2025` |
+| Weather data | CSV | `jersey_weather_2025` |
+| Jersey City neighborhoods | GeoJSON | `jersey_city_neighborhoods` |
+
+**Then we will use SQLAlchemy to:**
+
+- connect Python to PostGIS
+- load CSV data into PostgreSQL tables
+- load GeoJSON polygon data into a spatial table
+- query tables from Python
+- join Citi Bike rides with weather data
+- prepare the database for later spatial SQL analysis
+- create materialized views
+- connect with Tableau
+
+
+As we know PostGIS extends PostgreSQL with spatial functionality.
+
+
+
+
+
+::: {.columns}
+
+
+
+::: {.column}
+
+**Normal PostgreSQL**
+
+```text
+ride_id
+started_at
+temperature
+station_name
+```
+
+:::
+
+::: {.column}
+
+**PostGIS**
+
+```text
+POINT
+LINESTRING
+POLYGON
+MULTIPOLYGON
+```
+
+:::
+
+:::
+
+
+The stack is going to be:
+
+The stack will be:
+
+```text
+Docker
+  ↓
+PostGIS PostgreSQL Database
+  ↓
+SQLAlchemy
+  ↓
+Pandas / GeoPandas
+  ↓
+Citi Bike + Weather + Neighborhood Data
+```
+
+>This is the right direction because we already have geospatial data.
+
+>Instead of storing geometry as plain text only, we can eventually store real spatial geometry inside PostgreSQL using PostGIS.
+
+
+
+
+**This is important for our project because we have:**
+
+- station points
+- ride lines
+- neighborhood polygons
+- spatial joins
+- choropleth maps
+
+**So the longer-term direction is:**
+
+```text
+GeoPandas analysis
+        ↓
+PostGIS spatial database
+        ↓
+SQL spatial queries
+        ↓
+Tableau / dashboard / analytics
+```
+
+
+## Docker Environment Setup
+
+We need to have two files in the same folder:
+
+- `docker-compose.yaml`
+- `.env`
+
+
+
+::: {.callout-note}
+
+This is very similar to our SQL moduel, however instead of `PgAdmin`, we will use Python Notebooks and `DataGrip software`.
+
+
+> In order to download DataGrip opening [this URL](https://www.jetbrains.com/datagrip/download/)
+:::
+
+
+###  `.env` File
+
+
+```bash
+DB_USER=postgres
+DB_PASSWORD=password
+DB_NAME=citibike
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+
+
+### `docker-compose.yaml`
+
+We will use the `postgis/postgis:17-3.4` image.
+
+This image already includes PostgreSQL and PostGIS.
+
+```yaml
+services:
+  db:
+    container_name: postgis_aca
+    image: postgis/postgis:17-3.4
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - ./postgis_data:/var/lib/postgresql/data
+```
+
+
+### Start the Database
+
+**From the terminal, run:**
+
+```bash
+docker compose up -d
+```
+
+> Since we are not creating anything there is no need to run the container without detached mode (`-d`)
+
+
+Check whether the container is running:
+
+```bash
+docker compose up -d
+```
+
+$$\downarrow$$
+
+```text
+CONTAINER ID   IMAGE                    COMMAND                  CREATED          STATUS                    PORTS                                         NAMES
+f83207aa0464   postgis/postgis:17-3.4   "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   postgis_aca
+```
+
+### About Volume
+
+The volume below stores `PostgreSQL` data on your machine.
+
+```yaml
+- ./postgis_data:/var/lib/postgresql/data
+```
+
+This means that database data will persist even if the container is stopped.
+
+
+
+::: {.callout-important}
+
+Do not forget to update your `.gitignore` file by adding 
+
+`postgis_data/`
+
+:::
+
+
+
+If you want to fully reset the database, you must stop the container and delete the folder:
+
+```bash
+docker compose down
+rm -rf postgis_data
+docker compose up -d
+```
+
+
+::: {.callout-important}
+
+Be careful with this because it deletes the database data.
+
+:::
+
+
+## Python Setup
+
+As usual we need to start from activating virtual environment by typing in the terminal 
+
+
+```bash
+conda activate you_venv_name
+```
+
+
+The same applies for the jupyter notebooks, we need to the seletc the **respective kernel.**
+
+### Installing Packages
+
+Here we need to isntall the following packages
+
+```bash
+pip install pandas geopandas sqlalchemy psycopg2-binary geoalchemy2
+```
+
+
+### Import Libraries
+
+```{python}
+
+import os
+import pandas as pd
+import geopandas as gpd
+
+from pathlib import Path
+from sqlalchemy import create_engine, text
+from geoalchemy2 import Geometry
+```
+
+---
+
+### Define File Paths
+
+Adjust paths based on your course project structure.
+
+```{python}
+#| echo: true
+
+DATA_DIR = Path("../data/citibike")
+
+citibike_path = DATA_DIR / "JC2025.csv"
+weather_path = DATA_DIR / "jersey_weather_2025.csv"
+neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
+```
+
+
+
+### Define Database Connection
+
+For teaching, we can write the connection string explicitly.
+
+```{python}
+#| echo: true
+
+DB_USER = "postgres"
+DB_PASSWORD = "password"
+DB_HOST = "localhost"
+DB_PORT = "5432"
+DB_NAME = "citibike"
+
+DATABASE_URL = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+
+DATABASE_URL
+```
+
+
+
+
+### Masking Environment Variables
+
+In real life we cannot explicitly provide the enviroment variables. In that case we need to 
+
+
+If you want to read from environment variables, use this version.
+
+```{python}
+#| echo: true
+#| eval: false
+
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+
+DATABASE_URL = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+```
+
+
+### Define Engine
+
+
+```python
+engine = create_engine(DATABASE_URL)
+
+engine
+```
+
+```text
+Engine(postgresql+psycopg2://postgres:***@localhost:5432/citibike)
+```
