@@ -67,9 +67,9 @@ MULTIPOLYGON
 :::
 
 
-The stack is going to be:
+**The stack is going to be:**
 
-The stack will be:
+
 
 ```text
 Docker
@@ -250,7 +250,7 @@ The same applies for the jupyter notebooks, we need to the seletc the **respecti
 Here we need to isntall the following packages
 
 ```bash
-pip install pandas geopandas sqlalchemy psycopg2-binary geoalchemy2
+pip install pandas geopandas sqlalchemy psycopg2-binary geoalchemy2 python-dotenv
 ```
 
 
@@ -273,10 +273,22 @@ from geoalchemy2 import Geometry
 
 Adjust paths based on your course project structure.
 
-```{python}
+
+
+```python
 #| echo: true
 
 DATA_DIR = Path("../data/citibike")
+
+citibike_path = DATA_DIR / "JC2025.csv"
+weather_path = DATA_DIR / "jersey_weather_2025.csv"
+neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
+```
+
+```{python}
+#| echo: false
+
+DATA_DIR = Path("../../lab/python/data/citibike")
 
 citibike_path = DATA_DIR / "JC2025.csv"
 weather_path = DATA_DIR / "jersey_weather_2025.csv"
@@ -346,3 +358,844 @@ engine
 ```text
 Engine(postgresql+psycopg2://postgres:***@localhost:5432/citibike)
 ```
+
+
+### Test Connection
+
+
+After connecting to the engine we can test the results
+
+
+```python
+with engine.connect() as connection:
+    result = connection.execute(text("SELECT version();"))
+    print(result.fetchone()[0])
+```
+
+
+```text
+PostgreSQL 17.0 (Debian 17.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+```
+
+
+
+### Test PostGIS Extension
+
+```python
+
+with engine.connect() as connection:
+    result = connection.execute(text("SELECT PostGIS_Version();"))
+    print(result.fetchone()[0])
+```
+
+
+```text
+3.4 USE_GEOS=1 USE_PROJ=1 USE_STATS=1
+```
+
+>This confirms that the database is not only PostgreSQL, but PostgreSQL with PostGIS enabled.
+
+
+
+
+## Loading Data 
+
+Now that we have proper connection between `Python` and `PostgreSQL`, we can start ingesting the data.
+
+1. `citibike_df` to PostgeSQL
+2. `weather_df` to PostgreSQL
+3. `neighborhood_df` to PostgreSQL
+
+
+### Citibike to PostgreSQL
+
+Of course first we need to read the data
+
+####  Reading the data
+
+```{python}
+citibike_df = pd.read_csv(citibike_path)
+
+citibike_df.head()
+```
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+citibike_df.columns
+```
+
+
+Cleaning the data:
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+citibike_df["started_at"] = pd.to_datetime(
+    citibike_df["started_at"],
+    errors="coerce"
+)
+
+citibike_df["ended_at"] = pd.to_datetime(
+    citibike_df["ended_at"],
+    errors="coerce"
+)
+```
+
+
+>Create a date column for easier joins with weather data.
+
+
+
+```{python}
+#| echo: true
+#| eval: true
+#| output: true
+citibike_df["ride_date"] = citibike_df["started_at"].dt.date
+
+citibike_df["ride_date"] = pd.to_datetime(
+    citibike_df["ride_date"],
+    errors="coerce"
+)
+
+citibike_df[
+    [
+        "ride_id",
+        "started_at",
+        "ended_at",
+        "ride_date"
+    ]
+].head()
+```
+
+
+#### Writign CitiBike data to PostgreSQL Database
+
+```python
+citibike_df.to_sql(
+    name="jersey_city",
+    con=engine,
+    if_exists="replace",
+    index=False,
+    chunksize=50_000,
+    method="multi"
+)
+```
+
+
+
+::: {.callout-note}
+
+Check how many options it has:
+
+`if_exists:` Literal['fail', 'replace', 'append', 'delete_rows']
+
+:::
+
+
+#### Checking Citibike Data
+
+There are two options to check, either to use DataGrip or use python
+
+With the DataGrip by connecting to the DB
+
+![]({{< meta image_path >}}/db_connection.png)
+
+
+
+Selecting top 10 rows:
+
+![]({{< meta image_path >}}/citibike_view.png)
+
+
+
+In order to check the rows with python we simply need to call the query here inside the python!
+
+
+
+```python
+query = """
+SELECT
+    *
+FROM jersey_city
+LIMIT 10;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+
+```
+
+
+### Load Weather Data
+
+#### Read Weather CSV
+
+```{python}
+#| echo: true
+
+weather_df = pd.read_csv(weather_path)
+
+weather_df.head()
+```
+
+---
+
+#### Convert Date Column
+
+```{python}
+#| echo: true
+
+weather_df["date"] = pd.to_datetime(
+    weather_df["date"],
+    errors="coerce"
+)
+
+weather_df.head()
+```
+
+---
+
+#### Write Weather Data to Database
+
+```python
+#| echo: true
+
+weather_df.to_sql(
+    name="jersey_weather",
+    con=engine,
+    if_exists="replace",
+    index=False
+)
+```
+
+
+**Check the results:**
+
+![]({{< meta image_path >}}/weather_view.png)
+
+
+
+
+```python
+query = """
+SELECT
+    *
+FROM jersey_weather
+LIMIT 10;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+
+```
+
+
+
+---
+
+### Load Neighborhood GeoJSON as Spatial Table
+
+#### Read GeoJSON with GeoPandas
+
+```{python}
+#| echo: true
+
+neighborhood_gdf = gpd.read_file(neighborhood_path)
+
+neighborhood_gdf.head()
+```
+
+Checking the `crs`
+
+```{python}
+#| echo: true
+
+neighborhood_gdf.crs
+```
+
+
+
+The file should be in:
+
+```text
+EPSG:4326
+```
+
+If not, convert it.
+
+```{python}
+#| echo: true
+
+neighborhood_gdf = neighborhood_gdf.to_crs("EPSG:4326")
+```
+
+>As we can see the file is `EPSG:4326`
+
+---
+
+#### Inspect Geometry Type
+
+```{python}
+#| echo: true
+
+neighborhood_gdf.geom_type.value_counts()
+```
+
+**For neighborhoods, we expect:**
+
+```text
+Polygon
+```
+
+**or:**
+
+```text
+MultiPolygon
+```
+
+---
+
+#### Write GeoDataFrame to PostGIS
+
+Because this is a spatial table, we use `GeoDataFrame.to_postgis()`.
+
+```python
+#| echo: true
+
+neighborhood_gdf.to_postgis(
+    name="jersey_city_neighborhoods",
+    con=engine,
+    if_exists="replace",
+    index=False
+)
+```
+
+This creates a real geometry column in PostgreSQL.
+
+![]({{< meta image_path >}}/neighborhood_view.png)
+
+---
+
+#### Check Spatial Table
+
+```python
+
+
+query = """
+SELECT
+    neighborhood,
+    ST_GeometryType(geometry) AS geometry_type,
+    ST_SRID(geometry) AS srid
+FROM jersey_city_neighborhoods
+LIMIT 5;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+```
+
+---
+
+### Create Station Spatial Table
+
+The ride table has start and end coordinates, but we also want a station-level spatial table.
+
+---
+
+### Create Station Summary
+
+```{python}
+#| echo: true
+
+start_stations = citibike_df[
+    [
+        "ride_id",
+        "start_station_id",
+        "start_station_name",
+        "start_lat",
+        "start_lng"
+    ]
+].copy()
+
+start_stations = start_stations.rename(
+    columns={
+        "start_station_id": "station_id",
+        "start_station_name": "station_name",
+        "start_lat": "lat",
+        "start_lng": "lng"
+    }
+)
+
+start_stations["activity_type"] = "departure"
+```
+
+```{python}
+#| echo: true
+
+end_stations = citibike_df[
+    [
+        "ride_id",
+        "end_station_id",
+        "end_station_name",
+        "end_lat",
+        "end_lng"
+    ]
+].copy()
+
+end_stations = end_stations.rename(
+    columns={
+        "end_station_id": "station_id",
+        "end_station_name": "station_name",
+        "end_lat": "lat",
+        "end_lng": "lng"
+    }
+)
+
+end_stations["activity_type"] = "arrival"
+```
+
+```{python}
+#| echo: true
+
+station_activity_long = pd.concat(
+    [
+        start_stations,
+        end_stations
+    ],
+    ignore_index=True
+)
+
+station_activity_long = station_activity_long.dropna(
+    subset=[
+        "station_id",
+        "station_name",
+        "lat",
+        "lng"
+    ]
+)
+```
+
+```{python}
+#| echo: true
+
+station_activity_agg = (
+    station_activity_long
+    .groupby(
+        [
+            "station_id",
+            "station_name",
+            "lat",
+            "lng",
+            "activity_type"
+        ],
+        as_index=False
+    )
+    .agg(
+        number_of_rides=("ride_id", "count")
+    )
+)
+```
+
+```{python}
+#| echo: true
+
+station_summary = (
+    station_activity_agg
+    .pivot_table(
+        index=[
+            "station_id",
+            "station_name",
+            "lat",
+            "lng"
+        ],
+        columns="activity_type",
+        values="number_of_rides",
+        fill_value=0
+    )
+    .reset_index()
+)
+
+station_summary.columns.name = None
+
+station_summary = station_summary.rename(
+    columns={
+        "departure": "total_departures",
+        "arrival": "total_arrivals"
+    }
+)
+
+if "total_departures" not in station_summary.columns:
+    station_summary["total_departures"] = 0
+
+if "total_arrivals" not in station_summary.columns:
+    station_summary["total_arrivals"] = 0
+
+station_summary["total_activity"] = (
+    station_summary["total_departures"] +
+    station_summary["total_arrivals"]
+)
+
+station_summary["net_departures"] = (
+    station_summary["total_departures"] -
+    station_summary["total_arrivals"]
+)
+
+station_summary = station_summary.sort_values(
+    "total_activity",
+    ascending=False
+).reset_index(drop=True)
+
+station_summary.head()
+```
+
+
+
+#### Convert Station Summary to GeoDataFrame
+
+**Important coordinate rule:**
+
+$$
+x = \text{longitude}
+$$
+
+$$
+y = \text{latitude}
+$$
+
+```{python}
+#| echo: true
+
+station_gdf = gpd.GeoDataFrame(
+    station_summary,
+    geometry=gpd.points_from_xy(
+        station_summary["lng"],
+        station_summary["lat"]
+    ),
+    crs="EPSG:4326"
+)
+
+station_gdf.head()
+```
+
+---
+
+#### Write Station Points to PostGIS
+
+```python
+
+
+station_gdf.to_postgis(
+    name="jc_2025_stations",
+    con=engine,
+    if_exists="replace",
+    index=False
+)
+```
+
+![]({{< meta image_path >}}/stations_view.png)
+
+---
+
+#### Check Station Spatial Table
+
+```python
+#| echo: true
+
+query = """
+SELECT
+    station_id,
+    station_name,
+    total_activity,
+    ST_GeometryType(geometry) AS geometry_type,
+    ST_SRID(geometry) AS srid
+FROM jc_2025_stations
+LIMIT 5;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+```
+
+
+## Homework 1 | Dowload new data
+
+
+1. downlaod the remaining months from citibike and writo into PostgreSQL
+2. download the remaining weather days and writo into PostgreSQL
+3. check weather new stations apeared and update respectively
+
+
+
+
+---
+
+## SQL Alchemy
+
+<!-- todo: what is it? -->
+
+### List Tables
+
+```python
+#| echo: true
+
+query = """
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+```
+
+---
+
+### Count Rows for each table
+
+```python
+#| echo: true
+
+query = """
+SELECT 'jc_2025' AS table_name, COUNT(*) AS row_count FROM jc_2025
+UNION ALL
+SELECT 'jersey_weather_2025' AS table_name, COUNT(*) AS row_count FROM jersey_weather_2025
+UNION ALL
+SELECT 'jersey_city_neighborhoods' AS table_name, COUNT(*) AS row_count FROM jersey_city_neighborhoods
+UNION ALL
+SELECT 'jc_2025_stations' AS table_name, COUNT(*) AS row_count FROM jc_2025_stations;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+```
+
+---
+
+### Daily Ride Volume
+
+```python
+#| echo: true
+
+query = """
+SELECT
+    started_at::date AS ride_date,
+    COUNT(*) AS number_of_rides
+FROM jersey_city
+GROUP BY started_at::date
+ORDER BY ride_date;
+"""
+
+daily_rides_sql = pd.read_sql(
+    query,
+    con=engine
+)
+
+daily_rides_sql.head()
+```
+
+
+
+### Join Citi Bike and Weather
+
+```python
+#| echo: true
+
+query = """
+SELECT
+    c.started_at::date AS ride_date,
+    COUNT(*) AS number_of_rides,
+    w.temperature_2m_mean,
+    w.precipitation_sum,
+    w.rain_sum,
+    w.snowfall_sum,
+    w.wind_speed_10m_max
+FROM jersey_city AS c
+LEFT JOIN jersey_weather AS w
+    ON c.started_at::date = w.date::date
+GROUP BY
+    c.started_at::date,
+    w.temperature_2m_mean,
+    w.precipitation_sum,
+    w.rain_sum,
+    w.snowfall_sum,
+    w.wind_speed_10m_max
+ORDER BY ride_date;
+"""
+
+bike_weather_sql = pd.read_sql(
+    query,
+    con=engine
+)
+
+bike_weather_sql.head()
+```
+
+---
+
+### Spatial Join in SQL: Stations to Neighborhoods
+
+Now we can do the spatial join directly in PostGIS.
+
+This is the main reason for using the PostGIS image.
+
+```{python}
+#| echo: true
+
+query = """
+SELECT
+    s.station_id,
+    s.station_name,
+    s.total_departures,
+    s.total_arrivals,
+    s.total_activity,
+    s.net_departures,
+    n.neighborhood
+FROM jc_stations AS s
+JOIN jersey_city_neighborhoods AS n
+    ON ST_Within(s.geometry, n.geometry)
+ORDER BY s.total_activity DESC;
+"""
+
+station_neighborhood_sql = pd.read_sql(
+    query,
+    con=engine
+)
+
+station_neighborhood_sql.head()
+```
+
+---
+
+### Aggregate Station Activity by Neighborhood in SQL
+
+```python
+
+query = """
+SELECT
+    n.neighborhood,
+    COUNT(DISTINCT s.station_id) AS number_of_stations,
+    SUM(s.total_departures) AS total_departures,
+    SUM(s.total_arrivals) AS total_arrivals,
+    SUM(s.total_activity) AS total_activity,
+    SUM(s.net_departures) AS net_departures,
+    SUM(s.total_activity)::numeric / NULLIF(COUNT(DISTINCT s.station_id), 0) AS avg_activity_per_station
+FROM jersey_city_neighborhoods AS n
+LEFT JOIN jc_stations AS s
+    ON ST_Within(s.geometry, n.geometry)
+GROUP BY n.neighborhood
+ORDER BY total_activity DESC;
+"""
+
+neighborhood_activity_sql = pd.read_sql(
+    query,
+    con=engine
+)
+
+neighborhood_activity_sql.head()
+```
+
+---
+
+### Create Spatial Indexes
+
+Spatial indexes make spatial joins faster.
+
+```python
+
+
+with engine.begin() as connection:
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_jc_stations_geom
+        ON jc_stations
+        USING GIST (geometry);
+    """))
+
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_jersey_city_neighborhoods_geom
+        ON jersey_city_neighborhoods
+        USING GIST (geometry);
+    """))
+
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_jc_started_at
+        ON jersey_city (started_at);
+    """))
+
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_weather_date
+        ON jersey_weather (date);
+    """))
+```
+
+---
+
+
+## SQLAlchemy
+
+SQLAlchemy is the **bridge** between Python and PostgreSQL.
+
+```text
+Python
+  ↓
+SQLAlchemy
+  ↓
+PostgreSQL / PostGIS
+```
+
+It lets us connect to the database and send SQL queries from Python.
+
+---
+
+## PostGIS
+
+PostGIS gives PostgreSQL spatial ability.
+
+With PostGIS, the database can understand:
+
+- points
+- lines
+- polygons
+- spatial joins
+- spatial indexes
+- distance calculations
+
+---
+
+## GeoPandas and PostGIS
+
+GeoPandas is useful before and after the database.
+
+| Tool | Role |
+|---|---|
+| GeoPandas | read GeoJSON and create geometry |
+| SQLAlchemy | connect Python to database |
+| PostGIS | store and query spatial data |
+| Folium | visualize maps |
+
+---
+
+## Final Database Tables
+
+| Table | Type | Purpose |
+|---|---|---|
+| `jersey_city` | normal table | ride-level Citi Bike data |
+| `jersey_weather` | normal table | daily weather data |
+| `jersey_city_neighborhoods` | spatial table | neighborhood polygons |
+| `jc_stations` | spatial table | station points |
+
