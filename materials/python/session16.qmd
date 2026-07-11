@@ -256,11 +256,12 @@ pip install pandas geopandas sqlalchemy psycopg2-binary geoalchemy2 python-doten
 
 ### Import Libraries
 
-```python
+```{python}
 
 import os
 import pandas as pd
 import geopandas as gpd
+from zipfile import ZipFile
 
 from pathlib import Path
 from sqlalchemy import create_engine, text
@@ -276,24 +277,14 @@ Adjust paths based on your course project structure.
 
 
 ```python
-#| echo: true
-
-DATA_DIR = Path("../data/citibike")
+DATA_DIR = Path("../data/citibike/JC")
 
 citibike_path = DATA_DIR / "JC2025.csv"
 weather_path = DATA_DIR / "jersey_weather_2025.csv"
 neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
 ```
 
-```python
-#| echo: false
 
-DATA_DIR = Path("../../lab/python/data/citibike")
-
-citibike_path = DATA_DIR / "JC2025.csv"
-weather_path = DATA_DIR / "jersey_weather_2025.csv"
-neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
-```
 
 
 
@@ -302,8 +293,6 @@ neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
 For teaching, we can write the connection string explicitly.
 
 ```python
-#| echo: true
-
 DB_USER = "postgres"
 DB_PASSWORD = "password"
 DB_HOST = "localhost"
@@ -324,15 +313,12 @@ DATABASE_URL
 
 ### Masking Environment Variables
 
-In real life we cannot explicitly provide the enviroment variables. In that case we need to 
+In real life we cannot **explicitly** provide the enviroment variables. In that case we need to use `os.getenv()` method to import variables which we have stored in the `.env` file
 
 
 If you want to read from environment variables, use this version.
 
 ```python
-#| echo: true
-#| eval: false
-
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -413,13 +399,42 @@ Of course first we need to read the data
 
 ####  Reading the data
 
-```python
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+
+
+DATA_DIR = Path("../../lab/python/data/citibike/JC")
+citibike_path = DATA_DIR / "JC2025.csv"
+citibike_zip = DATA_DIR / "JC2025.zip"
+weather_path = DATA_DIR / "jersey_weather_2025.csv"
+neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
+```
+
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| output: true
+
+if not citibike_path.exists():
+    with ZipFile(citibike_zip, "r") as zip_ref:
+        zip_ref.extractall(DATA_DIR)
+else:
+    print('File exists')
+
+```
+
+
+```{python}
 citibike_df = pd.read_csv(citibike_path)
 
 citibike_df.head()
 ```
 
-```python
+```{python}
 #| echo: true
 #| eval: true
 #| output: true
@@ -429,7 +444,7 @@ citibike_df.columns
 
 Cleaning the data:
 
-```python
+```{python}
 #| echo: true
 #| eval: true
 #| output: true
@@ -449,7 +464,7 @@ citibike_df["ended_at"] = pd.to_datetime(
 
 
 
-```python
+```{python}
 #| echo: true
 #| eval: true
 #| output: true
@@ -530,12 +545,13 @@ pd.read_sql(
 
 ```
 
+<!-- todo: add screenshot -->
 
 ### Load Weather Data
 
 #### Read Weather CSV
 
-```python
+```{python}
 #| echo: true
 
 weather_df = pd.read_csv(weather_path)
@@ -547,7 +563,7 @@ weather_df.head()
 
 #### Convert Date Column
 
-```python
+```{python}
 #| echo: true
 
 weather_df["date"] = pd.to_datetime(
@@ -580,6 +596,7 @@ weather_df.to_sql(
 
 
 
+**Check the results with python:**
 
 ```python
 query = """
@@ -596,15 +613,13 @@ pd.read_sql(
 
 ```
 
-
-
 ---
 
 ### Load Neighborhood GeoJSON as Spatial Table
 
 #### Read GeoJSON with GeoPandas
 
-```python
+```{python}
 #| echo: true
 
 neighborhood_gdf = gpd.read_file(neighborhood_path)
@@ -614,7 +629,7 @@ neighborhood_gdf.head()
 
 Checking the `crs`
 
-```python
+```{python}
 #| echo: true
 
 neighborhood_gdf.crs
@@ -630,7 +645,7 @@ EPSG:4326
 
 If not, convert it.
 
-```python
+```{python}
 #| echo: true
 
 neighborhood_gdf = neighborhood_gdf.to_crs("EPSG:4326")
@@ -642,7 +657,7 @@ neighborhood_gdf = neighborhood_gdf.to_crs("EPSG:4326")
 
 #### Inspect Geometry Type
 
-```python
+```{python}
 #| echo: true
 
 neighborhood_gdf.geom_type.value_counts()
@@ -713,7 +728,7 @@ The ride table has start and end coordinates, but we also want a station-level s
 
 ### Create Station Summary
 
-```python
+```{python}
 #| echo: true
 
 start_stations = citibike_df[
@@ -738,7 +753,7 @@ start_stations = start_stations.rename(
 start_stations["activity_type"] = "departure"
 ```
 
-```python
+```{python}
 #| echo: true
 
 end_stations = citibike_df[
@@ -763,7 +778,7 @@ end_stations = end_stations.rename(
 end_stations["activity_type"] = "arrival"
 ```
 
-```python
+```{python}
 #| echo: true
 
 station_activity_long = pd.concat(
@@ -784,7 +799,7 @@ station_activity_long = station_activity_long.dropna(
 )
 ```
 
-```python
+```{python}
 #| echo: true
 
 station_activity_agg = (
@@ -805,7 +820,7 @@ station_activity_agg = (
 )
 ```
 
-```python
+```{python}
 #| echo: true
 
 station_summary = (
@@ -871,7 +886,7 @@ $$
 y = \text{latitude}
 $$
 
-```python
+```{python}
 #| echo: true
 
 station_gdf = gpd.GeoDataFrame(
@@ -891,8 +906,6 @@ station_gdf.head()
 #### Write Station Points to PostGIS
 
 ```python
-
-
 station_gdf.to_postgis(
     name="jc_2025_stations",
     con=engine,
@@ -908,7 +921,7 @@ station_gdf.to_postgis(
 #### Check Station Spatial Table
 
 ```python
-#| echo: true
+
 
 query = """
 SELECT
@@ -934,9 +947,6 @@ pd.read_sql(
 1. downlaod the remaining months from citibike and writo into PostgreSQL
 2. download the remaining weather days and writo into PostgreSQL
 3. check weather new stations apeared and update respectively
-
-
-
 
 ---
 
