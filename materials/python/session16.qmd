@@ -292,7 +292,7 @@ neighborhood_path = DATA_DIR / "jersey-city-neighborhoods.geojson"
 
 For teaching, we can write the connection string explicitly.
 
-```python
+```{python}
 DB_USER = "postgres"
 DB_PASSWORD = "password"
 DB_HOST = "localhost"
@@ -504,6 +504,20 @@ Check how many options it has:
 `if_exists:` Literal['fail', 'replace', 'append', 'delete_rows']
 
 :::
+
+
+---
+
+::: {.callout-important}
+
+In case of longer exectuion you can try with the stratified sampling, by selecting `50%` of the data per each customer.
+
+We need stratifed sampling in order to maitain proportion for each month.
+
+Checkout [thuis example.](https://hovhannisyan91.github.io/aca/materials/python/session10.html#stratified-sampling-proportional-to-the-category-distribution)
+
+:::
+
 
 
 #### Checking Citibike Data
@@ -946,14 +960,13 @@ pd.read_sql(
 
 ---
 
-## SQL Alchemy
+## `SQLAlchemy`
 
 <!-- todo: what is it? -->
 
 ### List Tables
 
 ```python
-#| echo: true
 
 query = """
 SELECT table_name
@@ -973,16 +986,15 @@ pd.read_sql(
 ### Count Rows for each table
 
 ```python
-#| echo: true
 
 query = """
-SELECT 'jc_2025' AS table_name, COUNT(*) AS row_count FROM jc_2025
-UNION ALL
-SELECT 'jersey_weather_2025' AS table_name, COUNT(*) AS row_count FROM jersey_weather_2025
-UNION ALL
-SELECT 'jersey_city_neighborhoods' AS table_name, COUNT(*) AS row_count FROM jersey_city_neighborhoods
-UNION ALL
-SELECT 'jc_2025_stations' AS table_name, COUNT(*) AS row_count FROM jc_2025_stations;
+    SELECT 'jc_2025' AS table_name, COUNT(*) AS row_count FROM jc_2025
+    UNION ALL
+    SELECT 'jersey_weather_2025' AS table_name, COUNT(*) AS row_count FROM jersey_weather_2025
+    UNION ALL
+    SELECT 'jersey_city_neighborhoods' AS table_name, COUNT(*) AS row_count FROM jersey_city_neighborhoods
+    UNION ALL
+    SELECT 'jc_2025_stations' AS table_name, COUNT(*) AS row_count FROM jc_2025_stations;
 """
 
 pd.read_sql(
@@ -996,15 +1008,13 @@ pd.read_sql(
 ### Daily Ride Volume
 
 ```python
-#| echo: true
-
 query = """
-SELECT
-    started_at::date AS ride_date,
-    COUNT(*) AS number_of_rides
-FROM jersey_city
-GROUP BY started_at::date
-ORDER BY ride_date;
+    SELECT
+        started_at::date AS ride_date,
+        COUNT(*) AS number_of_rides
+    FROM jersey_city
+    GROUP BY started_at::date
+    ORDER BY ride_date;
 """
 
 daily_rides_sql = pd.read_sql(
@@ -1020,8 +1030,6 @@ daily_rides_sql.head()
 ### Join Citi Bike and Weather
 
 ```python
-#| echo: true
-
 query = """
 SELECT
     c.started_at::date AS ride_date,
@@ -1120,7 +1128,7 @@ neighborhood_activity_sql.head()
 
 ### Create Spatial Indexes
 
-Spatial indexes make spatial joins faster.
+Spatial indexes make spatial joins **faster**.
 
 ```python
 
@@ -1149,24 +1157,191 @@ with engine.begin() as connection:
     """))
 ```
 
----
 
-
-## SQLAlchemy
+### SQLAlchemy Functionality
 
 SQLAlchemy is the **bridge** between Python and PostgreSQL.
 
-```text
-Python
-  ↓
-SQLAlchemy
-  ↓
-PostgreSQL / PostGIS
-```
+                    ```text
+                    Python
+                        ↓
+                    SQLAlchemy
+                        ↓
+                    PostgreSQL / PostGIS
+                    ```
 
 It lets us connect to the database and send SQL queries from Python.
 
 ---
+
+
+### SQLAlchemy Core
+
+The Core level provides a **Pythonic** way to interact with database schemas and run SQL commands without defining full classes.
+
+While SQLAlchemy is meant to abstract SQL, you can still run raw commands using the `text()` function:
+
+```python
+from sqlalchemy import text
+```
+
+```python
+with engine.connect() as connection:
+    connection.execute(text("CREATE TABLE IF NOT EXISTS people (name TEXT, age INTEGER)"))
+    connection.execute(text("INSERT INTO people (name, age) VALUES ('Mike', 30)"))
+    connection.commit() # Important: Changes must be committed to persist [7, 8]
+```
+
+### Defining Tables `MetaData`
+
+In Core, you use the MetaData object and the Table class to define your schem.
+
+```python
+from sqlalchemy import MetaData, Table, Column, Integer, String
+
+meta = MetaData()
+
+people = Table(
+    "people", meta,
+    Column("id", Integer, primary_key=True),
+    Column("name", String, nullable=False),
+    Column("age", Integer)
+)
+
+```
+
+---
+
+```python
+meta.create_all(engine) 
+```
+
+### Defining Tables with `ORM`
+
+**Optional**
+
+In ORM, you usually define Python classes, and those classes inherit from Base:
+
+
+```python
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String
+
+class Base(DeclarativeBase):
+    pass
+
+class Person(Base):
+    __tablename__ = "people"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    age: Mapped[int | None]
+```
+
+
+```python
+Base.metadata.create_all(engine)
+```
+
+
+::: {.callout-important}
+
+                            ```text
+                            SQLAlchemy Core
+                            ---------------
+                            MetaData()
+                            Table(...)
+                            Column(...)
+
+                            SQLAlchemy ORM
+                            --------------
+                            Base
+                            class Person(Base)
+                            mapped_column(...)
+```
+
+:::
+
+### `CRUD` operations
+
+#### Insert Values
+
+```python
+from sqlalchemy import insert
+
+insert_statement = people.insert().values(name = 'Jane', age = 40)
+result = conn.execute(insert_statement)
+conn.commit()
+```
+
+#### Select Values
+
+```python
+from sqlalchemy import select
+
+select_statement = people.select().where(people.c.age > 30)
+result = conn.execute(select_statement)
+```
+
+`c` means 
+
+
+After the result we need to fetch the data
+
+```python
+for row in result.fetchall():
+    print(row)
+```
+
+#### Update Values
+
+```python
+from sqlalchemy import update
+
+update_statement = people.update().where(people.c.name == "Jane").values(age=50)
+result = conn.execute(update_statement)
+conn.commit()
+```
+
+Once we had this we can check by selecting the same
+
+
+```python
+select_statement = people.select().where(people.c.age > 30)
+result = conn.execute(select_statement)
+for row in result.fetchall():
+    print(row)
+```
+
+
+#### Delete Values
+
+```python
+from sqlalchemy import delete
+
+delete_statement = people.delete().where(people.c.name == "Jane")
+result = conn.execute(delete_statement)
+conn.commit()
+```
+
+```python
+select_statement = people.select()
+result = conn.execute(select_statement)
+for row in result.fetchall():
+    print(row)
+```
+
+
+For a mental Model 
+
+```bash
+Base
+ └── Base.metadata
+      └── people table
+           ├── id
+           ├── name
+           └── age
+```
 
 ## PostGIS
 
@@ -1183,20 +1358,7 @@ With PostGIS, the database can understand:
 
 ---
 
-## GeoPandas and PostGIS
-
-GeoPandas is useful before and after the database.
-
-| Tool | Role |
-|---|---|
-| GeoPandas | read GeoJSON and create geometry |
-| SQLAlchemy | connect Python to database |
-| PostGIS | store and query spatial data |
-| Folium | visualize maps |
-
----
-
-## Final Database Tables
+### Summary
 
 | Table | Type | Purpose |
 |---|---|---|
@@ -1205,3 +1367,12 @@ GeoPandas is useful before and after the database.
 | `jersey_city_neighborhoods` | spatial table | neighborhood polygons |
 | `jc_stations` | spatial table | station points |
 
+**Use:**
+
+- **Core** when you want table/query control.
+- **ORM + Base** when you want to work with Python classes/objects mapped to database tables.
+
+
+### Resources
+
+- [Video about SQlAlchemy](https://www.youtube.com/watch?v=529LYDgRTgQ)

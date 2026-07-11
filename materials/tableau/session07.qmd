@@ -2,7 +2,7 @@
 title: "Session 07: Spatial Analytics"
 subtitle: "Working with Geographic Data in Tableau"
 categories: [tableau]
-image_path: "/img/tableau/05"
+image_path: "/img/tableau/07"
 ---
 
 
@@ -14,612 +14,1268 @@ Unlike traditional visualizations, spatial analysis allows us to understand how 
 
 Maps are powerful because they allow patterns to be understood visually. They are especially useful when geography is not just a visual element, but a key part of the analysis.
 
----
-
-### Geographic Data Formats
-
-Geographic data can exist in multiple formats, and understanding these formats is essential for correct analysis.
-
-- Spatial files such as **Shapefile (`.shp`), GeoJSON, KML**
-- Flat files such as **`Excel` or `CSV`**
-- Databases with spatial or location-based fields
-
-**Spatial files store both:**
-
-- **Geometry** → the shape (point, line, polygon)
-- **Attributes** → descriptive data
-
-When a spatial file is connected, Tableau automatically creates a **Geometry field**, which can be directly used for mapping.
-
-**Location-based** data (like `City`, `Country`, `Latitude`, `Longitude`) does not contain shapes. Tableau uses **geocoding** to convert these values into map coordinates.
-
----
-
-### Dataset for Spatial Analysis
-
-**In this session, we use:**
-
-- **Citi Bike dataset** (trip-level data with coordinates)
-- **NYC District GeoJSON file** (polygon-level data)
-
-**The Citi Bike dataset contains:**
-
-- `Start` and `End` coordinates  
-- Time information  
-- Station details  
-
-Since the dataset is split across multiple CSV files, we combine them using **Union**.
-
-The GeoJSON dataset contains:
-
-- District boundaries (MultiPolygon)  
-- Geographic shapes for mapping  
-
-<!-- TODO: Add more details about the datasets -->
-
----
-
-### Spatial Relationships
-
-We have already seen how spacial relationships work during the `SQL` and `Python` sessions. Spatial relationships are used when datasets do not share a common key but still need to be analyzed together.
-
-#### Steps to Create Spatial Relationship
-
-1. Load the **Citi Bike dataset**  
-2. Combine all CSV files using **Union**  
-3. Add the **GeoJSON file** to the data model  
-4. Create a calculated field in both datasets:
-
-```sql
-'New York'
-```
-
-5. Use this field to create a **relationship** between the datasets  
-
-This approach allows Tableau to connect the datasets logically without physically joining them, preserving flexibility and avoiding duplication.
-
-![Relationship Calculations]({{< meta image_path >}}/relationship_calculation.png)
-
-Now we have a working relationship between two tables.
-
-![Spatial Relationship]({{< meta image_path >}}/spatial_relationship.png)
-
----
-
-### Spatial Joins
-
-Spatial joins combine datasets based on geographic relationships rather than keys.
-
-The most common spatial join is:
-
-- **INTERSECTS** → checks if two geometries overlap  
-
-
-#### **Steps to Create Spatial Join:**
-
-1. In the data source tab, switch to the **physical layer**  
-2. Add the Citi Bike dataset  
-3. Create calculated fields:
-
-```sql
-MAKEPOINT([Start Lat], [Start Lng])
-```
-
-```sql
-MAKEPOINT([End Lat], [End Lng])
-```
-
-4. Drag the GeoJSON dataset next to the Citi Bike dataset  
-5. Choose **Left Join**  
-6. Set join condition:
-   - Spatial field (point) **INTERSECTS** polygon geometry  
-
-This will match each trip to a district based on location.
-
-![Spatial Join]({{< meta image_path >}}/spatial_join.png)
-
----
-
 
 ::: {.callout-important}
 
-#### Troubleshooting Spatial Joins
+For this Session we are going to use **citibike Database**
 
-**Common issue:**
+If you haven't created yet make sure to create one.
 
->Geometry is incompatible with geography
-
-**Solution:**
-
-- Convert `geometry` to `geography`  
-- Use coordinate system **`EPSG:4326`**  
-- Ensure coordinates follow **`Longitude`, `Latitude`** order  
+The steps creating the citibik db you can find [here](https://hovhannisyan91.github.io/aca/materials/python/session16.html#docker-environment-setup)
 
 :::
 
+## Connecting Tableau With Database | MacOS
 
----
+Before connecting Tablea with the `citibike`, first we need to setup the connector.
 
-### Spatial Functions
+### Downloading the JDBC connector 
 
-Spatial functions enable advanced geographic calculations directly within Tableau. They allow you to create, transform, and analyze spatial objects such as points, lines, and polygons. These functions are especially important when working with coordinate-based datasets, as they convert raw latitude and longitude values into map-ready objects and allow analytical operations such as distance measurement, movement analysis, and spatial comparison.
+Visit [here and download](https://jdbc.postgresql.org/download/) `JDBC` connector
+ 
+![]({{< meta image_path >}}/downloadjava8.jpg)
 
-Spatial functions are commonly used together with mapping and spatial joins. They help bridge the gap between raw data and geographic insight, making it possible to answer questions about proximity, interaction, and movement.
+### Put the `.jar` file in Tableau 
 
----
+Open the terminal and type the following command:
 
-#### Common Use Cases
-
-- Converting latitude and longitude into spatial points  
-- Visualizing movement between two locations  
-- Measuring distance between locations  
-- Creating service or coverage areas  
-- Identifying overlapping or interacting regions  
-
----
-
-#### Examples
-
-**Creating a spatial point from coordinates:**
-
-```sql
-MAKEPOINT([Latitude], [Longitude])
+```bash
+cd ~/Library/Tableau/Drivers
 ```
-**
-Visualizing movement between two locations:**
 
-```sql
-MAKELINE(
-    MAKEPOINT([Start Lat], [Start Lng]),
-    MAKEPOINT([End Lat], [End Lng])
+$$\downarrow$$
+
+```bash
+open .
+```
+
+$$\downarrow$$
+
+>put the downloaded file there
+
+![]({{< meta image_path >}}/postgresql_jar.jpg)
+
+## Connecting Tableau With Database | Windows
+
+### Downloading the JDBC connector 
+
+Visit [here and download](https://jdbc.postgresql.org/download/) `JDBC` connector
+ 
+![]({{< meta image_path >}}/downloadjava8.jpg)
+
+### Put the `.jar` file in Tableau 
+
+
+```bash
+"C:\Program Files\Tableau\Drivers"
+```
+
+>If Drivers folder does not exist create it 
+
+## Check the connection
+
+Once the above mentioned steps achieved we can check the connection.
+
+1. Open **Tableau Desktop**
+2. Navigate to the Other Connection
+3. Type the credentions which you find in YOUR `.env` file
+
+![]({{< meta image_path >}}/connection.png)
+
+
+---
+
+![]({{< meta image_path >}}/view_after_connection.png)
+
+---
+
+![]({{< meta image_path >}}/extract.png)
+
+
+
+## Tableau Dashboard with Database
+
+
+At this stage, we already have our core database tables loaded into PostGIS:
+
+| Table | Type | Purpose |
+|---|---|---|
+| `jersey_city` | normal table | ride-level Citi Bike data |
+| `jersey_weather` | normal table | daily weather data |
+| `jersey_city_neighborhoods` | spatial table | neighborhood polygons |
+| `jc_2025_stations` | spatial table | station points |
+
+The goal now is to create a **dashboard-ready SQL view** for Tableau.
+
+Instead of asking Tableau to join multiple raw tables, we prepare one analytical view inside PostgreSQL.
+
+This is usually better because the logic becomes centralized in the database.
+
+
+
+
+### Why Create a View for Tableau?
+
+A SQL view is a saved query.
+
+It behaves like a table, but the data is generated from the underlying query.
+
+For Tableau, this is useful because we can expose a clean analytical dataset.
+
+**Instead of giving Tableau this:**
+
+```text
+jersey_city
+jersey_weather
+jersey_city_neighborhoods
+jc_2025_stations
+```
+
+
+**we give Tableau this:**
+
+```text
+vw_tableau_citibike_dashboard
+```
+
+**This view can already include:**
+
+- ride-level information
+- date fields
+- station fields
+- weather fields
+- start neighborhood
+- end neighborhood
+- ride duration
+- approximate ride distance
+
+
+
+## Create a Materialized View for Tableau
+
+Now we will create a **materialized view**.
+
+A materialized view is better for dashboards because PostgreSQL physically stores the result of the query.
+
+This means Tableau does not need to recalculate all joins every time the dashboard is opened.
+
+The previous section already introduced the difference between a normal `VIEW` and a `MATERIALIZED VIEW`, where the materialized view is recommended for dashboard performance. 
+
+
+In order to review the views and materialized views you can check [this session.](https://hovhannisyan91.github.io/aca/materials/sql/session11.html#views-in-practice) 
+
+
+
+---
+
+### Why Use a Materialized View for Tableau?
+
+**For Tableau, a materialized view is useful when the dashboard query contains:**
+
+- joins
+- spatial joins
+- date calculations
+- weather enrichment
+- distance calculations
+- aggregation-ready fields
+
+**In our case, the dashboard view joins:**
+
+| Source | Purpose |
+|---|---|
+| `jersey_city` | ride-level data |
+| `jersey_weather` | daily weather data |
+| `jersey_city_neighborhoods` | start and end neighborhood lookup |
+
+Because this logic is repeated many times in Tableau, we will store the result in:
+
+```text
+mv_tableau_citibike_dashboard
+```
+
+---
+
+### Materialized View Grain
+
+The materialized view will have the following grain:
+
+```text
+one row = one Citi Bike ride
+```
+
+This is important.
+
+It means Tableau can still aggregate the data flexibly.
+
+For example, Tableau can aggregate rides by:
+
+- day
+- month
+- hour
+- bike type
+- user type
+- start station
+- end station
+- start neighborhood
+- end neighborhood
+- weather condition
+
+---
+
+### Create Materialized View with SQLAlchemy
+
+> You can also us the **DataGrip** and execute the `mv`.
+```python
+from sqlalchemy import text
+```
+
+```python
+create_tableau_materialized_view_sql = """
+DROP MATERIALIZED VIEW IF EXISTS mv_tableau_citibike_dashboard;
+
+CREATE MATERIALIZED VIEW mv_tableau_citibike_dashboard AS
+WITH ride_base AS (
+    SELECT
+        c.ride_id,
+        c.rideable_type,
+        c.member_casual,
+
+        c.started_at,
+        c.ended_at,
+        c.started_at::date AS ride_date,
+
+        EXTRACT(YEAR FROM c.started_at)::int AS ride_year,
+        EXTRACT(QUARTER FROM c.started_at)::int AS ride_quarter,
+        EXTRACT(MONTH FROM c.started_at)::int AS ride_month,
+        TO_CHAR(c.started_at, 'Month') AS ride_month_name,
+        TO_CHAR(c.started_at, 'Day') AS ride_day_of_week,
+        EXTRACT(ISODOW FROM c.started_at)::int AS ride_day_number,
+        EXTRACT(HOUR FROM c.started_at)::int AS ride_hour,
+
+        CASE
+            WHEN EXTRACT(ISODOW FROM c.started_at) IN (6, 7)
+                THEN 'Weekend'
+            ELSE 'Weekday'
+        END AS weekday_type,
+
+        EXTRACT(EPOCH FROM (c.ended_at - c.started_at)) / 60.0 AS ride_duration_minutes,
+
+        c.start_station_id,
+        c.start_station_name,
+        c.end_station_id,
+        c.end_station_name,
+
+        c.start_lat,
+        c.start_lng,
+        c.end_lat,
+        c.end_lng,
+
+        ST_SetSRID(
+            ST_MakePoint(c.start_lng, c.start_lat),
+            4326
+        ) AS start_geom,
+
+        ST_SetSRID(
+            ST_MakePoint(c.end_lng, c.end_lat),
+            4326
+        ) AS end_geom
+
+    FROM jersey_city AS c
+    WHERE
+        c.ride_id IS NOT NULL
+        AND c.started_at IS NOT NULL
+        AND c.ended_at IS NOT NULL
+        AND c.ended_at > c.started_at
+        AND c.start_lat IS NOT NULL
+        AND c.start_lng IS NOT NULL
+        AND c.end_lat IS NOT NULL
+        AND c.end_lng IS NOT NULL
+)
+
+SELECT
+    r.ride_id,
+    r.rideable_type,
+    r.member_casual,
+
+    r.started_at,
+    r.ended_at,
+    r.ride_date,
+    r.ride_year,
+    r.ride_quarter,
+    r.ride_month,
+    TRIM(r.ride_month_name) AS ride_month_name,
+    TRIM(r.ride_day_of_week) AS ride_day_of_week,
+    r.ride_day_number,
+    r.ride_hour,
+    r.weekday_type,
+
+    r.ride_duration_minutes,
+
+    r.start_station_id,
+    r.start_station_name,
+    r.end_station_id,
+    r.end_station_name,
+
+    r.start_lat,
+    r.start_lng,
+    r.end_lat,
+    r.end_lng,
+
+    start_n.neighborhood AS start_neighborhood,
+    end_n.neighborhood AS end_neighborhood,
+
+    ST_Distance(
+        r.start_geom::geography,
+        r.end_geom::geography
+    ) / 1000.0 AS distance_km,
+
+    CASE
+        WHEN ST_Distance(r.start_geom::geography, r.end_geom::geography) / 1000.0 < 1
+            THEN 'Short'
+        WHEN ST_Distance(r.start_geom::geography, r.end_geom::geography) / 1000.0 < 3
+            THEN 'Medium'
+        ELSE 'Long'
+    END AS distance_group,
+
+    CASE
+        WHEN r.ride_duration_minutes < 10
+            THEN 'Short'
+        WHEN r.ride_duration_minutes < 30
+            THEN 'Medium'
+        ELSE 'Long'
+    END AS duration_group,
+
+    w.temperature_2m_max,
+    w.temperature_2m_min,
+    w.temperature_2m_mean,
+    w.precipitation_sum,
+    w.rain_sum,
+    w.snowfall_sum,
+    w.wind_speed_10m_max,
+
+    CASE
+        WHEN w.precipitation_sum > 0
+            THEN 'Precipitation'
+        ELSE 'No Precipitation'
+    END AS precipitation_flag,
+
+    CASE
+        WHEN w.temperature_2m_mean < 0
+            THEN 'Freezing'
+        WHEN w.temperature_2m_mean < 10
+            THEN 'Cold'
+        WHEN w.temperature_2m_mean < 20
+            THEN 'Mild'
+        ELSE 'Warm'
+    END AS temperature_group
+
+FROM ride_base AS r
+
+LEFT JOIN jersey_weather AS w
+    ON r.ride_date = w.date::date
+
+LEFT JOIN jersey_city_neighborhoods AS start_n
+    ON ST_Within(r.start_geom, start_n.geometry)
+
+LEFT JOIN jersey_city_neighborhoods AS end_n
+    ON ST_Within(r.end_geom, end_n.geometry);
+"""
+```
+
+```python
+with engine.begin() as connection:
+    connection.execute(text(create_tableau_materialized_view_sql))
+```
+
+
+
+### Check the Materialized View
+
+```python
+query = """
+SELECT *
+FROM mv_tableau_citibike_dashboard
+LIMIT 10;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
 )
 ```
 
-**Calculating distance between two points:**
+---
 
-```sql
-DISTANCE(
-    MAKEPOINT([Start Lat], [Start Lng]),
-    MAKEPOINT([End Lat], [End Lng]),
-    'km'
+## Check Number of Rows
+
+```{python}
+#| echo: true
+
+query = """
+SELECT
+    COUNT(*) AS number_of_rows
+FROM mv_tableau_citibike_dashboard;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
 )
 ```
 
 
-#### Spatial Functions Summary
+### Check Data Quality
 
-| Function | Description | Typical Use Case |
-|----------|-------------|------------------|
-| MAKEPOINT | Converts latitude and longitude columns into a spatial point. | Enabling spatial joins for coordinate-based datasets. |
-| MAKELINE | Creates a line between two spatial points. | Origin–destination maps, mobility analysis, route visualization. |
-| DISTANCE | Calculates the distance between two spatial points using specified units. | Nearest branch analysis, trip distance calculation, proximity analysis. |
-| AREA | Returns the total surface area of a spatial polygon. | Territory size comparison, land coverage analysis. |
-| LENGTH | Returns the total geodetic length of a linestring geometry. | Route length measurement, infrastructure analysis. |
-| BUFFER | Creates a radius around a point, line, or polygon. | Service coverage zones, delivery radius modeling, proximity analysis. |
-| INTERSECTS | Returns True or False indicating whether two geometries overlap. | Spatial joins, containment checks. |
-| INTERSECTION | Returns the overlapping portion between two geometries. | Market overlap analysis, shared service area evaluation. |
-| DIFFERENCE | Subtracts the overlapping area of one polygon from another. | Identifying uncovered or restricted areas. |
-| SYMDIFFERENCE | Removes overlapping portions from both geometries and returns the remaining parts. | Territory comparison and competitive analysis. |
-| OUTLINE | Converts polygon geometry into boundary lines. | Styling borders separately from polygon fill. |
-| SHAPETYPE | Returns the geometry structure as text (Point, Polygon, etc.). | Debugging spatial data issues. |
-| VALIDATE | Confirms whether spatial geometry is topologically correct. | Cleaning corrupted spatial files and preventing join errors. |
----
+Before connecting Tableau, we should check whether important dashboard fields are missing.
 
-### Geographic Data Visualization
+```python
+query = """
+SELECT
+    COUNT(*) AS total_rides,
 
-Mapping in Tableau is not only about placing marks on a geographic background.  
+    COUNT(temperature_2m_mean) AS rides_with_weather,
+    COUNT(*) - COUNT(temperature_2m_mean) AS rides_missing_weather,
 
-**It is a combination of:**
+    COUNT(start_neighborhood) AS rides_with_start_neighborhood,
+    COUNT(*) - COUNT(start_neighborhood) AS rides_missing_start_neighborhood,
 
-- Data modeling  
-- Geocoding  
-- Aggregation logic  
-- Visual design  
+    COUNT(end_neighborhood) AS rides_with_end_neighborhood,
+    COUNT(*) - COUNT(end_neighborhood) AS rides_missing_end_neighborhood,
 
-For a map to function correctly both analytically and visually, we need **four** foundational components to be configured properly:
+    COUNT(distance_km) AS rides_with_distance,
+    COUNT(*) - COUNT(distance_km) AS rides_missing_distance
+FROM mv_tableau_citibike_dashboard;
+"""
 
-1. Data Type  
-2. Data Role  
-3. Geographic Role  
-4. Geographic Hierarchy  
-
-If any of these elements are misconfigured, you may encounter:
-
-- Unknown locations  
-- Incorrect aggregation  
-- Missing map rendering  
-- Broken drill-down behavior  
-- Spatial joins that do not work as expected  
-
-
-#### Data Type | Structural Foundation**
-
-The **Data Type** determines how Tableau stores and interprets the raw values.
-
-This is the first layer of configuration.
-
-Common Geographic Data Types
-
-| Field Type | Required Data Type | Why |
-|------------|-------------------|-----|
-| Latitude | Number (Decimal) | Must allow precise coordinate plotting |
-| Longitude | Number (Decimal) | Must allow precise coordinate plotting |
-| Country/State/City | String | Needed for geocoding |
-| Postal Code | String | Preserves leading zeros |
-| Geometry (GeoJSON/Shapefile) | Geometry | Native spatial object |
-
-
-Incorrect data types can cause:
-
-- Aggregation errors  
-- Loss of leading zeros (postal codes)  
-- Tableau not recognizing geographic information  
-- Failure in map rendering  
-
-
-If Postal Code is stored as Number:
-
-- `01234` becomes `1234`
-- Geocoding fails
+pd.read_sql(
+    query,
+    con=engine
+)
+```
 
 ---
 
-#### Data Role | Analytical Behavior
+### Create Indexes on the Materialized View
 
-The **Data Role** defines how Tableau treats the field in analysis.
+Unlike a normal view, a materialized view stores data physically.
 
-**Two primary roles:**
+So we can create indexes directly on it.
 
-- **Dimension** → categorical grouping  
-- **Measure** → numeric aggregation  
+Indexes help Tableau filter and aggregate faster.
 
-**Typical Configuration for Mapping**
+```python
 
-| Field | Data Role |
-|--------|-----------|
-| Latitude | Measure |
-| Longitude | Measure |
-| Country | Dimension |
-| State | Dimension |
-| City | Dimension |
-| Geometry | Measure |
+with engine.begin() as connection:
+    connection.execute(text("""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_tableau_ride_id
+        ON mv_tableau_citibike_dashboard (ride_id);
+    """))
 
-If `Latitude`/`Longitude` are set as **Dimensions:**
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_ride_date
+        ON mv_tableau_citibike_dashboard (ride_date);
+    """))
 
-- Points may not render correctly  
-- Aggregation logic may break  
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_ride_month
+        ON mv_tableau_citibike_dashboard (ride_year, ride_month);
+    """))
 
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_ride_hour
+        ON mv_tableau_citibike_dashboard (ride_hour);
+    """))
 
-#### Geographic Role | Geocoding Layer
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_member_casual
+        ON mv_tableau_citibike_dashboard (member_casual);
+    """))
 
-The **Geographic Role** connects a field to Tableau’s geocoding engine.
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_rideable_type
+        ON mv_tableau_citibike_dashboard (rideable_type);
+    """))
 
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_start_station
+        ON mv_tableau_citibike_dashboard (start_station_name);
+    """))
 
-> “This field represents a real-world geographic level.”
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_end_station
+        ON mv_tableau_citibike_dashboard (end_station_name);
+    """))
 
-**Common Geographic Roles:**
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_start_neighborhood
+        ON mv_tableau_citibike_dashboard (start_neighborhood);
+    """))
 
-- Country/Region  
-- State/Province  
-- County  
-- City  
-- Postal Code  
-- Latitude  
-- Longitude  
+    connection.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_mv_tableau_end_neighborhood
+        ON mv_tableau_citibike_dashboard (end_neighborhood);
+    """))
+```
 
-Once a geographic role is assigned:
+---
 
-- Tableau generates **Latitude (generated)**  
-- Tableau generates **Longitude (generated)**  
+### Refresh Materialized View
 
-These generated fields are automatically used for plotting.
+A materialized view does not update automatically.
 
-How Tableau Geocoding Works
+If we load new Citi Bike months or new weather data, we must refresh it.
 
-When using location names:
+```{python}
+#| echo: true
 
-1. Tableau references its internal geographic database  
-2. Matches names to coordinates  
-3. Places marks accordingly  
+with engine.begin() as connection:
+    connection.execute(
+        text("REFRESH MATERIALIZED VIEW mv_tableau_citibike_dashboard;")
+    )
+```
 
-If Tableau cannot match values, you will see:
+---
 
-- Unknown locations warning  
+## Concurrent Refresh
 
-To resolve:
+If the materialized view is used by Tableau, it is better to refresh it concurrently.
 
-- Click the warning icon  
-- Edit locations  
-- Specify country context  
-- Correct spelling inconsistencies  
+This allows users to continue reading the old version while PostgreSQL refreshes the new version.
 
+To use concurrent refresh, the materialized view must have a unique index.
 
-#### Geographic Hierarchy | Drill-Down Structure
+We already created:
 
-A **Hierarchy** defines the logical order of geographic levels.
+```text
+idx_mv_tableau_ride_id
+```
 
+Then we can run:
 
-Country  $\rightarrow$  State  $\rightarrow$  City  $\rightarrow$  Postal Code  
+```{python}
+#| echo: true
+#| eval: false
 
-**Hierarchies allow:**
-
-- Drill-down navigation  
-- Controlled aggregation  
-- Structured geographic exploration  
-
-How to Create a Hierarchy
-
-1. Right-click a geographic field (e.g., Country)  
-2. Select **Hierarchy → Create Hierarchy**  
-3. Drag lower levels into it  
-
-Benefits
-
-- Enables + / − drill controls  
-- Maintains geographic logic  
-- Improves dashboard interactivity  
-
-<!-- TODO: add screenshots -->
-
-### Mapping
-
-**Mapping with Raw Coordinates**
-
-If your dataset contains `Latitude` and `Longitude`:
-
-**Required Configuration:**
-
-- Data Type → Number (Decimal)  
-- Data Role → Measure  
-- Geographic Role → Latitude / Longitude  
-
-**Validation Rules:**
-
-- Longitude range: `-180` to `180`  
-- Latitude range: `-90` to `90`  
-- Coordinates must be decimal degrees  
-
-
+with engine.begin() as connection:
+    connection.execute(
+        text("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_tableau_citibike_dashboard;")
+    )
+```
 
 ::: {.callout-important}
 
-- Longitude always goes to: Columns (`X-axis`)
-- Latitude always goes to: Rows (`Y-axis`)
+`REFRESH MATERIALIZED VIEW CONCURRENTLY` requires a unique index on the materialized view.
 
+In our case, we use `ride_id` as the unique key.
 
 :::
 
-
-If properly configured:
-
-- Tableau plots points automatically  
-- No internal geocoding is required  
-
-**Mapping with Location Names**
-
-If your dataset contains names instead of coordinates:
-
-Required Configuration
-
-- Data Type → String  
-- Data Role → Dimension  
-- Geographic Role → Appropriate geographic level  
-
-Tableau converts names into coordinates using geocoding. In some cases, you may need to specify the country context to resolve ambiguities.
-
-
-**Mapping with Spatial Files (GeoJSON / Shapefile)**
-
-Spatial files contain embedded geometry objects.
-
-When imported:
-
-- Field Type → Geometry  
-- Data Role → Measure  
-
-Characteristics:
-
-- Coordinates are embedded  
-- No geocoding required  
-- Supports polygon and line rendering  
-
-Enables:
-
-- Choropleth maps  
-- Boundary overlays  
-- Spatial joins  
-- Spatial calculations  
-
-
-### Map Styles
-
-Once configuration is correct, map styling enhances interpretability.
-
-**Background Map Styles are:**
-
-- Light  
-- Normal  
-- Streets  
-- Satellite  
-
-**Choose style based on:**
-
-- Analytical clarity  
-- Contrast with marks  
-- Density visualization  
-
-### Map Layers
-
-**Tableau allows multiple layers:**
-
-- Polygon layer (district boundaries)  
-- Point layer (stations)  
-- Line layer (routes)  
-
-**Multi-layer maps enable:**
-
-- Territory + event visualization  
-- Origin–destination flows  
-- Hotspot analysis  
-
-**Each layer can have:**
-
-- Independent mark type  
-- Independent color  
-- Independent size  
-  
 ---
 
-### Basic Map Creation
+## Create Helper Function to Refresh the Dashboard View
+
+Instead of writing the refresh code every time, we can create a small helper function.
+
+```python
+
+def refresh_tableau_dashboard_view(engine, concurrently=False):
+    if concurrently:
+        refresh_sql = """
+        REFRESH MATERIALIZED VIEW CONCURRENTLY mv_tableau_citibike_dashboard;
+        """
+    else:
+        refresh_sql = """
+        REFRESH MATERIALIZED VIEW mv_tableau_citibike_dashboard;
+        """
+
+    with engine.begin() as connection:
+        connection.execute(text(refresh_sql))
+```
+
+**Use it:**
+
+```python
+
+refresh_tableau_dashboard_view(
+    engine=engine,
+    concurrently=True
+)
+```
+
+---
+
+## Preview Fields for Tableau
+
+```python
+query = """
+SELECT
+    ride_id,
+    ride_date,
+    ride_month_name,
+    ride_day_of_week,
+    weekday_type,
+    ride_hour,
+    rideable_type,
+    member_casual,
+    start_station_name,
+    end_station_name,
+    start_neighborhood,
+    end_neighborhood,
+    ride_duration_minutes,
+    duration_group,
+    distance_km,
+    distance_group,
+    temperature_2m_mean,
+    temperature_group,
+    precipitation_sum,
+    precipitation_flag,
+    rain_sum,
+    snowfall_sum,
+    wind_speed_10m_max
+FROM mv_tableau_citibike_dashboard
+LIMIT 10;
+"""
+
+pd.read_sql(
+    query,
+    con=engine
+)
+```
+
+## Tableau Dashboard Prototype
+
+Now we can design a long-format dashboard.
+
+The dashboard should be scrollable, because we want to show several analytical sections.
+
+**Recommended Tableau dashboard size:**
+
+| Setting | Value |
+|---|---|
+| Dashboard type | Fixed size |
+| Width | `1400 px` |
+| Height | `2400 px` |
+| Layout | Vertical / long format |
+| Main container | Vertical container |
+| Section containers | Horizontal containers inside vertical container |
+| Best use | Desktop / presentation / web publishing |
+
+**The dashboard should connect to:**
+
+```text
+mv_tableau_citibike_dashboard
+```
+
+## Dashboard Layout
+
+### Full Dashboard Structure
+
+```text
+Dashboard: Citi Bike Jersey City 2025
+
+Vertical Container
+│
+├── Header Container
+│
+├── KPI Container
+│
+├── Trend Analysis Container
+│
+├── User and Bike Mix Container
+│
+├── Geography Container
+│
+├── Weather Impact Container
+│
+├── Station Performance Container
+│
+├── Detail Table Container
+│
+└── Footer / Notes Container
+```
 
-Now let's create a simple map showing the distribution of the trips across New York city using the geometry field from the spatial file.
+---
 
-#### **Step 1**
+### Dashboard Size
 
-As we do not have a column with states we will make a calculated field `'New York'` and assign it as a geographic role with the level of **State/Province**. This will allow us to use the geometry field from the spatial file to plot the map of New York city.
+Use a fixed long dashboard.
 
-#### **Step 2**
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `2400 px` |
+| Background | light |
+| Padding | `16 px` |
+| Section spacing | `20 px` |
+| Sheet title font | `14–16 px` |
+| KPI font | `28–36 px` |
 
-Now we can make a hierarchy by right clicking on the newly created field, `[State]` and choosing **Hierarchy** → **Create Hierarchy** and then dragging the `[Boroname]` field (NYC borough) to the hierarchy. This will allow us to drill down from the state level to the geometry level and see the different districts of New York city which are available in our spatial file.
+---
 
-![Location Hierarchy]({{< meta image_path >}}/location_hierarchy.png)
+### Section 1: Header
 
-#### **Step 3**
+**Container type:**
 
-In order to count rides by district, we will drag the `Ride ID` field to the view and change the aggregation to **Count**. To show the distribution we can place the `Count of Ride ID` on the color mark and we will have a **choropleth map** showing the distribution of the rides across the different districts of New York city.
+```text
+Horizontal container
+```
 
-#### **Step 4**
+**Recommended size:**
+
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `120 px` |
 
-To make districts more visible drag and drop `[Boroname]` field to the label mark and we will have the name of the district on the map.
+**Content:**
 
-#### **Step 5**
+| Element | Size | Purpose |
+|---|---:|---|
+| Dashboard title | 900 x 60 | main title |
+| Date range filter | 250 x 60 | filter dashboard by date |
+| Member type filter | 200 x 60 | filter member/casual |
+| Bike type filter | 200 x 60 | filter bike type |
 
-To make the map more readable, we can also change the background map style by right clicking on the map and choosing **Background Layers** and then choosing the style that we like. In this case, we will choose the **Light** style to make the districts more visible and add **Background Map Layer** by ticked prefferences such as **Land Cover** and **Labels** to make the map more informative.
+**Suggested title:**
 
-![Simple Map]({{< meta image_path >}}/simple_map.png)
+```text
+Citi Bike Jersey City 2025 Dashboard
+```
 
-### Advanced Map Creation
+**Suggested subtitle:**
 
-#### **Step 1**  
+```text
+Ride demand, stations, neighborhoods, and weather impact
+```
 
-As we have already done the join between the spatial file and the tabular file, we can now build a map using the geometry field from the spatial file. To do that:
+---
 
-- First make sure that the fields with geographic roles are correctly assigned
-- Double click on the geometry field and it will be added to the view
+### Section 2: KPI Cards
 
-Tableau automatically:
+Container type:
 
-- Adds Latitude (generated) to Rows  
-- Adds Longitude (generated) to Columns  
-- Places Geometry on the Marks card, Details
+```text
+Horizontal container
+```
 
-The result is a map of New York City with its districts.
+Recommended size:
 
-![Polygons]({{< meta image_path >}}/polygons.png)
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `180 px` |
 
+Create five KPI cards.
 
-#### **Step 2**
+| KPI | Tableau Calculation | Size |
+|---|---|---:|
+| Total Rides | `COUNT([Ride Id])` | 260 x 140 |
+| Avg Ride Duration | `AVG([Ride Duration Minutes])` | 260 x 140 |
+| Avg Distance | `AVG([Distance Km])` | 260 x 140 |
+| Member Share | `SUM(IIF([Member Casual]='member',1,0)) / COUNT([Ride Id])` | 260 x 140 |
+| Rainy Day Rides | `SUM(IIF([Precipitation Flag]='Precipitation',1,0))` | 260 x 140 |
 
-Now we can add the trips data to the map. To do that let's create calculated fields for the start and end locations of the trips using `MAKEPOINT()` function as explained in the spatial joins section. Then we can add these calculated fields to the view to show the trip start and end locations on the map.
+Recommended design:
 
+| Property | Value |
+|---|---|
+| Container | horizontal |
+| Card background | very light gray |
+| Border | thin |
+| Padding | 12 px |
+| KPI number | large |
+| KPI label | small |
 
-#### **Step 3**
+---
 
-Having the trip start and end locations we can now make a flow map to show the movement of the trips between the start and end locations. To do that we will use `MAKELINE()` function to create a line between the start and end points of each trip. Then we can add this line to the view to visualize the flow of trips across the city.
+### Section 3: Ride Trend Analysis
 
-![Lines]({{< meta image_path >}}/lines.png)
+Container type:
 
-#### **Step 4**
+```text
+Vertical container
+```
 
-In map visualizations, we can use different geometry types adding map layers to show different aspects of the data. For example, we can draw routes to the polygon layer by dragging the line geometry to the view and we can also show the start and end points of the trips by dragging the point geometry to the view. This allows us to create a multi-layered map that shows both the routes and the locations of trip starts and ends.
+Recommended size:
 
-![Map with layers]({{< meta image_path >}}/map_with_layers.png)
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `420 px` |
 
+Sheets:
 
-### Proportional Symbol Map
+| Sheet | Chart Type | Size |
+|---|---|---:|
+| Daily Rides Trend | line chart | 1360 x 260 |
+| Rides by Hour | bar chart | 660 x 140 |
+| Rides by Day of Week | bar chart | 660 x 140 |
 
-Proportional symbol maps use sized marks (usually circles) to represent the magnitude of a measure at specific locations. The size of each mark is proportional to the value it represents.
+Layout:
 
-**Step 1**
+```text
+Vertical Container
+│
+├── Daily Rides Trend
+│
+└── Horizontal Container
+    ├── Rides by Hour
+    └── Rides by Day of Week
+```
 
-As in previous examples, we will start by creating a map using the geometry field `[Boroname]` from the spatial file to show the districts of New York city.
+Fields:
 
-**Step 2**
+| Chart | Columns | Rows | Marks |
+|---|---|---|---|
+| Daily Rides Trend | `ride_date` | `COUNT(ride_id)` | line |
+| Rides by Hour | `ride_hour` | `COUNT(ride_id)` | bar |
+| Rides by Day of Week | `ride_day_of_week` | `COUNT(ride_id)` | bar |
 
-Add `[Starting point]` to the view to show the start locations of the trips on the map.
+---
 
-**Step 3**
+### Section 4: User and Bike Mix
 
-Now we can add the `Count of Ride ID` to the size mark to show the number of trips starting at each location. This will create a proportional symbol map where the size of each mark corresponds to the number of trips starting at that location.
+**Container type:**
 
-**Step 4**
+```text
+Horizontal container
+```
 
-Add the `Count of Ride ID` to the color mark to show the distribution of the trips across the city. From color marks activate borders.This will allow us to quickly identify areas where there are more trips starting based on the color intensity of the marks on the map. 
+Recommended size:
 
-**Step 5**
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `320 px` |
 
-Add `[Starting Point ID]` to the detail mark to show the individual starting points of the trips on the map.
+Sheets:
 
-**Step 6**
+| Sheet | Chart Type | Size |
+|---|---|---:|
+| Rides by Member Type | bar chart | 430 x 280 |
+| Rides by Bike Type | bar chart | 430 x 280 |
+| Member Type by Bike Type | stacked bar | 470 x 280 |
 
-From the Marks card, we can also change the mark type to **Circle** and adjust the size and color to make the map more visually appealing and easier to interpret. This will allow us to quickly identify areas with high trip activity based on the size of the circles on the map.
+Fields:
 
-**Step 7**
+| Chart | Dimension | Measure |
+|---|---|---|
+| Rides by Member Type | `member_casual` | `COUNT(ride_id)` |
+| Rides by Bike Type | `rideable_type` | `COUNT(ride_id)` |
+| Member Type by Bike Type | `rideable_type`, `member_casual` | `COUNT(ride_id)` |
 
-Add `[Boroname]` to the filter shelf for interactive filtering by district. This will allow users to select specific districts and see the corresponding trip data on the map, enabling more detailed analysis of trip patterns within different areas of New York City.
+---
 
-This analysis can help identify which districts have the highest demand for Citi Bike trips, and can inform decisions about where to add more bike stations or increase bike availability.
+### Section 5: Geography Overview
 
-![Proportional Symbol Map]({{< meta image_path >}}/proportional_symbol_map.png)
+Container type:
 
-### Density Map
+```text
+Vertical container
+```
 
-Density maps use color intensity to represent the concentration of points in a given area. They are useful for visualizing patterns of activity across a geographic space.
+Recommended size:
 
-**Step 1**
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `520 px` |
 
-Bring `[Make route]` calculated field, `[Start Station ID]` and `[End Station ID]` to the view to show the routes of the trips on the map.
+Sheets:
 
-**Step 2**
+| Sheet | Chart Type | Size |
+|---|---|---:|
+| Start Neighborhood Map | map | 680 x 360 |
+| End Neighborhood Map | map | 680 x 360 |
+| Top Start Neighborhoods | horizontal bar | 680 x 140 |
+| Top End Neighborhoods | horizontal bar | 680 x 140 |
 
-Change the mark type to **Density** to create a density map that shows the concentration of trips across the city. The color intensity will indicate areas with higher or lower trip activity.
+Layout:
 
-**Step 3**
+```text
+Vertical Container
+│
+├── Horizontal Container
+│   ├── Start Neighborhood Map
+│   └── End Neighborhood Map
+│
+└── Horizontal Container
+    ├── Top Start Neighborhoods
+    └── Top End Neighborhoods
+```
 
-Adjust map style to **Streets** to make the trips density patterns more visible on the street map background. This will allow us to better understand the spatial distribution of trips in relation to the city's street layout.
+Important note:
 
-**Step 4**
+For Tableau maps using only the materialized view, we already have:
 
-Make density color intensity and opacity adjustments to enhance the visibility of high-density areas. This will help us quickly identify hotspots of trip activity across New York City.
+```text
+start_lat
+start_lng
+end_lat
+end_lng
+```
 
-This type of analysis can be useful for understanding where the highest demand for Citi Bike trips is located, and can inform decisions about where to focus resources for bike station placement or maintenance.
+So we can create station/ride point maps directly.
 
-**Step 5**
+For neighborhood polygon maps, connect Tableau also to:
 
-Untick **Aggregate Measures**  on the top pane **Analysis** section to show the individual trip routes on the map. Density maps calculate intensity based on the **number of marks in a geographic area**, so if we want to see the actual routes of the trips, we need to turn off aggregation. 
+```text
+jersey_city_neighborhoods
+```
 
-![Density Map]({{< meta image_path >}}/density_map.png)
+or export neighborhood polygons separately.
 
+---
+
+### Section 6: Weather Impact
+
+Container type:
+
+```text
+Vertical container
+```
+
+Recommended size:
+
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `420 px` |
+
+Sheets:
+
+| Sheet | Chart Type | Size |
+|---|---|---:|
+| Rides vs Temperature | scatter plot | 680 x 260 |
+| Rides by Temperature Group | bar chart | 680 x 260 |
+| Rides on Precipitation Days | bar chart | 680 x 140 |
+| Daily Rides and Temperature | dual-axis line | 1360 x 140 |
+
+Layout:
+
+```text
+Vertical Container
+│
+├── Horizontal Container
+│   ├── Rides vs Temperature
+│   └── Rides by Temperature Group
+│
+└── Horizontal Container
+    ├── Rides on Precipitation Days
+    └── Daily Rides and Temperature
+```
+
+Suggested fields:
+
+| Chart | Fields |
+|---|---|
+| Rides vs Temperature | `temperature_2m_mean`, `COUNT(ride_id)` |
+| Rides by Temperature Group | `temperature_group`, `COUNT(ride_id)` |
+| Rides on Precipitation Days | `precipitation_flag`, `COUNT(ride_id)` |
+| Daily Rides and Temperature | `ride_date`, `COUNT(ride_id)`, `AVG(temperature_2m_mean)` |
+
+---
+
+### Section 7: Station Performance
+
+Container type:
+
+```text
+Vertical container
+```
+
+Recommended size:
+
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `420 px` |
+
+Sheets:
+
+| Sheet | Chart Type | Size |
+|---|---|---:|
+| Top Start Stations | horizontal bar | 680 x 280 |
+| Top End Stations | horizontal bar | 680 x 280 |
+| Station Flow Matrix | heatmap | 1360 x 120 |
+
+Layout:
+
+```text
+Vertical Container
+│
+├── Horizontal Container
+│   ├── Top Start Stations
+│   └── Top End Stations
+│
+└── Station Flow Matrix
+```
+
+Fields:
+
+| Chart | Dimension | Measure |
+|---|---|---|
+| Top Start Stations | `start_station_name` | `COUNT(ride_id)` |
+| Top End Stations | `end_station_name` | `COUNT(ride_id)` |
+| Station Flow Matrix | `start_station_name`, `end_station_name` | `COUNT(ride_id)` |
 
 ::: {.callout-note}
-### Analysis → Aggregate Measures in Maps
 
-- **ON (default)** → Measures are summarized (SUM, AVG, etc.).  
-  Use for choropleth maps, KPIs by region, and territory comparison.
+For the station flow matrix, use top N stations only.
 
-- **OFF** → Each row becomes an individual mark.  
-  Use for point distribution maps, density maps, and event-level analysis.
+Otherwise, the heatmap will become too large and unreadable.
 
-Rule of thumb:  
-Use aggregation for **regional summaries**.  
-Turn it off for **raw spatial events and clustering analysis**.
 :::
+
+---
+
+### Section 8: Detail Table
+
+Container type:
+
+```text
+Vertical container
+```
+
+Recommended size:
+
+| Property | Value |
+|---|---|
+| Width | `1400 px` |
+| Height | `320 px` |
+
+This section is for detailed inspection.
+
+Fields:
+
+| Field | Purpose |
+|---|---|
+| `ride_id` | ride identifier |
+| `started_at` | start time |
+| `ended_at` | end time |
+| `ride_duration_minutes` | duration |
+| `rideable_type` | bike type |
+| `member_casual` | user type |
+| `start_station_name` | start station |
+| `end_station_name` | end station |
+| `start_neighborhood` | start neighborhood |
+| `end_neighborhood` | end neighborhood |
+| `distance_km` | distance |
+| `temperature_2m_mean` | weather context |
+
+Use this as a detail table for selected filters.
+
+## Tableau Dashboard Wireframe
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Citi Bike Jersey City 2025 Dashboard                                         │
+│ Ride demand, stations, neighborhoods, and weather impact                     │
+│ [Date Filter]       [Member Filter]       [Bike Type Filter]                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
+│ Total Rides  │ Avg Duration │ Avg Distance │ Member Share │ Rainy Rides  │
+└──────────────┴──────────────┴──────────────┴──────────────┴──────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Daily Rides Trend                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Rides by Hour                        │ Rides by Day of Week                  │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Rides by Member Type                 │ Rides by Bike Type                    │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Member Type by Bike Type                                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Start Location Map                   │ End Location Map                      │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Top Start Neighborhoods              │ Top End Neighborhoods                 │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Rides vs Temperature                 │ Rides by Temperature Group            │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Rides on Precipitation Days          │ Daily Rides and Temperature           │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────┬───────────────────────────────────────┐
+│ Top Start Stations                   │ Top End Stations                      │
+└──────────────────────────────────────┴───────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Station Flow Matrix                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Ride Detail Table                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Footer / Data Source Notes                                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# Recommended Tableau Sheets
+
+| Sheet Name | Chart Type | Data Source |
+|---|---|---|
+| `KPI - Total Rides` | KPI text | `mv_tableau_citibike_dashboard` |
+| `KPI - Avg Duration` | KPI text | `mv_tableau_citibike_dashboard` |
+| `KPI - Avg Distance` | KPI text | `mv_tableau_citibike_dashboard` |
+| `KPI - Member Share` | KPI text | `mv_tableau_citibike_dashboard` |
+| `KPI - Rainy Day Rides` | KPI text | `mv_tableau_citibike_dashboard` |
+| `Daily Rides Trend` | line chart | `mv_tableau_citibike_dashboard` |
+| `Rides by Hour` | bar chart | `mv_tableau_citibike_dashboard` |
+| `Rides by Day of Week` | bar chart | `mv_tableau_citibike_dashboard` |
+| `Rides by Member Type` | bar chart | `mv_tableau_citibike_dashboard` |
+| `Rides by Bike Type` | bar chart | `mv_tableau_citibike_dashboard` |
+| `Member Type by Bike Type` | stacked bar | `mv_tableau_citibike_dashboard` |
+| `Start Location Map` | symbol map | `mv_tableau_citibike_dashboard` |
+| `End Location Map` | symbol map | `mv_tableau_citibike_dashboard` |
+| `Top Start Neighborhoods` | horizontal bar | `mv_tableau_citibike_dashboard` |
+| `Top End Neighborhoods` | horizontal bar | `mv_tableau_citibike_dashboard` |
+| `Rides vs Temperature` | scatter plot | `mv_tableau_citibike_dashboard` |
+| `Rides by Temperature Group` | bar chart | `mv_tableau_citibike_dashboard` |
+| `Rides on Precipitation Days` | bar chart | `mv_tableau_citibike_dashboard` |
+| `Daily Rides and Temperature` | dual-axis line | `mv_tableau_citibike_dashboard` |
+| `Top Start Stations` | horizontal bar | `mv_tableau_citibike_dashboard` |
+| `Top End Stations` | horizontal bar | `mv_tableau_citibike_dashboard` |
+| `Station Flow Matrix` | heatmap | `mv_tableau_citibike_dashboard` |
+| `Ride Detail Table` | text table | `mv_tableau_citibike_dashboard` |
+
+---
+
+## Suggested Tableau Calculated Fields
+
+### Total Rides
+
+```text
+COUNT([ride_id])
+```
+
+---
+
+### Average Ride Duration
+
+```text
+AVG([ride_duration_minutes])
+```
+
+---
+
+### Average Distance
+
+```text
+AVG([distance_km])
+```
+
+---
+
+### Member Ride Flag
+
+```text
+IF [member_casual] = 'member' THEN 1 ELSE 0 END
+```
+
+---
+
+### Member Share
+
+```text
+SUM([Member Ride Flag]) / COUNT([ride_id])
+```
+
+---
+
+### Rainy Ride Flag
+
+```text
+IF [precipitation_flag] = 'Precipitation' THEN 1 ELSE 0 END
+```
+
+---
+
+### Rainy Ride Share
+
+```text
+SUM([Rainy Ride Flag]) / COUNT([ride_id])
+```
+
+---
+
+### Clean Start Neighborhood
+
+```text
+IFNULL([start_neighborhood], 'Outside Jersey City / Unknown')
+```
+
+---
+
+### Clean End Neighborhood
+
+```text
+IFNULL([end_neighborhood], 'Outside Jersey City / Unknown')
+```
+
+---
+
+## Dashboard Interaction Design
+
+Use the following filters globally:
+
+| Filter | Field | Apply To |
+|---|---|---|
+| Date Range | `ride_date` | all worksheets |
+| Member Type | `member_casual` | all worksheets |
+| Bike Type | `rideable_type` | all worksheets |
+| Start Neighborhood | `start_neighborhood` | geography and detail sections |
+| Weather Group | `temperature_group` | weather and trend sections |
+
+Recommended dashboard actions:
+
+| Action | Source Sheet | Target Sheets |
+|---|---|---|
+| Filter by neighborhood | Top Start Neighborhoods | all sheets |
+| Filter by hour | Rides by Hour | detail table and trend |
+| Filter by bike type | Rides by Bike Type | all sheets |
+| Highlight station flow | Station Flow Matrix | detail table |
+
+---
+
+## Dashboard Building Order in Tableau
+
+Build the dashboard in this order:
+
+1. Connect to PostgreSQL
+2. Select `mv_tableau_citibike_dashboard`
+3. Create KPI sheets
+4. Create time trend sheets
+5. Create member and bike mix sheets
+6. Create geography sheets
+7. Create weather sheets
+8. Create station sheets
+9. Create detail table
+10. Create fixed-size dashboard
+11. Add vertical container
+12. Add sections one by one
+13. Add filters at the top
+14. Apply filters to all relevant worksheets
+15. Add dashboard actions
+
 
 ## Resources
 
-### Github Repo
-
-[Tableau Course Code Repository](https://github.com/hovhannisyan91/tableau-analytics-portfolio/tree/main/session07) for this session is available in the GitHub repository linked above. It includes:
-
-- Tableau workbook with all examples
-- Sample datasets
